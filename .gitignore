@@ -1,0 +1,10 @@
+**/node_modules/
+**/.serverless/
+**/dist/
+**/.build/
+backend/services/.env.local
+**/yarn-error.log
+**/coverage
+.env.local
+./data/*
+!./data/README.md
