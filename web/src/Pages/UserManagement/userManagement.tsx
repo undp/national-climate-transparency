@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { AbilityContext } from '../../Casl/Can';
-import { UserManagementComponent, userManagementColumns } from 'carbon-library';
+import { UserManagementComponent, UserManagementColumns } from 'carbon-library';
 import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 
@@ -12,13 +12,14 @@ const UserManagement = () => {
   const { t } = useTranslation(['company']);
 
   const visibleColumns = [
-    userManagementColumns.logo,
-    userManagementColumns.name,
-    userManagementColumns.email,
-    userManagementColumns.phoneNo,
-    userManagementColumns.company,
-    userManagementColumns.companyRole,
-    userManagementColumns.role,
+    UserManagementColumns.logo,
+    UserManagementColumns.name,
+    UserManagementColumns.email,
+    UserManagementColumns.phoneNo,
+    UserManagementColumns.company,
+    UserManagementColumns.companyRole,
+    UserManagementColumns.role,
+    UserManagementColumns.actions,
   ];
 
   const navigateToUpdateUser = (record: any) => {
