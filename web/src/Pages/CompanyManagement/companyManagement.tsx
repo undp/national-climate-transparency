@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { AbilityContext } from '../../Casl/Can';
-import { CompanyManagementComponent, companyManagementColumns } from 'carbon-library';
+import { CompanyManagementComponent, CompanyManagementColumns } from 'carbon-library';
 import { useTranslation } from 'react-i18next';
 
 const CompanyManagement = () => {
@@ -10,11 +10,11 @@ const CompanyManagement = () => {
   const { t } = useTranslation(['company']);
 
   const visibleColumns = [
-    companyManagementColumns.logo,
-    companyManagementColumns.name,
-    companyManagementColumns.taxId,
-    companyManagementColumns.companyRole,
-    companyManagementColumns.programmeCount,
+    CompanyManagementColumns.logo,
+    CompanyManagementColumns.name,
+    CompanyManagementColumns.taxId,
+    CompanyManagementColumns.companyRole,
+    CompanyManagementColumns.programmeCount,
   ];
 
   const navigateToCompanyProfile = (record: any) => {
