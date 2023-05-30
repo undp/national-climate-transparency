@@ -34,8 +34,7 @@ const UserManagement = () => {
     <UserManagementComponent
       t={t}
       AbilityContext={AbilityContext}
-      post={post}
-      del={del}
+      useConnection={useConnection}
       visibleColumns={visibleColumns}
       onNavigateToUpdateUser={navigateToUpdateUser}
       onClickAddUser={navigateToAddNewUser}
