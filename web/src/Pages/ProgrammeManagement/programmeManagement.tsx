@@ -3,6 +3,7 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { ProgrammeManagementComponent, ProgrammeManagementColumns } from 'carbon-library';
+import './programmeManagement.scss';
 
 const ProgrammeManagement = () => {
   const navigate = useNavigate();
