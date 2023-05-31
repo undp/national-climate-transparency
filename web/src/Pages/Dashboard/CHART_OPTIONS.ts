@@ -1,4 +1,4 @@
-import { addCommSepRound } from '../../Definitions/InterfacesAndType/programme.definitions';
+import { addCommSepRound } from 'carbon-library';
 
 export const totalProgrammesOptions: any = {
   states: {

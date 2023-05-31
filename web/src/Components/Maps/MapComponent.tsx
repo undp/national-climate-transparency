@@ -1,7 +1,4 @@
-import {
-  MapComponentProps,
-  MapTypes,
-} from '../../Definitions/InterfacesAndType/mapComponent.definitions';
+import { MapComponentProps, MapTypes } from 'carbon-library';
 import MapboxComponent from './MapboxComponent';
 
 const MapComponent = (props: MapComponentProps) => {

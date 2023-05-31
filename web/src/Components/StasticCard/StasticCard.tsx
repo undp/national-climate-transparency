@@ -6,7 +6,7 @@ import clockHistory from '../../Assets/Images/clockHistory.svg';
 import envelopeCheck from '../../Assets/Images/envelopeCheck.svg';
 import coin from '../../Assets/Images/coin.svg';
 import { Skeleton, Tooltip } from 'antd';
-import { addCommSep } from '../../Definitions/InterfacesAndType/programme.definitions';
+import { addCommSep } from 'carbon-library';
 import { ClockHistory, BoxArrowRight, Diamond, Gem, InfoCircle } from 'react-bootstrap-icons';
 import { toolTipTextGen } from '../../Pages/Dashboard/toolTipTextGen';
 import { StatsCardsTypes } from '../../Casl/enums/statsCards.type.enum';

@@ -1,10 +1,7 @@
 import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import {
-  MapComponentProps,
-  MarkerData,
-} from '../../Definitions/InterfacesAndType/mapComponent.definitions';
+import { MapComponentProps, MarkerData } from 'carbon-library';
 import './MapboxComponent.scss';
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN

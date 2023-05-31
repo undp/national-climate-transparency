@@ -12,7 +12,7 @@ import {
   UnorderedListOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { LayoutSiderProps } from '../../Definitions/InterfacesAndType/layout.sider.definitions';
+import { LayoutSiderProps } from 'carbon-library';
 import { useTranslation } from 'react-i18next';
 
 const { Sider } = Layout;
