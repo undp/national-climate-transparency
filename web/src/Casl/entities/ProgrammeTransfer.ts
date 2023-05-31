@@ -1,7 +1,4 @@
-import {
-  CreditTransferStage,
-  RetireType,
-} from '../../Definitions/InterfacesAndType/programme.definitions';
+import { CreditTransferStage, RetireType } from 'carbon-library';
 import { BaseEntity } from './BaseEntity';
 
 export class ProgrammeTransfer implements BaseEntity {

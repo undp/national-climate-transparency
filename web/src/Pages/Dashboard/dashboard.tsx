@@ -14,10 +14,6 @@ import ProgrammeRejectAndTransfer from './ProgrammeRejectAndTransfer';
 import moment from 'moment';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import {
-  addCommSep,
-  addRoundNumber,
-} from '../../Definitions/InterfacesAndType/programme.definitions';
-import {
   ClockHistory,
   BoxArrowInRight,
   ShieldX,
@@ -43,11 +39,7 @@ import { CompanyRole } from '../../Casl/enums/company.role.enum';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '../../Components/Maps/MapComponent';
-import {
-  MapSourceData,
-  MapTypes,
-  MarkerData,
-} from '../../Definitions/InterfacesAndType/mapComponent.definitions';
+import { MapSourceData, MapTypes, MarkerData, addCommSep, addRoundNumber } from 'carbon-library';
 
 const { RangePicker } = DatePicker;
 
