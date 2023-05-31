@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Col, DatePicker, Radio, Row, Skeleton, Tooltip, message } from 'antd';
-import StasticCard from '../../Components/StasticCard/StasticCard';
 import './dashboard.scss';
 import {
   optionDonutPieA,
@@ -14,10 +13,6 @@ import ProgrammeRejectAndTransfer from './ProgrammeRejectAndTransfer';
 import moment from 'moment';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import {
-  addCommSep,
-  addRoundNumber,
-} from '../../Definitions/InterfacesAndType/programme.definitions';
-import {
   ClockHistory,
   BoxArrowInRight,
   ShieldX,
@@ -29,7 +24,6 @@ import {
 } from 'react-bootstrap-icons';
 import PieChartsStat from './pieChartStat';
 import BarChartsStat from './barChartStats';
-import LegendItem from '../../Components/LegendItem/legendItem';
 import {
   ChartSeriesItem,
   totalCertifiedCreditsSeriesInitialValues,
@@ -42,12 +36,16 @@ import { ProgrammeStage, ProgrammeStageLegend } from '../../Casl/enums/programme
 import { CompanyRole } from '../../Casl/enums/company.role.enum';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { useTranslation } from 'react-i18next';
-import MapComponent from '../../Components/Maps/MapComponent';
 import {
   MapSourceData,
   MapTypes,
   MarkerData,
-} from '../../Definitions/InterfacesAndType/mapComponent.definitions';
+  addCommSep,
+  addRoundNumber,
+  MapComponent,
+  LegendItem,
+  StasticCard,
+} from 'carbon-library';
 
 const { RangePicker } = DatePicker;
 

@@ -1,8 +1,5 @@
 import React, { useContext, useState, createContext, useCallback, useEffect } from 'react';
-import {
-  UserContextProps,
-  UserProps,
-} from '../../Definitions/InterfacesAndType/userInformationContext.definitions';
+import { UserContextProps, UserProps } from 'carbon-library';
 import { useConnection } from '../ConnectionContext/connectionContext';
 import jwt_decode from 'jwt-decode';
 import { useTranslation } from 'react-i18next';

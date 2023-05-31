@@ -17,7 +17,6 @@ import ProgrammeManagement from './Pages/ProgrammeManagement/programmeManagement
 import ProgrammeView from './Pages/ProgrammeView/programmeView';
 import i18next from 'i18next';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import CreditTransfers from './Pages/Transfers/creditTransfers';
 import Homepage from './Pages/Homepage/homepage';
 import PrivacyPolicy from './Pages/PrivacyPolicy/privacyPolicy';
 import CodeOfConduct from './Pages/CodeofConduct/codeofConduct';
@@ -104,13 +103,6 @@ const App = () => {
                     <Route path="viewAll" element={<UserManagement />} />
                     <Route path="addUser" element={<AddUser />} />
                     <Route path="updateUser" element={<AddUser />} />
-                  </Route>
-                  <Route
-                    path="/creditTransfers"
-                    element={<CustomLayout selectedKey="creditTransfers/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<CreditTransfers />} />
-                    {/* <Route path="view" element={<ProgrammeView />} /> */}
                   </Route>
                   <Route
                     path="/userProfile"
