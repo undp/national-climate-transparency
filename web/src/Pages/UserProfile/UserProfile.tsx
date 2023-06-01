@@ -8,7 +8,7 @@ import { useUserContext } from '../../Context/UserInformationContext/userInforma
 
 const CompanyProfile = () => {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation(['companyProfile']);
+  const { t, i18n } = useTranslation(['userProfile']);
   const { get } = useConnection();
 
   const onNavigateUpdateUser = (organisationDetails: any, userDetails: any) => {
