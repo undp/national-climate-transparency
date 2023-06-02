@@ -1,5 +1,3 @@
-import { PRECISION } from "carbon-credit-calculator/dist/esm/calculator";
-import { SectoralScope } from "serial-number-gen";
 import { Entity, Column, PrimaryColumn, UpdateDateColumn, CreateDateColumn } from "typeorm";
 import { AgricultureProperties } from "../dto/agriculture.properties";
 import { ProgrammeProperties } from "../dto/programme.properties";
@@ -9,6 +7,8 @@ import { TxType } from "../enum/txtype.enum";
 import { TypeOfMitigation } from "../enum/typeofmitigation.enum";
 import { ProgrammeStage } from "../enum/programme-status.enum";
 import { EntitySubject } from "./entity.subject";
+import { SectoralScope } from "@undp/serial-number-gen";
+import { PRECISION } from "../constants";
 
 @Entity()
 export class Programme implements EntitySubject {

@@ -90,13 +90,6 @@ export class ProgrammeController {
     }
 
     @ApiBearerAuth()
-    @UseGuards(TransferFreezeGuard, ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeTransferRequest))
-    @Put('retire')
-    async programmeRetire(@Body() body: ProgrammeRetire, @Request() req) {
-        return this.programmeService.retireProgramme(body, req.user)
-    }
-
-    @ApiBearerAuth()
     @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeCertify))
     @Put('certify')
     async programmeCertify(@Body() body: ProgrammeCertify, @Request() req) {
@@ -110,47 +103,4 @@ export class ProgrammeController {
         return this.programmeService.certify(body, false, req.user)
     }
 
-    @ApiBearerAuth()
-    @UseGuards(TransferFreezeGuard, ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Create, ProgrammeTransferRequest))
-    @Post('transferRequest')
-    async transferRequest(@Body() body: ProgrammeTransferRequest, @Request() req) {
-        return this.programmeService.transferRequest(body, req.user)
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(TransferFreezeGuard, ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Create, ProgrammeTransferRequest))
-    @Post('transferApprove')
-    async transferApprove(@Body() body: ProgrammeTransferApprove, @Request() req) {
-        return this.programmeService.transferApprove(body, req.user)
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(TransferFreezeGuard, ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Delete, ProgrammeTransfer))
-    @Post('transferReject')
-    async transferReject(@Body() body: ProgrammeTransferReject, @Request() req) {
-        return this.programmeService.transferReject(body, req.user)
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(TransferFreezeGuard, ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Delete, ProgrammeTransfer))
-    @Post('transferCancel')
-    async transferCancel(@Body() body: ProgrammeTransferCancel, @Request() req) {
-        return this.programmeService.transferCancel(body, req.user)
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeTransfer, true))
-    @Post('transferQuery')
-    queryUser(@Body()query: QueryDto, @Request() req) {
-      console.log(req.abilityCondition)
-      return this.programmeService.queryProgrammeTransfers(query, req.abilityCondition, req.user)
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeTransfer, true))
-    @Get('transfersByProgrammeId')
-    transfersByProgrammeId(@Query('programmeId') programmeId: string, @Request() req) {
-      console.log(req.abilityCondition)
-      return this.programmeService.getTransferByProgrammeId(programmeId, req.abilityCondition, req.user)
-    }
 }
