@@ -7,7 +7,7 @@ import { AbilityContext } from '../../Casl/Can';
 
 const AddUser = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation(['addUser', 'passwordReset']);
+  const { t } = useTranslation(['addUser', 'passwordReset', 'userProfile']);
 
   const onNavigateToUserManagement = () => {
     navigate('/userManagement/viewAll', { replace: true });
