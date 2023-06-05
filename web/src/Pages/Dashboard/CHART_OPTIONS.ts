@@ -1,4 +1,4 @@
-import { addCommSepRound } from 'carbon-library';
+import { addCommSepRound } from '@undp/carbon-library';
 
 export const totalProgrammesOptions: any = {
   states: {

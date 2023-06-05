@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import Geocoding from '@mapbox/mapbox-sdk/services/geocoding';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
-import { ProgrammeViewComponent } from 'carbon-library';
+import { ProgrammeViewComponent } from '@undp/carbon-library';
 
 const ProgrammeView = () => {
   const { t } = useTranslation(['view']);

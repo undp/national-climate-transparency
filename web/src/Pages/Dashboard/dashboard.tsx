@@ -45,7 +45,7 @@ import {
   MapComponent,
   LegendItem,
   StasticCard,
-} from 'carbon-library';
+} from '@undp/carbon-library';
 
 const { RangePicker } = DatePicker;
 

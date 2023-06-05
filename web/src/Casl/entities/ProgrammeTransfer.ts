@@ -1,4 +1,4 @@
-import { CreditTransferStage, RetireType } from 'carbon-library';
+import { CreditTransferStage, RetireType } from '@undp/carbon-library';
 import { BaseEntity } from './BaseEntity';
 
 export class ProgrammeTransfer implements BaseEntity {

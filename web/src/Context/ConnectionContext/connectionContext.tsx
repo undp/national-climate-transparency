@@ -1,6 +1,6 @@
 import React, { createContext, FC, useCallback, useContext, useEffect, useState } from 'react';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ConnectionProps, ConnectionContextProviderProps, Methods } from 'carbon-library';
+import { ConnectionProps, ConnectionContextProviderProps, Methods } from '@undp/carbon-library';
 
 const ConnectionContext = createContext<{
   connection?: ConnectionProps;
