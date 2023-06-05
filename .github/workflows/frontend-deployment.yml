@@ -5,6 +5,7 @@ on:
       - develop
     paths:
       - web/**
+      - .github/workflows/frontend*
 
 jobs:
   deploy_front_end:
@@ -42,4 +43,4 @@ jobs:
         working-directory: ./web
         run: CI=false yarn build
       - name: Deploy
-        run: aws s3 sync ./web/build s3://carbon-www-prod
+        run: aws s3 sync ./web/build s3://mrv-www-dev
