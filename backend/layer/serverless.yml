@@ -1,4 +1,4 @@
-service: lambda-layer
+service: lambda-layer-mrv
 
 provider:
   name: aws
