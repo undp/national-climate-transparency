@@ -29,7 +29,7 @@ Parameters:
 
   DBInstanceIdentifier:
     Type: String
-    Default: "carbondb"
+    Default: "carbondbmrv"
 
   DBEngine:
     Type: String
@@ -57,7 +57,7 @@ Parameters:
 
   DBName:
     Type: String
-    Default: "carbondb"
+    Default: "carbonmrvdb"
 
   DBUser:
     Type: String
@@ -67,9 +67,9 @@ Parameters:
     Type: String
     NoEcho: True
 
-  LedgerName:
-    Type: String
-    Default: carbon-registry
+  # LedgerName:
+  #   Type: String
+  #   Default: carbon-registry
 
 Resources:
   VPC:
@@ -222,12 +222,12 @@ Resources:
       DBSubnetGroupName:
         Ref: DBSubnetGroup
 
-  LedgerInstance:
-    Type: AWS::QLDB::Ledger
-    Properties: 
-      DeletionProtection: false
-      Name: !Sub ${LedgerName}-${EnvironmentName}
-      PermissionsMode: STANDARD
+  # LedgerInstance:
+  #   Type: AWS::QLDB::Ledger
+  #   Properties: 
+  #     DeletionProtection: false
+  #     Name: !Sub ${LedgerName}-${EnvironmentName}
+  #     PermissionsMode: STANDARD
 
   VpcEndpointSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
@@ -252,7 +252,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName:
-        Fn::Sub: lambda-role
+        Fn::Sub: lambda-role-${EnvironmentName}
       AssumeRolePolicyDocument:
         Statement:
           - Action:
@@ -294,21 +294,21 @@ Resources:
       VpcEndpointType: Interface
       VpcId: !Ref VPC
 
-  KinesisStream:
-    Type: AWS::Kinesis::Stream
-    Properties: 
-      Name: !Sub carbon-stream-${EnvironmentName}
-      ShardCount: 1
+  # KinesisStream:
+  #   Type: AWS::Kinesis::Stream
+  #   Properties: 
+  #     Name: !Sub carbon-stream-${EnvironmentName}
+  #     ShardCount: 1
 
-  QLDBStream:
-    Type: AWS::QLDB::Stream
-    Properties: 
-      InclusiveStartTime: '2020-05-29T00:00:00Z'
-      KinesisConfiguration: 
-        StreamArn: !GetAtt KinesisStream.Arn
-      LedgerName: !Ref LedgerInstance
-      RoleArn: !GetAtt LambdaRole.Arn
-      StreamName: !Sub qldb-${EnvironmentName}
+  # QLDBStream:
+  #   Type: AWS::QLDB::Stream
+  #   Properties: 
+  #     InclusiveStartTime: '2020-05-29T00:00:00Z'
+  #     KinesisConfiguration: 
+  #       StreamArn: !GetAtt KinesisStream.Arn
+  #     LedgerName: !Ref LedgerInstance
+  #     RoleArn: !GetAtt LambdaRole.Arn
+  #     StreamName: !Sub qldb-${EnvironmentName}
 
   S3GatewayEndpoint:
     Type: 'AWS::EC2::VPCEndpoint'
@@ -335,8 +335,12 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
     Properties:
-      AccessControl: PublicRead
-      BucketName: !Sub 'carbon-www-${EnvironmentName}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      BucketName: !Sub 'mrv-www-${EnvironmentName}'
       WebsiteConfiguration:
         ErrorDocument: 'index.html'
         IndexDocument: 'index.html'
@@ -345,8 +349,12 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
     Properties:
-      AccessControl: PublicRead
-      BucketName: !Sub 'carbon-common-${EnvironmentName}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      BucketName: !Sub 'mrv-common-${EnvironmentName}'
 
 
   S3BucketPolicy:
@@ -364,7 +372,7 @@ Resources:
   AsyncQueue:
     Type: AWS::SQS::Queue
     Properties: 
-      QueueName: !Sub 'AsyncQueue${EnvironmentName}.fifo'
+      QueueName: !Sub 'AsyncQueueMRV${EnvironmentName}.fifo'
       FifoQueue: true
       ContentBasedDeduplication: true
       VisibilityTimeout: 60
@@ -435,7 +443,7 @@ Resources:
   #   DeletionPolicy: Delete
   #   Properties:
   #     AccessControl: PublicRead
-  #     BucketName: !Sub 'carbon-common-prod'
+  #     BucketName: !Sub 'mrv-common-prod'
 
   # S3BucketPolicyProd:
   #   Type: AWS::S3::BucketPolicy

@@ -53,7 +53,7 @@ function setupSwagger(
   SwaggerModule.setup(`${httpBase}`, nestApp, document, {
     customSiteTitle: "API Documentation",
     customCss: `
-    .topbar-wrapper img {content:url(\'https://carbon-common-dev.s3.amazonaws.com/logo-h.png\'); height:50px; width:auto;}
+    .topbar-wrapper img {content:url(\'https://mrv-common-dev.s3.amazonaws.com/logo-h.png\'); height:50px; width:auto;}
     .swagger-ui .topbar { background-color: #f4f5fa; }
     .swagger-ui { background-color: white; }
     #links-header { position: absolute; top: 25px; right: calc((100% - 1440px)/2); }

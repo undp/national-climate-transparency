@@ -39,7 +39,7 @@ export default () => ({
       process.env.DISABLE_LOW_PRIORITY_EMAIL === "true" ? true : false,
   },
   s3CommonBucket: {
-    name: "carbon-common-" + (process.env.NODE_ENV || "dev"),
+    name: "mrv-common-" + (process.env.NODE_ENV || "dev"),
   },
   host: process.env.HOST || "https://test.carbreg.org",
   liveChat: "https://undp2020cdo.typeform.com/to/emSWOmDo",
@@ -51,7 +51,7 @@ export default () => ({
   },
   asyncQueueName:
     process.env.ASYNC_QUEUE_NAME ||
-    "https://sqs.us-east-1.amazonaws.com/302213478610/AsyncQueuedev.fifo",
+    "https://sqs.us-east-1.amazonaws.com/302213478610/AsyncQueueMRVdev.fifo",
   ITMOSystem: {
     endpoint:
       process.env.ITMO_ENDPOINT ||

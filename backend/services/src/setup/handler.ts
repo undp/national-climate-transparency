@@ -140,7 +140,6 @@ export const handler: Handler = async (event) => {
       logger: getLogger(ProgrammeModule),
     });
     const programmeService = prApp.get(ProgrammeService);
-    await programmeService.regenerateRegionCoordinates();
     return;
   }
 
