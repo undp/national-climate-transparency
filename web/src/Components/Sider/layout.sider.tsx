@@ -86,8 +86,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
               <img
                 alt="country flag"
                 src={
-                  process.env.COUNTRY_FLAG_URL ||
-                  'https://mrv-common-dev.s3.amazonaws.com/flag.png'
+                  process.env.COUNTRY_FLAG_URL || 'https://mrv-common-dev.s3.amazonaws.com/flag.png'
                 }
               />
             </div>
