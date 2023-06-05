@@ -1,7 +1,7 @@
 {
-  "name": "carbon-registry-services",
-  "version": "0.5.4",
-  "description": "Carbon Registry Framework",
+  "name": "carbon-mrv-services",
+  "version": "0.1",
+  "description": "Carbon MRV Framework",
   "author": "Xeptagon PVT LTD",
   "private": true,
   "license": "UNLICENSED",
