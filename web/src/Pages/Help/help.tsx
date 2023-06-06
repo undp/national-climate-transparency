@@ -25,8 +25,8 @@ const CarbonHelp = () => {
             </div>
             <div>
               <div style={{ display: 'flex' }}>
-                <div className="title">{'CARBON'}</div>
-                <div className="title-sub">{'REGISTRY'}</div>
+                <div className="title">{'TRANSPARENCY'}</div>
+                {/* <div className="title-sub">{'REGISTRY'}</div> */}
               </div>
               <div className="country-name">{process.env.COUNTRY_NAME || 'Antarctic Region'}</div>
             </div>

@@ -119,8 +119,8 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                     </div>
                     <div className="login-country-name">
                       <div className="title">
-                        {'CARBON'}
-                        <span className="title-sub">{'REGISTRY'}</span>
+                        {'TRANSPARENCY'}
+                        {/* <span className="title-sub">{'REGISTRY'}</span> */}
                       </div>
 
                       <span className="country-name">
