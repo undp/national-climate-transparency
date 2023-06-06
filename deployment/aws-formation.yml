@@ -369,6 +369,18 @@ Resources:
             Principal: '*'
             Resource: !Sub '${S3BucketWeb.Arn}/*'
 
+  S3BucketCommonWebPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketCommonWeb
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Action: 's3:GetObject'
+            Principal: '*'
+            Resource: !Sub '${S3BucketCommonWeb.Arn}/*'
+
   AsyncQueue:
     Type: AWS::SQS::Queue
     Properties: 
