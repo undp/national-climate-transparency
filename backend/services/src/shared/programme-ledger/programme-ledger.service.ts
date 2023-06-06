@@ -1,10 +1,8 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { InjectEntityManager } from "@nestjs/typeorm";
-import { PRECISION } from "carbon-credit-calculator/dist/esm/calculator";
 import { plainToClass } from "class-transformer";
 import { dom } from "ion-js";
 import axios from "axios";
-import { generateSerialNumber } from "serial-number-gen";
 import { EntityManager } from "typeorm";
 import { ProgrammeHistoryDto } from "../dto/programme.history.dto";
 import { CreditOverall } from "../entities/credit.overall.entity";
@@ -19,6 +17,7 @@ import {
 } from "../ledger-db/ledger.db.interface";
 import { HelperService } from "../util/helpers.service";
 import { Company } from "../entities/company.entity";
+import { PRECISION } from "../constants";
 
 @Injectable()
 export class ProgrammeLedgerService {
@@ -65,34 +64,6 @@ export class ProgrammeLedgerService {
         return [{}, {}, insertMap];
       }
     );
-    // let address: any[] = [];
-    // if (programme && programme.programmeProperties) {
-    //   if (programme.currentStage === "AwaitingAuthorization") {
-    //     const programmeProperties = programme.programmeProperties;
-    //     if (programmeProperties.geographicalLocation) {
-    //       for (
-    //         let index = 0;
-    //         index < programmeProperties.geographicalLocation.length;
-    //         index++
-    //       ) {
-    //         address.push(programmeProperties.geographicalLocation[index]);
-    //       }
-    //     }
-    //     await this.forwardGeocoding([...address]).then((response: any) => {
-    //       programme.geographicalLocationCordintes = [...response];
-    //     });
-    //   }
-    // }
-    // if (programme) {
-    //   await this.entityManger
-    //     .save<Programme>(plainToClass(Programme, programme))
-    //     .then((res: any) => {
-    //       console.log("create programme in repo -- ", res);
-    //     })
-    //     .catch((e: any) => {
-    //       console.log("create programme in repo -- ", e);
-    //     });
-    // }
     return programme;
   }
 
@@ -995,16 +966,7 @@ export class ProgrammeLedgerService {
         const year = new Date(programme.startTime * 1000).getFullYear();
         const startBlock = overall.credit + 1;
         const endBlock = overall.credit + programme.creditEst;
-        const serialNo = generateSerialNumber(
-          programme.countryCodeA2,
-          programme.sectoralScope,
-          programme.programmeId,
-          year,
-          startBlock,
-          endBlock,
-          programme.creditUnit
-        );
-        programme.serialNo = serialNo;
+
         programme.txTime = new Date().getTime();
         programme.currentStage = ProgrammeStage.AUTHORISED;
 
@@ -1046,7 +1008,6 @@ export class ProgrammeLedgerService {
         let insertMap = {};
         updateMap[this.ledger.tableName] = {
           currentStage: ProgrammeStage.AUTHORISED.valueOf(),
-          serialNo: serialNo,
           creditIssued: programme.creditIssued,
           creditBalance: programme.creditBalance,
           creditChange: programme.creditChange,
@@ -1061,7 +1022,6 @@ export class ProgrammeLedgerService {
 
         updateMap[this.ledger.overallTableName] = {
           credit: endBlock,
-          txRef: serialNo,
           txType: TxType.AUTH,
         };
         updateWhereMap[this.ledger.overallTableName] = {
@@ -1075,7 +1035,6 @@ export class ProgrammeLedgerService {
                 companyCreditBalances[String(com)] +
                   companyCreditDistribution[String(com)]
               ),
-              txRef: serialNo,
               txType: TxType.AUTH,
             };
             updateWhereMap[this.ledger.companyTableName + "#" + com] = {
@@ -1086,7 +1045,6 @@ export class ProgrammeLedgerService {
               credit: this.round2Precision(
                 companyCreditDistribution[String(com)]
               ),
-              txRef: serialNo,
               txType: TxType.AUTH,
               txId: String(com),
             };

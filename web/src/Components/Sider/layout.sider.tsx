@@ -12,7 +12,7 @@ import {
   UnorderedListOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { LayoutSiderProps } from 'carbon-library';
+import { LayoutSiderProps } from '@undp/carbon-library';
 import { useTranslation } from 'react-i18next';
 
 const { Sider } = Layout;
@@ -86,8 +86,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
               <img
                 alt="country flag"
                 src={
-                  process.env.COUNTRY_FLAG_URL ||
-                  'https://carbon-common-dev.s3.amazonaws.com/flag.png'
+                  process.env.COUNTRY_FLAG_URL || 'https://mrv-common-dev.s3.amazonaws.com/flag.png'
                 }
               />
             </div>

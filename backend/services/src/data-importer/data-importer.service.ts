@@ -3,7 +3,6 @@ import { ConfigService } from "@nestjs/config";
 import { ProgrammeService } from "../shared/programme/programme.service";
 import { CompanyService } from "../shared/company/company.service";
 import { ImporterInterface } from "./importer.interface";
-import { ITMOSystemImporter } from "./importers/itmo-system.service";
 import { UserService } from "../shared/user/user.service";
 
 @Injectable()
@@ -17,10 +16,10 @@ export class DataImporterService {
   ) {}
 
   private getImporter(type: string): ImporterInterface {
-    switch(type) {
-      case 'ITMO_SYSTEM':
-        return new ITMOSystemImporter(this.logger, this.configService, this.companyService, this.userService, this.programmeService);
-    }
+    // switch(type) {
+    //   case 'ITMO_SYSTEM':
+    //     return new ITMOSystemImporter(this.logger, this.configService, this.companyService, this.userService, this.programmeService);
+    // }
     return null;
   }
 

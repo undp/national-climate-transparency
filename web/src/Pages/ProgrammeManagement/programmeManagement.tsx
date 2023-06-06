@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
-import { ProgrammeManagementComponent, ProgrammeManagementColumns } from 'carbon-library';
+import { ProgrammeManagementComponent, ProgrammeManagementColumns } from '@undp/carbon-library';
 import './programmeManagement.scss';
 
 const ProgrammeManagement = () => {
