@@ -11,10 +11,10 @@ provider:
     role: arn:aws:iam::302213478610:role/lambda-role-dev
   vpc:
     subnetIds:
-      - subnet-0f01c3493bfdaabd7
-      - subnet-029725efdcd399b88
+      - subnet-042cb038d752b50dd
+      - subnet-0646392cded0ed2f7
     securityGroupIds:
-      - sg-029b80f0fd44eb16a
+      - sg-03937a2ebf99900ca
 
 package:
   patterns:
