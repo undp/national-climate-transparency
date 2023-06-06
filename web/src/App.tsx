@@ -27,8 +27,8 @@ import UserProfile from './Pages/UserProfile/UserProfile';
 import CompanyProfile from './Pages/CompanyProfile/companyProfile';
 import { AbilityContext } from './Casl/Can';
 import { defineAbility, updateUserAbility } from './Casl/ability';
-import { message } from 'antd';
 import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
+import { AddProgrammeComponent } from './Pages/Programme/programmeCreation';
 
 // message.config({
 //   duration: 60,
@@ -87,6 +87,7 @@ const App = () => {
                   >
                     <Route path="viewAll" element={<ProgrammeManagement />} />
                     <Route path="view" element={<ProgrammeView />} />
+                    <Route path="addProgramme" element={<AddProgrammeComponent />} />
                   </Route>
                   <Route
                     path="/companyManagement"

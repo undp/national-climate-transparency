@@ -38,6 +38,14 @@ body {
 .ant-input {
   border-radius: 5px !important;
 }
+
+.ant-select-selector {
+  border-radius: 5px !important;
+}
+
+.ant-select-selection-item {
+  color: $common-input-color !important;
+}
 .ant-btn {
   border-radius: 5px !important;
 }
