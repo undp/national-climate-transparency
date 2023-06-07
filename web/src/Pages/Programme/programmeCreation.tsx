@@ -5,15 +5,17 @@ import {
   DatePicker,
   Form,
   Input,
+  InputNumber,
   Radio,
   Row,
   Select,
+  Space,
   Steps,
   Tooltip,
   Upload,
   message,
 } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import './programmeCreation.scss';
 import '../../Styles/app.scss';
 import { RcFile, UploadFile } from 'antd/lib/upload';
@@ -72,6 +74,10 @@ export const AddProgrammeComponent = () => {
     nextOne(values);
   };
 
+  const onFinishStepTwo = (values: any) => {
+    nextOne(values);
+  };
+
   const getBase64 = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -80,21 +86,21 @@ export const AddProgrammeComponent = () => {
       reader.onerror = (error) => reject(error);
     });
 
-  const onFinishStepTwo = async (values: any) => {
-    // const requestData = { ...values, role: 'Admin', company: { ...stepOneData } };
-    setLoading(true);
-    try {
-    } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: `${t('errorInAddUser')} ${error.message}`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const onFinishStepTwo = async (values: any) => {
+  //   // const requestData = { ...values, role: 'Admin', company: { ...stepOneData } };
+  //   setLoading(true);
+  //   try {
+  //   } catch (error: any) {
+  //     message.open({
+  //       type: 'error',
+  //       content: `${t('errorInAddUser')} ${error.message}`,
+  //       duration: 3,
+  //       style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const onCancel = () => {};
 
@@ -271,6 +277,65 @@ export const AddProgrammeComponent = () => {
                   >
                     <Input size="large" />
                   </Form.Item>
+                  <Form.List name="ownershipPercentage">
+                    {(fields, { add, remove }) => (
+                      <div className="space-container" style={{ width: '100%' }}>
+                        {fields.map(({ key, name, ...restField }) => (
+                          <Space
+                            wrap={true}
+                            key={key}
+                            style={{ display: 'flex', marginBottom: 8 }}
+                            align="center"
+                            size={'large'}
+                          >
+                            <Form.Item
+                              {...restField}
+                              label="Organisation"
+                              name={[name, 'first']}
+                              wrapperCol={{ span: 24 }}
+                              className="organisation"
+                              rules={[{ required: true, message: 'Missing first name' }]}
+                            >
+                              <Select size="large">
+                                {Object.values(Sector).map((sector: any) => (
+                                  <Select.Option value={sector}>{sector}</Select.Option>
+                                ))}
+                              </Select>
+                            </Form.Item>
+                            <Form.Item
+                              {...restField}
+                              label="Ownership Percentage"
+                              className="ownership-percent"
+                              name={[name, 'last']}
+                              wrapperCol={{ span: 24 }}
+                              rules={[{ required: true, message: 'Missing last name' }]}
+                            >
+                              <InputNumber
+                                size="large"
+                                min={0}
+                                max={100}
+                                formatter={(value: any) => `${value}%`}
+                                parser={(value: any) => value!.replace('%', '')}
+                              />
+                            </Form.Item>
+                            {fields.length > 1 ? (
+                              <MinusCircleOutlined
+                                className="dynamic-delete-button"
+                                onClick={() => remove(name)}
+                              />
+                            ) : null}
+                          </Space>
+                        ))}
+                        <Form.Item>
+                          <Button
+                            type="dashed"
+                            onClick={() => add()}
+                            icon={<PlusOutlined />}
+                          ></Button>
+                        </Form.Item>
+                      </div>
+                    )}
+                  </Form.List>
                 </div>
               </Col>
               <Col xl={12} md={24}>
@@ -404,22 +469,99 @@ export const AddProgrammeComponent = () => {
               </Col>
             </Row>
             <div className="steps-actions">
-              {isUpdate ? (
-                <Row>
-                  <Button loading={loading} onClick={onCancel}>
-                    {t('addCompany:cancel')}
-                  </Button>
-                  <Button loading={loading} className="mg-left-1" type="primary" htmlType="submit">
-                    {t('addCompany:submit')}
-                  </Button>
-                </Row>
-              ) : (
-                current === 0 && (
-                  <Button type="primary" htmlType="submit">
-                    Next
-                  </Button>
-                )
-              )}
+              <Button type="primary" htmlType="submit">
+                Next
+              </Button>
+            </div>
+          </Form>
+        </div>
+      </div>
+    );
+  };
+
+  const ProgrammeFinancingSought = () => {
+    return (
+      <div className="programme-sought-form-container">
+        <div className="programme-sought-form">
+          <Form
+            labelCol={{ span: 20 }}
+            wrapperCol={{ span: 24 }}
+            name="programme-sought"
+            className="programme-sought-form"
+            layout="vertical"
+            requiredMark={true}
+            form={formTwo}
+            onFinish={onFinishStepTwo}
+          >
+            <Row className="row" gutter={[16, 16]}>
+              <Col xl={12} md={24}>
+                <div className="details-part-one">
+                  <Form.Item
+                    label="Estimated Programme Cost (USD)"
+                    name="estimatedProgrammeCost"
+                    rules={[
+                      {
+                        required: true,
+                        message: '',
+                      },
+                      {
+                        validator: async (rule, value) => {
+                          if (
+                            String(value).trim() === '' ||
+                            String(value).trim() === undefined ||
+                            value === null ||
+                            value === undefined
+                          ) {
+                            throw new Error(`Estimated Programme Cost (USD) ${t('isRequired')}`);
+                          }
+                        },
+                      },
+                    ]}
+                  >
+                    <Input size="large" />
+                  </Form.Item>
+                  <Form.Item
+                    label="Minimum Viable Carbon Price (USD per Ton) "
+                    name="minViableCarbonPrice"
+                    initialValue={state?.record?.name}
+                  >
+                    <Input defaultValue={'8.33'} disabled size="large" />
+                  </Form.Item>
+                </div>
+              </Col>
+              <Col xl={12} md={24}>
+                <div className="details-part-two">
+                  <Form.Item
+                    label="Estimated Credits"
+                    name="estimatedCredits"
+                    rules={[
+                      {
+                        required: true,
+                        message: '',
+                      },
+                      {
+                        validator: async (rule, value) => {
+                          if (
+                            String(value).trim() === '' ||
+                            String(value).trim() === undefined ||
+                            value === null ||
+                            value === undefined
+                          ) {
+                            throw new Error(`Estimated Credits ${t('isRequired')}`);
+                          }
+                        },
+                      },
+                    ]}
+                  >
+                    <Input size="large" />
+                  </Form.Item>
+                </div>
+              </Col>
+            </Row>
+            <div className="steps-actions">
+              <Button type="primary" htmlType="submit">
+                Next
+              </Button>
             </div>
           </Form>
         </div>
@@ -468,7 +610,11 @@ export const AddProgrammeComponent = () => {
                       <div className="title">{t('addProgramme:addProgramme2')}</div>
                     </div>
                   ),
-                  description: current === 1 && <div>2</div>,
+                  description: current === 1 && (
+                    <div>
+                      <ProgrammeFinancingSought />
+                    </div>
+                  ),
                 },
                 {
                   title: (
