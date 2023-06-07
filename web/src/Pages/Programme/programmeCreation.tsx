@@ -35,6 +35,7 @@ export const AddProgrammeComponent = () => {
   const { state } = useLocation();
   const [formOne] = Form.useForm();
   const [formTwo] = Form.useForm();
+  const [formChecks] = Form.useForm();
   const { put, get, post } = useConnection();
   const { t } = useTranslation(['common', 'addProgramme']);
   const [loading, setLoading] = useState<boolean>(false);
@@ -107,12 +108,6 @@ export const AddProgrammeComponent = () => {
 
   const ProgrammeDetailsForm = () => {
     const companyRole = state?.record?.companyRole;
-    const companyRoleClassName =
-      companyRole === CompanyRole.CERTIFIER
-        ? 'certifier'
-        : companyRole === CompanyRole.PROGRAMME_DEVELOPER
-        ? 'dev'
-        : 'gov';
     return (
       <div className="programme-details-form-container">
         <div className="programme-details-form">
