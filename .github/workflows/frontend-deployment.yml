@@ -16,7 +16,7 @@ jobs:
       REACT_APP_COUNTRY_FLAG_URL: 'https://mrv-common-dev.s3.amazonaws.com/flag.png'
       COUNTRY_CODE: 'NA'
       REACT_APP_MAPBOXGL_ACCESS_TOKEN: ${{ secrets.MAPBOXGL_ACCESS_TOKEN }}
-      REACT_APP_MAP_TYPE : "None"
+      REACT_APP_MAP_TYPE : "Mapbox"
     steps:
       - uses: actions/checkout@v3
       - name: Cache modules
