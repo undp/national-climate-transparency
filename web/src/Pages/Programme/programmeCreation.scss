@@ -8,6 +8,7 @@
   .programme-details-form,
   .programme-sought-form {
     width: 100%;
+
     .ant-picker-large {
       height: 40px !important;
       width: 100%;
@@ -15,6 +16,13 @@
     .steps-actions {
       display: flex;
       flex-direction: row-reverse;
+      margin-right: 1rem;
+
+      .back-btn {
+        border: 1px solid $primary-color;
+        color: $primary-color;
+        margin-right: 1rem;
+      }
       .mg-left-1 {
         margin-left: 1rem;
       }

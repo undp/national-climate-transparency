@@ -40,6 +40,7 @@ export const AddProgrammeComponent = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [contactNoInput] = useState<any>();
   const [stepOneData, setStepOneData] = useState<any>();
+  const [stepTwoData, setStepTwoData] = useState<any>();
   const [current, setCurrent] = useState<number>(0);
   const [isUpdate, setIsUpdate] = useState(false);
   const [countries, setCountries] = useState<[]>([]);
@@ -559,9 +560,19 @@ export const AddProgrammeComponent = () => {
               </Col>
             </Row>
             <div className="steps-actions">
-              <Button type="primary" htmlType="submit">
+              <Button
+                type="primary"
+                onClick={() => {
+                  setCurrent(current - 1);
+                }}
+              >
                 Next
               </Button>
+              {current === 1 && (
+                <Button className="back-btn" onClick={() => prevOne()} loading={loading}>
+                  BACK
+                </Button>
+              )}
             </div>
           </Form>
         </div>
