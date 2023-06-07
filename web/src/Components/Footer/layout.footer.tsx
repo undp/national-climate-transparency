@@ -17,11 +17,11 @@ const LayoutFooter = () => {
             </div>
             <div>
               <div style={{ display: 'flex' }}>
-                <div className="title">{'CARBON'}</div>
-                <div className="title-sub">{'REGISTRY'}</div>
+                <div className="title">{'TRANSPARENCY'}</div>
+                {/* <div className="title-sub">{'REGISTRY'}</div> */}
               </div>
               <div className="footer-country-name">
-                {process.env.COUNTRY_NAME || 'Antarctic Region'}
+                {process.env.REACT_APP_COUNTRY_NAME || 'Antarctic Region'}
               </div>
             </div>
           </div>
@@ -36,7 +36,7 @@ const LayoutFooter = () => {
       <Row>
         <Col md={10} lg={10}>
           <div className="footertext-bottom">
-            {process.env.COUNTRY_NAME || 'Antarctic Region'}
+            {process.env.REACT_APP_COUNTRY_NAME || 'Antarctic Region'}
             <CcCircle className="cc" color="#FFFF" size="10px" />
           </div>
         </Col>
