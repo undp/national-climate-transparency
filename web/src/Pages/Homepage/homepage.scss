@@ -76,12 +76,12 @@
       text-transform: uppercase;
     }
     .ant-btn-primary {
-      background: linear-gradient(to right,#1890ff, $gradient-background-end);
+      background: linear-gradient(to right, #b288fe, $gradient-background-end);
       color: $dark-text-color;
       border: none;
     }
     .ant-btn-primary:hover {
-      background: linear-gradient(to right, $gradient-background-end,#1890ff);
+      background: linear-gradient(to right, $gradient-background-end, #b288fe);
     }
   }
   // .image-container {

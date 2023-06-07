@@ -1,8 +1,13 @@
 @import '../Common/colors.dashboard.scss';
+@import '../../Styles/variables.scss';
 
 .mapboxgl-popup-content {
   background-color: $white !important;
   color: $card-title !important;
+}
+
+.card-icons {
+  color: $primary-color;
 }
 
 .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
@@ -31,6 +36,15 @@
 
 .margin-top-1 {
   margin-top: 1rem;
+}
+
+.ant-tooltip-inner {
+  border-radius: 5px !important;
+  background-color: $primary-purple !important;
+}
+
+.ant-tooltip-arrow-content {
+  --antd-arrow-background-color: linear-gradient(to right bottom, #9155fd, #9155fd) !important;
 }
 
 .cards-title {
@@ -349,8 +363,8 @@
               font-size: 0.75rem;
               border-radius: 3.125rem;
               padding: 0.05rem 0.8rem 0.05rem 0.8rem;
-              color: $primary-blue;
-              background-color: rgba($color: #b9e2f4, $alpha: 0.4);
+              color: $primary-color;
+              background-color: $primary-color-light-bg;
             }
           }
 

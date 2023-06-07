@@ -164,7 +164,7 @@ export const AddProgrammeComponent = () => {
                     </Select>
                   </Form.Item>
                   <Form.Item
-                    wrapperCol={{ span: 12 }}
+                    wrapperCol={{ span: 13 }}
                     label="Programme Start Date"
                     name="programmeStartDate"
                     rules={[
@@ -317,7 +317,7 @@ export const AddProgrammeComponent = () => {
                     </Select>
                   </Form.Item>
                   <Form.Item
-                    wrapperCol={{ span: 12 }}
+                    wrapperCol={{ span: 13 }}
                     label="Programme End Date"
                     name="programmeEndDate"
                     rules={[
@@ -330,7 +330,7 @@ export const AddProgrammeComponent = () => {
                     <DatePicker size="large" />
                   </Form.Item>
                   <Form.Item
-                    wrapperCol={{ span: 12 }}
+                    wrapperCol={{ span: 13 }}
                     className="role-group"
                     label="Conditional | Unconditional"
                     name="conditionalOrUnconditional"
@@ -428,7 +428,7 @@ export const AddProgrammeComponent = () => {
   };
 
   return (
-    <div className="add-company-main-container">
+    <div className="add-programme-main-container">
       <div className="title-container">
         <div className="main">
           {isUpdate ? t('addProgramme:editProgramme') : t('addProgramme:addProgramme')}

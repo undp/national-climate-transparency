@@ -1713,11 +1713,11 @@ ${total}
               }
               icon={
                 userInfoState?.companyRole === CompanyRole.GOVERNMENT ? (
-                  <ClockHistory color="#16B1FF" size={80} />
+                  <ClockHistory className="card-icons" size={80} />
                 ) : userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER ? (
-                  <BoxArrowInRight color="#16B1FF" size={80} />
+                  <BoxArrowInRight className="card-icons" size={80} />
                 ) : (
-                  <ShieldX color="#16B1FF" size={80} />
+                  <ShieldX className="card-icons" size={80} />
                 )
               }
               loading={loadingWithoutTimeRange}
@@ -1749,11 +1749,11 @@ ${total}
               }
               icon={
                 userInfoState?.companyRole === CompanyRole.GOVERNMENT ? (
-                  <BoxArrowRight color="#16B1FF" size={80} />
+                  <BoxArrowRight className="card-icons" size={80} />
                 ) : userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER ? (
-                  <BoxArrowRight color="#16B1FF" size={80} />
+                  <BoxArrowRight className="card-icons" size={80} />
                 ) : (
-                  <ShieldCheck color="#16B1FF" size={80} />
+                  <ShieldCheck className="card-icons" size={80} />
                 )
               }
               loading={loadingWithoutTimeRange}
@@ -1785,11 +1785,11 @@ ${total}
               }
               icon={
                 userInfoState?.companyRole === CompanyRole.GOVERNMENT ? (
-                  <Gem color="#16B1FF" size={80} />
+                  <Gem className="card-icons" size={80} />
                 ) : userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER ? (
-                  <Gem color="#16B1FF" size={80} />
+                  <Gem className="card-icons" size={80} />
                 ) : (
-                  <ShieldExclamation color="#16B1FF" size={80} />
+                  <ShieldExclamation className="card-icons" size={80} />
                 )
               }
               loading={loadingWithoutTimeRange}

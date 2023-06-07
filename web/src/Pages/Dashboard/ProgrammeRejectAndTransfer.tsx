@@ -1,5 +1,6 @@
 import { FC, useEffect } from 'react';
 import { Progress, Skeleton, Tooltip } from 'antd';
+import './dashboard.scss';
 import {
   ClockHistory,
   HandThumbsUp,
@@ -55,7 +56,7 @@ const ProgrammeRejectAndTransfer: FC<ProgrammeRejectAndTransferCardItemProps> = 
               <div className="value">{totalPrgrammes}</div>
             </div>
             <div className="icon">
-              <Clipboard2Pulse color="#16B1FF" size={80} />
+              <Clipboard2Pulse className="card-icons" size={80} />
             </div>
           </div>
           <div className="total-programme-extra-details">

@@ -2,6 +2,7 @@ import { Suspense, useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ConnectionContextProvider } from './Context/ConnectionContext/connectionContext';
 import 'antd/dist/antd.css';
+import './Styles/theme.less';
 import './Styles/app.scss';
 import Login from './Pages/Login/login';
 import { UserInformationContextProvider } from './Context/UserInformationContext/userInformationContext';

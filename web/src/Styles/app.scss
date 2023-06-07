@@ -6,6 +6,25 @@ body {
   font-weight: 400;
 }
 
+.layout-content-container .ant-btn-primary {
+  background-color: $primary-color !important;
+  color: #ffffff;
+  border: none;
+}
+
+.stastic-card-main-container .values-section .values-and-unit .value {
+  color: $primary-color !important;
+}
+
+.stastic-card-main-container .updated-on {
+  color: $primary-color !important;
+  background-color: $primary-color-light-bg !important;
+}
+
+.content-container .body-title {
+  color: $primary-color !important;
+}
+
 .ant-menu {
   background-color: $background-color;
 }
@@ -55,15 +74,6 @@ body {
 
 .ant-input-group .ant-input {
   width: 99% !important;
-}
-
-.ant-tooltip-inner {
-  border-radius: 5px !important;
-  background-color: #16b1ff !important;
-}
-
-.ant-tooltip-arrow-content {
-  --antd-arrow-background-color: linear-gradient(to right bottom, #16b1ff, #16b1ff) !important;
 }
 
 .ant-radio-group {
@@ -286,7 +296,7 @@ body {
   }
 
   .anticon-edit {
-    color: #16b1ff;
+    color: $primary-color;
   }
 
   .anticon-delete {

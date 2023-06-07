@@ -32,6 +32,10 @@
         align-items: start;
         width: 100%;
 
+        .icon-color {
+          color: $primary-color !important;
+        }
+
         .ant-upload {
           width: 20%;
         }
@@ -59,7 +63,7 @@
       .details-part-two {
         .role-group {
           .condition-radio-container {
-            width: 45%;
+            width: 48%;
             text-align: center;
             .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
               color: $dark-text-color !important;
