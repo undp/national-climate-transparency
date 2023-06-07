@@ -3,6 +3,7 @@ import { AsyncOperationsHandlerInterface } from "./async-operations-handler-inte
 import { AsyncActionType } from "src/shared/enum/async.action.type.enum";
 import { EmailService } from "src/shared/email/email.service";
 import { SQSEvent, SQSRecord } from "aws-lambda";
+import { RegistryClientService } from "../shared/registry-client/registry-client.service";
 
 type Response = { batchItemFailures: { itemIdentifier: string }[] };
 
@@ -10,7 +11,7 @@ type Response = { batchItemFailures: { itemIdentifier: string }[] };
 export class AsyncOperationsQueueHandlerService
   implements AsyncOperationsHandlerInterface
 {
-  constructor(private emailService: EmailService) {}
+  constructor(private emailService: EmailService, private registryClient: RegistryClientService) {}
 
   async asyncHandler(event: SQSEvent): Promise<Response> {
     const response: Response = { batchItemFailures: [] };
@@ -18,9 +19,14 @@ export class AsyncOperationsQueueHandlerService
       try {
         const actionType = record.messageAttributes?.actionType?.stringValue;
         if (actionType) {
-          if (actionType === AsyncActionType.Email.toString()) {
-            const emailBody = JSON.parse(record.body);
-            await this.emailService.sendEmail(emailBody);
+          switch(actionType) {
+            case AsyncActionType.Email.toString():
+              const emailBody = JSON.parse(record.body);
+              await this.emailService.sendEmail(emailBody);
+              break;
+            case AsyncActionType.RegistryCompanyCreate.toString():
+              await this.registryClient.createCompany(JSON.parse(record.body))
+              break;
           }
         }
       } catch (e) {
@@ -31,4 +37,6 @@ export class AsyncOperationsQueueHandlerService
     await Promise.all(promises);
     return response;
   }
+
+
 }

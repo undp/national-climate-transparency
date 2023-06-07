@@ -10,6 +10,7 @@ import { TypeOrmConfigService } from "../shared/typeorm.config.service";
 import { AsyncOperationsDatabaseHandlerService } from "./async-operations-database-handler.service";
 import { AsyncOperationsHandlerInterface } from "./async-operations-handler-interface.service";
 import { AsyncOperationsQueueHandlerService } from "./async-operations-queue-handler.service";
+import { RegistryClientModule } from "../shared/registry-client/registry-client.module";
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AsyncOperationsQueueHandlerService } from "./async-operations-queue-han
     }),
     TypeOrmModule.forFeature([AsyncActionEntity, Counter]),
     EmailModule,
+    RegistryClientModule
   ],
   providers: [
     {
