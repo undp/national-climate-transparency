@@ -9,21 +9,22 @@ import { ProgrammeViewComponent } from '@undp/carbon-library';
 
 const ProgrammeView = () => {
   const { t } = useTranslation(['view']);
-  const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : 'None';
+  const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : 'Mapbox';
 
   return (
-    <ProgrammeViewComponent
-      t={t}
-      useConnection={useConnection}
-      useLocation={useLocation}
-      useNavigate={useNavigate}
-      Geocoding={Geocoding}
-      useUserContext={useUserContext}
-      useSettingsContext={useSettingsContext}
-      mapType={mapType}
-      mapBoxAccessToken={process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN}
-      countryCode={process.env.COUNTRY_CODE}
-    ></ProgrammeViewComponent>
+    // <ProgrammeViewComponent
+    //   t={t}
+    //   useConnection={useConnection}
+    //   useLocation={useLocation}
+    //   useNavigate={useNavigate}
+    //   Geocoding={Geocoding}
+    //   useUserContext={useUserContext}
+    //   useSettingsContext={useSettingsContext}
+    //   mapType={mapType}
+    //   mapBoxAccessToken={process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN}
+    //   countryCode={process.env.COUNTRY_CODE}
+    // ></ProgrammeViewComponent>
+    <div></div>
   );
 };
 

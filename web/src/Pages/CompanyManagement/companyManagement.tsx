@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { AbilityContext } from '../../Casl/Can';
+import { useAbilityContext } from '../../Casl/Can';
 import { CompanyManagementComponent, CompanyManagementColumns } from '@undp/carbon-library';
 import { useTranslation } from 'react-i18next';
 import './companyManagement.scss';
@@ -29,7 +29,7 @@ const CompanyManagement = () => {
   return (
     <CompanyManagementComponent
       t={t}
-      AbilityContext={AbilityContext}
+      useAbilityContext={useAbilityContext}
       post={post}
       visibleColumns={visibleColumns}
       onNavigateToCompanyProfile={navigateToCompanyProfile}

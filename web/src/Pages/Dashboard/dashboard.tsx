@@ -178,7 +178,10 @@ const Dashboard = () => {
   const [programmeLocationsMapSource, setProgrammeLocationsMapSource] = useState<MapSourceData>();
   const [programmeLocationsMapLayer, setProgrammeLocationsMapLayer] = useState<any>();
 
-  const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : 'None';
+  const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : 'Mapbox';
+  const accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
+    ? process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
+    : '';
 
   const getAllProgrammeAnalyticsStatsParamsWithoutTimeRange = () => {
     return {
@@ -2016,6 +2019,7 @@ ${total}
                         height={360}
                         style="mapbox://styles/mapbox/light-v11"
                         onRender={programmeLocationsMapOnRender}
+                        accessToken={accessToken}
                       ></MapComponent>
                     </div>
                     <div className="stage-legends">
@@ -2081,6 +2085,7 @@ ${total}
                         layer={transferLocationsMapLayer}
                         height={360}
                         style="mapbox://styles/mapbox/streets-v11"
+                        accessToken={accessToken}
                       ></MapComponent>
                     </div>
                     <div className="updated-on margin-top-2">
