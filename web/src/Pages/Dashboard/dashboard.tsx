@@ -1549,26 +1549,28 @@ ${total}
       const matchExpression: any = ['match', ['get', 'iso_3166_1']];
       const txLocationMap: any = {};
 
-      const transferLocations: any = [...programmeTransferLocations];
+      if (programmeTransferLocations) {
+        const transferLocations: any = [...programmeTransferLocations];
 
-      // Calculate color values for each country based on 'hdi' value
-      for (const row of transferLocations) {
-        // Convert the range of data values to a suitable color
-        // const blue = row.ratio * 255;
+        // Calculate color values for each country based on 'hdi' value
+        for (const row of transferLocations) {
+          // Convert the range of data values to a suitable color
+          // const blue = row.ratio * 255;
 
-        const color =
-          row.count < 2
-            ? `#4da6ff`
-            : row.count < 10
-            ? '#0080ff'
-            : row.count < 50
-            ? '#0059b3'
-            : row.count < 100
-            ? '#003366'
-            : '#000d1a';
+          const color =
+            row.count < 2
+              ? `#4da6ff`
+              : row.count < 10
+              ? '#0080ff'
+              : row.count < 50
+              ? '#0059b3'
+              : row.count < 100
+              ? '#003366'
+              : '#000d1a';
 
-        matchExpression.push(row.country, color);
-        txLocationMap[row.country] = row.count;
+          matchExpression.push(row.country, color);
+          txLocationMap[row.country] = row.count;
+        }
       }
 
       setTxLocationMapData(txLocationMap);
@@ -1711,11 +1713,11 @@ ${total}
               }
               icon={
                 userInfoState?.companyRole === CompanyRole.GOVERNMENT ? (
-                  <ClockHistory color="#16B1FF" size={80} />
+                  <ClockHistory className="card-icons" size={80} />
                 ) : userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER ? (
-                  <BoxArrowInRight color="#16B1FF" size={80} />
+                  <BoxArrowInRight className="card-icons" size={80} />
                 ) : (
-                  <ShieldX color="#16B1FF" size={80} />
+                  <ShieldX className="card-icons" size={80} />
                 )
               }
               loading={loadingWithoutTimeRange}
@@ -1747,11 +1749,11 @@ ${total}
               }
               icon={
                 userInfoState?.companyRole === CompanyRole.GOVERNMENT ? (
-                  <BoxArrowRight color="#16B1FF" size={80} />
+                  <BoxArrowRight className="card-icons" size={80} />
                 ) : userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER ? (
-                  <BoxArrowRight color="#16B1FF" size={80} />
+                  <BoxArrowRight className="card-icons" size={80} />
                 ) : (
-                  <ShieldCheck color="#16B1FF" size={80} />
+                  <ShieldCheck className="card-icons" size={80} />
                 )
               }
               loading={loadingWithoutTimeRange}
@@ -1783,11 +1785,11 @@ ${total}
               }
               icon={
                 userInfoState?.companyRole === CompanyRole.GOVERNMENT ? (
-                  <Gem color="#16B1FF" size={80} />
+                  <Gem className="card-icons" size={80} />
                 ) : userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER ? (
-                  <Gem color="#16B1FF" size={80} />
+                  <Gem className="card-icons" size={80} />
                 ) : (
-                  <ShieldExclamation color="#16B1FF" size={80} />
+                  <ShieldExclamation className="card-icons" size={80} />
                 )
               }
               loading={loadingWithoutTimeRange}

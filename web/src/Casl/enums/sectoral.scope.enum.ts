@@ -1,0 +1,17 @@
+export enum SectoralScope {
+  EnergyIndustries = 'Energy Industries',
+  EnergyDistribution = 'Energy Distribution',
+  EnergyDemand = 'Energy Demand',
+  ManufacturingIndustries = 'Manufacturing Industries',
+  ChemicalIndustries = 'Chemical Industries',
+  Construction = 'Construction',
+  Transport = 'Transport',
+  MiningOrMineralProduction = 'Mining/Mineral Production',
+  MetalProduction = 'Metal Production',
+  FugitiveEmissionsFromFuels = 'Fugitive Emissions From Fuels',
+  FugitiveEmissionsFromProduction = 'Fugitive Emissions From Production and Consumption of Halocarbons and Sulphur Hexafluoride',
+  SolventUse = 'Solvent Use',
+  WasteHandling = 'Waste Handling and Disposal',
+  AfforestationAndReforestation = 'Afforestation and Reforestation',
+  Agriculture = 'Agriculture',
+}

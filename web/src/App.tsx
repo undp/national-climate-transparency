@@ -2,6 +2,7 @@ import { Suspense, useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ConnectionContextProvider } from './Context/ConnectionContext/connectionContext';
 import 'antd/dist/antd.css';
+import './Styles/theme.less';
 import './Styles/app.scss';
 import Login from './Pages/Login/login';
 import { UserInformationContextProvider } from './Context/UserInformationContext/userInformationContext';
@@ -27,8 +28,8 @@ import UserProfile from './Pages/UserProfile/UserProfile';
 import CompanyProfile from './Pages/CompanyProfile/companyProfile';
 import { AbilityContext } from './Casl/Can';
 import { defineAbility, updateUserAbility } from './Casl/ability';
-import { message } from 'antd';
 import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
+import { AddProgrammeComponent } from './Pages/Programme/programmeCreation';
 
 // message.config({
 //   duration: 60,
@@ -87,6 +88,7 @@ const App = () => {
                   >
                     <Route path="viewAll" element={<ProgrammeManagement />} />
                     <Route path="view" element={<ProgrammeView />} />
+                    <Route path="addProgramme" element={<AddProgrammeComponent />} />
                   </Route>
                   <Route
                     path="/companyManagement"

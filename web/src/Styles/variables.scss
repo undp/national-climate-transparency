@@ -2,8 +2,11 @@ $primary-font-family: 'Inter';
 $secondary-font-family: 'Sohne-Breit';
 $common-form-input-border: #d9d9d9;
 $note-light-text: rgba(58, 53, 65, 0.5);
+$common-input-color: rgba(0, 0, 0, 0.85);
 
-$primary-color: #9155FD;
+$primary-color: #9155fd;
+$primary-color-light-bg: rgba(222, 205, 254, 0.4);
+$primary-purple: #9155fd;
 
 $nav-color: #282828;
 $text-color: #3a3541;
@@ -16,8 +19,8 @@ $background-color: #f4f5fa;
 $background-color-dark: #232e3d;
 $outside-background-color: #ffffff;
 
-$gradient-background-start: #C6A7FE;
-$gradient-background-end: rgba(#9155FD, 0.94);
+$gradient-background-start: #ceb3fe;
+$gradient-background-end: rgba(#9155fd, 0.94);
 
 $sep-line-color: #f0f0f0;
 
