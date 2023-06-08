@@ -5,15 +5,16 @@ volumes:
   filestore:
     driver: local
 services:
-  db:
-    container_name: db
+  dbmrv:
+    container_name: dbmrv
     image: postgres
     restart: always
     ports:
-      - "5432:5432"
+      - "5433:5433"
     environment:
       POSTGRES_PASSWORD: "<ANY PASSOWORD>"
       POSTGRES_USER: root
+      PGPORT: 5433
       PSQL_USERNAME: root
       # POSTGRES_HOST_AUTH_METHOD: trust
       PGDATA: /data/postgres
@@ -25,11 +26,11 @@ services:
       context: .
       dockerfile: ./backend/services/Dockerfile
     ports:
-      - "3000:3000"
+      - "9000:3000"
     depends_on:
-      - db
+      - dbmrv
     environment:
-      DB_HOST: db
+      DB_HOST: dbmrv
       DB_USER: root
       DB_PASSWORD: "<ANY PASSOWORD>"
       RUN_MODULE: national-api
@@ -43,6 +44,8 @@ services:
       HOST: "http://localhost:3030"
       DOMAIN_MAP: "true"
       EXPIRES_IN: "7200"
+      DB_PORT: "5433"
+      DB_NAME: "carbondev"
     volumes:
       - filestore:/app/backend/services/public
       - ./users.csv:/app/backend/services/users.csv
@@ -52,26 +55,28 @@ services:
       context: .
       dockerfile: ./backend/services/Dockerfile
     ports:
-      - "3100:3100"
+      - "9100:3100"
     depends_on:
-      - db
+      - dbmrv
       - national
     environment:
-      DB_HOST: db
+      DB_HOST: dbmrv
       DB_USER: root
       DB_PASSWORD: "<ANY PASSOWORD>"
       RUN_PORT: 3100
       RUN_MODULE: analytics-api
       DOMAIN_MAP: "true"
+      DB_PORT: "5433"
+      DB_NAME: "carbondev"
   replicator:
     build:
       context: .
       dockerfile: ./backend/services/Dockerfile
     depends_on:
-      - db
+      - dbmrv
       - national
     environment:
-      DB_HOST: db
+      DB_HOST: dbmrv
       DB_USER: root
       DB_PASSWORD: "<ANY PASSOWORD>"
       # ,data-importer
@@ -84,6 +89,8 @@ services:
       ITMO_API_KEY: ""
       ITMO_EMAIL: ""
       ITMO_PASSWORD: ""
+      DB_PORT: "5433"
+      DB_NAME: "carbondev"
   # async-operations-handler:
   #   build:
   #     context: .
@@ -105,14 +112,14 @@ services:
       dockerfile: ./web/Dockerfile
       args:
         PORT: 3030
-        REACT_APP_BACKEND: http://localhost:3000
-        REACT_APP_STAT_URL: http://localhost:3100
+        REACT_APP_BACKEND: http://localhost:9000
+        REACT_APP_STAT_URL: http://localhost:9100
         REACT_APP_COUNTRY_NAME: "Antarctic Region"
         REACT_APP_COUNTRY_FLAG_URL: "https://mrv-common-dev.s3.amazonaws.com/flag.png"
         COUNTRY_CODE: "NG"
         REACT_APP_MAP_TYPE: "None"
     ports:
-      - "3030:3030"
+      - "9030:3030"
     depends_on:
-      - db
+      - dbmrv
       - national
