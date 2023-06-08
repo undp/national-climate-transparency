@@ -23,8 +23,8 @@ import { RegistryClientModule } from "../shared/registry-client/registry-client.
       useClass: TypeOrmConfigService,
     }),
     TypeOrmModule.forFeature([AsyncActionEntity, Counter]),
-    EmailModule,
-    RegistryClientModule
+    RegistryClientModule,
+    EmailModule
   ],
   providers: [
     {

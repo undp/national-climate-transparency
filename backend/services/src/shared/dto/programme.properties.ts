@@ -11,6 +11,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsUrl,
+  IsBoolean,
 } from "class-validator";
 import { GHGs } from "../enum/ghgs.enum";
 import { SourceOfFunding } from "../enum/sourceoffinding.enum";
@@ -80,15 +81,12 @@ export class ProgrammeProperties {
   @IsNotEmpty()
   greenHouseGasses: GHGs[];
 
+  @ApiPropertyOptional()
+  @IsBoolean()
+  @IsOptional()
+  @IsNotEmpty()
+  ndcScope?: boolean;
+
   creditYear?: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  programmeMaterials?: [];
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  projectMaterial?: [];
 }
