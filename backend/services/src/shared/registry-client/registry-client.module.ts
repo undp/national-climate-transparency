@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { RegistryClientService } from './registry-client.service';
 
 @Module({
-  providers: [RegistryClientService],
+  providers: [RegistryClientService, Logger,],
   exports: [RegistryClientService]
 })
 export class RegistryClientModule {}

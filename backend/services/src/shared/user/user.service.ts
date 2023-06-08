@@ -642,6 +642,12 @@ export class UserService {
 
     const { apiKey, password, ...resp } = usr;
 
+    const registryCompanyCreateAction: AsyncAction = {
+      actionType: AsyncActionType.RegistryCompanyCreate,
+      actionProps: userDto
+    };
+    await this.asyncOperationsInterface.AddAction(registryCompanyCreateAction);
+
     const response = new DataResponseMessageDto(
       HttpStatus.CREATED,
       this.helperService.formatReqMessagesString("user.createUserSuccess", []),

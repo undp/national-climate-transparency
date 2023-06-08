@@ -7,6 +7,7 @@ import { AsyncActionType } from "src/shared/enum/async.action.type.enum";
 import { CounterType } from "src/shared/util/counter.type.enum";
 import { Repository } from "typeorm";
 import { AsyncOperationsHandlerInterface } from "./async-operations-handler-interface.service";
+import { RegistryClientService } from "src/shared/registry-client/registry-client.service";
 
 @Injectable()
 export class AsyncOperationsDatabaseHandlerService
@@ -17,7 +18,8 @@ export class AsyncOperationsDatabaseHandlerService
     @InjectRepository(Counter) private counterRepo: Repository<Counter>,
     @InjectRepository(AsyncActionEntity)
     private asyncActionRepo: Repository<AsyncActionEntity>,
-    private emailService: EmailService
+    private emailService: EmailService,
+    private registryClient: RegistryClientService
   ) {}
 
   async asyncHandler(event: any): Promise<any> {
@@ -47,9 +49,17 @@ export class AsyncOperationsDatabaseHandlerService
         
       const startedSeq = lastSeq;
       notExecutedActions.forEach((action: any) => {
-        if (action.actionType === AsyncActionType.Email.toString()) {
-          const emailBody = JSON.parse(action.actionProps);
-          asyncPromises.push(this.emailService.sendEmail(emailBody));
+
+        if(action.actionType){
+          switch(action.actionType) {
+            case AsyncActionType.Email.toString():
+              const emailBody = JSON.parse(action.actionProps);
+              asyncPromises.push(this.emailService.sendEmail(emailBody));
+              break;
+            case AsyncActionType.RegistryCompanyCreate.toString():
+              asyncPromises.push(this.registryClient.createCompany(JSON.parse(action.actionProps)));
+              break;
+          }
         }
         lastSeq = action.actionId;
       });
