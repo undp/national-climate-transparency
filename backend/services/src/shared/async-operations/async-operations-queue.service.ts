@@ -23,22 +23,23 @@ export class AsyncOperationsQueueService implements AsyncOperationsInterface {
   }
 
   public async AddAction(action: AsyncAction): Promise<boolean> {
-    var params = {};
 
     if (action.actionType === AsyncActionType.Email) {
-      if (this.emailDisabled)
+      if (this.emailDisabled) {
         return false;
-      params = {
-        MessageAttributes: {
-          actionType: {
-            DataType: "Number",
-            StringValue: action.actionType.toString(),
-          },
+      }
+    };
+    
+    const params = {
+      MessageAttributes: {
+        actionType: {
+          DataType: "Number",
+          StringValue: action.actionType.toString(),
         },
-        MessageBody: JSON.stringify(action.actionProps),
-        MessageGroupId: action.actionProps.emailType,
-        QueueUrl: this.configService.get("asyncQueueName"),
-      };
+      },
+      MessageBody: JSON.stringify(action.actionProps),
+      MessageGroupId: action.actionType.toString(),
+      QueueUrl: this.configService.get("asyncQueueName"),
     }
 
     try {

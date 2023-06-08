@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REACT_APP_BACKEND: https://u4h9swxm8b.execute-api.us-east-1.amazonaws.com/dev
-      REACT_APP_COUNTRY_NAME: 'Government of Namibia'
+      REACT_APP_COUNTRY_NAME: 'Antarctic Region'
       REACT_APP_COUNTRY_FLAG_URL: 'https://mrv-common-dev.s3.amazonaws.com/flag.png'
       COUNTRY_CODE: 'NA'
       REACT_APP_MAPBOXGL_ACCESS_TOKEN: ${{ secrets.MAPBOXGL_ACCESS_TOKEN }}
-      REACT_APP_MAP_TYPE : "None"
+      REACT_APP_MAP_TYPE : "Mapbox"
     steps:
       - uses: actions/checkout@v3
       - name: Cache modules
