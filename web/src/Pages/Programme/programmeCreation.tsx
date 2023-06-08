@@ -45,6 +45,12 @@ export const AddProgrammeComponent = () => {
   const [current, setCurrent] = useState<number>(0);
   const [isUpdate, setIsUpdate] = useState(false);
   const [countries, setCountries] = useState<[]>([]);
+  const initialOrganisationOwnershipValues = [
+    {
+      organisation: undefined,
+      ownership: undefined,
+    },
+  ];
 
   const getCountryList = async () => {
     const response = await get('national/organisation/countries');
@@ -199,10 +205,10 @@ export const AddProgrammeComponent = () => {
                         N<sub>2</sub>O
                       </Select.Option>
                       <Select.Option value="HFC5">
-                        HFC<sub>5</sub>
+                        HFC<sub>s</sub>
                       </Select.Option>
                       <Select.Option value="PFC5">
-                        PFC<sub>5</sub>
+                        PFC<sub>s</sub>
                       </Select.Option>
                       <Select.Option value="SF6">
                         SF<sub>6</sub>
@@ -273,7 +279,10 @@ export const AddProgrammeComponent = () => {
                   >
                     <Input size="large" />
                   </Form.Item>
-                  <Form.List name="ownershipPercentage">
+                  <Form.List
+                    name="ownershipPercentage"
+                    initialValue={initialOrganisationOwnershipValues}
+                  >
                     {(fields, { add, remove }) => (
                       <div className="space-container" style={{ width: '100%' }}>
                         {fields.map(({ key, name, ...restField }) => (
@@ -287,7 +296,7 @@ export const AddProgrammeComponent = () => {
                             <Form.Item
                               {...restField}
                               label="Organisation"
-                              name={[name, 'first']}
+                              name={[name, 'organisation']}
                               wrapperCol={{ span: 24 }}
                               className="organisation"
                               rules={[{ required: true, message: 'Missing first name' }]}
@@ -302,7 +311,7 @@ export const AddProgrammeComponent = () => {
                               {...restField}
                               label="Ownership Percentage"
                               className="ownership-percent"
-                              name={[name, 'last']}
+                              name={[name, 'ownership']}
                               wrapperCol={{ span: 24 }}
                               rules={[{ required: true, message: 'Missing last name' }]}
                             >

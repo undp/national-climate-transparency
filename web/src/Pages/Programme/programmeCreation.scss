@@ -13,6 +13,10 @@
       height: 40px !important;
       width: 100%;
     }
+
+    .ant-upload-list-item-name {
+      color: $primary-color;
+    }
     .steps-actions {
       display: flex;
       flex-direction: row-reverse;
