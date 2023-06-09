@@ -11,6 +11,7 @@ import { AsyncOperationsDatabaseHandlerService } from "./async-operations-databa
 import { AsyncOperationsHandlerInterface } from "./async-operations-handler-interface.service";
 import { AsyncOperationsQueueHandlerService } from "./async-operations-queue-handler.service";
 import { RegistryClientModule } from "../shared/registry-client/registry-client.module";
+import { AsyncOperationsHandlerService } from "./async-operations-handler.service";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { RegistryClientModule } from "../shared/registry-client/registry-client.
           : AsyncOperationsDatabaseHandlerService,
     },
     Logger,
+    AsyncOperationsHandlerService,
   ],
 })
 export class AsyncOperationsModule {}
