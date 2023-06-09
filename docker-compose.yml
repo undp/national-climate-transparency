@@ -91,6 +91,9 @@ services:
       ITMO_PASSWORD: ""
       DB_PORT: "5433"
       DB_NAME: "carbondev"
+      REGISTRY_API_TOKEN: "c2hhbmlrYXcxMkB4ZXB0YWdvbi5jb21fX19TSUZXcDRKYS1xZTg4UWNfc19jcWE="
+      REGISTRY_ENDPOINT: "https://api.carbreg.org"
+      REGISTRY_SYNC_ENABLE : "true"
   # async-operations-handler:
   #   build:
   #     context: .

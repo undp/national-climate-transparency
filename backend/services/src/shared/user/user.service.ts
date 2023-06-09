@@ -388,6 +388,10 @@ export class UserService {
     companyRole: CompanyRole
   ): Promise<User | DataResponseMessageDto | undefined> {
     this.logger.verbose(`User create received  ${userDto.email} ${companyId}`);
+    const createdUserDto = {...userDto};
+    if(userDto.company){
+      createdUserDto.company={...userDto.company}
+    }
     const user = await this.findOne(userDto.email);
     if (user) {
       throw new HttpException(
@@ -642,11 +646,15 @@ export class UserService {
 
     const { apiKey, password, ...resp } = usr;
 
-    const registryCompanyCreateAction: AsyncAction = {
-      actionType: AsyncActionType.RegistryCompanyCreate,
-      actionProps: userDto
-    };
-    await this.asyncOperationsInterface.AddAction(registryCompanyCreateAction);
+    if (company) {
+      const registryCompanyCreateAction: AsyncAction = {
+        actionType: AsyncActionType.RegistryCompanyCreate,
+        actionProps: createdUserDto,
+      };
+      await this.asyncOperationsInterface.AddAction(
+        registryCompanyCreateAction
+      );
+    }
 
     const response = new DataResponseMessageDto(
       HttpStatus.CREATED,
