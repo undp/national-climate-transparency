@@ -14,12 +14,13 @@ import { ProgrammeTransferViewEntityQuery } from '../entities/programmeTransfer.
 import { UserModule } from '../user/user.module';
 import { EmailHelperModule } from '../email-helper/email-helper.module';
 import { LocationModule } from '../location/location.module';
+import { NDCAction } from '../entities/ndc.action.entity';
 
 @Module({
   imports: [
     ProgrammeLedgerModule, 
     CaslModule, 
-    TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, ProgrammeTransferViewEntityQuery]), 
+    TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, ProgrammeTransferViewEntityQuery, NDCAction]), 
     UtilModule, 
     CompanyModule, 
     UserModule,

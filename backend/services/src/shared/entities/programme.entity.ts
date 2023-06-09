@@ -9,6 +9,7 @@ import { ProgrammeStage } from "../enum/programme-status.enum";
 import { EntitySubject } from "./entity.subject";
 import { SectoralScope } from "@undp/serial-number-gen";
 import { PRECISION } from "../constants";
+import { ProgrammeDocuments } from "../dto/programme.documents";
 
 @Entity()
 export class Programme implements EntitySubject {
@@ -44,13 +45,6 @@ export class Programme implements EntitySubject {
     default: ProgrammeStage.AWAITING_AUTHORIZATION,
   })
   currentStage: ProgrammeStage;
-
-  @Column({
-    type: "enum",
-    enum: TypeOfMitigation,
-    array: false,
-  })
-  typeOfMitigation: TypeOfMitigation;
 
   @Column({ type: "bigint" })
   startTime: number;
@@ -115,16 +109,8 @@ export class Programme implements EntitySubject {
   @Column({
     type: "jsonb",
     array: false,
-    nullable: true,
   })
-  agricultureProperties: AgricultureProperties;
-
-  @Column({
-    type: "jsonb",
-    array: false,
-    nullable: true,
-  })
-  solarProperties: SolarProperties;
+  programmeDocuments: ProgrammeDocuments;
 
   @Column({ type: "bigint" })
   txTime: number;
