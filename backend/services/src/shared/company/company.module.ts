@@ -7,7 +7,6 @@ import configuration from "../configuration";
 import { TypeOrmConfigService } from "../typeorm.config.service";
 import { CompanyService } from "./company.service";
 import { UtilModule } from "../util/util.module";
-import { ProgrammeLedgerModule } from "../programme-ledger/programme-ledger.module";
 import { ProgrammeTransfer } from "../entities/programme.transfer";
 import { EmailHelperModule } from "../email-helper/email-helper.module";
 import { FileHandlerModule } from "../file-handler/filehandler.module";
@@ -26,7 +25,6 @@ import { FileHandlerModule } from "../file-handler/filehandler.module";
     TypeOrmModule.forFeature([Company, ProgrammeTransfer]),
     CaslModule,
     UtilModule,
-    ProgrammeLedgerModule,
     FileHandlerModule,
     forwardRef(() => EmailHelperModule),
   ],

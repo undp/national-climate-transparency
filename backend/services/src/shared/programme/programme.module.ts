@@ -1,6 +1,5 @@
-import { Logger, Module } from '@nestjs/common';
+import { Logger, Module, forwardRef } from '@nestjs/common';
 import { ProgrammeService } from './programme.service';
-import { ProgrammeLedgerModule } from '../programme-ledger/programme-ledger.module';
 import { CaslModule } from '../casl/casl.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Programme } from '../entities/programme.entity';
@@ -18,13 +17,12 @@ import { NDCAction } from '../entities/ndc.action.entity';
 
 @Module({
   imports: [
-    ProgrammeLedgerModule, 
     CaslModule, 
     TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, ProgrammeTransferViewEntityQuery, NDCAction]), 
-    UtilModule, 
-    CompanyModule, 
-    UserModule,
-    EmailHelperModule,
+    UtilModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => CompanyModule),
+    forwardRef(() => EmailHelperModule),
     LocationModule
   ],
   providers: [Logger, ProgrammeService],

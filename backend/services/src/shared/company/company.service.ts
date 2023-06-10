@@ -19,7 +19,6 @@ import { BasicResponseDto } from "../dto/basic.response.dto";
 import { CompanyState } from "../enum/company.state.enum";
 import { HelperService } from "../util/helpers.service";
 import { FindOrganisationQueryDto } from "../dto/find.organisation.dto";
-import { ProgrammeLedgerService } from "../programme-ledger/programme-ledger.service";
 import { OrganisationUpdateDto } from "../dto/organisation.update.dto";
 import { DataResponseDto } from "../dto/data.response.dto";
 import { ProgrammeTransfer } from "../entities/programme.transfer";
@@ -40,7 +39,6 @@ export class CompanyService {
     private logger: Logger,
     private configService: ConfigService,
     private helperService: HelperService,
-    private programmeLedgerService: ProgrammeLedgerService,
     @Inject(forwardRef(() => EmailHelperService))
     private emailHelperService: EmailHelperService,
     @InjectRepository(ProgrammeTransfer)
@@ -95,11 +93,11 @@ export class CompanyService {
     if (result.affected > 0) {
       // TODO: Currently there can be unfreezed credits after company suspend if transactions failed
       if (company.companyRole === CompanyRole.PROGRAMME_DEVELOPER) {
-        await this.programmeLedgerService.freezeCompany(
-          companyId,
-          this.getUserRefWithRemarks(user, `${remarks}#${company.name}`),
-          true
-        );
+        // await this.programmeLedgerService.freezeCompany(
+        //   companyId,
+        //   this.getUserRefWithRemarks(user, `${remarks}#${company.name}`),
+        //   true
+        // );
         await this.companyTransferCancel(
           companyId,
           `${remarks}#${user.companyId}#${user.id}#${SystemActionType.SUSPEND_AUTO_CANCEL}#${company.name}#${user.companyName}`
@@ -111,29 +109,29 @@ export class CompanyService {
           user.companyId
         );
       } else if (company.companyRole === CompanyRole.CERTIFIER) {
-        await this.programmeLedgerService.revokeCompanyCertifications(
-          companyId,
-          this.getUserRefWithRemarks(
-            user,
-            `${remarks}#${SystemActionType.SUSPEND_REVOKE}#${company.name}`
-          ),
-          async (programme: Programme) => {
-            const hostAddress = this.configService.get("host");
-            await this.emailHelperService.sendEmailToProgrammeOwnerAdmins(
-              programme.programmeId,
-              EmailTemplates.PROGRAMME_CERTIFICATION_REVOKE_BY_SYSTEM,
-              {
-                organisationName: company.name,
-                programmeName: programme.title,
-                credits: programme.creditBalance,
-                serialNumber: programme.serialNo,
-                pageLink:
-                  hostAddress +
-                  `/programmeManagement/view?id=${programme.programmeId}`,
-              }
-            );
-          }
-        );
+        // await this.programmeLedgerService.revokeCompanyCertifications(
+        //   companyId,
+        //   this.getUserRefWithRemarks(
+        //     user,
+        //     `${remarks}#${SystemActionType.SUSPEND_REVOKE}#${company.name}`
+        //   ),
+        //   async (programme: Programme) => {
+        //     const hostAddress = this.configService.get("host");
+        //     await this.emailHelperService.sendEmailToProgrammeOwnerAdmins(
+        //       programme.programmeId,
+        //       EmailTemplates.PROGRAMME_CERTIFICATION_REVOKE_BY_SYSTEM,
+        //       {
+        //         organisationName: company.name,
+        //         programmeName: programme.title,
+        //         credits: programme.creditBalance,
+        //         serialNumber: programme.serialNo,
+        //         pageLink:
+        //           hostAddress +
+        //           `/programmeManagement/view?id=${programme.programmeId}`,
+        //       }
+        //     );
+        //   }
+        // );
 
         await this.emailHelperService.sendEmail(
           company.email,
@@ -199,11 +197,11 @@ export class CompanyService {
       });
 
     if (result.affected > 0) {
-      await this.programmeLedgerService.freezeCompany(
-        companyId,
-        this.getUserRefWithRemarks(user, `${remarks}#${company.name}`),
-        false
-      );
+      // await this.programmeLedgerService.freezeCompany(
+      //   companyId,
+      //   this.getUserRefWithRemarks(user, `${remarks}#${company.name}`),
+      //   false
+      // );
       await this.emailHelperService.sendEmail(
         company.email,
         EmailTemplates.ORG_REACTIVATION,

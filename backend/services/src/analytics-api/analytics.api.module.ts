@@ -8,7 +8,6 @@ import { TypeOrmConfigService } from "../shared/typeorm.config.service";
 import { Programme } from "../shared/entities/programme.entity";
 import { ProgrammeTransfer } from "../shared/entities/programme.transfer";
 import { ProgrammeTransferViewEntityQuery } from "../shared/entities/programmeTransfer.view.entity";
-import { ProgrammeLedgerModule } from "../shared/programme-ledger/programme-ledger.module";
 import { CaslModule } from "../shared/casl/casl.module";
 import { AuthModule } from "../shared/auth/auth.module";
 import { UtilModule } from "../shared/util/util.module";
@@ -34,8 +33,7 @@ import { Company } from "../shared/entities/company.entity";
     ]),
     AuthModule,
     CaslModule,
-    UtilModule,
-    ProgrammeLedgerModule,
+    UtilModule
   ],
   controllers: [ProgrammeController],
   providers: [AnalyticsAPIService, Logger, AggregateAPIService],

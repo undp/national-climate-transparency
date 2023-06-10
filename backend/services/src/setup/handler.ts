@@ -19,8 +19,8 @@ import { LocationInterface } from "../shared/location/location.interface";
 import { ProgrammeModule } from "../shared/programme/programme.module";
 import { ProgrammeService } from "../shared/programme/programme.service";
 import { ConfigService } from "@nestjs/config";
-import { LedgerDbModule } from "../shared/ledger-db/ledger-db.module";
-import { LedgerDBInterface } from "../shared/ledger-db/ledger.db.interface";
+// import { LedgerDbModule } from "../shared/ledger-db/ledger-db.module";
+// import { LedgerDBInterface } from "../shared/ledger-db/ledger.db.interface";
 const fs = require("fs");
 
 export const handler: Handler = async (event) => {
@@ -150,29 +150,29 @@ export const handler: Handler = async (event) => {
     console.log("Root user already created and setup is completed");
   }
 
-  const app = await NestFactory.createApplicationContext(LedgerDbModule, {
-    logger: getLogger(LedgerDbModule),
-  });
-  try {
-    const ledgerModule = app.get(LedgerDBInterface);
+  // const app = await NestFactory.createApplicationContext(LedgerDbModule, {
+  //   logger: getLogger(LedgerDbModule),
+  // });
+  // try {
+  //   const ledgerModule = app.get(LedgerDBInterface);
 
-    await ledgerModule.createTable("company");
-    await ledgerModule.createIndex("txId", "company");
+  //   await ledgerModule.createTable("company");
+  //   await ledgerModule.createIndex("txId", "company");
 
-    await ledgerModule.createTable("overall");
-    await ledgerModule.createIndex("txId", "overall");
-    const creditOverall = new CreditOverall();
-    creditOverall.credit = 0;
-    creditOverall.txId = event["systemCountryCode"];
-    creditOverall.txRef = "genesis block";
-    creditOverall.txType = TxType.ISSUE;
-    await ledgerModule.insertRecord(creditOverall, "overall");
-    await ledgerModule.createTable();
-    await ledgerModule.createIndex("programmeId");
-    console.log("QLDB Table created");
-  } catch (e) {
-    console.log("QLDB table does not create", e);
-  }
+  //   await ledgerModule.createTable("overall");
+  //   await ledgerModule.createIndex("txId", "overall");
+  //   const creditOverall = new CreditOverall();
+  //   creditOverall.credit = 0;
+  //   creditOverall.txId = event["systemCountryCode"];
+  //   creditOverall.txRef = "genesis block";
+  //   creditOverall.txType = TxType.ISSUE;
+  //   await ledgerModule.insertRecord(creditOverall, "overall");
+  //   await ledgerModule.createTable();
+  //   await ledgerModule.createIndex("programmeId");
+  //   console.log("QLDB Table created");
+  // } catch (e) {
+  //   console.log("QLDB table does not create", e);
+  // }
 
   try {
     const company = new OrganisationDto();

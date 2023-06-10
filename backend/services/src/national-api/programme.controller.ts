@@ -51,14 +51,14 @@ export class ProgrammeController {
       return this.programmeService.query(query, req.abilityCondition)
     }
 
-    @ApiBearerAuth('api_key')
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
-    @Get('getHistory')
-    async getHistory(@Query('programmeId') programmeId: string, @Request() req) {
-        return this.programmeService.getProgrammeEvents(programmeId, req.user)
-    }
+    // @ApiBearerAuth('api_key')
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
+    // @Get('getHistory')
+    // async getHistory(@Query('programmeId') programmeId: string, @Request() req) {
+    //     return this.programmeService.getProgrammeEvents(programmeId, req.user)
+    // }
 
     @ApiBearerAuth()
     @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
@@ -67,40 +67,40 @@ export class ProgrammeController {
         return this.programmeService.updateCustomConstants(config.type, config);
     }
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
-    @Put('authorize')
-    async programmeApprove(@Body() body: ProgrammeApprove, @Request() req) {
-        return this.programmeService.approveProgramme(body, req.user)
-    }
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    // @Put('authorize')
+    // async programmeApprove(@Body() body: ProgrammeApprove, @Request() req) {
+    //     return this.programmeService.approveProgramme(body, req.user)
+    // }
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
-    @Put('issue')
-    async programmeIssue(@Body() body: ProgrammeIssue, @Request() req) {
-        return this.programmeService.issueProgrammeCredit(body, req.user)
-    }
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    // @Put('issue')
+    // async programmeIssue(@Body() body: ProgrammeIssue, @Request() req) {
+    //     return this.programmeService.issueProgrammeCredit(body, req.user)
+    // }
 
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
-    @Put('reject')
-    async programmeReject(@Body() body: ProgrammeReject, @Request() req) {
-        return this.programmeService.rejectProgramme(body, req.user)
-    }
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    // @Put('reject')
+    // async programmeReject(@Body() body: ProgrammeReject, @Request() req) {
+    //     return this.programmeService.rejectProgramme(body, req.user)
+    // }
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeCertify))
-    @Put('certify')
-    async programmeCertify(@Body() body: ProgrammeCertify, @Request() req) {
-        return this.programmeService.certify(body, true, req.user)
-    }
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeCertify))
+    // @Put('certify')
+    // async programmeCertify(@Body() body: ProgrammeCertify, @Request() req) {
+    //     return this.programmeService.certify(body, true, req.user)
+    // }
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeCertify))
-    @Put('revoke')
-    async programmeRevoke(@Body() body: ProgrammeRevoke, @Request() req) {
-        return this.programmeService.certify(body, false, req.user)
-    }
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeCertify))
+    // @Put('revoke')
+    // async programmeRevoke(@Body() body: ProgrammeRevoke, @Request() req) {
+    //     return this.programmeService.certify(body, false, req.user)
+    // }
 
 }

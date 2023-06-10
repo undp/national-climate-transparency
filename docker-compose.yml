@@ -68,32 +68,29 @@ services:
       DOMAIN_MAP: "true"
       DB_PORT: "5433"
       DB_NAME: "carbondev"
-  replicator:
-    build:
-      context: .
-      dockerfile: ./backend/services/Dockerfile
-    depends_on:
-      - dbmrv
-      - national
-    environment:
-      DB_HOST: dbmrv
-      DB_USER: root
-      DB_PASSWORD: "<ANY PASSOWORD>"
-      # ,data-importer
-      RUN_MODULE: replicator,async-operations-handler
-      LOCATION_SERVICE: OPENSTREET
-      SMTP_ENDPOINT: email-smtp.us-east-1.amazonaws.com
-      SMTP_PASSWORD: ""
-      IS_EMAIL_DISABLED: "true"
-      ASYNC_OPERATIONS_TYPE: Database
-      ITMO_API_KEY: ""
-      ITMO_EMAIL: ""
-      ITMO_PASSWORD: ""
-      DB_PORT: "5433"
-      DB_NAME: "carbondev"
-      REGISTRY_API_TOKEN: ""
-      REGISTRY_ENDPOINT: "https://api.carbreg.org"
-      REGISTRY_SYNC_ENABLE : "true"
+  # replicator:
+  #   build:
+  #     context: .
+  #     dockerfile: ./backend/services/Dockerfile
+  #   depends_on:
+  #     - dbmrv
+  #     - national
+  #   environment:
+  #     DB_HOST: dbmrv
+  #     DB_USER: root
+  #     DB_PASSWORD: "<ANY PASSOWORD>"
+  #     # ,data-importer
+  #     RUN_MODULE: replicator,async-operations-handler
+  #     LOCATION_SERVICE: OPENSTREET
+  #     SMTP_ENDPOINT: email-smtp.us-east-1.amazonaws.com
+  #     SMTP_PASSWORD: ""
+  #     IS_EMAIL_DISABLED: "true"
+  #     ASYNC_OPERATIONS_TYPE: Database
+  #     ITMO_API_KEY: ""
+  #     ITMO_EMAIL: ""
+  #     ITMO_PASSWORD: ""
+  #     DB_PORT: "5433"
+  #     DB_NAME: "carbondev"
   # async-operations-handler:
   #   build:
   #     context: .
