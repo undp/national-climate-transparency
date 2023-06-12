@@ -23,13 +23,12 @@ export class AsyncOperationsQueueService implements AsyncOperationsInterface {
   }
 
   public async AddAction(action: AsyncAction): Promise<boolean> {
-
     if (action.actionType === AsyncActionType.Email) {
       if (this.emailDisabled) {
         return false;
       }
-    };
-    
+    }
+
     const params = {
       MessageAttributes: {
         actionType: {
@@ -38,9 +37,9 @@ export class AsyncOperationsQueueService implements AsyncOperationsInterface {
         },
       },
       MessageBody: JSON.stringify(action.actionProps),
-      MessageGroupId: action.actionType.toString(),
+      MessageGroupId: action.actionType.toString() + new Date().getTime(),
       QueueUrl: this.configService.get("asyncQueueName"),
-    }
+    };
 
     try {
       await sqs.sendMessage(params).promise();

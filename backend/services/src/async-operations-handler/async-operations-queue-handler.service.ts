@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { AsyncOperationsHandlerInterface } from "./async-operations-handler-interface.service";
 import { SQSEvent } from "aws-lambda";
 import { AsyncOperationsHandlerService } from "./async-operations-handler.service";
@@ -10,10 +10,12 @@ export class AsyncOperationsQueueHandlerService
   implements AsyncOperationsHandlerInterface
 {
   constructor(
-    private asyncOperationsHandlerService: AsyncOperationsHandlerService
+    private asyncOperationsHandlerService: AsyncOperationsHandlerService,
+    private logger: Logger
   ) {}
 
   async asyncHandler(event: SQSEvent): Promise<Response> {
+    this.logger.log("Queue asyncHandler started", JSON.stringify(event));
     const response: Response = { batchItemFailures: [] };
     const promises = event.Records.map(async (record) => {
       try {
