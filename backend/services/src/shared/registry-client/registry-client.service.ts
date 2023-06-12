@@ -12,12 +12,13 @@ export class RegistryClientService {
     this.logger.log("RegistryClientService createCompany started", userDto.name);
     this.logger.log("endpoint", this.configService.get("registry.endpoint"));
     this.logger.log("apiToken", this.configService.get("registry.apiToken"));
-    
+
     if (!this.configService.get("registry.syncEnable")) {
       this.logger.debug("Company created ignored due to registry sync disable");
       return;
     }
 
+    this.logger.log("path ", this.configService.get("registry.endpoint") + "/national/user/add");
     return await axios.post(
       this.configService.get("registry.endpoint") + "/national/user/add",
       userDto,
