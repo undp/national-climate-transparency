@@ -269,8 +269,13 @@ export class ProgrammeService {
       programmeDto.designDocument = await this.uploadDocument(DocType.DESIGN_DOCUMENT, programme.programmeId, programmeDto.designDocument);
     }
 
+    const ndcAc = undefined;
     if (programmeDto.ndcAction) {
       this.calcCreditNDCAction(programmeDto.ndcAction, programme)
+      const data = instanceToPlain(programmeDto.ndcAction);
+      const ndcAc: NDCAction = plainToClass(NDCAction, data)
+      ndcAc.id = await this.createNDCActionId(programmeDto.ndcAction);
+      programmeDto.ndcAction.id = ndcAc.id;
     }
 
     await this.asyncOperationsInterface.addAction(
@@ -282,10 +287,8 @@ export class ProgrammeService {
     
     const savedProgramme = await this.entityManager
       .transaction(async (em) => {
-        if (programmeDto.ndcAction) {
-          const c: NDCAction = await em.save<NDCAction>(
-            plainToClass(NDCAction, programmeDto.ndcAction)
-          );
+        if (ndcAc) {
+          await em.save<NDCAction>(ndcAc);
         }
         if (programmeDto.designDocument) {
           const dr = new ProgrammeDocument();
@@ -474,8 +477,18 @@ export class ProgrammeService {
     }
   }
 
-  async addNDCAction(ndcAction: NDCActionDto): Promise<DataResponseDto> {
-    const program = await this.findById(ndcAction.programmeId);
+  private async createNDCActionId(ndcAction: NDCActionDto) {
+    const id = await this.counterService.incrementCount(
+      CounterType.NDC_ACTION,
+      3
+    );
+
+    const type = ndcAction.action == NDCActionType.Mitigation ? 'MTG' : ndcAction.action == NDCActionType.Adaptation ? 'ADT' : ndcAction.action == NDCActionType.Enablement ? 'ENB' : 'CRS'
+    return `${type}-${id}`
+  }
+
+  async addNDCAction(ndcActionDto: NDCActionDto): Promise<DataResponseDto> {
+    const program = await this.findById(ndcActionDto.programmeId);
 
     if (!program) {
       throw new HttpException(
@@ -487,9 +500,12 @@ export class ProgrammeService {
       );
     }
 
-    this.calcCreditNDCAction(ndcAction, program);
+    this.calcCreditNDCAction(ndcActionDto, program);
 
-    if (ndcAction.action == NDCActionType.Mitigation || ndcAction.action == NDCActionType.CrossCutting) {
+    const data = instanceToPlain(ndcActionDto);
+    const ndcAction: NDCAction = plainToClass(NDCAction, data)
+    ndcAction.id = await this.createNDCActionId(ndcActionDto);
+    if (ndcActionDto.action == NDCActionType.Mitigation || ndcActionDto.action == NDCActionType.CrossCutting) {
       await this.asyncOperationsInterface.addAction(
         {
           actionType: AsyncActionType.AddMitigation,

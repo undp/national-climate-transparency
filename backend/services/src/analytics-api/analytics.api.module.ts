@@ -1,13 +1,11 @@
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { ProgrammeController } from "./programme.controller";
-import { AnalyticsAPIService } from "./analytics.api.service";
 import configuration from "../shared/configuration";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { TypeOrmConfigService } from "../shared/typeorm.config.service";
 import { Programme } from "../shared/entities/programme.entity";
 import { ProgrammeTransfer } from "../shared/entities/programme.transfer";
-import { ProgrammeTransferViewEntityQuery } from "../shared/entities/programmeTransfer.view.entity";
 import { CaslModule } from "../shared/casl/casl.module";
 import { AuthModule } from "../shared/auth/auth.module";
 import { UtilModule } from "../shared/util/util.module";
@@ -28,7 +26,6 @@ import { Company } from "../shared/entities/company.entity";
     TypeOrmModule.forFeature([
       Programme,
       ProgrammeTransfer,
-      ProgrammeTransferViewEntityQuery,
       Company
     ]),
     AuthModule,
@@ -36,6 +33,6 @@ import { Company } from "../shared/entities/company.entity";
     UtilModule
   ],
   controllers: [ProgrammeController],
-  providers: [AnalyticsAPIService, Logger, AggregateAPIService],
+  providers: [Logger, AggregateAPIService],
 })
 export class AnalyticsAPIModule {}

@@ -12,12 +12,14 @@ export class AsyncOperationsHandlerService {
   ) {}
 
   async handler(actionType: any, dataObject: any) {
-    this.logger.log("AsyncOperationsHandlerService started", dataObject.name);
+
+    this.logger.log("AsyncOperationsHandlerService started", actionType.toString());
     if (actionType) {
-      switch (actionType) {
+      switch (actionType.toString()) {
         case AsyncActionType.Email.toString():
           return await this.emailService.sendEmail(dataObject);
         case AsyncActionType.RegistryCompanyCreate.toString():
+          console.log('RegistryCompanyCreate')
           return await this.registryClient.createCompany(dataObject);
         case AsyncActionType.ProgrammeCreate.toString():
           return await this.registryClient.createProgramme(dataObject);

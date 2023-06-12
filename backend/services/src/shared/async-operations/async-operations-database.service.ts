@@ -45,7 +45,7 @@ export class AsyncOperationsDatabaseService
       );
     });
 
-    this.logger.log("Succefully added to the AsyncAction table", action);
+    this.logger.log("Succefully added to the AsyncAction table",JSON.stringify(action));
 
     return true;
   }

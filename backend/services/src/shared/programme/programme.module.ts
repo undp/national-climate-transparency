@@ -9,7 +9,6 @@ import { CompanyModule } from '../company/company.module';
 import { ProgrammeTransfer } from '../entities/programme.transfer';
 import { Company } from '../entities/company.entity';
 import { ProgrammeQueryEntity } from '../entities/programme.view.entity';
-import { ProgrammeTransferViewEntityQuery } from '../entities/programmeTransfer.view.entity';
 import { UserModule } from '../user/user.module';
 import { EmailHelperModule } from '../email-helper/email-helper.module';
 import { LocationModule } from '../location/location.module';
@@ -21,7 +20,7 @@ import { AsyncOperationsModule } from '../async-operations/async-operations.modu
 @Module({
   imports: [
     CaslModule, 
-    TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, ProgrammeTransferViewEntityQuery, NDCAction, ProgrammeDocument]), 
+    TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, NDCAction, ProgrammeDocument]), 
     UtilModule,
     forwardRef(() => UserModule),
     forwardRef(() => CompanyModule),

@@ -52,25 +52,10 @@ export class Programme implements EntitySubject {
   creditEst: number;
 
   @Column({ type: "decimal", precision: 10, scale: PRECISION, nullable: true })
-  creditChange: number;
-
-  @Column({ type: "decimal", precision: 10, scale: PRECISION, nullable: true })
   creditIssued: number;
 
   // @Column({type: "decimal", precision: 10, scale: PRECISION, nullable: true})
   // creditPending: number;
-
-  @Column({ type: "decimal", precision: 10, scale: PRECISION, nullable: true })
-  creditBalance: number;
-
-  @Column("real", { array: true, nullable: true })
-  creditRetired: number[];
-
-  @Column("real", { array: true, nullable: true })
-  creditFrozen: number[];
-
-  @Column("real", { array: true, nullable: true })
-  creditTransferred: number[];
 
   @Column({ nullable: true })
   constantVersion: string;

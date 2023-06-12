@@ -67,7 +67,7 @@ export class EmailHelperService {
         templateData = {
           ...templateData,
           programmeName: programme.title,
-          credits: programme.creditBalance,
+          credits: programme.creditEst,
           serialNumber: programme.serialNo,
           organisationName: companyDetails.name,
           pageLink: hostAddress + `/programmeManagement/view?id=${programmeId}`,
@@ -79,7 +79,7 @@ export class EmailHelperService {
         templateData = {
           ...templateData,
           programmeName: programme.title,
-          credits: programme.creditBalance,
+          credits: programme.creditEst,
           serialNumber: programme.serialNo,
           organisationName: companyDetails.name,
           pageLink: hostAddress + `/programmeManagement/view?id=${programmeId}`,
@@ -94,7 +94,7 @@ export class EmailHelperService {
         templateData = {
           ...templateData,
           programmeName: programme.title,
-          credits: programme.creditBalance,
+          credits: programme.creditEst,
           serialNumber: programme.serialNo,
           organisationName: companyDetails.name,
           government: government.name,
@@ -220,7 +220,7 @@ export class EmailHelperService {
           government: companyDetails.name,
           serialNumber: programme.serialNo,
           programmeName: programme.title,
-          credits: programme.creditBalance,
+          credits: programme.creditEst,
           pageLink: hostAddress + `/programmeManagement/view?id=${programmeId}`,
         };
         break;

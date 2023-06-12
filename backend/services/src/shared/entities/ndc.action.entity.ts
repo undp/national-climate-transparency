@@ -12,7 +12,7 @@ import { Column, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 export class NDCAction {
 
   @PrimaryColumn()
-  id: number;
+  id: string;
 
   @Column()
   programmeId: string;

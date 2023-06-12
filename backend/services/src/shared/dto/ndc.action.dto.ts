@@ -82,4 +82,6 @@ export class NDCActionDto {
   coBenefitsProperties?: CoBenefitsProperties;
 
   constantVersion: string;
+
+  id?: string;
 }
