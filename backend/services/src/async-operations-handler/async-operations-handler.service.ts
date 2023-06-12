@@ -12,7 +12,7 @@ export class AsyncOperationsHandlerService {
   ) {}
 
   async handler(actionType: any, dataObject: any) {
-    this.logger.log("AsyncOperationsHandlerService started", dataObject);
+    this.logger.log("AsyncOperationsHandlerService started", dataObject.name);
     if (actionType) {
       switch (actionType) {
         case AsyncActionType.Email.toString():
