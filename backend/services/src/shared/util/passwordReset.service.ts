@@ -111,7 +111,7 @@ export class PasswordResetService {
           ),
         },
       };
-      await this.asyncOperationsInterface.AddAction(action);
+      await this.asyncOperationsInterface.addAction(action);
 
       this.passwordResetRepo.delete({ email: email });
       return new BasicResponseDto(

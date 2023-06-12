@@ -15,10 +15,10 @@ export class AsyncOperationsHandlerService {
       switch (actionType) {
         case AsyncActionType.Email.toString():
           return await this.emailService.sendEmail(dataObject);
-          break;
         case AsyncActionType.RegistryCompanyCreate.toString():
           return await this.registryClient.createCompany(dataObject);
-          break;
+        case AsyncActionType.ProgrammeCreate.toString():
+          return await this.registryClient.createProgramme(dataObject);
       }
     }
   }

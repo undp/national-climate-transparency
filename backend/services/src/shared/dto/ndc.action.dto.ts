@@ -70,10 +70,10 @@ export class NDCActionDto {
   ndcFinancing?: NdcFinancing;
   
 
-  @ApiPropertyOptional()
-  @ValidateNested()
-  @Type(() => NDCReports)
-  ndcReports?: NDCReports;
+  // @ApiPropertyOptional()
+  // @ValidateNested()
+  // @Type(() => NDCReports)
+  // ndcReports?: NDCReports;
 
 
   @ApiPropertyOptional()

@@ -243,7 +243,7 @@ export class UserService {
           ),
         },
       };
-      await this.asyncOperationsInterface.AddAction(action);
+      await this.asyncOperationsInterface.addAction(action);
       return new BasicResponseDto(
         HttpStatus.OK,
         this.helperService.formatReqMessagesString("user.resetSuccess", [])
@@ -315,7 +315,7 @@ export class UserService {
           ),
         },
       };
-      await this.asyncOperationsInterface.AddAction(action);
+      await this.asyncOperationsInterface.addAction(action);
 
       return new BasicResponseDto(
         HttpStatus.OK,
@@ -565,7 +565,7 @@ export class UserService {
             ),
           },
         };
-        await this.asyncOperationsInterface.AddAction(action);
+        await this.asyncOperationsInterface.addAction(action);
       }
     }
 
@@ -596,10 +596,19 @@ export class UserService {
         ),
       },
     };
-    await this.asyncOperationsInterface.AddAction(action);
+    await this.asyncOperationsInterface.addAction(action);
 
     u.createdTime = new Date().getTime();
 
+    if (company) {
+      const registryCompanyCreateAction: AsyncAction = {
+        actionType: AsyncActionType.RegistryCompanyCreate,
+        actionProps: createdUserDto,
+      };
+      await this.asyncOperationsInterface.addAction(
+        registryCompanyCreateAction
+      );
+    }
     const usr = await this.entityManger
       .transaction(async (em) => {
         if (company) {
@@ -645,16 +654,6 @@ export class UserService {
       });
 
     const { apiKey, password, ...resp } = usr;
-
-    if (company) {
-      const registryCompanyCreateAction: AsyncAction = {
-        actionType: AsyncActionType.RegistryCompanyCreate,
-        actionProps: createdUserDto,
-      };
-      await this.asyncOperationsInterface.AddAction(
-        registryCompanyCreateAction
-      );
-    }
 
     const response = new DataResponseMessageDto(
       HttpStatus.CREATED,

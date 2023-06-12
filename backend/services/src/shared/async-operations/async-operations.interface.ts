@@ -7,5 +7,5 @@ export interface AsyncAction {
 
 @Injectable()
 export abstract class AsyncOperationsInterface {
-  public abstract AddAction(action: AsyncAction): Promise<boolean>;
+  public abstract addAction(action: AsyncAction): Promise<boolean>;
 }

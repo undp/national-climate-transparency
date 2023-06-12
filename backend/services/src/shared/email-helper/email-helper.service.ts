@@ -296,7 +296,7 @@ export class EmailHelperService {
           ),
         },
       };
-      await this.asyncOperationsInterface.AddAction(action);
+      await this.asyncOperationsInterface.addAction(action);
     });
   }
 
@@ -383,7 +383,7 @@ export class EmailHelperService {
           ),
         },
       };
-      await this.asyncOperationsInterface.AddAction(action);
+      await this.asyncOperationsInterface.addAction(action);
     });
   }
 
@@ -418,6 +418,6 @@ export class EmailHelperService {
         ),
       },
     };
-    await this.asyncOperationsInterface.AddAction(action);
+    await this.asyncOperationsInterface.addAction(action);
   }
 }

@@ -14,16 +14,21 @@ import { UserModule } from '../user/user.module';
 import { EmailHelperModule } from '../email-helper/email-helper.module';
 import { LocationModule } from '../location/location.module';
 import { NDCAction } from '../entities/ndc.action.entity';
+import { ProgrammeDocument } from '../dto/programme.document';
+import { FileHandlerModule } from '../file-handler/filehandler.module';
+import { AsyncOperationsModule } from '../async-operations/async-operations.module';
 
 @Module({
   imports: [
     CaslModule, 
-    TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, ProgrammeTransferViewEntityQuery, NDCAction]), 
+    TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, ProgrammeTransferViewEntityQuery, NDCAction, ProgrammeDocument]), 
     UtilModule,
     forwardRef(() => UserModule),
     forwardRef(() => CompanyModule),
     forwardRef(() => EmailHelperModule),
-    LocationModule
+    LocationModule,
+    FileHandlerModule,
+    AsyncOperationsModule
   ],
   providers: [Logger, ProgrammeService],
   exports: [ProgrammeService]
