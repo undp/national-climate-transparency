@@ -30,7 +30,11 @@ export class AsyncOperationsQueueHandlerService
       }
     });
 
-    await Promise.all(promises);
-    return response;
+    try {
+      await Promise.all(promises);
+      return response;
+    } catch (exception) {
+      this.logger.log("asyncHandler failed", exception);
+    }
   }
 }
