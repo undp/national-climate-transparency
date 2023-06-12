@@ -35,8 +35,16 @@ import { UserService } from "../user/user.service";
 import { CountryService } from "../util/country.service";
 import { DataResponseMessageDto } from "../dto/data.response.message";
 import { LocationInterface } from "../location/location.interface";
-import { AgricultureConstants, AgricultureCreationRequest, SolarConstants, SolarCreationRequest, calculateCredit } from "@undp/carbon-credit-calculator";
+import {
+  AgricultureConstants,
+  AgricultureCreationRequest,
+  SolarConstants,
+  SolarCreationRequest,
+  calculateCredit,
+} from "@undp/carbon-credit-calculator";
 import { ProgrammeLedgerService } from "../programme-ledger/programme-ledger.service";
+import { NDCActionDto } from "../dto/ndc.action.dto";
+import { NDCAction } from "../entities/ndc.action.entity";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -59,6 +67,7 @@ export class ProgrammeService {
     @InjectRepository(Programme) private programmeRepo: Repository<Programme>,
     @InjectRepository(ProgrammeQueryEntity)
     private programmeViewRepo: Repository<ProgrammeQueryEntity>,
+    @InjectRepository(NDCAction) private ndcActionRepo: Repository<NDCAction>,
     @InjectRepository(ProgrammeTransferViewEntityQuery)
     private programmeTransferViewRepo: Repository<ProgrammeTransferViewEntityQuery>,
     @InjectRepository(Company) private companyRepo: Repository<Company>,
@@ -76,26 +85,27 @@ export class ProgrammeService {
   }
 
   private async getCreditRequest(
-    programmeDto: ProgrammeDto,
+    ndcActionDto: NDCActionDto,
+    programme: Programme,
     constants: ConstantEntity
   ) {
-    switch (programmeDto.typeOfMitigation) {
+    switch (ndcActionDto.typeOfMitigation) {
       case TypeOfMitigation.AGRICULTURE:
         const ar = new AgricultureCreationRequest();
-        ar.duration = programmeDto.endTime - programmeDto.startTime;
+        ar.duration = programme.endTime - programme.startTime;
         ar.durationUnit = "s";
-        ar.landArea = programmeDto.agricultureProperties.landArea;
-        ar.landAreaUnit = programmeDto.agricultureProperties.landAreaUnit;
+        ar.landArea = ndcActionDto.agricultureProperties.landArea;
+        ar.landAreaUnit = ndcActionDto.agricultureProperties.landAreaUnit;
         if (constants) {
           ar.agricultureConstants = constants.data as AgricultureConstants;
         }
         return ar;
       case TypeOfMitigation.SOLAR:
         const sr = new SolarCreationRequest();
-        sr.buildingType = programmeDto.solarProperties.consumerGroup;
-        sr.energyGeneration = programmeDto.solarProperties.energyGeneration;
+        sr.buildingType = ndcActionDto.solarProperties.consumerGroup;
+        sr.energyGeneration = ndcActionDto.solarProperties.energyGeneration;
         sr.energyGenerationUnit =
-          programmeDto.solarProperties.energyGenerationUnit;
+          ndcActionDto.solarProperties.energyGenerationUnit;
         if (constants) {
           sr.solarConstants = constants.data as SolarConstants;
         }
@@ -104,7 +114,7 @@ export class ProgrammeService {
     throw Error(
       this.helperService.formatReqMessagesString(
         "programme.notImplementedForMitigationType",
-        [programmeDto.typeOfMitigation]
+        [ndcActionDto.typeOfMitigation]
       )
     );
   }
@@ -209,36 +219,33 @@ export class ProgrammeService {
     );
     programme.countryCodeA2 = this.configService.get("systemCountry");
 
-    let constants = undefined;
-    if (!programmeDto.creditEst) {
-      constants = await this.getLatestConstant(programmeDto.typeOfMitigation);
+    // let constants = undefined;
+    // if (!programmeDto.creditEst) {
+    //   constants = await this.getLatestConstant(programmeDto.typeOfMitigation);
 
-      const req = await this.getCreditRequest(programmeDto, constants);
-      try {
-        programme.creditEst = Math.round(await calculateCredit(req));
-      } catch (err) {
-        this.logger.log(`Credit calculate failed ${err.message}`);
-        throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-      }
-    }
+    //   const req = await this.getCreditRequest(programmeDto, constants);
+    //   try {
+    //     programme.creditEst = Math.round(await calculateCredit(req));
+    //   } catch (err) {
+    //     this.logger.log(`Credit calculate failed ${err.message}`);
+    //     throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+    //   }
+    // }
 
-    if (programme.creditEst <= 0) {
-      throw new HttpException(
-        this.helperService.formatReqMessagesString(
-          "programme.noEnoughCreditsToCreateProgramme",
-          []
-        ),
-        HttpStatus.BAD_REQUEST
-      );
-    }
+    // if (programme.creditEst <= 0) {
+    //   throw new HttpException(
+    //     this.helperService.formatReqMessagesString(
+    //       "programme.noEnoughCreditsToCreateProgramme",
+    //       []
+    //     ),
+    //     HttpStatus.BAD_REQUEST
+    //   );
+    // }
     // programme.creditBalance = programme.creditIssued;
     // programme.creditChange = programme.creditIssued;
     programme.programmeProperties.creditYear = new Date(
       programme.startTime * 1000
     ).getFullYear();
-    programme.constantVersion = constants
-      ? String(constants.version)
-      : "default";
     programme.currentStage = ProgrammeStage.AWAITING_AUTHORIZATION;
     programme.companyId = companyIds;
     programme.txTime = new Date().getTime();
@@ -279,6 +286,40 @@ export class ProgrammeService {
     }
 
     return savedProgramme;
+  }
+
+  async addNDCAction(ndcAction: NDCActionDto): Promise<DataResponseDto> {
+    const program = await this.programmeLedger.getProgrammeById(
+      ndcAction.programmeId
+    );
+
+    if (!program) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.programmeNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    let constants = await this.getLatestConstant(ndcAction.typeOfMitigation);
+    const req = await this.getCreditRequest(ndcAction, program, constants);
+    try {
+      ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(
+        await calculateCredit(req)
+      );
+    } catch (err) {
+      this.logger.log(`Credit calculate failed ${err.message}`);
+      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+    }
+
+    ndcAction.constantVersion = constants
+      ? String(constants.version)
+      : "default";
+
+    await this.ndcActionRepo.save(ndcAction);
+    return null;
   }
 
   async query(
@@ -327,7 +368,6 @@ export class ProgrammeService {
       resp.length > 1 ? resp[1] : undefined
     );
   }
-
 
   async getProgrammeEvents(programmeId: string, user: User): Promise<any> {
     const resp = await this.programmeLedger.getProgrammeHistory(programmeId);
@@ -801,7 +841,6 @@ export class ProgrammeService {
     });
   }
 
-
   private getUserRef = (user: any) => {
     return `${user.companyId}#${user.companyName}#${user.id}`;
   };
@@ -809,5 +848,4 @@ export class ProgrammeService {
   private getUserRefWithRemarks = (user: any, remarks: string) => {
     return `${user.companyId}#${user.companyName}#${user.id}#${remarks}`;
   };
-
 }

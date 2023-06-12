@@ -1,12 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { ArrayMinSize, IsArray, IsEnum, IsInt, IsNotEmpty, IsNotEmptyObject, IsNumber, IsOptional, IsPositive, IsString, ValidateIf, ValidateNested } from "class-validator";
+import { ArrayMinSize, IsArray, IsEnum, IsInt, IsNotEmpty, IsNotEmptyObject, IsNumber, IsOptional, IsPositive, IsString, ValidateNested } from "class-validator";
 import { SectoralScope } from '@undp/serial-number-gen'
-import { TypeOfMitigation } from "../enum/typeofmitigation.enum";
-import { AgricultureProperties } from "./agriculture.properties";
-import { SolarProperties } from "./solar.properties";
 import { ProgrammeProperties } from "./programme.properties";
 import { Sector } from "../enum/sector.enum";
 import { Type } from "class-transformer";
+import { ProgrammeDocuments } from "./programme.documents";
+import { NDCActionDto } from "./ndc.action.dto";
 
 export class ProgrammeDto {
 
@@ -33,13 +32,6 @@ export class ProgrammeDto {
         message: 'Invalid sector. Supported following sector:' + Object.values(Sector)
     })
     sector: Sector;
-
-    @ApiProperty({ enum: TypeOfMitigation })
-    @IsEnum(TypeOfMitigation, {
-        message: 'Invalid mitigation type. Supported following values:' + Object.values(TypeOfMitigation)
-    })
-    @IsNotEmpty()
-    typeOfMitigation: TypeOfMitigation;
 
     @ApiProperty()
     @IsNotEmpty()
@@ -80,22 +72,18 @@ export class ProgrammeDto {
     programmeProperties: ProgrammeProperties;
 
     @ApiProperty()
-    @ValidateIf(o => o.typeOfMitigation === TypeOfMitigation.AGRICULTURE)
     @IsNotEmptyObject()
     @ValidateNested()
-    @Type(() => AgricultureProperties)
-    agricultureProperties?: AgricultureProperties;
+    @Type(() => ProgrammeDocuments)
+    programmeDocuments: ProgrammeDocuments;
 
     @ApiProperty()
-    @ValidateIf(o => o.typeOfMitigation === TypeOfMitigation.SOLAR)
-    @IsNotEmptyObject()
-    @ValidateNested()
-    @Type(() => SolarProperties)
-    solarProperties?: SolarProperties;
-
-    @ApiPropertyOptional()
     @IsNotEmpty()
-    @IsOptional()
     @IsNumber()
     creditEst: number;
+
+    @ApiPropertyOptional()
+    @ValidateNested()
+    @Type(() => NDCActionDto)
+    ndcAction?: NDCActionDto;
 }

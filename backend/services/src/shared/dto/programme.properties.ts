@@ -11,6 +11,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsUrl,
+  IsBoolean,
 } from "class-validator";
 import { GHGs } from "../enum/ghgs.enum";
 import { SourceOfFunding } from "../enum/sourceoffinding.enum";
@@ -33,7 +34,7 @@ export class ProgrammeProperties {
   @IsPositive()
   @IsNumber()
   @IsNotEmpty()
-  programmeCostUSD?: number;
+  estimatedProgrammeCostUSD: number;
 
   @ApiPropertyOptional({ enum: SourceOfFunding })
   @IsEnum(SourceOfFunding, {
@@ -80,15 +81,24 @@ export class ProgrammeProperties {
   @IsNotEmpty()
   greenHouseGasses: GHGs[];
 
+  @ApiPropertyOptional()
+  @IsBoolean()
+  @IsOptional()
+  @IsNotEmpty()
+  ndcScope?: boolean;
+
+  @ApiPropertyOptional()
+  @IsBoolean()
+  @IsOptional()
+  @IsNotEmpty()
+  includedInNDC?: boolean;
+
+  @ApiPropertyOptional()
+  @IsBoolean()
+  @IsOptional()
+  @IsNotEmpty()
+  includedInNap?: boolean;
+
   creditYear?: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  programmeMaterials?: [];
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNotEmpty()
-  projectMaterial?: [];
 }
