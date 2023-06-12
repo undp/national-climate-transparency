@@ -9,7 +9,13 @@ export class RegistryClientService {
   constructor(private configService: ConfigService, private logger: Logger) {}
 
   public async createCompany(userDto: UserDto) {
-    this.logger.log("RegistryClientService createCompany started", userDto);
+    this.logger.log(
+      "RegistryClientService createCompany started",
+      userDto,
+      this.configService.get("registry.endpoint"),
+      this.configService.get("registry.apiToken"),
+      this.configService.get("registry.syncEnable")
+    );
     if (!this.configService.get("registry.syncEnable")) {
       this.logger.debug("Company created ignored due to registry sync disable");
       return;
