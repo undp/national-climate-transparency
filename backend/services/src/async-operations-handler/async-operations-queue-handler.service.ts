@@ -15,7 +15,7 @@ export class AsyncOperationsQueueHandlerService
   ) {}
 
   async asyncHandler(event: SQSEvent): Promise<Response> {
-    this.logger.log("Queue asyncHandler started", JSON.stringify(event));
+    this.logger.log("Queue asyncHandler started");
     const response: Response = { batchItemFailures: [] };
     const promises = event.Records.map(async (record) => {
       try {
