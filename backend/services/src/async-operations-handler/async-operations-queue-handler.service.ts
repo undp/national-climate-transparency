@@ -24,7 +24,8 @@ export class AsyncOperationsQueueHandlerService
           actionType,
           JSON.parse(record.body)
         );
-      } catch (e) {
+      } catch (exception) {
+        this.logger.log("queue asyncHandler failed", exception);
         response.batchItemFailures.push({ itemIdentifier: record.messageId });
       }
     });
