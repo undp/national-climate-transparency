@@ -20,12 +20,10 @@ export class AsyncOperationsQueueHandlerService
     const promises = event.Records.map(async (record) => {
       try {
         const actionType = record.messageAttributes?.actionType?.stringValue;
-        const response = this.asyncOperationsHandlerService.handler(
+        return this.asyncOperationsHandlerService.handler(
           actionType,
           JSON.parse(record.body)
         );
-        console.log('response',response);
-        this.logger.log("response", response);
       } catch (exception) {
         this.logger.log("queue asyncHandler failed", exception);
         response.batchItemFailures.push({ itemIdentifier: record.messageId });
