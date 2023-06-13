@@ -420,7 +420,7 @@ export class UserService {
       }
     }
     if (company) {
-      if (companyRole != CompanyRole.GOVERNMENT && companyRole != CompanyRole.MRV) {
+      if (companyRole != CompanyRole.GOVERNMENT && companyRole != CompanyRole.API) {
         throw new HttpException(
           this.helperService.formatReqMessagesString("user.userUnAUth", []),
           HttpStatus.FORBIDDEN
