@@ -19,10 +19,13 @@ export class AsyncOperationsHandlerService {
         case AsyncActionType.Email.toString():
           return await this.emailService.sendEmail(dataObject);
         case AsyncActionType.RegistryCompanyCreate.toString():
-          console.log('RegistryCompanyCreate')
           return await this.registryClient.createCompany(dataObject);
         case AsyncActionType.ProgrammeCreate.toString():
           return await this.registryClient.createProgramme(dataObject);
+        case AsyncActionType.DocumentUpload.toString():
+          return await this.registryClient.addDocument(dataObject);
+        case AsyncActionType.AddMitigation.toString():
+          return await this.registryClient.addMitigation(dataObject);
       }
     }
   }

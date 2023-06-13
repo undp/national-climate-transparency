@@ -62,11 +62,11 @@ export class NDCAction {
   ndcFinancing?: NdcFinancing;
   
 
-  @Column({
-    type: "jsonb",
-    array: false,
-  })
-  ndcReports?: NDCReports;
+  // @Column({
+  //   type: "jsonb",
+  //   array: false,
+  // })
+  // ndcReports?: NDCReports;
 
 
   @Column({

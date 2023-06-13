@@ -289,6 +289,16 @@ export class ProgrammeService {
       .transaction(async (em) => {
         if (ndcAc) {
           await em.save<NDCAction>(ndcAc);
+          if (programmeDto.ndcAction.monitoringReport) {
+            const dr = new ProgrammeDocument();
+            dr.programmeId = programme.programmeId;
+            dr.actionId = ndcAc.id;
+            dr.status = DocumentStatus.PENDING;
+            dr.type = DocType.MONITORING_REPORT;
+            dr.txTime = new Date().getTime();
+            dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, programme.programmeId, programmeDto.ndcAction.monitoringReport);
+            const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
+          }
         }
         if (programmeDto.designDocument) {
           const dr = new ProgrammeDocument();
@@ -309,7 +319,7 @@ export class ProgrammeService {
             HttpStatus.BAD_REQUEST
           );
         } else {
-          this.logger.error(`User add error ${err}`);
+          this.logger.error(`Programme add error ${err}`);
         }
         return err;
       });
@@ -505,6 +515,7 @@ export class ProgrammeService {
     const data = instanceToPlain(ndcActionDto);
     const ndcAction: NDCAction = plainToClass(NDCAction, data)
     ndcAction.id = await this.createNDCActionId(ndcActionDto);
+    
     if (ndcActionDto.action == NDCActionType.Mitigation || ndcActionDto.action == NDCActionType.CrossCutting) {
       await this.asyncOperationsInterface.addAction(
         {
@@ -513,7 +524,32 @@ export class ProgrammeService {
         }
       );
     }
-    await this.ndcActionRepo.save(ndcAction);
+    const savedProgramme = await this.entityManager
+      .transaction(async (em) => {
+        await em.save<NDCAction>(ndcAction);
+        if (ndcActionDto.monitoringReport) {
+          const dr = new ProgrammeDocument();
+          dr.programmeId = program.programmeId;
+          dr.actionId = ndcAction.id;
+          dr.status = DocumentStatus.PENDING;
+          dr.type = DocType.MONITORING_REPORT;
+          dr.txTime = new Date().getTime();
+          dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, program.programmeId, ndcActionDto.monitoringReport);
+          const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
+        }
+      })
+      .catch((err: any) => {
+        console.log(err);
+        if (err instanceof QueryFailedError) {
+          throw new HttpException(
+            err.message,
+            HttpStatus.BAD_REQUEST
+          );
+        } else {
+          this.logger.error(`NDC Action add error ${err}`);
+        }
+        return err;
+      });
     return null;
   }
 
