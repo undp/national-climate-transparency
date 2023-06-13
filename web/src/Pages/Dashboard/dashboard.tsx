@@ -50,7 +50,7 @@ import {
 const { RangePicker } = DatePicker;
 
 const Dashboard = () => {
-  <div></div>;
+  return <div></div>;
 };
 
 export default Dashboard;
