@@ -13,5 +13,5 @@ export enum CompanyRole {
     INTERNAL_ORGANIZATION = 'InternationalOrganization',
     PROGRAMME_DEVELOPER = 'ProgrammeDeveloper',
     GOVERNMENT = 'Government',
-    MRV = 'MRV'
+    API = 'API'
 }
