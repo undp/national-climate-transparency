@@ -49,8 +49,8 @@ export class RegistryClientService {
         userEstimatedCredits: ndc.ndcFinancing.userEstimatedCredits,
         systemEstimatedCredits: ndc.ndcFinancing.systemEstimatedCredits,
         actionId: ndc.id,
-        properties: ndc.agricultureProperties ? ndc.agricultureProperties : ndc.solarProperties ? ndc.solarProperties;
-    }
+        properties: (ndc.agricultureProperties ? ndc.agricultureProperties : ndc.solarProperties ? ndc.solarProperties : undefined)
+    };
   }
   public async addMitigation(ndc: NDCAction) {
     console.log('creating mitigation action on registry', ndc)
