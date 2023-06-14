@@ -96,6 +96,7 @@ services:
       REGISTRY_ENDPOINT: 'http://192.168.1.13:3000'
       REGISTRY_SYNC_ENABLE: true
       NODE_ENV: 'dev'
+      REGISTRY_API_TOKEN: ''
   # async-operations-handler:
   #   build:
   #     context: .
