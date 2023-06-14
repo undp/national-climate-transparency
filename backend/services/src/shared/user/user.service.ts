@@ -600,7 +600,7 @@ export class UserService {
 
     u.createdTime = new Date().getTime();
 
-    if (company) {
+    if (company && companyRole !== CompanyRole.API && userFields.role !== Role.Root) {
       const registryCompanyCreateAction: AsyncAction = {
         actionType: AsyncActionType.RegistryCompanyCreate,
         actionProps: createdUserDto,
@@ -609,6 +609,7 @@ export class UserService {
         registryCompanyCreateAction
       );
     }
+
     const usr = await this.entityManger
       .transaction(async (em) => {
         if (company) {
