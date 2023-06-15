@@ -12,8 +12,8 @@ import { CoBenefitsProperties } from "./co.benefits";
 
 export class NDCActionDto {
 
-  @ApiProperty()
-  @IsNotEmpty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   programmeId: string;
 
@@ -90,4 +90,6 @@ export class NDCActionDto {
   constantVersion: string;
 
   id?: string;
+
+  externalId?: string;
 }

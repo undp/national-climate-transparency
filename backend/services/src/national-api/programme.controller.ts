@@ -65,6 +65,22 @@ export class ProgrammeController {
       return this.programmeService.query(query, req.abilityCondition)
     }
 
+    @ApiBearerAuth()
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
+    // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
+    @Post('queryDocs')
+    async queryDocuments(@Body()query: QueryDto, @Request() req) {
+      return this.programmeService.queryDocuments(query, req.abilityCondition)
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
+    // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
+    @Post('queryNdcActions')
+    async queryNdcActions(@Body()query: QueryDto, @Request() req) {
+      return this.programmeService.queryNdcActions(query, req.abilityCondition)
+    }
+
     // @ApiBearerAuth('api_key')
     // @ApiBearerAuth()
     // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
