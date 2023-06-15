@@ -28,6 +28,7 @@ import { Sector } from '../../Casl/enums/sector.enum';
 import { SectoralScope } from '../../Casl/enums/sectoral.scope.enum';
 import { GHGSCoveredValues } from '../../Casl/enums/ghgs.covered.values.enum';
 import { GeoGraphicalLocations } from '../../Casl/enums/geolocations.enum';
+import { InfoCircle } from 'react-bootstrap-icons';
 
 type SizeType = Parameters<typeof Form>[0]['size'];
 
@@ -43,7 +44,7 @@ export const AddProgrammeComponent = () => {
   const [stepOneData, setStepOneData] = useState<any>();
   const [stepTwoData, setStepTwoData] = useState<any>();
   const [minViableCarbonPrice, setMinViableCarbonPrice] = useState<any>();
-  const [current, setCurrent] = useState<number>(1);
+  const [current, setCurrent] = useState<number>(0);
   const [isUpdate, setIsUpdate] = useState(false);
   const [countries, setCountries] = useState<[]>([]);
   const initialOrganisationOwnershipValues = [
@@ -324,6 +325,7 @@ export const AddProgrammeComponent = () => {
                               label="Ownership Percentage"
                               className="ownership-percent"
                               name={[name, 'ownership']}
+                              labelCol={{ span: 24 }}
                               wrapperCol={{ span: 24 }}
                               rules={[{ required: true, message: 'Missing last name' }]}
                             >
@@ -453,6 +455,74 @@ export const AddProgrammeComponent = () => {
                     </Select>
                   </Form.Item>
                 </div>
+              </Col>
+            </Row>
+            <Row className="selection-details-row" gutter={[16, 16]}>
+              <Col md={24} xl={12} className="in-ndc-col">
+                <Row className="in-ndc-row">
+                  <Col md={16} lg={18} xl={19}>
+                    <div className="included-label">
+                      <div>{t('addProgramme:inNDC')}</div>
+                      <div className="info-container">
+                        <Tooltip
+                          arrowPointAtCenter
+                          placement="bottomRight"
+                          trigger="hover"
+                          title={t('addProgramme:inNDCToolTip')}
+                        >
+                          <InfoCircle color="#000000" size={17} />
+                        </Tooltip>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md={8} lg={6} xl={5} className="included-val">
+                    <Radio.Group size="small">
+                      <div className="yes-no-radio-container">
+                        <Radio.Button className="yes-no-radio" value="inNDC">
+                          {t('addProgramme:yes')}
+                        </Radio.Button>
+                      </div>
+                      <div className="yes-no-radio-container">
+                        <Radio.Button className="yes-no-radio" value="notInNDC">
+                          {t('addProgramme:no')}
+                        </Radio.Button>
+                      </div>
+                    </Radio.Group>
+                  </Col>
+                </Row>
+              </Col>
+              <Col md={24} xl={12} className="in-nap-col">
+                <Row className="in-nap-row">
+                  <Col md={16} lg={18} xl={19}>
+                    <div className="included-label">
+                      <div>{t('addProgramme:inNAP')}</div>
+                      <div className="info-container">
+                        <Tooltip
+                          arrowPointAtCenter
+                          placement="bottomRight"
+                          trigger="hover"
+                          title={t('addProgramme:inNAPToolTip')}
+                        >
+                          <InfoCircle color="#000000" size={17} />
+                        </Tooltip>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md={8} lg={6} xl={5} className="included-val">
+                    <Radio.Group size="small">
+                      <div className="yes-no-radio-container">
+                        <Radio.Button className="yes-no-radio" value="inNAP">
+                          {t('addProgramme:yes')}
+                        </Radio.Button>
+                      </div>
+                      <div className="yes-no-radio-container">
+                        <Radio.Button className="yes-no-radio" value="notInNAP">
+                          {t('addProgramme:no')}
+                        </Radio.Button>
+                      </div>
+                    </Radio.Group>
+                  </Col>
+                </Row>
               </Col>
             </Row>
             <div className="steps-actions">

@@ -1,8 +1,14 @@
 {
-    "addProgramme": "Add New Programme",
-    "addProgrammeSub": "",
-    "addProgramme1": "Programme Details",
-    "addProgramme2": "Programme Financing Sought",
-    "addProgramme3": "NDC Action Details",
-    "addProgramme4": "Co-Benefits"
+  "addProgramme": "Add New Programme",
+  "addProgrammeSub": "",
+  "addProgramme1": "Programme Details",
+  "addProgramme2": "Programme Financing Sought",
+  "addProgramme3": "NDC Action Details",
+  "addProgramme4": "Co-Benefits",
+  "inNDC": "Included in NDC",
+  "inNDCToolTip": "Nationally Determined Contributions (NDC)",
+  "inNAP": "Included in NAP",
+  "inNAPToolTip": "National Adaptation Plan (NAP)",
+  "yes": "YES",
+  "no": "NO"
 }
