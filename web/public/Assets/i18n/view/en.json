@@ -18,7 +18,7 @@
     "financingType": "Financing Type",
     "grantEquivalent": "Grant Equivalent Amount",
     "carbonPrice": "Carbon Price (USD per ton)",
-    "financial": "Financial",
+    "financial": "Financial Overview",
     "calculation": "Mitigation Type Calculation",
     "energyGeneration": "Energy Generation",
     "consumerGroup": "Building Type",
@@ -111,5 +111,7 @@
     "tlTxCancelSystemDesc": "The request to transfer {} {} credits from {} to {} was cancelled by the system due to the deactivation of {} by {}",
     "tlUnFrozen": "Credits Unfrozen",
     "tlUnFrozenDesc": "{} frozen {} credits  of the programme have been unfrozen due to the reactivation of {} by {}",
-    "tlTxLowCreditCancelSystemDesc" : "The request to transfer {} {} credits from {} to {} was cancelled by the system due to insufficient credit balance"
+    "tlTxLowCreditCancelSystemDesc" : "The request to transfer {} {} credits from {} to {} was cancelled by the system due to insufficient credit balance",
+    "programmeDocs": "Programme Documents",
+    "investments": "Investments"
 }

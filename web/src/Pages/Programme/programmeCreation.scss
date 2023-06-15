@@ -22,9 +22,14 @@
       flex-direction: row-reverse;
       margin-right: 1rem;
 
-      .back-btn {
+      .action-btn {
         border: 1px solid $primary-color;
         color: $primary-color;
+        margin-right: 1rem;
+      }
+      .back-btn {
+        border: 1px solid $border-default-btn;
+        color: $border-default-btn;
         margin-right: 1rem;
       }
       .mg-left-1 {

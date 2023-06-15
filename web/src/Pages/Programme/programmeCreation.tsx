@@ -42,7 +42,8 @@ export const AddProgrammeComponent = () => {
   const [contactNoInput] = useState<any>();
   const [stepOneData, setStepOneData] = useState<any>();
   const [stepTwoData, setStepTwoData] = useState<any>();
-  const [current, setCurrent] = useState<number>(0);
+  const [minViableCarbonPrice, setMinViableCarbonPrice] = useState<any>();
+  const [current, setCurrent] = useState<number>(1);
   const [isUpdate, setIsUpdate] = useState(false);
   const [countries, setCountries] = useState<[]>([]);
   const initialOrganisationOwnershipValues = [
@@ -84,6 +85,18 @@ export const AddProgrammeComponent = () => {
 
   const onFinishStepTwo = (values: any) => {
     nextOne(values);
+  };
+
+  const onFormTwoValuesChane = (changedValues: any, allValues: any) => {
+    console.log('form two ============== > ', changedValues, allValues);
+    if (
+      allValues?.estimatedCredits !== undefined &&
+      allValues?.estimatedProgrammeCost !== undefined
+    ) {
+      setMinViableCarbonPrice(
+        Number(allValues?.estimatedProgrammeCost / allValues?.estimatedCredits).toFixed(2)
+      );
+    }
   };
 
   const getBase64 = (file: RcFile): Promise<string> =>
@@ -220,7 +233,7 @@ export const AddProgrammeComponent = () => {
                     label="Design Document"
                     valuePropName="fileList"
                     getValueFromEvent={normFile}
-                    required={true}
+                    required={false}
                     rules={[
                       {
                         validator: async (rule, file) => {
@@ -260,8 +273,7 @@ export const AddProgrammeComponent = () => {
                     initialValue={state?.record?.name}
                     rules={[
                       {
-                        required: true,
-                        message: '',
+                        required: false,
                       },
                       {
                         validator: async (rule, value) => {
@@ -402,13 +414,12 @@ export const AddProgrammeComponent = () => {
                   <Form.Item
                     wrapperCol={{ span: 13 }}
                     className="role-group"
-                    label="Conditional | Unconditional"
-                    name="conditionalOrUnconditional"
+                    label="NDC Scope"
+                    name="ndcScope"
                     initialValue={companyRole}
                     rules={[
                       {
-                        required: true,
-                        message: `Conditional | Unconditional ${t('isRequired')}`,
+                        required: false,
                       },
                     ]}
                   >
@@ -441,35 +452,6 @@ export const AddProgrammeComponent = () => {
                       ))}
                     </Select>
                   </Form.Item>
-                  <Form.Item
-                    label="Credits Authorised for International Transfer and Use"
-                    name="creditsAuthorised"
-                    initialValue={state?.record?.name}
-                    rules={[
-                      {
-                        required: true,
-                        message: '',
-                      },
-                      {
-                        validator: async (rule, value) => {
-                          if (
-                            String(value).trim() === '' ||
-                            String(value).trim() === undefined ||
-                            value === null ||
-                            value === undefined
-                          ) {
-                            throw new Error(
-                              `Credits Authorised for International Transfer and Use ${t(
-                                'isRequired'
-                              )}`
-                            );
-                          }
-                        },
-                      },
-                    ]}
-                  >
-                    <Input size="large" />
-                  </Form.Item>
                 </div>
               </Col>
             </Row>
@@ -497,6 +479,7 @@ export const AddProgrammeComponent = () => {
             requiredMark={true}
             form={formTwo}
             onFinish={onFinishStepTwo}
+            onValuesChange={onFormTwoValuesChane}
           >
             <Row className="row" gutter={[16, 16]}>
               <Col xl={12} md={24}>
@@ -528,9 +511,8 @@ export const AddProgrammeComponent = () => {
                   <Form.Item
                     label="Minimum Viable Carbon Price (USD per Ton) "
                     name="minViableCarbonPrice"
-                    initialValue={state?.record?.name}
                   >
-                    <Input defaultValue={'8.33'} disabled size="large" />
+                    <Input defaultValue={minViableCarbonPrice} disabled size="large" />
                   </Form.Item>
                 </div>
               </Col>
@@ -567,10 +549,13 @@ export const AddProgrammeComponent = () => {
               <Button
                 type="primary"
                 onClick={() => {
-                  setCurrent(current - 1);
+                  setCurrent(current + 1);
                 }}
               >
                 Next
+              </Button>
+              <Button className="action-btn" onClick={() => prevOne()} loading={loading}>
+                ADD ACTION
               </Button>
               {current === 1 && (
                 <Button className="back-btn" onClick={() => prevOne()} loading={loading}>
@@ -638,7 +623,7 @@ export const AddProgrammeComponent = () => {
                       <div className="title">{t('addProgramme:addProgramme3')}</div>
                     </div>
                   ),
-                  description: current === 1 && <div>3</div>,
+                  description: current === 2 && <div>3</div>,
                 },
                 {
                   title: (
@@ -647,7 +632,7 @@ export const AddProgrammeComponent = () => {
                       <div className="title">{t('addProgramme:addProgramme4')}</div>
                     </div>
                   ),
-                  description: current === 1 && <div>4</div>,
+                  description: current === 3 && <div>4</div>,
                 },
               ]}
             />
