@@ -95,10 +95,10 @@ services:
       ITMO_PASSWORD: ""
       DB_PORT: "5433"
       DB_NAME: "carbondev"
-      REGISTRY_ENDPOINT: 'http://192.168.8.195:3000'
+      REGISTRY_ENDPOINT: 'http://192.168.123.5:3000'
       REGISTRY_SYNC_ENABLE: true
       NODE_ENV: 'dev'
-      REGISTRY_API_TOKEN: ''
+      REGISTRY_API_TOKEN: 'dGVzdEB4ZXB0YWdvbi5jb21fX193ZFJ6bGZHYjluWlk2QXhPQnZzTzI='
       FILE_SERVICE: local
   # async-operations-handler:
   #   build:

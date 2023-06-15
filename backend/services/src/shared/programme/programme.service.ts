@@ -289,8 +289,10 @@ export class ProgrammeService {
       this.calcAddNDCFields(ndcAc, programme)
 
       programmeDto.ndcAction.id = ndcAc.id;
-      programmeDto.ndcAction.programmeId = programme.programmeId
-      programmeDto.ndcAction.externalId = programme.externalId
+      programmeDto.ndcAction.programmeId = programme.programmeId;
+      programmeDto.ndcAction.externalId = programme.externalId;
+      programmeDto.ndcAction.ndcFinancing = ndcAc.ndcFinancing;
+      programmeDto.ndcAction.constantVersion = ndcAc.constantVersion;
     }
 
     const savedProgramme = await this.entityManager
@@ -432,13 +434,24 @@ export class ProgrammeService {
       );
     }
 
-    const resp = await this.documentRepo.update( {
-      id: documentAction.id,
-    },
-    {
-      status: documentAction.status,
-      remark: documentAction.remark,
-    });
+    const resp = await this.entityManager
+      .transaction(async (em) => {
+        if (d.type == DocType.METHODOLOGY_DOCUMENT && documentAction.status == DocumentStatus.ACCEPTED) {
+          await em.update(Programme, {
+            programmeId: d.programmeId,
+          },
+          {
+            currentStage: ProgrammeStage.ACCEPTED,
+          });
+        }
+        return await em.update(ProgrammeDocument, {
+          id: documentAction.id,
+        },
+        {
+          status: documentAction.status,
+          remark: documentAction.remark,
+        });
+      });
 
     return new DataResponseDto(HttpStatus.OK, resp);
   }
@@ -501,15 +514,18 @@ export class ProgrammeService {
     dr.txTime = new Date().getTime();
     dr.url = url;
 
+    let resp;
     if (!currentDoc) {
-      return await this.documentRepo.save(dr);
+      resp = await this.documentRepo.save(dr);
     } else {
-      return await this.documentRepo.update(whr, {
+      resp = await this.documentRepo.update(whr, {
         "status": dr.status,
         "txTime": dr.txTime,
         "url": dr.url
       })
     }
+
+    return new DataResponseDto(HttpStatus.OK, resp);
   }
 
   private async createNDCActionId(ndcAction: NDCActionDto) {
@@ -562,9 +578,9 @@ export class ProgrammeService {
         }
       );
     }
-    const savedProgramme = await this.entityManager
+    const saved = await this.entityManager
       .transaction(async (em) => {
-        await em.save<NDCAction>(ndcAction);
+        const n = await em.save<NDCAction>(ndcAction);
         if (ndcActionDto.monitoringReport) {
           const dr = new ProgrammeDocument();
           dr.programmeId = program.programmeId;
@@ -575,6 +591,8 @@ export class ProgrammeService {
           dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, program.programmeId, ndcActionDto.monitoringReport);
           const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
         }
+
+        return n;
       })
       .catch((err: any) => {
         console.log(err);
@@ -588,7 +606,7 @@ export class ProgrammeService {
         }
         return err;
       });
-    return null;
+    return new DataResponseDto(HttpStatus.OK, saved);;
   }
 
   async queryNdcActions(

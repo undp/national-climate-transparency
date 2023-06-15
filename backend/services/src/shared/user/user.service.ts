@@ -47,6 +47,7 @@ import {
 } from "../async-operations/async-operations.interface";
 import { AsyncActionType } from "../enum/async.action.type.enum";
 import { DataResponseMessageDto } from "../dto/data.response.message";
+import { AsyncOperationType } from "../enum/async.operation.type.enum";
 
 @Injectable()
 export class UserService {
@@ -515,13 +516,16 @@ export class UserService {
       company.companyId = parseInt(
         await this.counterService.incrementCount(CounterType.COMPANY, 3)
       );
-      if (company.logo) {
+      if (company.logo && this.helperService.isBase64(company.logo)) {
         const response: any = await this.fileHandler.uploadFile(
           `profile_images/${company.companyId}_${new Date().getTime()}.png`,
           company.logo
         );
         if (response) {
           company.logo = response;
+          if (process.env.ASYNC_OPERATIONS_TYPE === AsyncOperationType.Queue) {
+            createdUserDto.company.logo = response; 
+          }
         } else {
           throw new HttpException(
             this.helperService.formatReqMessagesString(
