@@ -1,6 +1,5 @@
-import { Logger, Module } from '@nestjs/common';
+import { Logger, Module, forwardRef } from '@nestjs/common';
 import { ProgrammeService } from './programme.service';
-import { ProgrammeLedgerModule } from '../programme-ledger/programme-ledger.module';
 import { CaslModule } from '../casl/casl.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Programme } from '../entities/programme.entity';
@@ -10,22 +9,25 @@ import { CompanyModule } from '../company/company.module';
 import { ProgrammeTransfer } from '../entities/programme.transfer';
 import { Company } from '../entities/company.entity';
 import { ProgrammeQueryEntity } from '../entities/programme.view.entity';
-import { ProgrammeTransferViewEntityQuery } from '../entities/programmeTransfer.view.entity';
 import { UserModule } from '../user/user.module';
 import { EmailHelperModule } from '../email-helper/email-helper.module';
 import { LocationModule } from '../location/location.module';
 import { NDCAction } from '../entities/ndc.action.entity';
+import { ProgrammeDocument } from '../dto/programme.document';
+import { FileHandlerModule } from '../file-handler/filehandler.module';
+import { AsyncOperationsModule } from '../async-operations/async-operations.module';
 
 @Module({
   imports: [
-    ProgrammeLedgerModule, 
     CaslModule, 
-    TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, ProgrammeTransferViewEntityQuery, NDCAction]), 
-    UtilModule, 
-    CompanyModule, 
-    UserModule,
-    EmailHelperModule,
-    LocationModule
+    TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, NDCAction, ProgrammeDocument]), 
+    UtilModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => CompanyModule),
+    forwardRef(() => EmailHelperModule),
+    LocationModule,
+    FileHandlerModule,
+    AsyncOperationsModule
   ],
   providers: [Logger, ProgrammeService],
   exports: [ProgrammeService]

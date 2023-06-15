@@ -1,5 +1,7 @@
 export enum AsyncActionType {
   Email,
   RegistryCompanyCreate,
-  ProgrammeCreate
+  ProgrammeCreate,
+  DocumentUpload,
+  AddMitigation
 }

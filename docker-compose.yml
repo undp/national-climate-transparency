@@ -46,6 +46,7 @@ services:
       EXPIRES_IN: "7200"
       DB_PORT: "5433"
       DB_NAME: "carbondev"
+      NODE_ENV: 'dev'
     volumes:
       - filestore:/app/backend/services/public
       - ./users.csv:/app/backend/services/users.csv
@@ -68,7 +69,8 @@ services:
       DOMAIN_MAP: "true"
       DB_PORT: "5433"
       DB_NAME: "carbondev"
-  replicator:
+      NODE_ENV: 'dev'
+  async-operations-handler:
     build:
       context: .
       dockerfile: ./backend/services/Dockerfile
@@ -80,7 +82,7 @@ services:
       DB_USER: root
       DB_PASSWORD: "<ANY PASSOWORD>"
       # ,data-importer
-      RUN_MODULE: replicator,async-operations-handler
+      RUN_MODULE: async-operations-handler
       LOCATION_SERVICE: OPENSTREET
       SMTP_ENDPOINT: email-smtp.us-east-1.amazonaws.com
       SMTP_PASSWORD: ""
@@ -91,9 +93,10 @@ services:
       ITMO_PASSWORD: ""
       DB_PORT: "5433"
       DB_NAME: "carbondev"
-      REGISTRY_API_TOKEN: ""
-      REGISTRY_ENDPOINT: "https://api.carbreg.org"
-      REGISTRY_SYNC_ENABLE : "true"
+      REGISTRY_ENDPOINT: 'http://192.168.1.13:3000'
+      REGISTRY_SYNC_ENABLE: true
+      NODE_ENV: 'dev'
+      REGISTRY_API_TOKEN: ''
   # async-operations-handler:
   #   build:
   #     context: .

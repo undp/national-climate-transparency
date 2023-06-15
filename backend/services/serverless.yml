@@ -80,25 +80,25 @@ functions:
       - ${param:depLayerArn1}
       - ${param:depLayerArn2}
 
-  replicator:
-    timeout: 60
-    handler: src/ledger-replicator/handler.handler
-    events:
-      - stream:
-          arn: arn:aws:kinesis:us-east-1:302213478610:stream/carbon-stream-${self:provider.stage}
-          batchSize: 2
-          startingPosition: LATEST
-          maximumRetryAttempts: 10
-          enabled: true
-    ssmToEnvironment:
-      - DB_PASSWORD
-      - MAPBOX_PK
-      - REGISTRY_API_TOKEN
-    environment:
-      NODE_PATH: "./:/opt/node_modules"
-    layers:
-      - ${param:depLayerArn1}
-      - ${param:depLayerArn2}
+  # replicator:
+  #   timeout: 60
+  #   handler: src/ledger-replicator/handler.handler
+  #   events:
+  #     - stream:
+  #         arn: arn:aws:kinesis:us-east-1:302213478610:stream/carbon-stream-${self:provider.stage}
+  #         batchSize: 2
+  #         startingPosition: LATEST
+  #         maximumRetryAttempts: 10
+  #         enabled: true
+  #   ssmToEnvironment:
+  #     - DB_PASSWORD
+  #     - MAPBOX_PK
+  #     - REGISTRY_API_TOKEN
+  #   environment:
+  #     NODE_PATH: "./:/opt/node_modules"
+  #   layers:
+  #     - ${param:depLayerArn1}
+  #     - ${param:depLayerArn2}
 
   data-importer:
     timeout: 60
@@ -130,6 +130,7 @@ functions:
     ssmToEnvironment:
       - SMTP_PASSWORD
       - DB_PASSWORD
+      - REGISTRY_API_TOKEN
     environment:
       NODE_PATH: "./:/opt/node_modules"
     layers:

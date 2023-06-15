@@ -7,11 +7,10 @@ import {
   MongoAbility,
 } from '@casl/ability';
 import { BaseEntity } from './entities/BaseEntity';
-import { Company } from './entities/Company';
+import { Company, User } from '@undp/carbon-library';
 import { Programme } from './entities/Programme';
 import { ProgrammeCertify } from './entities/ProgrammeCertify';
 import { ProgrammeTransfer } from './entities/ProgrammeTransfer';
-import { User } from './entities/User';
 import { Action } from './enums/action.enum';
 import { CompanyRole } from './enums/company.role.enum';
 import { ProgrammeStage } from './enums/programme-status.enum';
@@ -111,6 +110,9 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
     cannot(Action.Update, User, ['companyRole']);
 
     cannot([Action.Delete], Company, { companyRole: { $eq: CompanyRole.GOVERNMENT } });
+
+    //MRV related permissions
+    cannot([Action.Delete], Company);
 
     if (user.role === Role.Admin || user.role === Role.Root) {
       can(Action.Create, User);

@@ -26,7 +26,7 @@ export class AsyncOperationsDatabaseService
     this.emailDisabled = this.configService.get<boolean>("email.disabled");
   }
 
-  public async AddAction(action: AsyncAction): Promise<boolean> {
+  public async addAction(action: AsyncAction): Promise<boolean> {
     if (action.actionType === AsyncActionType.Email) {
       if (this.emailDisabled) return false;
     }
@@ -45,7 +45,7 @@ export class AsyncOperationsDatabaseService
       );
     });
 
-    this.logger.log("Succefully added to the AsyncAction table", action);
+    this.logger.log("Succefully added to the AsyncAction table",JSON.stringify(action));
 
     return true;
   }

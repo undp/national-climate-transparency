@@ -8,9 +8,11 @@ import { CompanyService } from "../company/company.service";
 import { Company } from "../entities/company.entity";
 import { Programme } from "../entities/programme.entity";
 import { AsyncActionType } from "../enum/async.action.type.enum";
-import { ProgrammeLedgerService } from "../programme-ledger/programme-ledger.service";
 import { UserService } from "../user/user.service";
 import { HelperService } from "../util/helpers.service";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { ProgrammeService } from "../programme/programme.service";
 
 @Injectable()
 export class EmailHelperService {
@@ -22,9 +24,10 @@ export class EmailHelperService {
     private configService: ConfigService,
     @Inject(forwardRef(() => CompanyService))
     private companyService: CompanyService,
-    private programmeLedger: ProgrammeLedgerService,
     private asyncOperationsInterface: AsyncOperationsInterface,
-    private helperService: HelperService
+    private helperService: HelperService,
+    @Inject(forwardRef(() => ProgrammeService))
+    private programmeService: ProgrammeService
   ) {
     this.isEmailDisabled = this.configService.get<boolean>(
       "email.disableLowPriorityEmails"
@@ -39,7 +42,7 @@ export class EmailHelperService {
     governmentId?: number
   ) {
     if (this.isEmailDisabled) return;
-    const programme = await this.programmeLedger.getProgrammeById(programmeId);
+    const programme = await this.programmeService.findById(programmeId);
     const hostAddress = this.configService.get("host");
     let companyDetails: Company;
 
@@ -64,7 +67,7 @@ export class EmailHelperService {
         templateData = {
           ...templateData,
           programmeName: programme.title,
-          credits: programme.creditBalance,
+          credits: programme.creditEst,
           serialNumber: programme.serialNo,
           organisationName: companyDetails.name,
           pageLink: hostAddress + `/programmeManagement/view?id=${programmeId}`,
@@ -76,7 +79,7 @@ export class EmailHelperService {
         templateData = {
           ...templateData,
           programmeName: programme.title,
-          credits: programme.creditBalance,
+          credits: programme.creditEst,
           serialNumber: programme.serialNo,
           organisationName: companyDetails.name,
           pageLink: hostAddress + `/programmeManagement/view?id=${programmeId}`,
@@ -91,7 +94,7 @@ export class EmailHelperService {
         templateData = {
           ...templateData,
           programmeName: programme.title,
-          credits: programme.creditBalance,
+          credits: programme.creditEst,
           serialNumber: programme.serialNo,
           organisationName: companyDetails.name,
           government: government.name,
@@ -138,7 +141,7 @@ export class EmailHelperService {
         break;
 
       case "CREDIT_TRANSFER_CANCELLATION":
-        programme = await this.programmeLedger.getProgrammeById(programmeId);
+        programme = await this.programmeService.findById(programmeId);
         companyDetails = await this.companyService.findByCompanyId(
           receiverCompanyId
         );
@@ -155,7 +158,7 @@ export class EmailHelperService {
         companyDetails = await this.companyService.findByCompanyId(
           receiverCompanyId
         );
-        programme = await this.programmeLedger.getProgrammeById(programmeId);
+        programme = await this.programmeService.findById(programmeId);
         templateData = {
           ...templateData,
           organisationName: companyDetails.name,
@@ -169,7 +172,7 @@ export class EmailHelperService {
         companyDetails = await this.companyService.findByCompanyId(
           receiverCompanyId
         );
-        programme = await this.programmeLedger.getProgrammeById(programmeId);
+        programme = await this.programmeService.findById(programmeId);
         templateData = {
           ...templateData,
           organisationName: companyDetails.name,
@@ -183,7 +186,7 @@ export class EmailHelperService {
         companyDetails = await this.companyService.findByCompanyId(
           receiverCompanyId
         );
-        programme = await this.programmeLedger.getProgrammeById(programmeId);
+        programme = await this.programmeService.findById(programmeId);
         templateData = {
           ...templateData,
           organisationName: companyDetails.name,
@@ -197,7 +200,7 @@ export class EmailHelperService {
         companyDetails = await this.companyService.findByCompanyId(
           receiverCompanyId
         );
-        programme = await this.programmeLedger.getProgrammeById(programmeId);
+        programme = await this.programmeService.findById(programmeId);
         templateData = {
           ...templateData,
           organisationName: companyDetails.name,
@@ -211,19 +214,19 @@ export class EmailHelperService {
         companyDetails = await this.companyService.findByCompanyId(
           receiverCompanyId
         );
-        programme = await this.programmeLedger.getProgrammeById(programmeId);
+        programme = await this.programmeService.findById(programmeId);
         templateData = {
           ...templateData,
           government: companyDetails.name,
           serialNumber: programme.serialNo,
           programmeName: programme.title,
-          credits: programme.creditBalance,
+          credits: programme.creditEst,
           pageLink: hostAddress + `/programmeManagement/view?id=${programmeId}`,
         };
         break;
 
       case "CREDIT_RETIREMENT_RECOGNITION":
-        programme = await this.programmeLedger.getProgrammeById(programmeId);
+        programme = await this.programmeService.findById(programmeId);
         templateData = {
           ...templateData,
           serialNumber: programme.serialNo,
@@ -233,7 +236,7 @@ export class EmailHelperService {
         break;
 
       case "CREDIT_RETIREMENT_NOT_RECOGNITION":
-        programme = await this.programmeLedger.getProgrammeById(programmeId);
+        programme = await this.programmeService.findById(programmeId);
         templateData = {
           ...templateData,
           serialNumber: programme.serialNo,
@@ -293,7 +296,7 @@ export class EmailHelperService {
           ),
         },
       };
-      await this.asyncOperationsInterface.AddAction(action);
+      await this.asyncOperationsInterface.addAction(action);
     });
   }
 
@@ -310,7 +313,7 @@ export class EmailHelperService {
     let programme: Programme;
     let companyDetails: Company;
     if (programmeId)
-      programme = await this.programmeLedger.getProgrammeById(programmeId);
+      programme = await this.programmeService.findById(programmeId);
 
     switch (template.id) {
       case "CREDIT_TRANSFER_GOV_ACCEPTED_TO_INITIATOR":
@@ -380,7 +383,7 @@ export class EmailHelperService {
           ),
         },
       };
-      await this.asyncOperationsInterface.AddAction(action);
+      await this.asyncOperationsInterface.addAction(action);
     });
   }
 
@@ -415,6 +418,6 @@ export class EmailHelperService {
         ),
       },
     };
-    await this.asyncOperationsInterface.AddAction(action);
+    await this.asyncOperationsInterface.addAction(action);
   }
 }

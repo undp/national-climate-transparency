@@ -7,7 +7,6 @@ import { Repository } from "typeorm";
 import { StatList } from "../shared/dto/stat.list.dto";
 import { StatType } from "../shared/enum/stat.type.enum";
 import { HelperService } from "../shared/util/helpers.service";
-import { ProgrammeTransferViewEntityQuery } from "../shared/entities/programmeTransfer.view.entity";
 import { QueryDto } from "../shared/dto/query.dto";
 import { FilterEntry } from "../shared/dto/filter.entry";
 import { SortEntry } from "../shared/dto/sort.entry";
@@ -44,8 +43,6 @@ export class AggregateAPIService {
     private helperService: HelperService,
     @InjectRepository(Programme) private programmeRepo: Repository<Programme>,
     @InjectRepository(Company) private companyRepo: Repository<Company>,
-    @InjectRepository(ProgrammeTransferViewEntityQuery)
-    private programmeTransferRepo: Repository<ProgrammeTransferViewEntityQuery>
   ) {}
 
   private getFilterAndByStatFilter(
@@ -744,16 +741,6 @@ export class AggregateAPIService {
       case StatType.MY_CREDIT:
         results[key] = await this.getCompanyCredits(companyId);
         break;
-      case StatType.PENDING_TRANSFER_INIT:
-      case StatType.PENDING_TRANSFER_RECV:
-        results[key] = await this.getPendingTxStats(
-          stat,
-          companyId,
-          abilityCondition,
-          lastTimeForWhere,
-          statCache
-        );
-        break;
       case StatType.CERTIFIED_BY_ME:
       case StatType.REVOKED_BY_ME:
         stat.statFilter
@@ -941,61 +928,6 @@ export class AggregateAPIService {
           GROUP  BY p."programmeId", b."currentStage"`);
         results[key] = await this.programmeLocationDataFormatter(
           resultsProgrammeLocations
-        );
-        break;
-      case StatType.ALL_TRANSFER_LOCATION:
-      case StatType.MY_TRANSFER_LOCATION:
-        if (stat.type === StatType.MY_TRANSFER_LOCATION) {
-          stat.statFilter
-            ? (stat.statFilter.onlyMine = true)
-            : (stat.statFilter = { onlyMine: true });
-        }
-
-        let filtCom = this.getFilterAndByStatFilter(
-          stat.statFilter,
-          null,
-          "txTime"
-        );
-        if (!filtCom) {
-          filtCom = [];
-        }
-        filtCom.push({
-          value: "0",
-          key: "retirementType",
-          operation: "=",
-        });
-        filtCom.push({
-          value: TransferStatus.RECOGNISED,
-          key: "status",
-          operation: "=",
-        });
-
-        let filterOr = undefined;
-        if (stat.statFilter && stat.statFilter.onlyMine) {
-          filterOr = [];
-          filterOr.push({
-            value: companyId,
-            key: "fromCompanyId",
-            operation: "=",
-          });
-          filterOr.push({
-            value: companyId,
-            key: "programmeCertifierId",
-            operation: "ANY",
-          });
-        }
-        results[key] = await this.genAggregateTypeOrmQuery(
-          this.programmeTransferRepo,
-          "transfer",
-          [`toCompanyMeta->>country`],
-          [new AggrEntry("requestId", "COUNT", "count")],
-          filtCom,
-          filterOr,
-          null,
-          abilityCondition,
-          lastTimeForWhere,
-          statCache,
-          ["authTime"]
         );
         break;
     }
@@ -1462,57 +1394,7 @@ export class AggregateAPIService {
       last: comp.creditTxTime,
     };
   }
-  async getPendingTxStats(
-    stat,
-    companyId,
-    abilityCondition,
-    lastTimeForWhere,
-    statCache
-  ) {
-    if (stat.statFilter) {
-      stat.statFilter.onlyMine = false;
-    } else {
-      stat.statFilter = { onlyMine: false };
-    }
-    let filt = this.getFilterAndByStatFilter(stat.statFilter, null, "txTime");
 
-    if (filt == null) {
-      filt = [];
-    }
-    filt.push({
-      key: "status",
-      operation: "=",
-      value: TransferStatus.PENDING,
-    });
-    filt.push({
-      key: "isRetirement",
-      operation: "!=",
-      value: true,
-    });
-
-    filt.push( {
-      value: companyId,
-      key:
-        stat.type === StatType.PENDING_TRANSFER_INIT
-          ? "initiatorCompanyId"
-          : "fromCompanyId",
-      operation: "=",
-    })
-
-    return await this.genAggregateTypeOrmQuery(
-      this.programmeTransferRepo,
-      "transfer",
-      null,
-      [new AggrEntry("requestId", "COUNT", "count")],
-      filt,
-      null,
-      null,
-      abilityCondition,
-      lastTimeForWhere,
-      statCache,
-      ["txTime"]
-    );
-  }
   async generateProgrammeAggregates(
     stat,
     frzAgg,

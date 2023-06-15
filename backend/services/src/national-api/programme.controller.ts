@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Programme } from '../shared/entities/programme.entity';
 import { Action } from '../shared/casl/action.enum';
@@ -9,21 +9,11 @@ import { ProgrammeDto } from '../shared/dto/programme.dto';
 import { ProgrammeService } from '../shared/programme/programme.service';
 import { QueryDto } from '../shared/dto/query.dto';
 import { ConstantUpdateDto } from '../shared/dto/constants.update.dto';
-import { ProgrammeStage } from '../shared/enum/programme-status.enum';
-import { ProgrammeApprove } from '../shared/dto/programme.approve';
-import { ProgrammeReject } from '../shared/dto/programme.reject';
-import { ProgrammeRetire } from '../shared/dto/programme.retire';
 import { ApiKeyJwtAuthGuard } from '../shared/auth/guards/api-jwt-key.guard';
-import { ProgrammeTransferRequest } from '../shared/dto/programme.transfer.request';
-import { ProgrammeTransfer } from '../shared/entities/programme.transfer';
-import { ProgrammeTransferApprove } from '../shared/dto/programme.transfer.approve';
-import { ProgrammeTransferReject } from '../shared/dto/programme.transfer.reject';
-import { JwtAuthGuard } from '../shared/auth/guards/jwt-auth.guard';
-import { ProgrammeCertify } from '../shared/dto/programme.certify';
-import { ProgrammeTransferCancel } from '../shared/dto/programme.transfer.cancel';
-import { ProgrammeIssue } from '../shared/dto/programme.issue';
-import { ProgrammeRevoke } from '../shared/dto/programme.revoke';
-import { TransferFreezeGuard } from 'src/shared/auth/guards/transfer-freeze.guard';
+import { NDCActionDto } from '../shared/dto/ndc.action.dto';
+import { JwtAuthGuard } from 'src/shared/auth/guards/jwt-auth.guard';
+import { ProgrammeDocumentDto } from 'src/shared/dto/programme.document.dto';
+import { DocumentAction } from 'src/shared/dto/document.action';
 
 @ApiTags('Programme')
 @ApiBearerAuth()
@@ -34,14 +24,38 @@ export class ProgrammeController {
 
     }
 
-    @ApiBearerAuth('api_key')
     @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
     @Post('create')
     async addProgramme(@Body()programme: ProgrammeDto) {
       return this.programmeService.create(programme)
     }
+
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
+    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
+    @Post('addNDCAction')
+    async addNDCAction(@Body()ndcAction: NDCActionDto) {
+      return this.programmeService.addNDCAction(ndcAction)
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
+    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
+    @Post('addDocument')
+    async addDocument(@Body()docDto: ProgrammeDocumentDto) {
+      return this.programmeService.addDocument(docDto)
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
+    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
+    @Post('docAction')
+    async docAction(@Body()docAction: DocumentAction) {
+      return this.programmeService.docAction(docAction)
+    }
+
 
     @ApiBearerAuth()
     @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
@@ -51,14 +65,14 @@ export class ProgrammeController {
       return this.programmeService.query(query, req.abilityCondition)
     }
 
-    @ApiBearerAuth('api_key')
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
-    @Get('getHistory')
-    async getHistory(@Query('programmeId') programmeId: string, @Request() req) {
-        return this.programmeService.getProgrammeEvents(programmeId, req.user)
-    }
+    // @ApiBearerAuth('api_key')
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
+    // @Get('getHistory')
+    // async getHistory(@Query('programmeId') programmeId: string, @Request() req) {
+    //     return this.programmeService.getProgrammeEvents(programmeId, req.user)
+    // }
 
     @ApiBearerAuth()
     @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
@@ -67,40 +81,40 @@ export class ProgrammeController {
         return this.programmeService.updateCustomConstants(config.type, config);
     }
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
-    @Put('authorize')
-    async programmeApprove(@Body() body: ProgrammeApprove, @Request() req) {
-        return this.programmeService.approveProgramme(body, req.user)
-    }
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    // @Put('authorize')
+    // async programmeApprove(@Body() body: ProgrammeApprove, @Request() req) {
+    //     return this.programmeService.approveProgramme(body, req.user)
+    // }
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
-    @Put('issue')
-    async programmeIssue(@Body() body: ProgrammeIssue, @Request() req) {
-        return this.programmeService.issueProgrammeCredit(body, req.user)
-    }
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    // @Put('issue')
+    // async programmeIssue(@Body() body: ProgrammeIssue, @Request() req) {
+    //     return this.programmeService.issueProgrammeCredit(body, req.user)
+    // }
 
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
-    @Put('reject')
-    async programmeReject(@Body() body: ProgrammeReject, @Request() req) {
-        return this.programmeService.rejectProgramme(body, req.user)
-    }
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    // @Put('reject')
+    // async programmeReject(@Body() body: ProgrammeReject, @Request() req) {
+    //     return this.programmeService.rejectProgramme(body, req.user)
+    // }
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeCertify))
-    @Put('certify')
-    async programmeCertify(@Body() body: ProgrammeCertify, @Request() req) {
-        return this.programmeService.certify(body, true, req.user)
-    }
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeCertify))
+    // @Put('certify')
+    // async programmeCertify(@Body() body: ProgrammeCertify, @Request() req) {
+    //     return this.programmeService.certify(body, true, req.user)
+    // }
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeCertify))
-    @Put('revoke')
-    async programmeRevoke(@Body() body: ProgrammeRevoke, @Request() req) {
-        return this.programmeService.certify(body, false, req.user)
-    }
+    // @ApiBearerAuth()
+    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeCertify))
+    // @Put('revoke')
+    // async programmeRevoke(@Body() body: ProgrammeRevoke, @Request() req) {
+    //     return this.programmeService.certify(body, false, req.user)
+    // }
 
 }

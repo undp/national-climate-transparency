@@ -4,7 +4,7 @@ import { SectoralScope } from '@undp/serial-number-gen'
 import { ProgrammeProperties } from "./programme.properties";
 import { Sector } from "../enum/sector.enum";
 import { Type } from "class-transformer";
-import { ProgrammeDocuments } from "./programme.documents";
+// import { ProgrammeDocuments } from "./programme.documents";
 import { NDCActionDto } from "./ndc.action.dto";
 
 export class ProgrammeDto {
@@ -71,11 +71,11 @@ export class ProgrammeDto {
     @Type(() => ProgrammeProperties)
     programmeProperties: ProgrammeProperties;
 
-    @ApiProperty()
-    @IsNotEmptyObject()
-    @ValidateNested()
-    @Type(() => ProgrammeDocuments)
-    programmeDocuments: ProgrammeDocuments;
+    @ApiPropertyOptional()
+    @IsString()
+    @IsOptional()
+    @IsNotEmpty()
+    designDocument?: string;
 
     @ApiProperty()
     @IsNotEmpty()

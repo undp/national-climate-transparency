@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsNotEmptyObject, IsString, ValidateIf, ValidateNested } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNotEmptyObject, IsOptional, IsString, ValidateIf, ValidateNested } from "class-validator";
 import { NDCActionType } from "../enum/ndc.action.enum";
 import { TypeOfMitigation } from "../enum/typeofmitigation.enum";
 import { Type } from "class-transformer";
@@ -71,9 +71,15 @@ export class NDCActionDto {
   
 
   @ApiPropertyOptional()
-  @ValidateNested()
-  @Type(() => NDCReports)
-  ndcReports?: NDCReports;
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty()
+  monitoringReport?: string;
+  
+  // @ApiPropertyOptional()
+  // @ValidateNested()
+  // @Type(() => NDCReports)
+  // ndcReports?: NDCReports;
 
 
   @ApiPropertyOptional()
@@ -82,4 +88,6 @@ export class NDCActionDto {
   coBenefitsProperties?: CoBenefitsProperties;
 
   constantVersion: string;
+
+  id?: string;
 }

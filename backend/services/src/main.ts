@@ -1,5 +1,4 @@
 import { AnalyticsAPIModule } from "./analytics-api/analytics.api.module";
-import { handler } from "./ledger-replicator/handler";
 import { handler as asyncHandler } from "./async-operations-handler/handler";
 import { handler as importHandler } from "./data-importer/handler";
 import * as setupHandler from "./setup/handler";
@@ -24,10 +23,10 @@ async function bootstrap() {
         module = AnalyticsAPIModule;
         httpPath = "stats";
         break;
-      case "replicator":
-        await handler();
-        console.log("Module initiated", moduleName);
-        continue;
+      // case "replicator":
+      //   await handler();
+      //   console.log("Module initiated", moduleName);
+      //   continue;
       case "async-operations-handler":
         await asyncHandler();
         console.log("Module initiated", moduleName);

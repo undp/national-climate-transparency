@@ -12,7 +12,7 @@ import { Column, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 export class NDCAction {
 
   @PrimaryColumn()
-  id: number;
+  id: string;
 
   @Column()
   programmeId: string;
@@ -62,11 +62,11 @@ export class NDCAction {
   ndcFinancing?: NdcFinancing;
   
 
-  @Column({
-    type: "jsonb",
-    array: false,
-  })
-  ndcReports?: NDCReports;
+  // @Column({
+  //   type: "jsonb",
+  //   array: false,
+  // })
+  // ndcReports?: NDCReports;
 
 
   @Column({

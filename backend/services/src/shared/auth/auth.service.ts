@@ -122,7 +122,7 @@ export class AuthService {
         },
       };
 
-      await this.asyncOperationsInterface.AddAction(action);
+      await this.asyncOperationsInterface.addAction(action);
 
       return new BasicResponseDto(
         HttpStatus.OK,
