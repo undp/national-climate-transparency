@@ -61,9 +61,6 @@ export const AddProgrammeComponent = () => {
         const alpha2Names = response.data.map((item: any) => {
           return item.alpha2;
         });
-        console.log('countries ------- > ');
-        console.log(alpha2Names);
-        console.log(response.data);
         setCountries(response.data);
       }
     } catch (error: any) {
@@ -164,6 +161,25 @@ export const AddProgrammeComponent = () => {
   const onChangeNDCScope = (event: any) => {
     if (event?.target) {
       setNdcScopeChanged(true);
+    }
+  };
+
+  const validateOwnershipPercentage = (_: any, value: any, callback: any) => {
+    const ownershipData = formOne.getFieldValue('ownershipPercentage');
+    const totalOwnership = ownershipData.reduce((sum: any, field: any) => sum + field.ownership, 0);
+
+    if (totalOwnership !== 100) {
+      callback('The total ownership percentage must be 100.');
+    } else {
+      callback();
+    }
+  };
+
+  const onChangeGeoLocation = (values: any[]) => {
+    if (values.includes('National')) {
+      const buyerCountryValues = Object.values(GeoGraphicalLocations);
+      const newBuyerValues = buyerCountryValues?.filter((item: any) => item !== 'National');
+      formOne.setFieldValue('geographicalLocation', [...newBuyerValues]);
     }
   };
 
@@ -382,21 +398,24 @@ export const AddProgrammeComponent = () => {
                                 wrapperCol={{ span: 24 }}
                                 rules={[
                                   { required: true, message: 'Missing ownership percentage' },
+                                  { validator: validateOwnershipPercentage },
                                 ]}
                               >
                                 <InputNumber
                                   size="large"
-                                  min={0}
+                                  min={1}
                                   max={100}
                                   formatter={(value) => `${value}%`}
                                   parser={(value: any) => value.replace('%', '')}
                                   disabled={fields?.length < 2}
                                 />
                               </Form.Item>
-                              <MinusCircleOutlined
-                                className="dynamic-delete-button"
-                                onClick={() => remove(name)}
-                              />
+                              {fields?.length > 1 && name !== 0 && (
+                                <MinusCircleOutlined
+                                  className="dynamic-delete-button"
+                                  onClick={() => remove(name)}
+                                />
+                              )}
                             </Space>
                           );
                         })}
@@ -503,7 +522,12 @@ export const AddProgrammeComponent = () => {
                       },
                     ]}
                   >
-                    <Select size="large">
+                    <Select
+                      mode="multiple"
+                      size="large"
+                      maxTagCount={2}
+                      onChange={onChangeGeoLocation}
+                    >
                       {Object.values(GeoGraphicalLocations).map((locations: any) => (
                         <Select.Option value={locations}>{locations}</Select.Option>
                       ))}
