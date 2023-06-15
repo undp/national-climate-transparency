@@ -72,7 +72,7 @@ export class ProgrammeService {
     @InjectRepository(ProgrammeQueryEntity)
     private programmeViewRepo: Repository<ProgrammeQueryEntity>,
     @InjectRepository(NDCAction) private ndcActionRepo: Repository<NDCAction>,
-    @InjectRepository(NDCAction) private documentRepo: Repository<ProgrammeDocument>,
+    @InjectRepository(ProgrammeDocument) private documentRepo: Repository<ProgrammeDocument>,
     @InjectRepository(ConstantEntity)
     private constantRepo: Repository<ConstantEntity>,
     private asyncOperationsInterface: AsyncOperationsInterface,
@@ -150,6 +150,16 @@ export class ProgrammeService {
     const programme: Programme = this.toProgramme(programmeDto);
     this.logger.verbose("Programme create", programme);
 
+    const pr = await this.findByExternalId(programmeDto.externalId);
+    if (pr) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.programmeExistsWithSameExetrnalId",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
     if (
       programmeDto.proponentTaxVatId.length > 1 &&
       (!programmeDto.proponentPercentage ||
@@ -269,22 +279,20 @@ export class ProgrammeService {
       programmeDto.designDocument = await this.uploadDocument(DocType.DESIGN_DOCUMENT, programme.programmeId, programmeDto.designDocument);
     }
 
-    const ndcAc = undefined;
+    let ndcAc: NDCAction = undefined;
     if (programmeDto.ndcAction) {
-      this.calcCreditNDCAction(programmeDto.ndcAction, programme)
       const data = instanceToPlain(programmeDto.ndcAction);
-      const ndcAc: NDCAction = plainToClass(NDCAction, data)
+      ndcAc = plainToClass(NDCAction, data)
       ndcAc.id = await this.createNDCActionId(programmeDto.ndcAction);
+
+      await this.calcCreditNDCAction(ndcAc, programme);
+      this.calcAddNDCFields(ndcAc, programme)
+
       programmeDto.ndcAction.id = ndcAc.id;
+      programmeDto.ndcAction.programmeId = programme.programmeId
+      programmeDto.ndcAction.externalId = programme.externalId
     }
 
-    await this.asyncOperationsInterface.addAction(
-      {
-        actionType: AsyncActionType.ProgrammeCreate,
-        actionProps: programmeDto,
-      }
-    );
-    
     const savedProgramme = await this.entityManager
       .transaction(async (em) => {
         if (ndcAc) {
@@ -323,7 +331,14 @@ export class ProgrammeService {
         }
         return err;
       });
-
+      
+    await this.asyncOperationsInterface.addAction(
+      {
+        actionType: AsyncActionType.ProgrammeCreate,
+        actionProps: programmeDto,
+      }
+    );
+      
     const hostAddress = this.configService.get("host");
     await this.emailHelperService.sendEmailToGovernmentAdmins(
       EmailTemplates.PROGRAMME_CREATE,
@@ -337,13 +352,13 @@ export class ProgrammeService {
     return savedProgramme;
   }
 
-  async calcCreditNDCAction(ndcAction: NDCActionDto, program: Programme) {
+  async calcCreditNDCAction(ndcAction: NDCAction, program: Programme) {
     let constants = await this.getLatestConstant(ndcAction.typeOfMitigation);
     const req = await this.getCreditRequest(ndcAction, program, constants);
+    const crdts = await calculateCredit(req);
+    console.log('Credit', crdts, req);
     try {
-      ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(
-        await calculateCredit(req)
-      );
+      ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(crdts);
     } catch (err) {
       this.logger.log(`Credit calculate failed ${err.message}`);
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
@@ -352,7 +367,17 @@ export class ProgrammeService {
     ndcAction.constantVersion = constants
       ? String(constants.version)
       : "default";
+
+    console.log('1111', ndcAction)
     return ndcAction;
+  }
+
+  async calcAddNDCFields(ndcAction: NDCAction, programme: Programme) {
+
+    ndcAction.programmeId = programme.programmeId;
+    ndcAction.externalId = programme.externalId;
+    ndcAction.txTime = new Date().getTime();
+    ndcAction.createdTime = ndcAction.txTime;
   }
 
   private getExpectedDoc(type: DocType) {
@@ -498,6 +523,17 @@ export class ProgrammeService {
   }
 
   async addNDCAction(ndcActionDto: NDCActionDto): Promise<DataResponseDto> {
+
+    if (!ndcActionDto.programmeId) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.programmeNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
     const program = await this.findById(ndcActionDto.programmeId);
 
     if (!program) {
@@ -510,11 +546,13 @@ export class ProgrammeService {
       );
     }
 
-    this.calcCreditNDCAction(ndcActionDto, program);
-
     const data = instanceToPlain(ndcActionDto);
     const ndcAction: NDCAction = plainToClass(NDCAction, data)
     ndcAction.id = await this.createNDCActionId(ndcActionDto);
+
+    await this.calcCreditNDCAction(ndcAction, program);
+    console.log('2222', ndcAction)
+    this.calcAddNDCFields(ndcAction, program)
     
     if (ndcActionDto.action == NDCActionType.Mitigation || ndcActionDto.action == NDCActionType.CrossCutting) {
       await this.asyncOperationsInterface.addAction(
@@ -551,6 +589,81 @@ export class ProgrammeService {
         return err;
       });
     return null;
+  }
+
+  async queryNdcActions(
+    query: QueryDto,
+    abilityCondition: string
+  ): Promise<DataListResponseDto> {
+    const skip = query.size * query.page - query.size;
+    let resp = await this.ndcActionRepo
+      .createQueryBuilder("ndcaction")
+      .where(
+        this.helperService.generateWhereSQL(
+          query,
+          this.helperService.parseMongoQueryToSQLWithTable(
+            "ndcaction",
+            abilityCondition
+          ),
+          "ndcaction"
+        )
+      )
+      .orderBy(
+        query?.sort?.key &&
+          `"ndcaction".${this.helperService.generateSortCol(query?.sort?.key)}`,
+        query?.sort?.order,
+        query?.sort?.nullFirst !== undefined
+          ? query?.sort?.nullFirst === true
+            ? "NULLS FIRST"
+            : "NULLS LAST"
+          : undefined
+      )
+      .offset(skip)
+      .limit(query.size)
+      .getManyAndCount();
+
+    return new DataListResponseDto(
+      resp.length > 0 ? resp[0] : undefined,
+      resp.length > 1 ? resp[1] : undefined
+    );
+  }
+
+
+  async queryDocuments(
+    query: QueryDto,
+    abilityCondition: string
+  ): Promise<DataListResponseDto> {
+    const skip = query.size * query.page - query.size;
+    let resp = await this.documentRepo
+      .createQueryBuilder("programmedocument")
+      .where(
+        this.helperService.generateWhereSQL(
+          query,
+          this.helperService.parseMongoQueryToSQLWithTable(
+            "programmedocument",
+            abilityCondition
+          ),
+          "programmedocument"
+        )
+      )
+      .orderBy(
+        query?.sort?.key &&
+          `"programmedocument".${this.helperService.generateSortCol(query?.sort?.key)}`,
+        query?.sort?.order,
+        query?.sort?.nullFirst !== undefined
+          ? query?.sort?.nullFirst === true
+            ? "NULLS FIRST"
+            : "NULLS LAST"
+          : undefined
+      )
+      .offset(skip)
+      .limit(query.size)
+      .getManyAndCount();
+
+    return new DataListResponseDto(
+      resp.length > 0 ? resp[0] : undefined,
+      resp.length > 1 ? resp[1] : undefined
+    );
   }
 
   async query(
