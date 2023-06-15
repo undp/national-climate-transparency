@@ -50,6 +50,8 @@ export const AddProgrammeComponent = () => {
   const [minViableCarbonPrice, setMinViableCarbonPrice] = useState<any>();
   const [current, setCurrent] = useState<number>(0);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [includedInNDC, setIncludedInNDC] = useState(false);
+  const [includedInNAP, setIncludedInNAP] = useState(false);
   const [countries, setCountries] = useState<[]>([]);
   const [organisationsList, setOrganisationList] = useState<any[]>([]);
 
@@ -107,6 +109,8 @@ export const AddProgrammeComponent = () => {
 
   const onFinishStepOne = (values: any) => {
     nextOne(values);
+    console.log('-------------------- form one values ------------------------');
+    console.log(values);
   };
 
   const onFinishStepTwo = (values: any) => {
@@ -154,32 +158,49 @@ export const AddProgrammeComponent = () => {
   const initialOrganisationOwnershipValues: any[] = [
     {
       organisation: userInfoState?.companyName,
-      ownership: 100,
+      proponentPercentage: 100,
     },
   ];
 
   const onChangeNDCScope = (event: any) => {
     if (event?.target) {
       setNdcScopeChanged(true);
+      setIncludedInNDC(true);
     }
   };
 
-  const validateOwnershipPercentage = (_: any, value: any, callback: any) => {
-    const ownershipData = formOne.getFieldValue('ownershipPercentage');
-    const totalOwnership = ownershipData.reduce((sum: any, field: any) => sum + field.ownership, 0);
+  // const validateOwnershipPercentage = (_: any, value: any, callback: any) => {
+  //   const ownershipData = formOne.getFieldValue('proponentPercentage');
+  //   const totalOwnership = ownershipData.reduce((sum: any, field: any) => sum + field.ownership, 0);
 
-    if (totalOwnership !== 100) {
-      callback('The total ownership percentage must be 100.');
-    } else {
-      callback();
-    }
-  };
+  //   if (totalOwnership !== 100) {
+  //     callback('The total ownership percentage must be 100.');
+  //   } else {
+  //     callback();
+  //   }
+  // };
 
   const onChangeGeoLocation = (values: any[]) => {
     if (values.includes('National')) {
       const buyerCountryValues = Object.values(GeoGraphicalLocations);
       const newBuyerValues = buyerCountryValues?.filter((item: any) => item !== 'National');
       formOne.setFieldValue('geographicalLocation', [...newBuyerValues]);
+    }
+  };
+
+  const onInCludedNAPChange = (event: any) => {
+    if (event?.target?.value === 'inNAP') {
+      setIncludedInNAP(true);
+    } else if (event?.target?.value === 'notInNAP') {
+      setIncludedInNAP(false);
+    }
+  };
+
+  const onInCludedNDCChange = (event: any) => {
+    if (event?.target?.value === 'inNDC') {
+      setIncludedInNDC(true);
+    } else if (event?.target?.value === 'notInNDC') {
+      setIncludedInNDC(false);
     }
   };
 
@@ -245,7 +266,7 @@ export const AddProgrammeComponent = () => {
                   <Form.Item
                     wrapperCol={{ span: 13 }}
                     label="Programme Start Date"
-                    name="programmeStartDate"
+                    name="startTime"
                     rules={[
                       {
                         required: true,
@@ -257,7 +278,7 @@ export const AddProgrammeComponent = () => {
                   </Form.Item>
                   <Form.Item
                     label="GHGs Covered"
-                    name="ghgsCovered"
+                    name="greenHouseGasses"
                     rules={[
                       {
                         required: true,
@@ -265,7 +286,7 @@ export const AddProgrammeComponent = () => {
                       },
                     ]}
                   >
-                    <Select size="large">
+                    <Select size="large" mode="multiple" maxTagCount={2}>
                       <Select.Option value="CO2">
                         CO<sub>2</sub>
                       </Select.Option>
@@ -292,21 +313,21 @@ export const AddProgrammeComponent = () => {
                     valuePropName="fileList"
                     getValueFromEvent={normFile}
                     required={false}
-                    rules={[
-                      {
-                        validator: async (rule, file) => {
-                          if (file === null || file === undefined) {
-                            if (!state?.record?.logo)
-                              throw new Error(`Design Document ${t('isRequired')}`);
-                          } else {
-                            if (file.length === 0) {
-                              throw new Error(`Design Document ${t('isRequired')}`);
-                            } else {
-                            }
-                          }
-                        },
-                      },
-                    ]}
+                    // rules={[
+                    //   {
+                    //     validator: async (rule, file) => {
+                    //       if (file === null || file === undefined) {
+                    //         if (!state?.record?.logo)
+                    //           throw new Error(`Design Document ${t('isRequired')}`);
+                    //       } else {
+                    //         if (file.length === 0) {
+                    //           throw new Error(`Design Document ${t('isRequired')}`);
+                    //         } else {
+                    //         }
+                    //       }
+                    //     },
+                    //   },
+                    // ]}
                   >
                     <Upload
                       beforeUpload={(file) => {
@@ -393,12 +414,12 @@ export const AddProgrammeComponent = () => {
                                 {...restField}
                                 label="Ownership Percentage"
                                 className="ownership-percent"
-                                name={[name, 'ownership']}
+                                name={[name, 'proponentPercentage']}
                                 labelCol={{ span: 24 }}
                                 wrapperCol={{ span: 24 }}
                                 rules={[
                                   { required: true, message: 'Missing ownership percentage' },
-                                  { validator: validateOwnershipPercentage },
+                                  // { validator: validateOwnershipPercentage },
                                 ]}
                               >
                                 <InputNumber
@@ -435,7 +456,6 @@ export const AddProgrammeComponent = () => {
                 <div className="details-part-two">
                   <Form.Item
                     label="External ID"
-                    initialValue={state?.record?.taxId}
                     name="externalId"
                     rules={[
                       {
@@ -477,7 +497,7 @@ export const AddProgrammeComponent = () => {
                   <Form.Item
                     wrapperCol={{ span: 13 }}
                     label="Programme End Date"
-                    name="programmeEndDate"
+                    name="endTime"
                     rules={[
                       {
                         required: true,
@@ -501,12 +521,12 @@ export const AddProgrammeComponent = () => {
                   >
                     <Radio.Group size="large" onChange={onChangeNDCScope}>
                       <div className="condition-radio-container">
-                        <Radio.Button className="condition-radio" value="conditional">
+                        <Radio.Button className="condition-radio" value="true">
                           CONDITIONAL
                         </Radio.Button>
                       </div>
                       <div className="condition-radio-container">
-                        <Radio.Button className="condition-radio" value="unconditional">
+                        <Radio.Button className="condition-radio" value="false">
                           UNCONDITIONAL
                         </Radio.Button>
                       </div>
@@ -559,6 +579,7 @@ export const AddProgrammeComponent = () => {
                       size="small"
                       disabled={ndcScopeChanged}
                       defaultValue={ndcScopeChanged && 'inNDC'}
+                      onChange={onInCludedNDCChange}
                     >
                       <div className="yes-no-radio-container">
                         <Radio.Button className="yes-no-radio" value="inNDC">
@@ -592,7 +613,7 @@ export const AddProgrammeComponent = () => {
                     </div>
                   </Col>
                   <Col md={8} lg={6} xl={5} className="included-val">
-                    <Radio.Group size="small">
+                    <Radio.Group size="small" onChange={onInCludedNAPChange}>
                       <div className="yes-no-radio-container">
                         <Radio.Button className="yes-no-radio" value="inNAP">
                           {t('addProgramme:yes')}
@@ -639,7 +660,7 @@ export const AddProgrammeComponent = () => {
                 <div className="details-part-one">
                   <Form.Item
                     label="Estimated Programme Cost (USD)"
-                    name="estimatedProgrammeCost"
+                    name="estimatedProgrammeCostUSD"
                     rules={[
                       {
                         required: true,
@@ -673,7 +694,7 @@ export const AddProgrammeComponent = () => {
                 <div className="details-part-two">
                   <Form.Item
                     label="Estimated Credits"
-                    name="estimatedCredits"
+                    name="creditEst"
                     rules={[
                       {
                         required: true,
