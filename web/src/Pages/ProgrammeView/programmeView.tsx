@@ -25,6 +25,7 @@ import InfoView from '../../Components/InfoView/info.view';
 import * as Icon from 'react-bootstrap-icons';
 import {
   BulbOutlined,
+  CheckCircleOutlined,
   ClockCircleOutlined,
   ExperimentOutlined,
   QrcodeOutlined,
@@ -81,6 +82,7 @@ import { useSettingsContext } from '../../Context/SettingsContext/settingsContex
 import RoleIcon from '../../Components/RoleIcon/role.icon';
 import { CompanyState } from '../../Casl/enums/company.state.enum';
 import ProgrammeDocuments from '../../Components/Programme/programmeDocuments';
+import InvestmentBody from '../../Components/InvestmentBody/investmentBody';
 
 const ProgrammeView = () => {
   const { get, put, post } = useConnection();
@@ -303,429 +305,34 @@ const ProgrammeView = () => {
     return parts.join('');
   };
 
-  const getTxActivityLog = (transfers: ProgrammeTransfer[], txDetails: any) => {
-    const hist: any = {};
-    for (const transfer of transfers) {
-      txDetails[transfer.requestId!] = transfer;
-      const createdTime = Number(transfer.createdTime ? transfer.createdTime : transfer.txTime!);
-      let d: any;
-      if (!transfer.isRetirement) {
-        d = {
-          status: 'process',
-          title: t('view:tlInitTitle'),
-          subTitle: DateTime.fromMillis(createdTime).toFormat(dateTimeFormat),
-          description: (
-            <TimelineBody
-              text={formatString('view:tlInitDesc', [
-                addCommSep(transfer.creditAmount),
-                creditUnit,
-                transfer.sender[0]?.name,
-                transfer.receiver[0]?.name,
-                transfer.requester[0]?.name,
-              ])}
-              remark={transfer.comment}
-              via={transfer.userName}
-            />
-          ),
-          icon: (
-            <span className="step-icon transfer-step">
-              <Icon.ClockHistory />
-            </span>
-          ),
-        };
-      } else {
-        d = {
-          status: 'process',
-          title: t('view:tlRetInit'),
-          subTitle: DateTime.fromMillis(createdTime).toFormat(dateTimeFormat),
-          description: (
-            <TimelineBody
-              text={formatString('view:tlRetInitDesc', [
-                addCommSep(transfer.creditAmount),
-                creditUnit,
-                transfer.sender[0]?.name,
-                `${
-                  transfer.toCompanyMeta?.countryName
-                    ? `to ${transfer.toCompanyMeta?.countryName} `
-                    : ''
-                }`,
-                transfer.retirementType === RetireType.CROSS_BORDER
-                  ? 'cross border transfer'
-                  : transfer.retirementType === RetireType.LEGAL_ACTION
-                  ? 'legal action'
-                  : 'other',
-                transfer.requester[0]?.name,
-              ])}
-              remark={transfer.comment}
-              via={transfer.userName}
-            />
-          ),
-          icon: (
-            <span className="step-icon retire-step">
-              <Icon.ClockHistory />
-            </span>
-          ),
-        };
-      }
-
-      addElement(d, createdTime, hist);
-
-      if (
-        transfer.status === CreditTransferStage.Rejected ||
-        transfer.status === CreditTransferStage.NotRecognised
-      ) {
-        const dx: any = {
-          status: 'process',
-          title: t(transfer.isRetirement ? 'view:tlRetRejectTitle' : 'view:tlRejectTitle'),
-          subTitle: DateTime.fromMillis(Number(transfer.txTime!)).toFormat(dateTimeFormat),
-          description: (
-            <TimelineBody
-              text={formatString(
-                transfer.isRetirement ? 'view:tlTxRetRejectDesc' : 'view:tlTxRejectDesc',
-                [
-                  addCommSep(transfer.creditAmount),
-                  creditUnit,
-                  transfer.sender[0]?.name,
-                  transfer.isRetirement && transfer.toCompanyMeta?.countryName
-                    ? transfer.toCompanyMeta?.countryName
-                    : transfer.receiver[0]?.name,
-                  transfer.isRetirement ? transfer.receiver[0]?.name : transfer.sender[0]?.name,
-                ]
-              )}
-              remark={transfer.txRef?.split('#')[0]}
-              via={transfer.userName}
-            />
-          ),
-          icon: (
-            <span
-              className={`step-icon ${transfer.isRetirement ? 'retire-step' : 'transfer-step'}`}
-            >
-              <Icon.XOctagon />
-            </span>
-          ),
-        };
-        addElement(dx, Number(transfer.txTime!), hist);
-      } else if (transfer.status === CreditTransferStage.Cancelled) {
-        const systemCancel = transfer.txRef && transfer.txRef.indexOf('#SUSPEND_AUTO_CANCEL#') >= 0;
-        const lowCreditSystemCancel =
-          transfer.txRef && transfer.txRef.indexOf('#LOW_CREDIT_AUTO_CANCEL#') >= 0;
-
-        const dx: any = {
-          status: 'process',
-          title: t(transfer.isRetirement ? 'view:tlRetCancelTitle' : 'view:tlTxCancelTitle'),
-          subTitle: DateTime.fromMillis(Number(transfer.txTime!)).toFormat(dateTimeFormat),
-          description: (
-            <TimelineBody
-              text={formatString(
-                systemCancel
-                  ? 'view:tlTxCancelSystemDesc'
-                  : lowCreditSystemCancel
-                  ? 'view:tlTxLowCreditCancelSystemDesc'
-                  : 'view:tlTxCancelDesc',
-                [
-                  addCommSep(transfer.creditAmount),
-                  creditUnit,
-                  transfer.sender[0]?.name,
-                  transfer.isRetirement && transfer.toCompanyMeta?.countryName
-                    ? transfer.toCompanyMeta.countryName
-                    : transfer.receiver[0]?.name,
-                  systemCancel
-                    ? transfer.txRef?.split('#')[4]
-                    : lowCreditSystemCancel
-                    ? ''
-                    : transfer.requester[0]?.name,
-                  transfer.txRef?.split('#')[5],
-                ]
-              )}
-              remark={transfer.txRef?.split('#')[0]}
-              via={transfer.userName}
-            />
-          ),
-          icon: (
-            <span
-              className={`step-icon ${transfer.isRetirement ? 'retire-step' : 'transfer-step'}`}
-            >
-              <Icon.ExclamationOctagon />
-            </span>
-          ),
-        };
-        addElement(dx, Number(transfer.txTime!), hist);
-      }
-    }
-    return hist;
-  };
-
-  const getProgrammeHistory = async (programmeId: string) => {
+  const getInvestmentHistory = async (programmeId: string) => {
     setLoadingHistory(true);
     try {
-      const historyPromise = get(`national/programme/getHistory?programmeId=${programmeId}`);
-      const transferPromise = get(
-        `national/programme/transfersByProgrammeId?programmeId=${programmeId}`
-      );
-
-      const [response, transfers] = await Promise.all([historyPromise, transferPromise]);
-
-      const txDetails: any = {};
-      const txList = await getTxActivityLog(transfers.data, txDetails);
-      let txListKeys = Object.keys(txList).sort();
-      const certifiedTime: any = {};
-      const activityList: any[] = [];
-      for (const activity of response.data) {
-        let el = undefined;
-        if (activity.data.txType === TxType.CREATE) {
-          el = {
-            status: 'process',
-            title: t('view:tlCreate'),
-            subTitle: DateTime.fromMillis(activity.data.txTime).toFormat(dateTimeFormat),
-            description: (
-              <TimelineBody
-                text={formatString('view:tlCreateDesc', [
-                  addCommSep(activity.data.creditEst),
-                  creditUnit,
-                ])}
-              />
-            ),
-            icon: (
-              <span className="step-icon created-step">
-                <Icon.CaretRight />
-              </span>
-            ),
-          };
-        } else if (activity.data.txType === TxType.AUTH) {
-          el = {
-            status: 'process',
-            title: t('view:tlAuth'),
-            subTitle: DateTime.fromMillis(activity.data.txTime).toFormat(dateTimeFormat),
-            description: (
-              <TimelineBody
-                text={formatString('view:tlAuthDesc', [
-                  addCommSep(activity.data.creditEst),
-                  creditUnit,
-                  DateTime.fromMillis(activity.data.endTime * 1000).toFormat(dateFormat),
-                  activity.data.serialNo,
-                  getTxRefValues(activity.data.txRef, 1),
-                ])}
-                remark={getTxRefValues(activity.data.txRef, 3)}
-                via={activity.data.userName}
-              />
-            ),
-            icon: (
-              <span className="step-icon auth-step">
-                <Icon.ClipboardCheck />
-              </span>
-            ),
-          };
-        } else if (activity.data.txType === TxType.ISSUE) {
-          el = {
-            status: 'process',
-            title: t('view:tlIssue'),
-            subTitle: DateTime.fromMillis(activity.data.txTime).toFormat(dateTimeFormat),
-            description: (
-              <TimelineBody
-                text={formatString('view:tlIssueDesc', [
-                  addCommSep(activity.data.creditChange),
-                  creditUnit,
-                  getTxRefValues(activity.data.txRef, 1),
-                ])}
-                remark={getTxRefValues(activity.data.txRef, 3)}
-                via={activity.data.userName}
-              />
-            ),
-            icon: (
-              <span className="step-icon issue-step">
-                <Icon.Award />
-              </span>
-            ),
-          };
-        } else if (activity.data.txType === TxType.REJECT) {
-          el = {
-            status: 'process',
-            title: t('view:tlReject'),
-            subTitle: DateTime.fromMillis(activity.data.txTime).toFormat(dateTimeFormat),
-            description: (
-              <TimelineBody
-                text={formatString('view:tlRejectDesc', [getTxRefValues(activity.data.txRef, 1)])}
-                remark={getTxRefValues(activity.data.txRef, 3)}
-                via={activity.data.userName}
-              />
-            ),
-            icon: (
-              <span className="step-icon reject-step">
-                <Icon.XOctagon />
-              </span>
-            ),
-          };
-        } else if (activity.data.txType === TxType.TRANSFER) {
-          el = {
-            status: 'process',
-            title: t('view:tlTransfer'),
-            subTitle: DateTime.fromMillis(activity.data.txTime).toFormat(dateTimeFormat),
-            description: (
-              <TimelineBody
-                text={formatString('view:tlTransferDesc', [
-                  addCommSep(activity.data.creditChange),
-                  creditUnit,
-                  getTxRefValues(activity.data.txRef, 6),
-                  getTxRefValues(activity.data.txRef, 4),
-                  getTxRefValues(activity.data.txRef, 1),
-                ])}
-                remark={getTxRefValues(activity.data.txRef, 9)}
-                via={activity.data.userName}
-              />
-            ),
-            icon: (
-              <span className="step-icon transfer-step">
-                <Icon.BoxArrowRight />
-              </span>
-            ),
-          };
-        } else if (activity.data.txType === TxType.REVOKE) {
-          const type = getTxRefValues(activity.data.txRef, 4);
-          let revokeComp = undefined;
-          if (type === 'SUSPEND_REVOKE') {
-            revokeComp = getTxRefValues(activity.data.txRef, 5);
-          }
-          el = {
-            status: 'process',
-            title: t('view:tlRevoke'),
-            subTitle: DateTime.fromMillis(activity.data.txTime).toFormat(dateTimeFormat),
-            description: (
-              <TimelineBody
-                text={formatString('view:tlRevokeDesc', [
-                  revokeComp !== undefined ? `due to the deactivation of ${revokeComp}` : '',
-                  getTxRefValues(activity.data.txRef, 1),
-                ])}
-                remark={getTxRefValues(activity.data.txRef, 3)}
-                via={activity.data.userName}
-              />
-            ),
-            icon: (
-              <span className="step-icon revoke-step">
-                <Icon.ShieldExclamation />
-              </span>
-            ),
-          };
-        } else if (activity.data.txType === TxType.CERTIFY) {
-          el = {
-            status: 'process',
-            title: t('view:tlCertify'),
-            subTitle: DateTime.fromMillis(activity.data.txTime).toFormat(dateTimeFormat),
-            description: (
-              <TimelineBody
-                text={formatString('view:tlCertifyDesc', [getTxRefValues(activity.data.txRef, 1)])}
-                remark={getTxRefValues(activity.data.txRef, 3)}
-                via={activity.data.userName}
-              />
-            ),
-            icon: (
-              <span className="step-icon cert-step">
-                <Icon.ShieldCheck />
-              </span>
-            ),
-          };
-          const cid = getTxRefValues(activity.data.txRef, 2);
-          if (cid) {
-            certifiedTime[cid] = DateTime.fromMillis(activity.data.txTime).toFormat('dd LLLL yyyy');
-          }
-        } else if (activity.data.txType === TxType.RETIRE) {
-          const reqID = getTxRefValues(activity.data.txRef, 7);
-          const tx = reqID ? txDetails[reqID!] : undefined;
-          const crossCountry = tx ? tx.toCompanyMeta?.countryName : undefined;
-          el = {
-            status: 'process',
-            title: t('view:tlRetire'),
-            subTitle: DateTime.fromMillis(activity.data.txTime).toFormat(dateTimeFormat),
-            description: (
-              <TimelineBody
-                text={formatString('view:tlRetireDesc', [
-                  addCommSep(activity.data.creditChange),
-                  creditUnit,
-                  getTxRefValues(activity.data.txRef, 6),
-                  `${crossCountry ? 'to ' + crossCountry : ''} `,
-                  getRetirementTypeString(tx?.retirementType)?.toLowerCase(),
-                  getTxRefValues(activity.data.txRef, 1),
-                ])}
-                remark={getTxRefValues(activity.data.txRef, 9)}
-                via={activity.data.userName}
-              />
-            ),
-            icon: (
-              <span className="step-icon retire-step">
-                <Icon.Save />
-              </span>
-            ),
-          };
-        } else if (activity.data.txType === TxType.FREEZE) {
-          el = {
-            status: 'process',
-            title: t('view:tlFrozen'),
-            subTitle: DateTime.fromMillis(activity.data.txTime).toFormat(dateTimeFormat),
-            description: (
-              <TimelineBody
-                text={formatString('view:tlFrozenDesc', [
-                  addCommSep(activity.data.creditChange),
-                  creditUnit,
-                  getTxRefValues(activity.data.txRef, 4),
-                  getTxRefValues(activity.data.txRef, 1),
-                ])}
-                remark={getTxRefValues(activity.data.txRef, 3)}
-                via={activity.data.userName}
-              />
-            ),
-            icon: (
-              <span className="step-icon freeze-step">
-                <Icon.Stopwatch />
-              </span>
-            ),
-          };
-        } else if (activity.data.txType === TxType.UNFREEZE) {
-          el = {
-            status: 'process',
-            title: t('view:tlUnFrozen'),
-            subTitle: DateTime.fromMillis(activity.data.txTime).toFormat(dateTimeFormat),
-            description: (
-              <TimelineBody
-                text={formatString('view:tlUnFrozenDesc', [
-                  addCommSep(activity.data.creditChange),
-                  creditUnit,
-                  getTxRefValues(activity.data.txRef, 4),
-                  getTxRefValues(activity.data.txRef, 1),
-                ])}
-                remark={getTxRefValues(activity.data.txRef, 3)}
-                via={activity.data.userName}
-              />
-            ),
-            icon: (
-              <span className="step-icon freeze-step">
-                <Icon.ArrowCounterclockwise />
-              </span>
-            ),
-          };
-        }
-        if (el) {
-          const toDelete = [];
-          for (const txT of txListKeys) {
-            if (Number(activity.data.txTime) > Number(txT)) {
-              activityList.unshift(...txList[txT]);
-              toDelete.push(txT);
-            } else {
-              break;
+      const TEMP_DATA = {
+        invester: 'National Development Bank',
+        amount: '500000',
+        time: '1686797789',
+      };
+      const el = {
+        status: 'process',
+        title: t('view:investment') + ' ' + '001',
+        subTitle: '',
+        description: (
+          <InvestmentBody
+            data={TEMP_DATA}
+            progressIcon={
+              <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
             }
-          }
-          toDelete.forEach((e) => delete txList[e]);
-          txListKeys = Object.keys(txList).sort();
-          activityList.unshift(el);
-        }
-      }
-
-      for (const txT of txListKeys) {
-        activityList.unshift(...txList[txT]);
-      }
-
-      setHistoryData(activityList);
-      setLoadingHistory(false);
-      setCertTimes(certifiedTime);
-      genCerts(state.record, certifiedTime);
+          />
+        ),
+        icon: (
+          <span className="step-icon freeze-step">
+            <Icon.Circle />
+          </span>
+        ),
+      };
+      const arEl = [el, el, el];
+      setHistoryData(arEl);
     } catch (error: any) {
       console.log('Error in getting programme', error);
       message.open({
@@ -735,8 +342,9 @@ const ProgrammeView = () => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
       setLoadingHistory(false);
+    } finally {
+      setLoadingHistory(false);
     }
-    return null;
   };
 
   const updateProgrammeData = (response: any) => {
@@ -791,7 +399,7 @@ const ProgrammeView = () => {
       } else {
         error = response.message;
       }
-      await getProgrammeHistory(data?.programmeId as string);
+      // await getProgrammeHistory(data?.programmeId as string);
       return error;
     } catch (e: any) {
       error = e.message;
@@ -879,7 +487,7 @@ const ProgrammeView = () => {
           error = response.message;
         }
 
-        await getProgrammeHistory(data?.programmeId as string);
+        // await getProgrammeHistory(data?.programmeId as string);
 
         setConfirmLoading(false);
         return error;
@@ -936,7 +544,7 @@ const ProgrammeView = () => {
 
   useEffect(() => {
     if (data) {
-      getProgrammeHistory(data.programmeId);
+      getInvestmentHistory(data.programmeId);
       drawMap();
       for (const company of data.company) {
         if (
@@ -1385,7 +993,7 @@ const ProgrammeView = () => {
               <div className="info-view">
                 <div className="title">
                   <span className="title-icon">{<ClockCircleOutlined />}</span>
-                  <span className="title-text">{t('view:investments')}</span>
+                  <span className="title-text">{t('view:investment')}</span>
                 </div>
                 <div className="content">
                   {loadingHistory ? (
