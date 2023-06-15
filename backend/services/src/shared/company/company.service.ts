@@ -256,7 +256,7 @@ export class CompanyService {
   async queryNames(query: QueryDto, abilityCondition: string): Promise<any> {
     const resp = await this.companyRepo
       .createQueryBuilder()
-      .select(['"companyId"', '"name"', '"state"'])
+      .select(['"companyId"', '"name"', '"state"', '"taxId"'])
       .where(
         this.helperService.generateWhereSQL(
           query,

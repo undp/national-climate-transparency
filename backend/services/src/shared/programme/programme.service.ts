@@ -128,8 +128,10 @@ export class ProgrammeService {
   }
 
   async uploadDocument(type: DocType, id: string, data: string) {
+
+    const filetype = type == DocType.METHODOLOGY_DOCUMENT ? 'xlsx' : 'pdf' 
     const response: any = await this.fileHandler.uploadFile(
-      `documents/${type}_${id}_${new Date().getTime()}.png`,
+      `documents/${this.helperService.enumToString(DocType, type)}${id ? '_' + id : ''}.${filetype}`,
       data
     );
     if (response) {
@@ -276,7 +278,7 @@ export class ProgrammeService {
     }
 
     if (programmeDto.designDocument) {
-      programmeDto.designDocument = await this.uploadDocument(DocType.DESIGN_DOCUMENT, programme.programmeId, programmeDto.designDocument);
+      programmeDto.designDocument = await this.uploadDocument(DocType.DESIGN_DOCUMENT, undefined, programmeDto.designDocument);
     }
 
     let ndcAc: NDCAction = undefined;
@@ -302,17 +304,19 @@ export class ProgrammeService {
           if (programmeDto.ndcAction.monitoringReport) {
             const dr = new ProgrammeDocument();
             dr.programmeId = programme.programmeId;
+            dr.externalId = programme.externalId;
             dr.actionId = ndcAc.id;
             dr.status = DocumentStatus.PENDING;
             dr.type = DocType.MONITORING_REPORT;
             dr.txTime = new Date().getTime();
-            dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, programme.programmeId, programmeDto.ndcAction.monitoringReport);
+            dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, ndcAc.id, programmeDto.ndcAction.monitoringReport);
             const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
           }
         }
         if (programmeDto.designDocument) {
           const dr = new ProgrammeDocument();
           dr.programmeId = programme.programmeId;
+          dr.externalId = programme.externalId;
           dr.status = DocumentStatus.PENDING;
           dr.type = DocType.DESIGN_DOCUMENT;
           dr.txTime = new Date().getTime();
@@ -425,9 +429,9 @@ export class ProgrammeService {
         {
           actionType: AsyncActionType.DocumentUpload,
           actionProps: {
-            type: d.type,
+            type: this.helperService.enumToString(DocType, d.type),
             data: d.url,
-            programmeId: d.programmeId,
+            externalId: d.externalId,
             actionId: d.actionId
           },
         }
@@ -506,9 +510,10 @@ export class ProgrammeService {
       where: whr,
     });
 
-    const url = await this.uploadDocument(documentDto.type, programme.programmeId, documentDto.data);
+    const url = await this.uploadDocument(documentDto.type, documentDto.actionId, documentDto.data);
     const dr = new ProgrammeDocument();
     dr.programmeId = programme.programmeId;
+    dr.externalId = programme.externalId;
     dr.status = DocumentStatus.PENDING;
     dr.type = documentDto.type;
     dr.txTime = new Date().getTime();
@@ -584,6 +589,7 @@ export class ProgrammeService {
         if (ndcActionDto.monitoringReport) {
           const dr = new ProgrammeDocument();
           dr.programmeId = program.programmeId;
+          dr.externalId = program.externalId;
           dr.actionId = ndcAction.id;
           dr.status = DocumentStatus.PENDING;
           dr.type = DocType.MONITORING_REPORT;

@@ -28,7 +28,8 @@ export class ProgrammeController {
     @UseGuards(JwtAuthGuard, PoliciesGuard)
     @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
     @Post('create')
-    async addProgramme(@Body()programme: ProgrammeDto) {
+    async addProgramme(@Body()programme: ProgrammeDto, @Request() req) {
+      global.baseUrl = `${req.protocol}://${req.get("Host")}`;
       return this.programmeService.create(programme)
     }
 
@@ -36,7 +37,8 @@ export class ProgrammeController {
     @UseGuards(JwtAuthGuard, PoliciesGuard)
     @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
     @Post('addNDCAction')
-    async addNDCAction(@Body()ndcAction: NDCActionDto) {
+    async addNDCAction(@Body()ndcAction: NDCActionDto, @Request() req) {
+      global.baseUrl = `${req.protocol}://${req.get("Host")}`;
       return this.programmeService.addNDCAction(ndcAction)
     }
 
@@ -44,7 +46,8 @@ export class ProgrammeController {
     @UseGuards(JwtAuthGuard, PoliciesGuard)
     @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
     @Post('addDocument')
-    async addDocument(@Body()docDto: ProgrammeDocumentDto) {
+    async addDocument(@Body()docDto: ProgrammeDocumentDto, @Request() req) {
+      global.baseUrl = `${req.protocol}://${req.get("Host")}`;
       return this.programmeService.addDocument(docDto)
     }
 
