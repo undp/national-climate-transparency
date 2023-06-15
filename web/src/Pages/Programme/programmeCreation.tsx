@@ -29,6 +29,7 @@ import { SectoralScope } from '../../Casl/enums/sectoral.scope.enum';
 import { GHGSCoveredValues } from '../../Casl/enums/ghgs.covered.values.enum';
 import { GeoGraphicalLocations } from '../../Casl/enums/geolocations.enum';
 import { InfoCircle } from 'react-bootstrap-icons';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 
 type SizeType = Parameters<typeof Form>[0]['size'];
 
@@ -38,8 +39,11 @@ export const AddProgrammeComponent = () => {
   const [formTwo] = Form.useForm();
   const [formChecks] = Form.useForm();
   const { put, get, post } = useConnection();
+  const { userInfoState } = useUserContext();
   const { t } = useTranslation(['common', 'addProgramme']);
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingList, setLoadingList] = useState<boolean>(false);
+  const [ndcScopeChanged, setNdcScopeChanged] = useState<boolean>(false);
   const [contactNoInput] = useState<any>();
   const [stepOneData, setStepOneData] = useState<any>();
   const [stepTwoData, setStepTwoData] = useState<any>();
@@ -47,22 +51,46 @@ export const AddProgrammeComponent = () => {
   const [current, setCurrent] = useState<number>(0);
   const [isUpdate, setIsUpdate] = useState(false);
   const [countries, setCountries] = useState<[]>([]);
-  const initialOrganisationOwnershipValues = [
-    {
-      organisation: undefined,
-      ownership: undefined,
-    },
-  ];
+  const [organisationsList, setOrganisationList] = useState<any[]>([]);
 
   const getCountryList = async () => {
-    const response = await get('national/organisation/countries');
-    if (response.data) {
-      const alpha2Names = response.data.map((item: any) => {
-        return item.alpha2;
-      });
-      setCountries(alpha2Names);
+    setLoadingList(true);
+    try {
+      const response = await get('national/organisation/countries');
+      if (response.data) {
+        const alpha2Names = response.data.map((item: any) => {
+          return item.alpha2;
+        });
+        console.log('countries ------- > ');
+        console.log(alpha2Names);
+        console.log(response.data);
+        setCountries(response.data);
+      }
+    } catch (error: any) {
+      console.log('Error in getting country list', error);
+    } finally {
+      setLoadingList(false);
     }
   };
+
+  const getOrganisationsDetails = async () => {
+    setLoadingList(true);
+    try {
+      const response = await post('national/organisation/queryNames', { page: 1, size: 100 });
+      if (response.data) {
+        setOrganisationList(response?.data);
+      }
+    } catch (error: any) {
+      console.log('Error in getting organisation list', error);
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
+  useEffect(() => {
+    getOrganisationsDetails();
+    getCountryList();
+  }, []);
 
   const normFile = (e: any) => {
     if (Array.isArray(e)) {
@@ -125,6 +153,19 @@ export const AddProgrammeComponent = () => {
   // };
 
   const onCancel = () => {};
+
+  const initialOrganisationOwnershipValues: any[] = [
+    {
+      organisation: userInfoState?.companyName,
+      ownership: 100,
+    },
+  ];
+
+  const onChangeNDCScope = (event: any) => {
+    if (event?.target) {
+      setNdcScopeChanged(true);
+    }
+  };
 
   const ProgrammeDetailsForm = () => {
     const companyRole = state?.record?.companyRole;
@@ -218,10 +259,10 @@ export const AddProgrammeComponent = () => {
                       <Select.Option value="N2O">
                         N<sub>2</sub>O
                       </Select.Option>
-                      <Select.Option value="HFC5">
+                      <Select.Option value="HFCs">
                         HFC<sub>s</sub>
                       </Select.Option>
-                      <Select.Option value="PFC5">
+                      <Select.Option value="PFCs">
                         PFC<sub>s</sub>
                       </Select.Option>
                       <Select.Option value="SF6">
@@ -290,7 +331,13 @@ export const AddProgrammeComponent = () => {
                       },
                     ]}
                   >
-                    <Input size="large" />
+                    <Select size="large" loading={loadingList}>
+                      {countries.map((country: any) => (
+                        <Select.Option key={country.alpha2} value={country.alpha2}>
+                          {country.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
                   </Form.Item>
                   <Form.List
                     name="ownershipPercentage"
@@ -298,53 +345,61 @@ export const AddProgrammeComponent = () => {
                   >
                     {(fields, { add, remove }) => (
                       <div className="space-container" style={{ width: '100%' }}>
-                        {fields.map(({ key, name, ...restField }) => (
-                          <Space
-                            wrap={true}
-                            key={key}
-                            style={{ display: 'flex', marginBottom: 8 }}
-                            align="center"
-                            size={'large'}
-                          >
-                            <Form.Item
-                              {...restField}
-                              label="Organisation"
-                              name={[name, 'organisation']}
-                              wrapperCol={{ span: 24 }}
-                              className="organisation"
-                              rules={[{ required: true, message: 'Missing first name' }]}
+                        {fields.map(({ key, name, ...restField }) => {
+                          return (
+                            <Space
+                              wrap={true}
+                              key={key}
+                              style={{ display: 'flex', marginBottom: 8 }}
+                              align="center"
+                              size={'large'}
                             >
-                              <Select size="large">
-                                {Object.values(Sector).map((sector: any) => (
-                                  <Select.Option value={sector}>{sector}</Select.Option>
-                                ))}
-                              </Select>
-                            </Form.Item>
-                            <Form.Item
-                              {...restField}
-                              label="Ownership Percentage"
-                              className="ownership-percent"
-                              name={[name, 'ownership']}
-                              labelCol={{ span: 24 }}
-                              wrapperCol={{ span: 24 }}
-                              rules={[{ required: true, message: 'Missing last name' }]}
-                            >
-                              <InputNumber
-                                size="large"
-                                min={0}
-                                max={100}
-                                formatter={(value: any) => `${value}%`}
-                                parser={(value: any) => value!.replace('%', '')}
-                              />
-                            </Form.Item>
-                            {fields.length > 1 ? (
+                              <Form.Item
+                                {...restField}
+                                label="Organisation"
+                                name={[name, 'organisation']}
+                                wrapperCol={{ span: 24 }}
+                                className="organisation"
+                                rules={[{ required: true, message: 'Missing organization' }]}
+                              >
+                                <Select size="large" loading={loadingList} disabled={name === 0}>
+                                  {organisationsList.map((organisation) => (
+                                    <Select.Option
+                                      key={organisation.companyId}
+                                      value={organisation.companyId}
+                                    >
+                                      {organisation.name}
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                label="Ownership Percentage"
+                                className="ownership-percent"
+                                name={[name, 'ownership']}
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                rules={[
+                                  { required: true, message: 'Missing ownership percentage' },
+                                ]}
+                              >
+                                <InputNumber
+                                  size="large"
+                                  min={0}
+                                  max={100}
+                                  formatter={(value) => `${value}%`}
+                                  parser={(value: any) => value.replace('%', '')}
+                                  disabled={fields?.length < 2}
+                                />
+                              </Form.Item>
                               <MinusCircleOutlined
                                 className="dynamic-delete-button"
                                 onClick={() => remove(name)}
                               />
-                            ) : null}
-                          </Space>
-                        ))}
+                            </Space>
+                          );
+                        })}
                         <Form.Item>
                           <Button
                             type="dashed"
@@ -425,7 +480,7 @@ export const AddProgrammeComponent = () => {
                       },
                     ]}
                   >
-                    <Radio.Group size="large">
+                    <Radio.Group size="large" onChange={onChangeNDCScope}>
                       <div className="condition-radio-container">
                         <Radio.Button className="condition-radio" value="conditional">
                           CONDITIONAL
@@ -476,7 +531,11 @@ export const AddProgrammeComponent = () => {
                     </div>
                   </Col>
                   <Col md={8} lg={6} xl={5} className="included-val">
-                    <Radio.Group size="small">
+                    <Radio.Group
+                      size="small"
+                      disabled={ndcScopeChanged}
+                      defaultValue={ndcScopeChanged && 'inNDC'}
+                    >
                       <div className="yes-no-radio-container">
                         <Radio.Button className="yes-no-radio" value="inNDC">
                           {t('addProgramme:yes')}
@@ -638,6 +697,10 @@ export const AddProgrammeComponent = () => {
       </div>
     );
   };
+
+  useEffect(() => {
+    getOrganisationsDetails();
+  }, []);
 
   return (
     <div className="add-programme-main-container">
