@@ -11,7 +11,7 @@
   "inNAPToolTip": "National Adaptation Plan (NAP)",
   "yes": "YES",
   "no": "NO",
-  "proponentPercentValidation": "Summation of Proponent Percentage should be 100",
+  "proponentPercentValidation": "Total Organisation Percentage is invalid",
   "programmeCreationSuccess": "The programme has been created successfully",
   "title": "Title",
   "externalId": "External Id",
@@ -34,5 +34,6 @@
   "addAction": "ADD ACTION",
   "back": "BACK",
   "conditional": "CONDITIONAL",
-  "unConditional": "UNCONDITIONAL"
+  "unConditional": "UNCONDITIONAL",
+  "endTimeVal": "End date cannot be earlier than the start date"
 }
