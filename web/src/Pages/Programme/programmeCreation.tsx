@@ -313,7 +313,24 @@ export const AddProgrammeComponent = () => {
                     rules={[
                       {
                         required: true,
-                        message: `${t('addProgramme:startTime')} ${t('isRequired')}`,
+                        message: '',
+                      },
+                      {
+                        validator: async (rule, value) => {
+                          if (
+                            String(value).trim() === '' ||
+                            String(value).trim() === undefined ||
+                            value === null ||
+                            value === undefined
+                          ) {
+                            throw new Error(`${t('addProgramme:startTime')} ${t('isRequired')}`);
+                          } else {
+                            const endTime = formOne.getFieldValue('endTime');
+                            if (endTime && value >= endTime) {
+                              throw new Error(`${t('addProgramme:endTimeVal')}`);
+                            }
+                          }
+                        },
                       },
                     ]}
                   >
@@ -561,7 +578,24 @@ export const AddProgrammeComponent = () => {
                     rules={[
                       {
                         required: true,
-                        message: `${t('addProgramme:endTime')} ${t('isRequired')}`,
+                        message: '',
+                      },
+                      {
+                        validator: async (rule, value) => {
+                          if (
+                            String(value).trim() === '' ||
+                            String(value).trim() === undefined ||
+                            value === null ||
+                            value === undefined
+                          ) {
+                            throw new Error(`${t('addProgramme:endTime')} ${t('isRequired')}`);
+                          } else {
+                            const startTime = formOne.getFieldValue('startTime');
+                            if (startTime && value <= startTime) {
+                              throw new Error(`${t('addProgramme:endTimeVal')}`);
+                            }
+                          }
+                        },
                       },
                     ]}
                   >
@@ -747,6 +781,12 @@ export const AddProgrammeComponent = () => {
                             throw new Error(
                               `${t('addProgramme:estimatedProgrammeCostUSD')} ${t('isRequired')}`
                             );
+                          } else if (!isNaN(value) && Number(value) > 0) {
+                            return Promise.resolve();
+                          } else {
+                            throw new Error(
+                              `${t('addProgramme:estimatedProgrammeCostUSD')} ${t('isInvalid')}`
+                            );
                           }
                         },
                       },
@@ -781,6 +821,10 @@ export const AddProgrammeComponent = () => {
                             value === undefined
                           ) {
                             throw new Error(`${t('addProgramme:creditEst')} ${t('isRequired')}`);
+                          } else if (!isNaN(value) && Number(value) > 0) {
+                            return Promise.resolve();
+                          } else {
+                            throw new Error(`${t('addProgramme:creditEst')} ${t('isInvalid')}`);
                           }
                         },
                       },
