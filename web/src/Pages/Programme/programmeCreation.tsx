@@ -18,15 +18,11 @@ import {
 import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import './programmeCreation.scss';
 import '../../Styles/app.scss';
-import { RcFile, UploadFile } from 'antd/lib/upload';
-import validator from 'validator';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { Sector } from '../../Casl/enums/sector.enum';
 import { SectoralScope } from '../../Casl/enums/sectoral.scope.enum';
-import { GHGSCoveredValues } from '../../Casl/enums/ghgs.covered.values.enum';
-import { GeoGraphicalLocations } from '../../Casl/enums/geolocations.enum';
 import { InfoCircle } from 'react-bootstrap-icons';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import moment from 'moment';
@@ -227,17 +223,6 @@ export const AddProgrammeComponent = () => {
     }
   };
 
-  // const validateOwnershipPercentage = (_: any, value: any, callback: any) => {
-  //   const ownershipData = formOne.getFieldValue('proponentPercentage');
-  //   const totalOwnership = ownershipData.reduce((sum: any, field: any) => sum + field.ownership, 0);
-
-  //   if (totalOwnership !== 100) {
-  //     callback('The total ownership percentage must be 100.');
-  //   } else {
-  //     callback();
-  //   }
-  // };
-
   const onChangeGeoLocation = (values: any[]) => {
     if (values.includes('National')) {
       const buyerCountryValues = regionsList;
@@ -281,7 +266,7 @@ export const AddProgrammeComponent = () => {
               <Col xl={12} md={24}>
                 <div className="details-part-one">
                   <Form.Item
-                    label="Title"
+                    label={t('addProgramme:title')}
                     name="title"
                     initialValue={state?.record?.name}
                     rules={[
@@ -297,7 +282,7 @@ export const AddProgrammeComponent = () => {
                             value === null ||
                             value === undefined
                           ) {
-                            throw new Error(`Title ${t('isRequired')}`);
+                            throw new Error(`${t('addProgramme:title')} ${t('isRequired')}`);
                           }
                         },
                       },
@@ -306,12 +291,12 @@ export const AddProgrammeComponent = () => {
                     <Input size="large" />
                   </Form.Item>
                   <Form.Item
-                    label="Sector"
+                    label={t('addProgramme:sector')}
                     name="sector"
                     rules={[
                       {
                         required: true,
-                        message: `Sector ${t('isRequired')}`,
+                        message: `${t('addProgramme:sector')} ${t('isRequired')}`,
                       },
                     ]}
                   >
@@ -323,12 +308,12 @@ export const AddProgrammeComponent = () => {
                   </Form.Item>
                   <Form.Item
                     wrapperCol={{ span: 13 }}
-                    label="Programme Start Date"
+                    label={t('addProgramme:startTime')}
                     name="startTime"
                     rules={[
                       {
                         required: true,
-                        message: `Programme Start Date ${t('isRequired')}`,
+                        message: `${t('addProgramme:startTime')} ${t('isRequired')}`,
                       },
                     ]}
                   >
@@ -338,12 +323,12 @@ export const AddProgrammeComponent = () => {
                     />
                   </Form.Item>
                   <Form.Item
-                    label="GHGs Covered"
+                    label={t('addProgramme:ghgCovered')}
                     name="greenHouseGasses"
                     rules={[
                       {
                         required: true,
-                        message: `GHGs Covered ${t('isRequired')}`,
+                        message: `${t('addProgramme:ghgCovered')} ${t('isRequired')}`,
                       },
                     ]}
                   >
@@ -369,8 +354,8 @@ export const AddProgrammeComponent = () => {
                     </Select>
                   </Form.Item>
                   <Form.Item
+                    label={t('addProgramme:designDoc')}
                     name="designDocument"
-                    label="Design Document"
                     valuePropName="fileList"
                     getValueFromEvent={normFile}
                     required={false}
@@ -408,7 +393,7 @@ export const AddProgrammeComponent = () => {
                     </Upload>
                   </Form.Item>
                   <Form.Item
-                    label="Buyer Country Eligibility"
+                    label={t('addProgramme:buyerCountryEligibility')}
                     name="buyerCountryEligibility"
                     initialValue={state?.record?.name}
                     rules={[
@@ -423,7 +408,9 @@ export const AddProgrammeComponent = () => {
                             value === null ||
                             value === undefined
                           ) {
-                            throw new Error(`Buyer Country Eligibility ${t('isRequired')}`);
+                            throw new Error(
+                              `${t('addProgramme:buyerCountryEligibility')} ${t('isRequired')}`
+                            );
                           }
                         },
                       },
@@ -454,11 +441,16 @@ export const AddProgrammeComponent = () => {
                             >
                               <Form.Item
                                 {...restField}
-                                label="Organisation"
+                                label={t('addProgramme:company')}
                                 name={[name, 'organisation']}
                                 wrapperCol={{ span: 24 }}
                                 className="organisation"
-                                rules={[{ required: true, message: 'Missing organization' }]}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: `${t('addProgramme:company')} ${t('isRequired')}`,
+                                  },
+                                ]}
                               >
                                 <Select size="large" loading={loadingList} disabled={name === 0}>
                                   {organisationsList.map((organisation) => (
@@ -473,13 +465,18 @@ export const AddProgrammeComponent = () => {
                               </Form.Item>
                               <Form.Item
                                 {...restField}
-                                label="Ownership Percentage"
+                                label={t('addProgramme:proponentPercentage')}
                                 className="ownership-percent"
                                 name={[name, 'proponentPercentage']}
                                 labelCol={{ span: 24 }}
                                 wrapperCol={{ span: 24 }}
                                 rules={[
-                                  { required: true, message: 'Missing ownership percentage' },
+                                  {
+                                    required: true,
+                                    message: `${t('addProgramme:proponentPercentage')} ${t(
+                                      'isRequired'
+                                    )}`,
+                                  },
                                   // { validator: validateOwnershipPercentage },
                                 ]}
                               >
@@ -516,7 +513,7 @@ export const AddProgrammeComponent = () => {
               <Col xl={12} md={24}>
                 <div className="details-part-two">
                   <Form.Item
-                    label="External ID"
+                    label={t('addProgramme:externalId')}
                     name="externalId"
                     rules={[
                       {
@@ -531,7 +528,7 @@ export const AddProgrammeComponent = () => {
                             value === null ||
                             value === undefined
                           ) {
-                            throw new Error(`External ID ${t('isRequired')}`);
+                            throw new Error(`${t('addProgramme:externalId')} ${t('isRequired')}`);
                           }
                         },
                       },
@@ -540,12 +537,12 @@ export const AddProgrammeComponent = () => {
                     <Input size="large" />
                   </Form.Item>
                   <Form.Item
-                    label="Sectoral Scope"
+                    label={t('addProgramme:sectoralScope')}
                     name="sectoralScope"
                     rules={[
                       {
                         required: true,
-                        message: `Sectoral Scope ${t('isRequired')}`,
+                        message: `${t('addProgramme:sectoralScope')} ${t('isRequired')}`,
                       },
                     ]}
                   >
@@ -559,12 +556,12 @@ export const AddProgrammeComponent = () => {
                   </Form.Item>
                   <Form.Item
                     wrapperCol={{ span: 13 }}
-                    label="Programme End Date"
+                    label={t('addProgramme:endTime')}
                     name="endTime"
                     rules={[
                       {
                         required: true,
-                        message: `Programme End Date ${t('isRequired')}`,
+                        message: `${t('addProgramme:endTime')} ${t('isRequired')}`,
                       },
                     ]}
                   >
@@ -574,9 +571,9 @@ export const AddProgrammeComponent = () => {
                     />
                   </Form.Item>
                   <Form.Item
+                    label={t('addProgramme:ndcScope')}
                     wrapperCol={{ span: 13 }}
                     className="role-group"
-                    label="NDC Scope"
                     name="ndcScope"
                     initialValue={companyRole}
                     rules={[
@@ -588,23 +585,23 @@ export const AddProgrammeComponent = () => {
                     <Radio.Group size="large" onChange={onChangeNDCScope}>
                       <div className="condition-radio-container">
                         <Radio.Button className="condition-radio" value="true">
-                          CONDITIONAL
+                          {t('addProgramme:conditional')}
                         </Radio.Button>
                       </div>
                       <div className="condition-radio-container">
                         <Radio.Button className="condition-radio" value="false">
-                          UNCONDITIONAL
+                          {t('addProgramme:unConditional')}
                         </Radio.Button>
                       </div>
                     </Radio.Group>
                   </Form.Item>
                   <Form.Item
-                    label="Geographical Location"
+                    label={t('addProgramme:geographicalLocation')}
                     name="geographicalLocation"
                     rules={[
                       {
                         required: true,
-                        message: `Geographical Location ${t('isRequired')}`,
+                        message: `${t('addProgramme:geographicalLocation')} ${t('isRequired')}`,
                       },
                     ]}
                   >
@@ -704,7 +701,7 @@ export const AddProgrammeComponent = () => {
             </Row>
             <div className="steps-actions">
               <Button type="primary" htmlType="submit" loading={loading}>
-                Next
+                {t('addProgramme:next')}
               </Button>
             </div>
           </Form>
@@ -732,7 +729,7 @@ export const AddProgrammeComponent = () => {
               <Col xl={12} md={24}>
                 <div className="details-part-one">
                   <Form.Item
-                    label="Estimated Programme Cost (USD)"
+                    label={t('addProgramme:estimatedProgrammeCostUSD')}
                     name="estimatedProgrammeCostUSD"
                     rules={[
                       {
@@ -747,7 +744,9 @@ export const AddProgrammeComponent = () => {
                             value === null ||
                             value === undefined
                           ) {
-                            throw new Error(`Estimated Programme Cost (USD) ${t('isRequired')}`);
+                            throw new Error(
+                              `${t('addProgramme:estimatedProgrammeCostUSD')} ${t('isRequired')}`
+                            );
                           }
                         },
                       },
@@ -756,7 +755,7 @@ export const AddProgrammeComponent = () => {
                     <Input size="large" />
                   </Form.Item>
                   <Form.Item
-                    label="Minimum Viable Carbon Price (USD per Ton) "
+                    label={t('addProgramme:minViableCarbonPrice')}
                     name="minViableCarbonPrice"
                   >
                     <Input disabled size="large" />
@@ -766,7 +765,7 @@ export const AddProgrammeComponent = () => {
               <Col xl={12} md={24}>
                 <div className="details-part-two">
                   <Form.Item
-                    label="Estimated Credits"
+                    label={t('addProgramme:creditEst')}
                     name="creditEst"
                     rules={[
                       {
@@ -781,7 +780,7 @@ export const AddProgrammeComponent = () => {
                             value === null ||
                             value === undefined
                           ) {
-                            throw new Error(`Estimated Credits ${t('isRequired')}`);
+                            throw new Error(`${t('addProgramme:creditEst')} ${t('isRequired')}`);
                           }
                         },
                       },
@@ -794,18 +793,18 @@ export const AddProgrammeComponent = () => {
             </Row>
             <div className="steps-actions">
               <Button type="primary" htmlType="submit" loading={loading}>
-                SUMBIT
+                {t('addProgramme:submit')}
               </Button>
               <Button
                 className="action-btn"
                 onClick={() => setCurrent(current + 1)}
                 loading={loading}
               >
-                ADD ACTION
+                {t('addProgramme:addAction')}
               </Button>
               {current === 1 && (
                 <Button className="back-btn" onClick={() => prevOne()} loading={loading}>
-                  BACK
+                  {t('addProgramme:back')}
                 </Button>
               )}
             </div>
