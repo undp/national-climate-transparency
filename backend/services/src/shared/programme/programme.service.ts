@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Inject, Injectable, Logger, forwardRef } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  forwardRef,
+} from "@nestjs/common";
 import { ProgrammeDto } from "../dto/programme.dto";
 import { Programme } from "../entities/programme.entity";
 import { instanceToPlain, plainToClass } from "class-transformer";
@@ -37,11 +44,18 @@ import { ProgrammeDocument } from "../dto/programme.document";
 import { FileHandlerInterface } from "../file-handler/filehandler.interface";
 import { DocType } from "../enum/document.type";
 import { DocumentStatus } from "../enum/document.status";
-import { AsyncAction, AsyncOperationsInterface } from "../async-operations/async-operations.interface";
+import {
+  AsyncAction,
+  AsyncOperationsInterface,
+} from "../async-operations/async-operations.interface";
 import { AsyncActionType } from "../enum/async.action.type.enum";
 import { ProgrammeDocumentDto } from "../dto/programme.document.dto";
 import { DocumentAction } from "../dto/document.action";
 import { NDCActionType } from "../enum/ndc.action.enum";
+import { ProgrammeAuth } from "../dto/programme.approve";
+import { ProgrammeIssue } from "../dto/programme.issue";
+import { BasicResponseDto } from "../dto/basic.response.dto";
+import { ProgrammeReject } from "../dto/programme.reject";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -72,7 +86,8 @@ export class ProgrammeService {
     @InjectRepository(ProgrammeQueryEntity)
     private programmeViewRepo: Repository<ProgrammeQueryEntity>,
     @InjectRepository(NDCAction) private ndcActionRepo: Repository<NDCAction>,
-    @InjectRepository(ProgrammeDocument) private documentRepo: Repository<ProgrammeDocument>,
+    @InjectRepository(ProgrammeDocument)
+    private documentRepo: Repository<ProgrammeDocument>,
     @InjectRepository(ConstantEntity)
     private constantRepo: Repository<ConstantEntity>,
     private asyncOperationsInterface: AsyncOperationsInterface,
@@ -127,9 +142,118 @@ export class ProgrammeService {
     });
   }
 
+  async issueCredit(issue: ProgrammeIssue) {
+    const programme = await this.findByExternalId(issue.externalId);
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (!programme.creditIssued) {
+      programme.creditIssued = 0;
+    }
+
+    if (programme.creditIssued + issue.issueAmount > programme.creditEst) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.issuedCreditCannotExceedEstCredit",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const resp = await this.programmeRepo.update(
+      {
+        externalId: issue.externalId,
+      },
+      {
+        creditIssued: programme.creditIssued + issue.issueAmount,
+      }
+    );
+
+    return new DataResponseDto(HttpStatus.OK, programme);
+  }
+
+  async rejectProgramme(auth: ProgrammeReject) {
+    const programme = await this.findByExternalId(auth.externalId);
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const resp = await this.programmeRepo.update(
+      {
+        externalId: auth.externalId,
+      },
+      {
+        currentStage: ProgrammeStage.REJECTED,
+      }
+    );
+
+    return new DataResponseDto(HttpStatus.OK, programme);
+  }
+
+  async authProgramme(auth: ProgrammeAuth) {
+    const programme = await this.findByExternalId(auth.externalId);
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (!programme.creditIssued) {
+      programme.creditIssued = 0;
+    }
+
+    if (!auth.issueAmount) {
+      auth.issueAmount = 0;
+    }
+
+    if (programme.creditIssued + auth.issueAmount > programme.creditEst) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.issuedCreditCannotExceedEstCredit",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const resp = await this.programmeRepo.update(
+      {
+        externalId: auth.externalId,
+      },
+      {
+        creditIssued: programme.creditIssued + auth.issueAmount,
+        serialNo: auth.serialNo,
+        currentStage: ProgrammeStage.AUTHORISED,
+      }
+    );
+
+    return new DataResponseDto(HttpStatus.OK, programme);
+  }
+
   async uploadDocument(type: DocType, id: string, data: string) {
+    const filetype = type == DocType.METHODOLOGY_DOCUMENT ? "xlsx" : "pdf";
     const response: any = await this.fileHandler.uploadFile(
-      `documents/${type}_${id}_${new Date().getTime()}.png`,
+      `documents/${this.helperService.enumToString(DocType, type)}${
+        id ? "_" + id : ""
+      }.${filetype}`,
       data
     );
     if (response) {
@@ -276,21 +400,27 @@ export class ProgrammeService {
     }
 
     if (programmeDto.designDocument) {
-      programmeDto.designDocument = await this.uploadDocument(DocType.DESIGN_DOCUMENT, programme.programmeId, programmeDto.designDocument);
+      programmeDto.designDocument = await this.uploadDocument(
+        DocType.DESIGN_DOCUMENT,
+        undefined,
+        programmeDto.designDocument
+      );
     }
 
     let ndcAc: NDCAction = undefined;
     if (programmeDto.ndcAction) {
       const data = instanceToPlain(programmeDto.ndcAction);
-      ndcAc = plainToClass(NDCAction, data)
+      ndcAc = plainToClass(NDCAction, data);
       ndcAc.id = await this.createNDCActionId(programmeDto.ndcAction);
 
       await this.calcCreditNDCAction(ndcAc, programme);
-      this.calcAddNDCFields(ndcAc, programme)
+      this.calcAddNDCFields(ndcAc, programme);
 
       programmeDto.ndcAction.id = ndcAc.id;
-      programmeDto.ndcAction.programmeId = programme.programmeId
-      programmeDto.ndcAction.externalId = programme.externalId
+      programmeDto.ndcAction.programmeId = programme.programmeId;
+      programmeDto.ndcAction.externalId = programme.externalId;
+      programmeDto.ndcAction.ndcFinancing = ndcAc.ndcFinancing;
+      programmeDto.ndcAction.constantVersion = ndcAc.constantVersion;
     }
 
     const savedProgramme = await this.entityManager
@@ -300,17 +430,23 @@ export class ProgrammeService {
           if (programmeDto.ndcAction.monitoringReport) {
             const dr = new ProgrammeDocument();
             dr.programmeId = programme.programmeId;
+            dr.externalId = programme.externalId;
             dr.actionId = ndcAc.id;
             dr.status = DocumentStatus.PENDING;
             dr.type = DocType.MONITORING_REPORT;
             dr.txTime = new Date().getTime();
-            dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, programme.programmeId, programmeDto.ndcAction.monitoringReport);
+            dr.url = await this.uploadDocument(
+              DocType.MONITORING_REPORT,
+              ndcAc.id,
+              programmeDto.ndcAction.monitoringReport
+            );
             const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
           }
         }
         if (programmeDto.designDocument) {
           const dr = new ProgrammeDocument();
           dr.programmeId = programme.programmeId;
+          dr.externalId = programme.externalId;
           dr.status = DocumentStatus.PENDING;
           dr.type = DocType.DESIGN_DOCUMENT;
           dr.txTime = new Date().getTime();
@@ -322,31 +458,25 @@ export class ProgrammeService {
       .catch((err: any) => {
         console.log(err);
         if (err instanceof QueryFailedError) {
-          throw new HttpException(
-            err.message,
-            HttpStatus.BAD_REQUEST
-          );
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         } else {
           this.logger.error(`Programme add error ${err}`);
         }
         return err;
       });
-      
-    await this.asyncOperationsInterface.addAction(
-      {
-        actionType: AsyncActionType.ProgrammeCreate,
-        actionProps: programmeDto,
-      }
-    );
-      
+
+    await this.asyncOperationsInterface.addAction({
+      actionType: AsyncActionType.ProgrammeCreate,
+      actionProps: programmeDto,
+    });
+
     const hostAddress = this.configService.get("host");
     await this.emailHelperService.sendEmailToGovernmentAdmins(
       EmailTemplates.PROGRAMME_CREATE,
       {
         organisationName: orgNamesList,
         programmePageLink:
-          hostAddress +
-          `/programmeManagement/view?id=${programme.programmeId}`,
+          hostAddress + `/programmeManagement/view?id=${programme.programmeId}`,
       }
     );
     return savedProgramme;
@@ -356,7 +486,7 @@ export class ProgrammeService {
     let constants = await this.getLatestConstant(ndcAction.typeOfMitigation);
     const req = await this.getCreditRequest(ndcAction, program, constants);
     const crdts = await calculateCredit(req);
-    console.log('Credit', crdts, req);
+    console.log("Credit", crdts, req);
     try {
       ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(crdts);
     } catch (err) {
@@ -368,12 +498,11 @@ export class ProgrammeService {
       ? String(constants.version)
       : "default";
 
-    console.log('1111', ndcAction)
+    console.log("1111", ndcAction);
     return ndcAction;
   }
 
   async calcAddNDCFields(ndcAction: NDCAction, programme: Programme) {
-
     ndcAction.programmeId = programme.programmeId;
     ndcAction.externalId = programme.externalId;
     ndcAction.txTime = new Date().getTime();
@@ -382,7 +511,7 @@ export class ProgrammeService {
 
   private getExpectedDoc(type: DocType) {
     if (type == DocType.METHODOLOGY_DOCUMENT) {
-      return DocType.DESIGN_DOCUMENT
+      return DocType.DESIGN_DOCUMENT;
     }
     if (type == DocType.MONITORING_REPORT) {
       return DocType.METHODOLOGY_DOCUMENT;
@@ -395,7 +524,7 @@ export class ProgrammeService {
   async docAction(documentAction: DocumentAction) {
     const d = await this.documentRepo.findOne({
       where: {
-        id: documentAction.id
+        id: documentAction.id,
       },
     });
     if (!d) {
@@ -408,6 +537,8 @@ export class ProgrammeService {
       );
     }
 
+    const pr = await this.findById(d.programmeId)
+
     if (d.status == DocumentStatus.ACCEPTED) {
       throw new HttpException(
         this.helperService.formatReqMessagesString(
@@ -419,32 +550,67 @@ export class ProgrammeService {
     }
 
     if (documentAction.status == DocumentStatus.ACCEPTED) {
-      await this.asyncOperationsInterface.addAction(
-        {
+
+      if (d.type == DocType.METHODOLOGY_DOCUMENT) {
+        await this.asyncOperationsInterface.addAction({
+          actionType: AsyncActionType.ProgrammeAccept,
+          actionProps: {
+            type: this.helperService.enumToString(DocType, d.type),
+            data: d.url,
+            externalId: d.externalId,
+            creditEst: Number(pr.creditEst),
+          },
+        });
+      } else {
+        await this.asyncOperationsInterface.addAction({
           actionType: AsyncActionType.DocumentUpload,
           actionProps: {
-            type: d.type,
+            type: this.helperService.enumToString(DocType, d.type),
             data: d.url,
-            programmeId: d.programmeId,
-            actionId: d.actionId
+            externalId: d.externalId,
+            actionId: d.actionId,
           },
-        }
-      );
+        });
+      }
     }
 
-    const resp = await this.documentRepo.update( {
-      id: documentAction.id,
-    },
-    {
-      status: documentAction.status,
-      remark: documentAction.remark,
+    const resp = await this.entityManager.transaction(async (em) => {
+      if (
+        d.type == DocType.METHODOLOGY_DOCUMENT &&
+        documentAction.status == DocumentStatus.ACCEPTED
+      ) {
+        await em.update(
+          Programme,
+          {
+            programmeId: d.programmeId,
+          },
+          {
+            currentStage: ProgrammeStage.APPROVED,
+          }
+        );
+      }
+      return await em.update(
+        ProgrammeDocument,
+        {
+          id: documentAction.id,
+        },
+        {
+          status: documentAction.status,
+          remark: documentAction.remark,
+        }
+      );
     });
 
-    return new DataResponseDto(HttpStatus.OK, resp);
+    return new BasicResponseDto(
+      HttpStatus.OK,
+      this.helperService.formatReqMessagesString(
+        "programme.actionSuccessful",
+        []
+      )
+    );
   }
 
   async addDocument(documentDto: ProgrammeDocumentDto) {
-
     const programme = await this.findById(documentDto.programmeId);
 
     if (!programme) {
@@ -462,15 +628,15 @@ export class ProgrammeService {
       let whr = {
         programmeId: documentDto.programmeId,
         status: DocumentStatus.ACCEPTED,
-        type: expected
-      }
+        type: expected,
+      };
       if (documentDto.actionId) {
-        whr['actionId'] = documentDto.actionId;
+        whr["actionId"] = documentDto.actionId;
       }
       const approvedDesign = await this.documentRepo.findOne({
         where: whr,
       });
-  
+
       if (!approvedDesign) {
         throw new HttpException(
           this.helperService.formatReqMessagesString(
@@ -481,35 +647,43 @@ export class ProgrammeService {
         );
       }
     }
-    
+
     let whr = {
       programmeId: documentDto.programmeId,
-      type: documentDto.type
-    }
+      type: documentDto.type,
+    };
     if (documentDto.actionId) {
-      whr['actionId'] = documentDto.actionId;
+      whr["actionId"] = documentDto.actionId;
     }
     const currentDoc = await this.documentRepo.findOne({
       where: whr,
     });
 
-    const url = await this.uploadDocument(documentDto.type, programme.programmeId, documentDto.data);
+    const url = await this.uploadDocument(
+      documentDto.type,
+      documentDto.actionId,
+      documentDto.data
+    );
     const dr = new ProgrammeDocument();
     dr.programmeId = programme.programmeId;
+    dr.externalId = programme.externalId;
     dr.status = DocumentStatus.PENDING;
     dr.type = documentDto.type;
     dr.txTime = new Date().getTime();
     dr.url = url;
 
+    let resp;
     if (!currentDoc) {
-      return await this.documentRepo.save(dr);
+      resp = await this.documentRepo.save(dr);
     } else {
-      return await this.documentRepo.update(whr, {
-        "status": dr.status,
-        "txTime": dr.txTime,
-        "url": dr.url
-      })
+      resp = await this.documentRepo.update(whr, {
+        status: dr.status,
+        txTime: dr.txTime,
+        url: dr.url,
+      });
     }
+
+    return new DataResponseDto(HttpStatus.OK, resp);
   }
 
   private async createNDCActionId(ndcAction: NDCActionDto) {
@@ -518,12 +692,18 @@ export class ProgrammeService {
       3
     );
 
-    const type = ndcAction.action == NDCActionType.Mitigation ? 'MTG' : ndcAction.action == NDCActionType.Adaptation ? 'ADT' : ndcAction.action == NDCActionType.Enablement ? 'ENB' : 'CRS'
-    return `${type}-${id}`
+    const type =
+      ndcAction.action == NDCActionType.Mitigation
+        ? "MTG"
+        : ndcAction.action == NDCActionType.Adaptation
+        ? "ADT"
+        : ndcAction.action == NDCActionType.Enablement
+        ? "ENB"
+        : "CRS";
+    return `${type}-${id}`;
   }
 
   async addNDCAction(ndcActionDto: NDCActionDto): Promise<DataResponseDto> {
-
     if (!ndcActionDto.programmeId) {
       throw new HttpException(
         this.helperService.formatReqMessagesString(
@@ -547,48 +727,53 @@ export class ProgrammeService {
     }
 
     const data = instanceToPlain(ndcActionDto);
-    const ndcAction: NDCAction = plainToClass(NDCAction, data)
+    const ndcAction: NDCAction = plainToClass(NDCAction, data);
     ndcAction.id = await this.createNDCActionId(ndcActionDto);
 
     await this.calcCreditNDCAction(ndcAction, program);
-    console.log('2222', ndcAction)
-    this.calcAddNDCFields(ndcAction, program)
-    
-    if (ndcActionDto.action == NDCActionType.Mitigation || ndcActionDto.action == NDCActionType.CrossCutting) {
-      await this.asyncOperationsInterface.addAction(
-        {
-          actionType: AsyncActionType.AddMitigation,
-          actionProps: ndcAction
-        }
-      );
+    console.log("2222", ndcAction);
+    this.calcAddNDCFields(ndcAction, program);
+
+    if (
+      ndcActionDto.action == NDCActionType.Mitigation ||
+      ndcActionDto.action == NDCActionType.CrossCutting
+    ) {
+      await this.asyncOperationsInterface.addAction({
+        actionType: AsyncActionType.AddMitigation,
+        actionProps: ndcAction,
+      });
     }
-    const savedProgramme = await this.entityManager
+    const saved = await this.entityManager
       .transaction(async (em) => {
-        await em.save<NDCAction>(ndcAction);
+        const n = await em.save<NDCAction>(ndcAction);
         if (ndcActionDto.monitoringReport) {
           const dr = new ProgrammeDocument();
           dr.programmeId = program.programmeId;
+          dr.externalId = program.externalId;
           dr.actionId = ndcAction.id;
           dr.status = DocumentStatus.PENDING;
           dr.type = DocType.MONITORING_REPORT;
           dr.txTime = new Date().getTime();
-          dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, program.programmeId, ndcActionDto.monitoringReport);
+          dr.url = await this.uploadDocument(
+            DocType.MONITORING_REPORT,
+            program.programmeId,
+            ndcActionDto.monitoringReport
+          );
           const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
         }
+
+        return n;
       })
       .catch((err: any) => {
         console.log(err);
         if (err instanceof QueryFailedError) {
-          throw new HttpException(
-            err.message,
-            HttpStatus.BAD_REQUEST
-          );
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         } else {
           this.logger.error(`NDC Action add error ${err}`);
         }
         return err;
       });
-    return null;
+    return new DataResponseDto(HttpStatus.OK, saved);
   }
 
   async queryNdcActions(
@@ -628,7 +813,6 @@ export class ProgrammeService {
     );
   }
 
-
   async queryDocuments(
     query: QueryDto,
     abilityCondition: string
@@ -648,7 +832,9 @@ export class ProgrammeService {
       )
       .orderBy(
         query?.sort?.key &&
-          `"programmedocument".${this.helperService.generateSortCol(query?.sort?.key)}`,
+          `"programmedocument".${this.helperService.generateSortCol(
+            query?.sort?.key
+          )}`,
         query?.sort?.order,
         query?.sort?.nullFirst !== undefined
           ? query?.sort?.nullFirst === true

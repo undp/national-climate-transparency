@@ -11,6 +11,9 @@ export class ProgrammeDocument {
   @Column()
   programmeId: string;
 
+  @Column()
+  externalId: string;
+
   @Column({nullable: true})
   actionId: string;
 

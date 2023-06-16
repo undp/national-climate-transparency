@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Programme } from '../shared/entities/programme.entity';
 import { Action } from '../shared/casl/action.enum';
@@ -11,9 +11,12 @@ import { QueryDto } from '../shared/dto/query.dto';
 import { ConstantUpdateDto } from '../shared/dto/constants.update.dto';
 import { ApiKeyJwtAuthGuard } from '../shared/auth/guards/api-jwt-key.guard';
 import { NDCActionDto } from '../shared/dto/ndc.action.dto';
-import { JwtAuthGuard } from 'src/shared/auth/guards/jwt-auth.guard';
-import { ProgrammeDocumentDto } from 'src/shared/dto/programme.document.dto';
-import { DocumentAction } from 'src/shared/dto/document.action';
+import { JwtAuthGuard } from '../shared/auth/guards/jwt-auth.guard';
+import { ProgrammeDocumentDto } from '../shared/dto/programme.document.dto';
+import { DocumentAction } from '../shared/dto/document.action';
+import { ProgrammeAuth } from '../shared/dto/programme.approve';
+import { ProgrammeIssue } from '../shared/dto/programme.issue';
+import { ProgrammeReject } from '../shared/dto/programme.reject';
 
 @ApiTags('Programme')
 @ApiBearerAuth()
@@ -28,7 +31,8 @@ export class ProgrammeController {
     @UseGuards(JwtAuthGuard, PoliciesGuard)
     @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
     @Post('create')
-    async addProgramme(@Body()programme: ProgrammeDto) {
+    async addProgramme(@Body()programme: ProgrammeDto, @Request() req) {
+      global.baseUrl = `${req.protocol}://${req.get("Host")}`;
       return this.programmeService.create(programme)
     }
 
@@ -36,7 +40,8 @@ export class ProgrammeController {
     @UseGuards(JwtAuthGuard, PoliciesGuard)
     @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
     @Post('addNDCAction')
-    async addNDCAction(@Body()ndcAction: NDCActionDto) {
+    async addNDCAction(@Body()ndcAction: NDCActionDto, @Request() req) {
+      global.baseUrl = `${req.protocol}://${req.get("Host")}`;
       return this.programmeService.addNDCAction(ndcAction)
     }
 
@@ -44,7 +49,8 @@ export class ProgrammeController {
     @UseGuards(JwtAuthGuard, PoliciesGuard)
     @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
     @Post('addDocument')
-    async addDocument(@Body()docDto: ProgrammeDocumentDto) {
+    async addDocument(@Body()docDto: ProgrammeDocumentDto, @Request() req) {
+      global.baseUrl = `${req.protocol}://${req.get("Host")}`;
       return this.programmeService.addDocument(docDto)
     }
 
@@ -95,6 +101,30 @@ export class ProgrammeController {
     @Post('updateConfigs')
     async updateConfigs(@Body() config: ConstantUpdateDto) {
         return this.programmeService.updateCustomConstants(config.type, config);
+    }
+
+    @ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    @Put('authProgramme')
+    async authProgramme(@Body() auth: ProgrammeAuth) {
+        return this.programmeService.authProgramme(auth);
+    }
+
+    @ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    @Put('issueCredit')
+    async issueCredit(@Body() issue: ProgrammeIssue) {
+        return this.programmeService.issueCredit(issue);
+    }
+
+    @ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    @Put('rejectProgramme')
+    async rejectProgramme(@Body() rej: ProgrammeReject) {
+        return this.programmeService.rejectProgramme(rej);
     }
 
     // @ApiBearerAuth()

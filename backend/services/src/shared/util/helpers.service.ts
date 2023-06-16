@@ -16,6 +16,20 @@ export class HelperService {
     private i18n: I18nService
   ) {}
 
+  public isBase64(text: string): boolean {
+    return Buffer.from(text, 'base64').toString('base64') === text
+  }
+
+  public enumToString(enumObj, value) {
+    const keys = Object.keys(enumObj);
+    for (const key of keys) {
+      if (enumObj[key] === value) {
+        return key;
+      }
+    }
+    return null; // Or throw an error if the value is not found
+  }
+
   private prepareValue(value: any, table?: string, toLower?: boolean) {
     if (value instanceof Array) {
       return "(" + value.map((e) => `'${e}'`).join(",") + ")";

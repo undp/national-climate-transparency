@@ -30,16 +30,23 @@ export class RegistryClientService {
             ).catch(ex => {
                 console.log('Exception', ex.response?.data)
                 if (ex.response?.data?.statusCode == 400 && ex.response?.data?.message?.indexOf('already exist') >= 0 ){
-                    return true;
+                    return data;
                 }
                 throw ex;
             });
     }
 
   public async addDocument(document: ProgrammeDocumentDto) {
-    console.log('adding document on registry', document.actionId)
-    const resp = await this.sendHttp("/national/programme/addDocument", document.actionId);
-    console.log('Successfully create company on registry', document.actionId)
+    console.log('adding document on registry', document)
+    const resp = await this.sendHttp("/national/programme/addDocument", document);
+    console.log('Successfully create document on registry', document.actionId)
+    return resp;
+  }
+
+  public async programmeAccept(document: any) {
+    console.log('programme accept on registry', document)
+    const resp = await this.sendHttp("/national/programme/acceptProgramme", document);
+    console.log('Successfully programme accepted on registry', document.actionId)
     return resp;
   }
 
@@ -94,7 +101,7 @@ export class RegistryClientService {
         "proponentTaxVatId": programme.proponentTaxVatId,
         "proponentPercentage": programme.proponentPercentage,
         "programmeProperties": props,
-        "creditEst": programme.creditEst,
+        // "creditEst": programme.creditEst,
       }
 
     if (programme.ndcAction) {
