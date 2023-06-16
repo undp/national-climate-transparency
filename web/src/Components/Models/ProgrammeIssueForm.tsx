@@ -2,11 +2,15 @@ import { LockOutlined } from '@ant-design/icons';
 import { Alert, Button, Col, Form, Input, InputNumber, Modal, Row } from 'antd';
 import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { addCommSep, Programme } from '../../Definitions/InterfacesAndType/programme.definitions';
+import {
+  addCommSep,
+  Programme,
+  ProgrammeT,
+} from '../../Definitions/InterfacesAndType/programme.definitions';
 import { creditUnit } from '../../Pages/Common/configs';
 
 export interface ProgrammeIssueFormProps {
-  programme: Programme;
+  programme: ProgrammeT;
   onCancel: any;
   actionBtnText: string;
   onFinish: any;

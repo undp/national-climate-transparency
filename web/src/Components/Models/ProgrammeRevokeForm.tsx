@@ -2,10 +2,10 @@ import { LockOutlined } from '@ant-design/icons';
 import { Alert, Button, Col, Form, Input, InputNumber, Modal, Row, Select } from 'antd';
 import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Programme } from '../../Definitions/InterfacesAndType/programme.definitions';
+import { Programme, ProgrammeT } from '../../Definitions/InterfacesAndType/programme.definitions';
 
 export interface ProgrammeRevokeFormProps {
-  programme: Programme;
+  programme: ProgrammeT;
   onCancel: any;
   actionBtnText: string;
   onFinish: any;

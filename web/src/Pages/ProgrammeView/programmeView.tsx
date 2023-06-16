@@ -38,8 +38,6 @@ import {
   UnitField,
   addCommSep,
   addSpaces,
-  getFinancialFields,
-  getGeneralFields,
   getStageEnumVal,
   getStageTagType,
   sumArray,
@@ -49,6 +47,11 @@ import RoleIcon from '../../Components/RoleIcon/role.icon';
 import { CompanyState } from '../../Casl/enums/company.state.enum';
 import ProgrammeDocuments from '../../Components/Programme/programmeDocuments';
 import InvestmentBody from '../../Components/InvestmentBody/investmentBody';
+import {
+  ProgrammeT,
+  getFinancialFields,
+  getGeneralFields,
+} from '../../Definitions/InterfacesAndType/programme.definitions';
 
 const ProgrammeView = () => {
   const { get, put, post } = useConnection();
@@ -56,7 +59,7 @@ const ProgrammeView = () => {
   const { userInfoState } = useUserContext();
   const { state } = useLocation();
   const navigate = useNavigate();
-  const [data, setData] = useState<Programme>();
+  const [data, setData] = useState<ProgrammeT>();
   const [historyData, setHistoryData] = useState<any>([]);
   const { i18n, t } = useTranslation(['view']);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
@@ -528,7 +531,7 @@ const ProgrammeView = () => {
     return <Loading />;
   }
 
-  const pieChartData = getPieChartData(data);
+  // const pieChartData = getPieChartData(data);
   const percentages: any[] = [];
 
   const companies: any = {};

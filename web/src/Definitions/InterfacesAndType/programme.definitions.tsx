@@ -157,6 +157,21 @@ export interface ProgrammeProperties {
   projectMaterial: [];
 }
 
+export interface ProgrammePropertiesT {
+  maxInternationalTransferAmount: string;
+  creditingPeriodInYears: number;
+  estimatedProgrammeCostUSD: number;
+  sourceOfFunding: any;
+  grantEquivalentAmount: number;
+  carbonPriceUSDPerTon: number;
+  buyerCountryEligibility: string;
+  geographicalLocation: string[];
+  greenHouseGasses: any[];
+  creditYear: number;
+  programmeMaterials: [];
+  projectMaterial: [];
+}
+
 export interface Programme {
   programmeId: string;
   serialNo: string;
@@ -193,7 +208,43 @@ export interface Programme {
   geographicalLocationCordintes: any;
 }
 
-export const getGeneralFields = (programme: Programme) => {
+export interface ProgrammeT {
+  programmeId: string;
+  serialNo: string;
+  title: string;
+  sectoralScope: string;
+  sector: string;
+  countryCodeA2: string;
+  currentStage: ProgrammeStage;
+  startTime: number;
+  endTime: number;
+  creditChange: number;
+  creditIssued: number;
+  creditEst: number;
+  creditBalance: number;
+  creditTransferred: number[];
+  creditRetired: number[];
+  creditFrozen: number[];
+  constantVersion: string;
+  proponentTaxVatId: string[];
+  companyId: number[];
+  proponentPercentage: number[];
+  creditOwnerPercentage: number[];
+  certifierId: any[];
+  certifier: any[];
+  company: any[];
+  creditUnit: string;
+  programmeProperties: ProgrammePropertiesT;
+  agricultureProperties: any;
+  solarProperties: any;
+  txTime: number;
+  createdTime: number;
+  txRef: string;
+  typeOfMitigation: TypeOfMitigation;
+  geographicalLocationCordintes: any;
+}
+
+export const getGeneralFields = (programme: ProgrammeT) => {
   return {
     title: programme.title,
     serialNo: programme.serialNo,
@@ -238,15 +289,11 @@ export const addSpaces = (text: string) => {
   return text.replace(/([A-Z])/g, ' $1').trim();
 };
 
-export const getFinancialFields = (programme: Programme) => {
+export const getFinancialFields = (programme: ProgrammeT) => {
   return {
-    programmeCost: addCommSep(programme.programmeProperties.programmeCostUSD),
-    financingType: addSpaces(programme.programmeProperties.sourceOfFunding),
-    grantEquivalent: new UnitField(
-      'USD',
-      addCommSep(programme.programmeProperties.grantEquivalentAmount)
-    ),
-    carbonPrice: addCommSep(programme.programmeProperties.carbonPriceUSDPerTon),
+    estimatedProgrammeCostUSD: addCommSep(programme.programmeProperties.estimatedProgrammeCostUSD),
+    creditEst: addCommSep(programme.creditEst),
+    carbonPriceUSDPerTon: addCommSep(programme.programmeProperties.carbonPriceUSDPerTon),
   };
 };
 

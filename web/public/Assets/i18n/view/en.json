@@ -114,5 +114,8 @@
   "tlTxLowCreditCancelSystemDesc": "The request to transfer {} {} credits from {} to {} was cancelled by the system due to insufficient credit balance",
   "programmeDocs": "Programme Documents",
   "investments": "Investments",
-  "investment": "Investment"
+  "investment": "Investment",
+  "estimatedProgrammeCostUSD": "Programme Cost(USD)",
+  "creditEst": "Estimated Credits",
+  "carbonPriceUSDPerTon": "Minimum Viable Carbon Price (USD per Ton) "
 }
