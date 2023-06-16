@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Inject, Injectable, Logger, forwardRef } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  forwardRef,
+} from "@nestjs/common";
 import { ProgrammeDto } from "../dto/programme.dto";
 import { Programme } from "../entities/programme.entity";
 import { instanceToPlain, plainToClass } from "class-transformer";
@@ -37,7 +44,10 @@ import { ProgrammeDocument } from "../dto/programme.document";
 import { FileHandlerInterface } from "../file-handler/filehandler.interface";
 import { DocType } from "../enum/document.type";
 import { DocumentStatus } from "../enum/document.status";
-import { AsyncAction, AsyncOperationsInterface } from "../async-operations/async-operations.interface";
+import {
+  AsyncAction,
+  AsyncOperationsInterface,
+} from "../async-operations/async-operations.interface";
 import { AsyncActionType } from "../enum/async.action.type.enum";
 import { ProgrammeDocumentDto } from "../dto/programme.document.dto";
 import { DocumentAction } from "../dto/document.action";
@@ -45,6 +55,7 @@ import { NDCActionType } from "../enum/ndc.action.enum";
 import { ProgrammeAuth } from "../dto/programme.approve";
 import { ProgrammeIssue } from "../dto/programme.issue";
 import { BasicResponseDto } from "../dto/basic.response.dto";
+import { ProgrammeReject } from "../dto/programme.reject";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -52,7 +63,6 @@ export declare function PrimaryGeneratedColumn(
 
 @Injectable()
 export class ProgrammeService {
-
   private userNameCache: any = {};
 
   constructor(
@@ -76,7 +86,8 @@ export class ProgrammeService {
     @InjectRepository(ProgrammeQueryEntity)
     private programmeViewRepo: Repository<ProgrammeQueryEntity>,
     @InjectRepository(NDCAction) private ndcActionRepo: Repository<NDCAction>,
-    @InjectRepository(ProgrammeDocument) private documentRepo: Repository<ProgrammeDocument>,
+    @InjectRepository(ProgrammeDocument)
+    private documentRepo: Repository<ProgrammeDocument>,
     @InjectRepository(ConstantEntity)
     private constantRepo: Repository<ConstantEntity>,
     private asyncOperationsInterface: AsyncOperationsInterface,
@@ -132,7 +143,6 @@ export class ProgrammeService {
   }
 
   async issueCredit(issue: ProgrammeIssue) {
-    
     const programme = await this.findByExternalId(issue.externalId);
     if (!programme) {
       throw new HttpException(
@@ -158,11 +168,38 @@ export class ProgrammeService {
       );
     }
 
-    const resp = await this.programmeRepo.update({
-      externalId: issue.externalId
-    }, {
-      creditIssued: programme.creditIssued + issue.issueAmount
-    });
+    const resp = await this.programmeRepo.update(
+      {
+        externalId: issue.externalId,
+      },
+      {
+        creditIssued: programme.creditIssued + issue.issueAmount,
+      }
+    );
+
+    return new DataResponseDto(HttpStatus.OK, programme);
+  }
+
+  async rejectProgramme(auth: ProgrammeReject) {
+    const programme = await this.findByExternalId(auth.externalId);
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const resp = await this.programmeRepo.update(
+      {
+        externalId: auth.externalId,
+      },
+      {
+        currentStage: ProgrammeStage.REJECTED,
+      }
+    );
 
     return new DataResponseDto(HttpStatus.OK, programme);
   }
@@ -184,7 +221,7 @@ export class ProgrammeService {
     }
 
     if (!auth.issueAmount) {
-      auth.issueAmount = 0
+      auth.issueAmount = 0;
     }
 
     if (programme.creditIssued + auth.issueAmount > programme.creditEst) {
@@ -197,23 +234,26 @@ export class ProgrammeService {
       );
     }
 
-    const resp = await this.programmeRepo.update({
-      externalId: auth.externalId
-    }, {
-      creditIssued: programme.creditIssued + auth.issueAmount,
-      serialNo: auth.serialNo,
-      currentStage: ProgrammeStage.AUTHORISED
-    });
+    const resp = await this.programmeRepo.update(
+      {
+        externalId: auth.externalId,
+      },
+      {
+        creditIssued: programme.creditIssued + auth.issueAmount,
+        serialNo: auth.serialNo,
+        currentStage: ProgrammeStage.AUTHORISED,
+      }
+    );
 
     return new DataResponseDto(HttpStatus.OK, programme);
   }
 
-
   async uploadDocument(type: DocType, id: string, data: string) {
-
-    const filetype = type == DocType.METHODOLOGY_DOCUMENT ? 'xlsx' : 'pdf' 
+    const filetype = type == DocType.METHODOLOGY_DOCUMENT ? "xlsx" : "pdf";
     const response: any = await this.fileHandler.uploadFile(
-      `documents/${this.helperService.enumToString(DocType, type)}${id ? '_' + id : ''}.${filetype}`,
+      `documents/${this.helperService.enumToString(DocType, type)}${
+        id ? "_" + id : ""
+      }.${filetype}`,
       data
     );
     if (response) {
@@ -360,17 +400,21 @@ export class ProgrammeService {
     }
 
     if (programmeDto.designDocument) {
-      programmeDto.designDocument = await this.uploadDocument(DocType.DESIGN_DOCUMENT, undefined, programmeDto.designDocument);
+      programmeDto.designDocument = await this.uploadDocument(
+        DocType.DESIGN_DOCUMENT,
+        undefined,
+        programmeDto.designDocument
+      );
     }
 
     let ndcAc: NDCAction = undefined;
     if (programmeDto.ndcAction) {
       const data = instanceToPlain(programmeDto.ndcAction);
-      ndcAc = plainToClass(NDCAction, data)
+      ndcAc = plainToClass(NDCAction, data);
       ndcAc.id = await this.createNDCActionId(programmeDto.ndcAction);
 
       await this.calcCreditNDCAction(ndcAc, programme);
-      this.calcAddNDCFields(ndcAc, programme)
+      this.calcAddNDCFields(ndcAc, programme);
 
       programmeDto.ndcAction.id = ndcAc.id;
       programmeDto.ndcAction.programmeId = programme.programmeId;
@@ -391,7 +435,11 @@ export class ProgrammeService {
             dr.status = DocumentStatus.PENDING;
             dr.type = DocType.MONITORING_REPORT;
             dr.txTime = new Date().getTime();
-            dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, ndcAc.id, programmeDto.ndcAction.monitoringReport);
+            dr.url = await this.uploadDocument(
+              DocType.MONITORING_REPORT,
+              ndcAc.id,
+              programmeDto.ndcAction.monitoringReport
+            );
             const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
           }
         }
@@ -410,31 +458,25 @@ export class ProgrammeService {
       .catch((err: any) => {
         console.log(err);
         if (err instanceof QueryFailedError) {
-          throw new HttpException(
-            err.message,
-            HttpStatus.BAD_REQUEST
-          );
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         } else {
           this.logger.error(`Programme add error ${err}`);
         }
         return err;
       });
-      
-    await this.asyncOperationsInterface.addAction(
-      {
-        actionType: AsyncActionType.ProgrammeCreate,
-        actionProps: programmeDto,
-      }
-    );
-      
+
+    await this.asyncOperationsInterface.addAction({
+      actionType: AsyncActionType.ProgrammeCreate,
+      actionProps: programmeDto,
+    });
+
     const hostAddress = this.configService.get("host");
     await this.emailHelperService.sendEmailToGovernmentAdmins(
       EmailTemplates.PROGRAMME_CREATE,
       {
         organisationName: orgNamesList,
         programmePageLink:
-          hostAddress +
-          `/programmeManagement/view?id=${programme.programmeId}`,
+          hostAddress + `/programmeManagement/view?id=${programme.programmeId}`,
       }
     );
     return savedProgramme;
@@ -444,7 +486,7 @@ export class ProgrammeService {
     let constants = await this.getLatestConstant(ndcAction.typeOfMitigation);
     const req = await this.getCreditRequest(ndcAction, program, constants);
     const crdts = await calculateCredit(req);
-    console.log('Credit', crdts, req);
+    console.log("Credit", crdts, req);
     try {
       ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(crdts);
     } catch (err) {
@@ -456,12 +498,11 @@ export class ProgrammeService {
       ? String(constants.version)
       : "default";
 
-    console.log('1111', ndcAction)
+    console.log("1111", ndcAction);
     return ndcAction;
   }
 
   async calcAddNDCFields(ndcAction: NDCAction, programme: Programme) {
-
     ndcAction.programmeId = programme.programmeId;
     ndcAction.externalId = programme.externalId;
     ndcAction.txTime = new Date().getTime();
@@ -470,7 +511,7 @@ export class ProgrammeService {
 
   private getExpectedDoc(type: DocType) {
     if (type == DocType.METHODOLOGY_DOCUMENT) {
-      return DocType.DESIGN_DOCUMENT
+      return DocType.DESIGN_DOCUMENT;
     }
     if (type == DocType.MONITORING_REPORT) {
       return DocType.METHODOLOGY_DOCUMENT;
@@ -483,7 +524,7 @@ export class ProgrammeService {
   async docAction(documentAction: DocumentAction) {
     const d = await this.documentRepo.findOne({
       where: {
-        id: documentAction.id
+        id: documentAction.id,
       },
     });
     if (!d) {
@@ -507,43 +548,54 @@ export class ProgrammeService {
     }
 
     if (documentAction.status == DocumentStatus.ACCEPTED) {
-      await this.asyncOperationsInterface.addAction(
-        {
-          actionType: AsyncActionType.DocumentUpload,
-          actionProps: {
-            type: this.helperService.enumToString(DocType, d.type),
-            data: d.url,
-            externalId: d.externalId,
-            actionId: d.actionId
-          },
-        }
-      );
+      await this.asyncOperationsInterface.addAction({
+        actionType: AsyncActionType.DocumentUpload,
+        actionProps: {
+          type: this.helperService.enumToString(DocType, d.type),
+          data: d.url,
+          externalId: d.externalId,
+          actionId: d.actionId,
+        },
+      });
     }
 
-    const resp = await this.entityManager
-      .transaction(async (em) => {
-        if (d.type == DocType.METHODOLOGY_DOCUMENT && documentAction.status == DocumentStatus.ACCEPTED) {
-          await em.update(Programme, {
+    const resp = await this.entityManager.transaction(async (em) => {
+      if (
+        d.type == DocType.METHODOLOGY_DOCUMENT &&
+        documentAction.status == DocumentStatus.ACCEPTED
+      ) {
+        await em.update(
+          Programme,
+          {
             programmeId: d.programmeId,
           },
           {
             currentStage: ProgrammeStage.ACCEPTED,
-          });
-        }
-        return await em.update(ProgrammeDocument, {
+          }
+        );
+      }
+      return await em.update(
+        ProgrammeDocument,
+        {
           id: documentAction.id,
         },
         {
           status: documentAction.status,
           remark: documentAction.remark,
-        });
-      });
+        }
+      );
+    });
 
-    return new DataResponseDto(HttpStatus.OK, resp);
+    return new BasicResponseDto(
+      HttpStatus.OK,
+      this.helperService.formatReqMessagesString(
+        "programme.actionSuccessful",
+        []
+      )
+    );
   }
 
   async addDocument(documentDto: ProgrammeDocumentDto) {
-
     const programme = await this.findById(documentDto.programmeId);
 
     if (!programme) {
@@ -561,15 +613,15 @@ export class ProgrammeService {
       let whr = {
         programmeId: documentDto.programmeId,
         status: DocumentStatus.ACCEPTED,
-        type: expected
-      }
+        type: expected,
+      };
       if (documentDto.actionId) {
-        whr['actionId'] = documentDto.actionId;
+        whr["actionId"] = documentDto.actionId;
       }
       const approvedDesign = await this.documentRepo.findOne({
         where: whr,
       });
-  
+
       if (!approvedDesign) {
         throw new HttpException(
           this.helperService.formatReqMessagesString(
@@ -580,19 +632,23 @@ export class ProgrammeService {
         );
       }
     }
-    
+
     let whr = {
       programmeId: documentDto.programmeId,
-      type: documentDto.type
-    }
+      type: documentDto.type,
+    };
     if (documentDto.actionId) {
-      whr['actionId'] = documentDto.actionId;
+      whr["actionId"] = documentDto.actionId;
     }
     const currentDoc = await this.documentRepo.findOne({
       where: whr,
     });
 
-    const url = await this.uploadDocument(documentDto.type, documentDto.actionId, documentDto.data);
+    const url = await this.uploadDocument(
+      documentDto.type,
+      documentDto.actionId,
+      documentDto.data
+    );
     const dr = new ProgrammeDocument();
     dr.programmeId = programme.programmeId;
     dr.externalId = programme.externalId;
@@ -606,10 +662,10 @@ export class ProgrammeService {
       resp = await this.documentRepo.save(dr);
     } else {
       resp = await this.documentRepo.update(whr, {
-        "status": dr.status,
-        "txTime": dr.txTime,
-        "url": dr.url
-      })
+        status: dr.status,
+        txTime: dr.txTime,
+        url: dr.url,
+      });
     }
 
     return new DataResponseDto(HttpStatus.OK, resp);
@@ -621,12 +677,18 @@ export class ProgrammeService {
       3
     );
 
-    const type = ndcAction.action == NDCActionType.Mitigation ? 'MTG' : ndcAction.action == NDCActionType.Adaptation ? 'ADT' : ndcAction.action == NDCActionType.Enablement ? 'ENB' : 'CRS'
-    return `${type}-${id}`
+    const type =
+      ndcAction.action == NDCActionType.Mitigation
+        ? "MTG"
+        : ndcAction.action == NDCActionType.Adaptation
+        ? "ADT"
+        : ndcAction.action == NDCActionType.Enablement
+        ? "ENB"
+        : "CRS";
+    return `${type}-${id}`;
   }
 
   async addNDCAction(ndcActionDto: NDCActionDto): Promise<DataResponseDto> {
-
     if (!ndcActionDto.programmeId) {
       throw new HttpException(
         this.helperService.formatReqMessagesString(
@@ -650,20 +712,21 @@ export class ProgrammeService {
     }
 
     const data = instanceToPlain(ndcActionDto);
-    const ndcAction: NDCAction = plainToClass(NDCAction, data)
+    const ndcAction: NDCAction = plainToClass(NDCAction, data);
     ndcAction.id = await this.createNDCActionId(ndcActionDto);
 
     await this.calcCreditNDCAction(ndcAction, program);
-    console.log('2222', ndcAction)
-    this.calcAddNDCFields(ndcAction, program)
-    
-    if (ndcActionDto.action == NDCActionType.Mitigation || ndcActionDto.action == NDCActionType.CrossCutting) {
-      await this.asyncOperationsInterface.addAction(
-        {
-          actionType: AsyncActionType.AddMitigation,
-          actionProps: ndcAction
-        }
-      );
+    console.log("2222", ndcAction);
+    this.calcAddNDCFields(ndcAction, program);
+
+    if (
+      ndcActionDto.action == NDCActionType.Mitigation ||
+      ndcActionDto.action == NDCActionType.CrossCutting
+    ) {
+      await this.asyncOperationsInterface.addAction({
+        actionType: AsyncActionType.AddMitigation,
+        actionProps: ndcAction,
+      });
     }
     const saved = await this.entityManager
       .transaction(async (em) => {
@@ -676,7 +739,11 @@ export class ProgrammeService {
           dr.status = DocumentStatus.PENDING;
           dr.type = DocType.MONITORING_REPORT;
           dr.txTime = new Date().getTime();
-          dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, program.programmeId, ndcActionDto.monitoringReport);
+          dr.url = await this.uploadDocument(
+            DocType.MONITORING_REPORT,
+            program.programmeId,
+            ndcActionDto.monitoringReport
+          );
           const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
         }
 
@@ -685,16 +752,13 @@ export class ProgrammeService {
       .catch((err: any) => {
         console.log(err);
         if (err instanceof QueryFailedError) {
-          throw new HttpException(
-            err.message,
-            HttpStatus.BAD_REQUEST
-          );
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         } else {
           this.logger.error(`NDC Action add error ${err}`);
         }
         return err;
       });
-    return new DataResponseDto(HttpStatus.OK, saved);;
+    return new DataResponseDto(HttpStatus.OK, saved);
   }
 
   async queryNdcActions(
@@ -734,7 +798,6 @@ export class ProgrammeService {
     );
   }
 
-
   async queryDocuments(
     query: QueryDto,
     abilityCondition: string
@@ -754,7 +817,9 @@ export class ProgrammeService {
       )
       .orderBy(
         query?.sort?.key &&
-          `"programmedocument".${this.helperService.generateSortCol(query?.sort?.key)}`,
+          `"programmedocument".${this.helperService.generateSortCol(
+            query?.sort?.key
+          )}`,
         query?.sort?.order,
         query?.sort?.nullFirst !== undefined
           ? query?.sort?.nullFirst === true

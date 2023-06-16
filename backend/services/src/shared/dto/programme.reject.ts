@@ -6,7 +6,7 @@ export class ProgrammeReject {
     @ApiProperty()
     @IsNotEmpty()
     @IsString()
-    programmeId: string;
+    externalId: string;
 
     @ApiProperty()
     @IsString()

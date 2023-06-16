@@ -6,6 +6,7 @@
     "programmeExistsWithSameExetrnalId": "Programme already exist with the given externalId",
     "transferRequestALreadyProcessed": "Programme transfer request already processed",
     "programmeNotExist": "Programme does not exist",
+    "actionSuccessful": "Action Successfully executed",
     "documentAlreadyAccepted": "Document already accepted",
     "documentNotExist": "Document does not exist",
     "invalidDocumentUpload": "Invalid document upload",

@@ -16,6 +16,7 @@ import { ProgrammeDocumentDto } from '../shared/dto/programme.document.dto';
 import { DocumentAction } from '../shared/dto/document.action';
 import { ProgrammeAuth } from '../shared/dto/programme.approve';
 import { ProgrammeIssue } from '../shared/dto/programme.issue';
+import { ProgrammeReject } from '../shared/dto/programme.reject';
 
 @ApiTags('Programme')
 @ApiBearerAuth()
@@ -116,6 +117,14 @@ export class ProgrammeController {
     @Put('issueCredit')
     async issueCredit(@Body() issue: ProgrammeIssue) {
         return this.programmeService.issueCredit(issue);
+    }
+
+    @ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    @Put('rejectProgramme')
+    async rejectProgramme(@Body() rej: ProgrammeReject) {
+        return this.programmeService.rejectProgramme(rej);
     }
 
     // @ApiBearerAuth()
