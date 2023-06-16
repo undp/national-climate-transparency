@@ -10,5 +10,7 @@
   "inNAP": "Included in NAP",
   "inNAPToolTip": "National Adaptation Plan (NAP)",
   "yes": "YES",
-  "no": "NO"
+  "no": "NO",
+  "proponentPercentValidation": "Summation of Proponent Percentage should be 100",
+  "programmeCreationSuccess": "The programme has been created successfully"
 }

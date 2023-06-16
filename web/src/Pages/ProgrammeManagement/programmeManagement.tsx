@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { ProgrammeManagementComponent, ProgrammeManagementColumns } from '@undp/carbon-library';
 import './programmeManagement.scss';
+import { useAbilityContext } from '../../Casl/Can';
 
 const ProgrammeManagement = () => {
   const navigate = useNavigate();
@@ -14,10 +15,17 @@ const ProgrammeManagement = () => {
     ProgrammeManagementColumns.company,
     ProgrammeManagementColumns.sector,
     ProgrammeManagementColumns.currentStage,
+    ProgrammeManagementColumns.certifierId,
+    ProgrammeManagementColumns.emissionsReductionExpected,
+    ProgrammeManagementColumns.emissionsReductionAchieved,
   ];
 
   const onNavigateToProgrammeView = (record: any) => {
     navigate('/programmeManagement/view', { state: { record } });
+  };
+
+  const onClickAddProgramme = () => {
+    navigate('/programmeManagement/addProgramme');
   };
 
   return (
@@ -27,6 +35,7 @@ const ProgrammeManagement = () => {
       useUserContext={useUserContext}
       useConnection={useConnection}
       onNavigateToProgrammeView={onNavigateToProgrammeView}
+      onClickAddProgramme={onClickAddProgramme}
     ></ProgrammeManagementComponent>
   );
 };

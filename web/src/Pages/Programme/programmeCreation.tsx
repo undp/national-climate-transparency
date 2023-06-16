@@ -21,7 +21,7 @@ import '../../Styles/app.scss';
 import { RcFile, UploadFile } from 'antd/lib/upload';
 import validator from 'validator';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { CompanyRole } from '../../Casl/enums/company.role.enum';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { Sector } from '../../Casl/enums/sector.enum';
@@ -30,6 +30,7 @@ import { GHGSCoveredValues } from '../../Casl/enums/ghgs.covered.values.enum';
 import { GeoGraphicalLocations } from '../../Casl/enums/geolocations.enum';
 import { InfoCircle } from 'react-bootstrap-icons';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import moment from 'moment';
 
 type SizeType = Parameters<typeof Form>[0]['size'];
 
@@ -37,6 +38,7 @@ export const AddProgrammeComponent = () => {
   const { state } = useLocation();
   const [formOne] = Form.useForm();
   const [formTwo] = Form.useForm();
+  const navigate = useNavigate();
   const [formChecks] = Form.useForm();
   const { put, get, post } = useConnection();
   const { userInfoState } = useUserContext();
@@ -50,10 +52,20 @@ export const AddProgrammeComponent = () => {
   const [minViableCarbonPrice, setMinViableCarbonPrice] = useState<any>();
   const [current, setCurrent] = useState<number>(0);
   const [isUpdate, setIsUpdate] = useState(false);
-  const [includedInNDC, setIncludedInNDC] = useState(false);
-  const [includedInNAP, setIncludedInNAP] = useState(false);
+  const [includedInNDC, setIncludedInNDC] = useState<any>();
+  const [includedInNAP, setIncludedInNAP] = useState<any>();
   const [countries, setCountries] = useState<[]>([]);
   const [organisationsList, setOrganisationList] = useState<any[]>([]);
+  const [userOrgTaxId, setUserOrgTaxId] = useState<any>('');
+  const [startTime, setStartTime] = useState<any>();
+  const [endTime, setEndTime] = useState<any>();
+
+  const initialOrganisationOwnershipValues: any[] = [
+    {
+      organisation: userInfoState?.companyName,
+      proponentPercentage: 100,
+    },
+  ];
 
   const getCountryList = async () => {
     setLoadingList(true);
@@ -78,6 +90,11 @@ export const AddProgrammeComponent = () => {
       const response = await post('national/organisation/queryNames', { page: 1, size: 100 });
       if (response.data) {
         setOrganisationList(response?.data);
+        const userOrganisation = response?.data.find(
+          (company: any) => company.name === userInfoState?.companyName
+        );
+        const taxId = userOrganisation ? userOrganisation.taxId : null;
+        setUserOrgTaxId(taxId);
       }
     } catch (error: any) {
       console.log('Error in getting organisation list', error);
@@ -99,6 +116,7 @@ export const AddProgrammeComponent = () => {
   };
 
   const nextOne = (val: any) => {
+    console.log(val);
     setCurrent(current + 1);
     setStepOneData(val);
   };
@@ -108,59 +126,89 @@ export const AddProgrammeComponent = () => {
   };
 
   const onFinishStepOne = (values: any) => {
-    nextOne(values);
-    console.log('-------------------- form one values ------------------------');
-    console.log(values);
+    setLoading(true);
+    let programmeDetails: any;
+    const ownershipPercentage = values?.ownershipPercentage;
+    const totalPercentage = ownershipPercentage.reduce(
+      (sum: any, field: any) => sum + field.proponentPercentage,
+      0
+    );
+    const proponentPercentages = ownershipPercentage.map((item: any) => item.proponentPercentage);
+    const proponentTxIds = ownershipPercentage.slice(1).map((item: any) => item.organisation);
+    if (totalPercentage !== 100) {
+      message.open({
+        type: 'error',
+        content: t('addProgramme:proponentPercentValidation'),
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      setLoading(false);
+    } else {
+      programmeDetails = {
+        title: values?.title,
+        externalId: values?.externalId,
+        sectoralScope: values?.sectoralScope,
+        sector: values?.sector,
+        startTime: moment(values?.startTime).startOf('day').unix(),
+        endTime: moment(values?.endTime).endOf('day').unix(),
+        proponentTaxVatId: [userOrgTaxId, ...proponentTxIds],
+        proponentPercentage: proponentPercentages,
+        programmeProperties: {
+          buyerCountryEligibility: values?.buyerCountryEligibility,
+          geographicalLocation: values?.geographicalLocation,
+          greenHouseGasses: values?.greenHouseGasses,
+          ndcScope: values?.ndcScope === 'true' ? true : false,
+          includedInNDC: includedInNDC,
+          includedInNap: includedInNDC,
+        },
+      };
+      setLoading(false);
+      nextOne(programmeDetails);
+    }
   };
 
-  const onFinishStepTwo = (values: any) => {
-    nextOne(values);
+  const onFinishStepTwo = async (values: any) => {
+    setLoading(true);
+    console.log('form two values ------------------- ');
+    console.log(values);
+    console.log(stepOneData);
+    const programmeDetails: any = stepOneData;
+    programmeDetails.creditEst = Number(values?.creditEst);
+    programmeDetails.programmeProperties.estimatedProgrammeCostUSD = Number(
+      values?.estimatedProgrammeCostUSD
+    );
+    programmeDetails.programmeProperties.carbonPriceUSDPerTon = Number(
+      values?.minViableCarbonPrice
+    );
+    console.log(programmeDetails);
+    try {
+      const response: any = await post('national/programme/create', programmeDetails);
+      console.log('Programme creation -> ', response);
+      if (response?.statusText === 'SUCCESS') {
+        message.open({
+          type: 'success',
+          content: t('addProgramme:programmeCreationSuccess'),
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+      navigate('/programmeManagement/view');
+    } catch (error: any) {
+      console.log('Error in programme creation - ', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onFormTwoValuesChane = (changedValues: any, allValues: any) => {
     console.log('form two ============== > ', changedValues, allValues);
-    if (
-      allValues?.estimatedCredits !== undefined &&
-      allValues?.estimatedProgrammeCost !== undefined
-    ) {
-      setMinViableCarbonPrice(
-        Number(allValues?.estimatedProgrammeCost / allValues?.estimatedCredits).toFixed(2)
+    if (allValues?.creditEst !== undefined && allValues?.estimatedProgrammeCostUSD !== undefined) {
+      formTwo.setFieldValue(
+        'minViableCarbonPrice',
+        Number(allValues?.estimatedProgrammeCostUSD / allValues?.creditEst).toFixed(2)
       );
     }
   };
-
-  const getBase64 = (file: RcFile): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-
-  // const onFinishStepTwo = async (values: any) => {
-  //   // const requestData = { ...values, role: 'Admin', company: { ...stepOneData } };
-  //   setLoading(true);
-  //   try {
-  //   } catch (error: any) {
-  //     message.open({
-  //       type: 'error',
-  //       content: `${t('errorInAddUser')} ${error.message}`,
-  //       duration: 3,
-  //       style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-  //     });
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  const onCancel = () => {};
-
-  const initialOrganisationOwnershipValues: any[] = [
-    {
-      organisation: userInfoState?.companyName,
-      proponentPercentage: 100,
-    },
-  ];
 
   const onChangeNDCScope = (event: any) => {
     if (event?.target) {
@@ -274,7 +322,10 @@ export const AddProgrammeComponent = () => {
                       },
                     ]}
                   >
-                    <DatePicker size="large" />
+                    <DatePicker
+                      size="large"
+                      disabledDate={(currentDate: any) => currentDate < moment().startOf('day')}
+                    />
                   </Form.Item>
                   <Form.Item
                     label="GHGs Covered"
@@ -403,7 +454,7 @@ export const AddProgrammeComponent = () => {
                                   {organisationsList.map((organisation) => (
                                     <Select.Option
                                       key={organisation.companyId}
-                                      value={organisation.companyId}
+                                      value={organisation.taxId}
                                     >
                                       {organisation.name}
                                     </Select.Option>
@@ -489,8 +540,10 @@ export const AddProgrammeComponent = () => {
                     ]}
                   >
                     <Select size="large">
-                      {Object.values(SectoralScope).map((sectoralScope: any) => (
-                        <Select.Option value={sectoralScope}>{sectoralScope}</Select.Option>
+                      {Object.entries(SectoralScope).map(([key, value]) => (
+                        <Select.Option key={value} value={value}>
+                          {key.replace(/([A-Z])/g, ' $1').trim()}
+                        </Select.Option>
                       ))}
                     </Select>
                   </Form.Item>
@@ -505,7 +558,10 @@ export const AddProgrammeComponent = () => {
                       },
                     ]}
                   >
-                    <DatePicker size="large" />
+                    <DatePicker
+                      size="large"
+                      disabledDate={(currentDate: any) => currentDate < moment().endOf('day')}
+                    />
                   </Form.Item>
                   <Form.Item
                     wrapperCol={{ span: 13 }}
@@ -613,7 +669,13 @@ export const AddProgrammeComponent = () => {
                     </div>
                   </Col>
                   <Col md={8} lg={6} xl={5} className="included-val">
-                    <Radio.Group size="small" onChange={onInCludedNAPChange}>
+                    <Radio.Group
+                      size="small"
+                      onChange={onInCludedNAPChange}
+                      defaultValue={
+                        includedInNAP ? 'inNAP' : includedInNAP === false ? 'notInNAP' : undefined
+                      }
+                    >
                       <div className="yes-no-radio-container">
                         <Radio.Button className="yes-no-radio" value="inNAP">
                           {t('addProgramme:yes')}
@@ -630,7 +692,7 @@ export const AddProgrammeComponent = () => {
               </Col>
             </Row>
             <div className="steps-actions">
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" loading={loading}>
                 Next
               </Button>
             </div>
@@ -686,7 +748,7 @@ export const AddProgrammeComponent = () => {
                     label="Minimum Viable Carbon Price (USD per Ton) "
                     name="minViableCarbonPrice"
                   >
-                    <Input defaultValue={minViableCarbonPrice} disabled size="large" />
+                    <Input disabled size="large" />
                   </Form.Item>
                 </div>
               </Col>
@@ -720,15 +782,14 @@ export const AddProgrammeComponent = () => {
               </Col>
             </Row>
             <div className="steps-actions">
-              <Button
-                type="primary"
-                onClick={() => {
-                  setCurrent(current + 1);
-                }}
-              >
-                Next
+              <Button type="primary" htmlType="submit" loading={loading}>
+                SUMBIT
               </Button>
-              <Button className="action-btn" onClick={() => prevOne()} loading={loading}>
+              <Button
+                className="action-btn"
+                onClick={() => setCurrent(current + 1)}
+                loading={loading}
+              >
                 ADD ACTION
               </Button>
               {current === 1 && (
@@ -794,24 +855,28 @@ export const AddProgrammeComponent = () => {
                     </div>
                   ),
                 },
-                {
-                  title: (
-                    <div className="step-title-container">
-                      <div className="step-count">03</div>
-                      <div className="title">{t('addProgramme:addProgramme3')}</div>
-                    </div>
-                  ),
-                  description: current === 2 && <div>3</div>,
-                },
-                {
-                  title: (
-                    <div className="step-title-container">
-                      <div className="step-count">04</div>
-                      <div className="title">{t('addProgramme:addProgramme4')}</div>
-                    </div>
-                  ),
-                  description: current === 3 && <div>4</div>,
-                },
+                ...(current > 1
+                  ? [
+                      {
+                        title: (
+                          <div className="step-title-container">
+                            <div className="step-count">03</div>
+                            <div className="title">{t('addProgramme:addProgramme3')}</div>
+                          </div>
+                        ),
+                        description: current === 2 && <div>3</div>,
+                      },
+                      {
+                        title: (
+                          <div className="step-title-container">
+                            <div className="step-count">04</div>
+                            <div className="title">{t('addProgramme:addProgramme4')}</div>
+                          </div>
+                        ),
+                        description: current === 3 && <div>4</div>,
+                      },
+                    ]
+                  : []),
               ]}
             />
           </div>
