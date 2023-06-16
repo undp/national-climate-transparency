@@ -49,7 +49,6 @@ export const AddProgrammeComponent = () => {
   const [contactNoInput] = useState<any>();
   const [stepOneData, setStepOneData] = useState<any>();
   const [stepTwoData, setStepTwoData] = useState<any>();
-  const [minViableCarbonPrice, setMinViableCarbonPrice] = useState<any>();
   const [current, setCurrent] = useState<number>(0);
   const [isUpdate, setIsUpdate] = useState(false);
   const [includedInNDC, setIncludedInNDC] = useState<any>();
@@ -57,8 +56,7 @@ export const AddProgrammeComponent = () => {
   const [countries, setCountries] = useState<[]>([]);
   const [organisationsList, setOrganisationList] = useState<any[]>([]);
   const [userOrgTaxId, setUserOrgTaxId] = useState<any>('');
-  const [startTime, setStartTime] = useState<any>();
-  const [endTime, setEndTime] = useState<any>();
+  const [regionsList, setRegionsList] = useState<any[]>([]);
 
   const initialOrganisationOwnershipValues: any[] = [
     {
@@ -72,13 +70,25 @@ export const AddProgrammeComponent = () => {
     try {
       const response = await get('national/organisation/countries');
       if (response.data) {
-        const alpha2Names = response.data.map((item: any) => {
-          return item.alpha2;
-        });
         setCountries(response.data);
       }
     } catch (error: any) {
       console.log('Error in getting country list', error);
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
+  const getRegionList = async () => {
+    setLoadingList(true);
+    try {
+      const response = await post('national/organisation/regions', { page: 1, size: 100 });
+      if (response.data) {
+        const regionNames = response.data.map((item: any) => item.regionName);
+        setRegionsList(['National', ...regionNames]);
+      }
+    } catch (error: any) {
+      console.log('Error in getting regions list', error);
     } finally {
       setLoadingList(false);
     }
@@ -106,6 +116,7 @@ export const AddProgrammeComponent = () => {
   useEffect(() => {
     getOrganisationsDetails();
     getCountryList();
+    getRegionList();
   }, []);
 
   const normFile = (e: any) => {
@@ -230,7 +241,7 @@ export const AddProgrammeComponent = () => {
 
   const onChangeGeoLocation = (values: any[]) => {
     if (values.includes('National')) {
-      const buyerCountryValues = Object.values(GeoGraphicalLocations);
+      const buyerCountryValues = regionsList;
       const newBuyerValues = buyerCountryValues?.filter((item: any) => item !== 'National');
       formOne.setFieldValue('geographicalLocation', [...newBuyerValues]);
     }
@@ -603,9 +614,10 @@ export const AddProgrammeComponent = () => {
                       size="large"
                       maxTagCount={2}
                       onChange={onChangeGeoLocation}
+                      loading={loadingList}
                     >
-                      {Object.values(GeoGraphicalLocations).map((locations: any) => (
-                        <Select.Option value={locations}>{locations}</Select.Option>
+                      {regionsList.map((region: any) => (
+                        <Select.Option value={region}>{region}</Select.Option>
                       ))}
                     </Select>
                   </Form.Item>
