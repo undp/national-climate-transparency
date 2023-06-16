@@ -24,6 +24,8 @@ export class AsyncOperationsHandlerService {
           return this.registryClient.createProgramme(dataObject);
         case AsyncActionType.DocumentUpload.toString():
           return this.registryClient.addDocument(dataObject);
+        case AsyncActionType.ProgrammeAccept.toString():
+          return this.registryClient.programmeAccept(dataObject);
         case AsyncActionType.AddMitigation.toString():
           return this.registryClient.addMitigation(dataObject);
       }

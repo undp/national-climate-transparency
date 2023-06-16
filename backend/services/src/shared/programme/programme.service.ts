@@ -537,6 +537,8 @@ export class ProgrammeService {
       );
     }
 
+    const pr = await this.findById(d.programmeId)
+
     if (d.status == DocumentStatus.ACCEPTED) {
       throw new HttpException(
         this.helperService.formatReqMessagesString(
@@ -548,15 +550,28 @@ export class ProgrammeService {
     }
 
     if (documentAction.status == DocumentStatus.ACCEPTED) {
-      await this.asyncOperationsInterface.addAction({
-        actionType: AsyncActionType.DocumentUpload,
-        actionProps: {
-          type: this.helperService.enumToString(DocType, d.type),
-          data: d.url,
-          externalId: d.externalId,
-          actionId: d.actionId,
-        },
-      });
+
+      if (d.type == DocType.METHODOLOGY_DOCUMENT) {
+        await this.asyncOperationsInterface.addAction({
+          actionType: AsyncActionType.ProgrammeAccept,
+          actionProps: {
+            type: this.helperService.enumToString(DocType, d.type),
+            data: d.url,
+            externalId: d.externalId,
+            creditEst: Number(pr.creditEst),
+          },
+        });
+      } else {
+        await this.asyncOperationsInterface.addAction({
+          actionType: AsyncActionType.DocumentUpload,
+          actionProps: {
+            type: this.helperService.enumToString(DocType, d.type),
+            data: d.url,
+            externalId: d.externalId,
+            actionId: d.actionId,
+          },
+        });
+      }
     }
 
     const resp = await this.entityManager.transaction(async (em) => {
@@ -570,7 +585,7 @@ export class ProgrammeService {
             programmeId: d.programmeId,
           },
           {
-            currentStage: ProgrammeStage.ACCEPTED,
+            currentStage: ProgrammeStage.APPROVED,
           }
         );
       }

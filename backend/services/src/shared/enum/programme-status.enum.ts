@@ -3,7 +3,7 @@ export enum ProgrammeStage {
   // AWAITING_VALIDATION = 'AwaitingValidation',
   // AWAITING_VERIFICATION = 'AwaitingVerification', // Up to this not used
   AWAITING_AUTHORIZATION = "AwaitingAuthorization",
-  ACCEPTED = "Accepted",
+  APPROVED = "Approved",
   AUTHORISED = "Authorised",
   REJECTED = "Rejected",
 //   ISSUED = "Issued",

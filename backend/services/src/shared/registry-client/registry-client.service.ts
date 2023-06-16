@@ -43,6 +43,13 @@ export class RegistryClientService {
     return resp;
   }
 
+  public async programmeAccept(document: any) {
+    console.log('programme accept on registry', document)
+    const resp = await this.sendHttp("/national/programme/acceptProgramme", document);
+    console.log('Successfully programme accepted on registry', document.actionId)
+    return resp;
+  }
+
   private createNDCReq(ndc: NDCAction | NDCActionDto) {
     return {
         typeOfMitigation: ndc.typeOfMitigation,
@@ -94,7 +101,7 @@ export class RegistryClientService {
         "proponentTaxVatId": programme.proponentTaxVatId,
         "proponentPercentage": programme.proponentPercentage,
         "programmeProperties": props,
-        "creditEst": programme.creditEst,
+        // "creditEst": programme.creditEst,
       }
 
     if (programme.ndcAction) {
