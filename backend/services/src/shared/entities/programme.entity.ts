@@ -52,7 +52,13 @@ export class Programme implements EntitySubject {
   creditEst: number;
 
   @Column({ type: "decimal", precision: 10, scale: PRECISION, nullable: true })
+  emissionReductionExpected: number;
+
+  @Column({ type: "decimal", precision: 10, scale: PRECISION, nullable: true })
   creditIssued: number;
+
+  @Column({ type: "decimal", precision: 10, scale: PRECISION, nullable: true })
+  emissionReductionAchieved: number;
 
   // @Column({type: "decimal", precision: 10, scale: PRECISION, nullable: true})
   // creditPending: number;

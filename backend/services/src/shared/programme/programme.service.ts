@@ -158,7 +158,7 @@ export class ProgrammeService {
       programme.creditIssued = 0;
     }
 
-    if (programme.creditIssued + issue.issueAmount > programme.creditEst) {
+    if (parseFloat(String(programme.creditIssued)) + issue.issueAmount > programme.creditEst) {
       throw new HttpException(
         this.helperService.formatReqMessagesString(
           "programme.issuedCreditCannotExceedEstCredit",
@@ -168,12 +168,17 @@ export class ProgrammeService {
       );
     }
 
+    const issued = parseFloat(String(programme.creditIssued)) + issue.issueAmount;
+    programme.creditIssued = issued
+    programme.emissionReductionAchieved = issued
+
     const resp = await this.programmeRepo.update(
       {
         externalId: issue.externalId,
       },
       {
-        creditIssued: programme.creditIssued + issue.issueAmount,
+        emissionReductionAchieved: issued,
+        creditIssued: issued
       }
     );
 
@@ -224,7 +229,7 @@ export class ProgrammeService {
       auth.issueAmount = 0;
     }
 
-    if (programme.creditIssued + auth.issueAmount > programme.creditEst) {
+    if (parseFloat(String(programme.creditIssued)) + auth.issueAmount > programme.creditEst) {
       throw new HttpException(
         this.helperService.formatReqMessagesString(
           "programme.issuedCreditCannotExceedEstCredit",
@@ -234,12 +239,14 @@ export class ProgrammeService {
       );
     }
 
+    const issued = parseFloat(String(programme.creditIssued)) + auth.issueAmount;
     const resp = await this.programmeRepo.update(
       {
         externalId: auth.externalId,
       },
       {
-        creditIssued: programme.creditIssued + auth.issueAmount,
+        creditIssued: issued,
+        emissionReductionAchieved: issued,
         serialNo: auth.serialNo,
         currentStage: ProgrammeStage.AUTHORISED,
       }
@@ -377,6 +384,7 @@ export class ProgrammeService {
     ).getFullYear();
     programme.currentStage = ProgrammeStage.AWAITING_AUTHORIZATION;
     programme.companyId = companyIds;
+    programme.emissionReductionExpected = programme.creditEst
     programme.txTime = new Date().getTime();
     if (programme.proponentPercentage) {
       programme.creditOwnerPercentage = programme.proponentPercentage;
