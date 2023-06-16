@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Programme } from '../shared/entities/programme.entity';
 import { Action } from '../shared/casl/action.enum';
@@ -11,9 +11,11 @@ import { QueryDto } from '../shared/dto/query.dto';
 import { ConstantUpdateDto } from '../shared/dto/constants.update.dto';
 import { ApiKeyJwtAuthGuard } from '../shared/auth/guards/api-jwt-key.guard';
 import { NDCActionDto } from '../shared/dto/ndc.action.dto';
-import { JwtAuthGuard } from 'src/shared/auth/guards/jwt-auth.guard';
-import { ProgrammeDocumentDto } from 'src/shared/dto/programme.document.dto';
-import { DocumentAction } from 'src/shared/dto/document.action';
+import { JwtAuthGuard } from '../shared/auth/guards/jwt-auth.guard';
+import { ProgrammeDocumentDto } from '../shared/dto/programme.document.dto';
+import { DocumentAction } from '../shared/dto/document.action';
+import { ProgrammeAuth } from '../shared/dto/programme.approve';
+import { ProgrammeIssue } from '../shared/dto/programme.issue';
 
 @ApiTags('Programme')
 @ApiBearerAuth()
@@ -98,6 +100,22 @@ export class ProgrammeController {
     @Post('updateConfigs')
     async updateConfigs(@Body() config: ConstantUpdateDto) {
         return this.programmeService.updateCustomConstants(config.type, config);
+    }
+
+    @ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    @Put('authProgramme')
+    async authProgramme(@Body() auth: ProgrammeAuth) {
+        return this.programmeService.authProgramme(auth);
+    }
+
+    @ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
+    @Put('issueCredit')
+    async issueCredit(@Body() issue: ProgrammeIssue) {
+        return this.programmeService.issueCredit(issue);
     }
 
     // @ApiBearerAuth()

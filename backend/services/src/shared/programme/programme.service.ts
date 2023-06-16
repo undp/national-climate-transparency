@@ -42,6 +42,9 @@ import { AsyncActionType } from "../enum/async.action.type.enum";
 import { ProgrammeDocumentDto } from "../dto/programme.document.dto";
 import { DocumentAction } from "../dto/document.action";
 import { NDCActionType } from "../enum/ndc.action.enum";
+import { ProgrammeAuth } from "../dto/programme.approve";
+import { ProgrammeIssue } from "../dto/programme.issue";
+import { BasicResponseDto } from "../dto/basic.response.dto";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -49,6 +52,7 @@ export declare function PrimaryGeneratedColumn(
 
 @Injectable()
 export class ProgrammeService {
+
   private userNameCache: any = {};
 
   constructor(
@@ -126,6 +130,84 @@ export class ProgrammeService {
       programmeId: id,
     });
   }
+
+  async issueCredit(issue: ProgrammeIssue) {
+    
+    const programme = await this.findByExternalId(issue.externalId);
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (!programme.creditIssued) {
+      programme.creditIssued = 0;
+    }
+
+    if (programme.creditIssued + issue.issueAmount > programme.creditEst) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.issuedCreditCannotExceedEstCredit",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const resp = await this.programmeRepo.update({
+      externalId: issue.externalId
+    }, {
+      creditIssued: programme.creditIssued + issue.issueAmount
+    });
+
+    return new DataResponseDto(HttpStatus.OK, programme);
+  }
+
+  async authProgramme(auth: ProgrammeAuth) {
+    const programme = await this.findByExternalId(auth.externalId);
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (!programme.creditIssued) {
+      programme.creditIssued = 0;
+    }
+
+    if (!auth.issueAmount) {
+      auth.issueAmount = 0
+    }
+
+    if (programme.creditIssued + auth.issueAmount > programme.creditEst) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.issuedCreditCannotExceedEstCredit",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const resp = await this.programmeRepo.update({
+      externalId: auth.externalId
+    }, {
+      creditIssued: programme.creditIssued + auth.issueAmount,
+      serialNo: auth.serialNo,
+      currentStage: ProgrammeStage.AUTHORISED
+    });
+
+    return new DataResponseDto(HttpStatus.OK, programme);
+  }
+
 
   async uploadDocument(type: DocType, id: string, data: string) {
 
