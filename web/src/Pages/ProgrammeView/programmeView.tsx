@@ -1,20 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  Row,
-  Col,
-  Card,
-  Progress,
-  Tag,
-  Steps,
-  message,
-  Skeleton,
-  Button,
-  Modal,
-  Select,
-  Radio,
-  Space,
-  Form,
-} from 'antd';
+import { Row, Col, Card, Progress, Tag, Steps, message, Skeleton, Button } from 'antd';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './programmeView.scss';
@@ -31,27 +16,13 @@ import {
   QrcodeOutlined,
   SafetyOutlined,
 } from '@ant-design/icons';
-import {
-  CertBGColor,
-  CertColor,
-  DevBGColor,
-  DevColor,
-  GovBGColor,
-  GovColor,
-  RootBGColor,
-  RootColor,
-  ViewBGColor,
-  ViewColor,
-} from '../Common/role.color.constants';
+import { DevBGColor, DevColor } from '../Common/role.color.constants';
 import { DateTime } from 'luxon';
 import Geocoding from '@mapbox/mapbox-sdk/services/geocoding';
 import TextArea from 'antd/lib/input/TextArea';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { ShieldCheck } from 'react-bootstrap-icons';
-import { creditUnit, dateFormat, dateTimeFormat } from '../Common/configs';
 import ProgrammeIssueForm from '../../Components/Models/ProgrammeIssueForm';
-import ProgrammeTransferForm from '../../Components/Models/ProgrammeTransferForm';
-import ProgrammeRetireForm from '../../Components/Models/ProgrammeRetireForm';
 import ProgrammeRevokeForm from '../../Components/Models/ProgrammeRevokeForm';
 import OrganisationStatus from '../../Components/Organisation/organisationStatus';
 import {
@@ -63,21 +34,16 @@ import {
   MarkerData,
   Programme,
   ProgrammeStage,
-  ProgrammeTransfer,
-  RetireType,
-  TxType,
   TypeOfMitigation,
   UnitField,
   addCommSep,
   addSpaces,
   getFinancialFields,
   getGeneralFields,
-  getRetirementTypeString,
   getStageEnumVal,
   getStageTagType,
   sumArray,
 } from '@undp/carbon-library';
-import TimelineBody from '../../Components/TimelineBody/timeLineBody';
 import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
 import RoleIcon from '../../Components/RoleIcon/role.icon';
 import { CompanyState } from '../../Casl/enums/company.state.enum';
