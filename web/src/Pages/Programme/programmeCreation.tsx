@@ -22,7 +22,6 @@ import { RcFile, UploadFile } from 'antd/lib/upload';
 import validator from 'validator';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CompanyRole } from '../../Casl/enums/company.role.enum';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { Sector } from '../../Casl/enums/sector.enum';
 import { SectoralScope } from '../../Casl/enums/sectoral.scope.enum';
