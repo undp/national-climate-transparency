@@ -47,7 +47,7 @@ export class FileLocationService implements LocationInterface {
         region.countryAlpha2 = columns[countryIndex].trim();
         region.regionName = columns[nameIndex].trim();
         region.geoCoordinates = [ Number(columns[longitudeIndex].trim()), Number(columns[latitudeIndex].trim()) ];
-        region.lang = columns[nameIndex].trim();
+        region.lang = columns[languageIndex].trim();
         region.key = region.regionName + '_' + region.lang;
         data.push(region);
       }
