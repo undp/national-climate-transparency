@@ -1039,6 +1039,8 @@ export class AggregateAPIService {
     lastTimeForWhere,
     statCache
   ) {
+
+    console.log('get Emissions', stat, companyId)
     if (
       [
         StatType.MY_TOTAL_EMISSIONS
@@ -1048,6 +1050,16 @@ export class AggregateAPIService {
         ? (stat.statFilter.onlyMine = true)
         : (stat.statFilter = { onlyMine: true });
     }
+
+    let filterAnd = this.getFilterAndByStatFilter(
+      stat.statFilter,
+      {
+        value: companyId,
+        key: "companyId",
+        operation: "ANY",
+      },
+      "createdTime"
+    );
 
     return await this.genAggregateTypeOrmQuery(
       this.programmeRepo,
@@ -1067,13 +1079,13 @@ export class AggregateAPIService {
           mineCompanyId: stat?.statFilter?.onlyMine ? companyId : undefined,
         },
       ],
-      null,
+      filterAnd,
       null,
       stat.statFilter?.timeGroup ? { key: "time_group", order: "ASC" } : null,
       abilityCondition,
       lastTimeForWhere,
       statCache,
-      [("createdTime"), "createdTime"],
+      ["createdTime"],
       stat.statFilter?.timeGroup ? "createdAt" : undefined,
       stat.statFilter?.timeGroup ? "day" : undefined
     );

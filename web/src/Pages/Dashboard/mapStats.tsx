@@ -40,9 +40,9 @@ const MapStats: FC<MapStatsProps> = (props: MapStatsProps) => {
   } = props;
 
   const accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
-  ? process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
-  : '';
-  
+    ? process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
+    : '';
+
   return (
     <div className="stastics-and-pie-card height-map-rem">
       <div className="pie-charts-top">

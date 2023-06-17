@@ -368,7 +368,10 @@ const Dashboard = () => {
             );
             newd[key] = {
               data: dx,
-              time: moment(parseInt(obj.last)).fromNow(),
+              time:
+                !obj.last || obj.last === '0' || obj.last === 0
+                  ? '0'
+                  : moment(parseInt(obj.last)).fromNow(),
             };
           }
         }
@@ -478,6 +481,10 @@ const Dashboard = () => {
   useEffect(() => {
     getData();
   }, []);
+
+  useEffect(() => {
+    getData();
+  }, [startTime, endTime]);
 
   return (
     <div className="dashboard-main-container">
