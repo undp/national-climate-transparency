@@ -6,6 +6,8 @@ import { NdcFinancing } from "../dto/ndc.financing";
 import { NDCReports } from "../dto/ndc.reports";
 import { SolarProperties } from "../dto/solar.properties";
 import { NDCActionType } from "../enum/ndc.action.enum";
+import { NDCStatus } from "../enum/ndc.status";
+import { Sector } from "../enum/sector.enum";
 import { TypeOfMitigation } from "../enum/typeofmitigation.enum";
 import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
@@ -89,6 +91,12 @@ export class NDCAction {
 
   @Column({ nullable: true })
   constantVersion: string;
+
+  @Column({ nullable: true })
+  sector: Sector;
+
+  @Column({ nullable: true })
+  status: NDCStatus
 
   externalId: string;
 }

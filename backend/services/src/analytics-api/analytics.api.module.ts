@@ -11,6 +11,7 @@ import { AuthModule } from "../shared/auth/auth.module";
 import { UtilModule } from "../shared/util/util.module";
 import { AggregateAPIService } from "./aggregate.api.service";
 import { Company } from "../shared/entities/company.entity";
+import { NDCActionViewEntity } from "../shared/entities/ndc.view.entity";
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { Company } from "../shared/entities/company.entity";
     TypeOrmModule.forFeature([
       Programme,
       ProgrammeTransfer,
-      Company
+      Company,
+      NDCActionViewEntity
     ]),
     AuthModule,
     CaslModule,

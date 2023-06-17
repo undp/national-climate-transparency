@@ -16,11 +16,12 @@ import { NDCAction } from '../entities/ndc.action.entity';
 import { ProgrammeDocument } from '../dto/programme.document';
 import { FileHandlerModule } from '../file-handler/filehandler.module';
 import { AsyncOperationsModule } from '../async-operations/async-operations.module';
+import { NDCActionViewEntity } from '../entities/ndc.view.entity';
 
 @Module({
   imports: [
     CaslModule, 
-    TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, NDCAction, ProgrammeDocument]), 
+    TypeOrmModule.forFeature([Programme, ProgrammeTransfer, ConstantEntity, Company, ProgrammeQueryEntity, NDCAction, ProgrammeDocument, NDCActionViewEntity]), 
     UtilModule,
     forwardRef(() => UserModule),
     forwardRef(() => CompanyModule),
