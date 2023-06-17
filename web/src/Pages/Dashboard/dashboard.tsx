@@ -32,6 +32,7 @@ const Dashboard = () => {
 
   const colorsStatus = ['#C6A7FE', '#FF8183', '#CDCDCD', '#7FEABF', '#B7A4FE'];
 
+  const TTSuffix = userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER ? 'My' : '';
   const genPayload = () => {
     const stats = [];
     for (const item in StatsCardsTypes) {
@@ -247,7 +248,7 @@ const Dashboard = () => {
       aggType: StatsCardsTypes.AGG_NDC_ACTION_BY_TYPE,
       configs: {
         title: t('ndcType'),
-        tooltip: t('ndcTypeTT'),
+        tooltip: t('ndcTypeTT' + TTSuffix),
         colors: colors,
       },
       callbacks: {
@@ -259,7 +260,7 @@ const Dashboard = () => {
       aggType: StatsCardsTypes.TOTAL_EMISSIONS,
       configs: {
         title: t('titleEmission'),
-        tooltip: t('titleEmissionTT'),
+        tooltip: t('titleEmissionTT' + TTSuffix),
         subTitle: '(tCO2e)',
         icon: <Clipboard2Pulse color={'#5DC380'} size={80} />,
       },
@@ -272,7 +273,7 @@ const Dashboard = () => {
       aggType: StatsCardsTypes.AGG_NDC_ACTION_BY_SECTOR,
       configs: {
         title: t('ndcSector'),
-        tooltip: t('ndcSectorTT'),
+        tooltip: t('ndcSectorTT' + TTSuffix),
         colors: colors,
         dataLabelField: 'sector',
         dataValField: 'count',
@@ -287,7 +288,7 @@ const Dashboard = () => {
       configs: {
         title: t('creditsSector'),
         subTitle: '(ITMOs)',
-        tooltip: t('creditsSectorTT'),
+        tooltip: t('creditsSectorTT' + TTSuffix),
         colors: colors,
         dataLabelField: 'sector',
         dataValField: 'totalestcredit',
@@ -301,7 +302,7 @@ const Dashboard = () => {
       aggType: StatsCardsTypes.PROGRAMME_LOCATION,
       configs: {
         title: t('programmeLocation'),
-        tooltip: t('programmeLocationTT'),
+        tooltip: t('programmeLocationTT' + TTSuffix),
         colors: colorsStatus,
         dataLabelField: 'sector',
         dataValField: 'totalestcredit',
