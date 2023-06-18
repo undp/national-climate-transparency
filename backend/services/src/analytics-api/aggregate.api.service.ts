@@ -818,7 +818,7 @@ export class AggregateAPIService {
           whereCW.push(`p."requestId" != 'null'`);
           if (stat.statFilter && stat.statFilter.onlyMine) {
             whereCW.push(
-              `${companyId} = ANY(b."fromCompanyId"))`
+              `${companyId} = b."fromCompanyId"`
             );
           }
           if (stat.statFilter && stat.statFilter.startTime) {
@@ -873,7 +873,7 @@ export class AggregateAPIService {
       console.log("Last time hit from the cache");
       colTime = lastTimeForWhere[cacheKey];
     } else {
-      colTime = await this.getLastTime(this.programmeRepo, tableName, timeWhere, tc);
+      colTime = await this.getLastTime(this.investmentRepo, tableName, timeWhere, tc);
       lastTimeForWhere[cacheKey] = colTime;
     }
     return colTime;
@@ -1224,19 +1224,23 @@ export class AggregateAPIService {
 
     let filterAnd = this.getFilterAndByStatFilter(
       stat.statFilter,
-      null,
+      {
+        value: companyId,
+        key: "fromCompanyId",
+        operation: "=",
+      },
       "createdTime"
     );
 
     let filterOr = undefined;
-    if (stat.statFilter && stat.statFilter.onlyMine) {
-      filterOr = [];
-      filterOr.push({
-        value: companyId,
-        key: "fromCompanyId",
-        operation: "=",
-      });
-    }
+    // if (stat.statFilter && stat.statFilter.onlyMine) {
+    //   filterOr = [];
+    //   filterOr.push({
+    //     value: companyId,
+    //     key: "fromCompanyId",
+    //     operation: "=",
+    //   });
+    // }
 
     return await this.genAggregateTypeOrmQuery(
       this.investmentRepo,
