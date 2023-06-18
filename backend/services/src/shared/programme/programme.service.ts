@@ -58,6 +58,14 @@ import { BasicResponseDto } from "../dto/basic.response.dto";
 import { ProgrammeReject } from "../dto/programme.reject";
 import { NDCStatus } from "../enum/ndc.status";
 import { NDCActionViewEntity } from "../entities/ndc.view.entity";
+import { InvestmentRequestDto } from "../dto/investment.request.dto";
+import { User } from "../entities/user.entity";
+import { Investment } from "../entities/investment.entity";
+import { InvestmentStatus } from "../enum/investment.status";
+import { InvestmentApprove } from "../dto/investment.approve";
+import { InvestmentReject } from "../dto/investment.reject";
+import { InvestmentCancel } from "../dto/investment.cancel";
+import { InvestmentView } from "../entities/investment.view.entity";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -65,6 +73,7 @@ export declare function PrimaryGeneratedColumn(
 
 @Injectable()
 export class ProgrammeService {
+
   private userNameCache: any = {};
 
   constructor(
@@ -94,6 +103,12 @@ export class ProgrammeService {
     private documentRepo: Repository<ProgrammeDocument>,
     @InjectRepository(ConstantEntity)
     private constantRepo: Repository<ConstantEntity>,
+
+    @InjectRepository(Investment)
+    private investmentRepo: Repository<Investment>,
+    @InjectRepository(InvestmentView)
+    private investmentViewRepo: Repository<InvestmentView>,
+
     private asyncOperationsInterface: AsyncOperationsInterface,
     @InjectEntityManager() private entityManager: EntityManager,
     private logger: Logger
@@ -103,6 +118,326 @@ export class ProgrammeService {
     const data = instanceToPlain(programmeDto);
     this.logger.verbose("Converted programme", JSON.stringify(data));
     return plainToClass(Programme, data);
+  }
+
+
+  private async doTransfer(
+    transfer: Investment,
+    user: string,
+    programme: Programme
+  ) {
+   
+    const companyIndex = programme.companyId.indexOf(transfer.fromCompanyId);
+
+    // Cannot be <= 0 
+    programme.creditOwnerPercentage[companyIndex] -= transfer.percentage
+    programme.creditOwnerPercentage.push(transfer.percentage);
+
+    programme.proponentPercentage[companyIndex] -= transfer.percentage
+    programme.proponentPercentage.push(transfer.percentage);
+
+    programme.companyId.push(Number(transfer.toCompanyId));
+
+    const savedProgramme = await this.entityManager
+      .transaction(async (em) => {
+        await em.update(
+          Investment,
+          {
+            requestId: transfer.requestId
+          }, {
+            status: InvestmentStatus.APPROVED,
+            txTime: new Date().getTime()
+          }
+        )
+        return await em.update(
+          Programme,
+          {
+            programmeId: programme.programmeId,
+          },
+          {
+            creditOwnerPercentage: programme.creditOwnerPercentage,
+            proponentPercentage: programme.proponentPercentage,
+            companyId: programme.companyId,
+            txTime: new Date().getTime(),
+          }
+        );
+      })
+      .catch((err: any) => {
+        console.log(err);
+        if (err instanceof QueryFailedError) {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        } else {
+          this.logger.error(`Programme add error ${err}`);
+        }
+        return err;
+      });
+
+    if (savedProgramme.affected > 0) {
+      return new DataResponseDto(HttpStatus.OK, programme);
+    }
+
+    throw new HttpException(
+      this.helperService.formatReqMessagesString(
+        "programme.internalErrorStatusUpdating",
+        []
+      ),
+      HttpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
+  
+  async addInvestment(req: InvestmentRequestDto, requester: User) {
+    this.logger.log(
+      `Programme investment request by ${requester.companyId}-${
+        requester.id
+      } received ${JSON.stringify(req)}`
+    );
+
+    if (
+      req.percentage &&
+      req.percentage.reduce((a, b) => a + b, 0) <= 0
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.percentage>0",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (req.fromCompanyIds.length > 1) {
+      if (!req.percentage) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString(
+            "programme.percentagesNeedsToDefineForMultipleComp",
+            []
+          ),
+          HttpStatus.BAD_REQUEST
+        );
+      } else if (req.fromCompanyIds.length != req.percentage.length) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString(
+            "programme.invalidCompPercentageForGivenComp",
+            []
+          ),
+          HttpStatus.BAD_REQUEST
+        );
+      }
+    }
+
+    if (
+      req.fromCompanyIds &&
+      req.percentage &&
+      req.fromCompanyIds.length != req.percentage.length
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.invalidCompPercentageForGivenComp",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const indexTo = req.fromCompanyIds.indexOf(req.toCompanyId);
+    if (indexTo >= 0 && req.percentage[indexTo] > 0) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.cantTransferCreditWithinSameComp",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const programme = await this.findById(req.programmeId);
+
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.programmeNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    this.logger.verbose(`Investment on programme ${JSON.stringify(programme)}`);
+
+    if (
+      requester.companyRole != CompanyRole.GOVERNMENT &&
+      ![...req.fromCompanyIds, req.toCompanyId].includes(requester.companyId)
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.cantInitiateTransferForOtherComp",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (!req.fromCompanyIds) {
+      req.fromCompanyIds = programme.companyId;
+    }
+    if (!programme.creditOwnerPercentage) {
+      programme.creditOwnerPercentage = [100];
+    }
+
+    if (!programme.proponentPercentage) {
+      programme.proponentPercentage = [100];
+    }
+
+    const requestedCompany = await this.companyService.findByCompanyId(
+      requester.companyId
+    );
+
+    const allInvestmentList: Investment[] = [];
+    const autoApproveInvestmentList: Investment[] = [];
+
+    const hostAddress = this.configService.get("host");
+
+    const ownershipMap = {};
+    const propPerMap = {}
+
+    for (const i in programme.companyId) {
+      ownershipMap[programme.companyId[i]] = programme.creditOwnerPercentage[i];
+      propPerMap[programme.companyId[i]] = programme.proponentPercentage[i];
+    }
+
+    programme.companyId = programme.companyId.map(c => Number(c))
+    const fromCompanyListMap = {};
+
+    const percSum = req.percentage.reduce((a, b) => a + b, 0)
+    for (const j in req.fromCompanyIds) {
+      const fromCompanyId = req.fromCompanyIds[j];
+      this.logger.log(
+        `Transfer request from ${fromCompanyId} to programme owned by ${programme.companyId}`
+      );
+      const fromCompany = await this.companyService.findByCompanyId(
+        fromCompanyId
+      );
+      fromCompanyListMap[fromCompanyId] = fromCompany;
+
+      if (programme.companyId.indexOf(fromCompanyId) < 0) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString(
+            "programme.fromCompInReqIsNotOwnerOfProgramme",
+            []
+          ),
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      if (!ownershipMap[fromCompanyId] || ownershipMap[fromCompanyId] < req.percentage[j] || !propPerMap[fromCompanyId] || propPerMap[fromCompanyId] < req.percentage) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString(
+            "programme.invalidCompPercentageForGivenComp",
+            []
+          ),
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      const investment = plainToClass(Investment, req);
+      investment.programmeId = req.programmeId;
+      investment.fromCompanyId = fromCompanyId;
+      investment.toCompanyId = req.toCompanyId;
+      investment.initiator = requester.id;
+      investment.initiatorCompanyId = requester.companyId;
+      investment.txTime = new Date().getTime();
+      investment.createdTime = investment.txTime;
+      investment.percentage = req.percentage[j];
+      investment.amount = Math.round(req.amount * req.percentage[j]/percSum)
+      investment.status = InvestmentStatus.PENDING;
+      if (requester.companyId == fromCompanyId) {
+        autoApproveInvestmentList.push(investment);
+      }
+      allInvestmentList.push(investment);
+    }
+    const results = await this.investmentRepo.insert(allInvestmentList);
+    console.log(results);
+    for (const i in allInvestmentList) {
+      allInvestmentList[i].requestId = results.identifiers[i].requestId;
+    }
+
+    let updateProgramme = undefined;
+    for (const trf of autoApproveInvestmentList) {
+      this.logger.log(`Investment send received ${trf}`);
+      const toCompany = await this.companyService.findByCompanyId(
+        trf.toCompanyId
+      );
+      console.log("To Company", toCompany);
+      updateProgramme = (
+        await this.doTransfer(
+          trf,
+          `${this.getUserRef(requester)}#${toCompany.companyId}#${
+            toCompany.name
+          }#${fromCompanyListMap[trf.fromCompanyId].companyId}#${
+            fromCompanyListMap[trf.fromCompanyId].name
+          }`,
+          programme
+        )
+      ).data;
+      // await this.emailHelperService.sendEmailToOrganisationAdmins(
+      //   trf.toCompanyId,
+      //   EmailTemplates.CREDIT_SEND_DEVELOPER,
+      //   {
+      //     organisationName: requestedCompany.name,
+      //     credits: trf.creditAmount,
+      //     programmeName: programme.title,
+      //     serialNumber: programme.serialNo,
+      //     pageLink: hostAddress + "/creditTransfers/viewAll",
+      //   }
+      // );
+    }
+    if (updateProgramme) {
+      return new DataResponseDto(HttpStatus.OK, updateProgramme);
+    }
+
+    // allInvestmentList.forEach(async (transfer) => {
+    //   if (requester.companyRole === CompanyRole.GOVERNMENT) {
+    //     if (transfer.toCompanyId === requester.companyId) {
+    //       await this.emailHelperService.sendEmailToOrganisationAdmins(
+    //         transfer.fromCompanyId,
+    //         EmailTemplates.CREDIT_TRANSFER_REQUISITIONS,
+    //         {
+    //           organisationName: requestedCompany.name,
+    //           credits: transfer.creditAmount,
+    //           programmeName: programme.title,
+    //           serialNumber: programme.serialNo,
+    //           pageLink: hostAddress + "/creditTransfers/viewAll",
+    //         }
+    //       );
+    //     } else {
+    //       await this.emailHelperService.sendEmailToOrganisationAdmins(
+    //         transfer.fromCompanyId,
+    //         EmailTemplates.CREDIT_TRANSFER_GOV,
+    //         {
+    //           credits: transfer.creditAmount,
+    //           programmeName: programme.title,
+    //           serialNumber: programme.serialNo,
+    //           pageLink: hostAddress + "/creditTransfers/viewAll",
+    //           government: requestedCompany.name,
+    //         },
+    //         transfer.toCompanyId
+    //       );
+    //     }
+    //   } else if (requester.companyId != transfer.fromCompanyId) {
+    //     await this.emailHelperService.sendEmailToOrganisationAdmins(
+    //       transfer.fromCompanyId,
+    //       EmailTemplates.CREDIT_TRANSFER_REQUISITIONS,
+    //       {
+    //         organisationName: requestedCompany.name,
+    //         credits: transfer.creditAmount,
+    //         programmeName: programme.title,
+    //         serialNumber: programme.serialNo,
+    //         pageLink: hostAddress + "/creditTransfers/viewAll",
+    //       }
+    //     );
+    //   }
+    // });
+
+    return new DataListResponseDto(allInvestmentList, allInvestmentList.length);
   }
 
   private async getCreditRequest(
@@ -391,7 +726,7 @@ export class ProgrammeService {
         );
       }
 
-      companyIds.push(projectCompany.companyId);
+      companyIds.push(Number(projectCompany.companyId));
       companyNames.push(projectCompany.name);
     }
 
@@ -1065,22 +1400,256 @@ export class ProgrammeService {
 
   private populateExtraFields = async (programme: Programme) => {
     const programmeProperties = programme.programmeProperties;
-    const address = [];
-    if (programmeProperties.geographicalLocation) {
-      for (
-        let index = 0;
-        index < programmeProperties.geographicalLocation.length;
-        index++
-      ) {
-        address.push(programmeProperties.geographicalLocation[index]);
-      }
-    }
-    await this.locationService
-      .getCoordinatesForRegion([...address])
+    programme.geographicalLocationCordintes = await this.locationService
+      .getCoordinatesForRegion(programmeProperties.geographicalLocation)
       .then((response: any) => {
         console.log("response from forwardGeoCoding function -> ", response);
-        programme.geographicalLocationCordintes = [...response];
+        return [...response];
       });
     programme.createdTime = new Date().getTime();
   };
+
+  async queryInvestment(query: QueryDto, abilityCondition: any, user: User) {
+    const resp = await this.investmentViewRepo
+      .createQueryBuilder("investment")
+      .where(
+        this.helperService.generateWhereSQL(
+          query,
+          this.helperService.parseMongoQueryToSQLWithTable(
+            "investment",
+            abilityCondition
+          )
+        )
+      )
+      .orderBy(
+        query?.sort?.key &&
+          this.helperService.generateSortCol(query?.sort?.key),
+        query?.sort?.order,
+        query?.sort?.nullFirst !== undefined
+          ? query?.sort?.nullFirst === true
+            ? "NULLS FIRST"
+            : "NULLS LAST"
+          : undefined
+      )
+      .offset(query.size * query.page - query.size)
+      .limit(query.size)
+      .getManyAndCount();
+    return new DataListResponseDto(
+      resp.length > 0 ? resp[0] : undefined,
+      resp.length > 1 ? resp[1] : undefined
+    );
+  }
+  async investmentCancel(req: InvestmentCancel, requester: User) {
+    this.logger.log(
+      `Investment cancel by ${requester.companyId}-${
+        requester.id
+      } received ${JSON.stringify(req)}`
+    );
+
+    const investment = await this.investmentRepo.findOneBy({
+      requestId: req.requestId,
+    });
+
+    if (!investment) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.investmentReqDoesNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (investment.status != InvestmentStatus.PENDING) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.acceptOrRejCancelledReq",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const result = await this.investmentRepo
+      .update(
+        {
+          requestId: req.requestId,
+          status: InvestmentStatus.PENDING,
+        },
+        {
+          status: InvestmentStatus.CANCELLED,
+          txTime: new Date().getTime(),
+          txRef: `${req.comment}#${requester.companyId}#${requester.id}`,
+        }
+      )
+      .catch((err) => {
+        this.logger.error(err);
+        return err;
+      });
+
+    if (result.affected > 0) {
+      return new BasicResponseDto(
+        HttpStatus.OK,
+        this.helperService.formatReqMessagesString(
+          "programme.investmentCancelSuccess",
+          []
+        )
+      );
+    }
+    return new BasicResponseDto(
+      HttpStatus.BAD_REQUEST,
+      this.helperService.formatReqMessagesString(
+        "programme.investmentReqNotExistinGiv",
+        []
+      )
+    );
+  }
+
+  async investmentReject(req: InvestmentReject, approver: User) {
+    this.logger.log(
+      `Investment reject ${JSON.stringify(req)} ${approver.companyId}`
+    );
+
+    const investment = await this.investmentRepo.findOneBy({
+      requestId: req.requestId,
+    });
+
+    if (!investment) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.investmentReqDoesNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (investment.status != InvestmentStatus.PENDING) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.acceptOrRejCancelledReq",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (
+      investment.fromCompanyId != approver.companyId
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.invalidApproverForInvestmentReq",
+          []
+        ),
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const result = await this.investmentRepo
+      .update(
+        {
+          requestId: req.requestId,
+          status: InvestmentStatus.PENDING,
+        },
+        {
+          status: InvestmentStatus.REJECTED,
+          txTime: new Date().getTime(),
+          txRef: `${req.comment}#${approver.companyId}#${approver.id}`,
+        }
+      )
+      .catch((err) => {
+        this.logger.error(err);
+        return err;
+      });
+
+
+    if (result.affected > 0) {
+      return new BasicResponseDto(
+        HttpStatus.OK,
+        this.helperService.formatReqMessagesString(
+          "programme.investmentReqRejectSuccess",
+          []
+        )
+      );
+    }
+
+    throw new HttpException(
+      this.helperService.formatReqMessagesString(
+        "programme.noPendReqFound",
+        []
+      ),
+      HttpStatus.BAD_REQUEST
+    );
+  }
+  async investmentApprove(req: InvestmentApprove, approver: User) {
+    const investment = await this.investmentRepo.findOneBy({
+      requestId: req.requestId,
+    });
+
+    if (!investment) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.investmentReqDoesNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (investment.status == InvestmentStatus.CANCELLED) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.acceptOrRejAlreadyCancelled",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (investment.status == InvestmentStatus.APPROVED) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.investmentAlreadyApproved",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (
+      investment.fromCompanyId != approver.companyId
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.invalidApproverForInvestmentReq",
+          []
+        ),
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const receiver = await this.companyService.findByCompanyId(
+      investment.toCompanyId
+    );
+    const giver = await this.companyService.findByCompanyId(
+      investment.fromCompanyId
+    );
+
+    const initiatorCompanyDetails = await this.companyService.findByCompanyId(
+      investment.initiatorCompanyId
+    );
+
+    const programme = await this.findById(investment.programmeId);
+
+    const transferResult = await this.doTransfer(
+      investment,
+      `${this.getUserRef(approver)}#${receiver.companyId}#${receiver.name}#${
+        giver.companyId
+      }#${giver.name}`,
+      programme
+    );
+
+    return transferResult;
+  }
 }

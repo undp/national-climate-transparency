@@ -96,7 +96,7 @@ const Dashboard = () => {
           }}
         />
       ),
-      startColor: '#5DC3801E',
+      startColor: '#EDF8F0',
       endColor: '#5DC380',
     });
 
@@ -105,12 +105,13 @@ const Dashboard = () => {
   };
 
   const countS = ['all', ['>=', ['get', 'count'], 0]];
-  const pending = ['all', ['==', ['get', 'stage'], 'AwaitingAuthorization']];
-  const authorised = ['all', ['==', ['get', 'stage'], 'Authorised']];
-  const rejected = ['all', ['==', ['get', 'stage'], 'Rejected']];
-  const approved = ['all', ['==', ['get', 'stage'], 'Approved']];
 
   const mapDataParse = (statData: any, labelField: string, valueField: string) => {
+    const pending = ['all', ['==', ['get', 'stage'], 'AwaitingAuthorization']];
+    const authorised = ['all', ['==', ['get', 'stage'], 'Authorised']];
+    const rejected = ['all', ['==', ['get', 'stage'], 'Rejected']];
+    const approved = ['all', ['==', ['get', 'stage'], 'Approved']];
+
     const center = statData?.features[0]?.geometry?.coordinates
       ? statData?.features[0]?.geometry?.coordinates
       : [7.4924165, 5.5324032];
@@ -152,6 +153,44 @@ const Dashboard = () => {
       },
     };
     return [mapSource, layer, center, ['Authorised', 'Rejected', 'Pending', 'Approved']];
+  };
+
+  const mapDataParseInvestment = (statData: any, labelField: string, valueField: string) => {
+    const publictype = ['all', ['==', ['get', 'type'], 'Public']];
+    const privatetype = ['all', ['==', ['get', 'type'], 'Private']];
+
+    const center = statData?.features[0]?.geometry?.coordinates
+      ? statData?.features[0]?.geometry?.coordinates
+      : [7.4924165, 5.5324032];
+
+    const mapSource: MapSourceData = {
+      key: 'investmentLocations',
+      data: {
+        type: 'geojson',
+        data: statData,
+        cluster: true,
+        clusterRadius: 40,
+        clusterProperties: {
+          // keep separate counts for each programmeStage category in a cluster
+          count: ['+', ['case', countS, ['get', 'count'], 0]],
+          public: ['+', ['case', publictype, ['get', 'count'], 0]],
+          private: ['+', ['case', privatetype, ['get', 'count'], 0]],
+        },
+      },
+    };
+
+    const layer = {
+      id: 'programmes_circle',
+      type: 'circle',
+      source: 'investmentLocations',
+      filter: ['!=', 'cluster', true],
+      paint: {
+        'circle-color': ['case', publictype, colorsStatus[0], colorsStatus[2]],
+        'circle-opacity': 1,
+        'circle-radius': 10,
+      },
+    };
+    return [mapSource, layer, center, ['Public', 'Private']];
   };
 
   const donutSegment = (start: any, end: any, r: any, r0: any, color: any) => {
@@ -242,6 +281,66 @@ const Dashboard = () => {
     return el.firstChild;
   };
 
+  const createDonutChartInvestment = (properties: any) => {
+    console.log('properties of donut creator --- > ', properties);
+    const offsets = [];
+    const offsetsStage = [];
+    let counts: any = [];
+    let typeCounts: any = [];
+    if (properties.count) {
+      counts = [properties.count];
+    }
+
+    if (properties.cluster_id) {
+      typeCounts = [properties.public, properties.private];
+    } else {
+      if (properties?.type === 'Public') {
+        typeCounts = [properties.count, 0];
+      } else if (properties?.type === 'Private') {
+        typeCounts = [0, properties.count];
+      }
+    }
+    let total = 0;
+    for (const count of counts) {
+      offsets.push(total);
+      total += count;
+    }
+    let totalStage = 0;
+    for (const count of typeCounts) {
+      offsetsStage.push(totalStage);
+      totalStage += count;
+    }
+    const fontSize = total >= 1000 ? 22 : total >= 500 ? 20 : total >= 100 ? 18 : 16;
+    const r = total >= 1000 ? 52 : total >= 500 ? 36 : total >= 100 ? 30 : 18;
+    const r0 = Math.round(r * 0.6);
+    const w = r * 2;
+
+    let html = `<div>
+      <svg width="${w}" height="${w}" viewbox="0 0 ${w} ${w}" text-anchor="middle" style="font: ${fontSize}px sans-serif; display: block">`;
+
+    for (let i = 0; i < typeCounts?.length; i++) {
+      if (typeCounts[i] !== 0) {
+        html += donutSegment(
+          offsetsStage[i] === 0 ? 0 : offsetsStage[i] / totalStage,
+          (offsetsStage[i] + typeCounts[i]) / totalStage,
+          r,
+          r0,
+          colorsStatus[i]
+        );
+      }
+    }
+    html += `<circle cx="${r}" cy="${r}" r="${r0}" fill="white" />
+      <text dominant-baseline="central" transform="translate(${r}, ${r})">
+      ${total}
+      </text>
+      </svg>
+      </div>`;
+
+    const el = document.createElement('div');
+    el.innerHTML = html;
+    return el.firstChild;
+  };
+
   const supportedWidgetList: any = {
     AGG_NDC_ACTION_BY_TYPE: {
       widgetType: WidgetType.PIE,
@@ -277,6 +376,20 @@ const Dashboard = () => {
         colors: colors,
         dataLabelField: 'sector',
         dataValField: 'count',
+      },
+      callbacks: {
+        parseData: dataParser,
+      },
+    },
+    AGG_INVESTMENT_BY_TYPE: {
+      widgetType: WidgetType.PIE,
+      aggType: StatsCardsTypes.AGG_INVESTMENT_BY_TYPE,
+      configs: {
+        title: t('totalInvestment'),
+        tooltip: t('totalInvestmentTT' + TTSuffix),
+        colors: colors,
+        dataLabelField: 'type',
+        dataValField: 'amount',
       },
       callbacks: {
         parseData: dataParser,
@@ -338,12 +451,57 @@ const Dashboard = () => {
         parseData: mapDataParse,
       },
     },
+    INVESTMENT_LOCATION: {
+      widgetType: WidgetType.MAP,
+      aggType: StatsCardsTypes.INVESTMENT_LOCATION,
+      configs: {
+        title: t('investLocations'),
+        tooltip: t('investLocationsTT' + TTSuffix),
+        colors: colorsStatus,
+        dataLabelField: 'sector',
+        dataValField: 'totalestcredit',
+        style: 'mapbox://styles/mapbox/light-v11',
+        renderCB: (map: any) => {
+          if (!map.isSourceLoaded('investmentLocations')) return;
+
+          const currentMarkers: MarkerData[] = [];
+          const features: any = map.querySourceFeatures('investmentLocations');
+
+          // for every cluster on the screen, create an HTML marker for it (if we didn't yet),
+          // and add it to the map if it's not there already
+          for (const feature of features) {
+            const coords = feature.geometry.coordinates;
+            const properties = feature.properties;
+            const id = properties.cluster_id ? properties.cluster_id : Number(properties.id);
+
+            const el: any = createDonutChartInvestment(properties);
+            const marker = {
+              id: id,
+              element: el,
+              location: coords,
+            };
+
+            currentMarkers.push(marker);
+          }
+
+          return currentMarkers;
+        },
+        mapType: mapType,
+      },
+      callbacks: {
+        parseData: mapDataParseInvestment,
+      },
+    },
   };
 
   const layout = [
     [StatsCardsTypes.AGG_NDC_ACTION_BY_TYPE, StatsCardsTypes.TOTAL_EMISSIONS],
-    [StatsCardsTypes.AGG_NDC_ACTION_BY_SECTOR, StatsCardsTypes.AGG_PROGRAMME_BY_SECTOR],
-    [StatsCardsTypes.PROGRAMME_LOCATION],
+    [
+      StatsCardsTypes.AGG_NDC_ACTION_BY_SECTOR,
+      StatsCardsTypes.AGG_PROGRAMME_BY_SECTOR,
+      StatsCardsTypes.AGG_INVESTMENT_BY_TYPE,
+    ],
+    [StatsCardsTypes.PROGRAMME_LOCATION, StatsCardsTypes.INVESTMENT_LOCATION],
   ];
 
   const getData = async () => {

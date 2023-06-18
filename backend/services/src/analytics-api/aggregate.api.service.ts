@@ -24,6 +24,7 @@ import { TransferStatus } from "../shared/enum/transform.status.enum";
 import { CompanyRole } from "../shared/enum/company.role.enum";
 import { PRECISION } from "../shared/constants";
 import { NDCActionViewEntity } from "../shared/entities/ndc.view.entity";
+import { InvestmentView } from "../shared/entities/investment.view.entity";
 
 @Injectable()
 export class AggregateAPIService {
@@ -44,6 +45,7 @@ export class AggregateAPIService {
     private helperService: HelperService,
     @InjectRepository(Programme) private programmeRepo: Repository<Programme>,
     @InjectRepository(NDCActionViewEntity) private ndcRepo: Repository<NDCActionViewEntity>,
+    @InjectRepository(InvestmentView) private investmentRepo: Repository<InvestmentView>,
     @InjectRepository(Company) private companyRepo: Repository<Company>,
   ) {}
 
@@ -256,7 +258,7 @@ export class AggregateAPIService {
     return resultS;
   }
 
-  private async programmeLocationDataFormatter(data) {
+  private async programmeLocationDataFormatter(data, groupField) {
     const locationData = [...data];
     let locationsGeoData: any = {};
     let features: any[] = [];
@@ -270,7 +272,7 @@ export class AggregateAPIService {
         let geometry: any = {};
         properties.id = String(index);
         properties.count = parseInt(locationDataItem?.count);
-        properties.stage = locationDataItem?.stage;
+        properties[groupField] = locationDataItem[groupField];
         geometry.type = "Point";
         geometry.coordinates = location;
         programmeGeoData.properties = properties;
@@ -733,6 +735,16 @@ export class AggregateAPIService {
           companyId
         );
         break;
+      case StatType.MY_AGG_INVESTMENT_BY_TYPE:
+      case StatType.AGG_INVESTMENT_BY_TYPE:
+        results[key] = await this.generateInvestmentAggregates(
+          stat,
+          abilityCondition,
+          lastTimeForWhere,
+          statCache,
+          companyId
+        );
+        break;
       case StatType.MY_AGG_NDC_ACTION_BY_SECTOR:
       case StatType.AGG_NDC_ACTION_BY_SECTOR:
       case StatType.MY_AGG_NDC_ACTION_BY_TYPE:
@@ -790,12 +802,44 @@ export class AggregateAPIService {
           ${whereC.join(" and ")}
           GROUP  BY p."programmeId", b."currentStage"`);
         results[key] = await this.programmeLocationDataFormatter(
-          resultsProgrammeLocations
+          resultsProgrammeLocations, "stage"
         );
-
-        
         results[key]['last'] = await this.getProgrammeLocationTime(whereC.slice(1), lastTimeForWhere);
         break;
+
+        case StatType.INVESTMENT_LOCATION:
+        case StatType.MY_INVESTMENT_LOCATION:
+          if (stat.type === StatType.MY_INVESTMENT_LOCATION) {
+            stat.statFilter
+              ? (stat.statFilter.onlyMine = true)
+              : (stat.statFilter = { onlyMine: true });
+          }
+          const whereCW = [];
+          whereCW.push(`p."requestId" != 'null'`);
+          if (stat.statFilter && stat.statFilter.onlyMine) {
+            whereCW.push(
+              `${companyId} = ANY(b."fromCompanyId"))`
+            );
+          }
+          if (stat.statFilter && stat.statFilter.startTime) {
+            whereCW.push(`"createdTime" >= ${stat.statFilter.startTime}`);
+          }
+          if (stat.statFilter && stat.statFilter.endTime) {
+            whereCW.push(`"createdTime" <= ${stat.statFilter.endTime}`);
+          }
+  
+          const resultsProgrammeLocationsI = await this.investmentRepo.manager
+            .query(`SELECT p."requestId" as loc, b."type" as type, count(*) AS count
+            FROM  investment_view b, jsonb_array_elements(b."fromGeo") p("requestId")
+            ${whereCW.length > 0 ? " where " : " "}
+            ${whereCW.join(" and ")}
+            GROUP  BY p."requestId", b."type"`);
+          results[key] = await this.programmeLocationDataFormatter(
+            resultsProgrammeLocationsI, "type"
+          );
+          results[key]['last'] = await this.getInvestmentLocationTime(whereCW.slice(1), lastTimeForWhere);
+          break;
+        
     }
     console.log('Calc stat done', stat.type)
     return results;
@@ -805,6 +849,23 @@ export class AggregateAPIService {
     const tc = 'createdTime'
     const tableName = 'programme'
     const timeWhere = whereC.join(" and ").replace(/b./g, "programme.");
+    const cacheKey = timeWhere + " " + tc + " from " + tableName;
+    let colTime;
+    console.log("Cache key", cacheKey);
+    if (lastTimeForWhere[cacheKey]) {
+      console.log("Last time hit from the cache");
+      colTime = lastTimeForWhere[cacheKey];
+    } else {
+      colTime = await this.getLastTime(this.programmeRepo, tableName, timeWhere, tc);
+      lastTimeForWhere[cacheKey] = colTime;
+    }
+    return colTime;
+  }
+
+  async getInvestmentLocationTime(whereC: string[], lastTimeForWhere: any) {
+    const tc = 'createdTime'
+    const tableName = 'investment'
+    const timeWhere = whereC.join(" and ").replace(/b./g, "investment.");
     const cacheKey = timeWhere + " " + tc + " from " + tableName;
     let colTime;
     console.log("Cache key", cacheKey);
@@ -1144,6 +1205,58 @@ export class AggregateAPIService {
       stat.statFilter?.timeGroup ? "day" : undefined
     );
   }
+
+  async generateInvestmentAggregates(stat,
+    abilityCondition,
+    lastTimeForWhere,
+    statCache,
+    companyId
+  ) {
+    if (
+      [
+        StatType.MY_AGG_INVESTMENT_BY_TYPE
+      ].includes(stat.type)
+    ) {
+      stat.statFilter
+        ? (stat.statFilter.onlyMine = true)
+        : (stat.statFilter = { onlyMine: true });
+    }
+
+    let filterAnd = this.getFilterAndByStatFilter(
+      stat.statFilter,
+      null,
+      "createdTime"
+    );
+
+    let filterOr = undefined;
+    if (stat.statFilter && stat.statFilter.onlyMine) {
+      filterOr = [];
+      filterOr.push({
+        value: companyId,
+        key: "fromCompanyId",
+        operation: "=",
+      });
+    }
+
+    return await this.genAggregateTypeOrmQuery(
+      this.investmentRepo,
+      "investment",
+      ["type"],
+      [
+        new AggrEntry("amount", "SUM", "amount")
+      ],
+      filterAnd,
+      null,
+      stat.statFilter?.timeGroup ? { key: "time_group", order: "ASC" } : null,
+      abilityCondition,
+      lastTimeForWhere,
+      statCache,
+      ["createdTime"],
+      stat.statFilter?.timeGroup ? "createdAt" : undefined,
+      stat.statFilter?.timeGroup ? "day" : undefined
+    );
+  }
+
   async generateProgrammeAggregates(
     stat,
     abilityCondition,

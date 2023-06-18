@@ -5,13 +5,13 @@ import configuration from "../shared/configuration";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { TypeOrmConfigService } from "../shared/typeorm.config.service";
 import { Programme } from "../shared/entities/programme.entity";
-import { ProgrammeTransfer } from "../shared/entities/programme.transfer";
 import { CaslModule } from "../shared/casl/casl.module";
 import { AuthModule } from "../shared/auth/auth.module";
 import { UtilModule } from "../shared/util/util.module";
 import { AggregateAPIService } from "./aggregate.api.service";
 import { Company } from "../shared/entities/company.entity";
 import { NDCActionViewEntity } from "../shared/entities/ndc.view.entity";
+import { InvestmentView } from "../shared/entities/investment.view.entity";
 
 @Module({
   imports: [
@@ -26,9 +26,9 @@ import { NDCActionViewEntity } from "../shared/entities/ndc.view.entity";
     }),
     TypeOrmModule.forFeature([
       Programme,
-      ProgrammeTransfer,
       Company,
-      NDCActionViewEntity
+      NDCActionViewEntity,
+      InvestmentView
     ]),
     AuthModule,
     CaslModule,
