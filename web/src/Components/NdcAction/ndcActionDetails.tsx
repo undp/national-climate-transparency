@@ -7,9 +7,11 @@ import {
   EnergyGenerationUnits,
   energyGenerationUnitList,
 } from '../../Definitions/energyGenerationUnits.enum';
-import { ConsumerGroups, consumerGroupList } from '../../Definitions/consumerGroups.enum';
+import { consumerGroupList } from '../../Definitions/consumerGroups.enum';
 import { LandAreaUnits, landAreaUnitList } from '../../Definitions/landAreaUnits.enum';
 import { UploadOutlined } from '@ant-design/icons';
+import './ndcActionDetails.scss';
+import '../../Pages/Common/common.table.scss';
 
 const NdcActionDetails = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -68,7 +70,7 @@ const NdcActionDetails = () => {
     'Climate Hazard ',
   ];
 
-  const props: UploadProps = {
+  const uploadProps: UploadProps = {
     //need to add
   };
 
@@ -83,8 +85,8 @@ const NdcActionDetails = () => {
   };
 
   return (
-    <div>
-      <Form name="basic" layout="vertical" requiredMark={true}>
+    <div className="ndc-action-details-container">
+      <Form name="ndcActionDetails" layout="vertical" requiredMark={true}>
         <Row justify="start" align="middle">
           <Col>
             <Form.Item
@@ -99,6 +101,7 @@ const NdcActionDetails = () => {
                   width: '249px',
                   borderRadius: '4px',
                 }}
+                dropdownStyle={{ color: 'red' }}
                 options={ndcActionTypeList}
               />
             </Form.Item>
@@ -126,9 +129,7 @@ const NdcActionDetails = () => {
         </Row>
 
         {ndcActionType === NdcActionTypes.CrossCutting && (
-          <label style={{ color: '#3A3541', fontSize: '14px', lineHeight: '22px' }}>
-            {t('ndcAction:mitigation')}
-          </label>
+          <label className="label-heading">{t('ndcAction:mitigation')}</label>
         )}
 
         {(ndcActionType === NdcActionTypes.Mitigation ||
@@ -154,7 +155,7 @@ const NdcActionDetails = () => {
 
         {(ndcActionType === NdcActionTypes.Mitigation ||
           ndcActionType === NdcActionTypes.CrossCutting) &&
-          mitigationType === MitigationTypes.Solar && (
+          mitigationType === MitigationTypes.SOLAR && (
             <>
               <Row justify="start" align="middle">
                 <Col>
@@ -163,6 +164,7 @@ const NdcActionDetails = () => {
                     rules={[
                       { required: true, message: `${t('ndcAction:energyGenerationRequiredMsg')}` },
                     ]}
+                    name="energyGeneration"
                   >
                     <Input style={{ width: 442 }} />
                   </Form.Item>
@@ -170,6 +172,7 @@ const NdcActionDetails = () => {
                 <Col style={{ marginLeft: '38px' }}>
                   <Form.Item
                     label={t('ndcAction:energyGenerationUnit')}
+                    name="energyGenerationUnit"
                     rules={[
                       {
                         required: true,
@@ -177,66 +180,75 @@ const NdcActionDetails = () => {
                       },
                     ]}
                   >
-                    <Select style={{ width: 442 }} options={energyGenerationUnitList} />
+                    <Select
+                      size="large"
+                      style={{ width: 442 }}
+                      options={energyGenerationUnitList}
+                    />
                   </Form.Item>
                 </Col>
               </Row>
               <Form.Item
                 label={t('ndcAction:consumerGroup')}
+                name="consumerGroup"
                 rules={[{ required: true, message: `${t('ndcAction:consumerGroupRequiredMsg')}` }]}
               >
-                <Select style={{ width: 442 }} options={consumerGroupList} />
+                <Select size="large" style={{ width: 442 }} options={consumerGroupList} />
               </Form.Item>
             </>
           )}
 
         {(ndcActionType === NdcActionTypes.Mitigation ||
           ndcActionType === NdcActionTypes.CrossCutting) &&
-          mitigationType === MitigationTypes.Agriculture && (
+          mitigationType === MitigationTypes.AGRICULTURE && (
             <Row justify="start" align="middle">
               <Col>
-                <Form.Item label={t('ndcAction:eligibleLandArea')}>
+                <Form.Item label={t('ndcAction:eligibleLandArea')} name="eligibleLandArea">
                   <Input style={{ width: 442 }} />
                 </Form.Item>
               </Col>
               <Col style={{ marginLeft: '38px' }}>
-                <Form.Item label={t('ndcAction:landAreaUnit')}>
-                  <Select style={{ width: 442 }} options={landAreaUnitList} />
+                <Form.Item label={t('ndcAction:landAreaUnit')} name="landAreaUnit">
+                  <Select size="large" style={{ width: 442 }} options={landAreaUnitList} />
                 </Form.Item>
               </Col>
             </Row>
           )}
 
         {ndcActionType === NdcActionTypes.CrossCutting && (
-          <label style={{ color: '#3A3541', fontSize: '14px', lineHeight: '22px' }}>
-            {t('ndcAction:adaptation')}
-          </label>
+          <label className="label-heading">{t('ndcAction:adaptation')}</label>
         )}
 
         {(ndcActionType === NdcActionTypes.Adaptation ||
           ndcActionType === NdcActionTypes.CrossCutting) && (
           <>
             <Row justify="start" align="middle">
-              <Form.Item label={t('ndcAction:implementingAgency')}>
+              <Form.Item label={t('ndcAction:implementingAgency')} name="implementingAgency">
                 <Select
                   style={{ width: 442 }}
+                  size="large"
                   options={implementingAgencyList.map((item) => ({ value: item, label: item }))}
                 />
               </Form.Item>
             </Row>
             <Row justify="start" align="middle">
               <Col>
-                <Form.Item label={t('ndcAction:nationalPlanObjectives')}>
+                <Form.Item
+                  label={t('ndcAction:nationalPlanObjectives')}
+                  name="nationalPlanObjectives"
+                >
                   <Select
+                    size="large"
                     style={{ width: 442 }}
                     options={nationalPlanObjectives.map((item) => ({ value: item, label: item }))}
                   />
                 </Form.Item>
               </Col>
               <Col style={{ marginLeft: '38px' }}>
-                <Form.Item label={t('ndcAction:nationalPlanCoverage')}>
+                <Form.Item label={t('ndcAction:nationalPlanCoverage')} name="nationalPlanCoverage">
                   <Select
                     style={{ width: 442 }}
+                    size="large"
                     options={nationalPlanCoverageList.map((item) => ({ value: item, label: item }))}
                   />
                 </Form.Item>
@@ -247,11 +259,11 @@ const NdcActionDetails = () => {
 
         {ndcActionType === NdcActionTypes.Enablement && (
           <>
-            <Form.Item label={t('ndcAction:title')}>
+            <Form.Item label={t('ndcAction:title')} name="EnablementTitle">
               <Input style={{ width: 442 }} />
             </Form.Item>
-            <Form.Item label={t('ndcAction:report')}>
-              <Upload {...props}>
+            <Form.Item label={t('ndcAction:report')} name="EnablementReport">
+              <Upload {...uploadProps}>
                 <Button icon={<UploadOutlined />}>Upload</Button>
               </Upload>
             </Form.Item>
@@ -263,6 +275,7 @@ const NdcActionDetails = () => {
           <Row justify="start" align="middle">
             <Col span={12}>
               <Form.Item
+                name="userEstimatedCredits"
                 label={t('ndcAction:userEstimatedCredits')}
                 style={{ display: 'inline-block', width: 'calc(100% - 15px)', marginRight: '15px' }}
               >
@@ -271,6 +284,7 @@ const NdcActionDetails = () => {
             </Col>
             <Col span={12}>
               <Form.Item
+                name="methodologyEstimatedCredits"
                 label={t('ndcAction:methodologyEstimatedCredits')}
                 style={{ display: 'inline-block', width: '100%' }}
               >

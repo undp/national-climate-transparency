@@ -26,5 +26,9 @@
   "mitigationTypeRequiredMsg": "Please select NDC action",
   "energyGenerationRequiredMsg": "Please enter energy generation",
   "energyGenerationUnitRequiredMsg": "Please enter energy generation unit",
-  "consumerGroupRequiredMsg": "Please enter consumer group"
+  "consumerGroupRequiredMsg": "Please enter consumer group",
+  "next": "Next",
+  "back": "Back",
+  "monitoringReport" : "Monitoring Report",
+  "submit": "Submit"
 }

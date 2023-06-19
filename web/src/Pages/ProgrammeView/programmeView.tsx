@@ -390,6 +390,10 @@ const ProgrammeView = () => {
     return info;
   };
 
+  const onClickedAddAction = () => {
+    navigate('/programmeManagement/addNdcAction', { state: { record: data } });
+  };
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const programmeId = queryParams.get('id');
@@ -476,7 +480,7 @@ const ProgrammeView = () => {
     <Button type="primary" onClick={() => {}}>
       {t('view:addInvestment')}
     </Button>,
-    <Button type="primary" onClick={() => {}}>
+    <Button type="primary" onClick={onClickedAddAction}>
       {t('view:addAction')}
     </Button>,
   ];

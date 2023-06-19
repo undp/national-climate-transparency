@@ -1,8 +1,8 @@
 export enum NdcActionTypes {
-  Mitigation,
-  Adaptation,
-  CrossCutting,
-  Enablement,
+  Mitigation = 'mitigation',
+  Adaptation = 'adaptation',
+  Enablement = 'enablement',
+  CrossCutting = 'crosscutting',
 }
 
 export const ndcActionTypeList = [

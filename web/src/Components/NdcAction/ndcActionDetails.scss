@@ -1,25 +1,30 @@
 @import '../../Styles/variables.scss';
 
 .ndc-action-details-container {
-  display: flex;
-  flex-direction: column;
-  border-radius: 5px;
-  padding: 0 50px;
+  Input {
+    height: 40px;
+  }
 
-  .title-container {
-    display: flex;
-    flex-direction: column;
-    border-radius: 5px;
+  .ant-select-selection-item {
+    color: #949599 !important;
+  }
 
-    .main {
-      font-size: 1.25rem;
-      font-weight: 500;
-      color: $title-main;
-    }
+  .ant-select-dropdown {
+    font-family: $primary-font-family;
+    color: #949599 !important;
+  }
 
-    .sub {
-      font-size: 0.8rem;
-      color: $title-sub;
-    }
+  .ant-select-selector {
+    color: #949599 !important;
+  }
+
+  .label-heading {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 22px;
+    color: rgba(58, 53, 65, 0.5);
+    margin-bottom: 5px;
   }
 }
