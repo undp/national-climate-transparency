@@ -121,6 +121,19 @@ export class CaslAbilityFactory {
           certifierId: { $elemMatch: { $eq: user.companyId } },
         });
 
+        // can(Action.Read, ProgrammeDocumentViewEntity, {
+        //   companyId: { $elemMatch: { $eq: user.companyId } },
+        // });
+
+        // can(Action.Read, NDCActionViewEntity, {
+        //   companyId: { $elemMatch: { $eq: user.companyId } },
+        // });
+
+        can(Action.Read, Investment, {
+          status: { $eq: InvestmentStatus.APPROVED },
+        });
+      } else if (user.companyRole == CompanyRole.PROGRAMME_DEVELOPER) {
+
         can(Action.Read, ProgrammeDocumentViewEntity, {
           companyId: { $elemMatch: { $eq: user.companyId } },
         });
@@ -129,10 +142,6 @@ export class CaslAbilityFactory {
           companyId: { $elemMatch: { $eq: user.companyId } },
         });
 
-        can(Action.Read, Investment, {
-          status: { $eq: InvestmentStatus.APPROVED },
-        });
-      } else if (user.companyRole == CompanyRole.PROGRAMME_DEVELOPER) {
         can(Action.Read, Programme, {
           currentStage: { $eq: ProgrammeStage.AUTHORISED },
         });
