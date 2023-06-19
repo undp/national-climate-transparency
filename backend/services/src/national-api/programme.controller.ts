@@ -22,6 +22,10 @@ import { Investment } from '../shared/entities/investment.entity';
 import { InvestmentApprove } from '../shared/dto/investment.approve';
 import { InvestmentCancel } from '../shared/dto/investment.cancel';
 import { InvestmentReject } from '../shared/dto/investment.reject';
+import { ProgrammeDocument } from '../shared/entities/programme.document';
+import { NDCAction } from '../shared/entities/ndc.action.entity';
+import { NDCActionViewEntity } from '../shared/entities/ndc.view.entity';
+import { ProgrammeDocumentViewEntity } from '../shared/entities/document.view.entity';
 
 @ApiTags('Programme')
 @ApiBearerAuth()
@@ -77,7 +81,7 @@ export class ProgrammeController {
     }
 
     @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeDocumentViewEntity, true))
     // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
     @Post('queryDocs')
     async queryDocuments(@Body()query: QueryDto, @Request() req) {
@@ -85,7 +89,7 @@ export class ProgrammeController {
     }
 
     @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, NDCActionViewEntity, true))
     // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
     @Post('queryNdcActions')
     async queryNdcActions(@Body()query: QueryDto, @Request() req) {
