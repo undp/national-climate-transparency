@@ -12,12 +12,13 @@ import { UserModule } from "../user/user.module";
 import { EmailHelperModule } from "../email-helper/email-helper.module";
 import { LocationModule } from "../location/location.module";
 import { NDCAction } from "../entities/ndc.action.entity";
-import { ProgrammeDocument } from "../dto/programme.document";
+import { ProgrammeDocument } from "../entities/programme.document";
 import { FileHandlerModule } from "../file-handler/filehandler.module";
 import { AsyncOperationsModule } from "../async-operations/async-operations.module";
 import { NDCActionViewEntity } from "../entities/ndc.view.entity";
 import { Investment } from "../entities/investment.entity";
 import { InvestmentView } from "../entities/investment.view.entity";
+import { ProgrammeDocumentViewEntity } from "../entities/document.view.entity";
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { InvestmentView } from "../entities/investment.view.entity";
       NDCActionViewEntity,
       Investment,
       InvestmentView,
+      ProgrammeDocumentViewEntity
     ]),
     UtilModule,
     forwardRef(() => UserModule),
