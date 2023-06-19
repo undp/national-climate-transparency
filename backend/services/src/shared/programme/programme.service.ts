@@ -853,22 +853,23 @@ export class ProgrammeService {
       let constants = await this.getLatestConstant(ndcAction.typeOfMitigation);
       const req = await this.getCreditRequest(ndcAction, program, constants);
       if (req) {
-        const crdts = await calculateCredit(req);
-        console.log("Credit", crdts, req);
         try {
-          ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(crdts);
-        } catch (err) {
-          this.logger.log(`Credit calculate failed ${err.message}`);
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        }
-    
-        ndcAction.constantVersion = constants
-          ? String(constants.version)
-          : "default";
-    
-        console.log("1111", ndcAction);
-      }
+          const crdts = await calculateCredit(req);
+          console.log("Credit", crdts, req);
+          try {
+            ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(crdts);
+          } catch (err) {
+            this.logger.log(`Credit calculate failed ${err.message}`);
+            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+          }
       
+          ndcAction.constantVersion = constants
+            ? String(constants.version)
+            : "default";
+        } catch(e) {
+          throw new HttpException(e, HttpStatus.BAD_REQUEST)
+        }
+      }
     }
     
     return ndcAction;
