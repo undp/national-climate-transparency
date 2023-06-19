@@ -31,7 +31,7 @@ export class NDCActionDto {
   methodology: string;
 
   @ApiProperty({ enum: TypeOfMitigation })
-  @ValidateIf(o => o.action === NDCActionType.Mitigation || o.ACADEMICS === NDCActionType.CrossCutting)
+  @ValidateIf(o => o.action === NDCActionType.Mitigation || o.action === NDCActionType.CrossCutting)
   @IsEnum(TypeOfMitigation, {
       message: 'Invalid mitigation type. Supported following values:' + Object.values(TypeOfMitigation)
   })
