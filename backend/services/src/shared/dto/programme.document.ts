@@ -1,7 +1,8 @@
-import { Column, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { DocumentStatus } from "../enum/document.status";
 import { DocType } from "../enum/document.type";
 
+@Entity()
 export class ProgrammeDocument {
 
   @PrimaryGeneratedColumn()
@@ -9,6 +10,9 @@ export class ProgrammeDocument {
 
   @Column()
   programmeId: string;
+
+  @Column()
+  externalId: string;
 
   @Column({nullable: true})
   actionId: string;

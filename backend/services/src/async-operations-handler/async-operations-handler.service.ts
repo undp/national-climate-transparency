@@ -17,15 +17,17 @@ export class AsyncOperationsHandlerService {
     if (actionType) {
       switch (actionType.toString()) {
         case AsyncActionType.Email.toString():
-          return await this.emailService.sendEmail(dataObject);
+          return this.emailService.sendEmail(dataObject);
         case AsyncActionType.RegistryCompanyCreate.toString():
-          return await this.registryClient.createCompany(dataObject);
+          return this.registryClient.createCompany(dataObject);
         case AsyncActionType.ProgrammeCreate.toString():
-          return await this.registryClient.createProgramme(dataObject);
+          return this.registryClient.createProgramme(dataObject);
         case AsyncActionType.DocumentUpload.toString():
-          return await this.registryClient.addDocument(dataObject);
+          return this.registryClient.addDocument(dataObject);
+        case AsyncActionType.ProgrammeAccept.toString():
+          return this.registryClient.programmeAccept(dataObject);
         case AsyncActionType.AddMitigation.toString():
-          return await this.registryClient.addMitigation(dataObject);
+          return this.registryClient.addMitigation(dataObject);
       }
     }
   }

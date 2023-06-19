@@ -28,18 +28,25 @@ export class RegistryClientService {
                 },
             }
             ).catch(ex => {
-                console.log('Exception', ex.response?.data?.statusCode)
+                console.log('Exception', ex.response?.data)
                 if (ex.response?.data?.statusCode == 400 && ex.response?.data?.message?.indexOf('already exist') >= 0 ){
-                    return true;
+                    return data;
                 }
                 throw ex;
             });
     }
 
   public async addDocument(document: ProgrammeDocumentDto) {
-    console.log('adding document on registry', document.actionId)
-    const resp = await this.sendHttp("/national/programme/addDocument", document.actionId);
-    console.log('Successfully create company on registry', document.actionId)
+    console.log('adding document on registry', document)
+    const resp = await this.sendHttp("/national/programme/addDocument", document);
+    console.log('Successfully create document on registry', document.actionId)
+    return resp;
+  }
+
+  public async programmeAccept(document: any) {
+    console.log('programme accept on registry', document)
+    const resp = await this.sendHttp("/national/programme/acceptProgramme", document);
+    console.log('Successfully programme accepted on registry', document.actionId)
     return resp;
   }
 
@@ -49,14 +56,18 @@ export class RegistryClientService {
         userEstimatedCredits: ndc.ndcFinancing.userEstimatedCredits,
         systemEstimatedCredits: ndc.ndcFinancing.systemEstimatedCredits,
         actionId: ndc.id,
+        constantVersion: '' + ndc.constantVersion,
         properties: (ndc.agricultureProperties ? ndc.agricultureProperties : ndc.solarProperties ? ndc.solarProperties : undefined)
     };
   }
   public async addMitigation(ndc: NDCAction) {
-    console.log('creating mitigation action on registry', ndc)
     const mitigationReq = this.createNDCReq(ndc);
-    const resp = await this.sendHttp("/national/programme/addMitigation", mitigationReq);
-    console.log('Successfully create company on registry', mitigationReq.actionId)
+    console.log('creating mitigation action on registry', ndc, mitigationReq)
+    const resp = await this.sendHttp("/national/programme/addMitigation", {
+        "mitigation": mitigationReq,
+        "externalId": ndc.externalId
+    });
+    console.log('Successfully create mitigation on registry', mitigationReq.actionId)
     return resp;
   }
 
@@ -90,7 +101,7 @@ export class RegistryClientService {
         "proponentTaxVatId": programme.proponentTaxVatId,
         "proponentPercentage": programme.proponentPercentage,
         "programmeProperties": props,
-        "creditEst": programme.creditEst,
+        // "creditEst": programme.creditEst,
       }
 
     if (programme.ndcAction) {

@@ -35,6 +35,15 @@ export const handler: Handler = async (event) => {
   });
   const userService = userApp.get(UserService);
 
+  const locationApp = await NestFactory.createApplicationContext(
+    LocationModule,
+    {
+      logger: getLogger(UserModule),
+    }
+  );
+  const locationInterface = locationApp.get(LocationInterface);
+  await locationInterface.init();
+
   if (event.type === "IMPORT_USERS" && event.body) {
 
     const users = event.body.split("\n");
@@ -56,7 +65,9 @@ export const handler: Handler = async (event) => {
           ? CompanyRole.GOVERNMENT
           : fields[4] == "Certifier"
           ? CompanyRole.CERTIFIER
-          : CompanyRole.PROGRAMME_DEVELOPER;
+          : fields[4] == "API"
+          ? CompanyRole.API
+          :CompanyRole.PROGRAMME_DEVELOPER;
       const ur =
         fields[5] == "admin"
           ? Role.Admin
@@ -77,7 +88,8 @@ export const handler: Handler = async (event) => {
           fields[6],
           fields[1],
           ur,
-          fields[2]
+          fields[2],
+          (cr === CompanyRole.API && fields.length > 7) ? fields[7] : undefined
         );
       } catch (e) {
         console.log('Fail to create user', fields[1])
@@ -113,6 +125,8 @@ export const handler: Handler = async (event) => {
       // (name: string, companyRole: CompanyRole, taxId: string, password: string, email: string, userRole: string
       const cr = fields[4] == "Certifier"
           ? CompanyRole.CERTIFIER
+          : fields[4] == "API"
+          ? CompanyRole.API
           : CompanyRole.PROGRAMME_DEVELOPER;
 
       try {
@@ -128,10 +142,11 @@ export const handler: Handler = async (event) => {
               country: configService.get("systemCountry"),
               companyRole: cr,
               createdTime: undefined,
+              regions: ['Lagos']
             });
         console.log('Company created', org)
       } catch (e) {
-        console.log('Fail to create company', fields[1])
+        console.log('Fail to create company', fields[1], e)
       }
     }
     return;
@@ -210,13 +225,4 @@ export const handler: Handler = async (event) => {
       await countryService.insertCountry(country);
     }
   });
-
-  const locationApp = await NestFactory.createApplicationContext(
-    LocationModule,
-    {
-      logger: getLogger(UserModule),
-    }
-  );
-  const locationInterface = locationApp.get(LocationInterface);
-  await locationInterface.init();
 };

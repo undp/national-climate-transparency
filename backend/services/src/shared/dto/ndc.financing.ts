@@ -10,8 +10,9 @@ export class NdcFinancing {
     @IsNumber()
     userEstimatedCredits: number;
 
-    @ApiProperty()
+    @ApiPropertyOptional()
     @IsNotEmpty()
+    @IsOptional()
     @IsNumber()
     systemEstimatedCredits: number;
 }

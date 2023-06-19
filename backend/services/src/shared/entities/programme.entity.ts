@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn } from "typeorm";
+import { Entity, Column, PrimaryColumn, UpdateDateColumn, CreateDateColumn } from "typeorm";
 import { ProgrammeProperties } from "../dto/programme.properties";
 import { Sector } from "../enum/sector.enum";
 import { TxType } from "../enum/txtype.enum";
@@ -52,7 +52,13 @@ export class Programme implements EntitySubject {
   creditEst: number;
 
   @Column({ type: "decimal", precision: 10, scale: PRECISION, nullable: true })
+  emissionReductionExpected: number;
+
+  @Column({ type: "decimal", precision: 10, scale: PRECISION, nullable: true })
   creditIssued: number;
+
+  @Column({ type: "decimal", precision: 10, scale: PRECISION, nullable: true })
+  emissionReductionAchieved: number;
 
   // @Column({type: "decimal", precision: 10, scale: PRECISION, nullable: true})
   // creditPending: number;
@@ -129,9 +135,9 @@ export class Programme implements EntitySubject {
   })
   geographicalLocationCordintes: any;
 
-  @Column({ type: 'timestamptz', nullable: true })
+  @CreateDateColumn({ type: 'timestamptz', nullable: true })
   createdAt: Date;
 
-  @Column({ type: 'timestamptz', nullable: true })
+  @UpdateDateColumn({ type: 'timestamptz', nullable: true })
   updatedAt: Date;
 }

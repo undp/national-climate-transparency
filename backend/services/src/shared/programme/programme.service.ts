@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Inject, Injectable, Logger, forwardRef } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  forwardRef,
+} from "@nestjs/common";
 import { ProgrammeDto } from "../dto/programme.dto";
 import { Programme } from "../entities/programme.entity";
 import { instanceToPlain, plainToClass } from "class-transformer";
@@ -37,11 +44,28 @@ import { ProgrammeDocument } from "../dto/programme.document";
 import { FileHandlerInterface } from "../file-handler/filehandler.interface";
 import { DocType } from "../enum/document.type";
 import { DocumentStatus } from "../enum/document.status";
-import { AsyncAction, AsyncOperationsInterface } from "../async-operations/async-operations.interface";
+import {
+  AsyncAction,
+  AsyncOperationsInterface,
+} from "../async-operations/async-operations.interface";
 import { AsyncActionType } from "../enum/async.action.type.enum";
 import { ProgrammeDocumentDto } from "../dto/programme.document.dto";
 import { DocumentAction } from "../dto/document.action";
 import { NDCActionType } from "../enum/ndc.action.enum";
+import { ProgrammeAuth } from "../dto/programme.approve";
+import { ProgrammeIssue } from "../dto/programme.issue";
+import { BasicResponseDto } from "../dto/basic.response.dto";
+import { ProgrammeReject } from "../dto/programme.reject";
+import { NDCStatus } from "../enum/ndc.status";
+import { NDCActionViewEntity } from "../entities/ndc.view.entity";
+import { InvestmentRequestDto } from "../dto/investment.request.dto";
+import { User } from "../entities/user.entity";
+import { Investment } from "../entities/investment.entity";
+import { InvestmentStatus } from "../enum/investment.status";
+import { InvestmentApprove } from "../dto/investment.approve";
+import { InvestmentReject } from "../dto/investment.reject";
+import { InvestmentCancel } from "../dto/investment.cancel";
+import { InvestmentView } from "../entities/investment.view.entity";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -49,6 +73,7 @@ export declare function PrimaryGeneratedColumn(
 
 @Injectable()
 export class ProgrammeService {
+
   private userNameCache: any = {};
 
   constructor(
@@ -72,9 +97,18 @@ export class ProgrammeService {
     @InjectRepository(ProgrammeQueryEntity)
     private programmeViewRepo: Repository<ProgrammeQueryEntity>,
     @InjectRepository(NDCAction) private ndcActionRepo: Repository<NDCAction>,
-    @InjectRepository(NDCAction) private documentRepo: Repository<ProgrammeDocument>,
+    @InjectRepository(NDCActionViewEntity)
+    private ndcActionViewRepo: Repository<NDCActionViewEntity>,
+    @InjectRepository(ProgrammeDocument)
+    private documentRepo: Repository<ProgrammeDocument>,
     @InjectRepository(ConstantEntity)
     private constantRepo: Repository<ConstantEntity>,
+
+    @InjectRepository(Investment)
+    private investmentRepo: Repository<Investment>,
+    @InjectRepository(InvestmentView)
+    private investmentViewRepo: Repository<InvestmentView>,
+
     private asyncOperationsInterface: AsyncOperationsInterface,
     @InjectEntityManager() private entityManager: EntityManager,
     private logger: Logger
@@ -84,6 +118,326 @@ export class ProgrammeService {
     const data = instanceToPlain(programmeDto);
     this.logger.verbose("Converted programme", JSON.stringify(data));
     return plainToClass(Programme, data);
+  }
+
+
+  private async doTransfer(
+    transfer: Investment,
+    user: string,
+    programme: Programme
+  ) {
+   
+    const companyIndex = programme.companyId.indexOf(transfer.fromCompanyId);
+
+    // Cannot be <= 0 
+    programme.creditOwnerPercentage[companyIndex] -= transfer.percentage
+    programme.creditOwnerPercentage.push(transfer.percentage);
+
+    programme.proponentPercentage[companyIndex] -= transfer.percentage
+    programme.proponentPercentage.push(transfer.percentage);
+
+    programme.companyId.push(Number(transfer.toCompanyId));
+
+    const savedProgramme = await this.entityManager
+      .transaction(async (em) => {
+        await em.update(
+          Investment,
+          {
+            requestId: transfer.requestId
+          }, {
+            status: InvestmentStatus.APPROVED,
+            txTime: new Date().getTime()
+          }
+        )
+        return await em.update(
+          Programme,
+          {
+            programmeId: programme.programmeId,
+          },
+          {
+            creditOwnerPercentage: programme.creditOwnerPercentage,
+            proponentPercentage: programme.proponentPercentage,
+            companyId: programme.companyId,
+            txTime: new Date().getTime(),
+          }
+        );
+      })
+      .catch((err: any) => {
+        console.log(err);
+        if (err instanceof QueryFailedError) {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        } else {
+          this.logger.error(`Programme add error ${err}`);
+        }
+        return err;
+      });
+
+    if (savedProgramme.affected > 0) {
+      return new DataResponseDto(HttpStatus.OK, programme);
+    }
+
+    throw new HttpException(
+      this.helperService.formatReqMessagesString(
+        "programme.internalErrorStatusUpdating",
+        []
+      ),
+      HttpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
+  
+  async addInvestment(req: InvestmentRequestDto, requester: User) {
+    this.logger.log(
+      `Programme investment request by ${requester.companyId}-${
+        requester.id
+      } received ${JSON.stringify(req)}`
+    );
+
+    if (
+      req.percentage &&
+      req.percentage.reduce((a, b) => a + b, 0) <= 0
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.percentage>0",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (req.fromCompanyIds.length > 1) {
+      if (!req.percentage) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString(
+            "programme.percentagesNeedsToDefineForMultipleComp",
+            []
+          ),
+          HttpStatus.BAD_REQUEST
+        );
+      } else if (req.fromCompanyIds.length != req.percentage.length) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString(
+            "programme.invalidCompPercentageForGivenComp",
+            []
+          ),
+          HttpStatus.BAD_REQUEST
+        );
+      }
+    }
+
+    if (
+      req.fromCompanyIds &&
+      req.percentage &&
+      req.fromCompanyIds.length != req.percentage.length
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.invalidCompPercentageForGivenComp",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const indexTo = req.fromCompanyIds.indexOf(req.toCompanyId);
+    if (indexTo >= 0 && req.percentage[indexTo] > 0) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.cantTransferCreditWithinSameComp",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const programme = await this.findById(req.programmeId);
+
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.programmeNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    this.logger.verbose(`Investment on programme ${JSON.stringify(programme)}`);
+
+    if (
+      requester.companyRole != CompanyRole.GOVERNMENT &&
+      ![...req.fromCompanyIds, req.toCompanyId].includes(requester.companyId)
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.cantInitiateTransferForOtherComp",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (!req.fromCompanyIds) {
+      req.fromCompanyIds = programme.companyId;
+    }
+    if (!programme.creditOwnerPercentage) {
+      programme.creditOwnerPercentage = [100];
+    }
+
+    if (!programme.proponentPercentage) {
+      programme.proponentPercentage = [100];
+    }
+
+    const requestedCompany = await this.companyService.findByCompanyId(
+      requester.companyId
+    );
+
+    const allInvestmentList: Investment[] = [];
+    const autoApproveInvestmentList: Investment[] = [];
+
+    const hostAddress = this.configService.get("host");
+
+    const ownershipMap = {};
+    const propPerMap = {}
+
+    for (const i in programme.companyId) {
+      ownershipMap[programme.companyId[i]] = programme.creditOwnerPercentage[i];
+      propPerMap[programme.companyId[i]] = programme.proponentPercentage[i];
+    }
+
+    programme.companyId = programme.companyId.map(c => Number(c))
+    const fromCompanyListMap = {};
+
+    const percSum = req.percentage.reduce((a, b) => a + b, 0)
+    for (const j in req.fromCompanyIds) {
+      const fromCompanyId = req.fromCompanyIds[j];
+      this.logger.log(
+        `Transfer request from ${fromCompanyId} to programme owned by ${programme.companyId}`
+      );
+      const fromCompany = await this.companyService.findByCompanyId(
+        fromCompanyId
+      );
+      fromCompanyListMap[fromCompanyId] = fromCompany;
+
+      if (programme.companyId.indexOf(fromCompanyId) < 0) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString(
+            "programme.fromCompInReqIsNotOwnerOfProgramme",
+            []
+          ),
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      if (!ownershipMap[fromCompanyId] || ownershipMap[fromCompanyId] < req.percentage[j] || !propPerMap[fromCompanyId] || propPerMap[fromCompanyId] < req.percentage) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString(
+            "programme.invalidCompPercentageForGivenComp",
+            []
+          ),
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      const investment = plainToClass(Investment, req);
+      investment.programmeId = req.programmeId;
+      investment.fromCompanyId = fromCompanyId;
+      investment.toCompanyId = req.toCompanyId;
+      investment.initiator = requester.id;
+      investment.initiatorCompanyId = requester.companyId;
+      investment.txTime = new Date().getTime();
+      investment.createdTime = investment.txTime;
+      investment.percentage = req.percentage[j];
+      investment.amount = Math.round(req.amount * req.percentage[j]/percSum)
+      investment.status = InvestmentStatus.PENDING;
+      if (requester.companyId == fromCompanyId) {
+        autoApproveInvestmentList.push(investment);
+      }
+      allInvestmentList.push(investment);
+    }
+    const results = await this.investmentRepo.insert(allInvestmentList);
+    console.log(results);
+    for (const i in allInvestmentList) {
+      allInvestmentList[i].requestId = results.identifiers[i].requestId;
+    }
+
+    let updateProgramme = undefined;
+    for (const trf of autoApproveInvestmentList) {
+      this.logger.log(`Investment send received ${trf}`);
+      const toCompany = await this.companyService.findByCompanyId(
+        trf.toCompanyId
+      );
+      console.log("To Company", toCompany);
+      updateProgramme = (
+        await this.doTransfer(
+          trf,
+          `${this.getUserRef(requester)}#${toCompany.companyId}#${
+            toCompany.name
+          }#${fromCompanyListMap[trf.fromCompanyId].companyId}#${
+            fromCompanyListMap[trf.fromCompanyId].name
+          }`,
+          programme
+        )
+      ).data;
+      // await this.emailHelperService.sendEmailToOrganisationAdmins(
+      //   trf.toCompanyId,
+      //   EmailTemplates.CREDIT_SEND_DEVELOPER,
+      //   {
+      //     organisationName: requestedCompany.name,
+      //     credits: trf.creditAmount,
+      //     programmeName: programme.title,
+      //     serialNumber: programme.serialNo,
+      //     pageLink: hostAddress + "/creditTransfers/viewAll",
+      //   }
+      // );
+    }
+    if (updateProgramme) {
+      return new DataResponseDto(HttpStatus.OK, updateProgramme);
+    }
+
+    // allInvestmentList.forEach(async (transfer) => {
+    //   if (requester.companyRole === CompanyRole.GOVERNMENT) {
+    //     if (transfer.toCompanyId === requester.companyId) {
+    //       await this.emailHelperService.sendEmailToOrganisationAdmins(
+    //         transfer.fromCompanyId,
+    //         EmailTemplates.CREDIT_TRANSFER_REQUISITIONS,
+    //         {
+    //           organisationName: requestedCompany.name,
+    //           credits: transfer.creditAmount,
+    //           programmeName: programme.title,
+    //           serialNumber: programme.serialNo,
+    //           pageLink: hostAddress + "/creditTransfers/viewAll",
+    //         }
+    //       );
+    //     } else {
+    //       await this.emailHelperService.sendEmailToOrganisationAdmins(
+    //         transfer.fromCompanyId,
+    //         EmailTemplates.CREDIT_TRANSFER_GOV,
+    //         {
+    //           credits: transfer.creditAmount,
+    //           programmeName: programme.title,
+    //           serialNumber: programme.serialNo,
+    //           pageLink: hostAddress + "/creditTransfers/viewAll",
+    //           government: requestedCompany.name,
+    //         },
+    //         transfer.toCompanyId
+    //       );
+    //     }
+    //   } else if (requester.companyId != transfer.fromCompanyId) {
+    //     await this.emailHelperService.sendEmailToOrganisationAdmins(
+    //       transfer.fromCompanyId,
+    //       EmailTemplates.CREDIT_TRANSFER_REQUISITIONS,
+    //       {
+    //         organisationName: requestedCompany.name,
+    //         credits: transfer.creditAmount,
+    //         programmeName: programme.title,
+    //         serialNumber: programme.serialNo,
+    //         pageLink: hostAddress + "/creditTransfers/viewAll",
+    //       }
+    //     );
+    //   }
+    // });
+
+    return new DataListResponseDto(allInvestmentList, allInvestmentList.length);
   }
 
   private async getCreditRequest(
@@ -127,9 +481,142 @@ export class ProgrammeService {
     });
   }
 
+  async issueCredit(issue: ProgrammeIssue) {
+    const programme = await this.findByExternalId(issue.externalId);
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (!programme.creditIssued) {
+      programme.creditIssued = 0;
+    }
+
+    if (
+      parseFloat(String(programme.creditIssued)) + issue.issueAmount >
+      programme.creditEst
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.issuedCreditCannotExceedEstCredit",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const issued =
+      parseFloat(String(programme.creditIssued)) + issue.issueAmount;
+    programme.creditIssued = issued;
+    programme.emissionReductionAchieved = issued;
+
+    const resp = await this.programmeRepo.update(
+      {
+        externalId: issue.externalId,
+      },
+      {
+        emissionReductionAchieved: issued,
+        creditIssued: issued,
+        creditUpdateTime: new Date().getTime(),
+        txTime: new Date().getTime(),
+      }
+    );
+
+    return new DataResponseDto(HttpStatus.OK, programme);
+  }
+
+  async rejectProgramme(auth: ProgrammeReject) {
+    const programme = await this.findByExternalId(auth.externalId);
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const resp = await this.programmeRepo.update(
+      {
+        externalId: auth.externalId,
+      },
+      {
+        currentStage: ProgrammeStage.REJECTED,
+        statusUpdateTime: new Date().getTime(),
+        txTime: new Date().getTime(),
+      }
+    );
+
+    return new DataResponseDto(HttpStatus.OK, programme);
+  }
+
+  async authProgramme(auth: ProgrammeAuth) {
+    const programme = await this.findByExternalId(auth.externalId);
+    if (!programme) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (!programme.creditIssued) {
+      programme.creditIssued = 0;
+    }
+
+    if (!auth.issueAmount) {
+      auth.issueAmount = 0;
+    }
+
+    if (
+      parseFloat(String(programme.creditIssued)) + auth.issueAmount >
+      programme.creditEst
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.issuedCreditCannotExceedEstCredit",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const issued =
+      parseFloat(String(programme.creditIssued)) + auth.issueAmount;
+    const t = new Date().getTime();
+    const resp = await this.programmeRepo.update(
+      {
+        externalId: auth.externalId,
+      },
+      {
+        creditIssued: issued,
+        emissionReductionAchieved: issued,
+        serialNo: auth.serialNo,
+        currentStage: ProgrammeStage.AUTHORISED,
+        statusUpdateTime: t,
+        authTime: t,
+        creditUpdateTime: t,
+        txTime: t,
+      }
+    );
+
+    return new DataResponseDto(HttpStatus.OK, programme);
+  }
+
   async uploadDocument(type: DocType, id: string, data: string) {
+    const filetype = type == DocType.METHODOLOGY_DOCUMENT ? "xlsx" : "pdf";
     const response: any = await this.fileHandler.uploadFile(
-      `documents/${type}_${id}_${new Date().getTime()}.png`,
+      `documents/${this.helperService.enumToString(DocType, type)}${
+        id ? "_" + id : ""
+      }.${filetype}`,
       data
     );
     if (response) {
@@ -150,6 +637,16 @@ export class ProgrammeService {
     const programme: Programme = this.toProgramme(programmeDto);
     this.logger.verbose("Programme create", programme);
 
+    const pr = await this.findByExternalId(programmeDto.externalId);
+    if (pr) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.programmeExistsWithSameExetrnalId",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
     if (
       programmeDto.proponentTaxVatId.length > 1 &&
       (!programmeDto.proponentPercentage ||
@@ -229,7 +726,7 @@ export class ProgrammeService {
         );
       }
 
-      companyIds.push(projectCompany.companyId);
+      companyIds.push(Number(projectCompany.companyId));
       companyNames.push(projectCompany.name);
     }
 
@@ -243,6 +740,7 @@ export class ProgrammeService {
     ).getFullYear();
     programme.currentStage = ProgrammeStage.AWAITING_AUTHORIZATION;
     programme.companyId = companyIds;
+    programme.emissionReductionExpected = programme.creditEst;
     programme.txTime = new Date().getTime();
     if (programme.proponentPercentage) {
       programme.creditOwnerPercentage = programme.proponentPercentage;
@@ -266,25 +764,31 @@ export class ProgrammeService {
     }
 
     if (programmeDto.designDocument) {
-      programmeDto.designDocument = await this.uploadDocument(DocType.DESIGN_DOCUMENT, programme.programmeId, programmeDto.designDocument);
+      programmeDto.designDocument = await this.uploadDocument(
+        DocType.DESIGN_DOCUMENT,
+        undefined,
+        programmeDto.designDocument
+      );
     }
 
-    const ndcAc = undefined;
+    let ndcAc: NDCAction = undefined;
     if (programmeDto.ndcAction) {
-      this.calcCreditNDCAction(programmeDto.ndcAction, programme)
       const data = instanceToPlain(programmeDto.ndcAction);
-      const ndcAc: NDCAction = plainToClass(NDCAction, data)
+      ndcAc = plainToClass(NDCAction, data);
       ndcAc.id = await this.createNDCActionId(programmeDto.ndcAction);
+
+      await this.calcCreditNDCAction(ndcAc, programme);
+      this.calcAddNDCFields(ndcAc, programme);
+
       programmeDto.ndcAction.id = ndcAc.id;
+      programmeDto.ndcAction.programmeId = programme.programmeId;
+      programmeDto.ndcAction.externalId = programme.externalId;
+      programmeDto.ndcAction.ndcFinancing = ndcAc.ndcFinancing;
+      programmeDto.ndcAction.constantVersion = ndcAc.constantVersion;
     }
 
-    await this.asyncOperationsInterface.addAction(
-      {
-        actionType: AsyncActionType.ProgrammeCreate,
-        actionProps: programmeDto,
-      }
-    );
-    
+    await this.populateExtraFields(programme);
+
     const savedProgramme = await this.entityManager
       .transaction(async (em) => {
         if (ndcAc) {
@@ -292,17 +796,23 @@ export class ProgrammeService {
           if (programmeDto.ndcAction.monitoringReport) {
             const dr = new ProgrammeDocument();
             dr.programmeId = programme.programmeId;
+            dr.externalId = programme.externalId;
             dr.actionId = ndcAc.id;
             dr.status = DocumentStatus.PENDING;
             dr.type = DocType.MONITORING_REPORT;
             dr.txTime = new Date().getTime();
-            dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, programme.programmeId, programmeDto.ndcAction.monitoringReport);
+            dr.url = await this.uploadDocument(
+              DocType.MONITORING_REPORT,
+              ndcAc.id,
+              programmeDto.ndcAction.monitoringReport
+            );
             const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
           }
         }
         if (programmeDto.designDocument) {
           const dr = new ProgrammeDocument();
           dr.programmeId = programme.programmeId;
+          dr.externalId = programme.externalId;
           dr.status = DocumentStatus.PENDING;
           dr.type = DocType.DESIGN_DOCUMENT;
           dr.txTime = new Date().getTime();
@@ -314,15 +824,17 @@ export class ProgrammeService {
       .catch((err: any) => {
         console.log(err);
         if (err instanceof QueryFailedError) {
-          throw new HttpException(
-            err.message,
-            HttpStatus.BAD_REQUEST
-          );
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         } else {
           this.logger.error(`Programme add error ${err}`);
         }
         return err;
       });
+
+    await this.asyncOperationsInterface.addAction({
+      actionType: AsyncActionType.ProgrammeCreate,
+      actionProps: programmeDto,
+    });
 
     const hostAddress = this.configService.get("host");
     await this.emailHelperService.sendEmailToGovernmentAdmins(
@@ -330,20 +842,19 @@ export class ProgrammeService {
       {
         organisationName: orgNamesList,
         programmePageLink:
-          hostAddress +
-          `/programmeManagement/view?id=${programme.programmeId}`,
+          hostAddress + `/programmeManagement/view?id=${programme.programmeId}`,
       }
     );
     return savedProgramme;
   }
 
-  async calcCreditNDCAction(ndcAction: NDCActionDto, program: Programme) {
+  async calcCreditNDCAction(ndcAction: NDCAction, program: Programme) {
     let constants = await this.getLatestConstant(ndcAction.typeOfMitigation);
     const req = await this.getCreditRequest(ndcAction, program, constants);
+    const crdts = await calculateCredit(req);
+    console.log("Credit", crdts, req);
     try {
-      ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(
-        await calculateCredit(req)
-      );
+      ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(crdts);
     } catch (err) {
       this.logger.log(`Credit calculate failed ${err.message}`);
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
@@ -352,12 +863,23 @@ export class ProgrammeService {
     ndcAction.constantVersion = constants
       ? String(constants.version)
       : "default";
+
+    console.log("1111", ndcAction);
     return ndcAction;
+  }
+
+  async calcAddNDCFields(ndcAction: NDCAction, programme: Programme) {
+    ndcAction.programmeId = programme.programmeId;
+    ndcAction.externalId = programme.externalId;
+    ndcAction.txTime = new Date().getTime();
+    ndcAction.createdTime = ndcAction.txTime;
+    ndcAction.sector = programme.sector;
+    ndcAction.status = NDCStatus.PENDING;
   }
 
   private getExpectedDoc(type: DocType) {
     if (type == DocType.METHODOLOGY_DOCUMENT) {
-      return DocType.DESIGN_DOCUMENT
+      return DocType.DESIGN_DOCUMENT;
     }
     if (type == DocType.MONITORING_REPORT) {
       return DocType.METHODOLOGY_DOCUMENT;
@@ -370,7 +892,7 @@ export class ProgrammeService {
   async docAction(documentAction: DocumentAction) {
     const d = await this.documentRepo.findOne({
       where: {
-        id: documentAction.id
+        id: documentAction.id,
       },
     });
     if (!d) {
@@ -383,6 +905,8 @@ export class ProgrammeService {
       );
     }
 
+    const pr = await this.findById(d.programmeId);
+
     if (d.status == DocumentStatus.ACCEPTED) {
       throw new HttpException(
         this.helperService.formatReqMessagesString(
@@ -392,34 +916,93 @@ export class ProgrammeService {
         HttpStatus.BAD_REQUEST
       );
     }
+    let ndc: NDCAction;
 
     if (documentAction.status == DocumentStatus.ACCEPTED) {
-      await this.asyncOperationsInterface.addAction(
-        {
+      if (d.type == DocType.METHODOLOGY_DOCUMENT) {
+        await this.asyncOperationsInterface.addAction({
+          actionType: AsyncActionType.ProgrammeAccept,
+          actionProps: {
+            type: this.helperService.enumToString(DocType, d.type),
+            data: d.url,
+            externalId: d.externalId,
+            creditEst: Number(pr.creditEst),
+          },
+        });
+      } else {
+        if (d.type == DocType.VERIFICATION_REPORT) {
+          ndc = await this.ndcActionRepo.findOne({
+            where: {
+              id: d.actionId,
+            },
+          });
+          if (ndc) {
+            ndc.status = NDCStatus.APPROVED;
+          }
+        }
+
+        await this.asyncOperationsInterface.addAction({
           actionType: AsyncActionType.DocumentUpload,
           actionProps: {
-            type: d.type,
+            type: this.helperService.enumToString(DocType, d.type),
             data: d.url,
-            programmeId: d.programmeId,
-            actionId: d.actionId
+            externalId: d.externalId,
+            actionId: d.actionId,
           },
-        }
-      );
+        });
+      }
     }
 
-    const resp = await this.documentRepo.update( {
-      id: documentAction.id,
-    },
-    {
-      status: documentAction.status,
-      remark: documentAction.remark,
+    const resp = await this.entityManager.transaction(async (em) => {
+      if (
+        d.type == DocType.METHODOLOGY_DOCUMENT &&
+        documentAction.status == DocumentStatus.ACCEPTED
+      ) {
+        await em.update(
+          Programme,
+          {
+            programmeId: d.programmeId,
+          },
+          {
+            currentStage: ProgrammeStage.APPROVED,
+            statusUpdateTime: new Date().getTime(),
+            txTime: new Date().getTime(),
+          }
+        );
+      }
+      if (ndc) {
+        await em.update(
+          NDCAction,
+          {
+            id: ndc.id,
+          },
+          {
+            status: ndc.status,
+          }
+        );
+      }
+      return await em.update(
+        ProgrammeDocument,
+        {
+          id: documentAction.id,
+        },
+        {
+          status: documentAction.status,
+          remark: documentAction.remark,
+        }
+      );
     });
 
-    return new DataResponseDto(HttpStatus.OK, resp);
+    return new BasicResponseDto(
+      HttpStatus.OK,
+      this.helperService.formatReqMessagesString(
+        "programme.actionSuccessful",
+        []
+      )
+    );
   }
 
   async addDocument(documentDto: ProgrammeDocumentDto) {
-
     const programme = await this.findById(documentDto.programmeId);
 
     if (!programme) {
@@ -437,15 +1020,15 @@ export class ProgrammeService {
       let whr = {
         programmeId: documentDto.programmeId,
         status: DocumentStatus.ACCEPTED,
-        type: expected
-      }
+        type: expected,
+      };
       if (documentDto.actionId) {
-        whr['actionId'] = documentDto.actionId;
+        whr["actionId"] = documentDto.actionId;
       }
       const approvedDesign = await this.documentRepo.findOne({
         where: whr,
       });
-  
+
       if (!approvedDesign) {
         throw new HttpException(
           this.helperService.formatReqMessagesString(
@@ -456,35 +1039,43 @@ export class ProgrammeService {
         );
       }
     }
-    
+
     let whr = {
       programmeId: documentDto.programmeId,
-      type: documentDto.type
-    }
+      type: documentDto.type,
+    };
     if (documentDto.actionId) {
-      whr['actionId'] = documentDto.actionId;
+      whr["actionId"] = documentDto.actionId;
     }
     const currentDoc = await this.documentRepo.findOne({
       where: whr,
     });
 
-    const url = await this.uploadDocument(documentDto.type, programme.programmeId, documentDto.data);
+    const url = await this.uploadDocument(
+      documentDto.type,
+      documentDto.actionId,
+      documentDto.data
+    );
     const dr = new ProgrammeDocument();
     dr.programmeId = programme.programmeId;
+    dr.externalId = programme.externalId;
     dr.status = DocumentStatus.PENDING;
     dr.type = documentDto.type;
     dr.txTime = new Date().getTime();
     dr.url = url;
 
+    let resp;
     if (!currentDoc) {
-      return await this.documentRepo.save(dr);
+      resp = await this.documentRepo.save(dr);
     } else {
-      return await this.documentRepo.update(whr, {
-        "status": dr.status,
-        "txTime": dr.txTime,
-        "url": dr.url
-      })
+      resp = await this.documentRepo.update(whr, {
+        status: dr.status,
+        txTime: dr.txTime,
+        url: dr.url,
+      });
     }
+
+    return new DataResponseDto(HttpStatus.OK, resp);
   }
 
   private async createNDCActionId(ndcAction: NDCActionDto) {
@@ -493,11 +1084,28 @@ export class ProgrammeService {
       3
     );
 
-    const type = ndcAction.action == NDCActionType.Mitigation ? 'MTG' : ndcAction.action == NDCActionType.Adaptation ? 'ADT' : ndcAction.action == NDCActionType.Enablement ? 'ENB' : 'CRS'
-    return `${type}-${id}`
+    const type =
+      ndcAction.action == NDCActionType.Mitigation
+        ? "MTG"
+        : ndcAction.action == NDCActionType.Adaptation
+        ? "ADT"
+        : ndcAction.action == NDCActionType.Enablement
+        ? "ENB"
+        : "CRS";
+    return `${type}-${id}`;
   }
 
   async addNDCAction(ndcActionDto: NDCActionDto): Promise<DataResponseDto> {
+    if (!ndcActionDto.programmeId) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.programmeNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
     const program = await this.findById(ndcActionDto.programmeId);
 
     if (!program) {
@@ -510,47 +1118,130 @@ export class ProgrammeService {
       );
     }
 
-    this.calcCreditNDCAction(ndcActionDto, program);
-
     const data = instanceToPlain(ndcActionDto);
-    const ndcAction: NDCAction = plainToClass(NDCAction, data)
+    const ndcAction: NDCAction = plainToClass(NDCAction, data);
     ndcAction.id = await this.createNDCActionId(ndcActionDto);
-    
-    if (ndcActionDto.action == NDCActionType.Mitigation || ndcActionDto.action == NDCActionType.CrossCutting) {
-      await this.asyncOperationsInterface.addAction(
-        {
-          actionType: AsyncActionType.AddMitigation,
-          actionProps: ndcAction
-        }
-      );
+
+    await this.calcCreditNDCAction(ndcAction, program);
+    console.log("2222", ndcAction);
+    this.calcAddNDCFields(ndcAction, program);
+
+    if (
+      ndcActionDto.action == NDCActionType.Mitigation ||
+      ndcActionDto.action == NDCActionType.CrossCutting
+    ) {
+      await this.asyncOperationsInterface.addAction({
+        actionType: AsyncActionType.AddMitigation,
+        actionProps: ndcAction,
+      });
     }
-    const savedProgramme = await this.entityManager
+    const saved = await this.entityManager
       .transaction(async (em) => {
-        await em.save<NDCAction>(ndcAction);
+        const n = await em.save<NDCAction>(ndcAction);
         if (ndcActionDto.monitoringReport) {
           const dr = new ProgrammeDocument();
           dr.programmeId = program.programmeId;
+          dr.externalId = program.externalId;
           dr.actionId = ndcAction.id;
           dr.status = DocumentStatus.PENDING;
           dr.type = DocType.MONITORING_REPORT;
           dr.txTime = new Date().getTime();
-          dr.url = await this.uploadDocument(DocType.MONITORING_REPORT, program.programmeId, ndcActionDto.monitoringReport);
+          dr.url = await this.uploadDocument(
+            DocType.MONITORING_REPORT,
+            program.programmeId,
+            ndcActionDto.monitoringReport
+          );
           const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
         }
+
+        return n;
       })
       .catch((err: any) => {
         console.log(err);
         if (err instanceof QueryFailedError) {
-          throw new HttpException(
-            err.message,
-            HttpStatus.BAD_REQUEST
-          );
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         } else {
           this.logger.error(`NDC Action add error ${err}`);
         }
         return err;
       });
-    return null;
+    return new DataResponseDto(HttpStatus.OK, saved);
+  }
+
+  async queryNdcActions(
+    query: QueryDto,
+    abilityCondition: string
+  ): Promise<DataListResponseDto> {
+    const skip = query.size * query.page - query.size;
+    let resp = await this.ndcActionViewRepo
+      .createQueryBuilder("ndcaction")
+      .where(
+        this.helperService.generateWhereSQL(
+          query,
+          this.helperService.parseMongoQueryToSQLWithTable(
+            "ndcaction",
+            abilityCondition
+          ),
+          "ndcaction"
+        )
+      )
+      .orderBy(
+        query?.sort?.key &&
+          `"ndcaction".${this.helperService.generateSortCol(query?.sort?.key)}`,
+        query?.sort?.order,
+        query?.sort?.nullFirst !== undefined
+          ? query?.sort?.nullFirst === true
+            ? "NULLS FIRST"
+            : "NULLS LAST"
+          : undefined
+      )
+      .offset(skip)
+      .limit(query.size)
+      .getManyAndCount();
+
+    return new DataListResponseDto(
+      resp.length > 0 ? resp[0] : undefined,
+      resp.length > 1 ? resp[1] : undefined
+    );
+  }
+
+  async queryDocuments(
+    query: QueryDto,
+    abilityCondition: string
+  ): Promise<DataListResponseDto> {
+    const skip = query.size * query.page - query.size;
+    let resp = await this.documentRepo
+      .createQueryBuilder("programmedocument")
+      .where(
+        this.helperService.generateWhereSQL(
+          query,
+          this.helperService.parseMongoQueryToSQLWithTable(
+            "programmedocument",
+            abilityCondition
+          ),
+          "programmedocument"
+        )
+      )
+      .orderBy(
+        query?.sort?.key &&
+          `"programmedocument".${this.helperService.generateSortCol(
+            query?.sort?.key
+          )}`,
+        query?.sort?.order,
+        query?.sort?.nullFirst !== undefined
+          ? query?.sort?.nullFirst === true
+            ? "NULLS FIRST"
+            : "NULLS LAST"
+          : undefined
+      )
+      .offset(skip)
+      .limit(query.size)
+      .getManyAndCount();
+
+    return new DataListResponseDto(
+      resp.length > 0 ? resp[0] : undefined,
+      resp.length > 1 ? resp[1] : undefined
+    );
   }
 
   async query(
@@ -647,361 +1338,6 @@ export class ProgrammeService {
     });
   }
 
-  // async certify(req: ProgrammeCertify, add: boolean, user: User) {
-  //   this.logger.log(
-  //     `Programme ${req.programmeId} certification received by ${user.id}`
-  //   );
-
-  //   if (add && user.companyRole != CompanyRole.CERTIFIER) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString("programme.unAuth", []),
-  //       HttpStatus.FORBIDDEN
-  //     );
-  //   }
-
-  //   if (
-  //     !add &&
-  //     ![CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(
-  //       user.companyRole
-  //     )
-  //   ) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.certifierOrGovCanOnlyPerformCertificationRevoke",
-  //         []
-  //       ),
-  //       HttpStatus.FORBIDDEN
-  //     );
-  //   }
-
-  //   let certifierId;
-  //   if (user.companyRole === CompanyRole.GOVERNMENT) {
-  //     if (!req.certifierId) {
-  //       throw new HttpException(
-  //         this.helperService.formatReqMessagesString(
-  //           "programme.certifierIdRequiredForGov",
-  //           []
-  //         ),
-  //         HttpStatus.FORBIDDEN
-  //       );
-  //     }
-  //     certifierId = req.certifierId;
-  //   } else {
-  //     certifierId = user.companyId;
-  //   }
-
-  //   const userCompany = await this.companyRepo.findOne({
-  //     where: { companyId: user.companyId },
-  //   });
-  //   if (userCompany && userCompany.state === CompanyState.SUSPENDED) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.organisationDeactivated",
-  //         []
-  //       ),
-  //       HttpStatus.FORBIDDEN
-  //     );
-  //   }
-
-  //   const updated = await this.programmeLedger.updateCertifier(
-  //     req.programmeId,
-  //     certifierId,
-  //     add,
-  //     this.getUserRefWithRemarks(user, req.comment)
-  //   );
-  //   updated.company = await this.companyRepo.find({
-  //     where: { companyId: In(updated.companyId) },
-  //   });
-  //   if (updated && updated.certifierId && updated.certifierId.length > 0) {
-  //     updated.certifier = await this.companyRepo.find({
-  //       where: { companyId: In(updated.certifierId) },
-  //     });
-  //   }
-
-  //   if (add) {
-  //     await this.emailHelperService.sendEmailToProgrammeOwnerAdmins(
-  //       req.programmeId,
-  //       EmailTemplates.PROGRAMME_CERTIFICATION,
-  //       {},
-  //       user.companyId
-  //     );
-  //   } else {
-  //     if (user.companyRole === CompanyRole.GOVERNMENT) {
-  //       await this.emailHelperService.sendEmailToProgrammeOwnerAdmins(
-  //         req.programmeId,
-  //         EmailTemplates.PROGRAMME_CERTIFICATION_REVOKE_BY_GOVT_TO_PROGRAMME,
-  //         {},
-  //         req.certifierId,
-  //         user.companyId
-  //       );
-  //       await this.emailHelperService.sendEmailToOrganisationAdmins(
-  //         req.certifierId,
-  //         EmailTemplates.PROGRAMME_CERTIFICATION_REVOKE_BY_GOVT_TO_CERT,
-  //         {},
-  //         user.companyId,
-  //         req.programmeId
-  //       );
-  //     } else {
-  //       await this.emailHelperService.sendEmailToProgrammeOwnerAdmins(
-  //         req.programmeId,
-  //         EmailTemplates.PROGRAMME_CERTIFICATION_REVOKE_BY_CERT,
-  //         {},
-  //         user.companyId
-  //       );
-  //     }
-  //   }
-
-  //   if (add) {
-  //     return new DataResponseMessageDto(
-  //       HttpStatus.OK,
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.certifyPendingProgramme",
-  //         []
-  //       ),
-  //       updated
-  //     );
-  //   } else {
-  //     return new DataResponseMessageDto(
-  //       HttpStatus.OK,
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.certificationRevocation",
-  //         []
-  //       ),
-  //       updated
-  //     );
-  //   }
-  // }
-
-  // async issueProgrammeCredit(req: ProgrammeIssue, user: User) {
-  //   this.logger.log(
-  //     `Programme ${req.programmeId} approve. Comment: ${req.comment}`
-  //   );
-  //   const program = await this.programmeLedger.getProgrammeById(
-  //     req.programmeId
-  //   );
-  //   if (!program) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.programmeNotExist",
-  //         []
-  //       ),
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   }
-
-  //   if (program.currentStage != ProgrammeStage.AUTHORISED) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.notInAUthorizedState",
-  //         []
-  //       ),
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   }
-  //   if (program.creditEst - program.creditIssued < req.issueAmount) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.issuedCreditAmountcantExceedPendingCredit",
-  //         []
-  //       ),
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   }
-  //   let updated: any = await this.programmeLedger.issueProgrammeStatus(
-  //     req.programmeId,
-  //     this.configService.get("systemCountry"),
-  //     program.companyId,
-  //     req.issueAmount,
-  //     this.getUserRefWithRemarks(user, req.comment)
-  //   );
-  //   if (!updated) {
-  //     return new BasicResponseDto(
-  //       HttpStatus.BAD_REQUEST,
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.notFOundAPendingProgrammeForTheId",
-  //         [req.programmeId]
-  //       )
-  //     );
-  //   }
-
-  //   const hostAddress = this.configService.get("host");
-  //   updated.companyId.forEach(async (companyId) => {
-  //     await this.emailHelperService.sendEmailToOrganisationAdmins(
-  //       companyId,
-  //       EmailTemplates.CREDIT_ISSUANCE,
-  //       {
-  //         programmeName: updated.title,
-  //         credits: req.issueAmount,
-  //         serialNumber: updated.serialNo,
-  //         pageLink:
-  //           hostAddress + `/programmeManagement/view?id=${updated.programmeId}`,
-  //       }
-  //     );
-  //   });
-
-  //   const companyData = await this.companyService.findByCompanyIds({
-  //     companyIds: program.companyId,
-  //   });
-
-  //   const suspendedCompanies = companyData.filter(
-  //     (company) => company.state == CompanyState.SUSPENDED
-  //   );
-
-  //   if (suspendedCompanies.length > 0) {
-  //     updated = await this.programmeLedger.freezeIssuedCredit(
-  //       req.programmeId,
-  //       req.issueAmount,
-  //       this.getUserRef(user),
-  //       suspendedCompanies
-  //     );
-  //     if (!updated) {
-  //       return new BasicResponseDto(
-  //         HttpStatus.BAD_REQUEST,
-  //         this.helperService.formatReqMessagesString(
-  //           "programme.internalErrorCreditFreezing",
-  //           [req.programmeId]
-  //         )
-  //       );
-  //     }
-  //   }
-
-  //   updated.company = await this.companyRepo.find({
-  //     where: { companyId: In(updated.companyId) },
-  //   });
-  //   if (updated.certifierId && updated.certifierId.length > 0) {
-  //     updated.certifier = await this.companyRepo.find({
-  //       where: { companyId: In(updated.certifierId) },
-  //     });
-  //   }
-
-  //   return new DataResponseDto(HttpStatus.OK, updated);
-  // }
-
-  // async approveProgramme(req: ProgrammeApprove, user: User) {
-  //   this.logger.log(
-  //     `Programme ${req.programmeId} approve. Comment: ${req.comment}`
-  //   );
-  //   const program = await this.programmeLedger.getProgrammeById(
-  //     req.programmeId
-  //   );
-  //   if (!program) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.programmeNotExist",
-  //         []
-  //       ),
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   }
-
-  //   if (program.currentStage != ProgrammeStage.AWAITING_AUTHORIZATION) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.notInPendingState",
-  //         []
-  //       ),
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   }
-  //   if (program.creditEst < req.issueAmount) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.issuedCreditCannotExceedEstCredit",
-  //         []
-  //       ),
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   }
-  //   const updated: any = await this.programmeLedger.authProgrammeStatus(
-  //     req.programmeId,
-  //     this.configService.get("systemCountry"),
-  //     program.companyId,
-  //     req.issueAmount,
-  //     this.getUserRefWithRemarks(user, req.comment)
-  //   );
-  //   if (!updated) {
-  //     return new BasicResponseDto(
-  //       HttpStatus.BAD_REQUEST,
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.inotFOundAPendingProgrammeForTheId",
-  //         [req.programmeId]
-  //       )`Does not found a pending programme for the given programme id ${req.programmeId}`
-  //     );
-  //   }
-
-  //   updated.company = await this.companyRepo.find({
-  //     where: { companyId: In(updated.companyId) },
-  //   });
-  //   if (updated.certifierId && updated.certifierId.length > 0) {
-  //     updated.certifier = await this.companyRepo.find({
-  //       where: { companyId: In(updated.certifierId) },
-  //     });
-  //   }
-
-  //   const hostAddress = this.configService.get("host");
-  //   let authDate = new Date(updated.txTime);
-  //   let date = authDate.getDate().toString().padStart(2, "0");
-  //   let month = authDate.toLocaleString("default", { month: "long" });
-  //   let year = authDate.getFullYear();
-  //   let formattedDate = `${date} ${month} ${year}`;
-
-  //   updated.company.forEach(async (company) => {
-  //     await this.emailHelperService.sendEmailToOrganisationAdmins(
-  //       company.companyId,
-  //       EmailTemplates.PROGRAMME_AUTHORISATION,
-  //       {
-  //         programmeName: updated.title,
-  //         authorisedDate: formattedDate,
-  //         serialNumber: updated.serialNo,
-  //         programmePageLink:
-  //           hostAddress + `/programmeManagement/view?id=${updated.programmeId}`,
-  //       }
-  //     );
-  //   });
-
-  //   return new DataResponseDto(HttpStatus.OK, updated);
-  // }
-
-  // async rejectProgramme(req: ProgrammeReject, user: User) {
-  //   this.logger.log(
-  //     `Programme ${req.programmeId} reject. Comment: ${req.comment}`
-  //   );
-  //   const programme = await this.findById(req.programmeId);
-  //   const currentStage = programme.currentStage;
-  //   if (currentStage === ProgrammeStage.REJECTED) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.rejectAlreadyRejectedProg",
-  //         []
-  //       ),
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   }
-  //   const updated = await this.programmeLedger.updateProgrammeStatus(
-  //     req.programmeId,
-  //     ProgrammeStage.REJECTED,
-  //     ProgrammeStage.AWAITING_AUTHORIZATION,
-  //     this.getUserRefWithRemarks(user, req.comment)
-  //   );
-  //   if (!updated) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString(
-  //         "programme.programmeNotExist",
-  //         []
-  //       ),
-  //       HttpStatus.BAD_REQUEST
-  //     );
-  //   }
-
-  //   await this.emailHelperService.sendEmailToProgrammeOwnerAdmins(
-  //     req.programmeId,
-  //     EmailTemplates.PROGRAMME_REJECTION,
-  //     { reason: req.comment }
-  //   );
-
-  //   return new BasicResponseDto(HttpStatus.OK, "Successfully updated");
-  // }
-
   private getUserName = async (usrId: string) => {
     this.logger.debug(`Getting user [${usrId}]`);
     if (usrId == "undefined" || usrId == "null") {
@@ -1061,4 +1397,259 @@ export class ProgrammeService {
   private getUserRefWithRemarks = (user: any, remarks: string) => {
     return `${user.companyId}#${user.companyName}#${user.id}#${remarks}`;
   };
+
+  private populateExtraFields = async (programme: Programme) => {
+    const programmeProperties = programme.programmeProperties;
+    programme.geographicalLocationCordintes = await this.locationService
+      .getCoordinatesForRegion(programmeProperties.geographicalLocation)
+      .then((response: any) => {
+        console.log("response from forwardGeoCoding function -> ", response);
+        return [...response];
+      });
+    programme.createdTime = new Date().getTime();
+  };
+
+  async queryInvestment(query: QueryDto, abilityCondition: any, user: User) {
+    const resp = await this.investmentViewRepo
+      .createQueryBuilder("investment")
+      .where(
+        this.helperService.generateWhereSQL(
+          query,
+          this.helperService.parseMongoQueryToSQLWithTable(
+            "investment",
+            abilityCondition
+          )
+        )
+      )
+      .orderBy(
+        query?.sort?.key &&
+          this.helperService.generateSortCol(query?.sort?.key),
+        query?.sort?.order,
+        query?.sort?.nullFirst !== undefined
+          ? query?.sort?.nullFirst === true
+            ? "NULLS FIRST"
+            : "NULLS LAST"
+          : undefined
+      )
+      .offset(query.size * query.page - query.size)
+      .limit(query.size)
+      .getManyAndCount();
+    return new DataListResponseDto(
+      resp.length > 0 ? resp[0] : undefined,
+      resp.length > 1 ? resp[1] : undefined
+    );
+  }
+  async investmentCancel(req: InvestmentCancel, requester: User) {
+    this.logger.log(
+      `Investment cancel by ${requester.companyId}-${
+        requester.id
+      } received ${JSON.stringify(req)}`
+    );
+
+    const investment = await this.investmentRepo.findOneBy({
+      requestId: req.requestId,
+    });
+
+    if (!investment) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.investmentReqDoesNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (investment.status != InvestmentStatus.PENDING) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.acceptOrRejCancelledReq",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const result = await this.investmentRepo
+      .update(
+        {
+          requestId: req.requestId,
+          status: InvestmentStatus.PENDING,
+        },
+        {
+          status: InvestmentStatus.CANCELLED,
+          txTime: new Date().getTime(),
+          txRef: `${req.comment}#${requester.companyId}#${requester.id}`,
+        }
+      )
+      .catch((err) => {
+        this.logger.error(err);
+        return err;
+      });
+
+    if (result.affected > 0) {
+      return new BasicResponseDto(
+        HttpStatus.OK,
+        this.helperService.formatReqMessagesString(
+          "programme.investmentCancelSuccess",
+          []
+        )
+      );
+    }
+    return new BasicResponseDto(
+      HttpStatus.BAD_REQUEST,
+      this.helperService.formatReqMessagesString(
+        "programme.investmentReqNotExistinGiv",
+        []
+      )
+    );
+  }
+
+  async investmentReject(req: InvestmentReject, approver: User) {
+    this.logger.log(
+      `Investment reject ${JSON.stringify(req)} ${approver.companyId}`
+    );
+
+    const investment = await this.investmentRepo.findOneBy({
+      requestId: req.requestId,
+    });
+
+    if (!investment) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.investmentReqDoesNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (investment.status != InvestmentStatus.PENDING) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.acceptOrRejCancelledReq",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (
+      investment.fromCompanyId != approver.companyId
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.invalidApproverForInvestmentReq",
+          []
+        ),
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const result = await this.investmentRepo
+      .update(
+        {
+          requestId: req.requestId,
+          status: InvestmentStatus.PENDING,
+        },
+        {
+          status: InvestmentStatus.REJECTED,
+          txTime: new Date().getTime(),
+          txRef: `${req.comment}#${approver.companyId}#${approver.id}`,
+        }
+      )
+      .catch((err) => {
+        this.logger.error(err);
+        return err;
+      });
+
+
+    if (result.affected > 0) {
+      return new BasicResponseDto(
+        HttpStatus.OK,
+        this.helperService.formatReqMessagesString(
+          "programme.investmentReqRejectSuccess",
+          []
+        )
+      );
+    }
+
+    throw new HttpException(
+      this.helperService.formatReqMessagesString(
+        "programme.noPendReqFound",
+        []
+      ),
+      HttpStatus.BAD_REQUEST
+    );
+  }
+  async investmentApprove(req: InvestmentApprove, approver: User) {
+    const investment = await this.investmentRepo.findOneBy({
+      requestId: req.requestId,
+    });
+
+    if (!investment) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.investmentReqDoesNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (investment.status == InvestmentStatus.CANCELLED) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.acceptOrRejAlreadyCancelled",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (investment.status == InvestmentStatus.APPROVED) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.investmentAlreadyApproved",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    if (
+      investment.fromCompanyId != approver.companyId
+    ) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.invalidApproverForInvestmentReq",
+          []
+        ),
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const receiver = await this.companyService.findByCompanyId(
+      investment.toCompanyId
+    );
+    const giver = await this.companyService.findByCompanyId(
+      investment.fromCompanyId
+    );
+
+    const initiatorCompanyDetails = await this.companyService.findByCompanyId(
+      investment.initiatorCompanyId
+    );
+
+    const programme = await this.findById(investment.programmeId);
+
+    const transferResult = await this.doTransfer(
+      investment,
+      `${this.getUserRef(approver)}#${receiver.companyId}#${receiver.name}#${
+        giver.companyId
+      }#${giver.name}`,
+      programme
+    );
+
+    return transferResult;
+  }
 }

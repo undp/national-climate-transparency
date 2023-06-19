@@ -6,7 +6,7 @@ export class ProgrammeIssue {
     @ApiProperty()
     @IsNotEmpty()
     @IsString()
-    programmeId: string;
+    externalId: string;
 
     @ApiPropertyOptional()
     @IsNumber()

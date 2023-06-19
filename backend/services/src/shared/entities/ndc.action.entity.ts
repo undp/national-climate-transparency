@@ -6,9 +6,12 @@ import { NdcFinancing } from "../dto/ndc.financing";
 import { NDCReports } from "../dto/ndc.reports";
 import { SolarProperties } from "../dto/solar.properties";
 import { NDCActionType } from "../enum/ndc.action.enum";
+import { NDCStatus } from "../enum/ndc.status";
+import { Sector } from "../enum/sector.enum";
 import { TypeOfMitigation } from "../enum/typeofmitigation.enum";
-import { Column, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
+@Entity()
 export class NDCAction {
 
   @PrimaryColumn()
@@ -38,12 +41,14 @@ export class NDCAction {
   @Column({
     type: "jsonb",
     array: false,
+    nullable: true
   })
   agricultureProperties?: AgricultureProperties;
 
   @Column({
     type: "jsonb",
     array: false,
+    nullable: true
   })
   solarProperties?: SolarProperties;
 
@@ -51,6 +56,7 @@ export class NDCAction {
   @Column({
     type: "jsonb",
     array: false,
+    nullable: true
   })
   adaptationProperties: AdaptationProperties;
 
@@ -58,6 +64,7 @@ export class NDCAction {
   @Column({
     type: "jsonb",
     array: false,
+    nullable: true
   })
   ndcFinancing?: NdcFinancing;
   
@@ -72,6 +79,7 @@ export class NDCAction {
   @Column({
     type: "jsonb",
     array: false,
+    nullable: true
   })
   coBenefitsProperties?: CoBenefitsProperties;
 
@@ -83,4 +91,12 @@ export class NDCAction {
 
   @Column({ nullable: true })
   constantVersion: string;
+
+  @Column({ nullable: true })
+  sector: Sector;
+
+  @Column({ nullable: true })
+  status: NDCStatus
+
+  externalId: string;
 }

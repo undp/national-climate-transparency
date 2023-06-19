@@ -21,16 +21,14 @@ import { HelperService } from "../util/helpers.service";
 import { FindOrganisationQueryDto } from "../dto/find.organisation.dto";
 import { OrganisationUpdateDto } from "../dto/organisation.update.dto";
 import { DataResponseDto } from "../dto/data.response.dto";
-import { ProgrammeTransfer } from "../entities/programme.transfer";
-import { TransferStatus } from "../enum/transform.status.enum";
 import { User } from "../entities/user.entity";
 import { EmailHelperService } from "../email-helper/email-helper.service";
-import { Programme } from "../entities/programme.entity";
 import { EmailTemplates } from "../email-helper/email.template";
 import { SystemActionType } from "../enum/system.action.type";
 import { FileHandlerInterface } from "../file-handler/filehandler.interface";
 import { CounterType } from "../util/counter.type.enum";
 import { CounterService } from "../util/counter.service";
+import { LocationInterface } from "../location/location.interface";
 
 @Injectable()
 export class CompanyService {
@@ -41,10 +39,9 @@ export class CompanyService {
     private helperService: HelperService,
     @Inject(forwardRef(() => EmailHelperService))
     private emailHelperService: EmailHelperService,
-    @InjectRepository(ProgrammeTransfer)
-    private programmeTransferRepo: Repository<ProgrammeTransfer>,
     private fileHandler: FileHandlerInterface,
-    private counterService: CounterService
+    private counterService: CounterService,
+    private locationService: LocationInterface 
   ) {}
 
   async suspend(
@@ -98,10 +95,6 @@ export class CompanyService {
         //   this.getUserRefWithRemarks(user, `${remarks}#${company.name}`),
         //   true
         // );
-        await this.companyTransferCancel(
-          companyId,
-          `${remarks}#${user.companyId}#${user.id}#${SystemActionType.SUSPEND_AUTO_CANCEL}#${company.name}#${user.companyName}`
-        );
         await this.emailHelperService.sendEmail(
           company.email,
           EmailTemplates.PROGRAMME_DEVELOPER_ORG_DEACTIVATION,
@@ -256,7 +249,7 @@ export class CompanyService {
   async queryNames(query: QueryDto, abilityCondition: string): Promise<any> {
     const resp = await this.companyRepo
       .createQueryBuilder()
-      .select(['"companyId"', '"name"', '"state"'])
+      .select(['"companyId"', '"name"', '"state"', '"taxId"'])
       .where(
         this.helperService.generateWhereSQL(
           query,
@@ -328,6 +321,13 @@ export class CompanyService {
       );
     }
 
+    companyDto.geographicalLocationCordintes = await this.locationService
+      .getCoordinatesForRegion(companyDto.regions)
+      .then((response: any) => {
+        console.log("response from forwardGeoCoding function -> ", response);
+        return  [...response];
+      });
+
     return await this.companyRepo.save(companyDto).catch((err: any) => {
       if (err instanceof QueryFailedError) {
         switch (err.driverError.code) {
@@ -397,6 +397,15 @@ export class CompanyService {
       companyUpdateFields["website"] = "";
     }
 
+    if (companyUpdateFields.hasOwnProperty("regions")) {
+      companyUpdateFields["geographicalLocationCordintes"] = await this.locationService
+      .getCoordinatesForRegion(companyUpdateFields["regions"])
+      .then((response: any) => {
+        console.log("response from forwardGeoCoding function -> ", response);
+        return  [...response];
+      });
+    }
+
     const result = await this.companyRepo
       .update(
         {
@@ -423,29 +432,6 @@ export class CompanyService {
       ),
       HttpStatus.INTERNAL_SERVER_ERROR
     );
-  }
-
-  async companyTransferCancel(companyId: number, remark: string) {
-    await this.programmeTransferRepo
-      .createQueryBuilder()
-      .update(ProgrammeTransfer)
-      .set({
-        status: TransferStatus.CANCELLED,
-        txRef: remark,
-        txTime: new Date().getTime(),
-      })
-      .where(
-        "(fromCompanyId = :companyId OR toCompanyId = :companyId) AND status = :status",
-        {
-          companyId: companyId,
-          status: TransferStatus.PENDING,
-        }
-      )
-      .execute()
-      .catch((err: any) => {
-        this.logger.error(err);
-        return err;
-      });
   }
 
   private getUserRefWithRemarks = (user: any, remarks: string) => {

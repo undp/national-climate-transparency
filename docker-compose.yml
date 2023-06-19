@@ -47,6 +47,7 @@ services:
       DB_PORT: "5433"
       DB_NAME: "carbondev"
       NODE_ENV: 'dev'
+      FILE_SERVICE: local
     volumes:
       - filestore:/app/backend/services/public
       - ./users.csv:/app/backend/services/users.csv
@@ -70,6 +71,7 @@ services:
       DB_PORT: "5433"
       DB_NAME: "carbondev"
       NODE_ENV: 'dev'
+      FILE_SERVICE: local
   async-operations-handler:
     build:
       context: .
@@ -93,10 +95,11 @@ services:
       ITMO_PASSWORD: ""
       DB_PORT: "5433"
       DB_NAME: "carbondev"
-      REGISTRY_ENDPOINT: 'http://192.168.1.13:3000'
+      REGISTRY_ENDPOINT: 'http://192.168.8.195:3000'
       REGISTRY_SYNC_ENABLE: true
       NODE_ENV: 'dev'
       REGISTRY_API_TOKEN: ''
+      FILE_SERVICE: local
   # async-operations-handler:
   #   build:
   #     context: .
