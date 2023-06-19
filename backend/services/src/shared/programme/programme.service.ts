@@ -926,38 +926,38 @@ export class ProgrammeService {
     let ndc: NDCAction;
 
     if (documentAction.status == DocumentStatus.ACCEPTED) {
-      if (d.type == DocType.METHODOLOGY_DOCUMENT) {
-        await this.asyncOperationsInterface.addAction({
-          actionType: AsyncActionType.ProgrammeAccept,
-          actionProps: {
-            type: this.helperService.enumToString(DocType, d.type),
-            data: d.url,
-            externalId: d.externalId,
-            creditEst: Number(pr.creditEst),
+    if (d.type == DocType.METHODOLOGY_DOCUMENT) {
+      await this.asyncOperationsInterface.addAction({
+        actionType: AsyncActionType.ProgrammeAccept,
+        actionProps: {
+          type: this.helperService.enumToString(DocType, d.type),
+          data: d.url,
+          externalId: d.externalId,
+          creditEst: Number(pr.creditEst),
+        },
+      });
+    } else {
+      if (d.type == DocType.VERIFICATION_REPORT) {
+        ndc = await this.ndcActionRepo.findOne({
+          where: {
+            id: d.actionId,
           },
         });
-      } else {
-        if (d.type == DocType.VERIFICATION_REPORT) {
-          ndc = await this.ndcActionRepo.findOne({
-            where: {
-              id: d.actionId,
-            },
-          });
-          if (ndc) {
-            ndc.status = NDCStatus.APPROVED;
-          }
+        if (ndc) {
+          ndc.status = NDCStatus.APPROVED;
         }
-
-        await this.asyncOperationsInterface.addAction({
-          actionType: AsyncActionType.DocumentUpload,
-          actionProps: {
-            type: this.helperService.enumToString(DocType, d.type),
-            data: d.url,
-            externalId: d.externalId,
-            actionId: d.actionId,
-          },
-        });
       }
+
+      await this.asyncOperationsInterface.addAction({
+        actionType: AsyncActionType.DocumentUpload,
+        actionProps: {
+          type: this.helperService.enumToString(DocType, d.type),
+          data: d.url,
+          externalId: d.externalId,
+          actionId: d.actionId,
+        },
+      });
+    }
     }
 
     const resp = await this.entityManager.transaction(async (em) => {
@@ -1029,12 +1029,14 @@ export class ProgrammeService {
         status: DocumentStatus.ACCEPTED,
         type: expected,
       };
-      if (documentDto.actionId) {
+      if (documentDto.actionId && documentDto.type === DocType.VERIFICATION_REPORT) {
         whr["actionId"] = documentDto.actionId;
       }
       const approvedDesign = await this.documentRepo.findOne({
         where: whr,
       });
+
+      console.log('Where', whr)
 
       if (!approvedDesign) {
         throw new HttpException(
@@ -1068,6 +1070,7 @@ export class ProgrammeService {
     dr.externalId = programme.externalId;
     dr.status = DocumentStatus.PENDING;
     dr.type = documentDto.type;
+    dr.actionId = documentDto.actionId;
     dr.txTime = new Date().getTime();
     dr.url = url;
 
