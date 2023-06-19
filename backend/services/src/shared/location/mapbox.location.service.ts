@@ -17,6 +17,10 @@ export class MapboxLocationService implements LocationInterface {
 
   public async getCoordinatesForRegion(regions: string[]): Promise<number[][]> {
     
+    if (!regions) {
+      return []
+    }
+    
     console.log("addresses passed to forwardGeocoding function -> ", regions);
     let geoCodinates: any[] = [];
     const ACCESS_TOKEN = this.configService.get('mapbox.key');

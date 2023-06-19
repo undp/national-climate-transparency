@@ -15,10 +15,11 @@ export interface PieChartStatsProps {
   lastUpdate: any;
   loading: boolean;
   toolTipText: string;
+  subTitle?: string;
 }
 
 const PieChartsStat: FC<PieChartStatsProps> = (props: PieChartStatsProps) => {
-  const { id, title, options, series, lastUpdate, loading, toolTipText } = props;
+  const { id, title, options, series, lastUpdate, loading, toolTipText, subTitle } = props;
   return (
     <div className="stastics-and-pie-card height-pie-rem">
       {loading ? (
@@ -31,9 +32,7 @@ const PieChartsStat: FC<PieChartStatsProps> = (props: PieChartStatsProps) => {
           <div className="pie-charts-top">
             <div className="pie-charts-title">
               {title}
-              {[StatsCardsTypes.CREDITS, StatsCardsTypes.CERTIFIED_CREDITS].includes(title) && (
-                <div className="unit">(ITMOs)</div>
-              )}
+              {subTitle && <div className="unit">{subTitle}</div>}
             </div>
             <div className="info-container">
               <Tooltip

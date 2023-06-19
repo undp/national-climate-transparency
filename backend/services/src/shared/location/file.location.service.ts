@@ -60,6 +60,10 @@ export class FileLocationService implements LocationInterface {
 
   public async getCoordinatesForRegion(regions: string[]): Promise<number[][]> {
 
+    if (!regions) {
+      return []
+    }
+    
     const list = [];
     for (const region of regions) {
       list.push(

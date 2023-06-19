@@ -7,10 +7,9 @@ import configuration from "../configuration";
 import { TypeOrmConfigService } from "../typeorm.config.service";
 import { CompanyService } from "./company.service";
 import { UtilModule } from "../util/util.module";
-import { ProgrammeTransfer } from "../entities/programme.transfer";
 import { EmailHelperModule } from "../email-helper/email-helper.module";
 import { FileHandlerModule } from "../file-handler/filehandler.module";
-
+import { LocationModule } from "../location/location.module";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,10 +21,11 @@ import { FileHandlerModule } from "../file-handler/filehandler.module";
       useClass: TypeOrmConfigService,
       imports: undefined,
     }),
-    TypeOrmModule.forFeature([Company, ProgrammeTransfer]),
+    TypeOrmModule.forFeature([Company]),
     CaslModule,
     UtilModule,
     FileHandlerModule,
+    LocationModule,
     forwardRef(() => EmailHelperModule),
   ],
   providers: [CompanyService, Logger],
