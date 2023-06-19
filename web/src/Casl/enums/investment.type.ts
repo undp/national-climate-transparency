@@ -1,4 +1,4 @@
 export enum InvestmentType {
-    PUBLIC = 'Public',
-    PRIVATE = 'Private',
+  PUBLIC = 'Public',
+  PRIVATE = 'Private',
 }
