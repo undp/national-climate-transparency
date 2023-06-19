@@ -56,6 +56,7 @@ body {
 
 .ant-input {
   border-radius: 5px !important;
+  color: $common-input-color !important;
 }
 
 .ant-select-selector {
@@ -208,6 +209,10 @@ body {
     span {
       text-transform: uppercase;
     }
+  }
+
+  .upload-doc {
+    color: $common-input-color !important;
   }
 }
 

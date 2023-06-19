@@ -1,6 +1,6 @@
 {
   "addProgramme": "Add New Programme",
-  "addProgrammeSub": "",
+  "addProgrammeSub": "Add New Programmes to the Transparency System",
   "addProgramme1": "Programme Details",
   "addProgramme2": "Programme Financing Sought",
   "addProgramme3": "NDC Action Details",
@@ -14,7 +14,7 @@
   "proponentPercentValidation": "Total Organisation Percentage is invalid",
   "programmeCreationSuccess": "The programme has been created successfully",
   "title": "Title",
-  "externalId": "External Id",
+  "externalId": "External ID",
   "ghgCovered": "GHGs Covered",
   "sector": "Sector",
   "startTime": "Programme Start Date",
