@@ -2,21 +2,88 @@
 @import '../Common/colors.role.scss';
 @import '../../Styles/variables.scss';
 
-.programme-details-form-container {
+.programme-details-form-container,
+.programme-sought-form-container {
   width: 100%;
-  .programme-details-form {
+  .programme-details-form,
+  .programme-sought-form {
+    width: 100%;
+
     .ant-picker-large {
       height: 40px !important;
       width: 100%;
     }
+
+    .ant-upload-list-item-name {
+      color: $primary-color;
+    }
     .steps-actions {
       display: flex;
       flex-direction: row-reverse;
+      margin-right: 1rem;
+
+      .action-btn {
+        border: 1px solid $primary-color;
+        color: $primary-color;
+        margin-right: 1rem;
+      }
+      .back-btn {
+        border: 1px solid $border-default-btn;
+        color: $border-default-btn;
+        margin-right: 1rem;
+      }
       .mg-left-1 {
         margin-left: 1rem;
       }
     }
+    .options-programme {
+      width: 100%;
+      border: 1px solid darkgreen;
+      .role-group {
+        .ant-radio-group {
+          width: 50%;
+        }
+        .condition-radio-container {
+          width: 30%;
+          text-align: center;
+          .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+            color: $dark-text-color !important;
+            border-color: $primary-purple !important;
+            box-shadow: none;
+          }
+        }
+        .ant-radio-button-wrapper::before {
+          background-color: transparent;
+        }
+        .ant-radio-button-wrapper {
+          border: 1px solid $common-form-input-border;
+        }
+
+        .anticon {
+          margin-right: 0.5rem;
+        }
+        .condition-radio {
+          width: 100%;
+          .ant-radio-button-checked {
+            background: $primary-purple;
+            color: #ffffff;
+          }
+        }
+        .role-icons {
+          margin-right: 5px;
+        }
+      }
+    }
     .row {
+      width: 100%;
+      .org-col {
+        border: 1px solid violet;
+        .details-part-three {
+          width: 100%;
+          border: 1px solid firebrick;
+        }
+      }
+
       .website {
         .ant-input {
           margin-left: 0.3rem;
@@ -25,6 +92,7 @@
           border: 1px solid $common-form-input-border;
         }
       }
+
       .design-upload-section {
         display: flex;
         flex-direction: row;
@@ -59,6 +127,31 @@
           border-radius: 5px !important;
           height: 40px !important;
         }
+
+        .space-container {
+          width: 100%;
+
+          .ownership-list-item {
+            display: flex;
+            width: 100%;
+            align-items: center;
+          }
+
+          .ant-space-item {
+            width: 100%;
+
+            .organisation {
+              width: 50%;
+            }
+          }
+
+          .ownership-percent {
+            width: 35%;
+            margin-left: 1rem;
+            .ant-input-number {
+            }
+          }
+        }
       }
       .details-part-two {
         .role-group {
@@ -90,6 +183,79 @@
           }
           .role-icons {
             margin-right: 5px;
+          }
+        }
+      }
+    }
+    .row-org {
+      width: 100%;
+      .org-col {
+        border: 1px solid violet;
+        .details-part-three {
+          width: 100%;
+          border: 1px solid firebrick;
+        }
+      }
+    }
+    .selection-details-row {
+      width: 100%;
+      margin-bottom: 1rem;
+
+      .in-ndc-col,
+      .in-nap-col {
+        width: 100%;
+      }
+
+      .in-ndc-row,
+      .in-nap-row {
+        width: 100%;
+        align-items: center;
+        .included-label {
+          display: flex;
+          flex-direction: row;
+          width: fit-content;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 14px;
+          color: $note-light-text;
+
+          .info-container {
+            display: flex;
+            flex-direction: row;
+            width: 10%;
+            height: 30px;
+            align-items: center;
+            justify-content: flex-end;
+          }
+        }
+        .included-val {
+          width: 100%;
+
+          .yes-no-radio-container {
+            width: 44%;
+            text-align: center;
+            .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+              color: $dark-text-color !important;
+              border-color: $primary-purple !important;
+              box-shadow: none;
+            }
+          }
+          .ant-radio-button-wrapper::before {
+            background-color: transparent;
+          }
+          .ant-radio-button-wrapper {
+            border: 1px solid $common-form-input-border;
+          }
+
+          .anticon {
+            margin-right: 0.5rem;
+          }
+          .yes-no-radio {
+            width: 100%;
+            .ant-radio-button-checked {
+              background: $primary-purple;
+              color: #ffffff;
+            }
           }
         }
       }

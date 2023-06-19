@@ -1,0 +1,53 @@
+@import '../../Styles/variables.scss';
+
+.ndc-action-body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 4rem;
+
+  .report-details {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 2.2rem;
+
+    .report-type {
+      display: flex;
+      flex-direction: row;
+      width: 50%;
+
+      .name {
+        font-weight: 600;
+        color: $common-filter-color;
+        width: 50%;
+      }
+
+      .icon {
+      }
+
+      .empty {
+        font-weight: 600;
+        color: #cacaca;
+        width: 50%;
+      }
+    }
+
+    .report-link {
+      display: flex;
+      flex-direction: row;
+      width: 50%;
+
+      .version {
+        font-weight: 600;
+        color: #cacaca;
+      }
+
+      .link {
+        margin-left: 1rem;
+      }
+    }
+  }
+}
