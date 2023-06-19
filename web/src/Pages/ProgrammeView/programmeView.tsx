@@ -79,10 +79,6 @@ const ProgrammeView = () => {
 
   const locationColors = ['#6ACDFF', '#FF923D', '#CDCDCD', '#FF8183', '#B7A4FE'];
 
-  const numIsExist = (n: any) => {
-    return n ? Number(n) : 0;
-  };
-
   const getCenter = (list: any[]) => {
     let count = 0;
     let lat = 0;
@@ -116,12 +112,14 @@ const ProgrammeView = () => {
 
         setMarkers(markerList);
       } else {
-        let accessToken;
-        if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
-          accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
-        }
+        const accessToken =
+          'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g';
+        // let accessToken;
+        // if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
+        //   accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
+        // }
 
-        if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
+        // if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
 
         for (const address of data!.programmeProperties.geographicalLocation) {
           const response = await Geocoding({ accessToken: accessToken })
@@ -153,34 +151,6 @@ const ProgrammeView = () => {
         }
       }
     }, 1000);
-  };
-
-  const genCerts = (d: any, certifiedTime: any) => {
-    if (d === undefined) {
-      return;
-    }
-    const c = d.certifier.map((cert: any) => {
-      return (
-        <div className="">
-          <div className="cert-info">
-            {isBase64(cert.logo) ? (
-              <img alt="certifier logo" src={'data:image/jpeg;base64,' + cert.logo} />
-            ) : cert.logo ? (
-              <img alt="certifier logo" src={cert.logo} />
-            ) : cert.name ? (
-              <div className="cert-logo">{cert.name.charAt(0).toUpperCase()}</div>
-            ) : (
-              <div className="cert-logo">{'A'}</div>
-            )}
-            <div className="text-center cert-name">{cert.name}</div>
-            {certifiedTime[cert.companyId] && (
-              <div className="text-center cert-date">{certifiedTime[cert.companyId]}</div>
-            )}
-          </div>
-        </div>
-      );
-    });
-    setCerts(c);
   };
 
   const getProgrammeById = async (programmeId: string) => {
@@ -316,27 +286,35 @@ const ProgrammeView = () => {
   const getNdcActionHistory = async (programmeId: string) => {
     setLoadingHistory(true);
     try {
-      const TEMP_NDC_ACTION_DATA = [
-        {
-          actionNo: 'Mitigation Action - 001',
-          monitoringReport: '',
-          verificationReport: '',
-        },
-        {
-          actionNo: 'Mitigation Action - 002',
-          monitoringReport: 'https://www.africau.edu/images/default/sample.pdf',
-          verificationReport: 'https://www.africau.edu/images/default/sample.pdf',
-        },
-        {
-          actionNo: 'Mitigation Action - 003',
-          monitoringReport: 'https://www.africau.edu/images/default/sample.pdf',
-          verificationReport: 'https://www.africau.edu/images/default/sample.pdf',
-        },
-      ];
-      const elArr = TEMP_NDC_ACTION_DATA?.map((ndcAction: any) => {
+      const response: any = await post('national/programme/queryNdcActions', {
+        page: 1,
+        size: 100,
+        filterAnd: [
+          {
+            key: 'programmeId',
+            operation: '=',
+            value: programmeId,
+          },
+        ],
+      });
+
+      if (response?.data) {
+        console.log('ndc actions ------------ ');
+        console.log(response?.data);
+      }
+      const ndcActionsHisData = response?.data?.map((item: any) => {
+        const ndcActionData: any = {
+          action: item?.action,
+          id: item?.id,
+          monitoringReport: item?.monitoringReport || '',
+          verificationReport: item?.verificationReport || '',
+        };
+        return ndcActionData;
+      });
+      const elArr = ndcActionsHisData?.map((ndcAction: any) => {
         const element = {
           status: 'process',
-          title: ndcAction.actionNo, // Extracting the last 3 characters from actionNo
+          title: ndcAction.id, // Extracting the last 3 characters from actionNo
           subTitle: '',
           description: (
             <NdcActionBody
@@ -347,6 +325,7 @@ const ProgrammeView = () => {
                   style={{ color: '#5DC380' }}
                 />
               }
+              programmeId={data?.programmeId}
             />
           ),
           icon: (
@@ -374,42 +353,6 @@ const ProgrammeView = () => {
 
   const getSuccessMsg = (response: any, initMsg: string, successMsg: string) => {
     return response.data instanceof Array ? initMsg : successMsg;
-  };
-
-  const onPopupAction = async (
-    body: any,
-    endpoint: any,
-    successMsg: any,
-    httpMode: any,
-    successCB: any
-  ) => {
-    body.programmeId = data?.programmeId;
-    let error;
-    try {
-      const response: any = await httpMode(`national/programme/${endpoint}`, body);
-      if (response.statusCode < 300 || response.status < 300) {
-        if (!response.data.certifier) {
-          response.data.certifier = [];
-        }
-        setOpenModal(false);
-        setComment(undefined);
-        error = undefined;
-        successCB(response);
-        message.open({
-          type: 'success',
-          content: typeof successMsg !== 'function' ? successMsg : successMsg(response),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-      } else {
-        error = response.message;
-      }
-      // await getProgrammeHistory(data?.programmeId as string);
-      return error;
-    } catch (e: any) {
-      error = e.message;
-      return error;
-    }
   };
 
   const mapArrayToi18n = (map: any) => {
@@ -775,6 +718,9 @@ const ProgrammeView = () => {
                       markers={markers}
                       height={250}
                       style="mapbox://styles/mapbox/streets-v11"
+                      accessToken={
+                        'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g'
+                      }
                     ></MapComponent>
                     <Row className="region-list">
                       {data.programmeProperties.geographicalLocation &&

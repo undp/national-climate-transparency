@@ -80,6 +80,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
           setMethodologyDocUrl(item?.url);
           setMethodologyDate(item?.txTime);
           setMethodDocStatus(item?.status);
+          setMethDocId(item?.id);
         }
         if (item?.url?.includes('OBJECTION')) {
           setNoObjectionDocUrl(item?.url);
@@ -141,6 +142,12 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
       const response: any = await post('national/programme/docAction', {
         id: id,
         status: DocumentStatus.ACCEPTED,
+      });
+      message.open({
+        type: 'success',
+        content: response?.message,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     } catch (error: any) {
       message.open({
@@ -204,6 +211,26 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                 <a href={designDocUrl} target="_blank" rel="noopener noreferrer" download>
                   <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
                 </a>
+                {designDocStatus === DocumentStatus.PENDING && (
+                  <>
+                    <FileAddOutlined
+                      className="common-progress-icon margin-left-1"
+                      style={{ color: '#3F3A47', cursor: 'pointer' }}
+                      onClick={handleDesignDocFileUpload}
+                    />
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      style={{ display: 'none' }}
+                      accept=".pdf"
+                      onChange={(e: any) => {
+                        const selectedFile = e.target.files[0];
+                        onUploadDocument(selectedFile, DocType.DESIGN_DOCUMENT);
+                        // Handle the selected file here
+                      }}
+                    />
+                  </>
+                )}
               </div>
             ) : (
               <>
@@ -255,7 +282,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                   userInfoState?.companyRole === CompanyRole.CERTIFIER) && (
                   <>
                     <LikeOutlined
-                      onClick={() => approveDoc(designDocId, methodDocStatus)}
+                      onClick={() => approveDoc(methDocId, methodDocStatus)}
                       className="common-progress-icon"
                       style={{ color: '#976ED7' }}
                     />
