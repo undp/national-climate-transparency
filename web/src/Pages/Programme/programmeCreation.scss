@@ -131,13 +131,24 @@
         .space-container {
           width: 100%;
 
+          .ownership-list-item {
+            display: flex;
+            width: 100%;
+            align-items: center;
+          }
+
           .ant-space-item {
-            width: 31%;
+            width: 100%;
+
+            .organisation {
+              width: 50%;
+            }
           }
 
           .ownership-percent {
+            width: 35%;
+            margin-left: 1rem;
             .ant-input-number {
-              width: 50%;
             }
           }
         }

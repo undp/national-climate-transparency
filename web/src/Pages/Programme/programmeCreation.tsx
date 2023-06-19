@@ -441,62 +441,64 @@ export const AddProgrammeComponent = () => {
                               align="center"
                               size={'large'}
                             >
-                              <Form.Item
-                                {...restField}
-                                label={t('addProgramme:company')}
-                                name={[name, 'organisation']}
-                                wrapperCol={{ span: 24 }}
-                                className="organisation"
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: `${t('addProgramme:company')} ${t('isRequired')}`,
-                                  },
-                                ]}
-                              >
-                                <Select size="large" loading={loadingList} disabled={name === 0}>
-                                  {organisationsList.map((organisation) => (
-                                    <Select.Option
-                                      key={organisation.companyId}
-                                      value={organisation.taxId}
-                                    >
-                                      {organisation.name}
-                                    </Select.Option>
-                                  ))}
-                                </Select>
-                              </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                label={t('addProgramme:proponentPercentage')}
-                                className="ownership-percent"
-                                name={[name, 'proponentPercentage']}
-                                labelCol={{ span: 24 }}
-                                wrapperCol={{ span: 24 }}
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: `${t('addProgramme:proponentPercentage')} ${t(
-                                      'isRequired'
-                                    )}`,
-                                  },
-                                  // { validator: validateOwnershipPercentage },
-                                ]}
-                              >
-                                <InputNumber
-                                  size="large"
-                                  min={1}
-                                  max={100}
-                                  formatter={(value) => `${value}%`}
-                                  parser={(value: any) => value.replace('%', '')}
-                                  disabled={fields?.length < 2}
-                                />
-                              </Form.Item>
-                              {fields?.length > 1 && name !== 0 && (
-                                <MinusCircleOutlined
-                                  className="dynamic-delete-button"
-                                  onClick={() => remove(name)}
-                                />
-                              )}
+                              <div className="ownership-list-item">
+                                <Form.Item
+                                  {...restField}
+                                  label={t('addProgramme:company')}
+                                  name={[name, 'organisation']}
+                                  wrapperCol={{ span: 24 }}
+                                  className="organisation"
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: `${t('addProgramme:company')} ${t('isRequired')}`,
+                                    },
+                                  ]}
+                                >
+                                  <Select size="large" loading={loadingList} disabled={name === 0}>
+                                    {organisationsList.map((organisation) => (
+                                      <Select.Option
+                                        key={organisation.companyId}
+                                        value={organisation.taxId}
+                                      >
+                                        {organisation.name}
+                                      </Select.Option>
+                                    ))}
+                                  </Select>
+                                </Form.Item>
+                                <Form.Item
+                                  {...restField}
+                                  label={t('addProgramme:proponentPercentage')}
+                                  className="ownership-percent"
+                                  name={[name, 'proponentPercentage']}
+                                  labelCol={{ span: 24 }}
+                                  wrapperCol={{ span: 24 }}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: `${t('addProgramme:proponentPercentage')} ${t(
+                                        'isRequired'
+                                      )}`,
+                                    },
+                                    // { validator: validateOwnershipPercentage },
+                                  ]}
+                                >
+                                  <InputNumber
+                                    size="large"
+                                    min={1}
+                                    max={100}
+                                    formatter={(value) => `${value}%`}
+                                    parser={(value: any) => value.replace('%', '')}
+                                    disabled={fields?.length < 2}
+                                  />
+                                </Form.Item>
+                                {fields?.length > 1 && name !== 0 && (
+                                  <MinusCircleOutlined
+                                    className="dynamic-delete-button"
+                                    onClick={() => remove(name)}
+                                  />
+                                )}
+                              </div>
                             </Space>
                           );
                         })}
