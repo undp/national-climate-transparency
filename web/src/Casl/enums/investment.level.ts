@@ -1,4 +1,4 @@
 export enum InvestmentLevel {
-    NATIONAL = 'National',
-    INTERNATIONAL = 'International',
+  NATIONAL = 'National',
+  INTERNATIONAL = 'International',
 }
