@@ -26,5 +26,11 @@
   "investmentDesc": "View the investments in the system based on your permissions",
   "addProgramme": "ADD PROGRAMME",
   "emissionsReductionExpected": "Emissions Reductions Expected (tCO2e)",
-  "emissionsReductionAchieved": "Emissions Reductions Achieved (tCO2e)"
+  "emissionsReductionAchieved": "Emissions Reductions Achieved (tCO2e)",
+  "isUploaded": "is uploaded",
+  "designDoc": "Design Documentation",
+  "methDoc": "Methodology Document",
+  "monitoringReport": "Monitoring Report",
+  "verificationReport": "Verification Report",
+  "objectionLett": "No Objection Letter"
 }

@@ -71,6 +71,7 @@ const ProgrammeView = () => {
   const [isAllOwnersDeactivated, setIsAllOwnersDeactivated] = useState(true);
   const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
+  const [documentsData, setDocumentsData] = useState<any[]>([]);
 
   const showModal = () => {
     setOpenModal(true);
@@ -115,14 +116,12 @@ const ProgrammeView = () => {
 
         setMarkers(markerList);
       } else {
-        const accessToken =
-          'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g';
-        // let accessToken;
-        // if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
-        //   accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
-        // }
+        let accessToken;
+        if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
+          accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
+        }
 
-        // if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
+        if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
 
         for (const address of data!.programmeProperties.geographicalLocation) {
           const response = await Geocoding({ accessToken: accessToken })
@@ -231,6 +230,31 @@ const ProgrammeView = () => {
       insertAt += 2;
     }
     return parts.join('');
+  };
+
+  const getDocuments = async (programmeId: string) => {
+    setLoadingHistory(true);
+    try {
+      const response: any = await post('national/programme/queryDocs', {
+        page: 1,
+        size: 100,
+        filterAnd: [
+          {
+            key: 'programmeId',
+            operation: '=',
+            value: programmeId,
+          },
+        ],
+      });
+      if (response?.data?.length > 0) {
+        console.log(response?.data);
+        setDocumentsData(response?.data);
+      }
+    } catch (err: any) {
+      console.log('Error in getting documents - ', err);
+    } finally {
+      setLoadingHistory(false);
+    }
   };
 
   const getInvestmentHistory = async (programmeId: string) => {
@@ -429,8 +453,9 @@ const ProgrammeView = () => {
     console.log('---- programme data -------- ');
     console.log(data);
     if (data) {
-      getInvestmentHistory(data.programmeId);
-      getNdcActionHistory(data.programmeId);
+      getInvestmentHistory(data?.programmeId);
+      getNdcActionHistory(data?.programmeId);
+      getDocuments(data?.programmeId);
       setEmissionsReductionExpected(
         data?.emissionReductionExpected !== null || data?.emissionReductionExpected !== undefined
           ? Number(data?.emissionReductionExpected)
@@ -725,9 +750,13 @@ const ProgrammeView = () => {
             <Card className="card-container">
               <div>
                 <ProgrammeDocuments
-                  data={[]}
+                  data={documentsData}
                   title={t('view:programmeDocs')}
                   icon={<QrcodeOutlined />}
+                  programmeId={data?.programmeId}
+                  getDocumentDetails={() => {
+                    getDocuments(data?.programmeId);
+                  }}
                 />
               </div>
             </Card>
@@ -746,9 +775,6 @@ const ProgrammeView = () => {
                       markers={markers}
                       height={250}
                       style="mapbox://styles/mapbox/streets-v11"
-                      accessToken={
-                        'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g'
-                      }
                     ></MapComponent>
                     <Row className="region-list">
                       {data.programmeProperties.geographicalLocation &&

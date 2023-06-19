@@ -4,10 +4,12 @@ import { addCommSep } from '@undp/carbon-library';
 import {
   BankOutlined,
   CheckCircleOutlined,
+  DislikeOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
   FlagOutlined,
   GlobalOutlined,
+  LikeOutlined,
   LineChartOutlined,
 } from '@ant-design/icons';
 import { InvestmentType } from '../../Casl/enums/investment.type';
@@ -28,9 +30,17 @@ const InvestmentBody: FC<InvestmentBodyProps> = (props: InvestmentBodyProps) => 
         <div className="name-and-progress">
           <div className="name">{data?.invester}</div>
           <div className="progress">
-            {data?.status === InvestmentStatus.APPROVED && (
+            {data?.status === InvestmentStatus.APPROVED ? (
               <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
-            )}
+            ) : data?.status === InvestmentStatus.PENDING ? (
+              <>
+                <LikeOutlined className="common-progress-icon" style={{ color: '#976ED7' }} />
+                <DislikeOutlined
+                  className="common-progress-icon margin-left-1"
+                  style={{ color: '#FD6F70' }}
+                />
+              </>
+            ) : null}
           </div>
         </div>
         <div className="time">

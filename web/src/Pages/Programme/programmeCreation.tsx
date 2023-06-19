@@ -145,6 +145,7 @@ export const AddProgrammeComponent = () => {
   };
 
   const onFinishStepOne = async (values: any) => {
+    console.log(values);
     setLoading(true);
     let programmeDetails: any;
     const ownershipPercentage = values?.ownershipPercentage;
@@ -217,6 +218,12 @@ export const AddProgrammeComponent = () => {
       navigate('/programmeManagement/view');
     } catch (error: any) {
       console.log('Error in programme creation - ', error);
+      message.open({
+        type: 'error',
+        content: error?.message,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
     } finally {
       setLoading(false);
     }
