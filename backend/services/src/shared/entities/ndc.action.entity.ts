@@ -34,6 +34,7 @@ export class NDCAction {
     type: "enum",
     enum: TypeOfMitigation,
     array: false,
+    nullable: true
   })
   typeOfMitigation: TypeOfMitigation;
 
