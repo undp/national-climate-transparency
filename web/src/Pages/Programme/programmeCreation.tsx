@@ -26,8 +26,13 @@ import { SectoralScope } from '../../Casl/enums/sectoral.scope.enum';
 import { InfoCircle } from 'react-bootstrap-icons';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import moment from 'moment';
+import { RcFile } from 'antd/lib/upload';
 
 type SizeType = Parameters<typeof Form>[0]['size'];
+
+const maximumImageSize = process.env.MAXIMUM_IMAGE_SIZE
+  ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
+  : 7145728;
 
 export const AddProgrammeComponent = () => {
   const { state } = useLocation();
@@ -59,6 +64,14 @@ export const AddProgrammeComponent = () => {
       proponentPercentage: 100,
     },
   ];
+
+  const getBase64 = (file: RcFile): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
 
   const getCountryList = async () => {
     setLoadingList(true);
@@ -131,7 +144,8 @@ export const AddProgrammeComponent = () => {
     setCurrent(current - 1);
   };
 
-  const onFinishStepOne = (values: any) => {
+  const onFinishStepOne = async (values: any) => {
+    console.log(values);
     setLoading(true);
     let programmeDetails: any;
     const ownershipPercentage = values?.ownershipPercentage;
@@ -141,6 +155,8 @@ export const AddProgrammeComponent = () => {
     );
     const proponentPercentages = ownershipPercentage.map((item: any) => item.proponentPercentage);
     const proponentTxIds = ownershipPercentage.slice(1).map((item: any) => item.organisation);
+    const logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
+    const logoUrls = logoBase64.split(',');
     if (totalPercentage !== 100) {
       message.open({
         type: 'error',
@@ -159,6 +175,7 @@ export const AddProgrammeComponent = () => {
         endTime: moment(values?.endTime).endOf('day').unix(),
         proponentTaxVatId: [userOrgTaxId, ...proponentTxIds],
         proponentPercentage: proponentPercentages,
+        designDocument: logoUrls[1],
         programmeProperties: {
           buyerCountryEligibility: values?.buyerCountryEligibility,
           geographicalLocation: values?.geographicalLocation,
@@ -201,6 +218,12 @@ export const AddProgrammeComponent = () => {
       navigate('/programmeManagement/view');
     } catch (error: any) {
       console.log('Error in programme creation - ', error);
+      message.open({
+        type: 'error',
+        content: error?.message,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
     } finally {
       setLoading(false);
     }
@@ -376,9 +399,25 @@ export const AddProgrammeComponent = () => {
                     valuePropName="fileList"
                     getValueFromEvent={normFile}
                     required={false}
+                    rules={[
+                      {
+                        validator: async (rule, file) => {
+                          let isCorrectFormat = false;
+                          if (file[0]?.type === 'application/pdf') {
+                            isCorrectFormat = true;
+                          }
+                          if (!isCorrectFormat) {
+                            throw new Error(`${t('addProgramme:invalidFileFormat')}`);
+                          } else if (file[0]?.size > maximumImageSize) {
+                            // default size format of files would be in bytes -> 1MB = 1000000bytes
+                            throw new Error(`${t('addProgramme:maxSizeVal')}`);
+                          }
+                        },
+                      },
+                    ]}
                   >
                     <Upload
-                      beforeUpload={(file) => {
+                      beforeUpload={(file: any) => {
                         return false;
                       }}
                       className="design-upload-section"

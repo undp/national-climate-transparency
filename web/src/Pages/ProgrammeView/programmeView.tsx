@@ -69,6 +69,9 @@ const ProgrammeView = () => {
   const [centerPoint, setCenterPoint] = useState<number[]>([]);
   const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : MapTypes.Mapbox;
   const [isAllOwnersDeactivated, setIsAllOwnersDeactivated] = useState(true);
+  const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
+  const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
+  const [documentsData, setDocumentsData] = useState<any[]>([]);
 
   const showModal = () => {
     setOpenModal(true);
@@ -113,14 +116,12 @@ const ProgrammeView = () => {
 
         setMarkers(markerList);
       } else {
-        const accessToken =
-          'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g';
-        // let accessToken;
-        // if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
-        //   accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
-        // }
+        let accessToken;
+        if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
+          accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
+        }
 
-        // if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
+        if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
 
         for (const address of data!.programmeProperties.geographicalLocation) {
           const response = await Geocoding({ accessToken: accessToken })
@@ -231,34 +232,73 @@ const ProgrammeView = () => {
     return parts.join('');
   };
 
+  const getDocuments = async (programmeId: string) => {
+    setLoadingHistory(true);
+    try {
+      const response: any = await post('national/programme/queryDocs', {
+        page: 1,
+        size: 100,
+        filterAnd: [
+          {
+            key: 'programmeId',
+            operation: '=',
+            value: programmeId,
+          },
+        ],
+      });
+      if (response?.data?.length > 0) {
+        console.log(response?.data);
+        setDocumentsData(response?.data);
+      }
+    } catch (err: any) {
+      console.log('Error in getting documents - ', err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   const getInvestmentHistory = async (programmeId: string) => {
     setLoadingHistory(true);
     try {
-      const TEMP_DATA = {
-        invester: 'National Development Bank',
-        amount: '500000',
-        time: '1686797789',
-      };
-      const el = {
-        status: 'process',
-        title: t('view:investment') + ' ' + '001',
-        subTitle: '',
-        description: (
-          <InvestmentBody
-            data={TEMP_DATA}
-            progressIcon={
-              <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
-            }
-          />
-        ),
-        icon: (
-          <span className="step-icon freeze-step">
-            <Icon.Circle />
-          </span>
-        ),
-      };
-      const arEl = [el, el, el];
-      setHistoryData(arEl);
+      const response: any = await post('national/programme/investmentQuery', {
+        page: 1,
+        size: 100,
+        filterAnd: [
+          {
+            key: 'programmeId',
+            operation: '=',
+            value: programmeId,
+          },
+        ],
+      });
+      const investmentHisData = response?.data?.map((item: any) => {
+        const investmentData: any = {
+          invester: item?.receiver[0]?.name,
+          amount: item?.amount,
+          createdAt: item?.createdTime,
+          type: item?.type,
+          level: item?.level,
+          stream: item?.stream,
+          status: item?.status,
+        };
+        return investmentData;
+      });
+      const elArr = investmentHisData?.map((investmentData: any, index: any) => {
+        console.log(investmentData);
+        const element = {
+          status: 'process',
+          title: t('view:investment') + ' ' + String(index + 1), // Extracting the last 3 characters from actionNo
+          subTitle: '',
+          description: <InvestmentBody data={investmentData} />,
+          icon: (
+            <span className="step-icon freeze-step">
+              <Icon.Circle />
+            </span>
+          ),
+        };
+        return element;
+      });
+      setHistoryData(elArr);
     } catch (error: any) {
       console.log('Error in getting programme', error);
       message.open({
@@ -414,9 +454,22 @@ const ProgrammeView = () => {
   }, []);
 
   useEffect(() => {
+    console.log('---- programme data -------- ');
+    console.log(data);
     if (data) {
-      getInvestmentHistory(data.programmeId);
-      getNdcActionHistory(data.programmeId);
+      getInvestmentHistory(data?.programmeId);
+      getNdcActionHistory(data?.programmeId);
+      getDocuments(data?.programmeId);
+      setEmissionsReductionExpected(
+        data?.emissionReductionExpected !== null || data?.emissionReductionExpected !== undefined
+          ? Number(data?.emissionReductionExpected)
+          : 0
+      );
+      setEmissionsReductionAchieved(
+        data?.emissionReductionAchieved !== null || data?.emissionReductionAchieved !== undefined
+          ? Number(data?.emissionReductionAchieved)
+          : 0
+      );
       drawMap();
       for (const company of data.company) {
         if (
@@ -608,8 +661,8 @@ const ProgrammeView = () => {
                 <div className="centered-card">{elements}</div>
               </div>
             </Card>
-            {data?.programmeProperties?.emissionsReductionAchieved &&
-              data?.programmeProperties?.emissionsReductionExpected && (
+            {data?.emissionReductionAchieved ||
+              (data?.emissionReductionExpected && (
                 <Card className="card-container">
                   <div className="info-view">
                     <div className="title">
@@ -665,7 +718,8 @@ const ProgrammeView = () => {
                                     showAlways: true,
                                     show: true,
                                     label: 'Expected',
-                                    formatter: () => '' + addCommSep(3200),
+                                    formatter: () =>
+                                      '' + addCommSep(data?.emissionReductionExpected),
                                   },
                                 },
                               },
@@ -688,7 +742,7 @@ const ProgrammeView = () => {
                             },
                           ],
                         }}
-                        series={[6320, 3200]}
+                        series={[emissionsReductionAchieved, emissionsReductionExpected]}
                         type="donut"
                         width="100%"
                         fontFamily="inter"
@@ -696,13 +750,17 @@ const ProgrammeView = () => {
                     </div>
                   </div>
                 </Card>
-              )}
+              ))}
             <Card className="card-container">
               <div>
                 <ProgrammeDocuments
-                  data={[]}
+                  data={documentsData}
                   title={t('view:programmeDocs')}
                   icon={<QrcodeOutlined />}
+                  programmeId={data?.programmeId}
+                  getDocumentDetails={() => {
+                    getDocuments(data?.programmeId);
+                  }}
                 />
               </div>
             </Card>
@@ -721,9 +779,6 @@ const ProgrammeView = () => {
                       markers={markers}
                       height={250}
                       style="mapbox://styles/mapbox/streets-v11"
-                      accessToken={
-                        'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g'
-                      }
                     ></MapComponent>
                     <Row className="region-list">
                       {data.programmeProperties.geographicalLocation &&
@@ -771,21 +826,23 @@ const ProgrammeView = () => {
                 />
               </div>
             </Card>
-            <Card className="card-container">
-              <div className="info-view">
-                <div className="title">
-                  <span className="title-icon">{<ClockCircleOutlined />}</span>
-                  <span className="title-text">{t('view:investment')}</span>
+            {historyData?.length > 0 && (
+              <Card className="card-container">
+                <div className="info-view">
+                  <div className="title">
+                    <span className="title-icon">{<ClockCircleOutlined />}</span>
+                    <span className="title-text">{t('view:investment')}</span>
+                  </div>
+                  <div className="content">
+                    {loadingHistory ? (
+                      <Skeleton />
+                    ) : (
+                      <Steps current={0} direction="vertical" items={historyData} />
+                    )}
+                  </div>
                 </div>
-                <div className="content">
-                  {loadingHistory ? (
-                    <Skeleton />
-                  ) : (
-                    <Steps current={0} direction="vertical" items={historyData} />
-                  )}
-                </div>
-              </div>
-            </Card>
+              </Card>
+            )}
             <Card className="card-container">
               <div className="info-view">
                 <div className="title">

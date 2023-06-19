@@ -1,34 +1,74 @@
 import React, { FC } from 'react';
 import './investmentBody.scss';
 import { addCommSep } from '@undp/carbon-library';
-import { BankOutlined, EyeOutlined, FlagOutlined } from '@ant-design/icons';
+import {
+  BankOutlined,
+  CheckCircleOutlined,
+  DislikeOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  FlagOutlined,
+  GlobalOutlined,
+  LikeOutlined,
+  LineChartOutlined,
+} from '@ant-design/icons';
+import { InvestmentType } from '../../Casl/enums/investment.type';
+import { InvestmentLevel } from '../../Casl/enums/investment.level';
+import { InvestmentStream } from '../../Casl/enums/investment.stream';
+import moment from 'moment';
+import { InvestmentStatus } from '../../Casl/enums/investment.status';
 
 export interface InvestmentBodyProps {
   data: any;
-  progressIcon: any;
 }
 
 const InvestmentBody: FC<InvestmentBodyProps> = (props: InvestmentBodyProps) => {
-  const { data, progressIcon } = props;
+  const { data } = props;
   return (
     <div className="investment-body">
       <div className="invester">
         <div className="name-and-progress">
           <div className="name">{data?.invester}</div>
-          <div className="progress">{progressIcon}</div>
+          <div className="progress">
+            {data?.status === InvestmentStatus.APPROVED ? (
+              <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
+            ) : data?.status === InvestmentStatus.PENDING ? (
+              <>
+                <LikeOutlined className="common-progress-icon" style={{ color: '#976ED7' }} />
+                <DislikeOutlined
+                  className="common-progress-icon margin-left-1"
+                  style={{ color: '#FD6F70' }}
+                />
+              </>
+            ) : null}
+          </div>
         </div>
-        <div className="time">17 May 2022 @ 19:06</div>
+        <div className="time">
+          {moment(parseInt(data?.createdAt)).format('DD MMMM YYYY @ HH:mm')}
+        </div>
       </div>
       <div className="amount">${addCommSep(data?.amount)}</div>
       <div className="actions">
         <div className="actions-icon-container">
-          <EyeOutlined className="action-icons" />
+          {data?.type === InvestmentType.PUBLIC ? (
+            <EyeOutlined className="action-icons" />
+          ) : (
+            <EyeInvisibleOutlined className="action-icons" />
+          )}
         </div>
         <div className="actions-icon-container">
-          <FlagOutlined className="action-icons" />
+          {data?.level === InvestmentLevel.INTERNATIONAL ? (
+            <GlobalOutlined className="action-icons" />
+          ) : (
+            <FlagOutlined className="action-icons" />
+          )}
         </div>
         <div className="actions-icon-container">
-          <BankOutlined className="action-icons" />
+          {data?.stream === InvestmentStream.CLIMATE_FINANCE ? (
+            <BankOutlined className="action-icons" />
+          ) : (
+            <LineChartOutlined className="action-icons" />
+          )}
         </div>
       </div>
     </div>

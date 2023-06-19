@@ -2,6 +2,7 @@
 import { AdaptationProperties } from "../dto/adaptation.properties";
 import { AgricultureProperties } from "../dto/agriculture.properties";
 import { CoBenefitsProperties } from "../dto/co.benefits";
+import { EnablementProperties } from "../dto/enablement.properties";
 import { NdcFinancing } from "../dto/ndc.financing";
 import { NDCReports } from "../dto/ndc.reports";
 import { SolarProperties } from "../dto/solar.properties";
@@ -34,6 +35,7 @@ export class NDCAction {
     type: "enum",
     enum: TypeOfMitigation,
     array: false,
+    nullable: true
   })
   typeOfMitigation: TypeOfMitigation;
 
@@ -82,6 +84,13 @@ export class NDCAction {
     nullable: true
   })
   coBenefitsProperties?: CoBenefitsProperties;
+
+  @Column({
+    type: "jsonb",
+    array: false,
+    nullable: true
+  })
+  enablementProperties?: EnablementProperties;
 
   @Column({ type: "bigint" })
   txTime: number;

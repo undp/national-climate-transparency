@@ -12,9 +12,11 @@ import {
   IsArray,
   IsUrl,
   IsBoolean,
+  ValidateNested,
 } from "class-validator";
 import { GHGs } from "../enum/ghgs.enum";
 import { SourceOfFunding } from "../enum/sourceoffinding.enum";
+import { Type } from "class-transformer";
 
 export class ProgrammeProperties {
   @ApiPropertyOptional()
@@ -72,6 +74,7 @@ export class ProgrammeProperties {
   geographicalLocation: string[];
 
   @ApiProperty({ enum: GHGs, isArray: true })
+  @IsArray()
   @IsEnum(GHGs, {
     message:
       "Invalid green house gas. Supported following values:" +

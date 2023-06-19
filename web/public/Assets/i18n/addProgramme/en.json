@@ -35,5 +35,7 @@
   "back": "BACK",
   "conditional": "CONDITIONAL",
   "unConditional": "UNCONDITIONAL",
-  "endTimeVal": "End date cannot be earlier than the start date"
+  "endTimeVal": "End date cannot be earlier than the start date",
+  "invalidFileFormat": "Unsupported file format",
+  "maxSizeVal": "Maximum upload file size is 5MP"
 }
