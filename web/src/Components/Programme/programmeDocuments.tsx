@@ -4,15 +4,17 @@ import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { dateFormat } from '../../Pages/Common/configs';
 import './programmeDocuments.scss';
+import { FileAddOutlined } from '@ant-design/icons';
 
 export interface ProgrammeDocumentsProps {
+  data: any;
   title: any;
   icon: any;
   hiddenColumns?: any;
 }
 
 const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumentsProps) => {
-  const { title, icon, hiddenColumns } = props;
+  const { data, title, icon, hiddenColumns } = props;
   return (
     <div className="info-view">
       <div className="title">
@@ -25,7 +27,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
             Design Document
           </Col>
           <Col span={12} className="field-value">
-            -
+            <FileAddOutlined className="common-progress-icon" style={{ color: '#cacaca' }} />
           </Col>
         </Row>
         <Row className="field" key="Methodology Document">
@@ -33,7 +35,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
             Methodology Document
           </Col>
           <Col span={12} className="field-value">
-            -
+            <FileAddOutlined className="common-progress-icon" style={{ color: '#cacaca' }} />
           </Col>
         </Row>
       </div>

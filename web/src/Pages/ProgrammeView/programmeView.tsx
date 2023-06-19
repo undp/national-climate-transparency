@@ -9,25 +9,18 @@ import { useTranslation } from 'react-i18next';
 import InfoView from '../../Components/InfoView/info.view';
 import * as Icon from 'react-bootstrap-icons';
 import {
+  BlockOutlined,
   BulbOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   ExperimentOutlined,
   QrcodeOutlined,
-  SafetyOutlined,
 } from '@ant-design/icons';
 import { DevBGColor, DevColor } from '../Common/role.color.constants';
-import { DateTime } from 'luxon';
 import Geocoding from '@mapbox/mapbox-sdk/services/geocoding';
-import TextArea from 'antd/lib/input/TextArea';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
-import { ShieldCheck } from 'react-bootstrap-icons';
-import ProgrammeIssueForm from '../../Components/Models/ProgrammeIssueForm';
-import ProgrammeRevokeForm from '../../Components/Models/ProgrammeRevokeForm';
 import OrganisationStatus from '../../Components/Organisation/organisationStatus';
 import {
-  CompanyRole,
-  CreditTransferStage,
   Loading,
   MapComponent,
   MapTypes,
@@ -52,6 +45,7 @@ import {
   getFinancialFields,
   getGeneralFields,
 } from '../../Definitions/InterfacesAndType/programme.definitions';
+import NdcActionBody from '../../Components/NdcActionBody/ndcActionBody';
 
 const ProgrammeView = () => {
   const { get, put, post } = useConnection();
@@ -61,6 +55,7 @@ const ProgrammeView = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<ProgrammeT>();
   const [historyData, setHistoryData] = useState<any>([]);
+  const [ndcActionHistoryData, setNdcActionHistoryData] = useState<any>([]);
   const { i18n, t } = useTranslation(['view']);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
   const [loadingAll, setLoadingAll] = useState<boolean>(true);
@@ -70,12 +65,10 @@ const ProgrammeView = () => {
   const [comment, setComment] = useState<any>(undefined);
   const [certs, setCerts] = useState<any>([]);
   const [certTimes, setCertTimes] = useState<any>({});
-  const [retireReason, setRetireReason] = useState<any>();
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [centerPoint, setCenterPoint] = useState<number[]>([]);
   const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : MapTypes.Mapbox;
   const [isAllOwnersDeactivated, setIsAllOwnersDeactivated] = useState(true);
-  const { isTransferFrozen, setTransferFrozen } = useSettingsContext();
 
   const showModal = () => {
     setOpenModal(true);
@@ -83,36 +76,8 @@ const ProgrammeView = () => {
 
   const locationColors = ['#6ACDFF', '#FF923D', '#CDCDCD', '#FF8183', '#B7A4FE'];
 
-  const getTxRefValues = (value: string, position: number, sep?: string) => {
-    if (sep === undefined) {
-      sep = '#';
-    }
-    const parts = value.split(sep);
-    if (parts.length - 1 < position) {
-      return null;
-    }
-    return parts[position];
-  };
-
   const numIsExist = (n: any) => {
     return n ? Number(n) : 0;
-  };
-
-  const getPieChartData = (d: Programme) => {
-    const frozen = d.creditFrozen
-      ? d.creditFrozen.reduce((a: any, b: any) => numIsExist(a) + numIsExist(b), 0)
-      : 0;
-    const dt = [
-      numIsExist(d.creditEst) - numIsExist(d.creditIssued),
-      numIsExist(d.creditIssued) -
-        sumArray(d.creditTransferred) -
-        sumArray(d.creditRetired) -
-        frozen,
-      sumArray(d.creditTransferred),
-      sumArray(d.creditRetired),
-      frozen,
-    ];
-    return dt;
   };
 
   const getCenter = (list: any[]) => {
@@ -189,14 +154,6 @@ const ProgrammeView = () => {
     }, 1000);
   };
 
-  const genPieData = (d: Programme) => {
-    // ['Authorised', 'Issued', 'Transferred', 'Retired', 'Frozen']
-
-    const dt = getPieChartData(d);
-    ApexCharts.exec('creditChart', 'updateSeries', {
-      series: dt,
-    });
-  };
   const genCerts = (d: any, certifiedTime: any) => {
     if (d === undefined) {
       return;
@@ -316,28 +273,67 @@ const ProgrammeView = () => {
     }
   };
 
-  const updateProgrammeData = (response: any) => {
-    setData(response.data);
-    state.record = response.data;
-    navigate('.', { state: { record: response.data } });
-    genCerts(response.data, certTimes);
-    genPieData(response.data);
+  const getNdcActionHistory = async (programmeId: string) => {
+    setLoadingHistory(true);
+    try {
+      const TEMP_NDC_ACTION_DATA = [
+        {
+          actionNo: 'Mitigation Action - 001',
+          monitoringReport: '',
+          verificationReport: '',
+        },
+        {
+          actionNo: 'Mitigation Action - 002',
+          monitoringReport: 'https://www.africau.edu/images/default/sample.pdf',
+          verificationReport: 'https://www.africau.edu/images/default/sample.pdf',
+        },
+        {
+          actionNo: 'Mitigation Action - 003',
+          monitoringReport: 'https://www.africau.edu/images/default/sample.pdf',
+          verificationReport: 'https://www.africau.edu/images/default/sample.pdf',
+        },
+      ];
+      const elArr = TEMP_NDC_ACTION_DATA?.map((ndcAction: any) => {
+        const element = {
+          status: 'process',
+          title: ndcAction.actionNo, // Extracting the last 3 characters from actionNo
+          subTitle: '',
+          description: (
+            <NdcActionBody
+              data={ndcAction}
+              progressIcon={
+                <CheckCircleOutlined
+                  className="common-progress-icon"
+                  style={{ color: '#5DC380' }}
+                />
+              }
+            />
+          ),
+          icon: (
+            <span className="step-icon freeze-step">
+              <Icon.Circle />
+            </span>
+          ),
+        };
+        return element;
+      });
+      setNdcActionHistoryData(elArr);
+    } catch (error: any) {
+      console.log('Error in getting programme', error);
+      message.open({
+        type: 'error',
+        content: error.message,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      setLoadingHistory(false);
+    } finally {
+      setLoadingHistory(false);
+    }
   };
 
   const getSuccessMsg = (response: any, initMsg: string, successMsg: string) => {
     return response.data instanceof Array ? initMsg : successMsg;
-  };
-
-  const updateCreditInfo = (response: any) => {
-    if (!(response.data instanceof Array) && response.data && data) {
-      response.data.company = data.company;
-      response.data.certifier = data.certifier;
-      setData(response.data);
-      state.record = response.data;
-      navigate('.', { state: { record: response.data } });
-      genCerts(response.data, certTimes);
-      genPieData(response.data);
-    }
   };
 
   const onPopupAction = async (
@@ -371,104 +367,6 @@ const ProgrammeView = () => {
       // await getProgrammeHistory(data?.programmeId as string);
       return error;
     } catch (e: any) {
-      error = e.message;
-      return error;
-    }
-  };
-
-  const onAction = async (action: string, body: any = undefined) => {
-    let error = undefined;
-    if (body) {
-      body.programmeId = data?.programmeId;
-    } else {
-      body = {
-        comment: comment,
-        programmeId: data?.programmeId,
-      };
-    }
-    try {
-      if (action !== 'Transfer') {
-        setConfirmLoading(true);
-        const response: any = await put(
-          `national/programme/${
-            action === 'Reject'
-              ? 'reject'
-              : action === 'Authorise'
-              ? 'authorize'
-              : action === 'Certify'
-              ? 'certify'
-              : action === 'Issue'
-              ? 'issue'
-              : action === 'Revoke'
-              ? 'revoke'
-              : 'retire'
-          }`,
-          body
-        );
-        if (response.statusCode === 200 || response.status === 200) {
-          if (!response.data.certifier) {
-            response.data.certifier = [];
-          }
-
-          if (
-            action === 'Authorise' ||
-            action === 'Certify' ||
-            action === 'Revoke' ||
-            action === 'Issue'
-          ) {
-            setData(response.data);
-            state.record = response.data;
-            navigate('.', { state: { record: response.data } });
-            genCerts(response.data, certTimes);
-            genPieData(response.data);
-          } else if (action === 'Reject') {
-            data!.currentStage = ProgrammeStage.Rejected;
-            setData(data);
-          }
-
-          setOpenModal(false);
-          setComment(undefined);
-          error = undefined;
-          message.open({
-            type: 'success',
-            content:
-              action === 'Reject'
-                ? t('view:successReject')
-                : action === 'Authorise'
-                ? t('view:successAuth')
-                : action === 'Issue'
-                ? 'Successfully issued'
-                : action === 'Certify'
-                ? 'Successfully certified'
-                : action === 'Revoke'
-                ? t('view:successRevokeCertifcate')
-                : t('view:successRetire'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
-        } else {
-          message.open({
-            type: 'error',
-            content: response.message,
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
-          error = response.message;
-        }
-
-        // await getProgrammeHistory(data?.programmeId as string);
-
-        setConfirmLoading(false);
-        return error;
-      }
-    } catch (e: any) {
-      message.open({
-        type: 'error',
-        content: e.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-      setConfirmLoading(false);
       error = e.message;
       return error;
     }
@@ -514,6 +412,7 @@ const ProgrammeView = () => {
   useEffect(() => {
     if (data) {
       getInvestmentHistory(data.programmeId);
+      getNdcActionHistory(data.programmeId);
       drawMap();
       for (const company of data.company) {
         if (
@@ -573,196 +472,15 @@ const ProgrammeView = () => {
     );
   });
   // genCerts(data);
-  const actionBtns = [];
+  const actionBtns = [
+    <Button type="primary" onClick={() => {}}>
+      {t('view:addInvestment')}
+    </Button>,
+    <Button type="primary" onClick={() => {}}>
+      {t('view:addAction')}
+    </Button>,
+  ];
 
-  if (userInfoState?.userRole !== 'ViewOnly') {
-    if (data.currentStage.toString() === 'AwaitingAuthorization') {
-      if (userInfoState?.companyRole === CompanyRole.GOVERNMENT) {
-        actionBtns.push(
-          <Button
-            danger
-            onClick={() => {
-              setActionInfo({
-                action: 'Reject',
-                text: t('view:popupText'),
-                type: 'danger',
-                title: `${t('view:rejectTitle')} - ${data.title}?`,
-                remark: true,
-                icon: <Icon.ClipboardX />,
-              });
-              showModal();
-            }}
-          >
-            {t('view:reject')}
-          </Button>
-        );
-        actionBtns.push(
-          <Button
-            type="primary"
-            onClick={() => {
-              setActionInfo({
-                action: 'Authorise',
-                text: t('view:popupText'),
-                title: `${t('view:authTitle')} - ${data.title}?`,
-                type: 'primary',
-                remark: false,
-                icon: <Icon.ClipboardCheck />,
-                contentComp: (
-                  <ProgrammeIssueForm
-                    enableIssue={false}
-                    programme={data}
-                    subText={t('view:popupText')}
-                    onCancel={() => {
-                      setOpenModal(false);
-                      setComment(undefined);
-                    }}
-                    actionBtnText={t('view:authorise')}
-                    onFinish={(body: any) =>
-                      onPopupAction(
-                        body,
-                        'authorize',
-                        t('view:successAuth'),
-                        put,
-                        updateProgrammeData
-                      )
-                    }
-                  />
-                ),
-              });
-              showModal();
-            }}
-          >
-            {t('view:authorise')}
-          </Button>
-        );
-      }
-    } else if (
-      data.currentStage.toString() !== ProgrammeStage.Rejected &&
-      Number(data.creditEst) > Number(data.creditIssued)
-    ) {
-      if (userInfoState?.companyRole === CompanyRole.GOVERNMENT) {
-        if (Number(data.creditEst) > Number(data.creditIssued)) {
-          actionBtns.push(
-            <Button
-              type="primary"
-              onClick={() => {
-                setActionInfo({
-                  action: 'Issue',
-                  text: t('view:popupText'),
-                  title: `${t('view:issueTitle')} - ${data.title}?`,
-                  type: 'primary',
-                  remark: false,
-                  icon: <Icon.Award />,
-                  contentComp: (
-                    <ProgrammeIssueForm
-                      enableIssue={true}
-                      programme={data}
-                      subText={t('view:popupText')}
-                      onCancel={() => {
-                        setOpenModal(false);
-                        setComment(undefined);
-                      }}
-                      actionBtnText={t('view:issue')}
-                      onFinish={(body: any) =>
-                        onPopupAction(
-                          body,
-                          'issue',
-                          t('view:successIssue'),
-                          put,
-                          updateProgrammeData
-                        )
-                      }
-                    />
-                  ),
-                });
-                showModal();
-              }}
-            >
-              {t('view:issue')}
-            </Button>
-          );
-        }
-      }
-    }
-
-    if (
-      userInfoState &&
-      String(userInfoState.companyState) !== CompanyState.SUSPENDED.valueOf() &&
-      data.certifier &&
-      userInfoState?.companyRole === CompanyRole.CERTIFIER &&
-      !data.certifier.map((e: any) => e.companyId).includes(userInfoState?.companyId)
-    ) {
-      actionBtns.push(
-        <Button
-          type="primary"
-          onClick={() => {
-            setActionInfo({
-              action: 'Certify',
-              text: ``,
-              title: `${t('view:certifyTitle')} - ${data.title}?`,
-              type: 'success',
-              remark: false,
-              icon: <ShieldCheck />,
-            });
-            showModal();
-          }}
-        >
-          {t('view:certify')}
-        </Button>
-      );
-    }
-    if (
-      userInfoState &&
-      String(userInfoState.companyState) !== CompanyState.SUSPENDED.valueOf() &&
-      data.certifier &&
-      data.certifier.length > 0 &&
-      ((userInfoState?.companyRole === CompanyRole.CERTIFIER &&
-        data.certifier.map((e: any) => e.companyId).includes(userInfoState?.companyId)) ||
-        userInfoState?.companyRole === CompanyRole.GOVERNMENT)
-    ) {
-      actionBtns.push(
-        <Button
-          danger
-          onClick={() => {
-            setActionInfo({
-              action: 'Revoke',
-              title: `${t('view:revokeTitle')} - ${data.title}?`,
-              text: ``,
-              type: 'danger',
-              remark: true,
-              icon: <Icon.ShieldExclamation />,
-              contentComp: (
-                <ProgrammeRevokeForm
-                  programme={data}
-                  subText={t('view:popupText')}
-                  onCancel={() => {
-                    setOpenModal(false);
-                    setComment(undefined);
-                  }}
-                  actionBtnText={t('view:revoke')}
-                  onFinish={(body: any) =>
-                    onPopupAction(
-                      body,
-                      'revoke',
-                      t('view:successRevokeCertifcate'),
-                      put,
-                      updateProgrammeData
-                    )
-                  }
-                  showCertifiers={userInfoState.companyRole === CompanyRole.GOVERNMENT}
-                />
-              ),
-            });
-            showModal();
-          }}
-        >
-          {t('view:revoke')}
-        </Button>
-      );
-    }
-  }
-
-  // }
   const generalInfo: any = {};
   Object.entries(getGeneralFields(data)).forEach(([k, v]) => {
     const text = t('view:' + k);
@@ -866,9 +584,7 @@ const ProgrammeView = () => {
           <div className="body-title">{t('view:details')}</div>
           <div className="body-sub-title">{t('view:desc')}</div>
         </div>
-        {/* <div className="flex-display action-btns">
-          {userInfoState?.userRole !== 'ViewOnly' && actionBtns}
-        </div> */}
+        <div className="flex-display action-btns margin-left-1">{actionBtns}</div>
       </div>
       <div className="content-body">
         <Row gutter={16}>
@@ -888,9 +604,102 @@ const ProgrammeView = () => {
                 <div className="centered-card">{elements}</div>
               </div>
             </Card>
+            {data?.programmeProperties?.emissionsReductionAchieved &&
+              data?.programmeProperties?.emissionsReductionExpected && (
+                <Card className="card-container">
+                  <div className="info-view">
+                    <div className="title">
+                      <span className="title-icon">{<BlockOutlined />}</span>
+                      <span className="title-text">
+                        {formatString('view:emissionsReductions', [])}
+                      </span>
+                    </div>
+                    <div className="map-content">
+                      <Chart
+                        id={'creditChart'}
+                        options={{
+                          labels: ['Achieved', 'Expected'],
+                          legend: {
+                            position: 'bottom',
+                          },
+                          colors: ['#b3b3ff', '#e0e0eb'],
+                          tooltip: {
+                            fillSeriesColor: false,
+                          },
+                          states: {
+                            normal: {
+                              filter: {
+                                type: 'none',
+                                value: 0,
+                              },
+                            },
+                            hover: {
+                              filter: {
+                                type: 'none',
+                                value: 0,
+                              },
+                            },
+                            active: {
+                              allowMultipleDataPointsSelection: true,
+                              filter: {
+                                type: 'darken',
+                                value: 0.7,
+                              },
+                            },
+                          },
+                          stroke: {
+                            colors: ['#00'],
+                          },
+                          plotOptions: {
+                            pie: {
+                              expandOnClick: false,
+                              donut: {
+                                size: '75%',
+                                labels: {
+                                  show: true,
+                                  total: {
+                                    showAlways: true,
+                                    show: true,
+                                    label: 'Expected',
+                                    formatter: () => '' + addCommSep(3200),
+                                  },
+                                },
+                              },
+                            },
+                          },
+                          dataLabels: {
+                            enabled: false,
+                          },
+                          responsive: [
+                            {
+                              breakpoint: 480,
+                              options: {
+                                chart: {
+                                  width: '15vw',
+                                },
+                                legend: {
+                                  position: 'bottom',
+                                },
+                              },
+                            },
+                          ],
+                        }}
+                        series={[6320, 3200]}
+                        type="donut"
+                        width="100%"
+                        fontFamily="inter"
+                      />
+                    </div>
+                  </div>
+                </Card>
+              )}
             <Card className="card-container">
               <div>
-                <ProgrammeDocuments title={t('view:programmeDocs')} icon={<QrcodeOutlined />} />
+                <ProgrammeDocuments
+                  data={[]}
+                  title={t('view:programmeDocs')}
+                  icon={<QrcodeOutlined />}
+                />
               </div>
             </Card>
             {mapType !== MapTypes.None ? (
@@ -969,6 +778,21 @@ const ProgrammeView = () => {
                     <Skeleton />
                   ) : (
                     <Steps current={0} direction="vertical" items={historyData} />
+                  )}
+                </div>
+              </div>
+            </Card>
+            <Card className="card-container">
+              <div className="info-view">
+                <div className="title">
+                  <span className="title-icon">{<ExperimentOutlined />}</span>
+                  <span className="title-text">{t('view:ndcActions')}</span>
+                </div>
+                <div className="content">
+                  {loadingHistory ? (
+                    <Skeleton />
+                  ) : (
+                    <Steps current={0} direction="vertical" items={ndcActionHistoryData} />
                   )}
                 </div>
               </div>

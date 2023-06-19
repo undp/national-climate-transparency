@@ -376,21 +376,6 @@ export const AddProgrammeComponent = () => {
                     valuePropName="fileList"
                     getValueFromEvent={normFile}
                     required={false}
-                    // rules={[
-                    //   {
-                    //     validator: async (rule, file) => {
-                    //       if (file === null || file === undefined) {
-                    //         if (!state?.record?.logo)
-                    //           throw new Error(`Design Document ${t('isRequired')}`);
-                    //       } else {
-                    //         if (file.length === 0) {
-                    //           throw new Error(`Design Document ${t('isRequired')}`);
-                    //         } else {
-                    //         }
-                    //       }
-                    //     },
-                    //   },
-                    // ]}
                   >
                     <Upload
                       beforeUpload={(file) => {
@@ -676,7 +661,15 @@ export const AddProgrammeComponent = () => {
                     <Radio.Group
                       size="small"
                       disabled={ndcScopeChanged}
-                      defaultValue={ndcScopeChanged && 'inNDC'}
+                      defaultValue={
+                        ndcScopeChanged
+                          ? 'inNDC'
+                          : includedInNDC
+                          ? 'inNDC'
+                          : includedInNDC === false
+                          ? 'notInNDC'
+                          : undefined
+                      }
                       onChange={onInCludedNDCChange}
                     >
                       <div className="yes-no-radio-container">

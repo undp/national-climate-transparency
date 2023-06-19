@@ -170,6 +170,8 @@ export interface ProgrammePropertiesT {
   creditYear: number;
   programmeMaterials: [];
   projectMaterial: [];
+  emissionsReductionExpected?: any;
+  emissionsReductionAchieved?: any;
 }
 
 export interface Programme {
@@ -258,6 +260,8 @@ export const getGeneralFields = (programme: ProgrammeT) => {
     startDate: DateTime.fromSeconds(Number(programme.startTime)),
     endDate: DateTime.fromSeconds(Number(programme.endTime)),
     buyerCountry: programme.programmeProperties.buyerCountryEligibility,
+    emissionsReductionExpected: programme.programmeProperties.emissionsReductionExpected,
+    emissionsReductionAchieved: programme.programmeProperties.emissionsReductionAchieved,
   };
 };
 
