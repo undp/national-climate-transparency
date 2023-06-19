@@ -40,7 +40,7 @@ import {
 } from "@undp/carbon-credit-calculator";
 import { NDCActionDto } from "../dto/ndc.action.dto";
 import { NDCAction } from "../entities/ndc.action.entity";
-import { ProgrammeDocument } from "../dto/programme.document";
+import { ProgrammeDocument } from "../entities/programme.document";
 import { FileHandlerInterface } from "../file-handler/filehandler.interface";
 import { DocType } from "../enum/document.type";
 import { DocumentStatus } from "../enum/document.status";
@@ -66,6 +66,7 @@ import { InvestmentApprove } from "../dto/investment.approve";
 import { InvestmentReject } from "../dto/investment.reject";
 import { InvestmentCancel } from "../dto/investment.cancel";
 import { InvestmentView } from "../entities/investment.view.entity";
+import { ProgrammeDocumentViewEntity } from "../entities/document.view.entity";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -101,6 +102,9 @@ export class ProgrammeService {
     private ndcActionViewRepo: Repository<NDCActionViewEntity>,
     @InjectRepository(ProgrammeDocument)
     private documentRepo: Repository<ProgrammeDocument>,
+    @InjectRepository(ProgrammeDocumentViewEntity)
+    private documentViewRepo: Repository<ProgrammeDocumentViewEntity>,
+
     @InjectRepository(ConstantEntity)
     private constantRepo: Repository<ConstantEntity>,
 
@@ -1210,7 +1214,7 @@ export class ProgrammeService {
     abilityCondition: string
   ): Promise<DataListResponseDto> {
     const skip = query.size * query.page - query.size;
-    let resp = await this.documentRepo
+    let resp = await this.documentViewRepo
       .createQueryBuilder("programmedocument")
       .where(
         this.helperService.generateWhereSQL(

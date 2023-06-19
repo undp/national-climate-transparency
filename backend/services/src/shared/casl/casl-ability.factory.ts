@@ -21,6 +21,10 @@ import { TransferStatus } from "../enum/transform.status.enum";
 import { ConfigurationSettings } from "../entities/configuration.settings";
 import { Investment } from "../entities/investment.entity";
 import { InvestmentStatus } from "../enum/investment.status";
+import { NDCAction } from "../entities/ndc.action.entity";
+import { ProgrammeDocument } from "../entities/programme.document";
+import { ProgrammeDocumentViewEntity } from "../entities/document.view.entity";
+import { NDCActionViewEntity } from "../entities/ndc.view.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -116,10 +120,28 @@ export class CaslAbilityFactory {
         can(Action.Read, Programme, {
           certifierId: { $elemMatch: { $eq: user.companyId } },
         });
+
+        // can(Action.Read, ProgrammeDocumentViewEntity, {
+        //   companyId: { $elemMatch: { $eq: user.companyId } },
+        // });
+
+        // can(Action.Read, NDCActionViewEntity, {
+        //   companyId: { $elemMatch: { $eq: user.companyId } },
+        // });
+
         can(Action.Read, Investment, {
           status: { $eq: InvestmentStatus.APPROVED },
         });
       } else if (user.companyRole == CompanyRole.PROGRAMME_DEVELOPER) {
+
+        can(Action.Read, ProgrammeDocumentViewEntity, {
+          companyId: { $elemMatch: { $eq: user.companyId } },
+        });
+
+        can(Action.Read, NDCActionViewEntity, {
+          companyId: { $elemMatch: { $eq: user.companyId } },
+        });
+
         can(Action.Read, Programme, {
           currentStage: { $eq: ProgrammeStage.AUTHORISED },
         });
