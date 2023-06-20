@@ -123,10 +123,11 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
 
   useEffect(() => {
     data?.map((item: any) => {
-      if (item?.type === DocType.MONITORING_REPORT) {
-        setMonitoringReportData(item);
-      } else if (item?.type === DocType.VERIFICATION_REPORT) {
-        setVerificationReportData(item);
+      if (item?.monitoringReport) {
+        setMonitoringReportData(item?.monitoringReport);
+      }
+      if (item?.verificationReportData) {
+        setVerificationReportData(item?.verificationReportData);
       }
     });
   }, []);

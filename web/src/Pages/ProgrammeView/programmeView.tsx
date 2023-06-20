@@ -255,6 +255,7 @@ const ProgrammeView = () => {
           level: item?.level,
           stream: item?.stream,
           status: item?.status,
+          requestId: item?.requestId,
         };
         return investmentData;
       });
@@ -291,7 +292,7 @@ const ProgrammeView = () => {
     setLoadingHistory(true);
     try {
       // if (programmeId && ndcActionDataItem === null) {
-      const response: any = await post('national/programme/investmentQuery', {
+      const response: any = await post('national/programme/queryNdcActions', {
         page: 1,
         size: 100,
         filterAnd: [
@@ -304,32 +305,35 @@ const ProgrammeView = () => {
       });
       console.log('ndc actions --------- > ');
       console.log(response.data);
-      // }
-      // if (ndcActionDataItem && programmeId === '') {
-      //   const mappedElements = Object.keys(ndcActionDataItem).map((actionId) => ({
-      //     status: 'process',
-      //     title: actionId,
-      //     subTitle: '',
-      //     description: (
-      //       <NdcActionBody
-      //         data={ndcActionDataItem[actionId]}
-      //         progressIcon={
-      //           <CheckCircleOutlined
-      //             className="common-progress-icon"
-      //             style={{ color: '#5DC380' }}
-      //           />
-      //         }
-      //         programmeId={ndcActionDataItem?.programmeId}
-      //       />
-      //     ),
-      //     icon: (
-      //       <span className="step-icon freeze-step">
-      //         <Icon.Circle />
-      //       </span>
-      //     ),
-      //   }));
-      //   setNdcActionHistoryData(mappedElements);
-      // }
+      const groupedByActionId = response.data.reduce((result: any, obj: any) => {
+        const actionId = obj.id;
+        if (!result[actionId]) {
+          result[actionId] = [];
+        }
+        result[actionId].push(obj);
+        return result;
+      }, {});
+      setNdcActionHistoryDataGrouped(groupedByActionId);
+      const mappedElements = Object.keys(groupedByActionId).map((actionId) => ({
+        status: 'process',
+        title: actionId,
+        subTitle: '',
+        description: (
+          <NdcActionBody
+            data={groupedByActionId[actionId]}
+            progressIcon={
+              <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
+            }
+            programmeId={data?.programmeId}
+          />
+        ),
+        icon: (
+          <span className="step-icon freeze-step">
+            <Icon.Circle />
+          </span>
+        ),
+      }));
+      setNdcActionHistoryData(mappedElements);
     } catch (error: any) {
       console.log('Error in getting programme', error);
       message.open({
@@ -415,21 +419,21 @@ const ProgrammeView = () => {
     }
   }, [data]);
 
-  useEffect(() => {
-    if (ndcActionData?.length > 0) {
-      const groupedByActionId = ndcActionData.reduce((result: any, obj: any) => {
-        const actionId = obj.actionId;
-        if (!result[actionId]) {
-          result[actionId] = [];
-        }
-        result[actionId].push(obj);
-        return result;
-      }, {});
-      console.log(ndcActionData);
-      setNdcActionHistoryDataGrouped(groupedByActionId);
-      console.log(groupedByActionId);
-    }
-  }, [ndcActionData]);
+  // useEffect(() => {
+  //   if (ndcActionData?.length > 0) {
+  //     const groupedByActionId = ndcActionData.reduce((result: any, obj: any) => {
+  //       const actionId = obj.actionId;
+  //       if (!result[actionId]) {
+  //         result[actionId] = [];
+  //       }
+  //       result[actionId].push(obj);
+  //       return result;
+  //     }, {});
+  //     console.log(ndcActionData);
+  //     setNdcActionHistoryDataGrouped(groupedByActionId);
+  //     console.log(groupedByActionId);
+  //   }
+  // }, [ndcActionData]);
 
   if (!data) {
     return <Loading />;
