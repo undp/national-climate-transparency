@@ -74,6 +74,7 @@ const ProgrammeView = () => {
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
   const [documentsData, setDocumentsData] = useState<any[]>([]);
   const [uploadMonitoringReport, setUploadMonitoringReport] = useState<boolean>(false);
+  const [accessTokenMap, setAccessTokenMap] = useState<any>('');
 
   const showModal = () => {
     setOpenModal(true);
@@ -114,14 +115,13 @@ const ProgrammeView = () => {
 
         setMarkers(markerList);
       } else {
-        const accessToken =
-          'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g';
-        // let accessToken;
-        // if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
-        //   accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
-        // }
+        let accessToken;
+        if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
+          accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
+          setAccessTokenMap(accessToken);
+        }
 
-        // if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
+        if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
 
         for (const address of data!.programmeProperties.geographicalLocation) {
           const response = await Geocoding({ accessToken: accessToken })
@@ -746,9 +746,7 @@ const ProgrammeView = () => {
                       markers={markers}
                       height={250}
                       style="mapbox://styles/mapbox/streets-v11"
-                      accessToken={
-                        'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g'
-                      }
+                      accessToken={accessTokenMap}
                     ></MapComponent>
                     <Row className="region-list">
                       {data.programmeProperties.geographicalLocation &&

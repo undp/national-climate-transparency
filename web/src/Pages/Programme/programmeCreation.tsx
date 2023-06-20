@@ -156,7 +156,10 @@ export const AddProgrammeComponent = () => {
       0
     );
     const proponentPercentages = ownershipPercentage.map((item: any) => item.proponentPercentage);
-    const proponentTxIds = ownershipPercentage.slice(1).map((item: any) => item.organisation);
+    const proponentTxIds =
+      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+        ? ownershipPercentage.slice(1).map((item: any) => item.organisation)
+        : ownershipPercentage.map((item: any) => item.organisation);
     const logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
     const logoUrls = logoBase64.split(',');
     if (totalPercentage !== 100) {
@@ -175,7 +178,10 @@ export const AddProgrammeComponent = () => {
         sector: values?.sector,
         startTime: moment(values?.startTime).startOf('day').unix(),
         endTime: moment(values?.endTime).endOf('day').unix(),
-        proponentTaxVatId: [userOrgTaxId, ...proponentTxIds],
+        proponentTaxVatId:
+          userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+            ? [userOrgTaxId, ...proponentTxIds]
+            : proponentTxIds,
         proponentPercentage: proponentPercentages,
         designDocument: logoUrls[1],
         programmeProperties: {
@@ -404,15 +410,17 @@ export const AddProgrammeComponent = () => {
                     rules={[
                       {
                         validator: async (rule, file) => {
-                          let isCorrectFormat = false;
-                          if (file[0]?.type === 'application/pdf') {
-                            isCorrectFormat = true;
-                          }
-                          if (!isCorrectFormat) {
-                            throw new Error(`${t('addProgramme:invalidFileFormat')}`);
-                          } else if (file[0]?.size > maximumImageSize) {
-                            // default size format of files would be in bytes -> 1MB = 1000000bytes
-                            throw new Error(`${t('addProgramme:maxSizeVal')}`);
+                          if (file) {
+                            let isCorrectFormat = false;
+                            if (file[0]?.type === 'application/pdf') {
+                              isCorrectFormat = true;
+                            }
+                            if (!isCorrectFormat) {
+                              throw new Error(`${t('addProgramme:invalidFileFormat')}`);
+                            } else if (file[0]?.size > maximumImageSize) {
+                              // default size format of files would be in bytes -> 1MB = 1000000bytes
+                              throw new Error(`${t('addProgramme:maxSizeVal')}`);
+                            }
                           }
                         },
                       },
