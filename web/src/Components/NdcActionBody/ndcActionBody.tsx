@@ -15,16 +15,18 @@ import { useTranslation } from 'react-i18next';
 import { DocumentStatus } from '../../Casl/enums/document.status';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { CompanyRole } from '@undp/carbon-library';
+import RejectDocumentationConfirmationModel from '../Models/rejectDocumentForm';
 
 export interface NdcActionBodyProps {
   data?: any;
   progressIcon?: any;
   programmeId?: any;
+  canUploadMonitorReport?: boolean;
   getProgrammeDocs?: any;
 }
 
 const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
-  const { data, progressIcon, programmeId, getProgrammeDocs } = props;
+  const { data, progressIcon, programmeId, canUploadMonitorReport, getProgrammeDocs } = props;
   const { t } = useTranslation(['programme']);
   const { userInfoState } = useUserContext();
   const fileInputMonitoringRef: any = useRef(null);
@@ -34,6 +36,9 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   const [monitoringReportData, setMonitoringReportData] = useState<any>();
   const [verificationReportData, setVerificationReportData] = useState<any>();
   const [ndcActionId, setNdcActionId] = useState<any>();
+  const [openRejectDocConfirmationModal, setOpenRejectDocConfirmationModal] = useState(false);
+  const [actionInfo, setActionInfo] = useState<any>({});
+  const [rejectDocData, setRejectDocData] = useState<any>({});
 
   const getBase64 = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -67,9 +72,9 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
         message.open({
           type: 'success',
           content:
-            type === DocType.DESIGN_DOCUMENT
-              ? `${t('programme:designDoc')}`
-              : `${t('programme:methDoc')}` + ' ' + `${t('programme:isUploaded')}`,
+            type === DocType.MONITORING_REPORT
+              ? `${t('programme:monitorDoc')}`
+              : `${t('programme:veriDoc')}` + ' ' + `${t('programme:isUploaded')}`,
           duration: 4,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -83,16 +88,18 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
       });
     } finally {
       getProgrammeDocs();
+      fileInputMonitoringRef.current = null;
+      fileInputVerificationRef.current = null;
       setLoading(false);
     }
   };
 
-  const approveDoc = async (id: any, status: any, actionId: any, type: any) => {
+  const docAction = async (id: any, status: any, actionId: any, type: any) => {
     setLoading(true);
     try {
       const response: any = await post('national/programme/docAction', {
         id: id,
-        status: DocumentStatus.ACCEPTED,
+        status: status,
         actionId: actionId,
       });
       message.open({
@@ -109,131 +116,116 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     } finally {
-      if (type === DocType.MONITORING_REPORT) {
-        monitoringReportData.status = DocumentStatus.ACCEPTED;
-        setMonitoringReportData({ ...monitoringReportData });
-      } else if (type === DocType.VERIFICATION_REPORT) {
-        verificationReportData.status = DocumentStatus.ACCEPTED;
-        setVerificationReportData({ ...verificationReportData });
-      }
+      getProgrammeDocs();
+      setOpenRejectDocConfirmationModal(false);
       setLoading(false);
     }
   };
 
+  const handleOk = () => {
+    docAction(
+      rejectDocData?.id,
+      DocumentStatus.REJECTED,
+      rejectDocData?.actionId,
+      rejectDocData?.type
+    );
+  };
+
+  const handleCancel = () => {
+    setOpenRejectDocConfirmationModal(false);
+  };
+
   useEffect(() => {
+    console.log(canUploadMonitorReport, ' --------------- can upload monitor report ------------');
     data?.map((item: any) => {
       setNdcActionId(item?.id);
       if (item?.monitoringReport) {
         setMonitoringReportData(item?.monitoringReport);
       }
       if (item?.verificationReport) {
-        setVerificationReportData(item?.verificationReportData);
+        setVerificationReportData(item?.verificationReport);
       }
     });
-  }, []);
+  }, [data]);
+
+  const companyRolePermission =
+    userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
+    userInfoState?.companyRole === CompanyRole.CERTIFIER;
+  const monitoringReportPending = monitoringReportData?.status === DocumentStatus.PENDING;
+  const monitoringReportAccepeted = monitoringReportData?.status === DocumentStatus.ACCEPTED;
+  const verifcationReportPending = verificationReportData?.status === DocumentStatus.PENDING;
 
   return loading ? (
     <Skeleton />
   ) : (
-    <div className="ndc-action-body">
-      <div className="report-details">
-        <div className="report-type">
-          <div className="name">Monitoring Report</div>
-          <div className="icon">
-            {monitoringReportData?.url ? (
-              monitoringReportData?.status === DocumentStatus.PENDING ? (
-                (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-                  userInfoState?.companyRole === CompanyRole.CERTIFIER) && (
-                  <>
-                    <LikeOutlined
-                      onClick={() =>
-                        approveDoc(
-                          monitoringReportData?.id,
-                          monitoringReportData?.status,
-                          monitoringReportData?.actionId,
-                          monitoringReportData?.type
-                        )
-                      }
+    <>
+      <div className="ndc-action-body">
+        <div className="report-details">
+          <div className="report-type">
+            <div className={canUploadMonitorReport ? 'name' : 'empty'}>
+              {t('programme:monitoringReport')}
+            </div>
+            <div className="icon">
+              {monitoringReportData?.url ? (
+                monitoringReportPending ? (
+                  companyRolePermission && (
+                    <>
+                      <LikeOutlined
+                        onClick={() =>
+                          docAction(
+                            monitoringReportData?.id,
+                            DocumentStatus.ACCEPTED,
+                            monitoringReportData?.actionId,
+                            monitoringReportData?.type
+                          )
+                        }
+                        className="common-progress-icon"
+                        style={{ color: '#976ED7' }}
+                      />
+                      <DislikeOutlined
+                        onClick={() => {
+                          setRejectDocData({
+                            id: monitoringReportData?.id,
+                            actionId: monitoringReportData?.actionId,
+                            type: monitoringReportData?.type,
+                          });
+                          setActionInfo({
+                            action: 'Reject',
+                            headerText: `${t('programme:rejectDocHeader')}`,
+                            text: `${t('programme:rejectDocBody')}`,
+                            type: 'reject',
+                            icon: <DislikeOutlined />,
+                          });
+                          setOpenRejectDocConfirmationModal(true);
+                        }}
+                        className="common-progress-icon margin-left-1"
+                        style={{ color: '#FD6F70' }}
+                      />
+                    </>
+                  )
+                ) : (
+                  monitoringReportAccepeted && (
+                    <CheckCircleOutlined
                       className="common-progress-icon"
-                      style={{ color: '#976ED7' }}
+                      style={{ color: '#5DC380' }}
                     />
-                    <DislikeOutlined
-                      className="common-progress-icon margin-left-1"
-                      style={{ color: '#FD6F70' }}
-                    />
-                  </>
+                  )
                 )
               ) : (
-                monitoringReportData?.status === DocumentStatus.ACCEPTED && (
-                  <CheckCircleOutlined
+                <>
+                  <FileAddOutlined
                     className="common-progress-icon"
-                    style={{ color: '#5DC380' }}
-                  />
-                )
-              )
-            ) : (
-              <>
-                <FileAddOutlined
-                  className="common-progress-icon"
-                  style={{ color: '#3F3A47', cursor: 'pointer' }}
-                  onClick={() => handleFileUploadMonitor()}
-                />
-                <input
-                  type="file"
-                  ref={fileInputMonitoringRef}
-                  style={{ display: 'none' }}
-                  accept=".pdf"
-                  onChange={(e: any) => {
-                    const selectedFile = e.target.files[0];
-                    onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
-                  }}
-                />
-              </>
-            )}
-          </div>
-        </div>
-        {monitoringReportData?.url && (
-          <div className="report-link">
-            <div className="version">V1.0</div>
-            <div className="link">
-              <a
-                href={monitoringReportData?.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                download
-              >
-                <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
-              </a>
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="report-details">
-        <div className="report-type">
-          <div
-            className={monitoringReportData?.status === DocumentStatus.ACCEPTED ? 'name' : 'empty'}
-          >
-            Verification Report
-          </div>
-          <div className="icon">
-            {verificationReportData?.url ? (
-              <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
-            ) : (
-              <>
-                <FileAddOutlined
-                  className="common-progress-icon"
-                  style={
-                    monitoringReportData?.status === DocumentStatus.ACCEPTED
-                      ? { color: '#3F3A47', cursor: 'pointer' }
-                      : { color: '#cacaca' }
-                  }
-                  onClick={() => {
-                    if (monitoringReportData?.status === DocumentStatus.ACCEPTED) {
-                      handleFileUploadVerification();
+                    style={
+                      canUploadMonitorReport
+                        ? { color: '#3F3A47', cursor: 'pointer' }
+                        : { color: '#cacaca', cursor: 'default' }
                     }
-                  }}
-                />
-                {monitoringReportData?.status === DocumentStatus.ACCEPTED && (
+                    onClick={() => {
+                      if (canUploadMonitorReport) {
+                        handleFileUploadMonitor();
+                      }
+                    }}
+                  />
                   <input
                     type="file"
                     ref={fileInputMonitoringRef}
@@ -241,31 +233,137 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     accept=".pdf"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
-                      onUploadDocument(selectedFile, DocType.VERIFICATION_REPORT);
+                      onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
                     }}
                   />
-                )}
-              </>
-            )}
-          </div>
-        </div>
-        {verificationReportData?.url && (
-          <div className="report-link">
-            <div className="version">V1.1</div>
-            <div className="link">
-              <a
-                href={verificationReportData?.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                download
-              >
-                <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
-              </a>
+                </>
+              )}
             </div>
           </div>
-        )}
+          {monitoringReportData?.url && (
+            <div className="report-link">
+              <div className="version">V1.0</div>
+              <div className="link">
+                <a
+                  href={monitoringReportData?.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                >
+                  <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="report-details">
+          <div className="report-type">
+            <div className={monitoringReportAccepeted ? 'name' : 'empty'}>
+              {t('programme:verificationReport')}
+            </div>
+            <div className="icon">
+              {verificationReportData?.url ? (
+                verifcationReportPending ? (
+                  companyRolePermission && (
+                    <>
+                      <LikeOutlined
+                        onClick={() =>
+                          docAction(
+                            verificationReportData?.id,
+                            verificationReportData?.status,
+                            verificationReportData?.actionId,
+                            verificationReportData?.type
+                          )
+                        }
+                        className="common-progress-icon"
+                        style={{ color: '#976ED7' }}
+                      />
+                      <DislikeOutlined
+                        onClick={() => {
+                          setRejectDocData({
+                            id: verificationReportData?.id,
+                            actionId: verificationReportData?.actionId,
+                            type: verificationReportData?.type,
+                          });
+                          setActionInfo({
+                            action: 'Reject',
+                            headerText: `${t('programme:rejectDocHeader')}`,
+                            text: `${t('programme:rejectDocBody')}`,
+                            type: 'reject',
+                            icon: <DislikeOutlined />,
+                          });
+                          setOpenRejectDocConfirmationModal(true);
+                        }}
+                        className="common-progress-icon margin-left-1"
+                        style={{ color: '#FD6F70' }}
+                      />
+                    </>
+                  )
+                ) : (
+                  verificationReportData?.status === DocumentStatus.ACCEPTED && (
+                    <CheckCircleOutlined
+                      className="common-progress-icon"
+                      style={{ color: '#5DC380' }}
+                    />
+                  )
+                )
+              ) : (
+                <>
+                  <FileAddOutlined
+                    className="common-progress-icon"
+                    style={
+                      monitoringReportAccepeted
+                        ? { color: '#3F3A47', cursor: 'pointer' }
+                        : { color: '#cacaca', cursor: 'default' }
+                    }
+                    onClick={() => {
+                      handleFileUploadVerification();
+                      if (monitoringReportAccepeted) {
+                      }
+                    }}
+                  />
+                  {monitoringReportAccepeted && (
+                    <input
+                      type="file"
+                      ref={fileInputVerificationRef}
+                      style={{ display: 'none' }}
+                      accept=".pdf"
+                      onChange={(e: any) => {
+                        const selectedFile = e.target.files[0];
+                        onUploadDocument(selectedFile, DocType.VERIFICATION_REPORT);
+                      }}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+          {verificationReportData?.url && (
+            <div className="report-link">
+              <div className="version">V1.1</div>
+              <div className="link">
+                <a
+                  href={verificationReportData?.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                >
+                  <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      <RejectDocumentationConfirmationModel
+        actionInfo={actionInfo}
+        onActionConfirmed={handleOk}
+        onActionCanceled={handleCancel}
+        openModal={openRejectDocConfirmationModal}
+        errorMsg={''}
+        loading={loading}
+      />
+    </>
   );
 };
 

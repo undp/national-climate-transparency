@@ -47,6 +47,7 @@ import {
 } from '../../Definitions/InterfacesAndType/programme.definitions';
 import NdcActionBody from '../../Components/NdcActionBody/ndcActionBody';
 import { DocType } from '../../Casl/enums/document.type';
+import { DocumentStatus } from '../../Casl/enums/document.status';
 
 const ProgrammeView = () => {
   const { get, put, post } = useConnection();
@@ -72,6 +73,7 @@ const ProgrammeView = () => {
   const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
   const [documentsData, setDocumentsData] = useState<any[]>([]);
+  const [uploadMonitoringReport, setUploadMonitoringReport] = useState<boolean>(false);
 
   const showModal = () => {
     setOpenModal(true);
@@ -112,13 +114,14 @@ const ProgrammeView = () => {
 
         setMarkers(markerList);
       } else {
-        let accessToken;
-        if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
-          accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
-          setAccessTokenMap(accessToken);
-        }
+        const accessToken =
+          'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g';
+        // let accessToken;
+        // if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
+        //   accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
+        // }
 
-        if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
+        // if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
 
         for (const address of data!.programmeProperties.geographicalLocation) {
           const response = await Geocoding({ accessToken: accessToken })
@@ -220,6 +223,14 @@ const ProgrammeView = () => {
         const objectsWithoutNullActionId = response?.data.filter(
           (obj: any) => obj.actionId !== null
         );
+        const objectsWithNullActionId = response?.data.filter((obj: any) => obj.actionId === null);
+        const hasAcceptedMethReport = objectsWithNullActionId?.some(
+          (item: any) =>
+            item?.type === DocType.METHODOLOGY_DOCUMENT && item?.status === DocumentStatus.ACCEPTED
+        );
+        if (hasAcceptedMethReport) {
+          setUploadMonitoringReport(true);
+        }
         setNdcActionData(objectsWithoutNullActionId);
         setDocumentsData(response?.data);
       }
@@ -246,6 +257,8 @@ const ProgrammeView = () => {
           },
         ],
       });
+      console.log('INVESTMENT QUERY --------- ');
+      console.log(response?.data);
       const investmentHisData = response?.data?.map((item: any) => {
         const investmentData: any = {
           invester: item?.receiver[0]?.name,
@@ -283,7 +296,6 @@ const ProgrammeView = () => {
         duration: 3,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
-      setLoadingHistory(false);
     } finally {
       setLoadingHistory(false);
       setLoadingInvestment(false);
@@ -306,8 +318,6 @@ const ProgrammeView = () => {
           },
         ],
       });
-      console.log('ndc actions --------- > ');
-      console.log(response.data);
       const groupedByActionId = response.data.reduce((result: any, obj: any) => {
         const actionId = obj.id;
         if (!result[actionId]) {
@@ -316,6 +326,7 @@ const ProgrammeView = () => {
         result[actionId].push(obj);
         return result;
       }, {});
+
       ndcActionData?.map((ndcData: any) => {
         if (Object.keys(groupedByActionId)?.includes(ndcData?.actionId)) {
           if (ndcData?.type === DocType.MONITORING_REPORT) {
@@ -325,6 +336,8 @@ const ProgrammeView = () => {
           }
         }
       });
+      console.log('mapped ------ ');
+      console.log(groupedByActionId);
       setNdcActionHistoryDataGrouped(groupedByActionId);
       const mappedElements = Object.keys(groupedByActionId).map((actionId) => ({
         status: 'process',
@@ -337,6 +350,7 @@ const ProgrammeView = () => {
               <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
             }
             programmeId={data?.programmeId}
+            canUploadMonitorReport={uploadMonitoringReport}
             getProgrammeDocs={() => getDocuments(String(data?.programmeId))}
           />
         ),
@@ -355,7 +369,6 @@ const ProgrammeView = () => {
         duration: 3,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
-      setLoadingHistory(false);
     } finally {
       setLoadingHistory(false);
       setLoadingNDC(false);
@@ -408,7 +421,6 @@ const ProgrammeView = () => {
     console.log(data);
     if (data) {
       getInvestmentHistory(data?.programmeId);
-      getNdcActionHistory(data?.programmeId);
       getDocuments(data?.programmeId);
       setEmissionsReductionExpected(
         data?.emissionReductionExpected !== null || data?.emissionReductionExpected !== undefined
@@ -438,6 +450,7 @@ const ProgrammeView = () => {
       getNdcActionHistory(data?.programmeId, ndcActionData);
     }
   }, [data, ndcActionData]);
+
   if (!data) {
     return <Loading />;
   }
@@ -733,7 +746,9 @@ const ProgrammeView = () => {
                       markers={markers}
                       height={250}
                       style="mapbox://styles/mapbox/streets-v11"
-                      accessToken={accessTokenMap}
+                      accessToken={
+                        'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g'
+                      }
                     ></MapComponent>
                     <Row className="region-list">
                       {data.programmeProperties.geographicalLocation &&
@@ -799,21 +814,21 @@ const ProgrammeView = () => {
               </Card>
             )}
             {ndcActionHistoryData?.length > 0 && (
-            <Card className="card-container">
-              <div className="info-view">
-                <div className="title">
-                  <span className="title-icon">{<ExperimentOutlined />}</span>
-                  <span className="title-text">{t('view:ndcActions')}</span>
-                </div>
-                <div className="content">
+              <Card className="card-container">
+                <div className="info-view">
+                  <div className="title">
+                    <span className="title-icon">{<ExperimentOutlined />}</span>
+                    <span className="title-text">{t('view:ndcActions')}</span>
+                  </div>
+                  <div className="content">
                     {loadingNDC ? (
-                    <Skeleton />
-                  ) : (
-                    <Steps current={0} direction="vertical" items={ndcActionHistoryData} />
-                  )}
+                      <Skeleton />
+                    ) : (
+                      <Steps current={0} direction="vertical" items={ndcActionHistoryData} />
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
             )}
           </Col>
         </Row>
