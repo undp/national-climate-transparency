@@ -20,3 +20,6 @@ export const CertBGColor = 'rgba(128, 255, 0, 0.12)';
 export const CertColor = '#519E4F';
 
 export const TooltipColor = '#6ACDFF';
+
+export const InvestmentBGColor = 'rgba(151, 110, 215, 0.3)';
+export const InvestmentColor = '#9155FD';

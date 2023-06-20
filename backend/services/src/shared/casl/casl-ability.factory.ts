@@ -25,6 +25,7 @@ import { NDCAction } from "../entities/ndc.action.entity";
 import { ProgrammeDocument } from "../entities/programme.document";
 import { ProgrammeDocumentViewEntity } from "../entities/document.view.entity";
 import { NDCActionViewEntity } from "../entities/ndc.view.entity";
+import { DocumentAction } from "../dto/document.action";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -95,6 +96,7 @@ export class CaslAbilityFactory {
 
       if (user.companyRole == CompanyRole.GOVERNMENT) {
         if (user.role != Role.ViewOnly) {
+          can(Action.Manage, DocumentAction);
           can(Action.Manage, Investment);
           can(Action.Manage, Programme);
           can(Action.Manage, Investment);
@@ -114,6 +116,7 @@ export class CaslAbilityFactory {
       if (user.role == Role.Admin && user.companyRole == CompanyRole.API) {
         can([Action.Create, Action.Read, Action.Update], Programme);
       } else if (user.companyRole == CompanyRole.CERTIFIER) {
+        can(Action.Manage, DocumentAction);
         can(Action.Read, Programme, {
           currentStage: { $in: [ProgrammeStage.AUTHORISED] },
         });

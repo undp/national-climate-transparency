@@ -9,6 +9,7 @@ import { AdaptationProperties } from "./adaptation.properties";
 import { NdcFinancing } from "./ndc.financing";
 import { NDCReports } from "./ndc.reports";
 import { CoBenefitsProperties } from "./co.benefits";
+import { EnablementProperties } from "./enablement.properties";
 
 export class NDCActionDto {
 
@@ -86,6 +87,11 @@ export class NDCActionDto {
   @ValidateNested()
   @Type(() => CoBenefitsProperties)
   coBenefitsProperties?: CoBenefitsProperties;
+
+  @ApiPropertyOptional()
+  @ValidateNested()
+  @Type(() => EnablementProperties)
+  enablementProperties?: EnablementProperties;
 
   constantVersion: string;
 
