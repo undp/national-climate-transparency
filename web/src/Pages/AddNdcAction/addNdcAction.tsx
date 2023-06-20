@@ -11,6 +11,7 @@ import { RcFile } from 'rc-upload/lib/interface';
 import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
 import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import { Programme, ProgrammeStage } from '@undp/carbon-library';
+import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
 
 const AddNdcAction = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -29,14 +30,6 @@ const AddNdcAction = () => {
       setNdcActionDetails(undefined);
     }
   }, []);
-
-  const getBase64 = (file: RcFile): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
 
   const isProjectReportsVisible = () => {
     return programmeDetails?.currentStage === ProgrammeStage.Authorised;
@@ -67,65 +60,9 @@ const AddNdcAction = () => {
     saveNdcAction();
   };
 
-  const onNdcActionDetailsSubmit = async (ndcActionFormvalues: any) => {
-    const ndcActionDetailObj: any = {};
-    ndcActionDetailObj.programmeId = programmeDetails?.programmeId;
-    ndcActionDetailObj.action = ndcActionFormvalues.ndcActionType;
-    ndcActionDetailObj.methodology = 'methodology';
-
-    if (
-      ndcActionFormvalues.ndcActionType === NdcActionTypes.Mitigation ||
-      ndcActionFormvalues.ndcActionType === NdcActionTypes.CrossCutting
-    ) {
-      ndcActionDetailObj.typeOfMitigation = ndcActionFormvalues.mitigationType;
-      if (ndcActionFormvalues.mitigationType === MitigationTypes.AGRICULTURE) {
-        ndcActionDetailObj.agricultureProperties = {
-          landArea: Number.isInteger(ndcActionFormvalues.eligibleLandArea)
-            ? parseInt(ndcActionFormvalues.eligibleLandArea)
-            : 0,
-          landAreaUnit: ndcActionFormvalues.landAreaUnit,
-        };
-      } else if (ndcActionFormvalues.mitigationType === MitigationTypes.SOLAR) {
-        ndcActionDetailObj.solarProperties = {
-          energyGeneration: Number.isInteger(ndcActionFormvalues.energyGeneration)
-            ? parseInt(ndcActionFormvalues.energyGeneration)
-            : 0,
-          energyGenerationUnit: ndcActionFormvalues.energyGenerationUnit,
-          consumerGroup: ndcActionFormvalues.consumerGroup,
-        };
-      }
-    }
-
-    if (
-      ndcActionFormvalues.ndcActionType === NdcActionTypes.Adaptation ||
-      ndcActionFormvalues.ndcActionType === NdcActionTypes.CrossCutting
-    ) {
-      ndcActionDetailObj.adaptationProperties = {
-        implementingAgency: ndcActionFormvalues.implementingAgency,
-        nationalPlanObjectives: ndcActionFormvalues.nationalPlanObjectives,
-        nationalPlanCoverage: ndcActionFormvalues.nationalPlanCoverage,
-      };
-    }
-
-    if (ndcActionFormvalues.ndcActionType === NdcActionTypes.Enablement) {
-      const enablementReport = await getBase64(
-        ndcActionFormvalues.EnablementReport.file.originFileObj as RcFile
-      );
-      const enablementReportData = enablementReport.split(',');
-      ndcActionDetailObj.enablementProperties = {
-        title: ndcActionFormvalues.EnablementTitle,
-        report: enablementReportData[1],
-      };
-    }
-
-    ndcActionDetailObj.ndcFinancing = {
-      userEstimatedCredits: Number.isInteger(ndcActionFormvalues.userEstimatedCredits)
-        ? parseInt(ndcActionFormvalues.userEstimatedCredits)
-        : 0,
-      systemEstimatedCredits: ndcActionFormvalues.methodologyEstimatedCredits,
-    };
-
-    setNdcActionDetails(ndcActionDetailObj);
+  const onNdcActionDetailsSubmit = async (ndcActionDetailsObj: any) => {
+    ndcActionDetailsObj.programmeId = programmeDetails?.programmeId;
+    setNdcActionDetails(ndcActionDetailsObj);
     onClickNext();
   };
 

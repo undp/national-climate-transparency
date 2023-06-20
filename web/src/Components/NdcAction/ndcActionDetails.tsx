@@ -12,6 +12,8 @@ import { LandAreaUnits, landAreaUnitList } from '../../Definitions/landAreaUnits
 import { UploadOutlined } from '@ant-design/icons';
 import './ndcActionDetails.scss';
 import '../../Pages/Common/common.table.scss';
+import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
+import { RcFile } from 'rc-upload/lib/interface';
 
 export interface NdcActionDetailsProps {
   isBackBtnVisible: boolean;
@@ -123,13 +125,73 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     setmitigationType(selectedMitigationType);
   };
 
+  const onNdcActionDetailsFormSubmit = async (ndcActionFormvalues: any) => {
+    const ndcActionDetailObj: any = {};
+    ndcActionDetailObj.action = ndcActionFormvalues.ndcActionType;
+    ndcActionDetailObj.methodology = 'methodology';
+
+    if (
+      ndcActionFormvalues.ndcActionType === NdcActionTypes.Mitigation ||
+      ndcActionFormvalues.ndcActionType === NdcActionTypes.CrossCutting
+    ) {
+      ndcActionDetailObj.typeOfMitigation = ndcActionFormvalues.mitigationType;
+      if (ndcActionFormvalues.mitigationType === MitigationTypes.AGRICULTURE) {
+        ndcActionDetailObj.agricultureProperties = {
+          landArea: Number.isInteger(ndcActionFormvalues.eligibleLandArea)
+            ? parseInt(ndcActionFormvalues.eligibleLandArea)
+            : 0,
+          landAreaUnit: ndcActionFormvalues.landAreaUnit,
+        };
+      } else if (ndcActionFormvalues.mitigationType === MitigationTypes.SOLAR) {
+        ndcActionDetailObj.solarProperties = {
+          energyGeneration: Number.isInteger(ndcActionFormvalues.energyGeneration)
+            ? parseInt(ndcActionFormvalues.energyGeneration)
+            : 0,
+          energyGenerationUnit: ndcActionFormvalues.energyGenerationUnit,
+          consumerGroup: ndcActionFormvalues.consumerGroup,
+        };
+      }
+    }
+
+    if (
+      ndcActionFormvalues.ndcActionType === NdcActionTypes.Adaptation ||
+      ndcActionFormvalues.ndcActionType === NdcActionTypes.CrossCutting
+    ) {
+      ndcActionDetailObj.adaptationProperties = {
+        implementingAgency: ndcActionFormvalues.implementingAgency,
+        nationalPlanObjectives: ndcActionFormvalues.nationalPlanObjectives,
+        nationalPlanCoverage: ndcActionFormvalues.nationalPlanCoverage,
+      };
+    }
+
+    if (ndcActionFormvalues.ndcActionType === NdcActionTypes.Enablement) {
+      const enablementReport = await getBase64(
+        ndcActionFormvalues.EnablementReport.file.originFileObj as RcFile
+      );
+      const enablementReportData = enablementReport.split(',');
+      ndcActionDetailObj.enablementProperties = {
+        title: ndcActionFormvalues.EnablementTitle,
+        report: enablementReportData[1],
+      };
+    }
+
+    ndcActionDetailObj.ndcFinancing = {
+      userEstimatedCredits: Number.isInteger(ndcActionFormvalues.userEstimatedCredits)
+        ? parseInt(ndcActionFormvalues.userEstimatedCredits)
+        : 0,
+      systemEstimatedCredits: ndcActionFormvalues.methodologyEstimatedCredits,
+    };
+
+    onFormSubmit(ndcActionDetailObj);
+  };
+
   return (
     <div className="ndc-action-details-container">
       <Form
         name="ndcActionDetails"
         layout="vertical"
         requiredMark={true}
-        onFinish={onFormSubmit}
+        onFinish={onNdcActionDetailsFormSubmit}
         form={form}
       >
         <Row justify="start" align="middle">
