@@ -486,7 +486,7 @@ body {
   }
 }
 
-.popup-danger {
+.popup-reject {
   .icon {
     color: $error-color;
   }
@@ -738,4 +738,19 @@ body {
   right: 0px;
   left: auto;
   min-width: 400px;
+}
+
+.ant-btn-dangerous {
+  color: #ffffff !important;
+  border-color: $danger-bg-color !important;
+  background: $danger-bg-color;
+}
+
+.ant-btn-dangerous.ant-btn-primary[disabled],
+.ant-btn-dangerous.ant-btn-primary[disabled]:hover,
+.ant-btn-dangerous.ant-btn-primary[disabled]:focus,
+.ant-btn-dangerous.ant-btn-primary[disabled]:active {
+  color: #ffffff !important;
+  border-color: $danger-bg-color !important;
+  background: $danger-bg-color;
 }

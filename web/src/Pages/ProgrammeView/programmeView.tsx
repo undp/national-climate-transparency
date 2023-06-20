@@ -56,6 +56,8 @@ const ProgrammeView = () => {
   const [data, setData] = useState<ProgrammeT>();
   const [historyData, setHistoryData] = useState<any>([]);
   const [ndcActionHistoryData, setNdcActionHistoryData] = useState<any>([]);
+  const [ndcActionHistoryDataGrouped, setNdcActionHistoryDataGrouped] = useState<any>();
+  const [ndcActionData, setNdcActionData] = useState<any>([]);
   const { i18n, t } = useTranslation(['view']);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
   const [loadingAll, setLoadingAll] = useState<boolean>(true);
@@ -217,7 +219,10 @@ const ProgrammeView = () => {
         ],
       });
       if (response?.data?.length > 0) {
-        console.log(response?.data);
+        const objectsWithoutNullActionId = response?.data.filter(
+          (obj: any) => obj.actionId !== null
+        );
+        setNdcActionData(objectsWithoutNullActionId);
         setDocumentsData(response?.data);
       }
     } catch (err: any) {
@@ -254,7 +259,6 @@ const ProgrammeView = () => {
         return investmentData;
       });
       const elArr = investmentHisData?.map((investmentData: any, index: any) => {
-        console.log(investmentData);
         const element = {
           status: 'process',
           title: t('view:investment') + ' ' + String(index + 1), // Extracting the last 3 characters from actionNo
@@ -283,10 +287,11 @@ const ProgrammeView = () => {
     }
   };
 
-  const getNdcActionHistory = async (programmeId: string) => {
+  const getNdcActionHistory = async (programmeId?: string) => {
     setLoadingHistory(true);
     try {
-      const response: any = await post('national/programme/queryNdcActions', {
+      // if (programmeId && ndcActionDataItem === null) {
+      const response: any = await post('national/programme/investmentQuery', {
         page: 1,
         size: 100,
         filterAnd: [
@@ -297,46 +302,34 @@ const ProgrammeView = () => {
           },
         ],
       });
-
-      if (response?.data) {
-        console.log('ndc actions ------------ ');
-        console.log(response?.data);
-      }
-      const ndcActionsHisData = response?.data?.map((item: any) => {
-        const ndcActionData: any = {
-          action: item?.action,
-          id: item?.id,
-          monitoringReport: item?.monitoringReport || '',
-          verificationReport: item?.verificationReport || '',
-        };
-        return ndcActionData;
-      });
-      const elArr = ndcActionsHisData?.map((ndcAction: any) => {
-        const element = {
-          status: 'process',
-          title: ndcAction.id, // Extracting the last 3 characters from actionNo
-          subTitle: '',
-          description: (
-            <NdcActionBody
-              data={ndcAction}
-              progressIcon={
-                <CheckCircleOutlined
-                  className="common-progress-icon"
-                  style={{ color: '#5DC380' }}
-                />
-              }
-              programmeId={data?.programmeId}
-            />
-          ),
-          icon: (
-            <span className="step-icon freeze-step">
-              <Icon.Circle />
-            </span>
-          ),
-        };
-        return element;
-      });
-      setNdcActionHistoryData(elArr);
+      console.log('ndc actions --------- > ');
+      console.log(response.data);
+      // }
+      // if (ndcActionDataItem && programmeId === '') {
+      //   const mappedElements = Object.keys(ndcActionDataItem).map((actionId) => ({
+      //     status: 'process',
+      //     title: actionId,
+      //     subTitle: '',
+      //     description: (
+      //       <NdcActionBody
+      //         data={ndcActionDataItem[actionId]}
+      //         progressIcon={
+      //           <CheckCircleOutlined
+      //             className="common-progress-icon"
+      //             style={{ color: '#5DC380' }}
+      //           />
+      //         }
+      //         programmeId={ndcActionDataItem?.programmeId}
+      //       />
+      //     ),
+      //     icon: (
+      //       <span className="step-icon freeze-step">
+      //         <Icon.Circle />
+      //       </span>
+      //     ),
+      //   }));
+      //   setNdcActionHistoryData(mappedElements);
+      // }
     } catch (error: any) {
       console.log('Error in getting programme', error);
       message.open({
@@ -421,6 +414,22 @@ const ProgrammeView = () => {
       }
     }
   }, [data]);
+
+  useEffect(() => {
+    if (ndcActionData?.length > 0) {
+      const groupedByActionId = ndcActionData.reduce((result: any, obj: any) => {
+        const actionId = obj.actionId;
+        if (!result[actionId]) {
+          result[actionId] = [];
+        }
+        result[actionId].push(obj);
+        return result;
+      }, {});
+      console.log(ndcActionData);
+      setNdcActionHistoryDataGrouped(groupedByActionId);
+      console.log(groupedByActionId);
+    }
+  }, [ndcActionData]);
 
   if (!data) {
     return <Loading />;

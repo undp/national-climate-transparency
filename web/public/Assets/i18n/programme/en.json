@@ -32,5 +32,8 @@
   "methDoc": "Methodology Document",
   "monitoringReport": "Monitoring Report",
   "verificationReport": "Verification Report",
-  "objectionLett": "No Objection Letter"
+  "objectionLett": "No Objection Letter",
+  "rejectDocHeader": "Are you sure you want to reject this document?",
+  "rejectDocBody": "You can’t undo this action",
+  "remarks": "Remarks"
 }
