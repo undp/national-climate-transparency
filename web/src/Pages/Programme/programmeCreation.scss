@@ -2,12 +2,21 @@
 @import '../Common/colors.role.scss';
 @import '../../Styles/variables.scss';
 
+.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-tail::after {
+  background-color: #d6cde2;
+}
+
 .programme-details-form-container,
 .programme-sought-form-container {
   width: 100%;
   .programme-details-form,
   .programme-sought-form {
     width: 100%;
+
+    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
+      border-color: #ff4d4f !important;
+    }
 
     .ant-picker-large {
       height: 40px !important;
@@ -298,7 +307,7 @@
     .main {
       font-size: 1.25rem;
       font-weight: 500;
-      color: $title-main;
+      color: $primary-color;
     }
 
     .sub {

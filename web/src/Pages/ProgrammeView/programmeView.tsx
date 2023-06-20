@@ -56,6 +56,8 @@ const ProgrammeView = () => {
   const [data, setData] = useState<ProgrammeT>();
   const [historyData, setHistoryData] = useState<any>([]);
   const [ndcActionHistoryData, setNdcActionHistoryData] = useState<any>([]);
+  const [ndcActionHistoryDataGrouped, setNdcActionHistoryDataGrouped] = useState<any>();
+  const [ndcActionData, setNdcActionData] = useState<any>([]);
   const { i18n, t } = useTranslation(['view']);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
   const [loadingAll, setLoadingAll] = useState<boolean>(true);
@@ -78,10 +80,6 @@ const ProgrammeView = () => {
   };
 
   const locationColors = ['#6ACDFF', '#FF923D', '#CDCDCD', '#FF8183', '#B7A4FE'];
-
-  const numIsExist = (n: any) => {
-    return n ? Number(n) : 0;
-  };
 
   const getCenter = (list: any[]) => {
     let count = 0;
@@ -155,34 +153,6 @@ const ProgrammeView = () => {
     }, 1000);
   };
 
-  const genCerts = (d: any, certifiedTime: any) => {
-    if (d === undefined) {
-      return;
-    }
-    const c = d.certifier.map((cert: any) => {
-      return (
-        <div className="">
-          <div className="cert-info">
-            {isBase64(cert.logo) ? (
-              <img alt="certifier logo" src={'data:image/jpeg;base64,' + cert.logo} />
-            ) : cert.logo ? (
-              <img alt="certifier logo" src={cert.logo} />
-            ) : cert.name ? (
-              <div className="cert-logo">{cert.name.charAt(0).toUpperCase()}</div>
-            ) : (
-              <div className="cert-logo">{'A'}</div>
-            )}
-            <div className="text-center cert-name">{cert.name}</div>
-            {certifiedTime[cert.companyId] && (
-              <div className="text-center cert-date">{certifiedTime[cert.companyId]}</div>
-            )}
-          </div>
-        </div>
-      );
-    });
-    setCerts(c);
-  };
-
   const getProgrammeById = async (programmeId: string) => {
     try {
       const response: any = await post('national/programme/query', {
@@ -247,7 +217,10 @@ const ProgrammeView = () => {
         ],
       });
       if (response?.data?.length > 0) {
-        console.log(response?.data);
+        const objectsWithoutNullActionId = response?.data.filter(
+          (obj: any) => obj.actionId !== null
+        );
+        setNdcActionData(objectsWithoutNullActionId);
         setDocumentsData(response?.data);
       }
     } catch (err: any) {
@@ -280,11 +253,11 @@ const ProgrammeView = () => {
           level: item?.level,
           stream: item?.stream,
           status: item?.status,
+          requestId: item?.requestId,
         };
         return investmentData;
       });
       const elArr = investmentHisData?.map((investmentData: any, index: any) => {
-        console.log(investmentData);
         const element = {
           status: 'process',
           title: t('view:investment') + ' ' + String(index + 1), // Extracting the last 3 characters from actionNo
@@ -313,51 +286,52 @@ const ProgrammeView = () => {
     }
   };
 
-  const getNdcActionHistory = async (programmeId: string) => {
+  const getNdcActionHistory = async (programmeId?: string) => {
     setLoadingHistory(true);
     try {
-      const TEMP_NDC_ACTION_DATA = [
-        {
-          actionNo: 'Mitigation Action - 001',
-          monitoringReport: '',
-          verificationReport: '',
-        },
-        {
-          actionNo: 'Mitigation Action - 002',
-          monitoringReport: 'https://www.africau.edu/images/default/sample.pdf',
-          verificationReport: 'https://www.africau.edu/images/default/sample.pdf',
-        },
-        {
-          actionNo: 'Mitigation Action - 003',
-          monitoringReport: 'https://www.africau.edu/images/default/sample.pdf',
-          verificationReport: 'https://www.africau.edu/images/default/sample.pdf',
-        },
-      ];
-      const elArr = TEMP_NDC_ACTION_DATA?.map((ndcAction: any) => {
-        const element = {
-          status: 'process',
-          title: ndcAction.actionNo, // Extracting the last 3 characters from actionNo
-          subTitle: '',
-          description: (
-            <NdcActionBody
-              data={ndcAction}
-              progressIcon={
-                <CheckCircleOutlined
-                  className="common-progress-icon"
-                  style={{ color: '#5DC380' }}
-                />
-              }
-            />
-          ),
-          icon: (
-            <span className="step-icon freeze-step">
-              <Icon.Circle />
-            </span>
-          ),
-        };
-        return element;
+      // if (programmeId && ndcActionDataItem === null) {
+      const response: any = await post('national/programme/queryNdcActions', {
+        page: 1,
+        size: 100,
+        filterAnd: [
+          {
+            key: 'programmeId',
+            operation: '=',
+            value: programmeId,
+          },
+        ],
       });
-      setNdcActionHistoryData(elArr);
+      console.log('ndc actions --------- > ');
+      console.log(response.data);
+      const groupedByActionId = response.data.reduce((result: any, obj: any) => {
+        const actionId = obj.id;
+        if (!result[actionId]) {
+          result[actionId] = [];
+        }
+        result[actionId].push(obj);
+        return result;
+      }, {});
+      setNdcActionHistoryDataGrouped(groupedByActionId);
+      const mappedElements = Object.keys(groupedByActionId).map((actionId) => ({
+        status: 'process',
+        title: actionId,
+        subTitle: '',
+        description: (
+          <NdcActionBody
+            data={groupedByActionId[actionId]}
+            progressIcon={
+              <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
+            }
+            programmeId={data?.programmeId}
+          />
+        ),
+        icon: (
+          <span className="step-icon freeze-step">
+            <Icon.Circle />
+          </span>
+        ),
+      }));
+      setNdcActionHistoryData(mappedElements);
     } catch (error: any) {
       console.log('Error in getting programme', error);
       message.open({
@@ -374,42 +348,6 @@ const ProgrammeView = () => {
 
   const getSuccessMsg = (response: any, initMsg: string, successMsg: string) => {
     return response.data instanceof Array ? initMsg : successMsg;
-  };
-
-  const onPopupAction = async (
-    body: any,
-    endpoint: any,
-    successMsg: any,
-    httpMode: any,
-    successCB: any
-  ) => {
-    body.programmeId = data?.programmeId;
-    let error;
-    try {
-      const response: any = await httpMode(`national/programme/${endpoint}`, body);
-      if (response.statusCode < 300 || response.status < 300) {
-        if (!response.data.certifier) {
-          response.data.certifier = [];
-        }
-        setOpenModal(false);
-        setComment(undefined);
-        error = undefined;
-        successCB(response);
-        message.open({
-          type: 'success',
-          content: typeof successMsg !== 'function' ? successMsg : successMsg(response),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-      } else {
-        error = response.message;
-      }
-      // await getProgrammeHistory(data?.programmeId as string);
-      return error;
-    } catch (e: any) {
-      error = e.message;
-      return error;
-    }
   };
 
   const mapArrayToi18n = (map: any) => {
@@ -483,7 +421,6 @@ const ProgrammeView = () => {
     return <Loading />;
   }
 
-  // const pieChartData = getPieChartData(data);
   const percentages: any[] = [];
 
   const companies: any = {};
