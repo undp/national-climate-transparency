@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { ProgrammeTransfer } from '@undp/carbon-library';
 import { GovBGColor, CertBGColor, DevBGColor } from '../../Pages/Common/role.color.constants';
+import { RcFile } from 'rc-upload/lib/interface';
 
 export enum ProgrammeStage {
   AwaitingAuthorization = 'Pending',
@@ -332,3 +333,11 @@ export const sumArray = (arrList: any[]) => {
 
   return arrList.reduce((a, b) => Number(a) + Number(b), 0);
 };
+
+export const getBase64 = (file: RcFile): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
