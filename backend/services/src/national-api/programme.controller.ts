@@ -42,7 +42,7 @@ export class ProgrammeController {
     @Post('create')
     async addProgramme(@Body()programme: ProgrammeDto, @Request() req) {
       global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-      return this.programmeService.create(programme)
+      return this.programmeService.create(programme, req.user)
     }
 
     @ApiBearerAuth()
@@ -51,7 +51,7 @@ export class ProgrammeController {
     @Post('addNDCAction')
     async addNDCAction(@Body()ndcAction: NDCActionDto, @Request() req) {
       global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-      return this.programmeService.addNDCAction(ndcAction)
+      return this.programmeService.addNDCAction(ndcAction, req.user)
     }
 
     @ApiBearerAuth()
@@ -60,12 +60,12 @@ export class ProgrammeController {
     @Post('addDocument')
     async addDocument(@Body()docDto: ProgrammeDocumentDto, @Request() req) {
       global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-      return this.programmeService.addDocument(docDto)
+      return this.programmeService.addDocument(docDto, req.user)
     }
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuard)
-    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
+    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, DocumentAction))
     @Post('docAction')
     async docAction(@Body()docAction: DocumentAction) {
       return this.programmeService.docAction(docAction)

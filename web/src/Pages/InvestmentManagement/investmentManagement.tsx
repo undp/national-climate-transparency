@@ -37,15 +37,19 @@ import {
   getCompanyBgColor,
   addCommSepRound,
   ProfileIcon,
+  RoleIcon,
 } from '@undp/carbon-library';
 import * as Icon from 'react-bootstrap-icons';
-import { TooltipColor } from '../Common/role.color.constants';
+import { InvestmentBGColor, InvestmentColor, TooltipColor } from '../Common/role.color.constants';
 import { creditUnit } from '../Common/configs';
 import { CircleFlag } from 'react-circle-flags';
 import { Role } from '../../Casl/enums/role.enum';
 import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
 import { PauseCircle, PlayCircle } from 'react-bootstrap-icons';
 import { InvestmentStatus, getStatusTagType } from '../../Casl/enums/investment.status';
+import { InvestmentType } from '../../Casl/enums/investment.type';
+import { InvestmentLevel } from '../../Casl/enums/investment.level';
+import { InvestmentStream } from '../../Casl/enums/investment.stream';
 
 type CompanyInfo = {
   name: string;
@@ -68,7 +72,7 @@ const InvestmentManagement = () => {
 
   const statusOptions = Object.keys(InvestmentStatus).map((k, index) => ({
     label: addSpaces(Object.values(InvestmentStatus)[index]),
-    value: k,
+    value: Object.values(InvestmentStatus)[index],
   }));
 
   const [selectedStatus, setSelectedStatus] = useState<any>(statusOptions.map((e) => e.value));
@@ -432,6 +436,69 @@ const InvestmentManagement = () => {
       },
     },
     {
+      title: t('programme:type'),
+      key: 'type',
+      sorter: true,
+      align: 'center' as const,
+      render: (item: any, Obj: any) => {
+        return (
+          <Tooltip title={Obj.type} color={TooltipColor} key={TooltipColor}>
+            <div>
+              <RoleIcon
+                icon={Obj.type === InvestmentType.PUBLIC ? <Icon.Eye /> : <Icon.EyeSlash />}
+                bg={InvestmentBGColor}
+                color={InvestmentColor}
+              />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: t('programme:level'),
+      key: 'level',
+      sorter: true,
+      align: 'center' as const,
+      render: (item: any, Obj: any) => {
+        return (
+          <Tooltip title={Obj.level} color={TooltipColor} key={TooltipColor}>
+            <div>
+              <RoleIcon
+                icon={Obj.level === InvestmentLevel.INTERNATIONAL ? <Icon.Globe2 /> : <Icon.Flag />}
+                bg={InvestmentBGColor}
+                color={InvestmentColor}
+              />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: t('programme:stream'),
+      key: 'stream',
+      sorter: true,
+      align: 'center' as const,
+      render: (item: any, Obj: any) => {
+        return (
+          <Tooltip title={Obj.stream} color={TooltipColor} key={TooltipColor}>
+            <div>
+              <RoleIcon
+                icon={
+                  Obj.stream === InvestmentStream.CLIMATE_FINANCE ? (
+                    <Icon.Bank />
+                  ) : (
+                    <Icon.GraphUpArrow />
+                  )
+                }
+                bg={InvestmentBGColor}
+                color={InvestmentColor}
+              />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+    {
       title: t('programme:sector'),
       dataIndex: 'programmeSector',
       key: 'programmeSector',
@@ -439,7 +506,33 @@ const InvestmentManagement = () => {
       align: 'left' as const,
     },
     {
-      title: t('creditTransfer:cSender'),
+      title: t('programme:investor'),
+      key: 'toCompanyId',
+      sorter: true,
+      align: 'left' as const,
+      render: (item: any, itemObj: any) => {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {itemObj.sender &&
+              itemObj.sender.map((v: any, i: any) => {
+                return (
+                  <Tooltip title={v.name} color={TooltipColor} key={TooltipColor}>
+                    <div>
+                      <ProfileIcon
+                        icon={v.logo}
+                        bg={getCompanyBgColor(v.companyRole)}
+                        name={v.name}
+                      />
+                    </div>
+                  </Tooltip>
+                );
+              })}
+          </div>
+        );
+      },
+    },
+    {
+      title: t('programme:owner'),
       key: 'fromCompanyId',
       sorter: true,
       align: 'left' as const,
@@ -465,83 +558,6 @@ const InvestmentManagement = () => {
       },
     },
     {
-      title: t('creditTransfer:cReceiver'),
-      dataIndex: 'toCompanyId',
-      key: 'toCompanyId',
-      sorter: true,
-      align: 'left' as const,
-      render: (item: any, itemObj: any) => {
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {itemObj.receiver &&
-              itemObj.receiver.map((v: any, i: any) => {
-                return !itemObj.isRetirement ? (
-                  <Tooltip title={v.name} color={TooltipColor} key={TooltipColor}>
-                    <div>
-                      <ProfileIcon
-                        icon={v.logo}
-                        bg={getCompanyBgColor(v.companyRole)}
-                        name={v.name}
-                      />
-                    </div>
-                  </Tooltip>
-                ) : itemObj.retirementType === '0' ? (
-                  <Tooltip
-                    title={
-                      t('creditTransfer:iaccount') +
-                      `${
-                        itemObj.toCompanyMeta && itemObj.toCompanyMeta.countryName
-                          ? ' - ' + itemObj.toCompanyMeta.countryName
-                          : ''
-                      }`
-                    }
-                    color={TooltipColor}
-                    key={TooltipColor}
-                  >
-                    {itemObj.toCompanyMeta && itemObj.toCompanyMeta.country && (
-                      <CircleFlag
-                        className="profile-icon flag-ret-icon"
-                        countryCode={itemObj.toCompanyMeta.country.toLowerCase()}
-                      />
-                    )}
-                  </Tooltip>
-                ) : (
-                  <Tooltip
-                    title={t('creditTransfer:laccount')}
-                    color={TooltipColor}
-                    key={TooltipColor}
-                  >
-                    <div className="ret-icon profile-icon">
-                      <Icon.Save />
-                    </div>
-                  </Tooltip>
-                );
-              })}
-          </div>
-        );
-      },
-    },
-    {
-      title: t('creditTransfer:cRequested') + ` (${creditUnit})`,
-      dataIndex: 'creditAmount',
-      key: 'creditAmount',
-      sorter: true,
-      align: 'right' as const,
-      render: (item: any) => {
-        return <span className="clickable">{addCommSepRound(item)}</span>;
-      },
-    },
-    // {
-    //   title: t('creditTransfer:cBalance') + ` (${creditUnit})`,
-    //   dataIndex: 'creditBalance',
-    //   key: 'creditBalance',
-    //   sorter: true,
-    //   align: 'right' as const,
-    //   render: (item: any, Obj: any) => {
-    //     return <span>{addCommSepRound(getSendCreditBalance(Obj))}</span>;
-    //   },
-    // },
-    {
       title: t('programme:status'),
       key: 'status',
       sorter: true,
@@ -554,6 +570,16 @@ const InvestmentManagement = () => {
             </Tag>
           </Tooltip>
         );
+      },
+    },
+    {
+      title: t('programme:amount'),
+      dataIndex: 'amount',
+      key: 'amount',
+      sorter: true,
+      align: 'right' as const,
+      render: (item: any) => {
+        return <span className="clickable">{addCommSepRound(item)}</span>;
       },
     },
     {
@@ -600,7 +626,7 @@ const InvestmentManagement = () => {
   };
 
   return (
-    <div className="credit-transfer-management content-container">
+    <div className="investment-management content-container">
       <div className="title-bar">
         <Row justify="space-between" align="middle">
           <Col span={20}>
@@ -632,41 +658,6 @@ const InvestmentManagement = () => {
           </Col>
           <Col lg={{ span: 8 }} md={{ span: 8 }}>
             <div className="filter-section">
-              <div className="search-filter">
-                <Checkbox
-                  className="label"
-                  onChange={(v) =>
-                    setDataFilter(
-                      v.target.checked
-                        ? [
-                            {
-                              key: 'initiatorCompanyId',
-                              operation: '=',
-                              value: userInfoState?.companyId,
-                            },
-                            {
-                              key: 'fromCompanyId',
-                              operation: '=',
-                              value: userInfoState?.companyId,
-                            },
-                            {
-                              key: 'toCompanyId',
-                              operation: '=',
-                              value: userInfoState?.companyId,
-                            },
-                            {
-                              key: 'programmeCertifierId',
-                              operation: 'ANY',
-                              value: userInfoState?.companyId,
-                            },
-                          ]
-                        : undefined
-                    )
-                  }
-                >
-                  {t('view:seeMine')}
-                </Checkbox>
-              </div>
               <div className="search-bar">
                 <Search
                   onPressEnter={onSearch}

@@ -818,7 +818,7 @@ export class AggregateAPIService {
           whereCW.push(`p."requestId" != 'null'`);
           if (stat.statFilter && stat.statFilter.onlyMine) {
             whereCW.push(
-              `${companyId} = b."fromCompanyId"`
+              `${companyId} = b."toCompanyId"`
             );
           }
           if (stat.statFilter && stat.statFilter.startTime) {
@@ -830,7 +830,7 @@ export class AggregateAPIService {
   
           const resultsProgrammeLocationsI = await this.investmentRepo.manager
             .query(`SELECT p."requestId" as loc, b."type" as type, count(*) AS count
-            FROM  investment_view b, jsonb_array_elements(b."fromGeo") p("requestId")
+            FROM  investment_view b, jsonb_array_elements(b."toGeo") p("requestId")
             ${whereCW.length > 0 ? " where " : " "}
             ${whereCW.join(" and ")}
             GROUP  BY p."requestId", b."type"`);
@@ -1226,7 +1226,7 @@ export class AggregateAPIService {
       stat.statFilter,
       {
         value: companyId,
-        key: "fromCompanyId",
+        key: "toCompanyId",
         operation: "=",
       },
       "createdTime"

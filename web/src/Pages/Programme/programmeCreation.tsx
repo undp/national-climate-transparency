@@ -27,6 +27,7 @@ import { InfoCircle } from 'react-bootstrap-icons';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import moment from 'moment';
 import { RcFile } from 'antd/lib/upload';
+import { CompanyRole } from '@undp/carbon-library';
 
 type SizeType = Parameters<typeof Form>[0]['size'];
 
@@ -60,8 +61,9 @@ export const AddProgrammeComponent = () => {
 
   const initialOrganisationOwnershipValues: any[] = [
     {
-      organisation: userInfoState?.companyName,
-      proponentPercentage: 100,
+      organisation:
+        userInfoState?.companyRole !== CompanyRole.GOVERNMENT && userInfoState?.companyName,
+      proponentPercentage: userInfoState?.companyRole !== CompanyRole.GOVERNMENT && 100,
     },
   ];
 
@@ -441,20 +443,6 @@ export const AddProgrammeComponent = () => {
                       {
                         required: false,
                       },
-                      {
-                        validator: async (rule, value) => {
-                          if (
-                            String(value).trim() === '' ||
-                            String(value).trim() === undefined ||
-                            value === null ||
-                            value === undefined
-                          ) {
-                            throw new Error(
-                              `${t('addProgramme:buyerCountryEligibility')} ${t('isRequired')}`
-                            );
-                          }
-                        },
-                      },
                     ]}
                   >
                     <Select size="large" loading={loadingList}>
@@ -494,7 +482,14 @@ export const AddProgrammeComponent = () => {
                                     },
                                   ]}
                                 >
-                                  <Select size="large" loading={loadingList} disabled={name === 0}>
+                                  <Select
+                                    size="large"
+                                    loading={loadingList}
+                                    disabled={
+                                      name === 0 &&
+                                      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+                                    }
+                                  >
                                     {organisationsList.map((organisation) => (
                                       <Select.Option
                                         key={organisation.companyId}
@@ -528,7 +523,10 @@ export const AddProgrammeComponent = () => {
                                     max={100}
                                     formatter={(value) => `${value}%`}
                                     parser={(value: any) => value.replace('%', '')}
-                                    disabled={fields?.length < 2}
+                                    disabled={
+                                      fields?.length < 2 &&
+                                      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+                                    }
                                   />
                                 </Form.Item>
                                 {fields?.length > 1 && name !== 0 && (
