@@ -1,5 +1,5 @@
 import { Button, Col, Form, Input, Row, Select, Upload, UploadProps } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NdcActionTypes, ndcActionTypeList } from '../../Definitions/ndcActionTypes.enum';
 import { MitigationTypes, mitigationTypeList } from '../../Definitions/mitigationTypes.enum';
@@ -13,10 +13,51 @@ import { UploadOutlined } from '@ant-design/icons';
 import './ndcActionDetails.scss';
 import '../../Pages/Common/common.table.scss';
 
-const NdcActionDetails = () => {
+export interface NdcActionDetailsProps {
+  isBackBtnVisible: boolean;
+  onClickedBackBtn?: any;
+  onFormSubmit: any;
+  ndcActionDetails: any;
+}
+
+const NdcActionDetails = (props: NdcActionDetailsProps) => {
+  const { isBackBtnVisible, onClickedBackBtn, onFormSubmit, ndcActionDetails } = props;
   const { t } = useTranslation(['ndcAction']);
   const [ndcActionType, setNdcActionType] = useState();
   const [mitigationType, setmitigationType] = useState();
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (ndcActionDetails) {
+      if (ndcActionDetails?.action) {
+        setNdcActionType(ndcActionDetails?.action);
+      }
+      if (ndcActionDetails?.typeOfMitigation) {
+        setmitigationType(ndcActionDetails?.typeOfMitigation);
+      }
+
+      form.setFieldsValue({
+        ndcActionType: ndcActionDetails?.action,
+        mitigationType: ndcActionDetails?.typeOfMitigation,
+        energyGeneration: ndcActionDetails?.solarProperties?.energyGeneration,
+        energyGenerationUnit: ndcActionDetails?.solarProperties?.energyGenerationUnit,
+        consumerGroup: ndcActionDetails?.solarProperties?.consumerGroup,
+        eligibleLandArea: ndcActionDetails?.agricultureProperties?.landArea,
+        landAreaUnit: ndcActionDetails?.agricultureProperties?.landAreaUnit,
+        implementingAgency: ndcActionDetails?.adaptationProperties?.implementingAgency,
+        nationalPlanObjectives: ndcActionDetails?.adaptationProperties?.nationalPlanObjectives,
+        nationalPlanCoverage: ndcActionDetails?.adaptationProperties?.nationalPlanCoverage,
+        EnablementTitle: ndcActionDetails?.enablementProperties?.title,
+        EnablementReport: ndcActionDetails?.enablementProperties?.report,
+        userEstimatedCredits: ndcActionDetails?.ndcFinancing?.userEstimatedCredits,
+        methodologyEstimatedCredits: 0,
+      });
+    } else {
+      form.setFieldsValue({
+        methodologyEstimatedCredits: 0,
+      });
+    }
+  }, []);
 
   const implementingAgencyList = [
     'Ministry of Agriculture, Water and Forestry (MAWF)',
@@ -76,17 +117,21 @@ const NdcActionDetails = () => {
 
   const handleNdcActionChange = (selectedNdcType: any) => {
     setNdcActionType(selectedNdcType);
-    console.log('selected ndc type', selectedNdcType);
   };
 
   const handleMitigationTypeChange = (selectedMitigationType: any) => {
     setmitigationType(selectedMitigationType);
-    console.log('selected mitigation type', selectedMitigationType);
   };
 
   return (
     <div className="ndc-action-details-container">
-      <Form name="ndcActionDetails" layout="vertical" requiredMark={true}>
+      <Form
+        name="ndcActionDetails"
+        layout="vertical"
+        requiredMark={true}
+        onFinish={onFormSubmit}
+        form={form}
+      >
         <Row justify="start" align="middle">
           <Col>
             <Form.Item
@@ -215,6 +260,30 @@ const NdcActionDetails = () => {
             </Row>
           )}
 
+        {(ndcActionType === NdcActionTypes.Mitigation ||
+          ndcActionType === NdcActionTypes.CrossCutting) && (
+          <Row justify="start" align="middle">
+            <Col span={12}>
+              <Form.Item
+                name="userEstimatedCredits"
+                label={t('ndcAction:userEstimatedCredits')}
+                style={{ display: 'inline-block', width: 'calc(100% - 15px)', marginRight: '15px' }}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="methodologyEstimatedCredits"
+                label={t('ndcAction:methodologyEstimatedCredits')}
+                style={{ display: 'inline-block', width: '100%' }}
+              >
+                <Input disabled />
+              </Form.Item>
+            </Col>
+          </Row>
+        )}
+
         {ndcActionType === NdcActionTypes.CrossCutting && (
           <label className="label-heading">{t('ndcAction:adaptation')}</label>
         )}
@@ -270,29 +339,14 @@ const NdcActionDetails = () => {
           </>
         )}
 
-        {(ndcActionType === NdcActionTypes.Mitigation ||
-          ndcActionType === NdcActionTypes.CrossCutting) && (
-          <Row justify="start" align="middle">
-            <Col span={12}>
-              <Form.Item
-                name="userEstimatedCredits"
-                label={t('ndcAction:userEstimatedCredits')}
-                style={{ display: 'inline-block', width: 'calc(100% - 15px)', marginRight: '15px' }}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="methodologyEstimatedCredits"
-                label={t('ndcAction:methodologyEstimatedCredits')}
-                style={{ display: 'inline-block', width: '100%' }}
-              >
-                <Input disabled value={0} />
-              </Form.Item>
-            </Col>
+        <div className="steps-actions">
+          <Row>
+            {isBackBtnVisible && <Button onClick={onClickedBackBtn}>{t('ndcAction:back')}</Button>}
+            <Button className="mg-left-1" type="primary" htmlType="submit">
+              {t('ndcAction:next')}
+            </Button>
           </Row>
-        )}
+        </div>
       </Form>
     </div>
   );

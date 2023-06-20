@@ -1,11 +1,11 @@
 export enum EnergyGenerationUnits {
-  Wh = 'Wh',
-  mWh = 'mWh',
-  kWh = 'kWh',
-  MWh = 'MWh',
-  GWh = 'GWh',
-  J = 'J',
-  KJ = 'KJ',
+  Wh = 'Wh/year/unit',
+  mWh = 'mWh/year/unit',
+  kWh = 'kWh/year/unit',
+  MWh = 'MWh/year/unit',
+  GWh = 'GWh/year/unit',
+  J = 'J/year/unit',
+  KJ = 'KJ/year/unit',
 }
 
 export const energyGenerationUnitList = [

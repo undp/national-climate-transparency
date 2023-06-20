@@ -27,4 +27,12 @@
     color: rgba(58, 53, 65, 0.5);
     margin-bottom: 5px;
   }
+
+  .steps-actions {
+    display: flex;
+    flex-direction: row-reverse;
+    .mg-left-1 {
+      margin-left: 1rem;
+    }
+  }
 }
