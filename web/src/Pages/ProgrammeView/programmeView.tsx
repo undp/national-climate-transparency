@@ -46,6 +46,7 @@ import {
   getGeneralFields,
 } from '../../Definitions/InterfacesAndType/programme.definitions';
 import NdcActionBody from '../../Components/NdcActionBody/ndcActionBody';
+import { DocType } from '../../Casl/enums/document.type';
 
 const ProgrammeView = () => {
   const { get, put, post } = useConnection();
@@ -61,12 +62,9 @@ const ProgrammeView = () => {
   const { i18n, t } = useTranslation(['view']);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
   const [loadingAll, setLoadingAll] = useState<boolean>(true);
+  const [loadingNDC, setLoadingNDC] = useState<boolean>(true);
+  const [loadingInvestment, setLoadingInvestment] = useState<boolean>(true);
   const [openModal, setOpenModal] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
-  const [actionInfo, setActionInfo] = useState<any>({});
-  const [comment, setComment] = useState<any>(undefined);
-  const [certs, setCerts] = useState<any>([]);
-  const [certTimes, setCertTimes] = useState<any>({});
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [centerPoint, setCenterPoint] = useState<number[]>([]);
   const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : MapTypes.Mapbox;
@@ -74,7 +72,6 @@ const ProgrammeView = () => {
   const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
   const [documentsData, setDocumentsData] = useState<any[]>([]);
-  const [accessTokenMap, setAccessTokenMap] = useState<any>('');
 
   const showModal = () => {
     setOpenModal(true);
@@ -206,6 +203,7 @@ const ProgrammeView = () => {
 
   const getDocuments = async (programmeId: string) => {
     setLoadingHistory(true);
+    setLoadingNDC(true);
     try {
       const response: any = await post('national/programme/queryDocs', {
         page: 1,
@@ -229,11 +227,13 @@ const ProgrammeView = () => {
       console.log('Error in getting documents - ', err);
     } finally {
       setLoadingHistory(false);
+      setLoadingNDC(false);
     }
   };
 
   const getInvestmentHistory = async (programmeId: string) => {
     setLoadingHistory(true);
+    setLoadingInvestment(true);
     try {
       const response: any = await post('national/programme/investmentQuery', {
         page: 1,
@@ -256,13 +256,14 @@ const ProgrammeView = () => {
           stream: item?.stream,
           status: item?.status,
           requestId: item?.requestId,
+          sender: item?.sender,
         };
         return investmentData;
       });
       const elArr = investmentHisData?.map((investmentData: any, index: any) => {
         const element = {
           status: 'process',
-          title: t('view:investment') + ' ' + String(index + 1), // Extracting the last 3 characters from actionNo
+          title: t('view:investment') + ' - ' + String(investmentData?.requestId), // Extracting the last 3 characters from actionNo
           subTitle: '',
           description: <InvestmentBody data={investmentData} />,
           icon: (
@@ -285,11 +286,13 @@ const ProgrammeView = () => {
       setLoadingHistory(false);
     } finally {
       setLoadingHistory(false);
+      setLoadingInvestment(false);
     }
   };
 
-  const getNdcActionHistory = async (programmeId?: string) => {
+  const getNdcActionHistory = async (programmeId: string, ndcActionDocs: any) => {
     setLoadingHistory(true);
+    setLoadingNDC(true);
     try {
       // if (programmeId && ndcActionDataItem === null) {
       const response: any = await post('national/programme/queryNdcActions', {
@@ -313,6 +316,15 @@ const ProgrammeView = () => {
         result[actionId].push(obj);
         return result;
       }, {});
+      ndcActionData?.map((ndcData: any) => {
+        if (Object.keys(groupedByActionId)?.includes(ndcData?.actionId)) {
+          if (ndcData?.type === DocType.MONITORING_REPORT) {
+            groupedByActionId[ndcData?.actionId][0].monitoringReport = ndcData;
+          } else if (ndcData?.type === DocType.VERIFICATION_REPORT) {
+            groupedByActionId[ndcData?.actionId][0].verificationReport = ndcData;
+          }
+        }
+      });
       setNdcActionHistoryDataGrouped(groupedByActionId);
       const mappedElements = Object.keys(groupedByActionId).map((actionId) => ({
         status: 'process',
@@ -325,6 +337,7 @@ const ProgrammeView = () => {
               <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
             }
             programmeId={data?.programmeId}
+            getProgrammeDocs={() => getDocuments(String(data?.programmeId))}
           />
         ),
         icon: (
@@ -345,6 +358,7 @@ const ProgrammeView = () => {
       setLoadingHistory(false);
     } finally {
       setLoadingHistory(false);
+      setLoadingNDC(false);
     }
   };
 
@@ -419,6 +433,11 @@ const ProgrammeView = () => {
     }
   }, [data]);
 
+  useEffect(() => {
+    if (data) {
+      getNdcActionHistory(data?.programmeId, ndcActionData);
+    }
+  }, [data, ndcActionData]);
   if (!data) {
     return <Loading />;
   }
@@ -770,7 +789,7 @@ const ProgrammeView = () => {
                     <span className="title-text">{t('view:investment')}</span>
                   </div>
                   <div className="content">
-                    {loadingHistory ? (
+                    {loadingInvestment ? (
                       <Skeleton />
                     ) : (
                       <Steps current={0} direction="vertical" items={historyData} />
@@ -779,6 +798,7 @@ const ProgrammeView = () => {
                 </div>
               </Card>
             )}
+            {ndcActionHistoryData?.length > 0 && (
             <Card className="card-container">
               <div className="info-view">
                 <div className="title">
@@ -786,7 +806,7 @@ const ProgrammeView = () => {
                   <span className="title-text">{t('view:ndcActions')}</span>
                 </div>
                 <div className="content">
-                  {loadingHistory ? (
+                    {loadingNDC ? (
                     <Skeleton />
                   ) : (
                     <Steps current={0} direction="vertical" items={ndcActionHistoryData} />
@@ -794,6 +814,7 @@ const ProgrammeView = () => {
                 </div>
               </div>
             </Card>
+            )}
           </Col>
         </Row>
       </div>

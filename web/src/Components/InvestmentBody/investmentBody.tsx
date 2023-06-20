@@ -19,7 +19,6 @@ import moment from 'moment';
 import { InvestmentStatus } from '../../Casl/enums/investment.status';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { Skeleton, message } from 'antd';
-import { DocumentStatus } from '../../Casl/enums/document.status';
 import RejectDocumentationConfirmationModel from '../Models/rejectDocumentForm';
 import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
@@ -51,13 +50,6 @@ const InvestmentBody: FC<InvestmentBodyProps> = (props: InvestmentBodyProps) => 
       return false;
     }
   };
-
-  useEffect(() => {
-    console.log(
-      'investment action permission -> ',
-      investmentActionPermission(data?.sender[0]?.companyId)
-    );
-  }, []);
 
   const investmentAction = async (type: any, id: any) => {
     setLoading(true);

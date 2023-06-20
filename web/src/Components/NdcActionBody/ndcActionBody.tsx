@@ -20,10 +20,11 @@ export interface NdcActionBodyProps {
   data?: any;
   progressIcon?: any;
   programmeId?: any;
+  getProgrammeDocs?: any;
 }
 
 const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
-  const { data, progressIcon, programmeId } = props;
+  const { data, progressIcon, programmeId, getProgrammeDocs } = props;
   const { t } = useTranslation(['programme']);
   const { userInfoState } = useUserContext();
   const fileInputMonitoringRef: any = useRef(null);
@@ -32,6 +33,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [monitoringReportData, setMonitoringReportData] = useState<any>();
   const [verificationReportData, setVerificationReportData] = useState<any>();
+  const [ndcActionId, setNdcActionId] = useState<any>();
 
   const getBase64 = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -49,10 +51,6 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
     fileInputVerificationRef?.current?.click();
   };
 
-  const textStyle = {
-    color: data?.monitoringReport === '' && '#d8d5dd', // Green if verified, red otherwise
-  };
-
   const onUploadDocument = async (file: any, type: any) => {
     setLoading(true);
     const logoBase64 = await getBase64(file as RcFile);
@@ -63,7 +61,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
         type: type,
         data: logoUrls[1],
         programmeId: programmeId,
-        actionId: data?.id,
+        actionId: ndcActionId,
       });
       if (response?.data) {
         message.open({
@@ -84,6 +82,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     } finally {
+      getProgrammeDocs();
       setLoading(false);
     }
   };
@@ -123,10 +122,11 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
 
   useEffect(() => {
     data?.map((item: any) => {
+      setNdcActionId(item?.id);
       if (item?.monitoringReport) {
         setMonitoringReportData(item?.monitoringReport);
       }
-      if (item?.verificationReportData) {
+      if (item?.verificationReport) {
         setVerificationReportData(item?.verificationReportData);
       }
     });
