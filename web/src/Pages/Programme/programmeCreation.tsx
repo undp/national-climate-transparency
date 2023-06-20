@@ -148,6 +148,7 @@ export const AddProgrammeComponent = () => {
   };
 
   const onFinishStepOne = async (values: any) => {
+    console.log(values);
     setLoading(true);
     let programmeDetails: any;
     const ownershipPercentage = values?.ownershipPercentage;
@@ -156,9 +157,16 @@ export const AddProgrammeComponent = () => {
       0
     );
     const proponentPercentages = ownershipPercentage.map((item: any) => item.proponentPercentage);
-    const proponentTxIds = ownershipPercentage.slice(1).map((item: any) => item.organisation);
-    const logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
-    const logoUrls = logoBase64.split(',');
+    const proponentTxIds =
+      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+        ? ownershipPercentage?.slice(1).map((item: any) => item.organisation)
+        : ownershipPercentage?.map((item: any) => item.organisation);
+    let logoBase64 = '';
+    let logoUrls: any[] = [];
+    if (values?.designDocument) {
+      logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
+      logoUrls = logoBase64?.split(',');
+    }
     if (totalPercentage !== 100) {
       message.open({
         type: 'error',
@@ -175,9 +183,11 @@ export const AddProgrammeComponent = () => {
         sector: values?.sector,
         startTime: moment(values?.startTime).startOf('day').unix(),
         endTime: moment(values?.endTime).endOf('day').unix(),
-        proponentTaxVatId: [userOrgTaxId, ...proponentTxIds],
+        proponentTaxVatId:
+          userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+            ? [userOrgTaxId, ...proponentTxIds]
+            : proponentTxIds,
         proponentPercentage: proponentPercentages,
-        designDocument: logoUrls[1],
         programmeProperties: {
           buyerCountryEligibility: values?.buyerCountryEligibility,
           geographicalLocation: values?.geographicalLocation,
@@ -187,6 +197,9 @@ export const AddProgrammeComponent = () => {
           includedInNap: includedInNDC,
         },
       };
+      if (logoUrls?.length > 0) {
+        programmeDetails.designDocument = logoUrls[1];
+      }
       setLoading(false);
       nextOne(programmeDetails);
     }
@@ -425,15 +438,17 @@ export const AddProgrammeComponent = () => {
                     rules={[
                       {
                         validator: async (rule, file) => {
-                          let isCorrectFormat = false;
-                          if (file[0]?.type === 'application/pdf') {
-                            isCorrectFormat = true;
-                          }
-                          if (!isCorrectFormat) {
-                            throw new Error(`${t('addProgramme:invalidFileFormat')}`);
-                          } else if (file[0]?.size > maximumImageSize) {
-                            // default size format of files would be in bytes -> 1MB = 1000000bytes
-                            throw new Error(`${t('addProgramme:maxSizeVal')}`);
+                          if (file) {
+                            let isCorrectFormat = false;
+                            if (file[0]?.type === 'application/pdf') {
+                              isCorrectFormat = true;
+                            }
+                            if (!isCorrectFormat) {
+                              throw new Error(`${t('addProgramme:invalidFileFormat')}`);
+                            } else if (file[0]?.size > maximumImageSize) {
+                              // default size format of files would be in bytes -> 1MB = 1000000bytes
+                              throw new Error(`${t('addProgramme:maxSizeVal')}`);
+                            }
                           }
                         },
                       },
