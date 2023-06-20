@@ -52,16 +52,10 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
   const [rejectDocData, setRejectDocData] = useState<any>({});
 
   const handleDesignDocFileUpload = () => {
-    // fileInputRef.current.onchange = (e: any) => {
-    //   fileInputRef.current = null;
-    // };
     fileInputRef?.current?.click();
   };
 
   const handleMethodologyFileUpload = () => {
-    // fileInputRefMeth.current.onchange = (e: any) => {
-    //   fileInputRefMeth.current = null;
-    // };
     fileInputRefMeth?.current?.click();
   };
 
@@ -201,6 +195,12 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
     setOpenRejectDocConfirmationModal(false);
   };
 
+  const companyRolePermission =
+    userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
+    userInfoState?.companyRole === CompanyRole.CERTIFIER;
+
+  const designDocPending = designDocStatus === DocumentStatus.PENDING;
+
   return loading ? (
     <Skeleton />
   ) : (
@@ -217,32 +217,30 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                 <div className={designDocUrl !== '' ? 'label-uploaded' : 'label'}>
                   {t('programme:designDoc')}
                 </div>
-                {designDocStatus === DocumentStatus.PENDING &&
-                  (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-                    userInfoState?.companyRole === CompanyRole.CERTIFIER) && (
-                    <>
-                      <LikeOutlined
-                        onClick={() => approveDoc(designDocId, designDocStatus)}
-                        className="common-progress-icon"
-                        style={{ color: '#976ED7' }}
-                      />
-                      <DislikeOutlined
-                        onClick={() => {
-                          setRejectDocData({ id: designDocId });
-                          setActionInfo({
-                            action: 'Reject',
-                            headerText: `${t('programme:rejectDocHeader')}`,
-                            text: `${t('programme:rejectDocBody')}`,
-                            type: 'reject',
-                            icon: <DislikeOutlined />,
-                          });
-                          setOpenRejectDocConfirmationModal(true);
-                        }}
-                        className="common-progress-icon margin-left-1"
-                        style={{ color: '#FD6F70' }}
-                      />
-                    </>
-                  )}
+                {designDocPending && companyRolePermission && (
+                  <>
+                    <LikeOutlined
+                      onClick={() => approveDoc(designDocId, designDocStatus)}
+                      className="common-progress-icon"
+                      style={{ color: '#976ED7' }}
+                    />
+                    <DislikeOutlined
+                      onClick={() => {
+                        setRejectDocData({ id: designDocId });
+                        setActionInfo({
+                          action: 'Reject',
+                          headerText: `${t('programme:rejectDocHeader')}`,
+                          text: `${t('programme:rejectDocBody')}`,
+                          type: 'reject',
+                          icon: <DislikeOutlined />,
+                        });
+                        setOpenRejectDocConfirmationModal(true);
+                      }}
+                      className="common-progress-icon margin-left-1"
+                      style={{ color: '#FD6F70' }}
+                    />
+                  </>
+                )}
                 {designDocStatus === DocumentStatus.ACCEPTED && (
                   <CheckCircleOutlined
                     className="common-progress-icon"
@@ -328,32 +326,30 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                 <div className={methodologyDocUrl !== '' ? 'label-uploaded' : 'label'}>
                   {t('programme:methDoc')}
                 </div>
-                {methodDocStatus === DocumentStatus.PENDING &&
-                  (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-                    userInfoState?.companyRole === CompanyRole.CERTIFIER) && (
-                    <>
-                      <LikeOutlined
-                        onClick={() => approveDoc(methDocId, methodDocStatus)}
-                        className="common-progress-icon"
-                        style={{ color: '#976ED7' }}
-                      />
-                      <DislikeOutlined
-                        onClick={() => {
-                          setRejectDocData({ id: methDocId });
-                          setActionInfo({
-                            action: 'Reject',
-                            headerText: `${t('programme:rejectDocHeader')}`,
-                            text: `${t('programme:rejectDocBody')}`,
-                            type: 'reject',
-                            icon: <DislikeOutlined />,
-                          });
-                          setOpenRejectDocConfirmationModal(true);
-                        }}
-                        className="common-progress-icon margin-left-1"
-                        style={{ color: '#FD6F70' }}
-                      />
-                    </>
-                  )}
+                {methodDocStatus === DocumentStatus.PENDING && companyRolePermission && (
+                  <>
+                    <LikeOutlined
+                      onClick={() => approveDoc(methDocId, methodDocStatus)}
+                      className="common-progress-icon"
+                      style={{ color: '#976ED7' }}
+                    />
+                    <DislikeOutlined
+                      onClick={() => {
+                        setRejectDocData({ id: methDocId });
+                        setActionInfo({
+                          action: 'Reject',
+                          headerText: `${t('programme:rejectDocHeader')}`,
+                          text: `${t('programme:rejectDocBody')}`,
+                          type: 'reject',
+                          icon: <DislikeOutlined />,
+                        });
+                        setOpenRejectDocConfirmationModal(true);
+                      }}
+                      className="common-progress-icon margin-left-1"
+                      style={{ color: '#FD6F70' }}
+                    />
+                  </>
+                )}
                 {methodDocStatus === DocumentStatus.ACCEPTED && (
                   <CheckCircleOutlined
                     className="common-progress-icon"
@@ -373,6 +369,31 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                   <a href={methodologyDocUrl} target="_blank" rel="noopener noreferrer" download>
                     <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
                   </a>
+                  {methodDocStatus !== DocumentStatus.ACCEPTED && (
+                    <>
+                      <FileAddOutlined
+                        className="common-progress-icon margin-left-1"
+                        style={
+                          designDocStatus === DocumentStatus.ACCEPTED
+                            ? { color: '#3F3A47', cursor: 'pointer' }
+                            : { color: '#cacaca' }
+                        }
+                        onClick={handleMethodologyFileUpload}
+                      />
+                      <input
+                        type="file"
+                        ref={fileInputRefMeth}
+                        style={{ display: 'none' }}
+                        accept=".xlsx"
+                        onChange={(e: any) => {
+                          const selectedFile = e.target.files[0];
+                          if (designDocStatus === DocumentStatus.ACCEPTED)
+                            onUploadDocument(selectedFile, DocType.METHODOLOGY_DOCUMENT);
+                          // Handle the selected file here
+                        }}
+                      />
+                    </>
+                  )}
                 </div>
               ) : (
                 <>

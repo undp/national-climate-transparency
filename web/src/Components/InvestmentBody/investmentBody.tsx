@@ -19,9 +19,9 @@ import moment from 'moment';
 import { InvestmentStatus } from '../../Casl/enums/investment.status';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { Skeleton, message } from 'antd';
-import { DocumentStatus } from '../../Casl/enums/document.status';
 import RejectDocumentationConfirmationModel from '../Models/rejectDocumentForm';
 import { useTranslation } from 'react-i18next';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 
 export interface InvestmentBodyProps {
   data: any;
@@ -30,6 +30,7 @@ export interface InvestmentBodyProps {
 const InvestmentBody: FC<InvestmentBodyProps> = (props: InvestmentBodyProps) => {
   const { data } = props;
   const { get, put, post } = useConnection();
+  const { userInfoState } = useUserContext();
   const { t } = useTranslation(['programme']);
   const [loading, setLoading] = useState<boolean>(false);
   const [investmentData, setInvestmentData] = useState<any>({});
@@ -41,6 +42,14 @@ const InvestmentBody: FC<InvestmentBodyProps> = (props: InvestmentBodyProps) => 
     setInvestmentData(data);
     console.log(data);
   }, [data]);
+
+  const investmentActionPermission = (companyId: any) => {
+    if (companyId === userInfoState?.companyId) {
+      return true;
+    } else {
+      return false;
+    }
+  };
 
   const investmentAction = async (type: any, id: any) => {
     setLoading(true);
@@ -105,7 +114,8 @@ const InvestmentBody: FC<InvestmentBodyProps> = (props: InvestmentBodyProps) => 
                   className="common-progress-icon"
                   style={{ color: '#5DC380' }}
                 />
-              ) : investmentData?.status === InvestmentStatus.PENDING ? (
+              ) : investmentData?.status === InvestmentStatus.PENDING &&
+                investmentActionPermission(data?.sender[0]?.companyId) ? (
                 <>
                   <LikeOutlined
                     onClick={() =>
