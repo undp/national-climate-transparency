@@ -148,6 +148,7 @@ export const AddProgrammeComponent = () => {
   };
 
   const onFinishStepOne = async (values: any) => {
+    console.log(values);
     setLoading(true);
     let programmeDetails: any;
     const ownershipPercentage = values?.ownershipPercentage;
@@ -158,10 +159,14 @@ export const AddProgrammeComponent = () => {
     const proponentPercentages = ownershipPercentage.map((item: any) => item.proponentPercentage);
     const proponentTxIds =
       userInfoState?.companyRole !== CompanyRole.GOVERNMENT
-        ? ownershipPercentage.slice(1).map((item: any) => item.organisation)
-        : ownershipPercentage.map((item: any) => item.organisation);
-    const logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
-    const logoUrls = logoBase64.split(',');
+        ? ownershipPercentage?.slice(1).map((item: any) => item.organisation)
+        : ownershipPercentage?.map((item: any) => item.organisation);
+    let logoBase64 = '';
+    let logoUrls: any[] = [];
+    if (values?.designDocument) {
+      logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
+      logoUrls = logoBase64?.split(',');
+    }
     if (totalPercentage !== 100) {
       message.open({
         type: 'error',
@@ -183,7 +188,6 @@ export const AddProgrammeComponent = () => {
             ? [userOrgTaxId, ...proponentTxIds]
             : proponentTxIds,
         proponentPercentage: proponentPercentages,
-        designDocument: logoUrls[1],
         programmeProperties: {
           buyerCountryEligibility: values?.buyerCountryEligibility,
           geographicalLocation: values?.geographicalLocation,
@@ -193,6 +197,9 @@ export const AddProgrammeComponent = () => {
           includedInNap: includedInNDC,
         },
       };
+      if (logoUrls?.length > 0) {
+        programmeDetails.designDocument = logoUrls[1];
+      }
       setLoading(false);
       nextOne(programmeDetails);
     }
