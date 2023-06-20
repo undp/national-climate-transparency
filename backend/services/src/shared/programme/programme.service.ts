@@ -631,7 +631,7 @@ export class ProgrammeService {
     }
   }
 
-  async create(programmeDto: ProgrammeDto): Promise<Programme | undefined> {
+  async create(programmeDto: ProgrammeDto, user: User): Promise<Programme | undefined> {
     this.logger.verbose("ProgrammeDTO received", programmeDto);
     const programme: Programme = this.toProgramme(programmeDto);
     this.logger.verbose("Programme create", programme);
@@ -788,47 +788,33 @@ export class ProgrammeService {
 
     await this.populateExtraFields(programme);
 
-    const savedProgramme = await this.entityManager
-      .transaction(async (em) => {
-        if (ndcAc) {
-          await em.save<NDCAction>(ndcAc);
-          if (programmeDto.ndcAction.monitoringReport) {
-            const dr = new ProgrammeDocument();
-            dr.programmeId = programme.programmeId;
-            dr.externalId = programme.externalId;
-            dr.actionId = ndcAc.id;
-            dr.status = DocumentStatus.PENDING;
-            dr.type = DocType.MONITORING_REPORT;
-            dr.txTime = new Date().getTime();
-            dr.url = await this.uploadDocument(
-              DocType.MONITORING_REPORT,
-              ndcAc.id,
-              programmeDto.ndcAction.monitoringReport
-            );
-            const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
-          }
-        }
-        if (programmeDto.designDocument) {
-          const dr = new ProgrammeDocument();
-          dr.programmeId = programme.programmeId;
-          dr.externalId = programme.externalId;
-          dr.status = DocumentStatus.PENDING;
-          dr.type = DocType.DESIGN_DOCUMENT;
-          dr.txTime = new Date().getTime();
-          dr.url = programmeDto.designDocument;
-          const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
-        }
-        return await em.save<Programme>(programme);
-      })
-      .catch((err: any) => {
-        console.log(err);
-        if (err instanceof QueryFailedError) {
-          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-        } else {
-          this.logger.error(`Programme add error ${err}`);
-        }
-        return err;
-      });
+    let dr;
+    if (programmeDto.designDocument) {
+      dr = new ProgrammeDocument();
+      dr.programmeId = programme.programmeId;
+      dr.externalId = programme.externalId;
+      dr.status = DocumentStatus.PENDING;
+      dr.type = DocType.DESIGN_DOCUMENT;
+      dr.txTime = new Date().getTime();
+      dr.url = programmeDto.designDocument;
+    }
+
+    let monitoringReport;
+
+    if (ndcAc && programmeDto.ndcAction.monitoringReport) {
+      monitoringReport = new ProgrammeDocument();
+      monitoringReport.programmeId = programme.programmeId;
+      monitoringReport.externalId = programme.externalId;
+      monitoringReport.actionId = ndcAc.id;
+      monitoringReport.status = DocumentStatus.PENDING;
+      monitoringReport.type = DocType.MONITORING_REPORT;
+      monitoringReport.txTime = new Date().getTime();
+      monitoringReport.url = await this.uploadDocument(
+        DocType.MONITORING_REPORT,
+        ndcAc.id,
+        programmeDto.ndcAction.monitoringReport
+      );
+    }
 
     await this.asyncOperationsInterface.addAction({
       actionType: AsyncActionType.ProgrammeCreate,
@@ -844,6 +830,61 @@ export class ProgrammeService {
           hostAddress + `/programmeManagement/view?id=${programme.programmeId}`,
       }
     );
+    
+    if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
+
+      if (dr) {
+        this.logger.log(`Approving design document since the user is ${user.companyRole}`)
+        dr.status = DocumentStatus.ACCEPTED;
+        await this.asyncOperationsInterface.addAction({
+          actionType: AsyncActionType.DocumentUpload,
+          actionProps: {
+            type: this.helperService.enumToString(DocType, dr.type),
+            data: dr.url,
+            externalId: dr.externalId,
+            actionId: dr.actionId,
+          },
+        });
+      }
+      if (monitoringReport) {
+        this.logger.log(`Approving monitoring report since the user is ${user.companyRole}`)
+        monitoringReport.status = DocumentStatus.ACCEPTED;
+        await this.asyncOperationsInterface.addAction({
+          actionType: AsyncActionType.DocumentUpload,
+          actionProps: {
+            type: this.helperService.enumToString(DocType, monitoringReport.type),
+            data: monitoringReport.url,
+            externalId: monitoringReport.externalId,
+            actionId: monitoringReport.actionId,
+          },
+        });
+      }
+      
+    }
+
+    const savedProgramme = await this.entityManager
+      .transaction(async (em) => {
+        if (ndcAc) {
+          await em.save<NDCAction>(ndcAc);
+          if (monitoringReport) {
+            await em.save<ProgrammeDocument>(monitoringReport);
+          }
+        }
+        if (dr) {
+          await em.save<ProgrammeDocument>(dr);
+        }
+        return await em.save<Programme>(programme);
+      })
+      .catch((err: any) => {
+        console.log(err);
+        if (err instanceof QueryFailedError) {
+          throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+        } else {
+          this.logger.error(`Programme add error ${err}`);
+        }
+        return err;
+      });
+
     return savedProgramme;
   }
 
@@ -896,36 +937,8 @@ export class ProgrammeService {
     }
   }
 
-  async docAction(documentAction: DocumentAction) {
-    const d = await this.documentRepo.findOne({
-      where: {
-        id: documentAction.id,
-      },
-    });
-    if (!d) {
-      throw new HttpException(
-        this.helperService.formatReqMessagesString(
-          "programme.documentNotExist",
-          []
-        ),
-        HttpStatus.BAD_REQUEST
-      );
-    }
-
-    const pr = await this.findById(d.programmeId);
-
-    if (d.status == DocumentStatus.ACCEPTED) {
-      throw new HttpException(
-        this.helperService.formatReqMessagesString(
-          "programme.documentAlreadyAccepted",
-          []
-        ),
-        HttpStatus.BAD_REQUEST
-      );
-    }
+  async approveDocumentPre(d: ProgrammeDocument, pr: Programme) {
     let ndc: NDCAction;
-
-    if (documentAction.status == DocumentStatus.ACCEPTED) {
     if (d.type == DocType.METHODOLOGY_DOCUMENT) {
       await this.asyncOperationsInterface.addAction({
         actionType: AsyncActionType.ProgrammeAccept,
@@ -958,35 +971,75 @@ export class ProgrammeService {
         },
       });
     }
+    return ndc;
+  }
+
+  async approveDocumentCommit(em: EntityManager, d: ProgrammeDocument, ndc: NDCAction) {
+    if (
+      d.type == DocType.METHODOLOGY_DOCUMENT
+    ) {
+      await em.update(
+        Programme,
+        {
+          programmeId: d.programmeId,
+        },
+        {
+          currentStage: ProgrammeStage.APPROVED,
+          statusUpdateTime: new Date().getTime(),
+          txTime: new Date().getTime(),
+        }
+      );
+    }
+
+    if (ndc) {
+      await em.update(
+        NDCAction,
+        {
+          id: ndc.id,
+        },
+        {
+          status: ndc.status,
+        }
+      );
+    }
+  }
+
+  async docAction(documentAction: DocumentAction) {
+    const d = await this.documentRepo.findOne({
+      where: {
+        id: documentAction.id,
+      },
+    });
+    if (!d) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentNotExist",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const pr = await this.findById(d.programmeId);
+
+    if (d.status == DocumentStatus.ACCEPTED) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.documentAlreadyAccepted",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    let ndc: NDCAction;
+
+    if (documentAction.status == DocumentStatus.ACCEPTED) {
+      ndc = await this.approveDocumentPre(d, pr);
     }
 
     const resp = await this.entityManager.transaction(async (em) => {
-      if (
-        d.type == DocType.METHODOLOGY_DOCUMENT &&
-        documentAction.status == DocumentStatus.ACCEPTED
-      ) {
-        await em.update(
-          Programme,
-          {
-            programmeId: d.programmeId,
-          },
-          {
-            currentStage: ProgrammeStage.APPROVED,
-            statusUpdateTime: new Date().getTime(),
-            txTime: new Date().getTime(),
-          }
-        );
-      }
-      if (ndc) {
-        await em.update(
-          NDCAction,
-          {
-            id: ndc.id,
-          },
-          {
-            status: ndc.status,
-          }
-        );
+      if (documentAction.status === DocumentStatus.ACCEPTED) {
+         await this.approveDocumentCommit(em, d, ndc);
       }
       return await em.update(
         ProgrammeDocument,
@@ -998,6 +1051,7 @@ export class ProgrammeService {
           remark: documentAction.remark,
         }
       );
+      
     });
 
     return new BasicResponseDto(
@@ -1009,7 +1063,7 @@ export class ProgrammeService {
     );
   }
 
-  async addDocument(documentDto: ProgrammeDocumentDto) {
+  async addDocument(documentDto: ProgrammeDocumentDto, user: User) {
     const programme = await this.findById(documentDto.programmeId);
 
     if (!programme) {
@@ -1074,17 +1128,27 @@ export class ProgrammeService {
     dr.txTime = new Date().getTime();
     dr.url = url;
 
-    let resp;
-    if (!currentDoc) {
-      resp = await this.documentRepo.save(dr);
-    } else {
-      resp = await this.documentRepo.update(whr, {
-        status: dr.status,
-        txTime: dr.txTime,
-        url: dr.url,
-      });
+    let ndc: NDCAction;
+    if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
+      this.logger.log(`Approving document since the user is ${user.companyRole}`)
+      dr.status = DocumentStatus.ACCEPTED;
+      ndc = await this.approveDocumentPre(dr, programme);
     }
 
+    let resp = await this.entityManager.transaction(async (em) => {
+      if (dr.status === DocumentStatus.ACCEPTED) {
+        await this.approveDocumentCommit(em, dr, ndc);
+      }
+      if (!currentDoc) {
+        return await em.save(dr);
+      } else {
+        return await em.update(ProgrammeDocument, whr, {
+          status: dr.status,
+          txTime: dr.txTime,
+          url: dr.url,
+        });
+      }
+    });
     return new DataResponseDto(HttpStatus.OK, resp);
   }
 
@@ -1105,7 +1169,7 @@ export class ProgrammeService {
     return `${type}-${id}`;
   }
 
-  async addNDCAction(ndcActionDto: NDCActionDto): Promise<DataResponseDto> {
+  async addNDCAction(ndcActionDto: NDCActionDto, user: User): Promise<DataResponseDto> {
     if (!ndcActionDto.programmeId) {
       throw new HttpException(
         this.helperService.formatReqMessagesString(
@@ -1145,25 +1209,43 @@ export class ProgrammeService {
         actionProps: ndcAction,
       });
     }
+
+
+    let dr;
+    if (ndcActionDto.monitoringReport) {
+      dr = new ProgrammeDocument();
+      dr.programmeId = program.programmeId;
+      dr.externalId = program.externalId;
+      dr.actionId = ndcAction.id;
+      dr.status = DocumentStatus.PENDING;
+      dr.type = DocType.MONITORING_REPORT;
+      dr.txTime = new Date().getTime();
+      dr.url = await this.uploadDocument(
+        DocType.MONITORING_REPORT,
+        program.programmeId,
+        ndcActionDto.monitoringReport
+      );
+
+      if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole) && dr) {
+        this.logger.log(`Approving document since the user is ${user.companyRole}`)
+        dr.status = DocumentStatus.ACCEPTED;
+        await this.asyncOperationsInterface.addAction({
+          actionType: AsyncActionType.DocumentUpload,
+          actionProps: {
+            type: this.helperService.enumToString(DocType, dr.type),
+            data: dr.url,
+            externalId: dr.externalId,
+            actionId: dr.actionId,
+          },
+        });
+      }
+    }
     const saved = await this.entityManager
       .transaction(async (em) => {
         const n = await em.save<NDCAction>(ndcAction);
-        if (ndcActionDto.monitoringReport) {
-          const dr = new ProgrammeDocument();
-          dr.programmeId = program.programmeId;
-          dr.externalId = program.externalId;
-          dr.actionId = ndcAction.id;
-          dr.status = DocumentStatus.PENDING;
-          dr.type = DocType.MONITORING_REPORT;
-          dr.txTime = new Date().getTime();
-          dr.url = await this.uploadDocument(
-            DocType.MONITORING_REPORT,
-            program.programmeId,
-            ndcActionDto.monitoringReport
-          );
-          const d: ProgrammeDocument = await em.save<ProgrammeDocument>(dr);
+        if (dr) {
+          await em.save<ProgrammeDocument>(dr);
         }
-
         return n;
       })
       .catch((err: any) => {

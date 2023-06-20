@@ -53,8 +53,8 @@ export class RegistryClientService {
   private createNDCReq(ndc: NDCAction | NDCActionDto) {
     return {
         typeOfMitigation: ndc.typeOfMitigation,
-        userEstimatedCredits: ndc.ndcFinancing.userEstimatedCredits,
-        systemEstimatedCredits: ndc.ndcFinancing.systemEstimatedCredits,
+        userEstimatedCredits: ndc.ndcFinancing?.userEstimatedCredits,
+        systemEstimatedCredits: ndc.ndcFinancing?.systemEstimatedCredits,
         actionId: ndc.id,
         constantVersion: '' + ndc.constantVersion,
         properties: (ndc.agricultureProperties ? ndc.agricultureProperties : ndc.solarProperties ? ndc.solarProperties : undefined)
