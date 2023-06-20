@@ -114,14 +114,12 @@ const ProgrammeView = () => {
 
         setMarkers(markerList);
       } else {
-        const accessToken =
-          'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g';
-        // let accessToken;
-        // if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
-        //   accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
-        // }
+        let accessToken;
+        if (mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN) {
+          accessToken = process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN;
+        }
 
-        // if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
+        if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
 
         for (const address of data!.programmeProperties.geographicalLocation) {
           const response = await Geocoding({ accessToken: accessToken })
@@ -419,27 +417,10 @@ const ProgrammeView = () => {
     }
   }, [data]);
 
-  // useEffect(() => {
-  //   if (ndcActionData?.length > 0) {
-  //     const groupedByActionId = ndcActionData.reduce((result: any, obj: any) => {
-  //       const actionId = obj.actionId;
-  //       if (!result[actionId]) {
-  //         result[actionId] = [];
-  //       }
-  //       result[actionId].push(obj);
-  //       return result;
-  //     }, {});
-  //     console.log(ndcActionData);
-  //     setNdcActionHistoryDataGrouped(groupedByActionId);
-  //     console.log(groupedByActionId);
-  //   }
-  // }, [ndcActionData]);
-
   if (!data) {
     return <Loading />;
   }
 
-  // const pieChartData = getPieChartData(data);
   const percentages: any[] = [];
 
   const companies: any = {};
@@ -731,9 +712,6 @@ const ProgrammeView = () => {
                       markers={markers}
                       height={250}
                       style="mapbox://styles/mapbox/streets-v11"
-                      accessToken={
-                        'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g'
-                      }
                     ></MapComponent>
                     <Row className="region-list">
                       {data.programmeProperties.geographicalLocation &&
