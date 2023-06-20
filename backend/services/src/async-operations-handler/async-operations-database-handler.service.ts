@@ -44,25 +44,24 @@ export class AsyncOperationsDatabaseHandlerService
       if (notExecutedActions.length === 0) return;
 
       const startedSeq = lastSeq;
-      notExecutedActions.forEach((action: any) => {
-        asyncPromises.push(
-          this.asyncOperationsHandlerService.handler(
-            action.actionType,
-            JSON.parse(action.actionProps)
-          )
-        );
-        lastSeq = action.actionId;
-      });
 
       try {
-        await Promise.all(asyncPromises);
-        await this.counterRepo.save({
-          id: CounterType.ASYNC_OPERATIONS,
-          counter: lastSeq,
-        });
+        for (const action of notExecutedActions) {
+          await this.asyncOperationsHandlerService.handler(
+            action.actionType,
+            JSON.parse(action.actionProps)
+          );
+          lastSeq = action.actionId;
+          await this.counterRepo.save({
+            id: CounterType.ASYNC_OPERATIONS,
+            counter: lastSeq,
+          });
+        }
+        // await Promise.all(asyncPromises);
+        
       } catch (exception) {
         this.logger.log("database asyncHandler failed", exception);
-        lastSeq = startedSeq;
+        // lastSeq = startedSeq;
       }
     }, 5000);
   }
