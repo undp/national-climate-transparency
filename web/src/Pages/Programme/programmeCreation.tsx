@@ -28,6 +28,7 @@ import { useUserContext } from '../../Context/UserInformationContext/userInforma
 import moment from 'moment';
 import { RcFile } from 'antd/lib/upload';
 import { CompanyRole } from '@undp/carbon-library';
+import NdcActionDetails from '../../Components/NdcAction/ndcActionDetails';
 
 type SizeType = Parameters<typeof Form>[0]['size'];
 
@@ -58,6 +59,7 @@ export const AddProgrammeComponent = () => {
   const [organisationsList, setOrganisationList] = useState<any[]>([]);
   const [userOrgTaxId, setUserOrgTaxId] = useState<any>('');
   const [regionsList, setRegionsList] = useState<any[]>([]);
+  const [programmeDetailsObj, setProgrammeDetailsObj] = useState<any>();
 
   const initialOrganisationOwnershipValues: any[] = [
     {
@@ -137,7 +139,6 @@ export const AddProgrammeComponent = () => {
   };
 
   const nextOne = (val: any) => {
-    console.log(val);
     setCurrent(current + 1);
     setStepOneData(val);
   };
@@ -147,7 +148,6 @@ export const AddProgrammeComponent = () => {
   };
 
   const onFinishStepOne = async (values: any) => {
-    console.log(values);
     setLoading(true);
     let programmeDetails: any;
     const ownershipPercentage = values?.ownershipPercentage;
@@ -198,22 +198,10 @@ export const AddProgrammeComponent = () => {
     }
   };
 
-  const onFinishStepTwo = async (values: any) => {
+  const saveNewProgramme = async (payload: any) => {
     setLoading(true);
-    console.log('form two values ------------------- ');
-    console.log(values);
-    console.log(stepOneData);
-    const programmeDetails: any = stepOneData;
-    programmeDetails.creditEst = Number(values?.creditEst);
-    programmeDetails.programmeProperties.estimatedProgrammeCostUSD = Number(
-      values?.estimatedProgrammeCostUSD
-    );
-    programmeDetails.programmeProperties.carbonPriceUSDPerTon = Number(
-      values?.minViableCarbonPrice
-    );
-    console.log(programmeDetails);
     try {
-      const response: any = await post('national/programme/create', programmeDetails);
+      const response: any = await post('national/programme/create', payload);
       console.log('Programme creation -> ', response);
       if (response?.statusText === 'SUCCESS') {
         message.open({
@@ -235,6 +223,36 @@ export const AddProgrammeComponent = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const onNdcActionDetailsSubmit = async (ndcActionDetailsObj: any) => {
+    const updatedProgrammeDetailsObj = { ...programmeDetailsObj, ndcAction: ndcActionDetailsObj };
+    setProgrammeDetailsObj(updatedProgrammeDetailsObj);
+    saveNewProgramme(updatedProgrammeDetailsObj);
+  };
+
+  const addFinancingSoughtData = (values: any) => {
+    const programmeDetails: any = stepOneData;
+    programmeDetails.creditEst = Number(values?.creditEst);
+    programmeDetails.programmeProperties.estimatedProgrammeCostUSD = Number(
+      values?.estimatedProgrammeCostUSD
+    );
+    programmeDetails.programmeProperties.carbonPriceUSDPerTon = Number(
+      values?.minViableCarbonPrice
+    );
+    setProgrammeDetailsObj(programmeDetails);
+    return programmeDetails;
+  };
+
+  const onFinishStepTwo = async (values: any) => {
+    const updatedProgrammeDetailsObj = addFinancingSoughtData(values);
+    saveNewProgramme(updatedProgrammeDetailsObj);
+  };
+
+  const onOpenNdcCreate = () => {
+    const values = formTwo.getFieldsValue();
+    addFinancingSoughtData(values);
+    setCurrent(current + 1);
   };
 
   const onFormTwoValuesChane = (changedValues: any, allValues: any) => {
@@ -879,11 +897,7 @@ export const AddProgrammeComponent = () => {
               <Button type="primary" htmlType="submit" loading={loading}>
                 {t('addProgramme:submit')}
               </Button>
-              <Button
-                className="action-btn"
-                onClick={() => setCurrent(current + 1)}
-                loading={loading}
-              >
+              <Button className="action-btn" loading={loading} onClick={onOpenNdcCreate}>
                 {t('addProgramme:addAction')}
               </Button>
               {current === 1 && (
@@ -958,7 +972,14 @@ export const AddProgrammeComponent = () => {
                             <div className="title">{t('addProgramme:addProgramme3')}</div>
                           </div>
                         ),
-                        description: current === 2 && <div>3</div>,
+                        description: current === 2 && (
+                          <NdcActionDetails
+                            isBackBtnVisible={true}
+                            onClickedBackBtn={prevOne}
+                            onFormSubmit={onNdcActionDetailsSubmit}
+                            ndcActionDetails={programmeDetailsObj?.ndcAction}
+                          ></NdcActionDetails>
+                        ),
                       },
                       {
                         title: (

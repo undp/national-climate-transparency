@@ -17,10 +17,11 @@ export class AsyncOperationsQueueHandlerService
   async asyncHandler(event: SQSEvent): Promise<Response> {
     this.logger.log("Queue asyncHandler started");
     const response: Response = { batchItemFailures: [] };
-    const promises = event.Records.map(async (record) => {
+
+    for (const record of event.Records) {
       try {
         const actionType = record.messageAttributes?.actionType?.stringValue;
-        return this.asyncOperationsHandlerService.handler(
+        await this.asyncOperationsHandlerService.handler(
           actionType,
           JSON.parse(record.body)
         );
@@ -28,13 +29,7 @@ export class AsyncOperationsQueueHandlerService
         this.logger.log("queue asyncHandler failed", exception);
         response.batchItemFailures.push({ itemIdentifier: record.messageId });
       }
-    });
-
-    try {
-      await Promise.all(promises);
-      return response;
-    } catch (exception) {
-      this.logger.log("asyncHandler failed", exception);
     }
+    return response;
   }
 }
