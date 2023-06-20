@@ -35,5 +35,6 @@
   "objectionLett": "No Objection Letter",
   "rejectDocHeader": "Are you sure you want to reject this document?",
   "rejectDocBody": "You can’t undo this action",
-  "remarks": "Remarks"
+  "remarks": "Remarks",
+  "rejectInvestmentHeader": "Are you sure you want to reject this investment?"
 }
