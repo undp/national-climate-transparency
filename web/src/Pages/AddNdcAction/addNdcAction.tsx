@@ -36,8 +36,11 @@ const AddNdcAction = () => {
   };
 
   const saveNdcAction = async () => {
+    if (ndcActionDetails.enablementReportData) {
+      delete ndcActionDetails.enablementReportData;
+    }
+
     const response: any = await post('national/programme/addNDCAction', ndcActionDetails);
-    console.log('response', response);
     if (response.status === 200 || response.status === 201) {
       navigate('/programmeManagement/view', { state: { record: programmeDetails } });
     }

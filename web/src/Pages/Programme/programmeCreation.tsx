@@ -220,6 +220,9 @@ export const AddProgrammeComponent = () => {
   };
 
   const onNdcActionDetailsSubmit = async (ndcActionDetailsObj: any) => {
+    if (ndcActionDetailsObj.enablementReportData) {
+      delete ndcActionDetailsObj.enablementReportData;
+    }
     const updatedProgrammeDetailsObj = { ...programmeDetailsObj, ndcAction: ndcActionDetailsObj };
     setProgrammeDetailsObj(updatedProgrammeDetailsObj);
     saveNewProgramme(updatedProgrammeDetailsObj);

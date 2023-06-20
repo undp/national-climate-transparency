@@ -1,4 +1,4 @@
-import { Button, Col, Form, Input, Row, Select, Upload, UploadProps } from 'antd';
+import { Button, Col, Form, Input, Row, Select, Upload, UploadFile, UploadProps } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NdcActionTypes, ndcActionTypeList } from '../../Definitions/ndcActionTypes.enum';
@@ -29,6 +29,10 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const [mitigationType, setmitigationType] = useState();
   const [form] = Form.useForm();
 
+  const maximumImageSize = process.env.MAXIMUM_IMAGE_SIZE
+    ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
+    : 7145728;
+
   useEffect(() => {
     if (ndcActionDetails) {
       if (ndcActionDetails?.action) {
@@ -50,7 +54,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         nationalPlanObjectives: ndcActionDetails?.adaptationProperties?.nationalPlanObjectives,
         nationalPlanCoverage: ndcActionDetails?.adaptationProperties?.nationalPlanCoverage,
         EnablementTitle: ndcActionDetails?.enablementProperties?.title,
-        EnablementReport: ndcActionDetails?.enablementProperties?.report,
+        EnablementReport: ndcActionDetails?.enablementReportData,
         userEstimatedCredits: ndcActionDetails?.ndcFinancing?.userEstimatedCredits,
         methodologyEstimatedCredits: 0,
       });
@@ -166,13 +170,14 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
 
     if (ndcActionFormvalues.ndcActionType === NdcActionTypes.Enablement) {
       const enablementReport = await getBase64(
-        ndcActionFormvalues.EnablementReport.file.originFileObj as RcFile
+        ndcActionFormvalues.EnablementReport[0]?.originFileObj as RcFile
       );
       const enablementReportData = enablementReport.split(',');
       ndcActionDetailObj.enablementProperties = {
         title: ndcActionFormvalues.EnablementTitle,
         report: enablementReportData[1],
       };
+      ndcActionDetailObj.enablementReportData = ndcActionFormvalues.EnablementReport;
     }
 
     ndcActionDetailObj.ndcFinancing = {
@@ -183,6 +188,13 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     };
 
     onFormSubmit(ndcActionDetailObj);
+  };
+
+  const normFile = (e: any) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
   };
 
   return (
@@ -236,7 +248,9 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         </Row>
 
         {ndcActionType === NdcActionTypes.CrossCutting && (
-          <label className="label-heading">{t('ndcAction:mitigation')}</label>
+          <Row>
+            <label className="label-heading">{t('ndcAction:mitigation')}</label>
+          </Row>
         )}
 
         {(ndcActionType === NdcActionTypes.Mitigation ||
@@ -310,12 +324,20 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
           mitigationType === MitigationTypes.AGRICULTURE && (
             <Row justify="start" align="middle">
               <Col>
-                <Form.Item label={t('ndcAction:eligibleLandArea')} name="eligibleLandArea">
+                <Form.Item
+                  label={t('ndcAction:eligibleLandArea')}
+                  name="eligibleLandArea"
+                  rules={[{ required: true, message: `${t('ndcAction:landAreaRequiredMsg')}` }]}
+                >
                   <Input style={{ width: 442 }} />
                 </Form.Item>
               </Col>
               <Col style={{ marginLeft: '38px' }}>
-                <Form.Item label={t('ndcAction:landAreaUnit')} name="landAreaUnit">
+                <Form.Item
+                  label={t('ndcAction:landAreaUnit')}
+                  name="landAreaUnit"
+                  rules={[{ required: true, message: `${t('ndcAction:landAreaUnitRequiredMsg')}` }]}
+                >
                   <Select size="large" style={{ width: 442 }} options={landAreaUnitList} />
                 </Form.Item>
               </Col>
@@ -347,7 +369,9 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         )}
 
         {ndcActionType === NdcActionTypes.CrossCutting && (
-          <label className="label-heading">{t('ndcAction:adaptation')}</label>
+          <Row>
+            <label className="label-heading">{t('ndcAction:adaptation')}</label>
+          </Row>
         )}
 
         {(ndcActionType === NdcActionTypes.Adaptation ||
@@ -393,11 +417,45 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
             <Form.Item label={t('ndcAction:title')} name="EnablementTitle">
               <Input style={{ width: 442 }} />
             </Form.Item>
-            <Form.Item label={t('ndcAction:report')} name="EnablementReport">
-              <Upload {...uploadProps}>
-                <Button icon={<UploadOutlined />}>Upload</Button>
-              </Upload>
-            </Form.Item>
+            <Row justify="space-between" align="middle">
+              <Form.Item
+                label={t('ndcAction:report')}
+                name="EnablementReport"
+                valuePropName="fileList"
+                getValueFromEvent={normFile}
+                required={false}
+                rules={[
+                  {
+                    validator: async (rule, file) => {
+                      let isCorrectFormat = false;
+                      if (file[0]?.type === 'application/pdf') {
+                        isCorrectFormat = true;
+                      }
+                      if (!isCorrectFormat) {
+                        throw new Error(`${t('ndcAction:invalidFileFormat')}`);
+                      } else if (file[0]?.size > maximumImageSize) {
+                        throw new Error(`${t('ndcAction:maxSizeVal')}`);
+                      }
+                    },
+                  },
+                ]}
+              >
+                <Upload
+                  beforeUpload={(file: any) => {
+                    return false;
+                  }}
+                  className="design-upload-section"
+                  name="design"
+                  listType="picture"
+                  multiple={false}
+                  maxCount={1}
+                >
+                  <Button className="upload-doc" size="large" icon={<UploadOutlined />}>
+                    Upload
+                  </Button>
+                </Upload>
+              </Form.Item>
+            </Row>
           </>
         )}
 

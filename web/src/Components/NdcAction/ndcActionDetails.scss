@@ -35,4 +35,40 @@
       margin-left: 1rem;
     }
   }
+
+  .upload-doc {
+    height: 40px !important;
+    margin-right: 240px;
+  }
+
+  .ant-upload-list-item {
+    border-radius: 5px !important;
+    height: 40px !important;
+  }
+
+  .design-upload-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: start;
+    width: 100%;
+
+    .icon-color {
+      color: $primary-color !important;
+    }
+
+    .ant-upload {
+      width: 20%;
+    }
+
+    .ant-upload-list {
+      align-items: center;
+      justify-content: center;
+      width: 75%;
+
+      .ant-upload-list-item {
+        margin-top: 0;
+      }
+    }
+  }
 }
