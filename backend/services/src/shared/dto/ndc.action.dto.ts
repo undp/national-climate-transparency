@@ -63,13 +63,13 @@ export class NDCActionDto {
   adaptationProperties: AdaptationProperties;
 
   
-  @ApiProperty()
+  @ApiPropertyOptional()
   @ValidateIf(o => o.action === NDCActionType.Mitigation || o.ACADEMICS === NDCActionType.CrossCutting)
-  @IsNotEmptyObject()
+  // @IsNotEmptyObject()
   @ValidateNested()
+  @IsOptional()
   @Type(() => NdcFinancing)
   ndcFinancing?: NdcFinancing;
-  
 
   @ApiPropertyOptional()
   @IsString()

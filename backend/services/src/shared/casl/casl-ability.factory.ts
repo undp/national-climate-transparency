@@ -117,9 +117,7 @@ export class CaslAbilityFactory {
         can([Action.Create, Action.Read, Action.Update], Programme);
       } else if (user.companyRole == CompanyRole.CERTIFIER) {
         can(Action.Manage, DocumentAction);
-        can(Action.Read, Programme, {
-          currentStage: { $in: [ProgrammeStage.AUTHORISED] },
-        });
+        can(Action.Read, Programme);
         can(Action.Read, Programme, {
           certifierId: { $elemMatch: { $eq: user.companyId } },
         });
@@ -146,7 +144,7 @@ export class CaslAbilityFactory {
         });
 
         can(Action.Read, Programme, {
-          currentStage: { $eq: ProgrammeStage.AUTHORISED },
+          currentStage: { $in: [ProgrammeStage.AUTHORISED, ProgrammeStage.APPROVED] },
         });
         can(Action.Read, Investment, {
           status: { $eq: InvestmentStatus.APPROVED },

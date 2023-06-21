@@ -67,6 +67,8 @@ import { InvestmentReject } from "../dto/investment.reject";
 import { InvestmentCancel } from "../dto/investment.cancel";
 import { InvestmentView } from "../entities/investment.view.entity";
 import { ProgrammeDocumentViewEntity } from "../entities/document.view.entity";
+import { Company } from "../entities/company.entity";
+import { NdcFinancing } from "../dto/ndc.financing";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -128,12 +130,15 @@ export class ProgrammeService {
   private async doTransfer(
     transfer: Investment,
     user: string,
-    programme: Programme
+    programme: Programme,
+    investor: Company
   ) {
    
-    const companyIndex = programme.companyId.indexOf(transfer.fromCompanyId);
+    const companyIndex = programme.companyId.map(e => Number(e)).indexOf(Number(transfer.fromCompanyId));
 
     // Cannot be <= 0 
+
+    console.log('PERC', programme.proponentPercentage, companyIndex)
     programme.creditOwnerPercentage[companyIndex] -= transfer.percentage
     programme.creditOwnerPercentage.push(transfer.percentage);
 
@@ -141,6 +146,17 @@ export class ProgrammeService {
     programme.proponentPercentage.push(transfer.percentage);
 
     programme.companyId.push(Number(transfer.toCompanyId));
+    programme.proponentTaxVatId.push(investor.taxId);
+
+    console.log('PERC', programme.proponentPercentage[companyIndex])
+    // await this.asyncOperationsInterface.addAction({
+    //   actionType: AsyncActionType.OwnershipUpdate,
+    //   actionProps: {
+    //     proponentTaxVatId: programme.proponentTaxVatId,
+    //     proponentPercentage: programme.proponentPercentage,
+    //     externalId: programme.externalId
+    //   },
+    // });
 
     const savedProgramme = await this.entityManager
       .transaction(async (em) => {
@@ -265,6 +281,7 @@ export class ProgrammeService {
         HttpStatus.BAD_REQUEST
       );
     }
+
     this.logger.verbose(`Investment on programme ${JSON.stringify(programme)}`);
 
     if (
@@ -307,6 +324,12 @@ export class ProgrammeService {
       ownershipMap[programme.companyId[i]] = programme.creditOwnerPercentage[i];
       propPerMap[programme.companyId[i]] = programme.proponentPercentage[i];
     }
+
+    // for(const i in req.fromCompanyIds) {
+    //   if (ownershipMap[req.fromCompanyIds[i]] - req.percentage[i] < 0) {
+
+    //   }
+    // }
 
     programme.companyId = programme.companyId.map(c => Number(c))
     const fromCompanyListMap = {};
@@ -379,7 +402,8 @@ export class ProgrammeService {
           }#${fromCompanyListMap[trf.fromCompanyId].companyId}#${
             fromCompanyListMap[trf.fromCompanyId].name
           }`,
-          programme
+          programme,
+          toCompany
         )
       ).data;
       // await this.emailHelperService.sendEmailToOrganisationAdmins(
@@ -897,6 +921,9 @@ export class ProgrammeService {
         try {
           const crdts = await calculateCredit(req);
           console.log("Credit", crdts, req);
+          if (!ndcAction.ndcFinancing) {
+            ndcAction.ndcFinancing = new NdcFinancing();
+          }
           try {
             ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(crdts);
           } catch (err) {
@@ -1739,7 +1766,8 @@ export class ProgrammeService {
       `${this.getUserRef(approver)}#${receiver.companyId}#${receiver.name}#${
         giver.companyId
       }#${giver.name}`,
-      programme
+      programme,
+      receiver
     );
 
     return transferResult;
