@@ -60,7 +60,7 @@ const InvestmentBody: FC<InvestmentBodyProps> = (props: InvestmentBodyProps) => 
         });
         message.open({
           type: 'success',
-          content: response?.message,
+          content: t('programme:investmentAccepted'),
           duration: 4,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });

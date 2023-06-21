@@ -4,7 +4,6 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 4rem;
 
   .report-details {
     display: flex;
@@ -12,17 +11,22 @@
     width: 100%;
     align-items: center;
     justify-content: space-between;
-    line-height: 2.2rem;
 
     .report-type {
       display: flex;
       flex-direction: row;
       width: 50%;
 
+      .name-time-container {
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+        margin-bottom: 0.5rem;
+      }
+
       .name {
         font-weight: 600;
         color: $common-filter-color;
-        width: 50%;
       }
 
       .icon {
@@ -31,7 +35,6 @@
       .empty {
         font-weight: 600;
         color: #cacaca;
-        width: 50%;
       }
     }
 
