@@ -22,17 +22,12 @@
   "adaptation": "Adaptation",
   "title": "Title",
   "report": "Report",
-  "ndcActionrequiredMsg": "Please select NDC action",
-  "mitigationTypeRequiredMsg": "Please select the mitigation action",
-  "energyGenerationRequiredMsg": "Please enter energy generation",
-  "energyGenerationUnitRequiredMsg": "Please enter energy generation unit",
-  "consumerGroupRequiredMsg": "Please enter consumer group",
   "next": "Next",
   "back": "Back",
   "monitoringReport": "Monitoring Report",
   "submit": "Submit",
-  "landAreaRequiredMsg": " Please enter land area",
-  "landAreaUnitRequiredMsg": " Please select land area unit",
   "invalidFileFormat": "Unsupported file format",
-  "maxSizeVal": "Maximum upload file size is 5MP"
+  "maxSizeVal": "Maximum upload file size is 5MP",
+  "isRequired": "is required",
+  "ndcToolTip": "Nationally Determined Contributions"
 }
