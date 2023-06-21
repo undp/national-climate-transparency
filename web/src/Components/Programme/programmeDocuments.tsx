@@ -25,11 +25,11 @@ export interface ProgrammeDocumentsProps {
   icon: any;
   programmeId: any;
   getDocumentDetails: any;
-  hiddenColumns?: any;
+  getProgrammeById: any;
 }
 
 const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumentsProps) => {
-  const { data, title, icon, programmeId, getDocumentDetails, hiddenColumns } = props;
+  const { data, title, icon, programmeId, getDocumentDetails, getProgrammeById } = props;
   const { t } = useTranslation(['programme']);
   const { userInfoState } = useUserContext();
   const { delete: del, post } = useConnection();
@@ -156,6 +156,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
       });
     } finally {
       getDocumentDetails();
+      getProgrammeById();
       setLoading(false);
     }
   };

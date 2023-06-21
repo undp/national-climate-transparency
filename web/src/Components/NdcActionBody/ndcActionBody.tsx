@@ -306,7 +306,9 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
         <div className="report-details">
           <div className="report-type">
             <div className="name-time-container">
-              <div className={monitoringReportAccepted ? 'name' : 'empty'}>
+              <div
+                className={canUploadMonitorReport && monitoringReportAccepted ? 'name' : 'empty'}
+              >
                 {t('programme:verificationReport')}
               </div>
               {verificationReportData?.txTime && (
