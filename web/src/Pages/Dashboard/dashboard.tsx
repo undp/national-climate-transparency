@@ -28,7 +28,20 @@ const Dashboard = () => {
     Date.parse(String(moment().subtract('13', 'days').startOf('day')))
   );
   const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : 'None';
-  const colors = ['#C6A7FE', '#7FEABF', '#CDCDCD', '#FF8183', '#B7A4FE'];
+  const colors = [
+    '#C6A7FE',
+    '#7FEABF',
+    '#CDCDCD',
+    '#FF8183',
+    '#B7A4FE',
+    '#16B1FF',
+    '#FFB480',
+    '#666699',
+    '#009999',
+    '#c2c2d6',
+    '#ddddbb',
+    '#ff9900',
+  ];
 
   const colorsStatus = ['#C6A7FE', '#FF8183', '#CDCDCD', '#7FEABF', '#B7A4FE'];
 
