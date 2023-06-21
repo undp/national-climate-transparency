@@ -15,12 +15,12 @@
     .report-type {
       display: flex;
       flex-direction: row;
-      width: 50%;
+      width: 60%;
 
       .name-time-container {
         display: flex;
         flex-direction: column;
-        width: 50%;
+        width: 70%;
         margin-bottom: 0.5rem;
       }
 
@@ -30,6 +30,9 @@
       }
 
       .icon {
+        display: flex;
+        align-items: center;
+        width: 30%;
       }
 
       .empty {
@@ -41,7 +44,7 @@
     .report-link {
       display: flex;
       flex-direction: row;
-      width: 50%;
+      width: 40%;
 
       .version {
         font-weight: 600;
