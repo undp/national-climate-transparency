@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { AsyncOperationsHandlerInterface } from "./async-operations-handler-interface.service";
 import { SQSEvent } from "aws-lambda";
 import { AsyncOperationsHandlerService } from "./async-operations-handler.service";
+import { AsyncActionType } from "../shared/enum/async.action.type.enum";
 
 type Response = { batchItemFailures: { itemIdentifier: string }[] };
 
@@ -19,15 +20,20 @@ export class AsyncOperationsQueueHandlerService
     const response: Response = { batchItemFailures: [] };
 
     for (const record of event.Records) {
+      const actionType = record.messageAttributes?.actionType?.stringValue;
       try {
-        const actionType = record.messageAttributes?.actionType?.stringValue;
+        
         await this.asyncOperationsHandlerService.handler(
           actionType,
           JSON.parse(record.body)
         );
       } catch (exception) {
         this.logger.log("queue asyncHandler failed", exception);
-        response.batchItemFailures.push({ itemIdentifier: record.messageId });
+        if (actionType?.toString() === AsyncActionType.Email.toString()) {
+          response.batchItemFailures.push({ itemIdentifier: record.messageId });
+        } else {
+          throw exception;
+        }
       }
     }
     return response;
