@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import NdcActionDetails from '../../Components/NdcAction/ndcActionDetails';
 import { useTranslation } from 'react-i18next';
-import { Button, Form, Input, Row, Steps, Upload, UploadProps } from 'antd';
+import { Button, Form, Input, Row, Steps, Tooltip, Upload, UploadProps } from 'antd';
 import './addNdcAction.scss';
 import { UploadOutlined } from '@ant-design/icons';
 import { FormInstance } from 'rc-field-form';
@@ -12,6 +12,7 @@ import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
 import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import { Programme, ProgrammeStage } from '@undp/carbon-library';
 import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
+import { InfoCircle } from 'react-bootstrap-icons';
 
 const AddNdcAction = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -88,6 +89,16 @@ const AddNdcAction = () => {
           <div className="step-title-container">
             <div className="step-count">01</div>
             <div className="title">{t('ndcAction:ndcActionDetailsTitle')}</div>
+            <div className="info-container">
+              <Tooltip
+                arrowPointAtCenter
+                placement="right"
+                trigger="hover"
+                title={t('ndcAction:ndcToolTip')}
+              >
+                <InfoCircle color="#000000" size={17} />
+              </Tooltip>
+            </div>
           </div>
         ),
         description: current === 1 && (

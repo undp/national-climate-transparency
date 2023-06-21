@@ -211,7 +211,12 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
             <Form.Item
               label={t('ndcAction:ndcAction')}
               name="ndcActionType"
-              rules={[{ required: true, message: `${t('ndcAction:ndcActionrequiredMsg')}` }]}
+              rules={[
+                {
+                  required: true,
+                  message: `${t('ndcAction:ndcAction')} ${t('ndcAction:isRequired')}`,
+                },
+              ]}
             >
               <Select
                 size="large"
@@ -259,7 +264,12 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
             <Form.Item
               label={t('ndcAction:mitigationType')}
               name="mitigationType"
-              rules={[{ required: true, message: `${t('ndcAction:mitigationTypeRequiredMsg')}` }]}
+              rules={[
+                {
+                  required: true,
+                  message: `${t('ndcAction:mitigationType')} ${t('ndcAction:isRequired')}`,
+                },
+              ]}
             >
               <Select
                 size="large"
@@ -283,7 +293,24 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   <Form.Item
                     label={t('ndcAction:energyGeneration')}
                     rules={[
-                      { required: true, message: `${t('ndcAction:energyGenerationRequiredMsg')}` },
+                      {
+                        required: true,
+                        message: ``,
+                      },
+                      {
+                        validator: async (rule, value) => {
+                          if (
+                            String(value).trim() === '' ||
+                            String(value).trim() === undefined ||
+                            value === null ||
+                            value === undefined
+                          ) {
+                            throw new Error(
+                              `${t('ndcAction:energyGeneration')} ${t('ndcAction:isRequired')}`
+                            );
+                          }
+                        },
+                      },
                     ]}
                     name="energyGeneration"
                   >
@@ -297,7 +324,9 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                     rules={[
                       {
                         required: true,
-                        message: `${t('ndcAction:energyGenerationUnitRequiredMsg')}`,
+                        message: `${t('ndcAction:energyGenerationUnit')} ${t(
+                          'ndcAction:isRequired'
+                        )}`,
                       },
                     ]}
                   >
@@ -312,7 +341,12 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
               <Form.Item
                 label={t('ndcAction:consumerGroup')}
                 name="consumerGroup"
-                rules={[{ required: true, message: `${t('ndcAction:consumerGroupRequiredMsg')}` }]}
+                rules={[
+                  {
+                    required: true,
+                    message: `${t('ndcAction:consumerGroup')} ${t('ndcAction:isRequired')}`,
+                  },
+                ]}
               >
                 <Select size="large" style={{ width: 442 }} options={consumerGroupList} />
               </Form.Item>
@@ -327,7 +361,26 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 <Form.Item
                   label={t('ndcAction:eligibleLandArea')}
                   name="eligibleLandArea"
-                  rules={[{ required: true, message: `${t('ndcAction:landAreaRequiredMsg')}` }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: ``,
+                    },
+                    {
+                      validator: async (rule, value) => {
+                        if (
+                          String(value).trim() === '' ||
+                          String(value).trim() === undefined ||
+                          value === null ||
+                          value === undefined
+                        ) {
+                          throw new Error(
+                            `${t('ndcAction:eligibleLandArea')} ${t('ndcAction:isRequired')}`
+                          );
+                        }
+                      },
+                    },
+                  ]}
                 >
                   <Input style={{ width: 442 }} />
                 </Form.Item>
@@ -336,7 +389,12 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 <Form.Item
                   label={t('ndcAction:landAreaUnit')}
                   name="landAreaUnit"
-                  rules={[{ required: true, message: `${t('ndcAction:landAreaUnitRequiredMsg')}` }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: `${t('ndcAction:landAreaUnit')} ${t('ndcAction:isRequired')}`,
+                    },
+                  ]}
                 >
                   <Select size="large" style={{ width: 442 }} options={landAreaUnitList} />
                 </Form.Item>
