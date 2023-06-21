@@ -9,7 +9,6 @@ import {
   EyeOutlined,
   FlagOutlined,
   GlobalOutlined,
-  LikeOutlined,
   LineChartOutlined,
 } from '@ant-design/icons';
 import { InvestmentType } from '../../Casl/enums/investment.type';
@@ -18,10 +17,8 @@ import { InvestmentStream } from '../../Casl/enums/investment.stream';
 import moment from 'moment';
 import { InvestmentStatus } from '../../Casl/enums/investment.status';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { Skeleton, message } from 'antd';
-import RejectDocumentationConfirmationModel from '../Models/rejectDocumentForm';
+import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 
 export interface InvestmentBodyProps {
   data: any;
@@ -30,157 +27,57 @@ export interface InvestmentBodyProps {
 const InvestmentBody: FC<InvestmentBodyProps> = (props: InvestmentBodyProps) => {
   const { data } = props;
   const { get, put, post } = useConnection();
-  const { userInfoState } = useUserContext();
   const { t } = useTranslation(['programme']);
   const [loading, setLoading] = useState<boolean>(false);
   const [investmentData, setInvestmentData] = useState<any>({});
-  const [openRejectDocConfirmationModal, setOpenRejectDocConfirmationModal] = useState(false);
-  const [actionInfo, setActionInfo] = useState<any>({});
-  const [rejectDocData, setRejectDocData] = useState<any>({});
 
   useEffect(() => {
     setInvestmentData(data);
     console.log(data);
   }, [data]);
 
-  const investmentActionPermission = (companyId: any) => {
-    if (companyId === userInfoState?.companyId) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  const investmentAction = async (type: any, id: any) => {
-    setLoading(true);
-    try {
-      if (type === InvestmentStatus.APPROVED) {
-        const response: any = await post('national/programme/investmentApprove', {
-          requestId: id,
-        });
-        message.open({
-          type: 'success',
-          content: t('programme:investmentAccepted'),
-          duration: 4,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        investmentData.status = InvestmentStatus.APPROVED;
-        setInvestmentData({ ...investmentData });
-      } else if (type === InvestmentStatus.REJECTED) {
-        const response: any = await post('national/programme/investmentReject', {
-          requestId: id,
-        });
-        message.open({
-          type: 'success',
-          content: response?.message,
-          duration: 4,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        investmentData.status = InvestmentStatus.REJECTED;
-        setInvestmentData({ ...investmentData });
-      }
-    } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error?.message,
-        duration: 4,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-    } finally {
-      setLoading(false);
-      setOpenRejectDocConfirmationModal(false);
-    }
-  };
-
-  const handleOk = () => {
-    investmentAction(InvestmentStatus.REJECTED, rejectDocData?.id);
-  };
-
-  const handleCancel = () => {
-    setOpenRejectDocConfirmationModal(false);
-  };
-
   return loading ? (
     <Skeleton />
   ) : (
-    <>
-      <div className="investment-body">
-        <div className="invester">
-          <div className="name-and-progress">
-            <div className="name">{investmentData?.invester}</div>
-            <div className="progress">
-              {investmentData?.status === InvestmentStatus.APPROVED ? (
-                <CheckCircleOutlined
-                  className="common-progress-icon"
-                  style={{ color: '#5DC380' }}
-                />
-              ) : investmentData?.status === InvestmentStatus.PENDING &&
-                investmentActionPermission(data?.sender[0]?.companyId) ? (
-                <>
-                  <LikeOutlined
-                    onClick={() =>
-                      investmentAction(InvestmentStatus.APPROVED, investmentData?.requestId)
-                    }
-                    className="common-progress-icon"
-                    style={{ color: '#976ED7' }}
-                  />
-                  <DislikeOutlined
-                    onClick={() => {
-                      setRejectDocData({ id: investmentData?.requestId });
-                      setActionInfo({
-                        action: 'Reject',
-                        headerText: `${t('programme:rejectInvestmentHeader')}`,
-                        text: `${t('programme:rejectDocBody')}`,
-                        type: 'reject',
-                        icon: <DislikeOutlined />,
-                      });
-                      setOpenRejectDocConfirmationModal(true);
-                    }}
-                    className="common-progress-icon margin-left-1"
-                    style={{ color: '#FD6F70' }}
-                  />
-                </>
-              ) : null}
-            </div>
-          </div>
-          <div className="time">
-            {moment(parseInt(investmentData?.createdAt)).format('DD MMMM YYYY @ HH:mm')}
+    <div className="investment-body">
+      <div className="invester">
+        <div className="name-and-progress">
+          <div className="name">{investmentData?.invester}</div>
+          <div className="progress">
+            {investmentData?.status === InvestmentStatus.APPROVED && (
+              <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
+            )}
           </div>
         </div>
-        <div className="amount">${addCommSep(investmentData?.amount)}</div>
-        <div className="actions">
-          <div className="actions-icon-container">
-            {investmentData?.type === InvestmentType.PUBLIC ? (
-              <EyeOutlined className="action-icons" />
-            ) : (
-              <EyeInvisibleOutlined className="action-icons" />
-            )}
-          </div>
-          <div className="actions-icon-container">
-            {investmentData?.level === InvestmentLevel.INTERNATIONAL ? (
-              <GlobalOutlined className="action-icons" />
-            ) : (
-              <FlagOutlined className="action-icons" />
-            )}
-          </div>
-          <div className="actions-icon-container">
-            {investmentData?.stream === InvestmentStream.CLIMATE_FINANCE ? (
-              <BankOutlined className="action-icons" />
-            ) : (
-              <LineChartOutlined className="action-icons" />
-            )}
-          </div>
+        <div className="time">
+          {moment(parseInt(investmentData?.createdAt)).format('DD MMMM YYYY @ HH:mm')}
         </div>
       </div>
-      <RejectDocumentationConfirmationModel
-        actionInfo={actionInfo}
-        onActionConfirmed={handleOk}
-        onActionCanceled={handleCancel}
-        openModal={openRejectDocConfirmationModal}
-        errorMsg={''}
-        loading={loading}
-      />
-    </>
+      <div className="amount">${addCommSep(investmentData?.amount)}</div>
+      <div className="actions">
+        <div className="actions-icon-container">
+          {investmentData?.type === InvestmentType.PUBLIC ? (
+            <EyeOutlined className="action-icons" />
+          ) : (
+            <EyeInvisibleOutlined className="action-icons" />
+          )}
+        </div>
+        <div className="actions-icon-container">
+          {investmentData?.level === InvestmentLevel.INTERNATIONAL ? (
+            <GlobalOutlined className="action-icons" />
+          ) : (
+            <FlagOutlined className="action-icons" />
+          )}
+        </div>
+        <div className="actions-icon-container">
+          {investmentData?.stream === InvestmentStream.CLIMATE_FINANCE ? (
+            <BankOutlined className="action-icons" />
+          ) : (
+            <LineChartOutlined className="action-icons" />
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
