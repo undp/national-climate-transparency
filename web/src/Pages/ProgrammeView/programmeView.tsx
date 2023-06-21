@@ -73,6 +73,7 @@ const ProgrammeView = () => {
   const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
   const [documentsData, setDocumentsData] = useState<any[]>([]);
+  const [curentProgrammeStatus, setCurrentProgrammeStatus] = useState<any>('');
   const [uploadMonitoringReport, setUploadMonitoringReport] = useState<boolean>(false);
   const accessToken =
     mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
@@ -225,7 +226,7 @@ const ProgrammeView = () => {
           (item: any) =>
             item?.type === DocType.METHODOLOGY_DOCUMENT && item?.status === DocumentStatus.ACCEPTED
         );
-        if (hasAcceptedMethReport) {
+        if (hasAcceptedMethReport && data?.currentStage === ProgrammeStage.Authorised) {
           setUploadMonitoringReport(true);
         }
         setNdcActionData(objectsWithoutNullActionId);
@@ -372,10 +373,6 @@ const ProgrammeView = () => {
     }
   };
 
-  const getSuccessMsg = (response: any, initMsg: string, successMsg: string) => {
-    return response.data instanceof Array ? initMsg : successMsg;
-  };
-
   const mapArrayToi18n = (map: any) => {
     if (!map) {
       return {};
@@ -418,8 +415,6 @@ const ProgrammeView = () => {
   }, []);
 
   useEffect(() => {
-    console.log('---- programme data -------- ');
-    console.log(data);
     if (data) {
       getInvestmentHistory(data?.programmeId);
       getDocuments(data?.programmeId);
@@ -448,6 +443,7 @@ const ProgrammeView = () => {
 
   useEffect(() => {
     if (data) {
+      setCurrentProgrammeStatus(data?.currentStage);
       getNdcActionHistory(data?.programmeId, ndcActionData);
     }
   }, [data, ndcActionData]);
@@ -728,6 +724,9 @@ const ProgrammeView = () => {
                   programmeId={data?.programmeId}
                   getDocumentDetails={() => {
                     getDocuments(data?.programmeId);
+                  }}
+                  getProgrammeById={() => {
+                    getProgrammeById(data?.programmeId);
                   }}
                 />
               </div>
