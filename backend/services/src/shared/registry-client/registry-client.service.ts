@@ -6,6 +6,7 @@ import { ProgrammeDto } from "../dto/programme.dto";
 import { NDCAction } from "../entities/ndc.action.entity";
 import { NDCActionDto } from "../dto/ndc.action.dto";
 import { ProgrammeDocumentDto } from "../dto/programme.document.dto";
+import { NDCActionType } from "../enum/ndc.action.enum";
 
 @Injectable()
 export class RegistryClientService {
@@ -104,7 +105,7 @@ export class RegistryClientService {
         // "creditEst": programme.creditEst,
       }
 
-    if (programme.ndcAction) {
+    if (programme.ndcAction && (programme.ndcAction.action === NDCActionType.Mitigation || programme.ndcAction.action === NDCActionType.CrossCutting) && programme.ndcAction.typeOfMitigation) {
         programmeReq["mitigationActions"] = [this.createNDCReq(programme.ndcAction)]
     }
     console.log('Creating programme', JSON.stringify(programmeReq))
