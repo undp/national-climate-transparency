@@ -38,5 +38,7 @@
   "remarks": "Remarks",
   "rejectInvestmentHeader": "Are you sure you want to reject this investment?",
   "monitorDoc": "Monitoring Report",
-  "veriDoc": "Verifcation Report"
+  "veriDoc": "Verifcation Report",
+  "investmentAccepted": "The investment request has been approved successfully",
+  "investmentRejected": "The Investment has been rejected"
 }

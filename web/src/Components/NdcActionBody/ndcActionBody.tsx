@@ -161,7 +161,16 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
     <Skeleton />
   ) : (
     <>
-      <div className="ndc-action-body">
+      <div
+        className="ndc-action-body"
+        style={
+          monitoringReportData?.url && verificationReportData?.url
+            ? { height: '5.5rem' }
+            : monitoringReportData?.url || verificationReportData?.url
+            ? { height: '4rem' }
+            : { height: '3rem' }
+        }
+      >
         <div className="report-details">
           <div className="report-type">
             <div className="name-time-container">
