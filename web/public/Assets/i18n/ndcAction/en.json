@@ -1,6 +1,8 @@
 {
   "addNdcTitle": "Add NDC Action",
   "addNdcSubTitle": "Add NDC Actions to programmes in the Transparency system",
+  "NdcTitle": "NDC Actions",
+  "NdcSubTitle": "NDC Actions sub titile",
   "ndcActionDetailsTitle": "NDC Action details",
   "coBenefitsTitle": "Co-Benefits",
   "projectReportsTitle": "Project Reports",
@@ -29,5 +31,13 @@
   "invalidFileFormat": "Unsupported file format",
   "maxSizeVal": "Maximum upload file size is 5MP",
   "isRequired": "is required",
-  "ndcToolTip": "Nationally Determined Contributions"
+  "ndcToolTip": "Nationally Determined Contributions",
+  "noNdcActions": "No NDC Actions Available",
+  "ndcColumnsActionId":"ACTION ID",
+  "ndcColumnsDate":"DATE",
+  "ndcColumnsNdcAction":"NDC ACTION",
+  "ndcColumnsProgrammeName":"PROGRAMME NAME",
+  "ndcColumnsSector":"SECTOR",
+  "ndcColumnsOwners":"OWNERS",
+  "ndcColumnsStatus":"STATUS"
 }
