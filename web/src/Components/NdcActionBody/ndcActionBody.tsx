@@ -16,6 +16,7 @@ import { DocumentStatus } from '../../Casl/enums/document.status';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { CompanyRole } from '@undp/carbon-library';
 import RejectDocumentationConfirmationModel from '../Models/rejectDocumentForm';
+import moment from 'moment';
 
 export interface NdcActionBodyProps {
   data?: any;
@@ -152,8 +153,9 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
     userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
     userInfoState?.companyRole === CompanyRole.CERTIFIER;
   const monitoringReportPending = monitoringReportData?.status === DocumentStatus.PENDING;
-  const monitoringReportAccepeted = monitoringReportData?.status === DocumentStatus.ACCEPTED;
+  const monitoringReportAccepted = monitoringReportData?.status === DocumentStatus.ACCEPTED;
   const verifcationReportPending = verificationReportData?.status === DocumentStatus.PENDING;
+  const verificationReportAccepted = verificationReportData?.status === DocumentStatus.ACCEPTED;
 
   return loading ? (
     <Skeleton />
@@ -162,8 +164,15 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
       <div className="ndc-action-body">
         <div className="report-details">
           <div className="report-type">
-            <div className={canUploadMonitorReport ? 'name' : 'empty'}>
-              {t('programme:monitoringReport')}
+            <div className="name-time-container">
+              <div className={canUploadMonitorReport ? 'name' : 'empty'}>
+                {t('programme:monitoringReport')}
+              </div>
+              {monitoringReportData?.txTime && (
+                <div className="time">
+                  {moment(parseInt(monitoringReportData?.txTime)).format('DD MMMM YYYY @ HH:mm')}
+                </div>
+              )}
             </div>
             <div className="icon">
               {monitoringReportData?.url ? (
@@ -204,7 +213,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     </>
                   )
                 ) : (
-                  monitoringReportAccepeted && (
+                  monitoringReportAccepted && (
                     <CheckCircleOutlined
                       className="common-progress-icon"
                       style={{ color: '#5DC380' }}
@@ -253,13 +262,47 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                   <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
                 </a>
               </div>
+              {!monitoringReportAccepted && (
+                <>
+                  <FileAddOutlined
+                    className="common-progress-icon margin-left-1"
+                    style={
+                      canUploadMonitorReport
+                        ? { color: '#3F3A47', cursor: 'pointer' }
+                        : { color: '#cacaca', cursor: 'default' }
+                    }
+                    onClick={() => {
+                      if (canUploadMonitorReport) {
+                        handleFileUploadMonitor();
+                      }
+                    }}
+                  />
+                  <input
+                    type="file"
+                    ref={fileInputMonitoringRef}
+                    style={{ display: 'none' }}
+                    accept=".pdf"
+                    onChange={(e: any) => {
+                      const selectedFile = e.target.files[0];
+                      onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
+                    }}
+                  />
+                </>
+              )}
             </div>
           )}
         </div>
         <div className="report-details">
           <div className="report-type">
-            <div className={monitoringReportAccepeted ? 'name' : 'empty'}>
-              {t('programme:verificationReport')}
+            <div className="name-time-container">
+              <div className={monitoringReportAccepted ? 'name' : 'empty'}>
+                {t('programme:verificationReport')}
+              </div>
+              {verificationReportData?.txTime && (
+                <div className="time">
+                  {moment(parseInt(verificationReportData?.txTime)).format('DD MMMM YYYY @ HH:mm')}
+                </div>
+              )}
             </div>
             <div className="icon">
               {verificationReportData?.url ? (
@@ -312,17 +355,15 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                   <FileAddOutlined
                     className="common-progress-icon"
                     style={
-                      monitoringReportAccepeted
+                      monitoringReportAccepted
                         ? { color: '#3F3A47', cursor: 'pointer' }
                         : { color: '#cacaca', cursor: 'default' }
                     }
                     onClick={() => {
                       handleFileUploadVerification();
-                      if (monitoringReportAccepeted) {
-                      }
                     }}
                   />
-                  {monitoringReportAccepeted && (
+                  {monitoringReportAccepted && (
                     <input
                       type="file"
                       ref={fileInputVerificationRef}
@@ -351,6 +392,31 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                   <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
                 </a>
               </div>
+              {!verificationReportAccepted && monitoringReportAccepted && (
+                <>
+                  <FileAddOutlined
+                    className="common-progress-icon margin-left-1"
+                    style={
+                      monitoringReportAccepted
+                        ? { color: '#3F3A47', cursor: 'pointer' }
+                        : { color: '#cacaca', cursor: 'default' }
+                    }
+                    onClick={() => {
+                      handleFileUploadVerification();
+                    }}
+                  />
+                  <input
+                    type="file"
+                    ref={fileInputVerificationRef}
+                    style={{ display: 'none' }}
+                    accept=".pdf"
+                    onChange={(e: any) => {
+                      const selectedFile = e.target.files[0];
+                      onUploadDocument(selectedFile, DocType.VERIFICATION_REPORT);
+                    }}
+                  />
+                </>
+              )}
             </div>
           )}
         </div>
