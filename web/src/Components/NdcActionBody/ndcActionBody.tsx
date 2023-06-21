@@ -73,9 +73,11 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
         message.open({
           type: 'success',
           content:
-            type === DocType.MONITORING_REPORT
+            (type === DocType.MONITORING_REPORT
               ? `${t('programme:monitorDoc')}`
-              : `${t('programme:veriDoc')}` + ' ' + `${t('programme:isUploaded')}`,
+              : `${t('programme:veriDoc')}`) +
+            ' ' +
+            `${t('programme:isUploaded')}`,
           duration: 4,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });

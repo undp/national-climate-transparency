@@ -111,9 +111,11 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
         message.open({
           type: 'success',
           content:
-            type === DocType.DESIGN_DOCUMENT
+            (type === DocType.DESIGN_DOCUMENT
               ? `${t('programme:designDoc')}`
-              : `${t('programme:methDoc')}` + ' ' + `${t('programme:isUploaded')}`,
+              : `${t('programme:methDoc')}`) +
+            ' ' +
+            `${t('programme:isUploaded')}`,
           duration: 4,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
