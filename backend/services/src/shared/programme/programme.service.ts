@@ -919,16 +919,17 @@ export class ProgrammeService {
       const req = await this.getCreditRequest(ndcAction, program, constants);
       if (req) {
         try {
-          const crdts = await calculateCredit(req);
-          console.log("Credit", crdts, req);
+          
           if (!ndcAction.ndcFinancing) {
             ndcAction.ndcFinancing = new NdcFinancing();
           }
           try {
+            const crdts = await calculateCredit(req);
             ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(crdts);
           } catch (err) {
             this.logger.log(`Credit calculate failed ${err.message}`);
-            throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+            ndcAction.ndcFinancing.systemEstimatedCredits = 0;
+            // throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
           }
       
           ndcAction.constantVersion = constants
