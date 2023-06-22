@@ -3,6 +3,7 @@ import './ndcActionBody.scss';
 import {
   CheckCircleOutlined,
   DislikeOutlined,
+  ExclamationCircleOutlined,
   FileAddOutlined,
   LikeOutlined,
   LinkOutlined,
@@ -14,20 +15,22 @@ import { Skeleton, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DocumentStatus } from '../../Casl/enums/document.status';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
-import { CompanyRole } from '@undp/carbon-library';
+import { CompanyRole, Role } from '@undp/carbon-library';
 import RejectDocumentationConfirmationModel from '../Models/rejectDocumentForm';
 import moment from 'moment';
+import { linkDocVisible, uploadDocUserPermission } from '../../Casl/documentsPermission';
 
 export interface NdcActionBodyProps {
   data?: any;
   progressIcon?: any;
   programmeId?: any;
   canUploadMonitorReport?: boolean;
+  programmeOwnerId?: any;
   getProgrammeDocs?: any;
 }
 
 const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
-  const { data, progressIcon, programmeId, canUploadMonitorReport, getProgrammeDocs } = props;
+  const { data, programmeId, canUploadMonitorReport, programmeOwnerId, getProgrammeDocs } = props;
   const { t } = useTranslation(['programme']);
   const { userInfoState } = useUserContext();
   const fileInputMonitoringRef: any = useRef(null);
@@ -152,27 +155,22 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   }, [data]);
 
   const companyRolePermission =
-    userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-    userInfoState?.companyRole === CompanyRole.CERTIFIER;
+    (userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
+      userInfoState?.userRole !== Role.ViewOnly) ||
+    (userInfoState?.companyRole === CompanyRole.CERTIFIER &&
+      userInfoState?.userRole !== Role.ViewOnly);
   const monitoringReportPending = monitoringReportData?.status === DocumentStatus.PENDING;
   const monitoringReportAccepted = monitoringReportData?.status === DocumentStatus.ACCEPTED;
+  const monitoringReportRejected = monitoringReportData?.status === DocumentStatus.REJECTED;
   const verifcationReportPending = verificationReportData?.status === DocumentStatus.PENDING;
   const verificationReportAccepted = verificationReportData?.status === DocumentStatus.ACCEPTED;
+  const verifcationReportRejected = verificationReportData?.status === DocumentStatus.REJECTED;
 
   return loading ? (
     <Skeleton />
   ) : (
     <>
-      <div
-        className="ndc-action-body"
-        style={
-          monitoringReportData?.url && verificationReportData?.url
-            ? { height: '5.5rem' }
-            : monitoringReportData?.url || verificationReportData?.url
-            ? { height: '4rem' }
-            : { height: '3rem' }
-        }
-      >
+      <div className="ndc-action-body">
         <div className="report-details">
           <div className="report-type">
             <div className="name-time-container">
@@ -223,11 +221,16 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                       />
                     </>
                   )
+                ) : monitoringReportAccepted ? (
+                  <CheckCircleOutlined
+                    className="common-progress-icon"
+                    style={{ color: '#5DC380' }}
+                  />
                 ) : (
-                  monitoringReportAccepted && (
-                    <CheckCircleOutlined
+                  monitoringReportRejected && (
+                    <ExclamationCircleOutlined
                       className="common-progress-icon"
-                      style={{ color: '#5DC380' }}
+                      style={{ color: '#FD6F70' }}
                     />
                   )
                 )
@@ -236,12 +239,24 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                   <FileAddOutlined
                     className="common-progress-icon"
                     style={
-                      canUploadMonitorReport
+                      canUploadMonitorReport &&
+                      uploadDocUserPermission(
+                        userInfoState,
+                        DocType.MONITORING_REPORT,
+                        programmeOwnerId
+                      )
                         ? { color: '#3F3A47', cursor: 'pointer' }
                         : { color: '#cacaca', cursor: 'default' }
                     }
                     onClick={() => {
-                      if (canUploadMonitorReport) {
+                      if (
+                        canUploadMonitorReport &&
+                        uploadDocUserPermission(
+                          userInfoState,
+                          DocType.MONITORING_REPORT,
+                          programmeOwnerId
+                        )
+                      ) {
                         handleFileUploadMonitor();
                       }
                     }}
@@ -264,26 +279,43 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
             <div className="report-link">
               {/* <div className="version">V1.0</div> */}
               <div className="link">
-                <a
-                  href={monitoringReportData?.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download
-                >
-                  <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
-                </a>
+                {linkDocVisible(monitoringReportData?.status) && (
+                  <a
+                    href={monitoringReportData?.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                  >
+                    <LinkOutlined
+                      className="common-progress-icon margin-right-1"
+                      style={{ color: '#3F3A47' }}
+                    />
+                  </a>
+                )}
               </div>
               {!monitoringReportAccepted && (
                 <>
                   <FileAddOutlined
-                    className="common-progress-icon margin-left-1"
+                    className="common-progress-icon"
                     style={
-                      canUploadMonitorReport
+                      canUploadMonitorReport &&
+                      uploadDocUserPermission(
+                        userInfoState,
+                        DocType.MONITORING_REPORT,
+                        programmeOwnerId
+                      )
                         ? { color: '#3F3A47', cursor: 'pointer' }
                         : { color: '#cacaca', cursor: 'default' }
                     }
                     onClick={() => {
-                      if (canUploadMonitorReport) {
+                      if (
+                        canUploadMonitorReport &&
+                        uploadDocUserPermission(
+                          userInfoState,
+                          DocType.MONITORING_REPORT,
+                          programmeOwnerId
+                        )
+                      ) {
                         handleFileUploadMonitor();
                       }
                     }}
@@ -355,11 +387,16 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                       />
                     </>
                   )
+                ) : verificationReportAccepted ? (
+                  <CheckCircleOutlined
+                    className="common-progress-icon"
+                    style={{ color: '#5DC380' }}
+                  />
                 ) : (
-                  verificationReportData?.status === DocumentStatus.ACCEPTED && (
-                    <CheckCircleOutlined
+                  verifcationReportRejected && (
+                    <ExclamationCircleOutlined
                       className="common-progress-icon"
-                      style={{ color: '#5DC380' }}
+                      style={{ color: '#FD6F70' }}
                     />
                   )
                 )
@@ -368,12 +405,26 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                   <FileAddOutlined
                     className="common-progress-icon"
                     style={
-                      monitoringReportAccepted
+                      monitoringReportAccepted &&
+                      uploadDocUserPermission(
+                        userInfoState,
+                        DocType.VERIFICATION_REPORT,
+                        programmeOwnerId
+                      )
                         ? { color: '#3F3A47', cursor: 'pointer' }
                         : { color: '#cacaca', cursor: 'default' }
                     }
                     onClick={() => {
-                      handleFileUploadVerification();
+                      if (
+                        monitoringReportAccepted &&
+                        uploadDocUserPermission(
+                          userInfoState,
+                          DocType.VERIFICATION_REPORT,
+                          programmeOwnerId
+                        )
+                      ) {
+                        handleFileUploadVerification();
+                      }
                     }}
                   />
                   {monitoringReportAccepted && (
@@ -396,26 +447,45 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
             <div className="report-link">
               {/* <div className="version">V1.1</div> */}
               <div className="link">
-                <a
-                  href={verificationReportData?.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download
-                >
-                  <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
-                </a>
+                {linkDocVisible(verificationReportData?.status) && (
+                  <a
+                    href={verificationReportData?.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                  >
+                    <LinkOutlined
+                      className="common-progress-icon margin-right-1"
+                      style={{ color: '#3F3A47' }}
+                    />
+                  </a>
+                )}
               </div>
               {!verificationReportAccepted && monitoringReportAccepted && (
                 <>
                   <FileAddOutlined
-                    className="common-progress-icon margin-left-1"
+                    className="common-progress-icon"
                     style={
-                      monitoringReportAccepted
+                      monitoringReportAccepted &&
+                      uploadDocUserPermission(
+                        userInfoState,
+                        DocType.VERIFICATION_REPORT,
+                        programmeOwnerId
+                      )
                         ? { color: '#3F3A47', cursor: 'pointer' }
                         : { color: '#cacaca', cursor: 'default' }
                     }
                     onClick={() => {
-                      handleFileUploadVerification();
+                      if (
+                        monitoringReportAccepted &&
+                        uploadDocUserPermission(
+                          userInfoState,
+                          DocType.VERIFICATION_REPORT,
+                          programmeOwnerId
+                        )
+                      ) {
+                        handleFileUploadVerification();
+                      }
                     }}
                   />
                   <input
