@@ -13,10 +13,9 @@
 }
 .separator {
   padding: 5px;
-  color: #D8D8D8;
+  color: #d8d8d8;
 }
 .role-group {
-
   .ant-col-13 {
     max-width: 300px;
   }
@@ -34,16 +33,15 @@
   .ant-radio-button-wrapper::before {
     background-color: transparent;
   }
-  .ant-radio-button-wrapper {
-    border: 1px solid $common-form-input-border;
-  }
 
   .anticon {
     margin-right: 0.5rem;
   }
 
   .ant-radio-button-wrapper {
-    color: rgba(#8C8C8C, 0.7) !important;
+    border: 1px solid $common-form-input-border;
+    color: rgba(#8c8c8c, 0.7) !important;
+    width: 100% !important;
   }
   .condition-radio {
     width: 100%;
