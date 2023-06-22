@@ -262,7 +262,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
           </div>
           {monitoringReportData?.url && (
             <div className="report-link">
-              <div className="version">V1.0</div>
+              {/* <div className="version">V1.0</div> */}
               <div className="link">
                 <a
                   href={monitoringReportData?.url}
@@ -394,7 +394,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
           </div>
           {verificationReportData?.url && (
             <div className="report-link">
-              <div className="version">V1.1</div>
+              {/* <div className="version">V1.1</div> */}
               <div className="link">
                 <a
                   href={verificationReportData?.url}

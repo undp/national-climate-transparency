@@ -625,8 +625,8 @@ const ProgrammeView = () => {
                 <div className="centered-card">{elements}</div>
               </div>
             </Card>
-            {data?.emissionReductionAchieved ||
-              (data?.emissionReductionExpected && (
+            {Number(data?.emissionReductionAchieved) !== 0 ||
+              (Number(data?.emissionReductionExpected) !== 0 && (
                 <Card className="card-container">
                   <div className="info-view">
                     <div className="title">
