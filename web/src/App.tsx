@@ -31,6 +31,7 @@ import { defineAbility, updateUserAbility } from './Casl/ability';
 import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
 import { AddProgrammeComponent } from './Pages/Programme/programmeCreation';
 import InvestmentManagement from './Pages/InvestmentManagement/investmentManagement';
+import AddNdcAction from './Pages/AddNdcAction/addNdcAction';
 
 // message.config({
 //   duration: 60,
@@ -90,6 +91,7 @@ const App = () => {
                     <Route path="viewAll" element={<ProgrammeManagement />} />
                     <Route path="view" element={<ProgrammeView />} />
                     <Route path="addProgramme" element={<AddProgrammeComponent />} />
+                    <Route path="addNdcAction" element={<AddNdcAction />} />
                   </Route>
                   <Route
                     path="/investmentManagement"

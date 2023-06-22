@@ -25,6 +25,7 @@ const CompanyProfile = () => {
       useLocation={useLocation}
       onNavigateToCompanyManagement={onNavigateToCompanyManagement}
       onNavigateToCompanyEdit={onNavigateToCompanyEdit}
+      regionField
     ></CompanyProfileComponent>
   );
 };

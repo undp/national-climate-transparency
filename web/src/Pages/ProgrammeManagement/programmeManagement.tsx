@@ -14,10 +14,17 @@ const ProgrammeManagement = () => {
     ProgrammeManagementColumns.company,
     ProgrammeManagementColumns.sector,
     ProgrammeManagementColumns.currentStage,
+    ProgrammeManagementColumns.certifierId,
+    ProgrammeManagementColumns.emissionsReductionExpected,
+    ProgrammeManagementColumns.emissionsReductionAchieved,
   ];
 
   const onNavigateToProgrammeView = (record: any) => {
     navigate('/programmeManagement/view', { state: { record } });
+  };
+
+  const onClickAddProgramme = () => {
+    navigate('/programmeManagement/addProgramme');
   };
 
   return (
@@ -27,6 +34,7 @@ const ProgrammeManagement = () => {
       useUserContext={useUserContext}
       useConnection={useConnection}
       onNavigateToProgrammeView={onNavigateToProgrammeView}
+      onClickAddProgramme={onClickAddProgramme}
     ></ProgrammeManagementComponent>
   );
 };

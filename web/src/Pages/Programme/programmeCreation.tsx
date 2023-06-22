@@ -5,52 +5,131 @@ import {
   DatePicker,
   Form,
   Input,
+  InputNumber,
   Radio,
   Row,
   Select,
+  Space,
   Steps,
   Tooltip,
   Upload,
   message,
 } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import './programmeCreation.scss';
 import '../../Styles/app.scss';
-import { RcFile, UploadFile } from 'antd/lib/upload';
-import validator from 'validator';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import { CompanyRole } from '../../Casl/enums/company.role.enum';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { Sector } from '../../Casl/enums/sector.enum';
 import { SectoralScope } from '../../Casl/enums/sectoral.scope.enum';
-import { GHGSCoveredValues } from '../../Casl/enums/ghgs.covered.values.enum';
-import { GeoGraphicalLocations } from '../../Casl/enums/geolocations.enum';
+import { InfoCircle } from 'react-bootstrap-icons';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import moment from 'moment';
+import { RcFile } from 'antd/lib/upload';
+import { CompanyRole } from '@undp/carbon-library';
+import NdcActionDetails from '../../Components/NdcAction/ndcActionDetails';
 
 type SizeType = Parameters<typeof Form>[0]['size'];
+
+const maximumImageSize = process.env.MAXIMUM_IMAGE_SIZE
+  ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
+  : 7145728;
 
 export const AddProgrammeComponent = () => {
   const { state } = useLocation();
   const [formOne] = Form.useForm();
   const [formTwo] = Form.useForm();
+  const navigate = useNavigate();
+  const [formChecks] = Form.useForm();
   const { put, get, post } = useConnection();
+  const { userInfoState } = useUserContext();
   const { t } = useTranslation(['common', 'addProgramme']);
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingList, setLoadingList] = useState<boolean>(false);
+  const [ndcScopeChanged, setNdcScopeChanged] = useState<boolean>(false);
   const [contactNoInput] = useState<any>();
   const [stepOneData, setStepOneData] = useState<any>();
+  const [stepTwoData, setStepTwoData] = useState<any>();
   const [current, setCurrent] = useState<number>(0);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [includedInNDC, setIncludedInNDC] = useState<any>();
+  const [includedInNAP, setIncludedInNAP] = useState<any>();
   const [countries, setCountries] = useState<[]>([]);
+  const [organisationsList, setOrganisationList] = useState<any[]>([]);
+  const [userOrgTaxId, setUserOrgTaxId] = useState<any>('');
+  const [regionsList, setRegionsList] = useState<any[]>([]);
+  const [programmeDetailsObj, setProgrammeDetailsObj] = useState<any>();
+
+  const initialOrganisationOwnershipValues: any[] = [
+    {
+      organisation:
+        userInfoState?.companyRole !== CompanyRole.GOVERNMENT && userInfoState?.companyName,
+      proponentPercentage: userInfoState?.companyRole !== CompanyRole.GOVERNMENT && 100,
+    },
+  ];
+
+  const getBase64 = (file: RcFile): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
 
   const getCountryList = async () => {
-    const response = await get('national/organisation/countries');
-    if (response.data) {
-      const alpha2Names = response.data.map((item: any) => {
-        return item.alpha2;
-      });
-      setCountries(alpha2Names);
+    setLoadingList(true);
+    try {
+      const response = await get('national/organisation/countries');
+      if (response.data) {
+        setCountries(response.data);
+      }
+    } catch (error: any) {
+      console.log('Error in getting country list', error);
+    } finally {
+      setLoadingList(false);
     }
   };
+
+  const getRegionList = async () => {
+    setLoadingList(true);
+    try {
+      const response = await post('national/organisation/regions', { page: 1, size: 100 });
+      if (response.data) {
+        const regionNames = response.data.map((item: any) => item.regionName);
+        setRegionsList(['National', ...regionNames]);
+      }
+    } catch (error: any) {
+      console.log('Error in getting regions list', error);
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
+  const getOrganisationsDetails = async () => {
+    setLoadingList(true);
+    try {
+      const response = await post('national/organisation/queryNames', { page: 1, size: 100 });
+      if (response.data) {
+        setOrganisationList(response?.data);
+        const userOrganisation = response?.data.find(
+          (company: any) => company.name === userInfoState?.companyName
+        );
+        const taxId = userOrganisation ? userOrganisation.taxId : null;
+        setUserOrgTaxId(taxId);
+      }
+    } catch (error: any) {
+      console.log('Error in getting organisation list', error);
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
+  useEffect(() => {
+    getOrganisationsDetails();
+    getCountryList();
+    getRegionList();
+  }, []);
 
   const normFile = (e: any) => {
     if (Array.isArray(e)) {
@@ -68,27 +147,84 @@ export const AddProgrammeComponent = () => {
     setCurrent(current - 1);
   };
 
-  const onFinishStepOne = (values: any) => {
-    nextOne(values);
-  };
-
-  const getBase64 = (file: RcFile): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-
-  const onFinishStepTwo = async (values: any) => {
-    // const requestData = { ...values, role: 'Admin', company: { ...stepOneData } };
+  const onFinishStepOne = async (values: any) => {
+    console.log(values);
     setLoading(true);
-    try {
-    } catch (error: any) {
+    let programmeDetails: any;
+    const ownershipPercentage = values?.ownershipPercentage;
+    const totalPercentage = ownershipPercentage.reduce(
+      (sum: any, field: any) => sum + field.proponentPercentage,
+      0
+    );
+    const proponentPercentages = ownershipPercentage.map((item: any) => item.proponentPercentage);
+    const proponentTxIds =
+      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+        ? ownershipPercentage?.slice(1).map((item: any) => item.organisation)
+        : ownershipPercentage?.map((item: any) => item.organisation);
+    let logoBase64 = '';
+    let logoUrls: any[] = [];
+    if (values?.designDocument) {
+      logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
+      logoUrls = logoBase64?.split(',');
+    }
+    if (totalPercentage !== 100) {
       message.open({
         type: 'error',
-        content: `${t('errorInAddUser')} ${error.message}`,
-        duration: 3,
+        content: t('addProgramme:proponentPercentValidation'),
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      setLoading(false);
+    } else {
+      programmeDetails = {
+        title: values?.title,
+        externalId: values?.externalId,
+        sectoralScope: values?.sectoralScope,
+        sector: values?.sector,
+        startTime: moment(values?.startTime).startOf('day').unix(),
+        endTime: moment(values?.endTime).endOf('day').unix(),
+        proponentTaxVatId:
+          userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+            ? [userOrgTaxId, ...proponentTxIds]
+            : proponentTxIds,
+        proponentPercentage: proponentPercentages,
+        programmeProperties: {
+          buyerCountryEligibility: values?.buyerCountryEligibility,
+          geographicalLocation: values?.geographicalLocation,
+          greenHouseGasses: values?.greenHouseGasses,
+          ndcScope: values?.ndcScope === 'true' ? true : false,
+          includedInNDC: includedInNDC,
+          includedInNap: includedInNDC,
+        },
+      };
+      if (logoUrls?.length > 0) {
+        programmeDetails.designDocument = logoUrls[1];
+      }
+      setLoading(false);
+      nextOne(programmeDetails);
+    }
+  };
+
+  const saveNewProgramme = async (payload: any) => {
+    setLoading(true);
+    try {
+      const response: any = await post('national/programme/create', payload);
+      console.log('Programme creation -> ', response);
+      if (response?.statusText === 'SUCCESS') {
+        message.open({
+          type: 'success',
+          content: t('addProgramme:programmeCreationSuccess'),
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+      navigate('/programmeManagement/view');
+    } catch (error: any) {
+      console.log('Error in programme creation - ', error);
+      message.open({
+        type: 'error',
+        content: error?.message,
+        duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     } finally {
@@ -96,16 +232,82 @@ export const AddProgrammeComponent = () => {
     }
   };
 
-  const onCancel = () => {};
+  const onNdcActionDetailsSubmit = async (ndcActionDetailsObj: any) => {
+    if (ndcActionDetailsObj.enablementReportData) {
+      delete ndcActionDetailsObj.enablementReportData;
+    }
+    const updatedProgrammeDetailsObj = { ...programmeDetailsObj, ndcAction: ndcActionDetailsObj };
+    setProgrammeDetailsObj(updatedProgrammeDetailsObj);
+    saveNewProgramme(updatedProgrammeDetailsObj);
+  };
+
+  const addFinancingSoughtData = (values: any) => {
+    const programmeDetails: any = stepOneData;
+    programmeDetails.creditEst = Number(values?.creditEst);
+    programmeDetails.programmeProperties.estimatedProgrammeCostUSD = Number(
+      values?.estimatedProgrammeCostUSD
+    );
+    programmeDetails.programmeProperties.carbonPriceUSDPerTon = Number(
+      values?.minViableCarbonPrice
+    );
+    setProgrammeDetailsObj(programmeDetails);
+    return programmeDetails;
+  };
+
+  const onFinishStepTwo = async (values: any) => {
+    const updatedProgrammeDetailsObj = addFinancingSoughtData(values);
+    saveNewProgramme(updatedProgrammeDetailsObj);
+  };
+
+  const onOpenNdcCreate = () => {
+    const values = formTwo.getFieldsValue();
+    addFinancingSoughtData(values);
+    setCurrent(current + 1);
+  };
+
+  const onFormTwoValuesChane = (changedValues: any, allValues: any) => {
+    console.log('form two ============== > ', changedValues, allValues);
+    if (allValues?.creditEst !== undefined && allValues?.estimatedProgrammeCostUSD !== undefined) {
+      formTwo.setFieldValue(
+        'minViableCarbonPrice',
+        Number(allValues?.estimatedProgrammeCostUSD / allValues?.creditEst).toFixed(2)
+      );
+    }
+  };
+
+  const onChangeNDCScope = (event: any) => {
+    if (event?.target) {
+      setNdcScopeChanged(true);
+      setIncludedInNDC(true);
+    }
+  };
+
+  const onChangeGeoLocation = (values: any[]) => {
+    if (values.includes('National')) {
+      const buyerCountryValues = regionsList;
+      const newBuyerValues = buyerCountryValues?.filter((item: any) => item !== 'National');
+      formOne.setFieldValue('geographicalLocation', [...newBuyerValues]);
+    }
+  };
+
+  const onInCludedNAPChange = (event: any) => {
+    if (event?.target?.value === 'inNAP') {
+      setIncludedInNAP(true);
+    } else if (event?.target?.value === 'notInNAP') {
+      setIncludedInNAP(false);
+    }
+  };
+
+  const onInCludedNDCChange = (event: any) => {
+    if (event?.target?.value === 'inNDC') {
+      setIncludedInNDC(true);
+    } else if (event?.target?.value === 'notInNDC') {
+      setIncludedInNDC(false);
+    }
+  };
 
   const ProgrammeDetailsForm = () => {
     const companyRole = state?.record?.companyRole;
-    const companyRoleClassName =
-      companyRole === CompanyRole.CERTIFIER
-        ? 'certifier'
-        : companyRole === CompanyRole.PROGRAMME_DEVELOPER
-        ? 'dev'
-        : 'gov';
     return (
       <div className="programme-details-form-container">
         <div className="programme-details-form">
@@ -123,7 +325,7 @@ export const AddProgrammeComponent = () => {
               <Col xl={12} md={24}>
                 <div className="details-part-one">
                   <Form.Item
-                    label="Title"
+                    label={t('addProgramme:title')}
                     name="title"
                     initialValue={state?.record?.name}
                     rules={[
@@ -139,7 +341,7 @@ export const AddProgrammeComponent = () => {
                             value === null ||
                             value === undefined
                           ) {
-                            throw new Error(`Title ${t('isRequired')}`);
+                            throw new Error(`${t('addProgramme:title')} ${t('isRequired')}`);
                           }
                         },
                       },
@@ -148,12 +350,12 @@ export const AddProgrammeComponent = () => {
                     <Input size="large" />
                   </Form.Item>
                   <Form.Item
-                    label="Sector"
+                    label={t('addProgramme:sector')}
                     name="sector"
                     rules={[
                       {
                         required: true,
-                        message: `Sector ${t('isRequired')}`,
+                        message: `${t('addProgramme:sector')} ${t('isRequired')}`,
                       },
                     ]}
                   >
@@ -165,28 +367,48 @@ export const AddProgrammeComponent = () => {
                   </Form.Item>
                   <Form.Item
                     wrapperCol={{ span: 13 }}
-                    label="Programme Start Date"
-                    name="programmeStartDate"
+                    label={t('addProgramme:startTime')}
+                    name="startTime"
                     rules={[
                       {
                         required: true,
-                        message: `Programme Start Date ${t('isRequired')}`,
+                        message: '',
+                      },
+                      {
+                        validator: async (rule, value) => {
+                          if (
+                            String(value).trim() === '' ||
+                            String(value).trim() === undefined ||
+                            value === null ||
+                            value === undefined
+                          ) {
+                            throw new Error(`${t('addProgramme:startTime')} ${t('isRequired')}`);
+                          } else {
+                            const endTime = formOne.getFieldValue('endTime');
+                            if (endTime && value >= endTime) {
+                              throw new Error(`${t('addProgramme:endTimeVal')}`);
+                            }
+                          }
+                        },
                       },
                     ]}
                   >
-                    <DatePicker size="large" />
+                    <DatePicker
+                      size="large"
+                      disabledDate={(currentDate: any) => currentDate < moment().startOf('day')}
+                    />
                   </Form.Item>
                   <Form.Item
-                    label="GHGs Covered"
-                    name="ghgsCovered"
+                    label={t('addProgramme:ghgCovered')}
+                    name="greenHouseGasses"
                     rules={[
                       {
                         required: true,
-                        message: `GHGs Covered ${t('isRequired')}`,
+                        message: `${t('addProgramme:ghgCovered')} ${t('isRequired')}`,
                       },
                     ]}
                   >
-                    <Select size="large">
+                    <Select size="large" mode="multiple" maxTagCount={2}>
                       <Select.Option value="CO2">
                         CO<sub>2</sub>
                       </Select.Option>
@@ -196,11 +418,11 @@ export const AddProgrammeComponent = () => {
                       <Select.Option value="N2O">
                         N<sub>2</sub>O
                       </Select.Option>
-                      <Select.Option value="HFC5">
-                        HFC<sub>5</sub>
+                      <Select.Option value="HFCs">
+                        HFC<sub>s</sub>
                       </Select.Option>
-                      <Select.Option value="PFC5">
-                        PFC<sub>5</sub>
+                      <Select.Option value="PFCs">
+                        PFC<sub>s</sub>
                       </Select.Option>
                       <Select.Option value="SF6">
                         SF<sub>6</sub>
@@ -208,21 +430,24 @@ export const AddProgrammeComponent = () => {
                     </Select>
                   </Form.Item>
                   <Form.Item
+                    label={t('addProgramme:designDoc')}
                     name="designDocument"
-                    label="Design Document"
                     valuePropName="fileList"
                     getValueFromEvent={normFile}
-                    required={true}
+                    required={false}
                     rules={[
                       {
                         validator: async (rule, file) => {
-                          if (file === null || file === undefined) {
-                            if (!state?.record?.logo)
-                              throw new Error(`Design Document ${t('isRequired')}`);
-                          } else {
-                            if (file.length === 0) {
-                              throw new Error(`Design Document ${t('isRequired')}`);
-                            } else {
+                          if (file) {
+                            let isCorrectFormat = false;
+                            if (file[0]?.type === 'application/pdf') {
+                              isCorrectFormat = true;
+                            }
+                            if (!isCorrectFormat) {
+                              throw new Error(`${t('addProgramme:invalidFileFormat')}`);
+                            } else if (file[0]?.size > maximumImageSize) {
+                              // default size format of files would be in bytes -> 1MB = 1000000bytes
+                              throw new Error(`${t('addProgramme:maxSizeVal')}`);
                             }
                           }
                         },
@@ -230,7 +455,7 @@ export const AddProgrammeComponent = () => {
                     ]}
                   >
                     <Upload
-                      beforeUpload={(file) => {
+                      beforeUpload={(file: any) => {
                         return false;
                       }}
                       className="design-upload-section"
@@ -247,37 +472,125 @@ export const AddProgrammeComponent = () => {
                     </Upload>
                   </Form.Item>
                   <Form.Item
-                    label="Buyer Country Eligibility"
+                    label={t('addProgramme:buyerCountryEligibility')}
                     name="buyerCountryEligibility"
                     initialValue={state?.record?.name}
                     rules={[
                       {
-                        required: true,
-                        message: '',
-                      },
-                      {
-                        validator: async (rule, value) => {
-                          if (
-                            String(value).trim() === '' ||
-                            String(value).trim() === undefined ||
-                            value === null ||
-                            value === undefined
-                          ) {
-                            throw new Error(`Buyer Country Eligibility ${t('isRequired')}`);
-                          }
-                        },
+                        required: false,
                       },
                     ]}
                   >
-                    <Input size="large" />
+                    <Select size="large" loading={loadingList}>
+                      {countries.map((country: any) => (
+                        <Select.Option key={country.alpha2} value={country.alpha2}>
+                          {country.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
                   </Form.Item>
+                  <Form.List
+                    name="ownershipPercentage"
+                    initialValue={initialOrganisationOwnershipValues}
+                  >
+                    {(fields, { add, remove }) => (
+                      <div className="space-container" style={{ width: '100%' }}>
+                        {fields.map(({ key, name, ...restField }) => {
+                          return (
+                            <Space
+                              wrap={true}
+                              key={key}
+                              style={{ display: 'flex', marginBottom: 8 }}
+                              align="center"
+                              size={'large'}
+                            >
+                              <div className="ownership-list-item">
+                                <Form.Item
+                                  {...restField}
+                                  label={t('addProgramme:company')}
+                                  name={[name, 'organisation']}
+                                  wrapperCol={{ span: 24 }}
+                                  className="organisation"
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: `${t('addProgramme:company')} ${t('isRequired')}`,
+                                    },
+                                  ]}
+                                >
+                                  <Select
+                                    size="large"
+                                    loading={loadingList}
+                                    disabled={
+                                      name === 0 &&
+                                      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+                                    }
+                                  >
+                                    {organisationsList.map((organisation) => (
+                                      <Select.Option
+                                        key={organisation.companyId}
+                                        value={organisation.taxId}
+                                      >
+                                        {organisation.name}
+                                      </Select.Option>
+                                    ))}
+                                  </Select>
+                                </Form.Item>
+                                <Form.Item
+                                  {...restField}
+                                  label={t('addProgramme:proponentPercentage')}
+                                  className="ownership-percent"
+                                  name={[name, 'proponentPercentage']}
+                                  labelCol={{ span: 24 }}
+                                  wrapperCol={{ span: 24 }}
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: `${t('addProgramme:proponentPercentage')} ${t(
+                                        'isRequired'
+                                      )}`,
+                                    },
+                                    // { validator: validateOwnershipPercentage },
+                                  ]}
+                                >
+                                  <InputNumber
+                                    size="large"
+                                    min={1}
+                                    max={100}
+                                    formatter={(value) => `${value}%`}
+                                    parser={(value: any) => value.replace('%', '')}
+                                    disabled={
+                                      fields?.length < 2 &&
+                                      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+                                    }
+                                  />
+                                </Form.Item>
+                                {fields?.length > 1 && name !== 0 && (
+                                  <MinusCircleOutlined
+                                    className="dynamic-delete-button"
+                                    onClick={() => remove(name)}
+                                  />
+                                )}
+                              </div>
+                            </Space>
+                          );
+                        })}
+                        <Form.Item>
+                          <Button
+                            type="dashed"
+                            onClick={() => add()}
+                            icon={<PlusOutlined />}
+                          ></Button>
+                        </Form.Item>
+                      </div>
+                    )}
+                  </Form.List>
                 </div>
               </Col>
               <Col xl={12} md={24}>
                 <div className="details-part-two">
                   <Form.Item
-                    label="External ID"
-                    initialValue={state?.record?.taxId}
+                    label={t('addProgramme:externalId')}
                     name="externalId"
                     rules={[
                       {
@@ -292,7 +605,7 @@ export const AddProgrammeComponent = () => {
                             value === null ||
                             value === undefined
                           ) {
-                            throw new Error(`External ID ${t('isRequired')}`);
+                            throw new Error(`${t('addProgramme:externalId')} ${t('isRequired')}`);
                           }
                         },
                       },
@@ -301,80 +614,225 @@ export const AddProgrammeComponent = () => {
                     <Input size="large" />
                   </Form.Item>
                   <Form.Item
-                    label="Sectoral Scope"
+                    label={t('addProgramme:sectoralScope')}
                     name="sectoralScope"
                     rules={[
                       {
                         required: true,
-                        message: `Sectoral Scope ${t('isRequired')}`,
+                        message: `${t('addProgramme:sectoralScope')} ${t('isRequired')}`,
                       },
                     ]}
                   >
                     <Select size="large">
-                      {Object.values(SectoralScope).map((sectoralScope: any) => (
-                        <Select.Option value={sectoralScope}>{sectoralScope}</Select.Option>
+                      {Object.entries(SectoralScope).map(([key, value]) => (
+                        <Select.Option key={value} value={value}>
+                          {key.replace(/([A-Z])/g, ' $1').trim()}
+                        </Select.Option>
                       ))}
                     </Select>
                   </Form.Item>
                   <Form.Item
                     wrapperCol={{ span: 13 }}
-                    label="Programme End Date"
-                    name="programmeEndDate"
+                    label={t('addProgramme:endTime')}
+                    name="endTime"
                     rules={[
                       {
                         required: true,
-                        message: `Programme End Date ${t('isRequired')}`,
+                        message: '',
+                      },
+                      {
+                        validator: async (rule, value) => {
+                          if (
+                            String(value).trim() === '' ||
+                            String(value).trim() === undefined ||
+                            value === null ||
+                            value === undefined
+                          ) {
+                            throw new Error(`${t('addProgramme:endTime')} ${t('isRequired')}`);
+                          } else {
+                            const startTime = formOne.getFieldValue('startTime');
+                            if (startTime && value <= startTime) {
+                              throw new Error(`${t('addProgramme:endTimeVal')}`);
+                            }
+                          }
+                        },
                       },
                     ]}
                   >
-                    <DatePicker size="large" />
+                    <DatePicker
+                      size="large"
+                      disabledDate={(currentDate: any) => currentDate < moment().endOf('day')}
+                    />
                   </Form.Item>
                   <Form.Item
+                    label={t('addProgramme:ndcScope')}
                     wrapperCol={{ span: 13 }}
                     className="role-group"
-                    label="Conditional | Unconditional"
-                    name="conditionalOrUnconditional"
+                    name="ndcScope"
                     initialValue={companyRole}
                     rules={[
                       {
-                        required: true,
-                        message: `Conditional | Unconditional ${t('isRequired')}`,
+                        required: false,
                       },
                     ]}
                   >
-                    <Radio.Group size="large">
+                    <Radio.Group size="large" onChange={onChangeNDCScope}>
                       <div className="condition-radio-container">
-                        <Radio.Button className="condition-radio" value="conditional">
-                          CONDITIONAL
+                        <Radio.Button className="condition-radio" value="true">
+                          {t('addProgramme:conditional')}
                         </Radio.Button>
                       </div>
                       <div className="condition-radio-container">
-                        <Radio.Button className="condition-radio" value="unconditional">
-                          UNCONDITIONAL
+                        <Radio.Button className="condition-radio" value="false">
+                          {t('addProgramme:unConditional')}
                         </Radio.Button>
                       </div>
                     </Radio.Group>
                   </Form.Item>
                   <Form.Item
-                    label="Geographical Location"
+                    label={t('addProgramme:geographicalLocation')}
                     name="geographicalLocation"
                     rules={[
                       {
                         required: true,
-                        message: `Geographical Location ${t('isRequired')}`,
+                        message: `${t('addProgramme:geographicalLocation')} ${t('isRequired')}`,
                       },
                     ]}
                   >
-                    <Select size="large">
-                      {Object.values(GeoGraphicalLocations).map((locations: any) => (
-                        <Select.Option value={locations}>{locations}</Select.Option>
+                    <Select
+                      mode="multiple"
+                      size="large"
+                      maxTagCount={2}
+                      onChange={onChangeGeoLocation}
+                      loading={loadingList}
+                    >
+                      {regionsList.map((region: any) => (
+                        <Select.Option value={region}>{region}</Select.Option>
                       ))}
                     </Select>
                   </Form.Item>
+                </div>
+              </Col>
+            </Row>
+            <Row className="selection-details-row" gutter={[16, 16]}>
+              <Col md={24} xl={12} className="in-ndc-col">
+                <Row className="in-ndc-row">
+                  <Col md={16} lg={18} xl={19}>
+                    <div className="included-label">
+                      <div>{t('addProgramme:inNDC')}</div>
+                      <div className="info-container">
+                        <Tooltip
+                          arrowPointAtCenter
+                          placement="bottomRight"
+                          trigger="hover"
+                          title={t('addProgramme:inNDCToolTip')}
+                        >
+                          <InfoCircle color="#000000" size={17} />
+                        </Tooltip>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md={8} lg={6} xl={5} className="included-val">
+                    <Radio.Group
+                      size="small"
+                      disabled={ndcScopeChanged}
+                      defaultValue={
+                        ndcScopeChanged
+                          ? 'inNDC'
+                          : includedInNDC
+                          ? 'inNDC'
+                          : includedInNDC === false
+                          ? 'notInNDC'
+                          : undefined
+                      }
+                      onChange={onInCludedNDCChange}
+                    >
+                      <div className="yes-no-radio-container">
+                        <Radio.Button className="yes-no-radio" value="inNDC">
+                          {t('addProgramme:yes')}
+                        </Radio.Button>
+                      </div>
+                      <div className="yes-no-radio-container">
+                        <Radio.Button className="yes-no-radio" value="notInNDC">
+                          {t('addProgramme:no')}
+                        </Radio.Button>
+                      </div>
+                    </Radio.Group>
+                  </Col>
+                </Row>
+              </Col>
+              <Col md={24} xl={12} className="in-nap-col">
+                <Row className="in-nap-row">
+                  <Col md={16} lg={18} xl={19}>
+                    <div className="included-label">
+                      <div>{t('addProgramme:inNAP')}</div>
+                      <div className="info-container">
+                        <Tooltip
+                          arrowPointAtCenter
+                          placement="bottomRight"
+                          trigger="hover"
+                          title={t('addProgramme:inNAPToolTip')}
+                        >
+                          <InfoCircle color="#000000" size={17} />
+                        </Tooltip>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md={8} lg={6} xl={5} className="included-val">
+                    <Radio.Group
+                      size="small"
+                      onChange={onInCludedNAPChange}
+                      defaultValue={
+                        includedInNAP ? 'inNAP' : includedInNAP === false ? 'notInNAP' : undefined
+                      }
+                    >
+                      <div className="yes-no-radio-container">
+                        <Radio.Button className="yes-no-radio" value="inNAP">
+                          {t('addProgramme:yes')}
+                        </Radio.Button>
+                      </div>
+                      <div className="yes-no-radio-container">
+                        <Radio.Button className="yes-no-radio" value="notInNAP">
+                          {t('addProgramme:no')}
+                        </Radio.Button>
+                      </div>
+                    </Radio.Group>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
+            <div className="steps-actions">
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {t('addProgramme:next')}
+              </Button>
+            </div>
+          </Form>
+        </div>
+      </div>
+    );
+  };
+
+  const ProgrammeFinancingSought = () => {
+    return (
+      <div className="programme-sought-form-container">
+        <div className="programme-sought-form">
+          <Form
+            labelCol={{ span: 20 }}
+            wrapperCol={{ span: 24 }}
+            name="programme-sought"
+            className="programme-sought-form"
+            layout="vertical"
+            requiredMark={true}
+            form={formTwo}
+            onFinish={onFinishStepTwo}
+            onValuesChange={onFormTwoValuesChane}
+          >
+            <Row className="row" gutter={[16, 16]}>
+              <Col xl={12} md={24}>
+                <div className="details-part-one">
                   <Form.Item
-                    label="Credits Authorised for International Transfer and Use"
-                    name="creditsAuthorised"
-                    initialValue={state?.record?.name}
+                    label={t('addProgramme:estimatedProgrammeCostUSD')}
+                    name="estimatedProgrammeCostUSD"
                     rules={[
                       {
                         required: true,
@@ -389,10 +847,52 @@ export const AddProgrammeComponent = () => {
                             value === undefined
                           ) {
                             throw new Error(
-                              `Credits Authorised for International Transfer and Use ${t(
-                                'isRequired'
-                              )}`
+                              `${t('addProgramme:estimatedProgrammeCostUSD')} ${t('isRequired')}`
                             );
+                          } else if (!isNaN(value) && Number(value) > 0) {
+                            return Promise.resolve();
+                          } else {
+                            throw new Error(
+                              `${t('addProgramme:estimatedProgrammeCostUSD')} ${t('isInvalid')}`
+                            );
+                          }
+                        },
+                      },
+                    ]}
+                  >
+                    <Input size="large" />
+                  </Form.Item>
+                  <Form.Item
+                    label={t('addProgramme:minViableCarbonPrice')}
+                    name="minViableCarbonPrice"
+                  >
+                    <Input disabled size="large" />
+                  </Form.Item>
+                </div>
+              </Col>
+              <Col xl={12} md={24}>
+                <div className="details-part-two">
+                  <Form.Item
+                    label={t('addProgramme:creditEst')}
+                    name="creditEst"
+                    rules={[
+                      {
+                        required: true,
+                        message: '',
+                      },
+                      {
+                        validator: async (rule, value) => {
+                          if (
+                            String(value).trim() === '' ||
+                            String(value).trim() === undefined ||
+                            value === null ||
+                            value === undefined
+                          ) {
+                            throw new Error(`${t('addProgramme:creditEst')} ${t('isRequired')}`);
+                          } else if (!isNaN(value) && Number(value) > 0) {
+                            return Promise.resolve();
+                          } else {
+                            throw new Error(`${t('addProgramme:creditEst')} ${t('isInvalid')}`);
                           }
                         },
                       },
@@ -404,21 +904,16 @@ export const AddProgrammeComponent = () => {
               </Col>
             </Row>
             <div className="steps-actions">
-              {isUpdate ? (
-                <Row>
-                  <Button loading={loading} onClick={onCancel}>
-                    {t('addCompany:cancel')}
-                  </Button>
-                  <Button loading={loading} className="mg-left-1" type="primary" htmlType="submit">
-                    {t('addCompany:submit')}
-                  </Button>
-                </Row>
-              ) : (
-                current === 0 && (
-                  <Button type="primary" htmlType="submit">
-                    Next
-                  </Button>
-                )
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {t('addProgramme:submit')}
+              </Button>
+              <Button className="action-btn" loading={loading} onClick={onOpenNdcCreate}>
+                {t('addProgramme:addAction')}
+              </Button>
+              {current === 1 && (
+                <Button className="back-btn" onClick={() => prevOne()} loading={loading}>
+                  {t('addProgramme:back')}
+                </Button>
               )}
             </div>
           </Form>
@@ -426,6 +921,10 @@ export const AddProgrammeComponent = () => {
       </div>
     );
   };
+
+  useEffect(() => {
+    getOrganisationsDetails();
+  }, []);
 
   return (
     <div className="add-programme-main-container">
@@ -468,26 +967,41 @@ export const AddProgrammeComponent = () => {
                       <div className="title">{t('addProgramme:addProgramme2')}</div>
                     </div>
                   ),
-                  description: current === 1 && <div>2</div>,
-                },
-                {
-                  title: (
-                    <div className="step-title-container">
-                      <div className="step-count">03</div>
-                      <div className="title">{t('addProgramme:addProgramme3')}</div>
+                  description: current === 1 && (
+                    <div>
+                      <ProgrammeFinancingSought />
                     </div>
                   ),
-                  description: current === 1 && <div>3</div>,
                 },
-                {
-                  title: (
-                    <div className="step-title-container">
-                      <div className="step-count">04</div>
-                      <div className="title">{t('addProgramme:addProgramme4')}</div>
-                    </div>
-                  ),
-                  description: current === 1 && <div>4</div>,
-                },
+                ...(current > 1
+                  ? [
+                      {
+                        title: (
+                          <div className="step-title-container">
+                            <div className="step-count">03</div>
+                            <div className="title">{t('addProgramme:addProgramme3')}</div>
+                          </div>
+                        ),
+                        description: current === 2 && (
+                          <NdcActionDetails
+                            isBackBtnVisible={true}
+                            onClickedBackBtn={prevOne}
+                            onFormSubmit={onNdcActionDetailsSubmit}
+                            ndcActionDetails={programmeDetailsObj?.ndcAction}
+                          ></NdcActionDetails>
+                        ),
+                      },
+                      {
+                        title: (
+                          <div className="step-title-container">
+                            <div className="step-count">04</div>
+                            <div className="title">{t('addProgramme:addProgramme4')}</div>
+                          </div>
+                        ),
+                        description: current === 3 && <div>4</div>,
+                      },
+                    ]
+                  : []),
               ]}
             />
           </div>
