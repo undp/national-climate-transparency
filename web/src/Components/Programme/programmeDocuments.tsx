@@ -115,12 +115,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
         setDocData([...docData, response?.data]);
         message.open({
           type: 'success',
-          content:
-            (type === DocType.DESIGN_DOCUMENT
-              ? `${t('programme:designDoc')}`
-              : `${t('programme:methDoc')}`) +
-            ' ' +
-            `${t('programme:isUploaded')}`,
+          content: `${t('programme:isUploaded')}`,
           duration: 4,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -129,7 +124,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
       fileInputRefMeth.current = null;
       message.open({
         type: 'error',
-        content: error?.message,
+        content: `${t('programme:notUploaded')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
@@ -148,14 +143,14 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
       });
       message.open({
         type: 'success',
-        content: response?.message,
+        content: `${t('programme:docApproved')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     } catch (error: any) {
       message.open({
         type: 'error',
-        content: error?.message,
+        content: `${t('programme:docRejected')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });

@@ -75,12 +75,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
       if (response?.data) {
         message.open({
           type: 'success',
-          content:
-            (type === DocType.MONITORING_REPORT
-              ? `${t('programme:monitorDoc')}`
-              : `${t('programme:veriDoc')}`) +
-            ' ' +
-            `${t('programme:isUploaded')}`,
+          content: `${t('programme:isUploaded')}`,
           duration: 4,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -88,7 +83,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
     } catch (error: any) {
       message.open({
         type: 'error',
-        content: error?.message,
+        content: `${t('programme:notUploaded')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
@@ -110,14 +105,14 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
       });
       message.open({
         type: 'success',
-        content: response?.message,
+        content: `${t('programme:docApproved')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     } catch (error: any) {
       message.open({
         type: 'error',
-        content: error?.message,
+        content: `${t('programme:docRejected')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
