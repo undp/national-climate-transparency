@@ -96,9 +96,7 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Manage, ProgrammeCertify);
     }
 
-    if (user.role === Role.Admin && user.companyRole === CompanyRole.MRV) {
-      can([Action.Create, Action.Read], Programme);
-    } else if (user.companyRole === CompanyRole.CERTIFIER) {
+    if (user.companyRole === CompanyRole.CERTIFIER) {
       can(Action.Read, Programme, { currentStage: { $in: [ProgrammeStage.AUTHORISED] } });
       can(Action.Read, Programme, { certifierId: { $elemMatch: { $eq: user.companyId } } });
     } else if (user.companyRole === CompanyRole.PROGRAMME_DEVELOPER) {

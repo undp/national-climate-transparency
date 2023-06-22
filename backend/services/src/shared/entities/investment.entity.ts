@@ -22,10 +22,10 @@ export class Investment implements EntitySubject {
   @Column({
     type: "enum",
     enum: Instrument,
-    array: false,
+    array: true,
     nullable: true
   })
-  instrument: Instrument;
+  instrument: Instrument[];
 
   @Column({nullable: true})
   interestRate?: number;

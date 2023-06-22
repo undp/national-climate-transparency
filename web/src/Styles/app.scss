@@ -468,6 +468,10 @@ body {
   }
 }
 
+.inline {
+  display: inline-block;
+}
+
 .popup-primary {
   .icon {
     color: $primary-color !important;

@@ -32,6 +32,7 @@ import { SettingsContextProvider } from './Context/SettingsContext/settingsConte
 import { AddProgrammeComponent } from './Pages/Programme/programmeCreation';
 import InvestmentManagement from './Pages/InvestmentManagement/investmentManagement';
 import AddNdcAction from './Pages/AddNdcAction/addNdcAction';
+import { AddInvestmentComponent } from './Pages/InvestmentManagement/investmentCreation';
 import NdcActionManagement from './Pages/NdcActionManagement/ndcActionManagement';
 import NdcActionView from './Pages/NdcActionView/ndcActionView';
 
@@ -100,6 +101,7 @@ const App = () => {
                     element={<CustomLayout selectedKey="investmentManagement/viewAll" />}
                   >
                     <Route path="viewAll" element={<InvestmentManagement />} />
+                    <Route path="addInvestment" element={<AddInvestmentComponent />} />
                   </Route>
                   <Route
                     path="/ndcManagement"
