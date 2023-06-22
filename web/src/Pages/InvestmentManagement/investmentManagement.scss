@@ -1,5 +1,62 @@
 @import '../../Styles/variables.scss';
 
+.steps-actions {
+  text-align: right;
+}
+
+.ownership-container {
+  padding: 15px 0px;
+
+  .label {
+    color: rgba(58, 53, 65, 0.5);
+  }
+}
+.separator {
+  padding: 5px;
+  color: #D8D8D8;
+}
+.role-group {
+
+  .ant-col-13 {
+    max-width: 300px;
+  }
+
+  .condition-radio-container {
+    width: 48%;
+    text-align: center;
+    .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+      color: $dark-text-color !important;
+      border-color: $primary-purple !important;
+      box-shadow: none;
+      max-width: 200px;
+    }
+  }
+  .ant-radio-button-wrapper::before {
+    background-color: transparent;
+  }
+  .ant-radio-button-wrapper {
+    border: 1px solid $common-form-input-border;
+  }
+
+  .anticon {
+    margin-right: 0.5rem;
+  }
+
+  .ant-radio-button-wrapper {
+    color: rgba(#8C8C8C, 0.7) !important;
+  }
+  .condition-radio {
+    width: 100%;
+    text-transform: uppercase;
+    .ant-radio-button-checked {
+      background: $primary-purple;
+      color: #ffffff;
+    }
+  }
+  .role-icons {
+    margin-right: 5px;
+  }
+}
 .investment-management {
   .role-icon {
     padding: 0.5rem 0.6rem;

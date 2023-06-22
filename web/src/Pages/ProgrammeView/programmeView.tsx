@@ -494,7 +494,12 @@ const ProgrammeView = () => {
   });
   // genCerts(data);
   const actionBtns = [
-    <Button type="primary" onClick={() => {}}>
+    <Button
+      type="primary"
+      onClick={() => {
+        navigate('/investmentManagement/addInvestment', { state: { record: data } });
+      }}
+    >
       {t('view:addInvestment')}
     </Button>,
     <Button type="primary" onClick={onClickedAddAction}>

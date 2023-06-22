@@ -40,5 +40,18 @@
   "monitorDoc": "Monitoring Report",
   "veriDoc": "Verifcation Report",
   "investmentAccepted": "The investment request has been approved successfully",
-  "investmentRejected": "The Investment has been rejected"
+  "investmentRejected": "The Investment has been rejected",
+  "addInvestment": "Add Investment",
+  "addInvestmentSub": "Add investment to a programme in the Transparency System",
+  "programmeFinancingInvested": "Programme Financing Invested",
+  "ownership": "Ownership",
+  "investorName": "Investor Name",
+  "amountInvested": "Amount invested (USD)",
+  "instrument": "Instrument",
+  "interestRate": "Interest Rate (%)",
+  "resultMetric": "Result Metric",
+  "paymentPerMetric": "Payment Per Metric",
+  "esgType": "ESG Classification",
+  "investmentCreationSuccess": "The investment request created successfully",
+  "total": "Total Ownership"
 }

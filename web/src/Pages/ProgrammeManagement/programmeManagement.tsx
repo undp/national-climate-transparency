@@ -27,6 +27,10 @@ const ProgrammeManagement = () => {
     navigate('/programmeManagement/addProgramme');
   };
 
+  const onClickAddInvestment = () => {
+    navigate('/programmeManagement/addInvestment');
+  };
+
   return (
     <ProgrammeManagementComponent
       t={t}
