@@ -2,7 +2,7 @@
   "addNdcTitle": "Add NDC Action",
   "addNdcSubTitle": "Add NDC Actions to programmes in the Transparency system",
   "NdcTitle": "NDC Actions",
-  "NdcSubTitle": "NDC Actions sub titile",
+  "NdcSubTitle": "NDC Actions of programmes in the Transparency System",
   "NdcDetailsViewTitle": "NDC Action Details -",
   "NdcDetailsViewSubTitle": "NDC Actions of programmes in the Transparency System",
   "ndcActionDetailsTitle": "NDC Action details",
@@ -62,5 +62,7 @@
   "viewMitigationUserEstimatedCredits": "User Estimated Credits",
   "viewAdaptationImplementingAgency": "Implementing Agency",
   "viewAdaptationNationalPlanObjectives": "National Plan Objectives",
-  "viewAdaptationNationalPlanCoverage": "National Plan Coverage"
+  "viewAdaptationNationalPlanCoverage": "National Plan Coverage",
+  "searchByProgrammeName": "Search by programme name",
+  "seeMine": "Mine Only"
 }

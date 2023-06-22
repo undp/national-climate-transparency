@@ -9,6 +9,7 @@ import { DateTime } from 'luxon';
 import { TooltipColor } from '../Common/role.color.constants';
 import { useNavigate } from 'react-router';
 import './ndcActionManagement.scss';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 
 const NdcActionManagement = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -28,6 +29,7 @@ const NdcActionManagement = () => {
   const { Search } = Input;
   const { post } = useConnection();
   const navigate = useNavigate();
+  const { userInfoState } = useUserContext();
 
   const statusOptions = Object.keys(NdcActionStatus).map((k, index) => ({
     label: addSpaces(Object.values(NdcActionStatus)[index]),
@@ -41,6 +43,7 @@ const NdcActionManagement = () => {
       title: t('ndcAction:ndcColumnsActionId'),
       dataIndex: 'id',
       key: 'id',
+      align: 'left' as const,
       sorter: true,
       render: (item: any) => {
         return <span className="clickable">{item}</span>;
@@ -71,12 +74,14 @@ const NdcActionManagement = () => {
       dataIndex: 'action',
       key: 'action',
       sorter: true,
+      align: 'left' as const,
     },
     {
       title: t('ndcAction:ndcColumnsProgrammeName'),
-      dataIndex: 'programmeId',
+      dataIndex: 'programmeName',
       key: 'programmeName',
       sorter: true,
+      align: 'left' as const,
       render: (item: any) => {
         return <span className="clickable">{item}</span>;
       },
@@ -92,12 +97,13 @@ const NdcActionManagement = () => {
       title: t('ndcAction:ndcColumnsSector'),
       dataIndex: 'sector',
       key: 'sector',
+      align: 'left' as const,
       sorter: true,
     },
     {
       title: t('ndcAction:ndcColumnsOwners'),
-      key: 'sector',
-      sorter: false,
+      key: 'programmeId',
+      sorter: true,
       align: 'left' as const,
       render: (item: any, itemObj: any) => {
         return (
@@ -123,8 +129,9 @@ const NdcActionManagement = () => {
     {
       title: t('ndcAction:ndcColumnsStatus'),
       dataIndex: 'status',
+      align: 'left' as const,
       key: 'status',
-      sorter: false,
+      sorter: true,
     },
   ];
 
@@ -135,17 +142,21 @@ const NdcActionManagement = () => {
       filter.push(statusFilter);
     }
 
+    if (dataFilter) {
+      filter.push(dataFilter);
+    }
+
     if (search && search !== '') {
       const interFilterOr = [
         {
-          key: 'sector',
+          key: 'programmeName',
           operation: 'like',
           value: `${search}%`,
         },
       ];
       if (!isNaN(Number(search))) {
         interFilterOr.push({
-          key: 'action',
+          key: 'id',
           operation: 'like',
           value: `${search}`,
         });
@@ -178,7 +189,6 @@ const NdcActionManagement = () => {
         page: currentPage,
         size: pageSize,
         filterAnd: filter,
-        filterOr: dataFilter,
         sort: sort,
       });
 
@@ -242,7 +252,7 @@ const NdcActionManagement = () => {
     setPageSize(size);
   };
 
-  const handleTableChange = (pag: any, sorter: any) => {
+  const handleTableChange = (page: any, sorter: any) => {
     setSortOrder(
       sorter.order === 'ascend' ? 'ASC' : sorter.order === 'descend' ? 'DESC' : undefined
     );
@@ -281,10 +291,28 @@ const NdcActionManagement = () => {
           </Col>
           <Col lg={{ span: 8 }} md={{ span: 8 }}>
             <div className="filter-section">
+              <div className="search-filter">
+                <Checkbox
+                  className="label"
+                  onChange={(v) =>
+                    setDataFilter(
+                      v.target.checked
+                        ? {
+                            key: 'companyId',
+                            operation: 'ANY',
+                            value: userInfoState?.companyId,
+                          }
+                        : undefined
+                    )
+                  }
+                >
+                  {t('ndcAction:seeMine')}
+                </Checkbox>
+              </div>
               <div className="search-bar">
                 <Search
                   onPressEnter={onSearch}
-                  placeholder={'Search'}
+                  placeholder={`${t('ndcAction:searchByProgrammeName')}`}
                   allowClear
                   onChange={(e) =>
                     e.target.value === ''

@@ -5,10 +5,10 @@ import { NDCAction } from "./ndc.action.entity";
 
 @ViewEntity({
     expression: `
-    SELECT ndc_action.*, programme."companyId" as "companyId", json_agg(DISTINCT "company".*) as "company" FROM "ndc_action" "ndc_action" 
+    SELECT ndc_action.*, programme."companyId" as "companyId",programme."title" as "programmeName", json_agg(DISTINCT "company".*) as "company" FROM "ndc_action" "ndc_action" 
     LEFT JOIN "programme" "programme" ON "programme"."programmeId" =  "ndc_action"."programmeId"
     LEFT JOIN "company" "company" ON "company"."companyId" = ANY("programme"."companyId") 
-    group by "ndc_action"."id", programme."companyId" ;
+    group by "ndc_action"."id", programme."companyId", programme."title" ;
     `,
 })
 export class NDCActionViewEntity extends NDCAction {
@@ -18,4 +18,7 @@ export class NDCActionViewEntity extends NDCAction {
 
     @ViewColumn()
     companyId: number[];
+
+    @ViewColumn()
+    programmeName: string;
 }
