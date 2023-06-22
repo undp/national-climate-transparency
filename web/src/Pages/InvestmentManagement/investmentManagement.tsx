@@ -50,6 +50,7 @@ import { InvestmentStatus, getStatusTagType } from '../../Casl/enums/investment.
 import { InvestmentType } from '../../Casl/enums/investment.type';
 import { InvestmentLevel } from '../../Casl/enums/investment.level';
 import { InvestmentStream } from '../../Casl/enums/investment.stream';
+import InvestmentActionModel from './investmentActionModel';
 
 type CompanyInfo = {
   name: string;
@@ -282,7 +283,7 @@ const InvestmentManagement = () => {
                   icon: <Icon.ExclamationOctagon />,
                   actionBtnText: t('creditTransfer:proceed'),
                   okAction: (requestId: any, comment: any) =>
-                    handleRequestOk(requestId, comment, 'transferCancel', undefined, isRetire),
+                    handleRequestOk(requestId, comment, 'investmentCancel', undefined, isRetire),
                   type: 'danger',
                   remarkRequired: true,
                 });
@@ -296,7 +297,7 @@ const InvestmentManagement = () => {
             </List.Item>
           )}
         />
-      ) : !record.isRetirement && record.fromCompanyId === userInfoState?.companyId ? (
+      ) : record.fromCompanyId === userInfoState?.companyId ? (
         <List
           className="action-menu"
           size="small"
@@ -314,7 +315,7 @@ const InvestmentManagement = () => {
                     handleRequestOk(
                       requestId,
                       comment,
-                      'transferApprove',
+                      'investmentApprove',
                       `${t('creditTransfer:transferReqApproved')}`
                     ),
                   type: 'primary',
@@ -332,62 +333,7 @@ const InvestmentManagement = () => {
                   icon: <Icon.XOctagon />,
                   actionBtnText: t('creditTransfer:reject'),
                   okAction: (requestId: any, comment: any) =>
-                    handleRequestOk(requestId, comment, 'transferReject'),
-                  type: 'danger',
-                  remarkRequired: true,
-                });
-              },
-            },
-          ]}
-          renderItem={(item: any) => (
-            <List.Item onClick={item.click}>
-              <Typography.Text className={`action-icon ${item.style}`}>{item.icon}</Typography.Text>
-              <span>{item.text}</span>
-            </List.Item>
-          )}
-        />
-      ) : record.isRetirement && userInfoState?.companyRole === CompanyRole.GOVERNMENT ? (
-        <List
-          className="action-menu"
-          size="small"
-          dataSource={[
-            {
-              text: t('creditTransfer:recognise'),
-              icon: <Icon.Save />,
-              style: 'color-primary',
-              click: () => {
-                showModalOnAction(record, {
-                  title: t('creditTransfer:recogniseTitle'),
-                  icon: <Icon.Save />,
-                  actionBtnText: t('creditTransfer:recognise'),
-                  okAction: (requestId: any, comment: any) =>
-                    handleRequestOk(
-                      requestId,
-                      comment,
-                      'transferApprove',
-                      `${t('creditTransfer:internationalTranferReqAccepted')}`
-                    ),
-                  type: 'primary',
-                  remarkRequired: false,
-                });
-              },
-            },
-            {
-              text: t('creditTransfer:notrecognise'),
-              icon: <Icon.XOctagon />,
-              style: 'color-error',
-              click: () => {
-                showModalOnAction(record, {
-                  title: t('creditTransfer:notRecogniseTitle'),
-                  icon: <Icon.XOctagon />,
-                  actionBtnText: t('creditTransfer:notrecognise'),
-                  okAction: (requestId: any, comment: any) =>
-                    handleRequestOk(
-                      requestId,
-                      comment,
-                      'transferReject',
-                      `${t('creditTransfer:internationalTranferReqAccepted')}`
-                    ),
+                    handleRequestOk(requestId, comment, 'investmentReject'),
                   type: 'danger',
                   remarkRequired: true,
                 });
@@ -705,9 +651,9 @@ const InvestmentManagement = () => {
           </Col>
         </Row>
       </div>
-      {/* {popupInfo && selectedReq && (
-        <TransferActionModel
-          transfer={selectedReq!}
+      {popupInfo && selectedReq && (
+        <InvestmentActionModel
+          investment={selectedReq!}
           onCancel={() => {
             setModalVisible(false);
             setSelectedReq(undefined);
@@ -721,7 +667,7 @@ const InvestmentManagement = () => {
           type={popupInfo!.type}
           remarkRequired={popupInfo.remarkRequired}
         />
-      )} */}
+      )}
     </div>
   );
 };
