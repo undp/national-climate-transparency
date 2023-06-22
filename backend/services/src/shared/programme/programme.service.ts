@@ -789,7 +789,7 @@ export class ProgrammeService {
     if (programmeDto.designDocument) {
       programmeDto.designDocument = await this.uploadDocument(
         DocType.DESIGN_DOCUMENT,
-        undefined,
+        programme.programmeId,
         programmeDto.designDocument
       );
     }
@@ -835,7 +835,7 @@ export class ProgrammeService {
       monitoringReport.txTime = new Date().getTime();
       monitoringReport.url = await this.uploadDocument(
         DocType.MONITORING_REPORT,
-        ndcAc.id,
+        programme.programmeId + '_' + ndcAc.id,
         programmeDto.ndcAction.monitoringReport
       );
     }
@@ -1144,7 +1144,7 @@ export class ProgrammeService {
 
     const url = await this.uploadDocument(
       documentDto.type,
-      documentDto.actionId,
+      programme.programmeId + '_' + documentDto.actionId,
       documentDto.data
     );
     const dr = new ProgrammeDocument();
