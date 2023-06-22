@@ -5,6 +5,7 @@ import './programmeDocuments.scss';
 import {
   CheckCircleOutlined,
   DislikeOutlined,
+  ExclamationCircleOutlined,
   FileAddOutlined,
   LikeOutlined,
   LinkOutlined,
@@ -18,18 +19,22 @@ import { DocumentStatus } from '../../Casl/enums/document.status';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { CompanyRole } from '../../Casl/enums/company.role.enum';
 import RejectDocumentationConfirmationModel from '../Models/rejectDocumentForm';
+import { Role } from '@undp/carbon-library';
+import { linkDocVisible, uploadDocUserPermission } from '../../Casl/documentsPermission';
 
 export interface ProgrammeDocumentsProps {
   data: any;
   title: any;
   icon: any;
   programmeId: any;
+  programmeOwnerId: any[];
   getDocumentDetails: any;
   getProgrammeById: any;
 }
 
 const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumentsProps) => {
-  const { data, title, icon, programmeId, getDocumentDetails, getProgrammeById } = props;
+  const { data, title, icon, programmeId, programmeOwnerId, getDocumentDetails, getProgrammeById } =
+    props;
   const { t } = useTranslation(['programme']);
   const { userInfoState } = useUserContext();
   const { delete: del, post } = useConnection();
@@ -110,12 +115,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
         setDocData([...docData, response?.data]);
         message.open({
           type: 'success',
-          content:
-            (type === DocType.DESIGN_DOCUMENT
-              ? `${t('programme:designDoc')}`
-              : `${t('programme:methDoc')}`) +
-            ' ' +
-            `${t('programme:isUploaded')}`,
+          content: `${t('programme:isUploaded')}`,
           duration: 4,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -124,7 +124,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
       fileInputRefMeth.current = null;
       message.open({
         type: 'error',
-        content: error?.message,
+        content: `${t('programme:notUploaded')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
@@ -134,64 +134,36 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
     }
   };
 
-  const approveDoc = async (id: any, status: any) => {
+  const docAction = async (id: any, status: DocumentStatus) => {
     setLoading(true);
     try {
       const response: any = await post('national/programme/docAction', {
         id: id,
-        status: DocumentStatus.ACCEPTED,
+        status: status,
       });
       message.open({
         type: 'success',
-        content: response?.message,
+        content: `${t('programme:docApproved')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     } catch (error: any) {
       message.open({
         type: 'error',
-        content: error?.message,
+        content: `${t('programme:docRejected')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     } finally {
+      setOpenRejectDocConfirmationModal(false);
       getDocumentDetails();
       getProgrammeById();
       setLoading(false);
     }
   };
 
-  const rejectDocument = async (rejectDoc: any) => {
-    setLoading(true);
-    try {
-      const response: any = await post('national/programme/docAction', {
-        id: rejectDoc?.id,
-        status: DocumentStatus.REJECTED,
-      });
-      if (response?.message.includes('Successfully')) {
-        message.open({
-          type: 'success',
-          content: response.message,
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        setOpenRejectDocConfirmationModal(false);
-      }
-    } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-    } finally {
-      getDocumentDetails();
-      setLoading(false);
-    }
-  };
-
   const handleOk = () => {
-    rejectDocument(rejectDocData);
+    docAction(rejectDocData?.id, DocumentStatus.REJECTED);
   };
 
   const handleCancel = () => {
@@ -199,8 +171,14 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
   };
 
   const companyRolePermission =
-    userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-    userInfoState?.companyRole === CompanyRole.CERTIFIER;
+    (userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
+      userInfoState?.userRole !== Role.ViewOnly) ||
+    (userInfoState?.companyRole === CompanyRole.CERTIFIER &&
+      userInfoState?.userRole !== Role.ViewOnly);
+
+  const designDocActionPermission =
+    userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
+    userInfoState?.userRole !== Role.ViewOnly;
 
   const designDocPending = designDocStatus === DocumentStatus.PENDING;
 
@@ -220,10 +198,10 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                 <div className={designDocUrl !== '' ? 'label-uploaded' : 'label'}>
                   {t('programme:designDoc')}
                 </div>
-                {designDocPending && companyRolePermission && (
+                {designDocPending && designDocActionPermission && (
                   <>
                     <LikeOutlined
-                      onClick={() => approveDoc(designDocId, designDocStatus)}
+                      onClick={() => docAction(designDocId, DocumentStatus.ACCEPTED)}
                       className="common-progress-icon"
                       style={{ color: '#976ED7' }}
                     />
@@ -250,6 +228,12 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                     style={{ color: '#5DC380' }}
                   />
                 )}
+                {designDocStatus === DocumentStatus.REJECTED && (
+                  <ExclamationCircleOutlined
+                    className="common-progress-icon"
+                    style={{ color: '#FD6F70' }}
+                  />
+                )}
               </div>
               {designDocUrl !== '' && (
                 <div className="time">
@@ -260,15 +244,34 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
             <Col span={10} className="field-value">
               {designDocUrl !== '' ? (
                 <div className="link">
-                  <a href={designDocUrl} target="_blank" rel="noopener noreferrer" download>
-                    <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
-                  </a>
+                  {linkDocVisible(designDocStatus) && (
+                    <a href={designDocUrl} target="_blank" rel="noopener noreferrer" download>
+                      <LinkOutlined
+                        className="common-progress-icon margin-right-1"
+                        style={{ color: '#3F3A47' }}
+                      />
+                    </a>
+                  )}
                   {designDocStatus !== DocumentStatus.ACCEPTED && (
                     <>
                       <FileAddOutlined
-                        className="common-progress-icon margin-left-1"
-                        style={{ color: '#3F3A47', cursor: 'pointer' }}
-                        onClick={handleDesignDocFileUpload}
+                        className="common-progress-icon"
+                        style={
+                          uploadDocUserPermission(
+                            userInfoState,
+                            DocType.DESIGN_DOCUMENT,
+                            programmeOwnerId
+                          )
+                            ? { color: '#3F3A47', cursor: 'pointer' }
+                            : { color: '#cacaca', cursor: 'default' }
+                        }
+                        onClick={() =>
+                          uploadDocUserPermission(
+                            userInfoState,
+                            DocType.DESIGN_DOCUMENT,
+                            programmeOwnerId
+                          ) && handleDesignDocFileUpload()
+                        }
                       />
                       <input
                         type="file"
@@ -288,8 +291,22 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                 <>
                   <FileAddOutlined
                     className="common-progress-icon"
-                    style={{ color: '#3F3A47', cursor: 'pointer' }}
-                    onClick={handleDesignDocFileUpload}
+                    style={
+                      uploadDocUserPermission(
+                        userInfoState,
+                        DocType.DESIGN_DOCUMENT,
+                        programmeOwnerId
+                      )
+                        ? { color: '#3F3A47', cursor: 'pointer' }
+                        : { color: '#cacaca', cursor: 'default' }
+                    }
+                    onClick={() =>
+                      uploadDocUserPermission(
+                        userInfoState,
+                        DocType.DESIGN_DOCUMENT,
+                        programmeOwnerId
+                      ) && handleDesignDocFileUpload()
+                    }
                   />
                   <input
                     type="file"
@@ -332,7 +349,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                 {methodDocStatus === DocumentStatus.PENDING && companyRolePermission && (
                   <>
                     <LikeOutlined
-                      onClick={() => approveDoc(methDocId, methodDocStatus)}
+                      onClick={() => docAction(methDocId, DocumentStatus.ACCEPTED)}
                       className="common-progress-icon"
                       style={{ color: '#976ED7' }}
                     />
@@ -359,6 +376,12 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                     style={{ color: '#5DC380' }}
                   />
                 )}
+                {methodDocStatus === DocumentStatus.REJECTED && (
+                  <ExclamationCircleOutlined
+                    className="common-progress-icon"
+                    style={{ color: '#FD6F70' }}
+                  />
+                )}
               </div>
               {methodologyDocUrl !== '' && (
                 <div className="time">
@@ -369,19 +392,37 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
             <Col span={10} className="field-value">
               {methodologyDocUrl !== '' ? (
                 <div className="link">
-                  <a href={methodologyDocUrl} target="_blank" rel="noopener noreferrer" download>
-                    <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
-                  </a>
+                  {linkDocVisible(methodDocStatus) && (
+                    <a href={methodologyDocUrl} target="_blank" rel="noopener noreferrer" download>
+                      <LinkOutlined
+                        className="common-progress-icon margin-right-1"
+                        style={{ color: '#3F3A47' }}
+                      />
+                    </a>
+                  )}
                   {methodDocStatus !== DocumentStatus.ACCEPTED && (
                     <>
                       <FileAddOutlined
-                        className="common-progress-icon margin-left-1"
+                        className="common-progress-icon"
                         style={
-                          designDocStatus === DocumentStatus.ACCEPTED
+                          designDocStatus === DocumentStatus.ACCEPTED &&
+                          uploadDocUserPermission(
+                            userInfoState,
+                            DocType.METHODOLOGY_DOCUMENT,
+                            programmeOwnerId
+                          )
                             ? { color: '#3F3A47', cursor: 'pointer' }
                             : { color: '#cacaca' }
                         }
-                        onClick={handleMethodologyFileUpload}
+                        onClick={() =>
+                          designDocStatus === DocumentStatus.ACCEPTED &&
+                          uploadDocUserPermission(
+                            userInfoState,
+                            DocType.METHODOLOGY_DOCUMENT,
+                            programmeOwnerId
+                          ) &&
+                          handleMethodologyFileUpload()
+                        }
                       />
                       <input
                         type="file"
@@ -403,11 +444,24 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                   <FileAddOutlined
                     className="common-progress-icon"
                     style={
-                      designDocStatus === DocumentStatus.ACCEPTED
+                      designDocStatus === DocumentStatus.ACCEPTED &&
+                      uploadDocUserPermission(
+                        userInfoState,
+                        DocType.METHODOLOGY_DOCUMENT,
+                        programmeOwnerId
+                      )
                         ? { color: '#3F3A47', cursor: 'pointer' }
-                        : { color: '#cacaca' }
+                        : { color: '#cacaca', cursor: 'default' }
                     }
-                    onClick={handleMethodologyFileUpload}
+                    onClick={() =>
+                      designDocStatus === DocumentStatus.ACCEPTED &&
+                      uploadDocUserPermission(
+                        userInfoState,
+                        DocType.METHODOLOGY_DOCUMENT,
+                        programmeOwnerId
+                      ) &&
+                      handleMethodologyFileUpload()
+                    }
                   />
                   <input
                     type="file"

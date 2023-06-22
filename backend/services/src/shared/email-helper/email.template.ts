@@ -4,11 +4,11 @@ export const EmailTemplates = {
     subject: "Welcome!",
     html: `
         Welcome {{organisationName}},<br><br> 
-        Your Organisation has been registered with the {{countryName}} Carbon Registry as a {{organisationRole}} Organisation. <br><br>
+        Your Organisation has been registered with the {{countryName}} Transparency System as a {{organisationRole}} Organisation. <br><br>
         Explore the Registry here {{home}}. <br><br> 
         
         Sincerely,<br> 
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   USER_CREATE: {
@@ -24,17 +24,17 @@ export const EmailTemplates = {
         Password (temporary): {{tempPassword}} <br><br>
 
         If you have any questions, feel free to email our customer success 
-        team <a href="mailto:help@carbreg.org?subject=I Need Help With The {{countryName}} Carbon Credit Registry">customer success team</a>
+        team <a href="mailto:help@carbreg.org?subject=I Need Help With The {{countryName}} Transparency System">customer success team</a>
         (We’re lightning quick at replying.) We also offer live chat {{liveChat}}. 
         <br><br>
 
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team <br><br>
+        The {{countryName}} Transparency System Team <br><br>
 
         <div style="font-size:12px">
             P.S.Need immediate help getting started? Check out our help 
             <a href="{{helpDoc}}">documentation</a>. Or, just reply to this email, the 
-            {{countryName}} Carbon Credit Registry Team is always ready to help! 
+            {{countryName}} Transparency System Team is always ready to help! 
         </div>
         <br>
         <div style="font-size:12px">
@@ -47,14 +47,14 @@ export const EmailTemplates = {
   },
   API_KEY_EMAIL: {
     id: "API_KEY_EMAIL",
-    subject: "Carbon Credit Registry API Key Generation",
+    subject: "Transparency System API Key Generation",
     html: `
         Hi {{name}},<br><br>
 
-        You carbon registry account api key regenerated  - {{apiKey}}.
+        You Transparency System account api key regenerated  - {{apiKey}}.
         <br><br>
         Sincerely,<br>
-        The Carbon Credit Registry Team 
+        The Transparency System Team 
     `,
     text: "",
   },
@@ -67,7 +67,7 @@ export const EmailTemplates = {
 
         <br><br>
         Sincerely,<br>
-        The Carbon Credit Registry Team 
+        The Transparency System Team 
         `,
     text: "",
   },
@@ -76,14 +76,14 @@ export const EmailTemplates = {
     subject: "Your Password was Changed",
     html: `
         Hi {{name}},<br><br>
-        The password of your Carbon Registry account was changed successfully. <br><br>
-        If you do not use {{countryName}} Carbon Credit Registry or did not request a password reset, please ignore this email or 
-        <a href="mailto:help@carbreg.org?subject=Password Problem with the {{countryName}} Carbon Credit Registry">contact support</a>
+        The password of your Transparency System account was changed successfully. <br><br>
+        If you do not use {{countryName}} Transparency System or did not request a password reset, please ignore this email or 
+        <a href="mailto:help@carbreg.org?subject=Password Problem with the {{countryName}} Transparency System">contact support</a>
         if you have questions. 
         
         <br><br>
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
     text: "",
   },
@@ -92,20 +92,20 @@ export const EmailTemplates = {
     subject: "Password Reset Request",
     html: `
         Hi {{name}},<br><br>
-        We received a request to reset your Carbon Registry password. <br><br>
+        We received a request to reset your Transparency System password. <br><br>
         Use the link below to set a new password for your account. This password reset is only valid for the next hour.
         <br><br>
 
         <a href="{{home}}/resetPassword/{{requestId}}">Click here to reset the password</a>
         <br><br>
 
-        If you do not use {{countryName}} Carbon Credit Registry or did not request a password reset, please ignore this email or 
-        <a href="mailto:help@carbreg.org?subject=Password Problem with the {{countryName}} Carbon Credit Registry">contact support</a>
+        If you do not use {{countryName}} Transparency System or did not request a password reset, please ignore this email or 
+        <a href="mailto:help@carbreg.org?subject=Password Problem with the {{countryName}} Transparency System">contact support</a>
         if you have questions.
         
         <br><br>
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
     text: "",
   },
@@ -121,7 +121,7 @@ export const EmailTemplates = {
         <br><br>
          
         Sincerely,  <br>
-        The {{countryName}} Carbon Credit Registry Team 
+        The {{countryName}} Transparency System Team 
         `,
   },
   PROGRAMME_AUTHORISATION: {
@@ -137,7 +137,7 @@ export const EmailTemplates = {
         <br><br>
         
         Sincerely,  <br>
-        The {{countryName}} Carbon Credit Registry Team 
+        The {{countryName}} Transparency System Team 
         `,
   },
   PROGRAMME_REJECTION: {
@@ -152,7 +152,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the programme.  <br><br>
 
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_ISSUANCE: {
@@ -166,7 +166,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the programme.<br><br>
 
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_TRANSFER_REQUISITIONS: {
@@ -179,7 +179,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the transfer request.<br><br>
 
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_TRANSFER_CANCELLATION: {
@@ -192,7 +192,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the transfer request.<br><br>
 
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_TRANSFER_CANCELLATION_SYS_TO_INITIATOR: {
@@ -205,7 +205,7 @@ export const EmailTemplates = {
       Click <a href="{{pageLink}}">here</a> for more details of the transfer request. <br><br>
       
       Sincerely, <br>
-      The {{countryName}} Carbon Credit Registry Team 
+      The {{countryName}} Transparency System Team 
     `,
   },
   CREDIT_TRANSFER_CANCELLATION_SYS_TO_SENDER: {
@@ -218,7 +218,7 @@ export const EmailTemplates = {
       Click <a href="{{pageLink}}">here</a> for more details of the transfer request. <br><br>
       
       Sincerely, <br>
-      The {{countryName}} Carbon Credit Registry Team 
+      The {{countryName}} Transparency System Team 
     `,
   },
   CREDIT_TRANSFER_ACCEPTED: {
@@ -231,7 +231,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the transfer request. <br><br>
 
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_TRANSFER_REJECTED: {
@@ -245,7 +245,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the transfer request. <br><br>
 
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team`,
+        The {{countryName}} Transparency System Team`,
   },
   CREDIT_TRANSFER_GOV: {
     id: "CREDIT_TRANSFER_GOV",
@@ -259,7 +259,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the transfer request. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_TRANSFER_GOV_CANCELLATION: {
@@ -274,7 +274,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the transfer request. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_TRANSFER_GOV_ACCEPTED_TO_INITIATOR: {
@@ -287,7 +287,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the transfer request.<br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_TRANSFER_GOV_ACCEPTED_TO_RECEIVER: {
@@ -300,7 +300,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the transfer request <br> <br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_TRANSFER_GOV_REJECTED: {
@@ -313,7 +313,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the transfer request <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_SEND_DEVELOPER: {
@@ -327,7 +327,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the transfer request. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   PROGRAMME_CERTIFICATION: {
@@ -340,7 +340,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the certification. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   PROGRAMME_CERTIFICATION_REVOKE_BY_CERT: {
@@ -353,7 +353,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the certification. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   PROGRAMME_CERTIFICATION_REVOKE_BY_GOVT_TO_PROGRAMME: {
@@ -366,7 +366,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the certification. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   PROGRAMME_CERTIFICATION_REVOKE_BY_GOVT_TO_CERT: {
@@ -379,7 +379,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the certification. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   PROGRAMME_CERTIFICATION_REVOKE_BY_SYSTEM: {
@@ -392,7 +392,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the certification. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   PROGRAMME_DEVELOPER_ORG_DEACTIVATION: {
@@ -408,7 +408,7 @@ export const EmailTemplates = {
          · All the international transfer retire requests sent by your Organisation were cancelled.<br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CERTIFIER_ORG_DEACTIVATION: {
@@ -422,7 +422,7 @@ export const EmailTemplates = {
         · All the certificates given by your Organisation were revoked. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_RETIREMENT_BY_GOV: {
@@ -435,7 +435,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the retirement. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_RETIREMENT_BY_DEV: {
@@ -448,7 +448,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the international transfer retire request. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_RETIREMENT_CANCEL: {
@@ -461,7 +461,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the international transfer retire request. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_RETIREMENT_CANCEL_SYS_TO_INITIATOR: {
@@ -473,7 +473,7 @@ export const EmailTemplates = {
       Click <a href="{{pageLink}}">here</a> for more details of the international transfer retire request. <br><br>
     
       Sincerely,  <br>
-      The {{countryName}} Carbon Credit Registry Team 
+      The {{countryName}} Transparency System Team 
     `,
   },
   CREDIT_RETIREMENT_CANCEL_SYS_TO_GOV: {
@@ -485,7 +485,7 @@ export const EmailTemplates = {
       Click <a href="{{pageLink}}">here</a> for more details of the international transfer retire request. <br><br>
     
       Sincerely,  <br>
-      The {{countryName}} Carbon Credit Registry Team 
+      The {{countryName}} Transparency System Team 
     `,
   },
   CREDIT_RETIREMENT_RECOGNITION: {
@@ -498,7 +498,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the international transfer retire request. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   CREDIT_RETIREMENT_NOT_RECOGNITION: {
@@ -511,7 +511,7 @@ export const EmailTemplates = {
         Click <a href="{{pageLink}}">here</a> for more details of the international transfer retire request. <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
   ORG_REACTIVATION: {
@@ -523,7 +523,7 @@ export const EmailTemplates = {
         Your Organisation has been reactivated by the {{government}}. Your Organisation will be able to perform actions as before and all the users of the Organisation will be reactivated.  <br><br>
         
         Sincerely, <br>
-        The {{countryName}} Carbon Credit Registry Team
+        The {{countryName}} Transparency System Team
         `,
   },
 };

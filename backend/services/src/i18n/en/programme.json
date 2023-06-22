@@ -43,7 +43,7 @@
     "cantTransferCreditWithinSameComp": "Cannot transfer ownership within the same company",
     "programmeNotInCreditIssuedState": "Programme is not in credit issued state",
     "cantInitiateTransferForOtherComp": "Cannot initiate investments for other companies",
-    "fromCompInReqIsNotOwnerOfProgramme": "From company mentioned in the request does own the programme",
+    "fromCompInReqIsNotOwnerOfProgramme": "From company mentioned in the request does not own the programme",
     "companyHaveNoEnoughBalanceForTransfer": "Company {} does not have enough balance for the transfer. Available: {}",
     "proponentPercMustDefinedForEvryProponentTaxId": "Proponent percentage must defined for each proponent tax id",
     "proponentPercAndTaxIdsNotMatched": "Proponent percentage and number of tax ids does not match",
