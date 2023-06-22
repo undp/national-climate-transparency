@@ -77,6 +77,7 @@
     "accept": "Accept",
     "certifier": "Certifier",
     "seeMine": "Mine",
+    "ownershipPercentage": "Ownership Percentage",
     "tlRejectTitle": "Transfer Request Rejected",
     "tlTxRejectDesc": "The request to transfer {} {} credits from {} to {} was rejected by {}",
     "tlInitTitle": "Transfer Initiated",

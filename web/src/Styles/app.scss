@@ -461,11 +461,11 @@ body {
 
 .popup-primary {
   .icon {
-    color: $primary-color;
+    color: $primary-color !important;
   }
 
   .ant-btn-primary {
-    background: $primary-color;
+    background: $primary-color !important;
     border-radius: $primary-color;
     border: none;
   }
