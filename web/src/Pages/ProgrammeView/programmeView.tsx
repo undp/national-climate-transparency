@@ -75,6 +75,7 @@ const ProgrammeView = () => {
   const [documentsData, setDocumentsData] = useState<any[]>([]);
   const [curentProgrammeStatus, setCurrentProgrammeStatus] = useState<any>('');
   const [uploadMonitoringReport, setUploadMonitoringReport] = useState<boolean>(false);
+  const [programmeOwnerId, setProgrammeOwnerId] = useState<any[]>([]);
   const accessToken =
     mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
       ? process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
@@ -334,8 +335,6 @@ const ProgrammeView = () => {
           }
         }
       });
-      console.log('mapped ------ ');
-      console.log(groupedByActionId);
       setNdcActionHistoryDataGrouped(groupedByActionId);
       const mappedElements = Object.keys(groupedByActionId).map((actionId) => ({
         status: 'process',
@@ -344,10 +343,8 @@ const ProgrammeView = () => {
         description: (
           <NdcActionBody
             data={groupedByActionId[actionId]}
-            progressIcon={
-              <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
-            }
             programmeId={data?.programmeId}
+            programmeOwnerId={programmeOwnerId}
             canUploadMonitorReport={uploadMonitoringReport}
             getProgrammeDocs={() => getDocuments(String(data?.programmeId))}
           />
@@ -443,6 +440,7 @@ const ProgrammeView = () => {
 
   useEffect(() => {
     if (data) {
+      setProgrammeOwnerId(data?.companyId);
       setCurrentProgrammeStatus(data?.currentStage);
       getNdcActionHistory(data?.programmeId, ndcActionData);
     }
@@ -727,6 +725,7 @@ const ProgrammeView = () => {
                   title={t('view:programmeDocs')}
                   icon={<QrcodeOutlined />}
                   programmeId={data?.programmeId}
+                  programmeOwnerId={programmeOwnerId}
                   getDocumentDetails={() => {
                     getDocuments(data?.programmeId);
                   }}

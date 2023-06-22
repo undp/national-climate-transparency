@@ -33,6 +33,8 @@ import { AddProgrammeComponent } from './Pages/Programme/programmeCreation';
 import InvestmentManagement from './Pages/InvestmentManagement/investmentManagement';
 import AddNdcAction from './Pages/AddNdcAction/addNdcAction';
 import { AddInvestmentComponent } from './Pages/InvestmentManagement/investmentCreation';
+import NdcActionManagement from './Pages/NdcActionManagement/ndcActionManagement';
+import NdcActionView from './Pages/NdcActionView/ndcActionView';
 
 // message.config({
 //   duration: 60,
@@ -100,6 +102,13 @@ const App = () => {
                   >
                     <Route path="viewAll" element={<InvestmentManagement />} />
                     <Route path="addInvestment" element={<AddInvestmentComponent />} />
+                  </Route>
+                  <Route
+                    path="/ndcManagement"
+                    element={<CustomLayout selectedKey="ndcManagement/viewAll" />}
+                  >
+                    <Route path="viewAll" element={<NdcActionManagement />} />
+                    <Route path="view" element={<NdcActionView />} />
                   </Route>
                   <Route
                     path="/companyManagement"
