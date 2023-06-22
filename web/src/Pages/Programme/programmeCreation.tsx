@@ -29,6 +29,7 @@ import moment from 'moment';
 import { RcFile } from 'antd/lib/upload';
 import { CompanyRole } from '@undp/carbon-library';
 import NdcActionDetails from '../../Components/NdcAction/ndcActionDetails';
+import CoBenifitsComponent from '../../Components/CoBenifits/coBenifits';
 
 type SizeType = Parameters<typeof Form>[0]['size'];
 
@@ -998,7 +999,7 @@ export const AddProgrammeComponent = () => {
                             <div className="title">{t('addProgramme:addProgramme4')}</div>
                           </div>
                         ),
-                        description: current === 3 && <div>4</div>,
+                        description: current === 3 && <CoBenifitsComponent />,
                       },
                     ]
                   : []),
