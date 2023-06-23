@@ -39,70 +39,87 @@ const sdgGoalsDetails = [
   {
     name: 'noPoverty',
     image: goal1,
+    selected: false,
   },
   {
     name: 'zeroHunger',
     image: goal2,
+    selected: false,
   },
   {
     name: 'gdHealth',
     image: goal3,
+    selected: false,
   },
   {
     name: 'qualityEducation',
     image: goal4,
+    selected: false,
   },
   {
     name: 'genderEq',
     image: goal5,
+    selected: false,
   },
   {
     name: 'cleanWatr',
     image: goal6,
+    selected: false,
   },
   {
     name: 'affEnergy',
     image: goal7,
+    selected: false,
   },
   {
     name: 'decentWork',
     image: goal8,
+    selected: false,
   },
   {
     name: 'industry',
     image: goal9,
+    selected: false,
   },
   {
     name: 'reducedInEq',
     image: goal10,
+    selected: false,
   },
   {
     name: 'sustainableCities',
     image: goal11,
+    selected: false,
   },
   {
     name: 'responsibleConsumption',
     image: goal12,
+    selected: false,
   },
   {
     name: 'climateAction',
     image: goal13,
+    selected: false,
   },
   {
     name: 'lifeBelowWater',
     image: goal14,
+    selected: false,
   },
   {
     name: 'lifeOnLand',
     image: goal15,
+    selected: false,
   },
   {
     name: 'peace',
     image: goal16,
+    selected: false,
   },
   {
     name: 'partnership',
     image: goal17,
+    selected: false,
   },
 ];
 
@@ -111,8 +128,56 @@ const SdgGoals = () => {
   const [selectedImageId, setSelectedImageId] = useState(null);
   const [sdgGoals, setSdgGoals] = useState<any[]>(sdgGoalsDetails);
 
+  const returnSelectedImage = (image: any) => {
+    switch (image) {
+      case goal1:
+        return goal1Seletced;
+      case goal2:
+        return goal2Seletced;
+      case goal3:
+        return goal3Seletced;
+      case goal4:
+        return goal4Seletced;
+      case goal5:
+        return goal5Seletced;
+      case goal6:
+        return goal6Seletced;
+      case goal7:
+        return goal7Seletced;
+      case goal8:
+        return goal8Seletced;
+      case goal9:
+        return goal9Seletced;
+      case goal10:
+        return goal10Seletced;
+      case goal11:
+        return goal11Seletced;
+      case goal12:
+        return goal12Seletced;
+      case goal13:
+        return goal13Seletced;
+      case goal14:
+        return goal14Seletced;
+      case goal15:
+        return goal15Seletced;
+      case goal16:
+        return goal16Seletced;
+      case goal17:
+        return goal17Seletced;
+      default:
+        return image;
+    }
+  };
+
   const handleImageSelect = (imageId: any, image: any) => {
     setSelectedImageId(imageId);
+    setSdgGoals((goals) =>
+      goals.map((goal) =>
+        goal.name === imageId
+          ? { ...goal, selected: true, image: returnSelectedImage(goal?.image) }
+          : { ...goal, selected: false }
+      )
+    );
   };
 
   return (
@@ -124,7 +189,7 @@ const SdgGoals = () => {
         onFinish={() => {}}
       >
         <Row gutter={[5, 16]} className="row">
-          {sdgGoalsDetails?.map((sdgGoal: any) => (
+          {sdgGoals?.map((sdgGoal: any) => (
             <Col sm={12} md={12} lg={4} xl={4} className="col">
               <div className="img-container">
                 <Form.Item name="images">
