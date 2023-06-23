@@ -12,6 +12,17 @@ export class S3FileHandlerService implements FileHandlerInterface {
     private configService: ConfigService
   ) {}
   
+
+  private getContentType(filename: string) {
+    if (filename.endsWith('.pdf')){
+      return 'application/pdf'
+    }
+    if (filename.endsWith('.xlsx') || filename.endsWith('.xls')) {
+      return 'application/excel'
+    }
+    return "image/png";
+  }
+
   public async uploadFile(path: string, content: string): Promise<string> {
     const imgBuffer = Buffer.from(content, "base64");
     var uploadParams = {
@@ -19,7 +30,7 @@ export class S3FileHandlerService implements FileHandlerInterface {
       Key: "",
       Body: imgBuffer,
       ContentEncoding: "base64",
-      ContentType: "image/png",
+      ContentType: this.getContentType(path),
     };
     
     // uploadParams.Key = `profile_images/${companyId}_${new Date().getTime()}.png`;
