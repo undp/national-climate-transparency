@@ -162,7 +162,6 @@ const SdgGoals = () => {
     [goal15Selected]: goal15,
     [goal16Selected]: goal16,
     [goal17Selected]: goal17,
-    // Add other mappings...
   };
 
   const returnSelectedImage = (image: any) => {
