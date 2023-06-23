@@ -169,13 +169,18 @@ const SdgGoals = () => {
     }
   };
 
+  const renderGoalImage = (goal: any, selected?: boolean) => {
+    const selectedImage = returnSelectedImage(goal.image);
+    return selected ? selectedImage : goal.image;
+  };
+
   const handleImageSelect = (imageId: any, image: any) => {
     setSelectedImageId(imageId);
     setSdgGoals((goals) =>
       goals.map((goal) =>
-        goal.name === imageId
-          ? { ...goal, selected: true, image: returnSelectedImage(goal?.image) }
-          : { ...goal, selected: false }
+        goal.name === imageId && goal?.selected === false
+          ? { ...goal, selected: true, image: renderGoalImage(goal, true) }
+          : { ...goal, selected: false, image: renderGoalImage(goal) }
       )
     );
   };
