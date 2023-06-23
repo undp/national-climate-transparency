@@ -1,3 +1,5 @@
+@import '../../Styles/variables.scss';
+
 .co-benifits-container {
   display: flex;
   width: 100%;
@@ -18,22 +20,64 @@
       .benifits-details {
         width: 95%;
 
-        .form-item {
-          .ant-form-item-label {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-start;
-          }
-          .radio-group {
-            width: 50%;
-
-            .condition-radio {
-              width: 45%;
+        .part-one {
+          width: 100%;
+          .form-item {
+            width: 100%;
+            .ant-form-item-label {
+              display: flex;
+              flex-direction: row;
               align-items: center;
-              justify-content: center;
+              text-align: left;
+              justify-content: flex-start;
+              white-space: initial;
+            }
+
+            .ant-radio-group {
+              text-align: center;
+              align-items: center;
+              justify-content: flex-start;
+              margin-left: 0.5rem;
+
+              .yes-no-radio-container:first-child {
+                margin-right: 1rem;
+              }
+            }
+
+            .yes-no-radio-container {
+              width: 35%;
+              text-align: center;
+              .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+                color: $dark-text-color !important;
+                border-color: $primary-purple !important;
+                box-shadow: none;
+              }
+            }
+            .ant-radio-button-wrapper::before {
+              background-color: transparent;
+            }
+            .ant-radio-button-wrapper {
+              border: 1px solid $common-form-input-border;
+            }
+
+            .anticon {
+              margin-right: 0.5rem;
+            }
+            .yes-no-radio {
+              width: 100%;
+              .ant-radio-button-checked {
+                background: $primary-purple;
+                color: #ffffff;
+              }
             }
           }
+        }
+      }
+
+      .row {
+        .col {
+          display: flex;
+          flex-direction: column !important;
         }
       }
     }
