@@ -2,7 +2,40 @@
   display: flex;
   width: 100%;
 
+  .ant-form-item-label > label::after {
+    content: none;
+  }
+
   .benifits-tabs {
     width: 100%;
+
+    .co-benifits-tab-item {
+      width: 100%;
+      // align-items: center;
+      // justify-content: center;
+      margin-left: 3rem;
+
+      .benifits-details {
+        width: 95%;
+
+        .form-item {
+          .ant-form-item-label {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+          }
+          .radio-group {
+            width: 50%;
+
+            .condition-radio {
+              width: 45%;
+              align-items: center;
+              justify-content: center;
+            }
+          }
+        }
+      }
+    }
   }
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import './coBenifits.scss';
 import { Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
+import GenderParity from './genderParity';
 
 const CoBenifitsComponent = () => {
   const { t } = useTranslation(['coBenifits']);
@@ -14,7 +15,7 @@ const CoBenifitsComponent = () => {
     {
       label: t('coBenifits:genderPart'),
       key: '2',
-      children: 'Gender Parity',
+      children: <GenderParity />,
     },
     {
       label: t('coBenifits:safeguards'),
