@@ -628,96 +628,94 @@ const ProgrammeView = () => {
                 <div className="centered-card">{elements}</div>
               </div>
             </Card>
-            {(emissionsReductionExpected !== 0 ||
-              emissionsReductionAchieved !== 0) && (
-                <Card className="card-container">
-                  <div className="info-view">
-                    <div className="title">
-                      <span className="title-icon">{<BlockOutlined />}</span>
-                      <span className="title-text">
-                        {formatString('view:emissionsReductions', [])}
-                      </span>
-                    </div>
-                    <div className="map-content">
-                      <Chart
-                        id={'creditChart'}
-                        options={{
-                          labels: ['Achieved', 'Expected'],
-                          legend: {
-                            position: 'bottom',
-                          },
-                          colors: ['#b3b3ff', '#e0e0eb'],
-                          tooltip: {
-                            fillSeriesColor: false,
-                          },
-                          states: {
-                            normal: {
-                              filter: {
-                                type: 'none',
-                                value: 0,
-                              },
-                            },
-                            hover: {
-                              filter: {
-                                type: 'none',
-                                value: 0,
-                              },
-                            },
-                            active: {
-                              allowMultipleDataPointsSelection: true,
-                              filter: {
-                                type: 'darken',
-                                value: 0.7,
-                              },
-                            },
-                          },
-                          stroke: {
-                            colors: ['#00'],
-                          },
-                          plotOptions: {
-                            pie: {
-                              expandOnClick: false,
-                              donut: {
-                                size: '75%',
-                                labels: {
-                                  show: true,
-                                  total: {
-                                    showAlways: true,
-                                    show: true,
-                                    label: 'Expected',
-                                    formatter: () =>
-                                      '' + addCommSep(data?.emissionReductionExpected),
-                                  },
-                                },
-                              },
-                            },
-                          },
-                          dataLabels: {
-                            enabled: false,
-                          },
-                          responsive: [
-                            {
-                              breakpoint: 480,
-                              options: {
-                                chart: {
-                                  width: '15vw',
-                                },
-                                legend: {
-                                  position: 'bottom',
-                                },
-                              },
-                            },
-                          ],
-                        }}
-                        series={[emissionsReductionAchieved, emissionsReductionExpected]}
-                        type="donut"
-                        width="100%"
-                        fontFamily="inter"
-                      />
-                    </div>
+            {(emissionsReductionExpected !== 0 || emissionsReductionAchieved !== 0) && (
+              <Card className="card-container">
+                <div className="info-view">
+                  <div className="title">
+                    <span className="title-icon">{<BlockOutlined />}</span>
+                    <span className="title-text">
+                      {formatString('view:emissionsReductions', [])}
+                    </span>
                   </div>
-                </Card>
-              )}
+                  <div className="map-content">
+                    <Chart
+                      id={'creditChart'}
+                      options={{
+                        labels: ['Achieved', 'Expected'],
+                        legend: {
+                          position: 'bottom',
+                        },
+                        colors: ['#b3b3ff', '#e0e0eb'],
+                        tooltip: {
+                          fillSeriesColor: false,
+                        },
+                        states: {
+                          normal: {
+                            filter: {
+                              type: 'none',
+                              value: 0,
+                            },
+                          },
+                          hover: {
+                            filter: {
+                              type: 'none',
+                              value: 0,
+                            },
+                          },
+                          active: {
+                            allowMultipleDataPointsSelection: true,
+                            filter: {
+                              type: 'darken',
+                              value: 0.7,
+                            },
+                          },
+                        },
+                        stroke: {
+                          colors: ['#00'],
+                        },
+                        plotOptions: {
+                          pie: {
+                            expandOnClick: false,
+                            donut: {
+                              size: '75%',
+                              labels: {
+                                show: true,
+                                total: {
+                                  showAlways: true,
+                                  show: true,
+                                  label: 'Expected',
+                                  formatter: () => '' + addCommSep(data?.emissionReductionExpected),
+                                },
+                              },
+                            },
+                          },
+                        },
+                        dataLabels: {
+                          enabled: false,
+                        },
+                        responsive: [
+                          {
+                            breakpoint: 480,
+                            options: {
+                              chart: {
+                                width: '15vw',
+                              },
+                              legend: {
+                                position: 'bottom',
+                              },
+                            },
+                          },
+                        ],
+                      }}
+                      series={[emissionsReductionAchieved, emissionsReductionExpected]}
+                      type="donut"
+                      width="100%"
+                      fontFamily="inter"
+                    />
+                  </div>
+                </div>
+              </Card>
+            )}
             <Card className="card-container">
               <div>
                 <ProgrammeDocuments
