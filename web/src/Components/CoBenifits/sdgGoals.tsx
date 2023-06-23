@@ -1,5 +1,5 @@
 import { Checkbox, Col, Form, Row } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import goal1 from '../../Assets/Images/SdgGoalsImages/goal-1.jpg';
 import goal2 from '../../Assets/Images/SdgGoalsImages/goal-2.jpg';
 import goal3 from '../../Assets/Images/SdgGoalsImages/goal-3.jpg';
@@ -125,7 +125,6 @@ const sdgGoalsDetails = [
 
 const SdgGoals = () => {
   const [formOne] = Form.useForm();
-  const [selectedImageId, setSelectedImageId] = useState(null);
   const [sdgGoals, setSdgGoals] = useState<any[]>(sdgGoalsDetails);
 
   const returnSelectedImage = (image: any) => {
@@ -164,35 +163,67 @@ const SdgGoals = () => {
         return goal16Seletced;
       case goal17:
         return goal17Seletced;
+      case goal1Seletced:
+        return goal1;
+      case goal2Seletced:
+        return goal2;
+      case goal3Seletced:
+        return goal3;
+      case goal4Seletced:
+        return goal4;
+      case goal5Seletced:
+        return goal5;
+      case goal6Seletced:
+        return goal6;
+      case goal7Seletced:
+        return goal7;
+      case goal8Seletced:
+        return goal8;
+      case goal9Seletced:
+        return goal9;
+      case goal10Seletced:
+        return goal10;
+      case goal11Seletced:
+        return goal11;
+      case goal12Seletced:
+        return goal12;
+      case goal13Seletced:
+        return goal13;
+      case goal14Seletced:
+        return goal14;
+      case goal15Seletced:
+        return goal15;
+      case goal16Seletced:
+        return goal16;
+      case goal17Seletced:
+        return goal17;
       default:
         return image;
     }
   };
 
-  const renderGoalImage = (goal: any, selected?: boolean) => {
-    const selectedImage = returnSelectedImage(goal.image);
-    return selected ? selectedImage : goal.image;
-  };
-
   const handleImageSelect = (imageId: any, image: any) => {
-    setSelectedImageId(imageId);
     setSdgGoals((goals) =>
       goals.map((goal) =>
-        goal.name === imageId && goal?.selected === false
-          ? { ...goal, selected: true, image: renderGoalImage(goal, true) }
-          : { ...goal, selected: false, image: renderGoalImage(goal) }
+        goal.name === imageId
+          ? {
+              ...goal,
+              selected: !goal.selected,
+              image: returnSelectedImage(goal?.image),
+            }
+          : goal
       )
     );
   };
 
+  useEffect(() => {
+    console.log('sdg goals changes ------------- > ');
+    console.log(sdgGoals);
+  }, [sdgGoals]);
+
   return (
     <div className="co-benifits-tab-item">
-      <Form
-        name="sdg-goals-details"
-        className="benifits-details-sdg-goals"
-        form={formOne}
-        onFinish={() => {}}
-      >
+      <Form name="sdg-goals-details" className="benifits-details-sdg-goals" form={formOne}>
         <Row gutter={[5, 16]} className="row">
           {sdgGoals?.map((sdgGoal: any) => (
             <Col sm={12} md={12} lg={4} xl={4} className="col">
@@ -201,7 +232,6 @@ const SdgGoals = () => {
                   <img
                     src={sdgGoal?.image}
                     alt={`Image ${sdgGoal?.name}`}
-                    className={selectedImageId === sdgGoal?.name ? 'selected' : ''}
                     onClick={() => handleImageSelect(sdgGoal?.name, sdgGoal?.image)}
                   />
                 </Form.Item>
