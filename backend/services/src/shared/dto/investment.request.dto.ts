@@ -18,28 +18,30 @@ export class InvestmentRequestDto {
   @ApiProperty()
   amount: number;
 
-  @ApiPropertyOptional({ enum: Instrument })
+  @ApiPropertyOptional({ enum: Instrument, isArray: true })
   @IsEnum(Instrument, {
-      message: 'Invalid instrument type. Supported following values:' + Object.values(Instrument)
+      message: 'Invalid instrument type. Supported following values:' + Object.values(Instrument),
+      each: true,
   })
   @IsOptional()
-  instrument: Instrument;
+  @IsArray()
+  instrument: Instrument[];
 
   @ApiPropertyOptional()
-  @ValidateIf(o => o.instrument === Instrument.LOAN)
+  @ValidateIf(o => o.instrument.indexOf(Instrument.LOAN) >= 0)
   @IsNumber()
   @IsOptional()
   @IsNotEmpty()
   interestRate?: number;
 
   @ApiPropertyOptional()
-  @ValidateIf(o => o.instrument === Instrument.RESULT_BASED)
+  @ValidateIf(o => o.instrument.indexOf(Instrument.RESULT_BASED) >= 0)
   @IsString()
   @IsNotEmpty()
   resultMetric?: string;
 
   @ApiPropertyOptional()
-  @ValidateIf(o => o.instrument === Instrument.RESULT_BASED)
+  @ValidateIf(o => o.instrument.indexOf(Instrument.RESULT_BASED) >= 0)
   @IsNumber()
   @IsNotEmpty()
   paymentPerMetric?: number;
