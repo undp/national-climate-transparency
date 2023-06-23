@@ -56,7 +56,7 @@ export class ProgrammeController {
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuard)
-    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
+    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, DocumentAction))
     @Post('addDocument')
     async addDocument(@Body()docDto: ProgrammeDocumentDto, @Request() req) {
       global.baseUrl = `${req.protocol}://${req.get("Host")}`;
@@ -65,10 +65,10 @@ export class ProgrammeController {
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuard)
-    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, DocumentAction))
+    @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, DocumentAction))
     @Post('docAction')
-    async docAction(@Body()docAction: DocumentAction) {
-      return this.programmeService.docAction(docAction)
+    async docAction(@Body()docAction: DocumentAction, @Request() req) {
+      return this.programmeService.docAction(docAction, req.user)
     }
 
 

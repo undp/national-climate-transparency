@@ -628,8 +628,8 @@ const ProgrammeView = () => {
                 <div className="centered-card">{elements}</div>
               </div>
             </Card>
-            {Number(data?.emissionReductionAchieved) !== 0 ||
-              (Number(data?.emissionReductionExpected) !== 0 && (
+            {(emissionsReductionExpected !== 0 ||
+              emissionsReductionAchieved !== 0) && (
                 <Card className="card-container">
                   <div className="info-view">
                     <div className="title">
@@ -717,7 +717,7 @@ const ProgrammeView = () => {
                     </div>
                   </div>
                 </Card>
-              ))}
+              )}
             <Card className="card-container">
               <div>
                 <ProgrammeDocuments

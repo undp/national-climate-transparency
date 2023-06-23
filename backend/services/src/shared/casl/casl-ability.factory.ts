@@ -134,7 +134,7 @@ export class CaslAbilityFactory {
           status: { $eq: InvestmentStatus.APPROVED },
         });
       } else if (user.companyRole == CompanyRole.PROGRAMME_DEVELOPER) {
-
+        can([Action.Create, Action.Read], DocumentAction);
         can(Action.Read, ProgrammeDocumentViewEntity, {
           companyId: { $elemMatch: { $eq: user.companyId } },
         });

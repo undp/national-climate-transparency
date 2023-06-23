@@ -158,7 +158,7 @@ export enum CompanyRole {
 export interface ProgrammeProperties {
   maxInternationalTransferAmount: string;
   creditingPeriodInYears: number;
-  programmeCostUSD: number;
+  estimatedProgrammeCostUSD: number;
   sourceOfFunding: any;
   grantEquivalentAmount: number;
   carbonPriceUSDPerTon: number;

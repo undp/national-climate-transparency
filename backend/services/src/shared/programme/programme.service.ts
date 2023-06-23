@@ -69,6 +69,7 @@ import { InvestmentView } from "../entities/investment.view.entity";
 import { ProgrammeDocumentViewEntity } from "../entities/document.view.entity";
 import { Company } from "../entities/company.entity";
 import { NdcFinancing } from "../dto/ndc.financing";
+import { PRECISION } from "../constants";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -759,6 +760,8 @@ export class ProgrammeService {
       3
     );
     programme.countryCodeA2 = this.configService.get("systemCountry");
+
+    programme.programmeProperties.carbonPriceUSDPerTon = parseFloat((programme.programmeProperties.estimatedProgrammeCostUSD / programme.creditEst).toFixed(PRECISION))
     programme.programmeProperties.creditYear = new Date(
       programme.startTime * 1000
     ).getFullYear();
@@ -868,6 +871,7 @@ export class ProgrammeService {
             data: dr.url,
             externalId: dr.externalId,
             actionId: dr.actionId,
+            certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
           },
         });
       }
@@ -881,6 +885,7 @@ export class ProgrammeService {
             data: monitoringReport.url,
             externalId: monitoringReport.externalId,
             actionId: monitoringReport.actionId,
+            certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
           },
         });
       }
@@ -966,7 +971,7 @@ export class ProgrammeService {
     }
   }
 
-  async approveDocumentPre(d: ProgrammeDocument, pr: Programme) {
+  async approveDocumentPre(d: ProgrammeDocument, pr: Programme, certifierId: number) {
     let ndc: NDCAction;
     if (d.type == DocType.METHODOLOGY_DOCUMENT) {
       await this.asyncOperationsInterface.addAction({
@@ -976,6 +981,7 @@ export class ProgrammeService {
           data: d.url,
           externalId: d.externalId,
           creditEst: Number(pr.creditEst),
+          certifierId: certifierId
         },
       });
     } else {
@@ -997,6 +1003,7 @@ export class ProgrammeService {
           data: d.url,
           externalId: d.externalId,
           actionId: d.actionId,
+          certifierId: certifierId
         },
       });
     }
@@ -1033,7 +1040,7 @@ export class ProgrammeService {
     }
   }
 
-  async docAction(documentAction: DocumentAction) {
+  async docAction(documentAction: DocumentAction, user: User) {
     const d = await this.documentRepo.findOne({
       where: {
         id: documentAction.id,
@@ -1063,7 +1070,7 @@ export class ProgrammeService {
     let ndc: NDCAction;
 
     if (documentAction.status == DocumentStatus.ACCEPTED) {
-      ndc = await this.approveDocumentPre(d, pr);
+      ndc = await this.approveDocumentPre(d, pr, (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined));
     }
 
     const resp = await this.entityManager.transaction(async (em) => {
@@ -1161,7 +1168,7 @@ export class ProgrammeService {
     if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
       this.logger.log(`Approving document since the user is ${user.companyRole}`)
       dr.status = DocumentStatus.ACCEPTED;
-      ndc = await this.approveDocumentPre(dr, programme);
+      ndc = await this.approveDocumentPre(dr, programme, (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined));
     }
 
     let resp = await this.entityManager.transaction(async (em) => {
@@ -1265,6 +1272,7 @@ export class ProgrammeService {
             data: dr.url,
             externalId: dr.externalId,
             actionId: dr.actionId,
+            certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
           },
         });
       }
