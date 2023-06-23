@@ -635,6 +635,7 @@ export class ProgrammeService {
   }
 
   async uploadDocument(type: DocType, id: string, data: string) {
+    console.log('Doc upload', id, data)
     const filetype = type == DocType.METHODOLOGY_DOCUMENT ? "xlsx" : "pdf";
     const response: any = await this.fileHandler.uploadFile(
       `documents/${this.helperService.enumToString(DocType, type)}${
@@ -1144,7 +1145,7 @@ export class ProgrammeService {
 
     const url = await this.uploadDocument(
       documentDto.type,
-      programme.programmeId + '_' + documentDto.actionId,
+      programme.programmeId + (documentDto.actionId ? ('_' + documentDto.actionId) : ''),
       documentDto.data
     );
     const dr = new ProgrammeDocument();
