@@ -657,6 +657,24 @@ export class ProgrammeService {
     }
   }
 
+  async queueDocument(action: AsyncActionType, req: any, ndcAction: NDCAction, docType: DocType) {
+
+    if (docType === DocType.MONITORING_REPORT || docType === DocType.VERIFICATION_REPORT) {
+      if (!ndcAction) {
+        return;
+      }
+
+      if (!((ndcAction.action === NDCActionType.Mitigation || ndcAction.action === NDCActionType.CrossCutting) && ndcAction.typeOfMitigation)) {
+        return;
+      }
+    }
+
+    await this.asyncOperationsInterface.addAction({
+      actionType: action,
+      actionProps: req,
+    });
+  }
+
   async create(programmeDto: ProgrammeDto, user: User): Promise<Programme | undefined> {
     this.logger.verbose("ProgrammeDTO received", programmeDto);
     const programme: Programme = this.toProgramme(programmeDto);
@@ -864,30 +882,25 @@ export class ProgrammeService {
       if (dr) {
         this.logger.log(`Approving design document since the user is ${user.companyRole}`)
         dr.status = DocumentStatus.ACCEPTED;
-        await this.asyncOperationsInterface.addAction({
-          actionType: AsyncActionType.DocumentUpload,
-          actionProps: {
-            type: this.helperService.enumToString(DocType, dr.type),
-            data: dr.url,
-            externalId: dr.externalId,
-            actionId: dr.actionId,
-            certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
-          },
-        });
+        await this.queueDocument(AsyncActionType.DocumentUpload, {
+          type: this.helperService.enumToString(DocType, dr.type),
+          data: dr.url,
+          externalId: dr.externalId,
+          actionId: dr.actionId,
+          certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
+        }, ndcAc, dr.type);
       }
       if (monitoringReport) {
         this.logger.log(`Approving monitoring report since the user is ${user.companyRole}`)
         monitoringReport.status = DocumentStatus.ACCEPTED;
-        await this.asyncOperationsInterface.addAction({
-          actionType: AsyncActionType.DocumentUpload,
-          actionProps: {
-            type: this.helperService.enumToString(DocType, monitoringReport.type),
-            data: monitoringReport.url,
-            externalId: monitoringReport.externalId,
-            actionId: monitoringReport.actionId,
-            certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
-          },
-        });
+
+        await this.queueDocument(AsyncActionType.DocumentUpload, {
+          type: this.helperService.enumToString(DocType, monitoringReport.type),
+          data: monitoringReport.url,
+          externalId: monitoringReport.externalId,
+          actionId: monitoringReport.actionId,
+          certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
+        }, ndcAc, monitoringReport.type);
       }
       
     }
@@ -974,16 +987,14 @@ export class ProgrammeService {
   async approveDocumentPre(d: ProgrammeDocument, pr: Programme, certifierId: number) {
     let ndc: NDCAction;
     if (d.type == DocType.METHODOLOGY_DOCUMENT) {
-      await this.asyncOperationsInterface.addAction({
-        actionType: AsyncActionType.ProgrammeAccept,
-        actionProps: {
-          type: this.helperService.enumToString(DocType, d.type),
-          data: d.url,
-          externalId: d.externalId,
-          creditEst: Number(pr.creditEst),
-          certifierId: certifierId
-        },
-      });
+
+      await this.queueDocument(AsyncActionType.ProgrammeAccept, {
+        type: this.helperService.enumToString(DocType, d.type),
+        data: d.url,
+        externalId: d.externalId,
+        creditEst: Number(pr.creditEst),
+        certifierId: certifierId
+      }, ndc, d.type);
     } else {
       if (d.type == DocType.VERIFICATION_REPORT) {
         ndc = await this.ndcActionRepo.findOne({
@@ -996,16 +1007,13 @@ export class ProgrammeService {
         }
       }
 
-      await this.asyncOperationsInterface.addAction({
-        actionType: AsyncActionType.DocumentUpload,
-        actionProps: {
-          type: this.helperService.enumToString(DocType, d.type),
-          data: d.url,
-          externalId: d.externalId,
-          actionId: d.actionId,
-          certifierId: certifierId
-        },
-      });
+      await this.queueDocument(AsyncActionType.DocumentUpload, {
+        type: this.helperService.enumToString(DocType, d.type),
+        data: d.url,
+        externalId: d.externalId,
+        actionId: d.actionId,
+        certifierId: certifierId
+      }, ndc, d.type);
     }
     return ndc;
   }
@@ -1265,16 +1273,14 @@ export class ProgrammeService {
       if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole) && dr) {
         this.logger.log(`Approving document since the user is ${user.companyRole}`)
         dr.status = DocumentStatus.ACCEPTED;
-        await this.asyncOperationsInterface.addAction({
-          actionType: AsyncActionType.DocumentUpload,
-          actionProps: {
-            type: this.helperService.enumToString(DocType, dr.type),
-            data: dr.url,
-            externalId: dr.externalId,
-            actionId: dr.actionId,
-            certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
-          },
-        });
+
+        await this.queueDocument(AsyncActionType.DocumentUpload, {
+          type: this.helperService.enumToString(DocType, dr.type),
+          data: dr.url,
+          externalId: dr.externalId,
+          actionId: dr.actionId,
+          certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
+        }, ndcAction, dr.type);
       }
     }
     const saved = await this.entityManager

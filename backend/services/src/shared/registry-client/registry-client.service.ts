@@ -33,6 +33,10 @@ export class RegistryClientService {
                 if (ex.response?.data?.statusCode == 400 && ex.response?.data?.message?.indexOf('already exist') >= 0 ){
                     return data;
                 }
+                if (ex.response?.data?.statusCode == 400 && ex.response?.data?.message?.indexOf('Mitigation action does not exist') >= 0) {
+                  return data;
+                }
+                
                 throw ex;
             });
     }
