@@ -71,7 +71,7 @@ const GenderParity = () => {
     <div className="co-benifits-tab-item">
       <Form
         name="gender-parity-details"
-        className="benifits-details"
+        className="benifits-details-gender-parity"
         labelCol={{ md: 16, lg: 19, xl: 19 }}
         wrapperCol={{ md: 8, lg: 5, xl: 5 }}
         layout="horizontal"
