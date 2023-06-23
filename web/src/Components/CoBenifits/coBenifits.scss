@@ -74,6 +74,43 @@
         }
       }
 
+      .benifits-details-sdg-goals {
+        width: 95%;
+
+        .row {
+          width: 100%;
+          .col {
+            width: 100%;
+
+            .img-container {
+              display: flex;
+              width: 88%;
+              align-items: center;
+              justify-content: center;
+              padding-top: 1.5rem;
+
+              .images {
+                display: flex;
+                border: 1px solid black;
+                width: 100%;
+                align-items: center;
+                justify-content: center;
+              }
+              img {
+                width: 100%;
+                height: auto;
+                border: 1px solid rgb(228, 228, 228);
+                border-radius: 5px;
+              }
+
+              img:hover {
+                box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
+              }
+            }
+          }
+        }
+      }
+
       .row {
         .col {
           display: flex;
