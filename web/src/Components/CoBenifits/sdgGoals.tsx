@@ -18,23 +18,23 @@ import goal15 from '../../Assets/Images/SdgGoalsImages/goal-15.jpg';
 import goal16 from '../../Assets/Images/SdgGoalsImages/goal-16.jpg';
 import goal17 from '../../Assets/Images/SdgGoalsImages/goal-17.jpg';
 
-import goal1Seletced from '../../Assets/Images/SdgGoalsImages/goal-1-selected.jpg';
-import goal2Seletced from '../../Assets/Images/SdgGoalsImages/goal-2-selected.jpg';
-import goal3Seletced from '../../Assets/Images/SdgGoalsImages/goal-3-selected.jpg';
-import goal4Seletced from '../../Assets/Images/SdgGoalsImages/goal-4-selected.jpg';
-import goal5Seletced from '../../Assets/Images/SdgGoalsImages/goal-5-selected.jpg';
-import goal6Seletced from '../../Assets/Images/SdgGoalsImages/goal-6-selected.jpg';
-import goal7Seletced from '../../Assets/Images/SdgGoalsImages/goal-7-selected.jpg';
-import goal8Seletced from '../../Assets/Images/SdgGoalsImages/goal-8-selected.jpg';
-import goal9Seletced from '../../Assets/Images/SdgGoalsImages/goal-9-selected.jpg';
-import goal10Seletced from '../../Assets/Images/SdgGoalsImages/goal-10-selected.jpg';
-import goal11Seletced from '../../Assets/Images/SdgGoalsImages/goal-11-selected.jpg';
-import goal12Seletced from '../../Assets/Images/SdgGoalsImages/goal-12-selected.jpg';
-import goal13Seletced from '../../Assets/Images/SdgGoalsImages/goal-13-selected.jpg';
-import goal14Seletced from '../../Assets/Images/SdgGoalsImages/goal-14-selected.jpg';
-import goal15Seletced from '../../Assets/Images/SdgGoalsImages/goal-15-selected.jpg';
-import goal16Seletced from '../../Assets/Images/SdgGoalsImages/goal-16-selected.jpg';
-import goal17Seletced from '../../Assets/Images/SdgGoalsImages/goal-17-selected.jpg';
+import goal1Selected from '../../Assets/Images/SdgGoalsImages/goal-1-selected.jpg';
+import goal2Selected from '../../Assets/Images/SdgGoalsImages/goal-2-selected.jpg';
+import goal3Selected from '../../Assets/Images/SdgGoalsImages/goal-3-selected.jpg';
+import goal4Selected from '../../Assets/Images/SdgGoalsImages/goal-4-selected.jpg';
+import goal5Selected from '../../Assets/Images/SdgGoalsImages/goal-5-selected.jpg';
+import goal6Selected from '../../Assets/Images/SdgGoalsImages/goal-6-selected.jpg';
+import goal7Selected from '../../Assets/Images/SdgGoalsImages/goal-7-selected.jpg';
+import goal8Selected from '../../Assets/Images/SdgGoalsImages/goal-8-selected.jpg';
+import goal9Selected from '../../Assets/Images/SdgGoalsImages/goal-9-selected.jpg';
+import goal10Selected from '../../Assets/Images/SdgGoalsImages/goal-10-selected.jpg';
+import goal11Selected from '../../Assets/Images/SdgGoalsImages/goal-11-selected.jpg';
+import goal12Selected from '../../Assets/Images/SdgGoalsImages/goal-12-selected.jpg';
+import goal13Selected from '../../Assets/Images/SdgGoalsImages/goal-13-selected.jpg';
+import goal14Selected from '../../Assets/Images/SdgGoalsImages/goal-14-selected.jpg';
+import goal15Selected from '../../Assets/Images/SdgGoalsImages/goal-15-selected.jpg';
+import goal16Selected from '../../Assets/Images/SdgGoalsImages/goal-16-selected.jpg';
+import goal17Selected from '../../Assets/Images/SdgGoalsImages/goal-17-selected.jpg';
 const sdgGoalsDetails = [
   {
     name: 'noPoverty',
@@ -127,79 +127,49 @@ const SdgGoals = () => {
   const [formOne] = Form.useForm();
   const [sdgGoals, setSdgGoals] = useState<any[]>(sdgGoalsDetails);
 
+  const goalImageMap = {
+    [goal1]: goal1Selected,
+    [goal2]: goal2Selected,
+    [goal3]: goal3Selected,
+    [goal4]: goal4Selected,
+    [goal5]: goal5Selected,
+    [goal6]: goal6Selected,
+    [goal7]: goal7Selected,
+    [goal8]: goal8Selected,
+    [goal9]: goal9Selected,
+    [goal10]: goal10Selected,
+    [goal11]: goal11Selected,
+    [goal12]: goal12Selected,
+    [goal13]: goal13Selected,
+    [goal14]: goal14Selected,
+    [goal15]: goal15Selected,
+    [goal16]: goal16Selected,
+    [goal17]: goal17Selected,
+    [goal1Selected]: goal1,
+    [goal2Selected]: goal2,
+    [goal3Selected]: goal3,
+    [goal4Selected]: goal4,
+    [goal5Selected]: goal5,
+    [goal6Selected]: goal6,
+    [goal7Selected]: goal7,
+    [goal8Selected]: goal8,
+    [goal9Selected]: goal9,
+    [goal10Selected]: goal10,
+    [goal11Selected]: goal11,
+    [goal12Selected]: goal12,
+    [goal13Selected]: goal13,
+    [goal14Selected]: goal14,
+    [goal15Selected]: goal15,
+    [goal16Selected]: goal16,
+    [goal17Selected]: goal17,
+    // Add other mappings...
+  };
+
   const returnSelectedImage = (image: any) => {
-    switch (image) {
-      case goal1:
-        return goal1Seletced;
-      case goal2:
-        return goal2Seletced;
-      case goal3:
-        return goal3Seletced;
-      case goal4:
-        return goal4Seletced;
-      case goal5:
-        return goal5Seletced;
-      case goal6:
-        return goal6Seletced;
-      case goal7:
-        return goal7Seletced;
-      case goal8:
-        return goal8Seletced;
-      case goal9:
-        return goal9Seletced;
-      case goal10:
-        return goal10Seletced;
-      case goal11:
-        return goal11Seletced;
-      case goal12:
-        return goal12Seletced;
-      case goal13:
-        return goal13Seletced;
-      case goal14:
-        return goal14Seletced;
-      case goal15:
-        return goal15Seletced;
-      case goal16:
-        return goal16Seletced;
-      case goal17:
-        return goal17Seletced;
-      case goal1Seletced:
-        return goal1;
-      case goal2Seletced:
-        return goal2;
-      case goal3Seletced:
-        return goal3;
-      case goal4Seletced:
-        return goal4;
-      case goal5Seletced:
-        return goal5;
-      case goal6Seletced:
-        return goal6;
-      case goal7Seletced:
-        return goal7;
-      case goal8Seletced:
-        return goal8;
-      case goal9Seletced:
-        return goal9;
-      case goal10Seletced:
-        return goal10;
-      case goal11Seletced:
-        return goal11;
-      case goal12Seletced:
-        return goal12;
-      case goal13Seletced:
-        return goal13;
-      case goal14Seletced:
-        return goal14;
-      case goal15Seletced:
-        return goal15;
-      case goal16Seletced:
-        return goal16;
-      case goal17Seletced:
-        return goal17;
-      default:
-        return image;
+    if (goalImageMap.hasOwnProperty(image)) {
+      return goalImageMap[image];
     }
+    return image;
   };
 
   const handleImageSelect = (imageId: any, image: any) => {
