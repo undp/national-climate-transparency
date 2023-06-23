@@ -11,6 +11,8 @@ import { DocumentStatus } from '../../Casl/enums/document.status';
 import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
 import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import * as Icon from 'react-bootstrap-icons';
+import { addCommSep } from '@undp/carbon-library';
+import Chart from 'react-apexcharts';
 
 const NdcActionView = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -20,6 +22,8 @@ const NdcActionView = () => {
   const [ndcActionReportDetails, setNdcActionReportDetails] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
   const [ndcActionDetails, setNdcActionDetails] = useState<NdcAction>();
+  const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
+  const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
 
   const getProjectReportActions = (reportData: any) => {
     return (
@@ -85,6 +89,18 @@ const NdcActionView = () => {
         //Get Ndc action details using sction id
       } else if (state.record) {
         setNdcActionDetails(state.record);
+        setEmissionsReductionExpected(
+          state.record?.emissionReductionExpected !== null ||
+            state.record?.emissionReductionExpected !== undefined
+            ? Number(state.record?.emissionReductionExpected)
+            : 0
+        );
+        setEmissionsReductionAchieved(
+          state.record?.emissionReductionAchieved !== null ||
+            state.record?.emissionReductionAchieved !== undefined
+            ? Number(state.record?.emissionReductionAchieved)
+            : 0
+        );
       }
     }
   });
@@ -155,6 +171,17 @@ const NdcActionView = () => {
     }
   };
 
+  const formatString = (langTag: string, vargs: any[]) => {
+    const str = t(langTag);
+    const parts = str.split('{}');
+    let insertAt = 1;
+    for (const arg of vargs) {
+      parts.splice(insertAt, 0, arg);
+      insertAt += 2;
+    }
+    return parts.join('');
+  };
+
   return (
     <div className="ndc-details-view content-container">
       <div className="title-bar">
@@ -168,11 +195,98 @@ const NdcActionView = () => {
       </div>
       <div className="content-body">
         <Row gutter={16}>
-          <Col lg={6} md={24}>
-            <Card className="card-container fix-height"></Card>
-          </Col>
+          {(emissionsReductionAchieved !== 0 || emissionsReductionExpected !== 0) && (
+            <Col lg={6} md={24}>
+              <Card className="card-container fix-height">
+                <div className="info-view">
+                  <div className="title">
+                    <span className="title-text">
+                      {formatString('ndcAction:NdcCreditChartTitle', [])}
+                    </span>
+                  </div>
+                  <div className="map-content">
+                    <Chart
+                      id={'creditChart'}
+                      options={{
+                        labels: ['Achieved', 'Expected'],
+                        legend: {
+                          position: 'bottom',
+                        },
+                        colors: ['#b3b3ff', '#e0e0eb'],
+                        tooltip: {
+                          fillSeriesColor: false,
+                        },
+                        states: {
+                          normal: {
+                            filter: {
+                              type: 'none',
+                              value: 0,
+                            },
+                          },
+                          hover: {
+                            filter: {
+                              type: 'none',
+                              value: 0,
+                            },
+                          },
+                          active: {
+                            allowMultipleDataPointsSelection: true,
+                            filter: {
+                              type: 'darken',
+                              value: 0.7,
+                            },
+                          },
+                        },
+                        stroke: {
+                          colors: ['#00'],
+                        },
+                        plotOptions: {
+                          pie: {
+                            expandOnClick: false,
+                            donut: {
+                              size: '75%',
+                              labels: {
+                                show: true,
+                                total: {
+                                  showAlways: true,
+                                  show: true,
+                                  label: 'Expected',
+                                  formatter: () =>
+                                    '' + addCommSep(state.record?.emissionReductionExpected),
+                                },
+                              },
+                            },
+                          },
+                        },
+                        dataLabels: {
+                          enabled: false,
+                        },
+                        responsive: [
+                          {
+                            breakpoint: 480,
+                            options: {
+                              chart: {
+                                width: '15vw',
+                              },
+                              legend: {
+                                position: 'bottom',
+                              },
+                            },
+                          },
+                        ],
+                      }}
+                      series={[emissionsReductionAchieved, emissionsReductionExpected]}
+                      type="donut"
+                      width="100%"
+                      fontFamily="inter"
+                    />
+                  </div>
+                </div>
+              </Card>
+            </Col>
+          )}
           <Col lg={8} md={24}>
-            <Card className="card-container">
+            <Card className="card-container fix-height">
               <div>
                 <InfoView
                   data={ndcActionBasicDetails}

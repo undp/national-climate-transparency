@@ -64,5 +64,6 @@
   "viewAdaptationNationalPlanObjectives": "National Plan Objectives",
   "viewAdaptationNationalPlanCoverage": "National Plan Coverage",
   "searchByProgrammeName": "Search by programme name",
-  "seeMine": "Mine Only"
+  "seeMine": "Mine Only",
+  "NdcCreditChartTitle":"Emissions Reductions (tCo2E)"
 }
