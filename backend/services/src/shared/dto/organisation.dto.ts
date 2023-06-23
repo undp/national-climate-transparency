@@ -37,6 +37,7 @@ export class OrganisationDto {
   @ArrayMinSize(1)
   @MaxLength(100, { each: true })
   @IsNotEmpty({ each: true })
+  @IsOptional()
   regions: string[];
 
   @ValidateIf(
