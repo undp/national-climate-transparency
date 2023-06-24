@@ -138,7 +138,14 @@ export const AddInvestmentComponent = () => {
     const payload = stepOneData;
     payload.programmeId = data.programmeId;
     payload.amount = parseFloat(payload.amount);
-    payload.interestRate = parseFloat(payload.interestRate);
+
+    if (payload.interestRate) {
+      payload.interestRate = parseFloat(payload.interestRate);
+    }
+    if (payload.paymentPerMetric) {
+      payload.paymentPerMetric = parseFloat(payload.paymentPerMetric);
+    }
+
     payload.fromCompanyIds = data.companyId.map((e) => Number(e));
     payload.percentage = val.percentage;
     payload.toCompanyId = userInfoState?.companyId;
