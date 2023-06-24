@@ -657,7 +657,7 @@ export class ProgrammeService {
     }
   }
 
-  async queueDocument(action: AsyncActionType, req: any, ndcAction: NDCAction, docType: DocType) {
+  async queueDocument(action: AsyncActionType, req: any, ndcAction: NDCAction, docType: DocType, certifierId: number) {
 
     if (docType === DocType.MONITORING_REPORT || docType === DocType.VERIFICATION_REPORT) {
       if (!ndcAction) {
@@ -666,6 +666,13 @@ export class ProgrammeService {
 
       if (!((ndcAction.action === NDCActionType.Mitigation || ndcAction.action === NDCActionType.CrossCutting) && ndcAction.typeOfMitigation)) {
         return;
+      }
+    }
+
+    if (certifierId) {
+      const comp = await this.companyService.findByCompanyId(certifierId);
+      if (comp) {
+        req['certifierTaxId'] = comp.taxId;
       }
     }
 
@@ -886,9 +893,8 @@ export class ProgrammeService {
           type: this.helperService.enumToString(DocType, dr.type),
           data: dr.url,
           externalId: dr.externalId,
-          actionId: dr.actionId,
-          certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
-        }, ndcAc, dr.type);
+          actionId: dr.actionId
+        }, ndcAc, dr.type, user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
       }
       if (monitoringReport) {
         this.logger.log(`Approving monitoring report since the user is ${user.companyRole}`)
@@ -898,9 +904,8 @@ export class ProgrammeService {
           type: this.helperService.enumToString(DocType, monitoringReport.type),
           data: monitoringReport.url,
           externalId: monitoringReport.externalId,
-          actionId: monitoringReport.actionId,
-          certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
-        }, ndcAc, monitoringReport.type);
+          actionId: monitoringReport.actionId
+        }, ndcAc, monitoringReport.type, user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
       }
       
     }
@@ -992,9 +997,8 @@ export class ProgrammeService {
         type: this.helperService.enumToString(DocType, d.type),
         data: d.url,
         externalId: d.externalId,
-        creditEst: Number(pr.creditEst),
-        certifierId: certifierId
-      }, ndc, d.type);
+        creditEst: Number(pr.creditEst)
+      }, ndc, d.type, certifierId);
     } else {
       if (d.type == DocType.VERIFICATION_REPORT) {
         ndc = await this.ndcActionRepo.findOne({
@@ -1011,9 +1015,8 @@ export class ProgrammeService {
         type: this.helperService.enumToString(DocType, d.type),
         data: d.url,
         externalId: d.externalId,
-        actionId: d.actionId,
-        certifierId: certifierId
-      }, ndc, d.type);
+        actionId: d.actionId
+      }, ndc, d.type, certifierId);
     }
     return ndc;
   }
@@ -1278,9 +1281,8 @@ export class ProgrammeService {
           type: this.helperService.enumToString(DocType, dr.type),
           data: dr.url,
           externalId: dr.externalId,
-          actionId: dr.actionId,
-          certifierId: user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined
-        }, ndcAction, dr.type);
+          actionId: dr.actionId
+        }, ndcAction, dr.type, user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
       }
     }
     const saved = await this.entityManager
