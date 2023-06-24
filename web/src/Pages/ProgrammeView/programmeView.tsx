@@ -641,7 +641,7 @@ const ProgrammeView = () => {
                     <Chart
                       id={'creditChart'}
                       options={{
-                        labels: ['Achieved', 'Expected'],
+                        labels: ['Achieved', 'Pending'],
                         legend: {
                           position: 'bottom',
                         },

@@ -56,5 +56,7 @@
   "paymentPerMetric": "Payment Per Metric",
   "esgType": "ESG Classification",
   "investmentCreationSuccess": "The investment request created successfully",
-  "total": "Total Ownership"
+  "total": "Total Ownership",
+  "ClimateFinance": "Climate Finance",
+  "CarbonMarket": "Carbon Market"
 }
