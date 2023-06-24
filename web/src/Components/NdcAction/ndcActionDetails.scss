@@ -1,0 +1,74 @@
+@import '../../Styles/variables.scss';
+
+.ndc-action-details-container {
+  Input {
+    height: 40px;
+  }
+
+  .ant-select-selection-item {
+    color: #949599 !important;
+  }
+
+  .ant-select-dropdown {
+    font-family: $primary-font-family;
+    color: #949599 !important;
+  }
+
+  .ant-select-selector {
+    color: #949599 !important;
+  }
+
+  .label-heading {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 22px;
+    color: rgba(58, 53, 65, 0.5);
+    margin-bottom: 5px;
+  }
+
+  .steps-actions {
+    display: flex;
+    flex-direction: row-reverse;
+    .mg-left-1 {
+      margin-left: 1rem;
+    }
+  }
+
+  .upload-doc {
+    height: 40px !important;
+    margin-right: 240px;
+  }
+
+  .ant-upload-list-item {
+    border-radius: 5px !important;
+    height: 40px !important;
+  }
+
+  .design-upload-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: start;
+    width: 100%;
+
+    .icon-color {
+      color: $primary-color !important;
+    }
+
+    .ant-upload {
+      width: 20%;
+    }
+
+    .ant-upload-list {
+      align-items: center;
+      justify-content: center;
+      width: 75%;
+
+      .ant-upload-list-item {
+        margin-top: 0;
+      }
+    }
+  }
+}

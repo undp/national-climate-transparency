@@ -1,0 +1,675 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+import { EllipsisOutlined } from '@ant-design/icons';
+import {
+  Row,
+  Checkbox,
+  message,
+  Tag,
+  PaginationProps,
+  Col,
+  Input,
+  Table,
+  Empty,
+  Popover,
+  List,
+  Typography,
+  Modal,
+  Button,
+  Form,
+  Tooltip,
+} from 'antd';
+// import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { CheckboxValueType } from 'antd/lib/checkbox/Group';
+import { DateTime } from 'luxon';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useConnection } from '../../Context/ConnectionContext/connectionContext';
+
+import './investmentManagement.scss';
+import '../Common/common.table.scss';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+// import TransferActionModel from '../../Components/Models/TransferActionModel';
+import {
+  ProgrammeTransfer,
+  addSpaces,
+  CompanyRole,
+  getCompanyBgColor,
+  addCommSepRound,
+  ProfileIcon,
+  RoleIcon,
+} from '@undp/carbon-library';
+import * as Icon from 'react-bootstrap-icons';
+import { InvestmentBGColor, InvestmentColor, TooltipColor } from '../Common/role.color.constants';
+import { creditUnit } from '../Common/configs';
+import { CircleFlag } from 'react-circle-flags';
+import { Role } from '../../Casl/enums/role.enum';
+import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
+import { PauseCircle, PlayCircle } from 'react-bootstrap-icons';
+import { InvestmentStatus, getStatusTagType } from '../../Casl/enums/investment.status';
+import { InvestmentType } from '../../Casl/enums/investment.type';
+import { InvestmentLevel } from '../../Casl/enums/investment.level';
+import { InvestmentStream } from '../../Casl/enums/investment.stream';
+import InvestmentActionModel from './investmentActionModel';
+
+type CompanyInfo = {
+  name: string;
+  credit: number;
+};
+
+type PopupInfo = {
+  title: string;
+  icon: any;
+  actionBtnText: string;
+  okAction: any;
+  type: 'primary' | 'danger';
+  remarkRequired: boolean;
+};
+
+const InvestmentManagement = () => {
+  const navigate = useNavigate();
+  const { userInfoState } = useUserContext();
+  const { i18n, t } = useTranslation(['common', 'programme']);
+
+  const statusOptions = Object.keys(InvestmentStatus).map((k, index) => ({
+    label: addSpaces(Object.values(InvestmentStatus)[index]),
+    value: Object.values(InvestmentStatus)[index],
+  }));
+
+  const [selectedStatus, setSelectedStatus] = useState<any>(statusOptions.map((e) => e.value));
+  const [indeterminate, setIndeterminate] = useState(false);
+  const [checkAll, setCheckAll] = useState(true);
+
+  const { post, get } = useConnection();
+  const [totalProgramme, setTotalProgramme] = useState<number>();
+  const [dataFilter, setDataFilter] = useState<any>();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [tableData, setTableData] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [search, setSearch] = useState<string>();
+  const [searchText, setSearchText] = useState<string>();
+  const [statusFilter, setStatusFilter] = useState<any>();
+  const [sortOrder, setSortOrder] = useState<string>();
+  const [sortField, setSortField] = useState<string>();
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [selectedReq, setSelectedReq] = useState<ProgrammeTransfer>();
+  const [popupInfo, setPopupInfo] = useState<PopupInfo>();
+  const [companiesInfo, setCompaniesInfo] = useState<CompanyInfo[]>();
+  const [totalComCredits, setTotalComCredits] = useState<number>(0);
+  const [companyIdsVal, setCompanyIdsVal] = useState<number[]>();
+  const [creditAmount, setCreditAmount] = useState<number>(0);
+  const { isTransferFrozen, setTransferFrozen } = useSettingsContext();
+
+  const onStatusQuery = async (checkedValues: CheckboxValueType[]) => {
+    console.log(checkedValues);
+
+    if (checkedValues !== selectedStatus) {
+      setSelectedStatus(checkedValues);
+    }
+
+    if (checkedValues.length === 0) {
+      setTableData([]);
+      setTotalProgramme(0);
+      return;
+    }
+    setStatusFilter({
+      key: 'status',
+      operation: 'in',
+      value: checkedValues,
+    });
+  };
+  const [formModal] = Form.useForm();
+  const { Search } = Input;
+
+  const onCheckAllChange = (e: any) => {
+    const nw = e.target.checked ? statusOptions.map((el) => el.value) : [];
+    setSelectedStatus(nw);
+    setIndeterminate(false);
+    setCheckAll(e.target.checked);
+    onStatusQuery(nw);
+  };
+
+  const getInvestmentData = async () => {
+    setLoading(true);
+    const filter: any[] = [];
+    if (statusFilter) {
+      filter.push(statusFilter);
+    }
+
+    if (search && search !== '') {
+      const interFilterOr = [
+        {
+          key: 'programmeTitle',
+          operation: 'like',
+          value: `${search}%`,
+        },
+      ];
+      if (!isNaN(Number(search))) {
+        interFilterOr.push({
+          key: 'requestId',
+          operation: '=',
+          value: `${search}`,
+        });
+      }
+      filter.push({
+        value: {
+          page: currentPage,
+          size: pageSize,
+          filterOr: interFilterOr,
+        },
+      });
+    }
+
+    let sort: any;
+    if (sortOrder && sortField) {
+      sort = {
+        key: sortField,
+        order: sortOrder,
+        nullFirst: false,
+      };
+    } else {
+      sort = {
+        key: 'requestId',
+        order: 'DESC',
+      };
+    }
+
+    try {
+      const response: any = await post('national/programme/investmentQuery', {
+        page: currentPage,
+        size: pageSize,
+        filterAnd: filter,
+        filterOr: dataFilter,
+        sort: sort,
+      });
+
+      console.log(response);
+      setTableData(response.data);
+      setTotalProgramme(response.response.data.total);
+      setLoading(false);
+    } catch (error: any) {
+      console.log('Error in getting programme investment', error);
+      message.open({
+        type: 'error',
+        content: error.message,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      getInvestmentData();
+    }
+  }, [statusFilter, dataFilter]);
+
+  useEffect(() => {
+    getInvestmentData();
+  }, [currentPage, pageSize, sortField, sortOrder, search]);
+
+  const handleRequestOk = async (
+    reqId: number,
+    remarks: string,
+    endpoint: string,
+    successText?: string,
+    isRetire?: boolean
+  ) => {
+    setLoading(true);
+    try {
+      const response: any = await post('national/programme/' + endpoint, {
+        requestId: reqId,
+        comment: remarks,
+      });
+      let successMsg = response.message;
+      if (isRetire) {
+        successMsg = t('creditTransfer:internationalTransferReqCancelled');
+      }
+      console.log(response);
+      message.open({
+        type: 'success',
+        content: successText ? successText : successMsg,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      setLoading(false);
+      getInvestmentData();
+      setModalVisible(false);
+    } catch (error: any) {
+      console.log('Error in Cancelling transfer request', error);
+      setLoading(false);
+      return error.message;
+    }
+  };
+
+  const showModalOnAction = (record: any, info: PopupInfo) => {
+    setSelectedReq(record);
+    setModalVisible(true);
+    setPopupInfo(info);
+  };
+
+  const getSendCreditBalance = (record: ProgrammeTransfer) => {
+    const idx = record.companyId!.map((e) => Number(e)).indexOf(record.fromCompanyId!);
+    if (idx < 0) {
+      return 0;
+    }
+    if (!record.creditOwnerPercentage) {
+      return record.creditBalance;
+    }
+    return (Number(record.creditBalance!) * Number(record.creditOwnerPercentage![idx])) / 100;
+  };
+
+  const actionMenu = (record: any) => {
+    let isRetire = false;
+    if (record.isRetirement === true) {
+      isRetire = true;
+    }
+    if (record.status === 'Pending' && userInfoState?.userRole !== Role.ViewOnly) {
+      return userInfoState?.companyId === record.initiatorCompanyId ? (
+        <List
+          className="action-menu"
+          size="small"
+          dataSource={[
+            {
+              text: t('creditTransfer:cancel'),
+              icon: <Icon.ExclamationOctagon />,
+              click: () => {
+                showModalOnAction(record, {
+                  title: t('creditTransfer:cancelTitle'),
+                  icon: <Icon.ExclamationOctagon />,
+                  actionBtnText: t('creditTransfer:proceed'),
+                  okAction: (requestId: any, comment: any) =>
+                    handleRequestOk(requestId, comment, 'investmentCancel', undefined, isRetire),
+                  type: 'danger',
+                  remarkRequired: true,
+                });
+              },
+            },
+          ]}
+          renderItem={(item: any) => (
+            <List.Item onClick={item.click}>
+              <Typography.Text className="action-icon color-error">{item.icon}</Typography.Text>
+              <span>{item.text}</span>
+            </List.Item>
+          )}
+        />
+      ) : record.fromCompanyId === userInfoState?.companyId ? (
+        <List
+          className="action-menu"
+          size="small"
+          dataSource={[
+            {
+              text: t('creditTransfer:accept'),
+              icon: <Icon.ClipboardCheck />,
+              style: 'color-primary',
+              click: () => {
+                showModalOnAction(record, {
+                  title: t('creditTransfer:acceptTitle'),
+                  icon: <Icon.ClipboardCheck />,
+                  actionBtnText: t('creditTransfer:proceed'),
+                  okAction: (requestId: any, comment: any) =>
+                    handleRequestOk(
+                      requestId,
+                      comment,
+                      'investmentApprove',
+                      `${t('creditTransfer:transferReqApproved')}`
+                    ),
+                  type: 'primary',
+                  remarkRequired: false,
+                });
+              },
+            },
+            {
+              text: t('creditTransfer:reject'),
+              icon: <Icon.XOctagon />,
+              style: 'color-error',
+              click: () => {
+                showModalOnAction(record, {
+                  title: t('creditTransfer:rejectTitle'),
+                  icon: <Icon.XOctagon />,
+                  actionBtnText: t('creditTransfer:reject'),
+                  okAction: (requestId: any, comment: any) =>
+                    handleRequestOk(requestId, comment, 'investmentReject'),
+                  type: 'danger',
+                  remarkRequired: true,
+                });
+              },
+            },
+          ]}
+          renderItem={(item: any) => (
+            <List.Item onClick={item.click}>
+              <Typography.Text className={`action-icon ${item.style}`}>{item.icon}</Typography.Text>
+              <span>{item.text}</span>
+            </List.Item>
+          )}
+        />
+      ) : null;
+    }
+  };
+
+  const columns = [
+    {
+      title: t('programme:requestID'),
+      dataIndex: 'requestId',
+      key: 'requestId',
+      sorter: true,
+    },
+    {
+      title: t('programme:date'),
+      key: 'txTime',
+      sorter: true,
+      align: 'left' as const,
+      render: (item: any, itemObj: any) => {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {DateTime.fromMillis(parseInt(itemObj.txTime)).toFormat('dd LLLL yyyy')}
+          </div>
+        );
+      },
+    },
+    {
+      title: t('programme:programmeName'),
+      dataIndex: 'programmeTitle',
+      key: 'programmeTitle',
+      sorter: true,
+      align: 'left' as const,
+      render: (item: any) => {
+        return <span className="clickable">{item}</span>;
+      },
+    },
+    {
+      title: t('programme:type'),
+      key: 'type',
+      sorter: true,
+      align: 'center' as const,
+      render: (item: any, Obj: any) => {
+        return (
+          <Tooltip title={Obj.type} color={TooltipColor} key={TooltipColor}>
+            <div>
+              <RoleIcon
+                icon={Obj.type === InvestmentType.PUBLIC ? <Icon.Eye /> : <Icon.EyeSlash />}
+                bg={InvestmentBGColor}
+                color={InvestmentColor}
+              />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: t('programme:level'),
+      key: 'level',
+      sorter: true,
+      align: 'center' as const,
+      render: (item: any, Obj: any) => {
+        return (
+          <Tooltip title={Obj.level} color={TooltipColor} key={TooltipColor}>
+            <div>
+              <RoleIcon
+                icon={Obj.level === InvestmentLevel.INTERNATIONAL ? <Icon.Globe2 /> : <Icon.Flag />}
+                bg={InvestmentBGColor}
+                color={InvestmentColor}
+              />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: t('programme:stream'),
+      key: 'stream',
+      sorter: true,
+      align: 'center' as const,
+      render: (item: any, Obj: any) => {
+        return (
+          <Tooltip title={Obj.stream} color={TooltipColor} key={TooltipColor}>
+            <div>
+              <RoleIcon
+                icon={
+                  Obj.stream === InvestmentStream.CLIMATE_FINANCE ? (
+                    <Icon.Bank />
+                  ) : (
+                    <Icon.GraphUpArrow />
+                  )
+                }
+                bg={InvestmentBGColor}
+                color={InvestmentColor}
+              />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: t('programme:sector'),
+      dataIndex: 'programmeSector',
+      key: 'programmeSector',
+      sorter: true,
+      align: 'left' as const,
+    },
+    {
+      title: t('programme:investor'),
+      key: 'toCompanyId',
+      sorter: true,
+      align: 'left' as const,
+      render: (item: any, itemObj: any) => {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {itemObj.sender &&
+              itemObj.sender.map((v: any, i: any) => {
+                return (
+                  <Tooltip title={v.name} color={TooltipColor} key={TooltipColor}>
+                    <div>
+                      <ProfileIcon
+                        icon={v.logo}
+                        bg={getCompanyBgColor(v.companyRole)}
+                        name={v.name}
+                      />
+                    </div>
+                  </Tooltip>
+                );
+              })}
+          </div>
+        );
+      },
+    },
+    {
+      title: t('programme:owner'),
+      key: 'fromCompanyId',
+      sorter: true,
+      align: 'left' as const,
+      render: (item: any, itemObj: any) => {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {itemObj.sender &&
+              itemObj.sender.map((v: any, i: any) => {
+                return (
+                  <Tooltip title={v.name} color={TooltipColor} key={TooltipColor}>
+                    <div>
+                      <ProfileIcon
+                        icon={v.logo}
+                        bg={getCompanyBgColor(v.companyRole)}
+                        name={v.name}
+                      />
+                    </div>
+                  </Tooltip>
+                );
+              })}
+          </div>
+        );
+      },
+    },
+    {
+      title: t('programme:status'),
+      key: 'status',
+      sorter: true,
+      align: 'center' as const,
+      render: (item: any, Obj: any) => {
+        return (
+          <Tooltip title={Obj.serialNo} color={TooltipColor} key={TooltipColor}>
+            <Tag className="clickable" color={getStatusTagType(Obj.status)}>
+              {addSpaces(Obj.status)}
+            </Tag>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: t('programme:amount'),
+      dataIndex: 'amount',
+      key: 'amount',
+      sorter: true,
+      align: 'right' as const,
+      render: (item: any) => {
+        return <span className="clickable">{addCommSepRound(item)}</span>;
+      },
+    },
+    {
+      align: 'right' as const,
+      render: (_: any, record: any) => {
+        const menu = actionMenu(record);
+        return menu && !isTransferFrozen ? (
+          <Popover placement="bottomRight" content={menu} trigger="click">
+            <EllipsisOutlined
+              rotate={90}
+              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
+            />
+          </Popover>
+        ) : (
+          <span></span>
+        );
+      },
+      // render: () => {
+      //   return (
+      //     <div className="clickable">
+      //       <MoreOutlined style={{ fontSize: '20px' }} />
+      //     </div>
+      //   );
+      // },
+    },
+  ];
+
+  const onSearch = async () => {
+    setSearch(searchText);
+  };
+
+  const onChange: PaginationProps['onChange'] = (page, size) => {
+    setCurrentPage(page);
+    setPageSize(size);
+  };
+
+  const handleTableChange = (pag: any, sorter: any) => {
+    console.log(pag, sorter);
+    setSortOrder(
+      sorter.order === 'ascend' ? 'ASC' : sorter.order === 'descend' ? 'DESC' : undefined
+    );
+    setSortField(sorter.columnKey);
+    // setCurrentPage(1);
+  };
+
+  return (
+    <div className="investment-management content-container">
+      <div className="title-bar">
+        <Row justify="space-between" align="middle">
+          <Col span={20}>
+            <div className="body-title">{t('programme:investmentTitle')}</div>
+            <div className="body-sub-title">{t('programme:investmentDesc')}</div>
+          </Col>
+        </Row>
+      </div>
+      <div className="content-card">
+        <Row>
+          <Col lg={{ span: 16 }} md={{ span: 16 }}>
+            <div className="action-bar">
+              <Checkbox
+                className="all-check"
+                indeterminate={indeterminate}
+                onChange={onCheckAllChange}
+                checked={checkAll}
+                defaultChecked={true}
+              >
+                All
+              </Checkbox>
+              <Checkbox.Group
+                options={statusOptions}
+                defaultValue={statusOptions.map((e) => e.value)}
+                value={selectedStatus}
+                onChange={onStatusQuery}
+              />
+            </div>
+          </Col>
+          <Col lg={{ span: 8 }} md={{ span: 8 }}>
+            <div className="filter-section">
+              <div className="search-bar">
+                <Search
+                  onPressEnter={onSearch}
+                  placeholder={'Search'}
+                  allowClear
+                  onChange={(e) =>
+                    e.target.value === ''
+                      ? setSearch(e.target.value)
+                      : setSearchText(e.target.value)
+                  }
+                  onSearch={setSearch}
+                  style={{ width: 265 }}
+                />
+              </div>
+            </div>
+          </Col>
+        </Row>
+        <Row>
+          <Col span={24}>
+            <div className="programmeManagement-table-container">
+              <Table
+                dataSource={tableData}
+                columns={columns}
+                className="common-table-class"
+                loading={loading}
+                pagination={{
+                  current: currentPage,
+                  pageSize: pageSize,
+                  total: totalProgramme,
+                  showQuickJumper: true,
+                  showSizeChanger: true,
+                  onChange: onChange,
+                }}
+                onChange={(val: any, filter: any, sorter: any) => handleTableChange(val, sorter)}
+                locale={{
+                  emptyText: (
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={tableData.length === 0 ? t('creditTransfer:noTransfer') : null}
+                    />
+                  ),
+                }}
+              />
+            </div>
+          </Col>
+        </Row>
+      </div>
+      {popupInfo && selectedReq && (
+        <InvestmentActionModel
+          investment={selectedReq!}
+          onCancel={() => {
+            setModalVisible(false);
+            setSelectedReq(undefined);
+          }}
+          actionBtnText={popupInfo!.actionBtnText}
+          onFinish={popupInfo?.okAction}
+          subText={''}
+          openModal={modalVisible}
+          icon={popupInfo!.icon}
+          title={popupInfo!.title}
+          type={popupInfo!.type}
+          remarkRequired={popupInfo.remarkRequired}
+        />
+      )}
+    </div>
+  );
+};
+
+export default InvestmentManagement;
