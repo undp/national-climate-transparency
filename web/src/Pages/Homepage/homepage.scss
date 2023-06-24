@@ -95,25 +95,16 @@
   //     );
   // }
   .image-container {
-    bbackground-image: linear-gradient(
+    background-image: linear-gradient(
         to bottom,
-        rgba(196, 196, 196, 0) 0%,
-        rgba(4, 104, 177, 0.6) 0.01%
+        rgba(255, 255, 255, 0.3) 2%,
+        rgba(22, 177, 255, 0.1) 10%
       ),
       url('../../Assets/Images/factory.webp');
     background-image: linear-gradient(
         to bottom,
-        rgba(196, 196, 196, 0) 0% rgba(4, 104, 177, 0.6) 0.01%
-      ),
-      image-set(
-        '../../Assets/Images/factory.png' type('image/png'),
-        '../../Assets/Images/factory.webp' type('image/webp')
-      );
-    background-image: -webkit-gradient(
-        linear,
-        left top,
-        left bottom,
-        from(hsla(0, 0%, 77%, 0), rgba(4, 104, 177, 0.6))
+        rgba(255, 255, 255, 0.3) 2%,
+        rgba(22, 177, 255, 0.1) 40%
       ),
       image-set(
         '../../Assets/Images/factory.png' type('image/png'),
