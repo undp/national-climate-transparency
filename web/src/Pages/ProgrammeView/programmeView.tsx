@@ -707,7 +707,10 @@ const ProgrammeView = () => {
                           },
                         ],
                       }}
-                      series={[emissionsReductionAchieved, emissionsReductionExpected]}
+                      series={[
+                        emissionsReductionAchieved,
+                        emissionsReductionExpected - emissionsReductionAchieved,
+                      ]}
                       type="donut"
                       width="100%"
                       fontFamily="inter"
