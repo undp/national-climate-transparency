@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REACT_APP_BACKEND: https://u4h9swxm8b.execute-api.us-east-1.amazonaws.com/dev
-      REACT_APP_COUNTRY_NAME: 'Antarctic Region'
+      REACT_APP_COUNTRY_NAME: 'CountryX'
       REACT_APP_COUNTRY_FLAG_URL: 'https://mrv-common-dev.s3.amazonaws.com/flag.png'
       COUNTRY_CODE: 'NA'
       REACT_APP_MAPBOXGL_ACCESS_TOKEN: ${{ secrets.MAPBOXGL_ACCESS_TOKEN }}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Col, DatePicker, Row, message } from 'antd';
+import { Col, DatePicker, Row, Skeleton, message } from 'antd';
 import './dashboard.scss';
 import { getChartOptions } from './CHART_OPTIONS';
 import moment from 'moment';
@@ -676,13 +676,20 @@ const Dashboard = () => {
           />
         </div>
       </div>
-      {layout.map((row, i) => (
+
+      {loading ? (
         <div className="stastics-and-charts-container center">
-          <Row gutter={[40, 40]} className="stastic-card-row">
-            {row.map((item, j) => getWidgetJSX(item))}
-          </Row>
+          <Skeleton />
         </div>
-      ))}
+      ) : (
+        layout.map((row, i) => (
+          <div className="stastics-and-charts-container center">
+            <Row gutter={[40, 40]} className="stastic-card-row">
+              {row.map((item, j) => getWidgetJSX(item))}
+            </Row>
+          </div>
+        ))
+      )}
     </div>
   );
 };

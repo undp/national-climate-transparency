@@ -29,7 +29,7 @@ const CarbonHelp = () => {
                 {/* <div className="title-sub">{'REGISTRY'}</div> */}
               </div>
               <div className="country-name">
-                {process.env.REACT_APP_COUNTRY_NAME || 'Antarctic Region'}
+                {process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}
               </div>
             </div>
           </div>

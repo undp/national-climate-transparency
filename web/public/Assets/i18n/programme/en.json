@@ -23,7 +23,7 @@
   "owner": "Owner",
   "amount": "Amount (USD)",
   "investmentTitle": "Investments",
-  "investmentDesc": "View the investments in the system based on your permissions",
+  "investmentDesc": "Investments made on programmes in the Transparency System",
   "addProgramme": "ADD PROGRAMME",
   "emissionsReductionExpected": "Emissions Reductions Expected (tCO2e)",
   "emissionsReductionAchieved": "Emissions Reductions Achieved (tCO2e)",
