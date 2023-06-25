@@ -545,7 +545,7 @@ export const AddInvestmentComponent = () => {
                                     <InputNumber
                                       placeholder=""
                                       controls={false}
-                                      disabled={userInfoState?.companyId === Number(companyId)}
+                                      // disabled={userInfoState?.companyId === Number(companyId)}
                                       onKeyPress={(event) => {
                                         if (!/[0-9\.]/.test(event.key)) {
                                           event.preventDefault();

@@ -991,8 +991,7 @@ export class ProgrammeService {
     }
   }
 
-  async approveDocumentPre(d: ProgrammeDocument, pr: Programme, certifierId: number) {
-    let ndc: NDCAction;
+  async approveDocumentPre(d: ProgrammeDocument, pr: Programme, certifierId: number, ndc: NDCAction) {
     if (d.type == DocType.METHODOLOGY_DOCUMENT) {
 
       await this.queueDocument(AsyncActionType.ProgrammeAccept, {
@@ -1003,11 +1002,6 @@ export class ProgrammeService {
       }, ndc, d.type, certifierId);
     } else {
       if (d.type == DocType.VERIFICATION_REPORT) {
-        ndc = await this.ndcActionRepo.findOne({
-          where: {
-            id: d.actionId,
-          },
-        });
         if (ndc) {
           ndc.status = NDCStatus.APPROVED;
         }
@@ -1083,7 +1077,14 @@ export class ProgrammeService {
     let ndc: NDCAction;
 
     if (documentAction.status == DocumentStatus.ACCEPTED) {
-      ndc = await this.approveDocumentPre(d, pr, (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined));
+      if (d.actionId) {
+        ndc = await this.ndcActionRepo.findOne({
+          where: {
+            id: d.actionId,
+          },
+        });
+      }
+      ndc = await this.approveDocumentPre(d, pr, (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined), ndc);
     }
 
     const resp = await this.entityManager.transaction(async (em) => {
@@ -1181,7 +1182,15 @@ export class ProgrammeService {
     if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
       this.logger.log(`Approving document since the user is ${user.companyRole}`)
       dr.status = DocumentStatus.ACCEPTED;
-      ndc = await this.approveDocumentPre(dr, programme, (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined));
+      let ndc;
+      if (dr.actionId) {
+        ndc = await this.ndcActionRepo.findOne({
+          where: {
+            id: dr.actionId,
+          },
+        });
+      }
+      ndc = await this.approveDocumentPre(dr, programme, (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined), ndc);
     }
 
     let resp = await this.entityManager.transaction(async (em) => {
