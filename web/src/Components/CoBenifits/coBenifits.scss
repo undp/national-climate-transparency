@@ -1,11 +1,19 @@
 @import '../../Styles/variables.scss';
 
 .co-benifits-container {
-  display: flex;
+  //display: flex;
   width: 100%;
 
   .ant-form-item-label > label::after {
     content: none;
+  }
+
+  .steps-actions {
+    display: flex;
+    flex-direction: row-reverse;
+    .mg-left-1 {
+      margin-left: 1rem;
+    }
   }
 
   .benifits-tabs {

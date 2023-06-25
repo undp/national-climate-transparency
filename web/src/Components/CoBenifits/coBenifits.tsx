@@ -1,21 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './coBenifits.scss';
-import { Tabs } from 'antd';
+import { Button, Row, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
 import GenderParity from './genderParity';
 import Assessment from './assessment';
 import SdgGoals from './sdgGoals';
 import Safeguards from './safeguards';
 
-const CoBenifitsComponent = () => {
+export interface CoBenefitProps {
+  onClickedBackBtn: any;
+  onFormSubmit: any;
+  coBenefitsDetails?: any;
+  submitButtonText?: any;
+}
+
+const CoBenifitsComponent = (props: CoBenefitProps) => {
+  const { onClickedBackBtn, onFormSubmit, coBenefitsDetails, submitButtonText } = props;
   const { t } = useTranslation(['coBenifits']);
+  const [coBenefitDetails, setCoBenefitDetails] = useState();
 
   const onAssessmentFormSubmit = (coBenefitsAssessmentDetails: any) => {
-    //console.log('coBenefitsAssessmentDetails', coBenefitsAssessmentDetails);
+    setCoBenefitDetails((pre: any) => ({ ...pre, assessmentDetails: coBenefitsAssessmentDetails }));
   };
 
   const onSafeguardFormSubmit = (safeguardDetails: any) => {
-    //console.log('safeguardDetails', safeguardDetails);
+    setCoBenefitDetails((pre: any) => ({ ...pre, safeguardDetails: safeguardDetails }));
   };
 
   const tabItems = [
@@ -57,7 +66,21 @@ const CoBenifitsComponent = () => {
   ];
   return (
     <div className="co-benifits-container">
-      <Tabs className="benifits-tabs" defaultActiveKey="1" centered items={tabItems} />
+      <div>
+        <Tabs className="benifits-tabs" defaultActiveKey="1" centered items={tabItems} />
+      </div>
+      <div className="steps-actions">
+        <Row>
+          <Button onClick={onClickedBackBtn}>{t('back')}</Button>
+          <Button
+            className="mg-left-1"
+            type="primary"
+            onClick={() => onFormSubmit(coBenefitDetails)}
+          >
+            {submitButtonText ? submitButtonText : t('submit')}
+          </Button>
+        </Row>
+      </div>
     </div>
   );
 };
