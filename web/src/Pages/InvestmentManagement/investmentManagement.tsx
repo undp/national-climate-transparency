@@ -459,8 +459,8 @@ const InvestmentManagement = () => {
       render: (item: any, itemObj: any) => {
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {itemObj.sender &&
-              itemObj.sender.map((v: any, i: any) => {
+            {itemObj.receiver &&
+              itemObj.receiver.map((v: any, i: any) => {
                 return (
                   <Tooltip title={v.name} color={TooltipColor} key={TooltipColor}>
                     <div>
