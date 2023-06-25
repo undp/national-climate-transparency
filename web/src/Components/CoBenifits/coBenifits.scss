@@ -118,5 +118,49 @@
         }
       }
     }
+
+    .assesment-tab-item{
+      .ant-radio-group {
+        text-align: center;
+        align-items: center;
+        justify-content: flex-start;
+        margin-left: 1rem;
+
+        .radio-container {
+          margin-right: 1rem;
+        }
+      }
+
+      .ant-radio-button-checked {
+        background: $primary-purple;
+        color: #ffffff;
+      }
+
+      Input {
+        height: 40px;
+      }
+    }
+
+    .safeguard-tab-item{
+      .ant-radio-group {
+        text-align: center;
+        align-items: center;
+        justify-content: flex-start;
+        margin-left: 1rem;
+
+        .radio-container {
+          margin-right: 1rem;
+        }
+      }
+
+      .ant-radio-button-checked {
+        background: $primary-purple;
+        color: #ffffff;
+      }
+
+      Input {
+        height: 40px;
+      }
+    }
   }
 }
