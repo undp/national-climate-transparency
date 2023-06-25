@@ -387,6 +387,9 @@ const InvestmentManagement = () => {
       sorter: true,
       align: 'center' as const,
       render: (item: any, Obj: any) => {
+        if (!Obj.type) {
+          return <span>-</span>;
+        }
         return (
           <Tooltip title={Obj.type} color={TooltipColor} key={TooltipColor}>
             <div>
@@ -406,6 +409,9 @@ const InvestmentManagement = () => {
       sorter: true,
       align: 'center' as const,
       render: (item: any, Obj: any) => {
+        if (!Obj.level) {
+          return <span>-</span>;
+        }
         return (
           <Tooltip title={Obj.level} color={TooltipColor} key={TooltipColor}>
             <div>
@@ -425,6 +431,9 @@ const InvestmentManagement = () => {
       sorter: true,
       align: 'center' as const,
       render: (item: any, Obj: any) => {
+        if (!Obj.stream) {
+          return <span>-</span>;
+        }
         return (
           <Tooltip title={Obj.stream} color={TooltipColor} key={TooltipColor}>
             <div>

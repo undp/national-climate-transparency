@@ -1146,7 +1146,7 @@ export class AggregateAPIService {
       abilityCondition,
       lastTimeForWhere,
       statCache,
-      ["createdTime"],
+      ["creditUpdateTime"],
       stat.statFilter?.timeGroup ? "createdAt" : undefined,
       stat.statFilter?.timeGroup ? "day" : undefined
     );
@@ -1232,6 +1232,14 @@ export class AggregateAPIService {
       "createdTime"
     );
 
+    // if (!filterAnd) {
+    //   filterAnd = []
+    // }
+    // filterAnd.push({
+    //   value: 'NULL',
+    //   key: "type",
+    //   operation: "is not",
+    // })
     let filterOr = undefined;
     // if (stat.statFilter && stat.statFilter.onlyMine) {
     //   filterOr = [];
@@ -1242,7 +1250,7 @@ export class AggregateAPIService {
     //   });
     // }
 
-    return await this.genAggregateTypeOrmQuery(
+    const d = await this.genAggregateTypeOrmQuery(
       this.investmentRepo,
       "investment",
       ["type"],
@@ -1259,6 +1267,14 @@ export class AggregateAPIService {
       stat.statFilter?.timeGroup ? "createdAt" : undefined,
       stat.statFilter?.timeGroup ? "day" : undefined
     );
+    if (d && d.data) {
+      for (const r of d.data) {
+        if (r.type === 0 || r.type === '0') {
+          r.type = 'Unknown'
+        }
+      }
+    }
+    return d;
   }
 
   async generateProgrammeAggregates(

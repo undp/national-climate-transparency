@@ -627,7 +627,7 @@ export class ProgrammeService {
         currentStage: ProgrammeStage.AUTHORISED,
         statusUpdateTime: t,
         authTime: t,
-        creditUpdateTime: t,
+        // creditUpdateTime: t,
         txTime: t,
       }
     );
@@ -800,6 +800,7 @@ export class ProgrammeService {
       programme.creditOwnerPercentage = programme.proponentPercentage;
     }
     programme.createdTime = programme.txTime;
+    programme.creditUpdateTime = programme.txTime;
     if (!programme.creditUnit) {
       programme.creditUnit = this.configService.get("defaultCreditUnit");
     }
@@ -887,7 +888,7 @@ export class ProgrammeService {
     );
     
     if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
-
+      const certifierId = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
       if (dr) {
         this.logger.log(`Approving design document since the user is ${user.companyRole}`)
         dr.status = DocumentStatus.ACCEPTED;
@@ -896,11 +897,20 @@ export class ProgrammeService {
           data: dr.url,
           externalId: dr.externalId,
           actionId: dr.actionId
-        }, ndcAc, dr.type, user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+        }, ndcAc, dr.type, certifierId);
+
+        if (certifierId) {
+          programme.certifierId = [certifierId]
+        }
+        
       }
       if (monitoringReport) {
         this.logger.log(`Approving monitoring report since the user is ${user.companyRole}`)
         monitoringReport.status = DocumentStatus.ACCEPTED;
+
+        if (certifierId) {
+          programme.certifierId = [certifierId]
+        }
 
         await this.queueDocument(AsyncActionType.DocumentUpload, {
           type: this.helperService.enumToString(DocType, monitoringReport.type),
@@ -1017,20 +1027,47 @@ export class ProgrammeService {
     return ndc;
   }
 
-  async approveDocumentCommit(em: EntityManager, d: ProgrammeDocument, ndc: NDCAction) {
+  async updateProgrammeCertifier(programme: Programme, certifierId: number, update: any) {
+    if (!programme.certifierId) {
+      programme.certifierId = [certifierId]
+    } else {
+      programme.certifierId.push(certifierId)
+    }
+    if (update) {
+      update['certifierId'] = programme.certifierId;
+    }
+    if (programme.revokedCertifierId) {
+      const index = programme.revokedCertifierId.map(e => Number(e)).indexOf(Number(certifierId));
+      if (index >=0) {
+        programme.revokedCertifierId.splice(index, 1);
+        if (update) {
+          update['revokedCertifierId'] = programme.revokedCertifierId;
+        }
+      }
+    }
+    return programme;
+  }
+
+  async approveDocumentCommit(em: EntityManager, d: ProgrammeDocument, ndc: NDCAction, certifierId: number, program: Programme) {
     if (
       d.type == DocType.METHODOLOGY_DOCUMENT
     ) {
+      const updT = {
+        currentStage: ProgrammeStage.APPROVED,
+        statusUpdateTime: new Date().getTime(),
+        txTime: new Date().getTime(),
+      };
+
+      if (certifierId && program) {
+       await this.updateProgrammeCertifier(program, certifierId, updT);
+      }
+      
       await em.update(
         Programme,
         {
           programmeId: d.programmeId,
         },
-        {
-          currentStage: ProgrammeStage.APPROVED,
-          statusUpdateTime: new Date().getTime(),
-          txTime: new Date().getTime(),
-        }
+        updT
       );
     }
 
@@ -1076,6 +1113,8 @@ export class ProgrammeService {
     }
     let ndc: NDCAction;
 
+    let cid;
+    let program;
     if (documentAction.status == DocumentStatus.ACCEPTED) {
       if (d.actionId) {
         ndc = await this.ndcActionRepo.findOne({
@@ -1084,12 +1123,14 @@ export class ProgrammeService {
           },
         });
       }
-      ndc = await this.approveDocumentPre(d, pr, (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined), ndc);
+      cid = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+      program = await this.findById(d.programmeId);
+      ndc = await this.approveDocumentPre(d, pr, cid, ndc);
     }
 
     const resp = await this.entityManager.transaction(async (em) => {
       if (documentAction.status === DocumentStatus.ACCEPTED) {
-         await this.approveDocumentCommit(em, d, ndc);
+         await this.approveDocumentCommit(em, d, ndc, cid, program);
       }
       return await em.update(
         ProgrammeDocument,
@@ -1179,6 +1220,7 @@ export class ProgrammeService {
     dr.url = url;
 
     let ndc: NDCAction;
+    let certifierId;
     if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
       this.logger.log(`Approving document since the user is ${user.companyRole}`)
       dr.status = DocumentStatus.ACCEPTED;
@@ -1190,12 +1232,13 @@ export class ProgrammeService {
           },
         });
       }
-      ndc = await this.approveDocumentPre(dr, programme, (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined), ndc);
+      certifierId = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+      ndc = await this.approveDocumentPre(dr, programme, certifierId, ndc);
     }
 
     let resp = await this.entityManager.transaction(async (em) => {
       if (dr.status === DocumentStatus.ACCEPTED) {
-        await this.approveDocumentCommit(em, dr, ndc);
+        await this.approveDocumentCommit(em, dr, ndc, certifierId, programme);
       }
       if (!currentDoc) {
         return await em.save(dr);
@@ -1270,6 +1313,7 @@ export class ProgrammeService {
 
 
     let dr;
+    let programmeUpdate = undefined;
     if (ndcActionDto.monitoringReport) {
       dr = new ProgrammeDocument();
       dr.programmeId = program.programmeId;
@@ -1288,12 +1332,17 @@ export class ProgrammeService {
         this.logger.log(`Approving document since the user is ${user.companyRole}`)
         dr.status = DocumentStatus.ACCEPTED;
 
+        const certifierId = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+        if (certifierId) {
+          programmeUpdate = {};
+          await this.updateProgrammeCertifier(program, certifierId, programmeUpdate)
+        }
         await this.queueDocument(AsyncActionType.DocumentUpload, {
           type: this.helperService.enumToString(DocType, dr.type),
           data: dr.url,
           externalId: dr.externalId,
           actionId: dr.actionId
-        }, ndcAction, dr.type, user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+        }, ndcAction, dr.type, certifierId);
       }
     }
     const saved = await this.entityManager
@@ -1301,6 +1350,14 @@ export class ProgrammeService {
         const n = await em.save<NDCAction>(ndcAction);
         if (dr) {
           await em.save<ProgrammeDocument>(dr);
+        }
+        if (programmeUpdate && Object.keys(programmeUpdate).length > 0) {
+          await em.update(Programme,
+            {
+              programmeId: program.programmeId
+            }, 
+            programmeUpdate
+            )
         }
         return n;
       })
