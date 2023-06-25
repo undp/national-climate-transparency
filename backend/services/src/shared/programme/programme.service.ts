@@ -661,10 +661,12 @@ export class ProgrammeService {
 
     if (docType === DocType.MONITORING_REPORT || docType === DocType.VERIFICATION_REPORT) {
       if (!ndcAction) {
+        this.logger.log(`Ignoring document add ${ndcAction} ${docType} ${certifierId}`)
         return;
       }
 
       if (!((ndcAction.action === NDCActionType.Mitigation || ndcAction.action === NDCActionType.CrossCutting) && ndcAction.typeOfMitigation)) {
+        this.logger.log(`Ignoring non-mitigation add ${ndcAction} ${docType} ${certifierId}`)
         return;
       }
     }

@@ -148,7 +148,7 @@ export const AddInvestmentComponent = () => {
 
     payload.fromCompanyIds = data.companyId.map((e) => Number(e));
     payload.percentage = val.percentage;
-    payload.toCompanyId = userInfoState?.companyId;
+    payload.toCompanyId = Number(payload.toCompanyId);
     try {
       const response: any = await post('national/programme/addInvestment', payload);
       console.log('investment creation -> ', response);
