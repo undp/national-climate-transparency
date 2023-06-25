@@ -22,5 +22,7 @@
   "isRequired": "is required",
   "n/a": "N/A",
   "yes": "YES",
-  "no": "NO"
+  "no": "NO",
+  "back":"BACK",
+  "submit":"SUBMIT"
 }
