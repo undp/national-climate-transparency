@@ -12,7 +12,7 @@
     "creditsSector": "Credit Estimated",
     "creditsSectorTT": "Graphical representation of the number of credits estimated under each programme sector at present in programmes created in the transparency system during the specified time",
     "creditsSectorTTMy": "Graphical representation of the number of credits estimated under each programme sector at present in programmes, owned by your organisation, created in the transparency system during the specified time",
-    "totalInvestment": "Total Investment ($)",
+    "totalInvestment": "Total Investment",
     "totalInvestmentTT": "Graphical representation of the total amount of investments under each investment type at present in programmes created in the transparency system during the specified time",
     "totalInvestmentTTMy": "Graphical representation of the total amount of investments under each investment type at present in programmes, owned by your organisation, created in the transparency system during the specified time",
     "programmeLocation": "Programme Locations",
