@@ -399,6 +399,7 @@ const Dashboard = () => {
       aggType: StatsCardsTypes.AGG_INVESTMENT_BY_TYPE,
       configs: {
         title: t('totalInvestment'),
+        subTitle: '($)',
         tooltip: t('totalInvestmentTT' + TTSuffix),
         colors: colors,
         dataLabelField: 'type',

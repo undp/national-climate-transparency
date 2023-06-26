@@ -380,6 +380,13 @@ const InvestmentManagement = () => {
       render: (item: any) => {
         return <span className="clickable">{item}</span>;
       },
+      onCell: (record: any, rowIndex: any) => {
+        return {
+          onClick: (ev: any) => {
+            navigate('/programmeManagement/view', { state: { id: record.programmeId } });
+          },
+        };
+      },
     },
     {
       title: t('programme:type'),
@@ -387,6 +394,9 @@ const InvestmentManagement = () => {
       sorter: true,
       align: 'center' as const,
       render: (item: any, Obj: any) => {
+        if (!Obj.type) {
+          return <span>-</span>;
+        }
         return (
           <Tooltip title={Obj.type} color={TooltipColor} key={TooltipColor}>
             <div>
@@ -406,6 +416,9 @@ const InvestmentManagement = () => {
       sorter: true,
       align: 'center' as const,
       render: (item: any, Obj: any) => {
+        if (!Obj.level) {
+          return <span>-</span>;
+        }
         return (
           <Tooltip title={Obj.level} color={TooltipColor} key={TooltipColor}>
             <div>
@@ -425,6 +438,9 @@ const InvestmentManagement = () => {
       sorter: true,
       align: 'center' as const,
       render: (item: any, Obj: any) => {
+        if (!Obj.stream) {
+          return <span>-</span>;
+        }
         return (
           <Tooltip title={Obj.stream} color={TooltipColor} key={TooltipColor}>
             <div>
@@ -459,8 +475,8 @@ const InvestmentManagement = () => {
       render: (item: any, itemObj: any) => {
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {itemObj.sender &&
-              itemObj.sender.map((v: any, i: any) => {
+            {itemObj.receiver &&
+              itemObj.receiver.map((v: any, i: any) => {
                 return (
                   <Tooltip title={v.name} color={TooltipColor} key={TooltipColor}>
                     <div>

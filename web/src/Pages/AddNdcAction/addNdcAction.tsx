@@ -13,6 +13,7 @@ import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import { Programme, ProgrammeStage } from '@undp/carbon-library';
 import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
 import { InfoCircle } from 'react-bootstrap-icons';
+import CoBenifitsComponent from '../../Components/CoBenifits/coBenifits';
 
 const AddNdcAction = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -36,12 +37,12 @@ const AddNdcAction = () => {
     return programmeDetails?.currentStage === ProgrammeStage.Authorised;
   };
 
-  const saveNdcAction = async () => {
-    if (ndcActionDetails.enablementReportData) {
-      delete ndcActionDetails.enablementReportData;
+  const saveNdcAction = async (ndcActionDetailsObj: any) => {
+    if (ndcActionDetailsObj.enablementReportData) {
+      delete ndcActionDetailsObj.enablementReportData;
     }
 
-    const response: any = await post('national/programme/addNDCAction', ndcActionDetails);
+    const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
     if (response.status === 200 || response.status === 201) {
       navigate('/programmeManagement/view', { state: { record: programmeDetails } });
     }
@@ -60,8 +61,13 @@ const AddNdcAction = () => {
       projectReportFormValues.monitoringReport.file.originFileObj as RcFile
     );
     const logoUrls = logoBase64.split(',');
-    setNdcActionDetails((pre: any) => ({ ...pre, monitoringReport: logoUrls[1] }));
-    saveNdcAction();
+    const updatedNdcActionDetails = {
+      ...ndcActionDetails,
+      monitoringReport: logoUrls[1],
+    };
+
+    setNdcActionDetails(updatedNdcActionDetails);
+    saveNdcAction(updatedNdcActionDetails);
   };
 
   const onNdcActionDetailsSubmit = async (ndcActionDetailsObj: any) => {
@@ -71,10 +77,15 @@ const AddNdcAction = () => {
   };
 
   const onCoBenefitsSubmit = async (coBenefitsFormValues: any) => {
+    const updatedNdcActionDetails = {
+      ...ndcActionDetails,
+      coBenefitsProperties: coBenefitsFormValues,
+    };
+    setNdcActionDetails(updatedNdcActionDetails);
     if (isProjectReportsVisible()) {
       onClickNext();
     } else {
-      saveNdcAction();
+      saveNdcAction(updatedNdcActionDetails);
     }
   };
 
@@ -117,16 +128,14 @@ const AddNdcAction = () => {
           </div>
         ),
         description: current === 2 && (
-          <div>
-            <div className="steps-actions">
-              <Row>
-                <Button onClick={onClickBack}>{t('ndcAction:back')}</Button>
-                <Button className="mg-left-1" type="primary" onClick={onCoBenefitsSubmit}>
-                  {isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')}
-                </Button>
-              </Row>
-            </div>
-          </div>
+          <CoBenifitsComponent
+            onClickedBackBtn={onClickBack}
+            coBenefitsDetails={ndcActionDetails.coBenefitsProperties}
+            onFormSubmit={onCoBenefitsSubmit}
+            submitButtonText={
+              isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
+            }
+          />
         ),
       },
     ];

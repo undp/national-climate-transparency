@@ -138,9 +138,17 @@ export const AddInvestmentComponent = () => {
     const payload = stepOneData;
     payload.programmeId = data.programmeId;
     payload.amount = parseFloat(payload.amount);
+
+    if (payload.interestRate) {
+      payload.interestRate = parseFloat(payload.interestRate);
+    }
+    if (payload.paymentPerMetric) {
+      payload.paymentPerMetric = parseFloat(payload.paymentPerMetric);
+    }
+
     payload.fromCompanyIds = data.companyId.map((e) => Number(e));
     payload.percentage = val.percentage;
-    payload.toCompanyId = userInfoState?.companyId;
+    payload.toCompanyId = Number(payload.toCompanyId);
     try {
       const response: any = await post('national/programme/addInvestment', payload);
       console.log('investment creation -> ', response);
@@ -537,7 +545,7 @@ export const AddInvestmentComponent = () => {
                                     <InputNumber
                                       placeholder=""
                                       controls={false}
-                                      disabled={userInfoState?.companyId === Number(companyId)}
+                                      // disabled={userInfoState?.companyId === Number(companyId)}
                                       onKeyPress={(event) => {
                                         if (!/[0-9\.]/.test(event.key)) {
                                           event.preventDefault();

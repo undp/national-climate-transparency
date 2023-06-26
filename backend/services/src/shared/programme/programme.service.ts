@@ -136,18 +136,25 @@ export class ProgrammeService {
   ) {
    
     const companyIndex = programme.companyId.map(e => Number(e)).indexOf(Number(transfer.fromCompanyId));
+    const toCompanyIndex = programme.companyId.map(e => Number(e)).indexOf(Number(transfer.toCompanyId));
 
     // Cannot be <= 0 
 
     console.log('PERC', programme.proponentPercentage, companyIndex)
-    programme.creditOwnerPercentage[companyIndex] -= transfer.percentage
-    programme.creditOwnerPercentage.push(transfer.percentage);
+    if (toCompanyIndex < 0) {
+      programme.creditOwnerPercentage[companyIndex] -= transfer.percentage
+      programme.creditOwnerPercentage.push(transfer.percentage);
 
-    programme.proponentPercentage[companyIndex] -= transfer.percentage
-    programme.proponentPercentage.push(transfer.percentage);
+      programme.proponentPercentage[companyIndex] -= transfer.percentage
+      programme.proponentPercentage.push(transfer.percentage);
 
-    programme.companyId.push(Number(transfer.toCompanyId));
-    programme.proponentTaxVatId.push(investor.taxId);
+      programme.companyId.push(Number(transfer.toCompanyId));
+      programme.proponentTaxVatId.push(investor.taxId);
+    } else {
+      programme.proponentPercentage[toCompanyIndex] += transfer.percentage
+      programme.creditOwnerPercentage[toCompanyIndex] += transfer.percentage
+    }
+    
 
     console.log('PERC', programme.proponentPercentage[companyIndex])
     // await this.asyncOperationsInterface.addAction({
@@ -627,7 +634,7 @@ export class ProgrammeService {
         currentStage: ProgrammeStage.AUTHORISED,
         statusUpdateTime: t,
         authTime: t,
-        creditUpdateTime: t,
+        // creditUpdateTime: t,
         txTime: t,
       }
     );
@@ -661,10 +668,12 @@ export class ProgrammeService {
 
     if (docType === DocType.MONITORING_REPORT || docType === DocType.VERIFICATION_REPORT) {
       if (!ndcAction) {
+        this.logger.log(`Ignoring document add ${ndcAction} ${docType} ${certifierId}`)
         return;
       }
 
       if (!((ndcAction.action === NDCActionType.Mitigation || ndcAction.action === NDCActionType.CrossCutting) && ndcAction.typeOfMitigation)) {
+        this.logger.log(`Ignoring non-mitigation add ${ndcAction} ${docType} ${certifierId}`)
         return;
       }
     }
@@ -675,6 +684,13 @@ export class ProgrammeService {
         req['certifierTaxId'] = comp.taxId;
       }
     }
+
+    // if (action === AsyncActionType.DocumentUpload && docType === DocType.DESIGN_DOCUMENT) {
+    //   await this.asyncOperationsInterface.addAction({
+    //     actionType: AsyncActionType.GenerateNoObjectionReport,
+    //     actionProps: req,
+    //   });
+    // }
 
     await this.asyncOperationsInterface.addAction({
       actionType: action,
@@ -798,6 +814,7 @@ export class ProgrammeService {
       programme.creditOwnerPercentage = programme.proponentPercentage;
     }
     programme.createdTime = programme.txTime;
+    programme.creditUpdateTime = programme.txTime;
     if (!programme.creditUnit) {
       programme.creditUnit = this.configService.get("defaultCreditUnit");
     }
@@ -827,7 +844,7 @@ export class ProgrammeService {
     if (programmeDto.ndcAction) {
       const data = instanceToPlain(programmeDto.ndcAction);
       ndcAc = plainToClass(NDCAction, data);
-      ndcAc.id = await this.createNDCActionId(programmeDto.ndcAction);
+      ndcAc.id = await this.createNDCActionId(programmeDto.ndcAction, programme.programmeId);
 
       await this.calcCreditNDCAction(ndcAc, programme);
       this.calcAddNDCFields(ndcAc, programme);
@@ -885,7 +902,7 @@ export class ProgrammeService {
     );
     
     if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
-
+      const certifierId = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
       if (dr) {
         this.logger.log(`Approving design document since the user is ${user.companyRole}`)
         dr.status = DocumentStatus.ACCEPTED;
@@ -894,11 +911,19 @@ export class ProgrammeService {
           data: dr.url,
           externalId: dr.externalId,
           actionId: dr.actionId
-        }, ndcAc, dr.type, user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+        }, ndcAc, dr.type, certifierId);
+
+        if (certifierId) {
+          programme.certifierId = [certifierId]
+        }
       }
       if (monitoringReport) {
         this.logger.log(`Approving monitoring report since the user is ${user.companyRole}`)
         monitoringReport.status = DocumentStatus.ACCEPTED;
+
+        if (certifierId) {
+          programme.certifierId = [certifierId]
+        }
 
         await this.queueDocument(AsyncActionType.DocumentUpload, {
           type: this.helperService.enumToString(DocType, monitoringReport.type),
@@ -989,8 +1014,7 @@ export class ProgrammeService {
     }
   }
 
-  async approveDocumentPre(d: ProgrammeDocument, pr: Programme, certifierId: number) {
-    let ndc: NDCAction;
+  async approveDocumentPre(d: ProgrammeDocument, pr: Programme, certifierId: number, ndc: NDCAction) {
     if (d.type == DocType.METHODOLOGY_DOCUMENT) {
 
       await this.queueDocument(AsyncActionType.ProgrammeAccept, {
@@ -1001,11 +1025,6 @@ export class ProgrammeService {
       }, ndc, d.type, certifierId);
     } else {
       if (d.type == DocType.VERIFICATION_REPORT) {
-        ndc = await this.ndcActionRepo.findOne({
-          where: {
-            id: d.actionId,
-          },
-        });
         if (ndc) {
           ndc.status = NDCStatus.APPROVED;
         }
@@ -1021,20 +1040,48 @@ export class ProgrammeService {
     return ndc;
   }
 
-  async approveDocumentCommit(em: EntityManager, d: ProgrammeDocument, ndc: NDCAction) {
+  async updateProgrammeCertifier(programme: Programme, certifierId: number, update: any) {
+    if (!programme.certifierId) {
+      programme.certifierId = [certifierId]
+    } else {
+      programme.certifierId.push(certifierId)
+    }
+    if (update) {
+      update['certifierId'] = programme.certifierId;
+    }
+    if (programme.revokedCertifierId) {
+      const index = programme.revokedCertifierId.map(e => Number(e)).indexOf(Number(certifierId));
+      if (index >=0) {
+        programme.revokedCertifierId.splice(index, 1);
+        if (update) {
+          update['revokedCertifierId'] = programme.revokedCertifierId;
+        }
+      }
+    }
+    return programme;
+  }
+
+  async approveDocumentCommit(em: EntityManager, d: ProgrammeDocument, ndc: NDCAction, certifierId: number, program: Programme) {
     if (
       d.type == DocType.METHODOLOGY_DOCUMENT
     ) {
+      const updT = {
+        currentStage: ProgrammeStage.APPROVED,
+        statusUpdateTime: new Date().getTime(),
+        txTime: new Date().getTime(),
+      };
+
+      if (certifierId && program) {
+       await this.updateProgrammeCertifier(program, certifierId, updT);
+      }
+      console.log('Update T', updT)
+      
       await em.update(
         Programme,
         {
           programmeId: d.programmeId,
         },
-        {
-          currentStage: ProgrammeStage.APPROVED,
-          statusUpdateTime: new Date().getTime(),
-          txTime: new Date().getTime(),
-        }
+        updT
       );
     }
 
@@ -1080,13 +1127,24 @@ export class ProgrammeService {
     }
     let ndc: NDCAction;
 
+    let cid;
+    let program;
     if (documentAction.status == DocumentStatus.ACCEPTED) {
-      ndc = await this.approveDocumentPre(d, pr, (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined));
+      if (d.actionId) {
+        ndc = await this.ndcActionRepo.findOne({
+          where: {
+            id: d.actionId,
+          },
+        });
+      }
+      cid = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+      program = await this.findById(d.programmeId);
+      ndc = await this.approveDocumentPre(d, pr, cid, ndc);
     }
 
     const resp = await this.entityManager.transaction(async (em) => {
       if (documentAction.status === DocumentStatus.ACCEPTED) {
-         await this.approveDocumentCommit(em, d, ndc);
+         await this.approveDocumentCommit(em, d, ndc, cid, program);
       }
       return await em.update(
         ProgrammeDocument,
@@ -1176,15 +1234,25 @@ export class ProgrammeService {
     dr.url = url;
 
     let ndc: NDCAction;
+    let certifierId;
     if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
       this.logger.log(`Approving document since the user is ${user.companyRole}`)
       dr.status = DocumentStatus.ACCEPTED;
-      ndc = await this.approveDocumentPre(dr, programme, (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined));
+      let ndc;
+      if (dr.actionId) {
+        ndc = await this.ndcActionRepo.findOne({
+          where: {
+            id: dr.actionId,
+          },
+        });
+      }
+      certifierId = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+      ndc = await this.approveDocumentPre(dr, programme, certifierId, ndc);
     }
 
     let resp = await this.entityManager.transaction(async (em) => {
       if (dr.status === DocumentStatus.ACCEPTED) {
-        await this.approveDocumentCommit(em, dr, ndc);
+        await this.approveDocumentCommit(em, dr, ndc, certifierId, programme);
       }
       if (!currentDoc) {
         return await em.save(dr);
@@ -1199,7 +1267,7 @@ export class ProgrammeService {
     return new DataResponseDto(HttpStatus.OK, resp);
   }
 
-  private async createNDCActionId(ndcAction: NDCActionDto) {
+  private async createNDCActionId(ndcAction: NDCActionDto, programmeId: string) {
     const id = await this.counterService.incrementCount(
       CounterType.NDC_ACTION,
       3
@@ -1207,13 +1275,13 @@ export class ProgrammeService {
 
     const type =
       ndcAction.action == NDCActionType.Mitigation
-        ? "MTG"
+        ? "M"
         : ndcAction.action == NDCActionType.Adaptation
-        ? "ADT"
+        ? "A"
         : ndcAction.action == NDCActionType.Enablement
-        ? "ENB"
-        : "CRS";
-    return `${type}-${id}`;
+        ? "E"
+        : "C";
+    return `${programmeId}-${type}-${id}`;
   }
 
   async addNDCAction(ndcActionDto: NDCActionDto, user: User): Promise<DataResponseDto> {
@@ -1241,7 +1309,7 @@ export class ProgrammeService {
 
     const data = instanceToPlain(ndcActionDto);
     const ndcAction: NDCAction = plainToClass(NDCAction, data);
-    ndcAction.id = await this.createNDCActionId(ndcActionDto);
+    ndcAction.id = await this.createNDCActionId(ndcActionDto, program.programmeId);
 
     await this.calcCreditNDCAction(ndcAction, program);
     console.log("2222", ndcAction);
@@ -1259,6 +1327,7 @@ export class ProgrammeService {
 
 
     let dr;
+    let programmeUpdate = undefined;
     if (ndcActionDto.monitoringReport) {
       dr = new ProgrammeDocument();
       dr.programmeId = program.programmeId;
@@ -1277,12 +1346,17 @@ export class ProgrammeService {
         this.logger.log(`Approving document since the user is ${user.companyRole}`)
         dr.status = DocumentStatus.ACCEPTED;
 
+        const certifierId = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+        if (certifierId) {
+          programmeUpdate = {};
+          await this.updateProgrammeCertifier(program, certifierId, programmeUpdate)
+        }
         await this.queueDocument(AsyncActionType.DocumentUpload, {
           type: this.helperService.enumToString(DocType, dr.type),
           data: dr.url,
           externalId: dr.externalId,
           actionId: dr.actionId
-        }, ndcAction, dr.type, user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+        }, ndcAction, dr.type, certifierId);
       }
     }
     const saved = await this.entityManager
@@ -1290,6 +1364,14 @@ export class ProgrammeService {
         const n = await em.save<NDCAction>(ndcAction);
         if (dr) {
           await em.save<ProgrammeDocument>(dr);
+        }
+        if (programmeUpdate && Object.keys(programmeUpdate).length > 0) {
+          await em.update(Programme,
+            {
+              programmeId: program.programmeId
+            }, 
+            programmeUpdate
+            )
         }
         return n;
       })
