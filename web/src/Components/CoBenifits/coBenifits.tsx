@@ -20,12 +20,16 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
   const { t } = useTranslation(['coBenifits']);
   const [coBenefitDetails, setCoBenefitDetails] = useState();
 
-  const onAssessmentFormSubmit = (coBenefitsAssessmentDetails: any) => {
-    setCoBenefitDetails((pre: any) => ({ ...pre, assessmentDetails: coBenefitsAssessmentDetails }));
-  };
-
   const onSdgGoalsFormSubmit = (sdgGoalsDetails: any) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, sdgGoals: sdgGoalsDetails }));
+  };
+
+  const onEnvironmentalFormSubmit = (environmentalsDetails: any) => {
+    setCoBenefitDetails((pre: any) => ({ ...pre, environmental: environmentalsDetails }));
+  };
+
+  const onAssessmentFormSubmit = (coBenefitsAssessmentDetails: any) => {
+    setCoBenefitDetails((pre: any) => ({ ...pre, assessmentDetails: coBenefitsAssessmentDetails }));
   };
 
   const onSafeguardFormSubmit = (safeguardDetails: any) => {
@@ -51,7 +55,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:environmental'),
       key: '4',
-      children: <Environmental />,
+      children: <Environmental onFormSubmit={onEnvironmentalFormSubmit} />,
     },
     {
       label: t('coBenifits:social'),

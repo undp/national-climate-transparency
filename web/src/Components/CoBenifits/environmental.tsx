@@ -1,9 +1,10 @@
 import { Form, Radio } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RadioButtonStatus } from '../../Definitions/commonEnums';
 
-const Environmental = () => {
+const Environmental = (props: any) => {
+  const { onFormSubmit } = props;
   const { t } = useTranslation(['environment']);
   const environmentalDetailsInitial: any[] = [
     {
@@ -181,9 +182,8 @@ const Environmental = () => {
   const [environmentalDetails, setEnvironmentalDetails] = useState<any[]>(
     environmentalDetailsInitial
   );
-  const onFinishFormOne = () => {};
+  const [environmentalFormDetails, setEnvironmentalFormDetails] = useState<any>();
   const onFieldsChange = (changedFields: any) => {
-    console.log(changedFields);
     const changedFieldName = changedFields[0]?.name[0];
     const changedFieldValue = changedFields[0]?.value;
     if (changedFieldName.includes('1')) {
@@ -202,6 +202,15 @@ const Environmental = () => {
       setEnvironmentalDetails(updatedEnvironmentalDetails);
     }
   };
+
+  useEffect(() => {
+    onFormSubmit(environmentalFormDetails);
+  }, [environmentalFormDetails]);
+
+  const onEnvironmentalValuesChanged = (changedValues: any) => {
+    setEnvironmentalFormDetails((pre: any) => ({ ...pre, ...changedValues }));
+  };
+
   return (
     <div className="co-benifits-tab-item">
       <Form
@@ -213,7 +222,7 @@ const Environmental = () => {
         requiredMark={true}
         form={formOne}
         onFieldsChange={onFieldsChange}
-        onFinish={onFinishFormOne}
+        onValuesChange={onEnvironmentalValuesChanged}
       >
         <div className="section">
           {environmentalDetails?.map((environmentalDetail: any) => (
