@@ -366,5 +366,33 @@
         height: 40px;
       }
     }
+
+    .social-tab-item {
+      .ant-radio-group {
+        text-align: center;
+        align-items: center;
+        justify-content: flex-start;
+        margin-left: 1rem;
+
+        .radio-container {
+          margin-right: 1rem;
+        }
+      }
+
+      .ant-radio-button-checked {
+        background: $primary-purple;
+        color: #ffffff;
+      }
+
+      .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+        color: $dark-text-color !important;
+        border-color: $primary-purple !important;
+        box-shadow: none;
+      }
+
+      Input {
+        height: 40px;
+      }
+    }
   }
 }
