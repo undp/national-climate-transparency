@@ -58,5 +58,6 @@
   "investmentCreationSuccess": "The investment request created successfully",
   "total": "Total Ownership",
   "ClimateFinance": "Climate Finance",
-  "CarbonMarket": "Carbon Market"
+  "CarbonMarket": "Carbon Market",
+  "rejectTip": "Request Adjustments"
 }

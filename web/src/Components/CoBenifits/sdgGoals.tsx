@@ -1,40 +1,41 @@
-import { Checkbox, Col, Form, Row } from 'antd';
+import { Col, Form, Row } from 'antd';
 import React, { useEffect, useState } from 'react';
-import goal1 from '../../Assets/Images/SdgGoalsImages/goal-1.jpg';
-import goal2 from '../../Assets/Images/SdgGoalsImages/goal-2.jpg';
-import goal3 from '../../Assets/Images/SdgGoalsImages/goal-3.jpg';
-import goal4 from '../../Assets/Images/SdgGoalsImages/goal-4.jpg';
-import goal5 from '../../Assets/Images/SdgGoalsImages/goal-5.jpg';
-import goal6 from '../../Assets/Images/SdgGoalsImages/goal-6.jpg';
-import goal7 from '../../Assets/Images/SdgGoalsImages/goal-7.jpg';
-import goal8 from '../../Assets/Images/SdgGoalsImages/goal-8.jpg';
-import goal9 from '../../Assets/Images/SdgGoalsImages/goal-9.jpg';
-import goal10 from '../../Assets/Images/SdgGoalsImages/goal-10.jpg';
-import goal11 from '../../Assets/Images/SdgGoalsImages/goal-11.jpg';
-import goal12 from '../../Assets/Images/SdgGoalsImages/goal-12.jpg';
-import goal13 from '../../Assets/Images/SdgGoalsImages/goal-13.jpg';
-import goal14 from '../../Assets/Images/SdgGoalsImages/goal-14.jpg';
-import goal15 from '../../Assets/Images/SdgGoalsImages/goal-15.jpg';
-import goal16 from '../../Assets/Images/SdgGoalsImages/goal-16.jpg';
-import goal17 from '../../Assets/Images/SdgGoalsImages/goal-17.jpg';
+import { SdgGoals as SdgGoalsEnum } from '../../Casl/enums/sdgGoals.enum';
+import goal1 from '../../Assets/Images/SdgGoalsImages/goal-1.png';
+import goal2 from '../../Assets/Images/SdgGoalsImages/goal-2.png';
+import goal3 from '../../Assets/Images/SdgGoalsImages/goal-3.png';
+import goal4 from '../../Assets/Images/SdgGoalsImages/goal-4.png';
+import goal5 from '../../Assets/Images/SdgGoalsImages/goal-5.png';
+import goal6 from '../../Assets/Images/SdgGoalsImages/goal-6.png';
+import goal7 from '../../Assets/Images/SdgGoalsImages/goal-7.png';
+import goal8 from '../../Assets/Images/SdgGoalsImages/goal-8.png';
+import goal9 from '../../Assets/Images/SdgGoalsImages/goal-9.png';
+import goal10 from '../../Assets/Images/SdgGoalsImages/goal-10.png';
+import goal11 from '../../Assets/Images/SdgGoalsImages/goal-11.png';
+import goal12 from '../../Assets/Images/SdgGoalsImages/goal-12.png';
+import goal13 from '../../Assets/Images/SdgGoalsImages/goal-13.png';
+import goal14 from '../../Assets/Images/SdgGoalsImages/goal-14.png';
+import goal15 from '../../Assets/Images/SdgGoalsImages/goal-15.png';
+import goal16 from '../../Assets/Images/SdgGoalsImages/goal-16.png';
+import goal17 from '../../Assets/Images/SdgGoalsImages/goal-17.png';
 
-import goal1Selected from '../../Assets/Images/SdgGoalsImages/goal-1-selected.jpg';
-import goal2Selected from '../../Assets/Images/SdgGoalsImages/goal-2-selected.jpg';
-import goal3Selected from '../../Assets/Images/SdgGoalsImages/goal-3-selected.jpg';
-import goal4Selected from '../../Assets/Images/SdgGoalsImages/goal-4-selected.jpg';
-import goal5Selected from '../../Assets/Images/SdgGoalsImages/goal-5-selected.jpg';
-import goal6Selected from '../../Assets/Images/SdgGoalsImages/goal-6-selected.jpg';
-import goal7Selected from '../../Assets/Images/SdgGoalsImages/goal-7-selected.jpg';
-import goal8Selected from '../../Assets/Images/SdgGoalsImages/goal-8-selected.jpg';
-import goal9Selected from '../../Assets/Images/SdgGoalsImages/goal-9-selected.jpg';
-import goal10Selected from '../../Assets/Images/SdgGoalsImages/goal-10-selected.jpg';
-import goal11Selected from '../../Assets/Images/SdgGoalsImages/goal-11-selected.jpg';
-import goal12Selected from '../../Assets/Images/SdgGoalsImages/goal-12-selected.jpg';
-import goal13Selected from '../../Assets/Images/SdgGoalsImages/goal-13-selected.jpg';
-import goal14Selected from '../../Assets/Images/SdgGoalsImages/goal-14-selected.jpg';
-import goal15Selected from '../../Assets/Images/SdgGoalsImages/goal-15-selected.jpg';
-import goal16Selected from '../../Assets/Images/SdgGoalsImages/goal-16-selected.jpg';
-import goal17Selected from '../../Assets/Images/SdgGoalsImages/goal-17-selected.jpg';
+import goal1Selected from '../../Assets/Images/SdgGoalsImages/goal-1-selected.png';
+import goal2Selected from '../../Assets/Images/SdgGoalsImages/goal-2-selected.png';
+import goal3Selected from '../../Assets/Images/SdgGoalsImages/goal-3-selected.png';
+import goal4Selected from '../../Assets/Images/SdgGoalsImages/goal-4-selected.png';
+import goal5Selected from '../../Assets/Images/SdgGoalsImages/goal-5-selected.png';
+import goal6Selected from '../../Assets/Images/SdgGoalsImages/goal-6-selected.png';
+import goal7Selected from '../../Assets/Images/SdgGoalsImages/goal-7-selected.png';
+import goal8Selected from '../../Assets/Images/SdgGoalsImages/goal-8-selected.png';
+import goal9Selected from '../../Assets/Images/SdgGoalsImages/goal-9-selected.png';
+import goal10Selected from '../../Assets/Images/SdgGoalsImages/goal-10-selected.png';
+import goal11Selected from '../../Assets/Images/SdgGoalsImages/goal-11-selected.png';
+import goal12Selected from '../../Assets/Images/SdgGoalsImages/goal-12-selected.png';
+import goal13Selected from '../../Assets/Images/SdgGoalsImages/goal-13-selected.png';
+import goal14Selected from '../../Assets/Images/SdgGoalsImages/goal-14-selected.png';
+import goal15Selected from '../../Assets/Images/SdgGoalsImages/goal-15-selected.png';
+import goal16Selected from '../../Assets/Images/SdgGoalsImages/goal-16-selected.png';
+import goal17Selected from '../../Assets/Images/SdgGoalsImages/goal-17-selected.png';
 const sdgGoalsDetails = [
   {
     name: 'noPoverty',
@@ -123,9 +124,11 @@ const sdgGoalsDetails = [
   },
 ];
 
-const SdgGoals = () => {
+const SdgGoals = (props: any) => {
+  const { onFormSubmit } = props;
   const [formOne] = Form.useForm();
   const [sdgGoals, setSdgGoals] = useState<any[]>(sdgGoalsDetails);
+  const [sdgGoalsFromProgramme, setSdgGoalsFromProgramme] = useState<any[]>([]);
 
   const goalImageMap = {
     [goal1]: goal1Selected,
@@ -186,9 +189,15 @@ const SdgGoals = () => {
   };
 
   useEffect(() => {
-    console.log('sdg goals changes ------------- > ');
-    console.log(sdgGoals);
+    const selectedGoals = sdgGoals
+      .filter((goal: any) => goal.selected)
+      .map((goal: any) => SdgGoalsEnum[goal.name as keyof typeof SdgGoalsEnum]);
+    setSdgGoalsFromProgramme(selectedGoals);
   }, [sdgGoals]);
+
+  useEffect(() => {
+    onFormSubmit(sdgGoalsFromProgramme);
+  }, [sdgGoalsFromProgramme]);
 
   return (
     <div className="co-benifits-tab-item">
