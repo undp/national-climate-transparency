@@ -29,5 +29,6 @@
   "balanceOfPaymentsQ1": "Does the activity contribute to improving the country's balance of payments?",
   "balanceOfPaymentsQ2": "Reduction of the dependency on foreign sources of energy",
   "balanceOfPaymentsQ3": "Other macroeconomic benefits",
-  "furtherInfoQ1": "Do you have any further information that highlights the sustainable development co-benefits of the activity?"
+  "furtherInfoQ1": "Do you have any further information that highlights the sustainable development co-benefits of the activity?",
+  "isRequired": "is required!"
 }

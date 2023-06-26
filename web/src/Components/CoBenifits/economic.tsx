@@ -228,7 +228,8 @@ const Economic = (props: any) => {
                       name={field?.name}
                       rules={[
                         {
-                          required: false,
+                          required: field?.required,
+                          message: field?.required && `${t(field?.name)} ${t('isRequired')}`,
                         },
                       ]}
                     >

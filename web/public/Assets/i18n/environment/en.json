@@ -6,7 +6,7 @@
   "land": "Land",
   "water": "Water",
   "naturalResource": "Natural Resources",
-  "airQ1": "Does the activity improve airQ quality in the area?",
+  "airQ1": "Does the activity improve air quality in the area?",
   "airQ2": "Reducing level/frequency/time of SOx (sulphur oxides) emissions?",
   "airQ3": "Reducing level/frequency/time of fly ash emissions?",
   "airQ4": "Reducing level/frequency/time of SPM (Suspended Particulate Matter) emissions?",
@@ -35,5 +35,6 @@
   "naturalResourceQ3": "Plant life (e.g. plant habitats)",
   "naturalResourceQ4": "Species diversity (e.g. animals, insects, birds)",
   "naturalResourceQ5": "Forests",
-  "naturalResourceQ6": "Other depletable natural resources (enhanced/protected)"
+  "naturalResourceQ6": "Other depletable natural resources (enhanced/protected)",
+  "isRequired": "is required!"
 }
