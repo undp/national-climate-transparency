@@ -1,12 +1,13 @@
 import { Col, Form, Input, InputNumber, Radio, Row } from 'antd';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const GenderParity = () => {
+const GenderParity = (props: any) => {
+  const { onFormSubmit } = props;
   const { t } = useTranslation(['genderParity']);
   const [formOne] = Form.useForm();
   const [formTwo] = Form.useForm();
-  const onFinishFormOne = () => {};
+  const [genderParityDetails, setGenderParityDetails] = useState();
 
   const genderParityDetailsOne = [
     {
@@ -67,6 +68,18 @@ const GenderParity = () => {
     },
   ];
 
+  useEffect(() => {
+    onFormSubmit(genderParityDetails);
+  }, [genderParityDetails]);
+
+  const onGenderParityValuesChanged = (changedValues: any) => {
+    setGenderParityDetails((pre: any) => ({ ...pre, ...changedValues }));
+  };
+
+  const onGenderParityValuesChangedSub = (changedValues: any) => {
+    setGenderParityDetails((pre: any) => ({ ...pre, ...changedValues }));
+  };
+
   return (
     <div className="co-benifits-tab-item">
       <Form
@@ -77,7 +90,7 @@ const GenderParity = () => {
         layout="horizontal"
         requiredMark={true}
         form={formOne}
-        onFinish={onFinishFormOne}
+        onValuesChange={onGenderParityValuesChanged}
       >
         <div className="part-one">
           {genderParityDetailsOne?.map((genderParityItem: any) => {
@@ -109,7 +122,12 @@ const GenderParity = () => {
           })}
         </div>
         <div className="part-two">
-          <Form name="additional-details" layout="vertical" form={formTwo}>
+          <Form
+            name="additional-details"
+            layout="vertical"
+            form={formTwo}
+            onValuesChange={onGenderParityValuesChangedSub}
+          >
             <Row gutter={[16, 16]}>
               {genderParityDetailsTwo?.map((genderDetail: any) => (
                 <Col md={genderDetail?.col?.md} lg={genderDetail?.col?.lg}>

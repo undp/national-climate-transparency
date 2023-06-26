@@ -24,6 +24,10 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, sdgGoals: sdgGoalsDetails }));
   };
 
+  const onGenderParityFormSubmit = (genderParityDetails: any) => {
+    setCoBenefitDetails((pre: any) => ({ ...pre, genderPariy: genderParityDetails }));
+  };
+
   const onEnvironmentalFormSubmit = (environmentalsDetails: any) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, environmental: environmentalsDetails }));
   };
@@ -45,7 +49,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:genderPart'),
       key: '2',
-      children: <GenderParity />,
+      children: <GenderParity onFormSubmit={onGenderParityFormSubmit} />,
     },
     {
       label: t('coBenifits:safeguards'),
