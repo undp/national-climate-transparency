@@ -5,5 +5,6 @@ export enum AsyncActionType {
   DocumentUpload,
   ProgrammeAccept,
   AddMitigation,
-  OwnershipUpdate
+  OwnershipUpdate,
+  GenerateNoObjectionReport
 }
