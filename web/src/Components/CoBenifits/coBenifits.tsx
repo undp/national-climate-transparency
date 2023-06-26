@@ -7,6 +7,7 @@ import Assessment from './assessment';
 import SdgGoals from './sdgGoals';
 import Safeguards from './safeguards';
 import Environmental from './environmental';
+import Economic from './economic';
 
 export interface CoBenefitProps {
   onClickedBackBtn: any;
@@ -30,6 +31,10 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
 
   const onEnvironmentalFormSubmit = (environmentalsDetails: any) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, environmental: environmentalsDetails }));
+  };
+
+  const onEconomicFormSubmit = (economicDetails: any) => {
+    setCoBenefitDetails((pre: any) => ({ ...pre, economic: economicDetails }));
   };
 
   const onAssessmentFormSubmit = (coBenefitsAssessmentDetails: any) => {
@@ -69,7 +74,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:economic'),
       key: '6',
-      children: 'Econimic',
+      children: <Economic onFormSubmit={onEconomicFormSubmit} />,
     },
     {
       label: t('coBenifits:assessment'),
