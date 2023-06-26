@@ -6,6 +6,8 @@ import GenderParity from './genderParity';
 import Assessment from './assessment';
 import SdgGoals from './sdgGoals';
 import Safeguards from './safeguards';
+import Environmental from './environmental';
+import Economic from './economic';
 
 export interface CoBenefitProps {
   onClickedBackBtn: any;
@@ -19,6 +21,22 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
   const { t } = useTranslation(['coBenifits']);
   const [coBenefitDetails, setCoBenefitDetails] = useState();
 
+  const onSdgGoalsFormSubmit = (sdgGoalsDetails: any) => {
+    setCoBenefitDetails((pre: any) => ({ ...pre, sdgGoals: sdgGoalsDetails }));
+  };
+
+  const onGenderParityFormSubmit = (genderParityDetails: any) => {
+    setCoBenefitDetails((pre: any) => ({ ...pre, genderPariy: genderParityDetails }));
+  };
+
+  const onEnvironmentalFormSubmit = (environmentalsDetails: any) => {
+    setCoBenefitDetails((pre: any) => ({ ...pre, environmental: environmentalsDetails }));
+  };
+
+  const onEconomicFormSubmit = (economicDetails: any) => {
+    setCoBenefitDetails((pre: any) => ({ ...pre, economic: economicDetails }));
+  };
+
   const onAssessmentFormSubmit = (coBenefitsAssessmentDetails: any) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, assessmentDetails: coBenefitsAssessmentDetails }));
   };
@@ -31,12 +49,12 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:sdgGoals'),
       key: '1',
-      children: <SdgGoals />,
+      children: <SdgGoals onFormSubmit={onSdgGoalsFormSubmit} />,
     },
     {
       label: t('coBenifits:genderPart'),
       key: '2',
-      children: <GenderParity />,
+      children: <GenderParity onFormSubmit={onGenderParityFormSubmit} />,
     },
     {
       label: t('coBenifits:safeguards'),
@@ -46,7 +64,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:environmental'),
       key: '4',
-      children: 'Environmental',
+      children: <Environmental onFormSubmit={onEnvironmentalFormSubmit} />,
     },
     {
       label: t('coBenifits:social'),
@@ -56,7 +74,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:economic'),
       key: '6',
-      children: 'Econimic',
+      children: <Economic onFormSubmit={onEconomicFormSubmit} />,
     },
     {
       label: t('coBenifits:assessment'),

@@ -136,18 +136,25 @@ export class ProgrammeService {
   ) {
    
     const companyIndex = programme.companyId.map(e => Number(e)).indexOf(Number(transfer.fromCompanyId));
+    const toCompanyIndex = programme.companyId.map(e => Number(e)).indexOf(Number(transfer.toCompanyId));
 
     // Cannot be <= 0 
 
     console.log('PERC', programme.proponentPercentage, companyIndex)
-    programme.creditOwnerPercentage[companyIndex] -= transfer.percentage
-    programme.creditOwnerPercentage.push(transfer.percentage);
+    if (toCompanyIndex < 0) {
+      programme.creditOwnerPercentage[companyIndex] -= transfer.percentage
+      programme.creditOwnerPercentage.push(transfer.percentage);
 
-    programme.proponentPercentage[companyIndex] -= transfer.percentage
-    programme.proponentPercentage.push(transfer.percentage);
+      programme.proponentPercentage[companyIndex] -= transfer.percentage
+      programme.proponentPercentage.push(transfer.percentage);
 
-    programme.companyId.push(Number(transfer.toCompanyId));
-    programme.proponentTaxVatId.push(investor.taxId);
+      programme.companyId.push(Number(transfer.toCompanyId));
+      programme.proponentTaxVatId.push(investor.taxId);
+    } else {
+      programme.proponentPercentage[toCompanyIndex] += transfer.percentage
+      programme.creditOwnerPercentage[toCompanyIndex] += transfer.percentage
+    }
+    
 
     console.log('PERC', programme.proponentPercentage[companyIndex])
     // await this.asyncOperationsInterface.addAction({
@@ -678,6 +685,13 @@ export class ProgrammeService {
       }
     }
 
+    // if (action === AsyncActionType.DocumentUpload && docType === DocType.DESIGN_DOCUMENT) {
+    //   await this.asyncOperationsInterface.addAction({
+    //     actionType: AsyncActionType.GenerateNoObjectionReport,
+    //     actionProps: req,
+    //   });
+    // }
+
     await this.asyncOperationsInterface.addAction({
       actionType: action,
       actionProps: req,
@@ -830,7 +844,7 @@ export class ProgrammeService {
     if (programmeDto.ndcAction) {
       const data = instanceToPlain(programmeDto.ndcAction);
       ndcAc = plainToClass(NDCAction, data);
-      ndcAc.id = await this.createNDCActionId(programmeDto.ndcAction);
+      ndcAc.id = await this.createNDCActionId(programmeDto.ndcAction, programme.programmeId);
 
       await this.calcCreditNDCAction(ndcAc, programme);
       this.calcAddNDCFields(ndcAc, programme);
@@ -902,7 +916,6 @@ export class ProgrammeService {
         if (certifierId) {
           programme.certifierId = [certifierId]
         }
-        
       }
       if (monitoringReport) {
         this.logger.log(`Approving monitoring report since the user is ${user.companyRole}`)
@@ -1061,6 +1074,7 @@ export class ProgrammeService {
       if (certifierId && program) {
        await this.updateProgrammeCertifier(program, certifierId, updT);
       }
+      console.log('Update T', updT)
       
       await em.update(
         Programme,
@@ -1253,7 +1267,7 @@ export class ProgrammeService {
     return new DataResponseDto(HttpStatus.OK, resp);
   }
 
-  private async createNDCActionId(ndcAction: NDCActionDto) {
+  private async createNDCActionId(ndcAction: NDCActionDto, programmeId: string) {
     const id = await this.counterService.incrementCount(
       CounterType.NDC_ACTION,
       3
@@ -1261,13 +1275,13 @@ export class ProgrammeService {
 
     const type =
       ndcAction.action == NDCActionType.Mitigation
-        ? "MTG"
+        ? "M"
         : ndcAction.action == NDCActionType.Adaptation
-        ? "ADT"
+        ? "A"
         : ndcAction.action == NDCActionType.Enablement
-        ? "ENB"
-        : "CRS";
-    return `${type}-${id}`;
+        ? "E"
+        : "C";
+    return `${programmeId}-${type}-${id}`;
   }
 
   async addNDCAction(ndcActionDto: NDCActionDto, user: User): Promise<DataResponseDto> {
@@ -1295,7 +1309,7 @@ export class ProgrammeService {
 
     const data = instanceToPlain(ndcActionDto);
     const ndcAction: NDCAction = plainToClass(NDCAction, data);
-    ndcAction.id = await this.createNDCActionId(ndcActionDto);
+    ndcAction.id = await this.createNDCActionId(ndcActionDto, program.programmeId);
 
     await this.calcCreditNDCAction(ndcAction, program);
     console.log("2222", ndcAction);

@@ -1,4 +1,4 @@
-import { Col, Row, Skeleton, message } from 'antd';
+import { Col, Row, Skeleton, Tooltip, message } from 'antd';
 import { DateTime } from 'luxon';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import './programmeDocuments.scss';
@@ -103,19 +103,31 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
     setLoading(true);
     const logoBase64 = await getBase64(file as RcFile);
     const logoUrls = logoBase64.split(',');
-    console.log(logoUrls[1], file);
     try {
-      const response: any = await post('national/programme/addDocument', {
-        type: type,
-        data: logoUrls[1],
-        programmeId: programmeId,
-      });
-      fileInputRefMeth.current = null;
-      if (response?.data) {
-        setDocData([...docData, response?.data]);
+      if (
+        (type === DocType.DESIGN_DOCUMENT && file?.type === 'application/pdf') ||
+        (type === DocType.METHODOLOGY_DOCUMENT &&
+          file?.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+      ) {
+        const response: any = await post('national/programme/addDocument', {
+          type: type,
+          data: logoUrls[1],
+          programmeId: programmeId,
+        });
+        fileInputRefMeth.current = null;
+        if (response?.data) {
+          setDocData([...docData, response?.data]);
+          message.open({
+            type: 'success',
+            content: `${t('programme:isUploaded')}`,
+            duration: 4,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      } else {
         message.open({
-          type: 'success',
-          content: `${t('programme:isUploaded')}`,
+          type: 'error',
+          content: `${t('programme:invalidFileFormat')}`,
           duration: 4,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -143,14 +155,17 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
       });
       message.open({
         type: 'success',
-        content: `${t('programme:docApproved')}`,
+        content:
+          status === DocumentStatus.ACCEPTED
+            ? `${t('programme:docApproved')}`
+            : `${t('programme:docRejected')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     } catch (error: any) {
       message.open({
         type: 'error',
-        content: `${t('programme:docRejected')}`,
+        content: error?.message,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
@@ -229,10 +244,17 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                   />
                 )}
                 {designDocStatus === DocumentStatus.REJECTED && (
-                  <ExclamationCircleOutlined
-                    className="common-progress-icon"
-                    style={{ color: '#FD6F70' }}
-                  />
+                  <Tooltip
+                    arrowPointAtCenter
+                    placement="top"
+                    trigger="hover"
+                    title={t('programme:rejectTip')}
+                  >
+                    <ExclamationCircleOutlined
+                      className="common-progress-icon"
+                      style={{ color: '#FD6F70' }}
+                    />
+                  </Tooltip>
                 )}
               </div>
               {designDocUrl !== '' && (
@@ -377,10 +399,17 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                   />
                 )}
                 {methodDocStatus === DocumentStatus.REJECTED && (
-                  <ExclamationCircleOutlined
-                    className="common-progress-icon"
-                    style={{ color: '#FD6F70' }}
-                  />
+                  <Tooltip
+                    arrowPointAtCenter
+                    placement="top"
+                    trigger="hover"
+                    title={t('programme:rejectTip')}
+                  >
+                    <ExclamationCircleOutlined
+                      className="common-progress-icon"
+                      style={{ color: '#FD6F70' }}
+                    />
+                  </Tooltip>
                 )}
               </div>
               {methodologyDocUrl !== '' && (

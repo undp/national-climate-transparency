@@ -11,7 +11,7 @@ import {
 import { DocType } from '../../Casl/enums/document.type';
 import { RcFile } from 'antd/lib/upload';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { Skeleton, message } from 'antd';
+import { Skeleton, Tooltip, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DocumentStatus } from '../../Casl/enums/document.status';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
@@ -66,16 +66,25 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
     const logoUrls = logoBase64.split(',');
     console.log(logoUrls[1], file);
     try {
-      const response: any = await post('national/programme/addDocument', {
-        type: type,
-        data: logoUrls[1],
-        programmeId: programmeId,
-        actionId: ndcActionId,
-      });
-      if (response?.data) {
+      if (file?.type === 'application/pdf') {
+        const response: any = await post('national/programme/addDocument', {
+          type: type,
+          data: logoUrls[1],
+          programmeId: programmeId,
+          actionId: ndcActionId,
+        });
+        if (response?.data) {
+          message.open({
+            type: 'success',
+            content: `${t('programme:isUploaded')}`,
+            duration: 4,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      } else {
         message.open({
-          type: 'success',
-          content: `${t('programme:isUploaded')}`,
+          type: 'error',
+          content: `${t('programme:invalidFileFormat')}`,
           duration: 4,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -95,7 +104,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
     }
   };
 
-  const docAction = async (id: any, status: any, actionId: any, type: any) => {
+  const docAction = async (id: any, status: DocumentStatus, actionId: any, type: any) => {
     setLoading(true);
     try {
       const response: any = await post('national/programme/docAction', {
@@ -105,14 +114,17 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
       });
       message.open({
         type: 'success',
-        content: `${t('programme:docApproved')}`,
+        content:
+          status === DocumentStatus.ACCEPTED
+            ? `${t('programme:docApproved')}`
+            : `${t('programme:docRejected')}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     } catch (error: any) {
       message.open({
         type: 'error',
-        content: `${t('programme:docRejected')}`,
+        content: error?.message,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
@@ -223,10 +235,17 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                   />
                 ) : (
                   monitoringReportRejected && (
-                    <ExclamationCircleOutlined
-                      className="common-progress-icon"
-                      style={{ color: '#FD6F70' }}
-                    />
+                    <Tooltip
+                      arrowPointAtCenter
+                      placement="top"
+                      trigger="hover"
+                      title={t('programme:rejectTip')}
+                    >
+                      <ExclamationCircleOutlined
+                        className="common-progress-icon"
+                        style={{ color: '#FD6F70' }}
+                      />
+                    </Tooltip>
                   )
                 )
               ) : (
@@ -389,10 +408,17 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                   />
                 ) : (
                   verifcationReportRejected && (
-                    <ExclamationCircleOutlined
-                      className="common-progress-icon"
-                      style={{ color: '#FD6F70' }}
-                    />
+                    <Tooltip
+                      arrowPointAtCenter
+                      placement="top"
+                      trigger="hover"
+                      title={t('programme:rejectTip')}
+                    >
+                      <ExclamationCircleOutlined
+                        className="common-progress-icon"
+                        style={{ color: '#FD6F70' }}
+                      />
+                    </Tooltip>
                   )
                 )
               ) : (

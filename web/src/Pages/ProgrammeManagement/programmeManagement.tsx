@@ -16,7 +16,7 @@ const ProgrammeManagement = () => {
     ProgrammeManagementColumns.currentStage,
     ProgrammeManagementColumns.certifierId,
     ProgrammeManagementColumns.emissionReductionExpected,
-    ProgrammeManagementColumns.emissionReductionAchieved,
+    ProgrammeManagementColumns.emissionReductionExpected,
   ];
 
   const onNavigateToProgrammeView = (record: any) => {
