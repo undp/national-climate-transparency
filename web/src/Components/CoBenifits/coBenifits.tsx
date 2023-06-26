@@ -6,6 +6,7 @@ import GenderParity from './genderParity';
 import Assessment from './assessment';
 import SdgGoals from './sdgGoals';
 import Safeguards from './safeguards';
+import Environmental from './environmental';
 
 export interface CoBenefitProps {
   onClickedBackBtn: any;
@@ -46,7 +47,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:environmental'),
       key: '4',
-      children: 'Environmental',
+      children: <Environmental />,
     },
     {
       label: t('coBenifits:social'),
