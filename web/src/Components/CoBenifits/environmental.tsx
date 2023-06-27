@@ -1,10 +1,10 @@
-import { Form, Radio } from 'antd';
+import { Empty, Form, Radio } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RadioButtonStatus } from '../../Definitions/commonEnums';
 
 const Environmental = (props: any) => {
-  const { onFormSubmit, environmentalViewData } = props;
+  const { onFormSubmit, environmentalViewData, viewOnly } = props;
   const { t } = useTranslation(['environment']);
   const environmentalDetailsInitial: any[] = [
     {
@@ -243,7 +243,7 @@ const Environmental = (props: any) => {
   };
 
   useEffect(() => {
-    if (environmentalViewData) {
+    if (environmentalViewData && viewOnly === true) {
       const updatedEnvironmentalData: any[] = [
         {
           section: t('air'),
@@ -285,9 +285,12 @@ const Environmental = (props: any) => {
           });
         }
       }
-      setEnvironmentalUpdatedDetails(updatedEnvironmentalData);
-      setEnvironmentalDetails(updatedEnvironmentalData);
-      console.log(updatedEnvironmentalData);
+      const filteredEconomicData = updatedEnvironmentalData.filter(
+        (item) => item.fields.length > 0
+      );
+      setEnvironmentalUpdatedDetails(filteredEconomicData);
+      setEnvironmentalDetails(filteredEconomicData);
+      console.log(filteredEconomicData);
     }
   }, []);
 
@@ -304,6 +307,7 @@ const Environmental = (props: any) => {
         onFieldsChange={onFieldsChange}
         onValuesChange={onEnvironmentalValuesChanged}
       >
+        {environmentalDetails?.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
         <div className={environmentalViewData ? 'section view-section' : 'section'}>
           {environmentalDetails?.map((environmentalDetail: any) => (
             <>

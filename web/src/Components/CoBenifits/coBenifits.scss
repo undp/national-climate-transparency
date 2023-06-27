@@ -15,6 +15,12 @@
       background-color: #ffffff;
       border-color: rgba(140, 140, 140, 0.7);
     }
+
+    .ant-input[disabled]  {
+      color: rgba(140, 140, 140, 0.7) !important;
+      background-color: #ffffff !important;
+      border-color: rgba(140, 140, 140, 0.7) !important;
+    }
   }
 
   .steps-actions {

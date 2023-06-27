@@ -67,15 +67,26 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
         <SdgGoals
           onFormSubmit={onSdgGoalsFormSubmit}
           sdgGoalsViewData={
-            viewOnly && coBenifitsViewDetails?.sdgGoals && coBenifitsViewDetails?.sdgGoals
+            viewOnly
+              ? coBenifitsViewDetails?.sdgGoals
+                ? coBenifitsViewDetails?.sdgGoals
+                : []
+              : undefined
           }
+          viewOnly={viewOnly || false}
         />
       ),
     },
     {
       label: t('coBenifits:genderPart'),
       key: '2',
-      children: <GenderParity onFormSubmit={onGenderParityFormSubmit} />,
+      children: (
+        <GenderParity
+          onFormSubmit={onGenderParityFormSubmit}
+          genderParityViewData={viewOnly && coBenifitsViewDetails?.genderPariy}
+          viewOnly={viewOnly || false}
+        />
+      ),
     },
     {
       label: t('coBenifits:safeguards'),
@@ -88,7 +99,14 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       children: (
         <Environmental
           onFormSubmit={onEnvironmentalFormSubmit}
-          environmentalViewData={viewOnly && coBenifitsViewDetails?.environmental}
+          environmentalViewData={
+            viewOnly
+              ? coBenifitsViewDetails?.environmental
+                ? coBenifitsViewDetails?.environmental
+                : {}
+              : undefined
+          }
+          viewOnly={viewOnly || false}
         />
       ),
     },
@@ -103,7 +121,14 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       children: (
         <Economic
           onFormSubmit={onEconomicFormSubmit}
-          economicViewData={viewOnly && coBenifitsViewDetails?.economic}
+          economicViewData={
+            viewOnly
+              ? coBenifitsViewDetails?.economic
+                ? coBenifitsViewDetails?.economic
+                : {}
+              : undefined
+          }
+          viewOnly={viewOnly || false}
         />
       ),
     },

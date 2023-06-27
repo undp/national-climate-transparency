@@ -125,7 +125,7 @@ const sdgGoalsDetails = [
 ];
 
 const SdgGoals = (props: any) => {
-  const { onFormSubmit, sdgGoalsViewData } = props;
+  const { onFormSubmit, sdgGoalsViewData, viewOnly } = props;
   const [formOne] = Form.useForm();
   const [sdgGoals, setSdgGoals] = useState<any[]>(sdgGoalsDetails);
   const [sdgGoalsFromProgramme, setSdgGoalsFromProgramme] = useState<any[]>([]);
