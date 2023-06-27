@@ -23,6 +23,7 @@ const NdcActionView = () => {
   const [ndcActionReportDetails, setNdcActionReportDetails] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
   const [ndcActionDetails, setNdcActionDetails] = useState<NdcAction>();
+  const [coBenifitsComponentDetails, setCoBenifitsComponentnDetails] = useState<any>();
   const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
 
@@ -90,6 +91,7 @@ const NdcActionView = () => {
         //Get Ndc action details using sction id
       } else if (state.record) {
         setNdcActionDetails(state.record);
+        setCoBenifitsComponentnDetails(state?.record?.coBenefitsProperties);
         setEmissionsReductionExpected(
           state.record?.emissionReductionExpected !== null ||
             state.record?.emissionReductionExpected !== undefined
@@ -181,13 +183,6 @@ const NdcActionView = () => {
       insertAt += 2;
     }
     return parts.join('');
-  };
-
-  const getCoBenifitsData = () => {
-    const data: any = {
-      sdgGoals: ['Zero Hunger', 'Good Health and Well-being', 'Quality Education'],
-    };
-    return data;
   };
 
   return (
@@ -354,24 +349,8 @@ const NdcActionView = () => {
               <div className="co-benifits-view">
                 <div className="title">Co-Benifits</div>
                 <CoBenifitsComponent
-                  viewOnly
-                  coBenifitsViewDetails={{
-                    sdgGoals: ['Zero Hunger', 'Good Health and Well-being', 'Quality Education'],
-                    environmental: {
-                      airQ1: 'YES',
-                      airQ2: 'YES',
-                      airQ3: 'YES',
-                      airQ5: 'YES',
-                      airQ6: 'YES',
-                      airQ4: 'NO',
-                      airQ7: 'YES',
-                      airQ8: 'NO',
-                      airQ9: 'NO',
-                      landQ1: 'NO',
-                      waterQ1: 'NO',
-                      naturalResourceQ1: 'N/A',
-                    },
-                  }}
+                  viewOnly={true}
+                  coBenifitsViewDetails={state?.record?.coBenefitsProperties}
                 />
               </div>
             </Card>

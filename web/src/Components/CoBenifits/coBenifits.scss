@@ -8,6 +8,15 @@
     content: none;
   }
 
+  .view-section {
+    .ant-radio-button-wrapper-disabled:first-child,
+    .ant-radio-button-wrapper-disabled:hover {
+      color: rgba(140, 140, 140, 0.7);
+      background-color: #ffffff;
+      border-color: rgba(140, 140, 140, 0.7);
+    }
+  }
+
   .steps-actions {
     display: flex;
     flex-direction: row-reverse;
