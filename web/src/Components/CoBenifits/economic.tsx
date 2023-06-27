@@ -1,10 +1,10 @@
-import { Form, Radio } from 'antd';
+import { Empty, Form, Radio } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RadioButtonStatus } from '../../Definitions/commonEnums';
 
 const Economic = (props: any) => {
-  const { onFormSubmit, economicViewData } = props;
+  const { onFormSubmit, economicViewData, viewOnly } = props;
   const { t } = useTranslation(['economic']);
   const economicDetailsInitial: any[] = [
     {
@@ -203,7 +203,7 @@ const Economic = (props: any) => {
   };
 
   useEffect(() => {
-    if (economicViewData) {
+    if (economicViewData && viewOnly === true) {
       const updatedEconomicData: any[] = [
         {
           section: t('growth'),
@@ -251,7 +251,8 @@ const Economic = (props: any) => {
           });
         }
       }
-      setEconomicDetails(updatedEconomicData);
+      const filteredEconomicData = updatedEconomicData.filter((item) => item.fields.length > 0);
+      setEconomicDetails(filteredEconomicData);
       console.log(updatedEconomicData);
     }
   }, []);
@@ -269,6 +270,7 @@ const Economic = (props: any) => {
         onFieldsChange={onFieldsChange}
         onValuesChange={onEconomicValuesChanged}
       >
+        {economicDetails?.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
         <div className={economicViewData ? 'section view-section' : 'section'}>
           {economicDetails?.map((environmentalDetail: any) => (
             <>

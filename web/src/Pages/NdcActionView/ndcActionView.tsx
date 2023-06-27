@@ -343,19 +343,21 @@ const NdcActionView = () => {
             </Col>
           </Row>
         )}
-        <Row>
-          <Col lg={24}>
-            <Card className="card-container">
-              <div className="co-benifits-view">
-                <div className="title">Co-Benifits</div>
-                <CoBenifitsComponent
-                  viewOnly={true}
-                  coBenifitsViewDetails={state?.record?.coBenefitsProperties}
-                />
-              </div>
-            </Card>
-          </Col>
-        </Row>
+        {state?.record?.coBenefitsProperties && (
+          <Row>
+            <Col lg={24}>
+              <Card className="card-container">
+                <div className="co-benifits-view">
+                  <div className="title">Co-Benifits</div>
+                  <CoBenifitsComponent
+                    viewOnly={true}
+                    coBenifitsViewDetails={state?.record?.coBenefitsProperties}
+                  />
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        )}
       </div>
     </div>
   );
