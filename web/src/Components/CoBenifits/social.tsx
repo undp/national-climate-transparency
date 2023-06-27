@@ -1,0 +1,296 @@
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Form, Input, Radio, Row } from 'antd';
+import { RadioButtonStatus, FormElementType } from '../../Definitions/commonEnums';
+
+const Social = (props: any) => {
+  const { onFormSubmit } = props;
+  const { t } = useTranslation(['social']);
+  const [form] = Form.useForm();
+  const [refreshCounter, setRefreshCounter] = useState(0);
+  const [socialDetails, setSocialDetails] = useState(0);
+
+  const SocialElementDetails: any[] = [
+    {
+      title: t('jobs'),
+      label: t('jobRelatedMainQ'),
+      name: 'jobRelatedMainQ',
+      subItems: [
+        {
+          type: FormElementType.Radio,
+          label: t('jobRelatedSubQ1'),
+          name: 'jobRelatedSubQ1',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('jobRelatedSubQ2'),
+          name: 'jobRelatedSubQ2',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('jobRelatedSubQ3'),
+          name: 'jobRelatedSubQ3',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('jobRelatedSubQ4'),
+          name: 'jobRelatedSubQ4',
+        },
+        {
+          type: FormElementType.Input,
+          label: t('jobRelatedSubQ5'),
+          name: 'jobRelatedSubQ5',
+        },
+        {
+          type: FormElementType.Input,
+          label: t('jobRelatedSubQ6'),
+          name: 'jobRelatedSubQ6',
+        },
+        {
+          type: FormElementType.Input,
+          label: t('jobRelatedSubQ7'),
+          name: 'jobRelatedSubQ7',
+        },
+      ],
+    },
+    {
+      title: t('health'),
+      label: t('healthRelatedMainQ'),
+      name: 'healthRelatedMainQ',
+      subItems: [
+        {
+          type: FormElementType.Radio,
+          label: t('healthRelatedSubQ1'),
+          name: 'healthRelatedSubQ1',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('healthRelatedSubQ2'),
+          name: 'healthRelatedSubQ2',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('healthRelatedSubQ3'),
+          name: 'healthRelatedSubQ3',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('healthRelatedSubQ4'),
+          name: 'healthRelatedSubQ4',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('healthRelatedSubQ5'),
+          name: 'healthRelatedSubQ5',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('healthRelatedSubQ6'),
+          name: 'healthRelatedSubQ6',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('healthRelatedSubQ7'),
+          name: 'healthRelatedSubQ7',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('healthRelatedSubQ8'),
+          name: 'healthRelatedSubQ8',
+        },
+      ],
+    },
+    {
+      title: t('educational'),
+      label: t('educationRelatedMainQ'),
+      name: 'educationRelatedMainQ',
+      subItems: [
+        {
+          type: FormElementType.Radio,
+          label: t('educationRelatedSubQ1'),
+          name: 'educationRelatedSubQ1',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('educationRelatedSubQ2'),
+          name: 'educationRelatedSubQ2',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('educationRelatedSubQ3'),
+          name: 'educationRelatedSubQ3',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('educationRelatedSubQ4'),
+          name: 'educationRelatedSubQ4',
+        },
+      ],
+    },
+    {
+      title: t('welfare'),
+      label: t('welfareRelatedMainQ'),
+      name: 'welfareRelatedMainQ',
+      subItems: [
+        {
+          type: FormElementType.Radio,
+          label: t('welfareRelatedSubQ1'),
+          name: 'welfareRelatedSubQ1',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('welfareRelatedSubQ2'),
+          name: 'welfareRelatedSubQ2',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('welfareRelatedSubQ3'),
+          name: 'welfareRelatedSubQ3',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('welfareRelatedSubQ4'),
+          name: 'welfareRelatedSubQ4',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('welfareRelatedSubQ5'),
+          name: 'welfareRelatedSubQ5',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('welfareRelatedSubQ6'),
+          name: 'welfareRelatedSubQ6',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('welfareRelatedSubQ7'),
+          name: 'welfareRelatedSubQ7',
+        },
+        {
+          type: FormElementType.Radio,
+          label: t('welfareRelatedSubQ8'),
+          name: 'welfareRelatedSubQ8',
+        },
+      ],
+    },
+  ];
+
+  const onRadioStatusChanged = () => {
+    setRefreshCounter((pre) => pre + 1);
+  };
+
+  useEffect(() => {
+    onFormSubmit(socialDetails);
+  }, [socialDetails]);
+
+  const onSocialValuesChanged = (changedValues: any) => {
+    setSocialDetails((pre: any) => ({ ...pre, ...changedValues }));
+  };
+
+  return (
+    <div className="social-tab-item">
+      <Form
+        name="socialDetails"
+        labelWrap={true}
+        form={form}
+        labelAlign="left"
+        labelCol={{ md: 16, lg: 18, xl: 18 }}
+        wrapperCol={{ md: 8, lg: 6, xl: 6 }}
+        layout="horizontal"
+        onValuesChange={onSocialValuesChanged}
+      >
+        {SocialElementDetails.map((element: any) => {
+          return (
+            <>
+              <div style={{ marginBottom: '15px' }}>
+                <label className="co-sub-title-text">{element.title}</label>
+              </div>
+              <Form.Item
+                label={element.label}
+                name={element.name}
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+              >
+                <Radio.Group size="middle" onChange={onRadioStatusChanged}>
+                  <div className="radio-container">
+                    <Radio.Button className="radio" value={RadioButtonStatus.YES}>
+                      {t('yes')}
+                    </Radio.Button>
+                  </div>
+                  <div className="radio-container">
+                    <Radio.Button className="radio" value={RadioButtonStatus.NO}>
+                      {t('no')}
+                    </Radio.Button>
+                  </div>
+                  <div className="radio-container">
+                    <Radio.Button className="radio" value={RadioButtonStatus.NA}>
+                      {t('na')}
+                    </Radio.Button>
+                  </div>
+                </Radio.Group>
+              </Form.Item>
+              {form.getFieldValue(element.name) === RadioButtonStatus.YES &&
+                element.subItems.map((elementItem: any) => {
+                  if (elementItem.type === FormElementType.Radio) {
+                    return (
+                      <Form.Item
+                        label={elementItem.label}
+                        name={elementItem.name}
+                        className="mg-left-2"
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
+                        <Radio.Group size="middle">
+                          <div className="radio-container">
+                            <Radio.Button className="radio" value={RadioButtonStatus.YES}>
+                              {t('yes')}
+                            </Radio.Button>
+                          </div>
+                          <div className="radio-container">
+                            <Radio.Button className="radio" value={RadioButtonStatus.NO}>
+                              {t('no')}
+                            </Radio.Button>
+                          </div>
+                          <div className="radio-container">
+                            <Radio.Button className="radio" value={RadioButtonStatus.NA}>
+                              {t('na')}
+                            </Radio.Button>
+                          </div>
+                        </Radio.Group>
+                      </Form.Item>
+                    );
+                  } else if (elementItem.type === FormElementType.Input) {
+                    return (
+                      <Form.Item
+                        className="mg-left-2"
+                        labelCol={{ span: 24 }}
+                        wrapperCol={{ span: 24 }}
+                        label={elementItem.label}
+                        name={elementItem.name}
+                        rules={[
+                          {
+                            required: true,
+                          },
+                        ]}
+                      >
+                        <Input style={{ width: 303 }} />
+                      </Form.Item>
+                    );
+                  }
+                })}
+            </>
+          );
+        })}
+      </Form>
+    </div>
+  );
+};
+
+export default Social;

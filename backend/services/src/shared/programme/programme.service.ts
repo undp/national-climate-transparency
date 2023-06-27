@@ -845,7 +845,7 @@ export class ProgrammeService {
       const data = instanceToPlain(programmeDto.ndcAction);
       ndcAc = plainToClass(NDCAction, data);
       ndcAc.id = await this.createNDCActionId(programmeDto.ndcAction, programme.programmeId);
-
+      ndcAc.coBenefitsProperties = programmeDto.ndcAction.coBenefitsProperties;
       await this.calcCreditNDCAction(ndcAc, programme);
       this.calcAddNDCFields(ndcAc, programme);
 
@@ -1310,7 +1310,7 @@ export class ProgrammeService {
     const data = instanceToPlain(ndcActionDto);
     const ndcAction: NDCAction = plainToClass(NDCAction, data);
     ndcAction.id = await this.createNDCActionId(ndcActionDto, program.programmeId);
-
+    ndcAction.coBenefitsProperties = ndcActionDto.coBenefitsProperties;
     await this.calcCreditNDCAction(ndcAction, program);
     console.log("2222", ndcAction);
     this.calcAddNDCFields(ndcAction, program);

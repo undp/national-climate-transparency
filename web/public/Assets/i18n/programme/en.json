@@ -59,5 +59,6 @@
   "total": "Total Ownership",
   "ClimateFinance": "Climate Finance",
   "CarbonMarket": "Carbon Market",
-  "rejectTip": "Request Adjustments"
+  "rejectTip": "Request Adjustments",
+  "invalidFileFormat": "Unsupported file format"
 }
