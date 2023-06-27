@@ -8,6 +8,7 @@ import SdgGoals from './sdgGoals';
 import Safeguards from './safeguards';
 import Environmental from './environmental';
 import Economic from './economic';
+import Social from './social';
 
 export interface CoBenefitProps {
   onClickedBackBtn?: any;
@@ -54,6 +55,10 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, safeguardDetails: safeguardDetails }));
   };
 
+  const onSocialFormSubmit = (socialValueDetails: any) => {
+    setCoBenefitDetails((pre: any) => ({ ...pre, socialValueDetails: socialValueDetails }));
+  };
+
   const tabItems = [
     {
       label: t('coBenifits:sdgGoals'),
@@ -80,7 +85,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:social'),
       key: '5',
-      children: 'Social',
+      children: <Social onFormSubmit={onSocialFormSubmit} />,
     },
     {
       label: t('coBenifits:economic'),
