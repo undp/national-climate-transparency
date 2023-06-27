@@ -125,10 +125,19 @@ const sdgGoalsDetails = [
 ];
 
 const SdgGoals = (props: any) => {
-  const { onFormSubmit } = props;
+  const { onFormSubmit, data } = props;
   const [formOne] = Form.useForm();
   const [sdgGoals, setSdgGoals] = useState<any[]>(sdgGoalsDetails);
   const [sdgGoalsFromProgramme, setSdgGoalsFromProgramme] = useState<any[]>([]);
+
+  const getKeyByValue = (value: string) => {
+    for (const key in SdgGoalsEnum) {
+      if (SdgGoalsEnum[key as keyof typeof SdgGoalsEnum] === value) {
+        return key;
+      }
+    }
+    return undefined;
+  };
 
   const goalImageMap = {
     [goal1]: goal1Selected,
@@ -189,6 +198,24 @@ const SdgGoals = (props: any) => {
   };
 
   useEffect(() => {
+    if (data) {
+      const sdgGoalsFromData = data?.map((item: any) => getKeyByValue(item));
+      const updatedSdgGoals = sdgGoals.map((goal) => {
+        if (sdgGoalsFromData.includes(goal.name)) {
+          return {
+            ...goal,
+            selected: true,
+            image: returnSelectedImage(goal?.image),
+          };
+        } else {
+          return goal;
+        }
+      });
+      setSdgGoals(updatedSdgGoals);
+    }
+  }, []);
+
+  useEffect(() => {
     const selectedGoals = sdgGoals
       .filter((goal: any) => goal.selected)
       .map((goal: any) => SdgGoalsEnum[goal.name as keyof typeof SdgGoalsEnum]);
@@ -205,12 +232,12 @@ const SdgGoals = (props: any) => {
         <Row gutter={[5, 16]} className="row">
           {sdgGoals?.map((sdgGoal: any) => (
             <Col sm={12} md={12} lg={4} xl={4} className="col">
-              <div className="img-container">
+              <div className={data ? 'img-container-data' : 'img-container'}>
                 <Form.Item name="images">
                   <img
                     src={sdgGoal?.image}
                     alt={`Image ${sdgGoal?.name}`}
-                    onClick={() => handleImageSelect(sdgGoal?.name, sdgGoal?.image)}
+                    onClick={() => !data && handleImageSelect(sdgGoal?.name, sdgGoal?.image)}
                   />
                 </Form.Item>
               </div>
