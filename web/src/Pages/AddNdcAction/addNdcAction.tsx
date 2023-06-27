@@ -25,7 +25,7 @@ const AddNdcAction = () => {
   const { post } = useConnection();
 
   useEffect(() => {
-    if (!state.record) {
+    if (!state?.record) {
       navigate('/programmeManagement/viewAll', { replace: true });
     } else {
       setprogrammeDetails(state.record);
@@ -41,7 +41,6 @@ const AddNdcAction = () => {
     if (ndcActionDetailsObj.enablementReportData) {
       delete ndcActionDetailsObj.enablementReportData;
     }
-
     const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
     if (response.status === 200 || response.status === 201) {
       navigate('/programmeManagement/view', { state: { record: programmeDetails } });
