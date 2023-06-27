@@ -13,6 +13,7 @@ import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import * as Icon from 'react-bootstrap-icons';
 import { addCommSep } from '@undp/carbon-library';
 import Chart from 'react-apexcharts';
+import CoBenifitsComponent from '../../Components/CoBenifits/coBenifits';
 
 const NdcActionView = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -182,6 +183,13 @@ const NdcActionView = () => {
     return parts.join('');
   };
 
+  const getCoBenifitsData = () => {
+    const data: any = {
+      sdgGoals: ['Zero Hunger', 'Good Health and Well-being', 'Quality Education'],
+    };
+    return data;
+  };
+
   return (
     <div className="ndc-details-view content-container">
       <div className="title-bar">
@@ -340,6 +348,35 @@ const NdcActionView = () => {
             </Col>
           </Row>
         )}
+        <Row>
+          <Col lg={24}>
+            <Card className="card-container">
+              <div className="co-benifits-view">
+                <div className="title">Co-Benifits</div>
+                <CoBenifitsComponent
+                  viewOnly
+                  coBenifitsViewDetails={{
+                    sdgGoals: ['Zero Hunger', 'Good Health and Well-being', 'Quality Education'],
+                    environmental: {
+                      airQ1: 'YES',
+                      airQ2: 'YES',
+                      airQ3: 'YES',
+                      airQ5: 'YES',
+                      airQ6: 'YES',
+                      airQ4: 'NO',
+                      airQ7: 'YES',
+                      airQ8: 'NO',
+                      airQ9: 'NO',
+                      landQ1: 'NO',
+                      waterQ1: 'NO',
+                      naturalResourceQ1: 'N/A',
+                    },
+                  }}
+                />
+              </div>
+            </Card>
+          </Col>
+        </Row>
       </div>
     </div>
   );

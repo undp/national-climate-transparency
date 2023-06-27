@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { RadioButtonStatus } from '../../Definitions/commonEnums';
 
 const Environmental = (props: any) => {
-  const { onFormSubmit } = props;
+  const { onFormSubmit, environmentalViewData } = props;
   const { t } = useTranslation(['environment']);
   const environmentalDetailsInitial: any[] = [
     {
@@ -240,6 +240,11 @@ const Environmental = (props: any) => {
   const onEnvironmentalValuesChanged = (changedValues: any) => {
     setEnvironmentalFormDetails((pre: any) => ({ ...pre, ...changedValues }));
   };
+
+  useEffect(() => {
+    console.log('data view---------> ');
+    console.log(environmentalViewData);
+  }, []);
 
   return (
     <div className="co-benifits-tab-item">

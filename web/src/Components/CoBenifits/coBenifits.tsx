@@ -11,14 +11,23 @@ import Economic from './economic';
 import Social from './social';
 
 export interface CoBenefitProps {
-  onClickedBackBtn: any;
-  onFormSubmit: any;
+  onClickedBackBtn?: any;
+  onFormSubmit?: any;
   coBenefitsDetails?: any;
   submitButtonText?: any;
+  viewOnly?: boolean;
+  coBenifitsViewDetails?: any;
 }
 
 const CoBenifitsComponent = (props: CoBenefitProps) => {
-  const { onClickedBackBtn, onFormSubmit, coBenefitsDetails, submitButtonText } = props;
+  const {
+    onClickedBackBtn,
+    onFormSubmit,
+    coBenefitsDetails,
+    submitButtonText,
+    viewOnly,
+    coBenifitsViewDetails,
+  } = props;
   const { t } = useTranslation(['coBenifits']);
   const [coBenefitDetails, setCoBenefitDetails] = useState();
 
@@ -54,7 +63,12 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:sdgGoals'),
       key: '1',
-      children: <SdgGoals onFormSubmit={onSdgGoalsFormSubmit} />,
+      children: (
+        <SdgGoals
+          onFormSubmit={onSdgGoalsFormSubmit}
+          sdgGoalsViewData={viewOnly && coBenifitsViewDetails?.sdgGoals}
+        />
+      ),
     },
     {
       label: t('coBenifits:genderPart'),
@@ -69,7 +83,12 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:environmental'),
       key: '4',
-      children: <Environmental onFormSubmit={onEnvironmentalFormSubmit} />,
+      children: (
+        <Environmental
+          onFormSubmit={onEnvironmentalFormSubmit}
+          environmentalViewData={viewOnly && coBenifitsViewDetails?.environmental}
+        />
+      ),
     },
     {
       label: t('coBenifits:social'),
@@ -87,23 +106,26 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       children: <Assessment onFormSubmit={onAssessmentFormSubmit} />,
     },
   ];
+
   return (
     <div className="co-benifits-container">
       <div>
         <Tabs className="benifits-tabs" defaultActiveKey="1" centered items={tabItems} />
       </div>
-      <div className="steps-actions">
-        <Row>
-          <Button onClick={onClickedBackBtn}>{t('back')}</Button>
-          <Button
-            className="mg-left-1"
-            type="primary"
-            onClick={() => onFormSubmit(coBenefitDetails)}
-          >
-            {submitButtonText ? submitButtonText : t('submit')}
-          </Button>
-        </Row>
-      </div>
+      {!viewOnly && (
+        <div className="steps-actions">
+          <Row>
+            <Button onClick={onClickedBackBtn}>{t('back')}</Button>
+            <Button
+              className="mg-left-1"
+              type="primary"
+              onClick={() => onFormSubmit(coBenefitDetails)}
+            >
+              {submitButtonText ? submitButtonText : t('submit')}
+            </Button>
+          </Row>
+        </div>
+      )}
     </div>
   );
 };
