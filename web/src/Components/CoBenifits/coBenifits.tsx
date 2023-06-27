@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './coBenifits.scss';
 import { Button, Row, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -66,7 +66,9 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       children: (
         <SdgGoals
           onFormSubmit={onSdgGoalsFormSubmit}
-          sdgGoalsViewData={viewOnly && coBenifitsViewDetails?.sdgGoals}
+          sdgGoalsViewData={
+            viewOnly && coBenifitsViewDetails?.sdgGoals && coBenifitsViewDetails?.sdgGoals
+          }
         />
       ),
     },
@@ -98,7 +100,12 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:economic'),
       key: '6',
-      children: <Economic onFormSubmit={onEconomicFormSubmit} />,
+      children: (
+        <Economic
+          onFormSubmit={onEconomicFormSubmit}
+          economicViewData={viewOnly && coBenifitsViewDetails?.economic}
+        />
+      ),
     },
     {
       label: t('coBenifits:assessment'),

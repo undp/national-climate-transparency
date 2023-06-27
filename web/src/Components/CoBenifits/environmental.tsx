@@ -212,6 +212,7 @@ const Environmental = (props: any) => {
   const [environmentalDetails, setEnvironmentalDetails] = useState<any[]>(
     environmentalDetailsInitial
   );
+  const [environmentalUpdatedDetails, setEnvironmentalUpdatedDetails] = useState<any[]>();
   const [environmentalFormDetails, setEnvironmentalFormDetails] = useState<any>();
   const onFieldsChange = (changedFields: any) => {
     const changedFieldName = changedFields[0]?.name[0];
@@ -242,8 +243,52 @@ const Environmental = (props: any) => {
   };
 
   useEffect(() => {
-    console.log('data view---------> ');
-    console.log(environmentalViewData);
+    if (environmentalViewData) {
+      const updatedEnvironmentalData: any[] = [
+        {
+          section: t('air'),
+          fields: [],
+        },
+        {
+          section: t('land'),
+          fields: [],
+        },
+        {
+          section: t('water'),
+          fields: [],
+        },
+        {
+          section: t('naturalResource'),
+          fields: [],
+        },
+      ];
+      for (const key in environmentalViewData) {
+        let section = '';
+        if (String(key).includes('air')) {
+          section = t('air');
+        } else if (String(key).includes('land')) {
+          section = t('land');
+        } else if (String(key).includes('water')) {
+          section = t('water');
+        } else if (String(key).includes('naturalResource')) {
+          section = t('naturalResource');
+        }
+
+        const environmentalItem = updatedEnvironmentalData.find((item) => item.section === section);
+
+        if (environmentalItem) {
+          environmentalItem.fields.push({
+            name: key,
+            label: t(key),
+            hide: false,
+            value: environmentalViewData[key],
+          });
+        }
+      }
+      setEnvironmentalUpdatedDetails(updatedEnvironmentalData);
+      setEnvironmentalDetails(updatedEnvironmentalData);
+      console.log(updatedEnvironmentalData);
+    }
   }, []);
 
   return (
@@ -259,7 +304,7 @@ const Environmental = (props: any) => {
         onFieldsChange={onFieldsChange}
         onValuesChange={onEnvironmentalValuesChanged}
       >
-        <div className="section">
+        <div className={environmentalViewData ? 'section view-section' : 'section'}>
           {environmentalDetails?.map((environmentalDetail: any) => (
             <>
               <div className="title">{environmentalDetail?.section}</div>
@@ -277,22 +322,57 @@ const Environmental = (props: any) => {
                         },
                       ]}
                     >
-                      <Radio.Group size="middle" onChange={() => {}}>
-                        <div className="yes-no-radio-container">
-                          <Radio.Button className="yes-no-radio" value={RadioButtonStatus.YES}>
-                            {t('yes')}
-                          </Radio.Button>
-                        </div>
-                        <div className="yes-no-radio-container">
-                          <Radio.Button className="yes-no-radio" value={RadioButtonStatus.NO}>
-                            {t('no')}
-                          </Radio.Button>
-                        </div>
-                        <div className="yes-no-radio-container">
-                          <Radio.Button className="yes-no-radio" value={RadioButtonStatus.NA}>
-                            {t('na')}
-                          </Radio.Button>
-                        </div>
+                      <Radio.Group
+                        size="middle"
+                        onChange={() => {}}
+                        disabled={environmentalViewData && true}
+                      >
+                        {environmentalViewData ? (
+                          <>
+                            {field?.value === RadioButtonStatus.YES && (
+                              <div className="yes-no-radio-container">
+                                <Radio.Button
+                                  className="yes-no-radio"
+                                  value={RadioButtonStatus.YES}
+                                >
+                                  {t('yes')}
+                                </Radio.Button>
+                              </div>
+                            )}
+                            {field?.value === RadioButtonStatus.NO && (
+                              <div className="yes-no-radio-container">
+                                <Radio.Button className="yes-no-radio" value={RadioButtonStatus.NO}>
+                                  {t('no')}
+                                </Radio.Button>
+                              </div>
+                            )}
+                            {field?.value === RadioButtonStatus.NA && (
+                              <div className="yes-no-radio-container">
+                                <Radio.Button className="yes-no-radio" value={RadioButtonStatus.NA}>
+                                  {t('na')}
+                                </Radio.Button>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div className="yes-no-radio-container">
+                              <Radio.Button className="yes-no-radio" value={RadioButtonStatus.YES}>
+                                {t('yes')}
+                              </Radio.Button>
+                            </div>
+                            <div className="yes-no-radio-container">
+                              <Radio.Button className="yes-no-radio" value={RadioButtonStatus.NO}>
+                                {t('no')}
+                              </Radio.Button>
+                            </div>
+                            <div className="yes-no-radio-container">
+                              <Radio.Button className="yes-no-radio" value={RadioButtonStatus.NA}>
+                                {t('na')}
+                              </Radio.Button>
+                            </div>
+                          </>
+                        )}
                       </Radio.Group>
                     </Form.Item>
                   )
