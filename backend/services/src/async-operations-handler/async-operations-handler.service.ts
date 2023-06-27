@@ -2,12 +2,14 @@ import { RegistryClientService } from "src/shared/registry-client/registry-clien
 import { AsyncActionType } from "../shared/enum/async.action.type.enum";
 import { EmailService } from "src/shared/email/email.service";
 import { Injectable, Logger } from "@nestjs/common";
+import { ObjectionLetterGen } from "../shared/util/objection.letter.gen";
 
 @Injectable()
 export class AsyncOperationsHandlerService {
   constructor(
     private emailService: EmailService,
     private registryClient: RegistryClientService,
+    private letterGen: ObjectionLetterGen,
     private logger: Logger
   ) {}
 
@@ -18,6 +20,8 @@ export class AsyncOperationsHandlerService {
       switch (actionType.toString()) {
         case AsyncActionType.Email.toString():
           return this.emailService.sendEmail(dataObject);
+        case AsyncActionType.GenerateNoObjectionReport.toString():
+          return this.letterGen.generateReport(dataObject.companyNames, dataObject.title, dataObject.programmeId);
         case AsyncActionType.RegistryCompanyCreate.toString():
           return this.registryClient.createCompany(dataObject);
         case AsyncActionType.ProgrammeCreate.toString():

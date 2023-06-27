@@ -57,6 +57,7 @@
     "passport-headerapikey": "^1.2.2",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
+    "pdfkit": "^0.13.0",
     "pg": "^8.8.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

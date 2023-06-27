@@ -12,6 +12,7 @@ import { AsyncOperationsHandlerInterface } from "./async-operations-handler-inte
 import { AsyncOperationsQueueHandlerService } from "./async-operations-queue-handler.service";
 import { RegistryClientModule } from "../shared/registry-client/registry-client.module";
 import { AsyncOperationsHandlerService } from "./async-operations-handler.service";
+import { UtilModule } from "../shared/util/util.module";
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { AsyncOperationsHandlerService } from "./async-operations-handler.servic
     }),
     TypeOrmModule.forFeature([AsyncActionEntity, Counter]),
     RegistryClientModule,
-    EmailModule
+    EmailModule,
+    UtilModule
   ],
   providers: [
     {
