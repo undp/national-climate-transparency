@@ -91,7 +91,13 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:safeguards'),
       key: '3',
-      children: <Safeguards onFormSubmit={onSafeguardFormSubmit} />,
+      children: (
+        <Safeguards
+          safeGuardViewData={viewOnly && coBenifitsViewDetails?.safeguardDetails}
+          viewOnly={viewOnly || false}
+          onFormSubmit={onSafeguardFormSubmit}
+        />
+      ),
     },
     {
       label: t('coBenifits:environmental'),
@@ -113,7 +119,13 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:social'),
       key: '5',
-      children: <Social onFormSubmit={onSocialFormSubmit} />,
+      children: (
+        <Social
+          onFormSubmit={onSocialFormSubmit}
+          socialViewData={viewOnly && coBenifitsViewDetails?.socialValueDetails}
+          viewOnly={viewOnly || false}
+        />
+      ),
     },
     {
       label: t('coBenifits:economic'),
@@ -135,7 +147,13 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:assessment'),
       key: '7',
-      children: <Assessment onFormSubmit={onAssessmentFormSubmit} />,
+      children: (
+        <Assessment
+          onFormSubmit={onAssessmentFormSubmit}
+          assessmentViewData={viewOnly && coBenifitsViewDetails?.assessmentDetails}
+          viewOnly={viewOnly || false}
+        />
+      ),
     },
   ];
 
