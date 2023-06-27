@@ -23,4 +23,5 @@ export const titleList = [
 export enum FormElementType {
   Radio,
   Label,
+  Input,
 }

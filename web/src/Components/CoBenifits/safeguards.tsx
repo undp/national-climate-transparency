@@ -170,6 +170,160 @@ const Safeguards = (props: any) => {
       label: t('labourRightsQ4'),
       name: 'labourRightsQ4',
     },
+    {
+      type: FormElementType.Label,
+      label: t('economicConsequences'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('economicConsequencesQ1'),
+      name: 'economicConsequencesQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('emissions'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('emissionsQ1'),
+      name: 'emissionsQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('energySupply'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('energySupplyQ1'),
+      name: 'energySupplyQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('waterPattern'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('waterPatternQ1'),
+      name: 'waterPatternQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('erosoin'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('erosoinQ1'),
+      name: 'erosoinQ1',
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('erosoinQ2'),
+      name: 'erosoinQ2',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('landscape'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('landscapeQ1'),
+      name: 'landscapeQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('naturalDisaster'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('naturalDisasterQ1'),
+      name: 'naturalDisasterQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('genetic'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('geneticQ1'),
+      name: 'geneticQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('pollutants'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('pollutantsQ1'),
+      name: 'pollutantsQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('hazardousWaste'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('hazardousWasteQ1'),
+      name: 'hazardousWasteQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('pesticides'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('pesticidesQ1'),
+      name: 'pesticidesQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('harvestForests'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('harvestForestsQ1'),
+      name: 'harvestForestsQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('food'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('foodQ1'),
+      name: 'foodQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('animalHusbandry'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('animalHusbandryQ1'),
+      name: 'animalHusbandryQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('criticalHabitats'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('criticalHabitatsQ1'),
+      name: 'criticalHabitatsQ1',
+    },
+    {
+      type: FormElementType.Label,
+      label: t('endangeredSpecies'),
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('endangeredSpeciesQ1'),
+      name: 'endangeredSpeciesQ1',
+    },
+    {
+      type: FormElementType.Radio,
+      label: t('endangeredSpeciesQ2'),
+      name: 'endangeredSpeciesQ2',
+    },
   ];
 
   useEffect(() => {
@@ -225,10 +379,17 @@ const Safeguards = (props: any) => {
             );
           } else if (formItem.type === FormElementType.Label) {
             return (
-              <Form.Item
-                className={formItem.className ? formItem.className : ''}
-                label={formItem.label}
-              ></Form.Item>
+              <div style={{ marginBottom: '15px' }}>
+                <label
+                  className={
+                    formItem.className
+                      ? formItem.className + ' co-sub-title-text'
+                      : 'co-sub-title-text'
+                  }
+                >
+                  {formItem.label}
+                </label>
+              </div>
             );
           }
         })}

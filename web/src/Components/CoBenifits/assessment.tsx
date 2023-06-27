@@ -8,6 +8,9 @@ const Assessment = (props: any) => {
   const { onFormSubmit } = props;
   const { t } = useTranslation(['coBenifits']);
   const [cobenefitsAssessmentDetails, setCobenefitsAssessmentDetails] = useState();
+  const [isVerifyingOrgVisible, setIsVerifyingOrgVisible] = useState(false);
+  const [isVerifyingDetailsVisible, setIsVerifyingDetailsVisible] = useState(false);
+  const [isPersonListedDetailsVisible, setIsPersonListedDetailsVisible] = useState(false);
 
   useEffect(() => {
     onFormSubmit(cobenefitsAssessmentDetails);
@@ -24,16 +27,40 @@ const Assessment = (props: any) => {
     }
   };
 
+  const onIsThirdPartyVerifiedChanged = (e: any) => {
+    if (e?.target?.value === RadioButtonStatus.YES) {
+      setIsVerifyingOrgVisible(true);
+    } else {
+      setIsVerifyingOrgVisible(false);
+    }
+  };
+
+  const onIsWillingToVerifiedChanged = (e: any) => {
+    if (e?.target?.value === RadioButtonStatus.YES) {
+      setIsVerifyingDetailsVisible(true);
+    } else {
+      setIsVerifyingDetailsVisible(false);
+    }
+  };
+
+  const onIsThePersonListedChanged = (e: any) => {
+    if (e?.target?.value !== RadioButtonStatus.YES) {
+      setIsPersonListedDetailsVisible(true);
+    } else {
+      setIsPersonListedDetailsVisible(false);
+    }
+  };
+
   return (
     <div className="assesment-tab-item">
       <Form.Provider onFormChange={onFormChanged}>
         <Row>
           <Form
             name="from1"
-            labelCol={{ span: 14 }}
+            labelCol={{ span: 19 }}
             labelWrap={true}
             labelAlign="left"
-            wrapperCol={{ span: 8 }}
+            wrapperCol={{ span: 5 }}
             layout="horizontal"
             requiredMark={true}
           >
@@ -48,7 +75,7 @@ const Assessment = (props: any) => {
                   },
                 ]}
               >
-                <Radio.Group size="middle">
+                <Radio.Group size="middle" onChange={onIsThirdPartyVerifiedChanged}>
                   <div className="radio-container">
                     <Radio.Button className="radio" value={RadioButtonStatus.YES}>
                       {t('yes')}
@@ -66,17 +93,33 @@ const Assessment = (props: any) => {
                   </div>
                 </Radio.Group>
               </Form.Item>
+              {isVerifyingOrgVisible === true && (
+                <Form.Item
+                  labelCol={{ span: 24 }}
+                  wrapperCol={{ span: 24 }}
+                  label={t('verifyingOrgNamelbl')}
+                  name="verifyingOrgName"
+                  rules={[
+                    {
+                      required: true,
+                      message: `${t('information')} ${t('isRequired')}`,
+                    },
+                  ]}
+                >
+                  <Input style={{ width: 303 }} />
+                </Form.Item>
+              )}
               <Form.Item
                 label={t('assesmentIsWillingToVerified')}
                 className="form-item"
                 name="IsWillingToVerified"
                 rules={[
                   {
-                    required: false,
+                    required: true,
                   },
                 ]}
               >
-                <Radio.Group size="middle">
+                <Radio.Group size="middle" onChange={onIsWillingToVerifiedChanged}>
                   <div className="radio-container">
                     <Radio.Button className="radio" value={RadioButtonStatus.YES}>
                       {t('yes')}
@@ -94,6 +137,16 @@ const Assessment = (props: any) => {
                   </div>
                 </Radio.Group>
               </Form.Item>
+              {isVerifyingDetailsVisible === true && (
+                <Form.Item
+                  label={t('verifyingDetailslbl')}
+                  name="verifyingDetails"
+                  labelCol={{ span: 24 }}
+                  wrapperCol={{ span: 24 }}
+                >
+                  <Input style={{ width: 303 }} />
+                </Form.Item>
+              )}
             </div>
           </Form>
         </Row>
@@ -108,6 +161,9 @@ const Assessment = (props: any) => {
             layout="vertical"
             requiredMark={true}
           >
+            <Row className="mg-bottom-1">
+              <label className="co-sub-title-text">{t('contactInformation')}</label>
+            </Row>
             <Row justify="start" gutter={16}>
               <Col flex="139px">
                 <Form.Item
@@ -223,50 +279,71 @@ const Assessment = (props: any) => {
         </Row>
 
         <Row>
-          <Form
-            name="form3"
-            labelCol={{ span: 14 }}
-            labelWrap={true}
-            labelAlign="left"
-            wrapperCol={{ span: 8 }}
-            layout="horizontal"
-            requiredMark={true}
-          >
-            <div className="radio-content">
-              <Form.Item
-                label={t('assesmentIsThePersonListed')}
-                className="form-item"
-                name="isThePersonListed"
-                rules={[
-                  {
-                    required: false,
-                  },
-                ]}
-              >
-                <Radio.Group size="middle" onChange={() => {}}>
-                  <div className="radio-container">
-                    <Radio.Button className="radio" value={RadioButtonStatus.YES}>
-                      {t('yes')}
-                    </Radio.Button>
-                  </div>
-                  <div className="radio-container">
-                    <Radio.Button className="radio" value={RadioButtonStatus.NO}>
-                      {t('no')}
-                    </Radio.Button>
-                  </div>
-                  <div className="radio-container">
-                    <Radio.Button className="radio" value={RadioButtonStatus.NA}>
-                      {t('n/a')}
-                    </Radio.Button>
-                  </div>
-                </Radio.Group>
-              </Form.Item>
-            </div>
-          </Form>
+          <Col span={24}>
+            <Form
+              name="form3"
+              labelCol={{ span: 19 }}
+              labelWrap={true}
+              labelAlign="left"
+              wrapperCol={{ span: 5 }}
+              layout="horizontal"
+              requiredMark={true}
+            >
+              <div className="radio-content">
+                <Form.Item
+                  label={t('assesmentIsThePersonListed')}
+                  className="form-item"
+                  name="isThePersonListed"
+                  rules={[
+                    {
+                      required: false,
+                    },
+                  ]}
+                >
+                  <Radio.Group size="middle" onChange={onIsThePersonListedChanged}>
+                    <div className="radio-container">
+                      <Radio.Button className="radio" value={RadioButtonStatus.YES}>
+                        {t('yes')}
+                      </Radio.Button>
+                    </div>
+                    <div className="radio-container">
+                      <Radio.Button className="radio" value={RadioButtonStatus.NO}>
+                        {t('no')}
+                      </Radio.Button>
+                    </div>
+                    <div className="radio-container">
+                      <Radio.Button className="radio" value={RadioButtonStatus.NA}>
+                        {t('n/a')}
+                      </Radio.Button>
+                    </div>
+                  </Radio.Group>
+                </Form.Item>
+                {isPersonListedDetailsVisible === true && (
+                  <Form.Item
+                    labelCol={{ span: 24 }}
+                    wrapperCol={{ span: 24 }}
+                    label={t('specify')}
+                    name="personListedDetails"
+                    rules={[
+                      {
+                        required: true,
+                        message: `${t('information')} ${t('isRequired')}`,
+                      },
+                    ]}
+                  >
+                    <Input style={{ width: 303 }} />
+                  </Form.Item>
+                )}
+              </div>
+            </Form>
+          </Col>
         </Row>
 
         <Row>
           <Form layout="vertical" name="form4">
+            <Row className="mg-bottom-1">
+              <label className="co-sub-title-text">{t('feasibilityReport')}</label>
+            </Row>
             <Row justify="start" gutter={16}>
               <Col flex="303px">
                 <Form.Item label={t('assessmentStudyName')} name="studyName">
@@ -281,8 +358,19 @@ const Assessment = (props: any) => {
             </Row>
             <Row>
               <Form.Item label={t('assessmentDocuments')} name="document">
-                <Upload>
-                  <Button icon={<UploadOutlined />}>Upload</Button>
+                <Upload
+                  beforeUpload={(file: any) => {
+                    return false;
+                  }}
+                  className="design-upload-section"
+                  name="document"
+                  listType="picture"
+                  multiple={false}
+                  maxCount={1}
+                >
+                  <Button className="upload-doc" size="large" icon={<UploadOutlined />}>
+                    Upload
+                  </Button>
                 </Upload>
               </Form.Item>
             </Row>

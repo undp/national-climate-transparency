@@ -16,6 +16,14 @@
     }
   }
 
+  .co-sub-title-text {
+    color: rgba(58, 53, 65, 0.5);
+    font-size: 14px;
+    font-family: Inter;
+    font-weight: 600;
+    line-height: 22px;
+  }
+
   .benifits-tabs {
     width: 100%;
 
@@ -284,8 +292,50 @@
         color: #ffffff;
       }
 
+      .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+        color: $dark-text-color !important;
+        border-color: $primary-purple !important;
+        box-shadow: none;
+      }
+
       Input {
         height: 40px;
+      }
+
+      .design-upload-section {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: start;
+        width: 100%;
+
+        .icon-color {
+          color: $primary-color !important;
+        }
+
+        .ant-upload {
+          width: 20%;
+        }
+
+        .ant-upload-list {
+          align-items: center;
+          justify-content: center;
+          width: 75%;
+
+          .ant-upload-list-item {
+            margin-top: 0;
+          }
+        }
+      }
+
+      .upload-doc {
+        height: 40px !important;
+        margin-right: 240px;
+      }
+
+      .ant-upload-list-item {
+        border-radius: 5px !important;
+        height: 40px !important;
       }
     }
 
@@ -304,6 +354,40 @@
       .ant-radio-button-checked {
         background: $primary-purple;
         color: #ffffff;
+      }
+
+      .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+        color: $dark-text-color !important;
+        border-color: $primary-purple !important;
+        box-shadow: none;
+      }
+
+      Input {
+        height: 40px;
+      }
+    }
+
+    .social-tab-item {
+      .ant-radio-group {
+        text-align: center;
+        align-items: center;
+        justify-content: flex-start;
+        margin-left: 1rem;
+
+        .radio-container {
+          margin-right: 1rem;
+        }
+      }
+
+      .ant-radio-button-checked {
+        background: $primary-purple;
+        color: #ffffff;
+      }
+
+      .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+        color: $dark-text-color !important;
+        border-color: $primary-purple !important;
+        box-shadow: none;
       }
 
       Input {
