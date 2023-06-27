@@ -15,8 +15,8 @@ export interface CoBenefitProps {
   onFormSubmit?: any;
   coBenefitsDetails?: any;
   submitButtonText?: any;
-  coBenifitView?: boolean;
-  data?: any;
+  viewOnly?: boolean;
+  coBenifitsViewDetails?: any;
 }
 
 const CoBenifitsComponent = (props: CoBenefitProps) => {
@@ -25,8 +25,8 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     onFormSubmit,
     coBenefitsDetails,
     submitButtonText,
-    coBenifitView,
-    data,
+    viewOnly,
+    coBenifitsViewDetails,
   } = props;
   const { t } = useTranslation(['coBenifits']);
   const [coBenefitDetails, setCoBenefitDetails] = useState();
@@ -64,7 +64,10 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       label: t('coBenifits:sdgGoals'),
       key: '1',
       children: (
-        <SdgGoals onFormSubmit={onSdgGoalsFormSubmit} data={coBenifitView && data?.sdgGoals} />
+        <SdgGoals
+          onFormSubmit={onSdgGoalsFormSubmit}
+          sdgGoalsViewData={viewOnly && coBenifitsViewDetails?.sdgGoals}
+        />
       ),
     },
     {
@@ -80,7 +83,12 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:environmental'),
       key: '4',
-      children: <Environmental onFormSubmit={onEnvironmentalFormSubmit} />,
+      children: (
+        <Environmental
+          onFormSubmit={onEnvironmentalFormSubmit}
+          environmentalViewData={viewOnly && coBenifitsViewDetails?.environmental}
+        />
+      ),
     },
     {
       label: t('coBenifits:social'),
@@ -104,7 +112,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       <div>
         <Tabs className="benifits-tabs" defaultActiveKey="1" centered items={tabItems} />
       </div>
-      {!coBenifitView && (
+      {!viewOnly && (
         <div className="steps-actions">
           <Row>
             <Button onClick={onClickedBackBtn}>{t('back')}</Button>

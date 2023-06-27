@@ -125,7 +125,7 @@ const sdgGoalsDetails = [
 ];
 
 const SdgGoals = (props: any) => {
-  const { onFormSubmit, data } = props;
+  const { onFormSubmit, sdgGoalsViewData } = props;
   const [formOne] = Form.useForm();
   const [sdgGoals, setSdgGoals] = useState<any[]>(sdgGoalsDetails);
   const [sdgGoalsFromProgramme, setSdgGoalsFromProgramme] = useState<any[]>([]);
@@ -198,8 +198,8 @@ const SdgGoals = (props: any) => {
   };
 
   useEffect(() => {
-    if (data) {
-      const sdgGoalsFromData = data?.map((item: any) => getKeyByValue(item));
+    if (sdgGoalsViewData) {
+      const sdgGoalsFromData = sdgGoalsViewData?.map((item: any) => getKeyByValue(item));
       const updatedSdgGoals = sdgGoals.map((goal) => {
         if (sdgGoalsFromData.includes(goal.name)) {
           return {
@@ -232,12 +232,14 @@ const SdgGoals = (props: any) => {
         <Row gutter={[5, 16]} className="row">
           {sdgGoals?.map((sdgGoal: any) => (
             <Col sm={12} md={12} lg={4} xl={4} className="col">
-              <div className={data ? 'img-container-data' : 'img-container'}>
+              <div className={sdgGoalsViewData ? 'img-container-data' : 'img-container'}>
                 <Form.Item name="images">
                   <img
                     src={sdgGoal?.image}
                     alt={`Image ${sdgGoal?.name}`}
-                    onClick={() => !data && handleImageSelect(sdgGoal?.name, sdgGoal?.image)}
+                    onClick={() =>
+                      !sdgGoalsViewData && handleImageSelect(sdgGoal?.name, sdgGoal?.image)
+                    }
                   />
                 </Form.Item>
               </div>

@@ -354,9 +354,23 @@ const NdcActionView = () => {
               <div className="co-benifits-view">
                 <div className="title">Co-Benifits</div>
                 <CoBenifitsComponent
-                  coBenifitView
-                  data={{
+                  viewOnly
+                  coBenifitsViewDetails={{
                     sdgGoals: ['Zero Hunger', 'Good Health and Well-being', 'Quality Education'],
+                    environmental: {
+                      airQ1: 'YES',
+                      airQ2: 'YES',
+                      airQ3: 'YES',
+                      airQ5: 'YES',
+                      airQ6: 'YES',
+                      airQ4: 'NO',
+                      airQ7: 'YES',
+                      airQ8: 'NO',
+                      airQ9: 'NO',
+                      landQ1: 'NO',
+                      waterQ1: 'NO',
+                      naturalResourceQ1: 'N/A',
+                    },
                   }}
                 />
               </div>
