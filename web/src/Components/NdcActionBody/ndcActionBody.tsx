@@ -66,16 +66,25 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
     const logoUrls = logoBase64.split(',');
     console.log(logoUrls[1], file);
     try {
-      const response: any = await post('national/programme/addDocument', {
-        type: type,
-        data: logoUrls[1],
-        programmeId: programmeId,
-        actionId: ndcActionId,
-      });
-      if (response?.data) {
+      if (file?.type === 'application/pdf') {
+        const response: any = await post('national/programme/addDocument', {
+          type: type,
+          data: logoUrls[1],
+          programmeId: programmeId,
+          actionId: ndcActionId,
+        });
+        if (response?.data) {
+          message.open({
+            type: 'success',
+            content: `${t('programme:isUploaded')}`,
+            duration: 4,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      } else {
         message.open({
-          type: 'success',
-          content: `${t('programme:isUploaded')}`,
+          type: 'error',
+          content: `${t('programme:invalidFileFormat')}`,
           duration: 4,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });

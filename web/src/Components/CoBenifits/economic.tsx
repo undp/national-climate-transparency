@@ -3,313 +3,276 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RadioButtonStatus } from '../../Definitions/commonEnums';
 
-const Environmental = (props: any) => {
-  const { onFormSubmit, environmentalViewData, viewOnly } = props;
-  const { t } = useTranslation(['environment']);
-  const environmentalDetailsInitial: any[] = [
+const Economic = (props: any) => {
+  const { onFormSubmit, economicViewData, viewOnly } = props;
+  const { t } = useTranslation(['economic']);
+  const economicDetailsInitial: any[] = [
     {
-      section: t('air'),
+      section: t('growth'),
       fields: [
         {
-          name: 'airQ1',
-          label: t('airQ1'),
+          name: 'growthQ1',
+          label: t('growthQ1'),
           hide: false,
           required: true,
         },
         {
-          name: 'airQ2',
-          label: t('airQ2'),
+          name: 'growthQ2',
+          label: t('growthQ2'),
           hide: true,
           required: true,
         },
         {
-          name: 'airQ3',
-          label: t('airQ3'),
+          name: 'growthQ3',
+          label: t('growthQ3'),
           hide: true,
           required: true,
         },
         {
-          name: 'airQ4',
-          label: t('airQ4'),
+          name: 'growthQ4',
+          label: t('growthQ4'),
           hide: true,
           required: true,
         },
         {
-          name: 'airQ5',
-          label: t('airQ5'),
+          name: 'growthQ5',
+          label: t('growthQ5'),
           hide: true,
           required: true,
         },
         {
-          name: 'airQ6',
-          label: t('airQ6'),
+          name: 'growthQ6',
+          label: t('growthQ6'),
           hide: true,
           required: true,
         },
         {
-          name: 'airQ7',
-          label: t('airQ7'),
+          name: 'growthQ7',
+          label: t('growthQ7'),
           hide: true,
           required: true,
         },
         {
-          name: 'airQ8',
-          label: t('airQ8'),
-          hide: true,
-          required: true,
-        },
-        {
-          name: 'airQ9',
-          label: t('airQ9'),
+          name: 'growthQ8',
+          label: t('growthQ8'),
           hide: true,
           required: true,
         },
       ],
     },
     {
-      section: t('land'),
+      section: t('energy'),
       fields: [
         {
-          name: 'landQ1',
-          label: t('landQ1'),
+          name: 'energyQ1',
+          label: t('energyQ1'),
           hide: false,
           required: true,
         },
         {
-          name: 'landQ2',
-          label: t('landQ2'),
+          name: 'energyQ2',
+          label: t('energyQ2'),
           hide: true,
           required: true,
         },
         {
-          name: 'landQ3',
-          label: t('landQ3'),
+          name: 'energyQ3',
+          label: t('energyQ3'),
           hide: true,
           required: true,
         },
         {
-          name: 'landQ4',
-          label: t('landQ4'),
+          name: 'energyQ4',
+          label: t('energyQ4'),
           hide: true,
           required: true,
         },
         {
-          name: 'landQ5',
-          label: t('landQ5'),
-          hide: true,
-          required: true,
-        },
-        {
-          name: 'landQ6',
-          label: t('landQ6'),
-          hide: true,
-          required: true,
-        },
-        {
-          name: 'landQ7',
-          label: t('landQ7'),
-          hide: true,
-          required: true,
-        },
-        {
-          name: 'landQ8',
-          label: t('landQ8'),
+          name: 'energyQ5',
+          label: t('energyQ5'),
           hide: true,
           required: true,
         },
       ],
     },
     {
-      section: t('water'),
+      section: t('techTransfer'),
       fields: [
         {
-          name: 'waterQ1',
-          label: t('waterQ1'),
+          name: 'techTransferQ1',
+          label: t('techTransferQ1'),
           hide: false,
           required: true,
         },
         {
-          name: 'waterQ2',
-          label: t('waterQ2'),
+          name: 'techTransferQ2',
+          label: t('techTransferQ2'),
           hide: true,
           required: true,
         },
         {
-          name: 'waterQ3',
-          label: t('waterQ3'),
+          name: 'techTransferQ3',
+          label: t('techTransferQ3'),
           hide: true,
           required: true,
         },
         {
-          name: 'waterQ4',
-          label: t('waterQ4'),
+          name: 'techTransferQ4',
+          label: t('techTransferQ4'),
           hide: true,
           required: true,
         },
         {
-          name: 'waterQ5',
-          label: t('waterQ5'),
+          name: 'techTransferQ5',
+          label: t('techTransferQ5'),
           hide: true,
           required: true,
         },
         {
-          name: 'waterQ6',
-          label: t('waterQ6'),
-          hide: true,
-          required: true,
-        },
-        {
-          name: 'waterQ7',
-          label: t('waterQ7'),
+          name: 'techTransferQ6',
+          label: t('techTransferQ6'),
           hide: true,
           required: true,
         },
       ],
     },
     {
-      section: t('naturalResource'),
+      section: t('balanceOfPayments'),
       fields: [
         {
-          name: 'naturalResourceQ1',
-          label: t('naturalResourceQ1'),
+          name: 'balanceOfPaymentsQ1',
+          label: t('balanceOfPaymentsQ1'),
           hide: false,
           required: true,
         },
         {
-          name: 'naturalResourceQ2',
-          label: t('naturalResourceQ2'),
+          name: 'balanceOfPaymentsQ2',
+          label: t('balanceOfPaymentsQ2'),
           hide: true,
           required: true,
         },
         {
-          name: 'naturalResourceQ3',
-          label: t('naturalResourceQ3'),
+          name: 'balanceOfPaymentsQ3',
+          label: t('balanceOfPaymentsQ3'),
           hide: true,
           required: true,
         },
+      ],
+    },
+    {
+      section: t('furtherInfo'),
+      fields: [
         {
-          name: 'naturalResourceQ4',
-          label: t('naturalResourceQ4'),
-          hide: true,
-          required: true,
-        },
-        {
-          name: 'naturalResourceQ5',
-          label: t('naturalResourceQ5'),
-          hide: true,
-          required: true,
-        },
-        {
-          name: 'naturalResourceQ6',
-          label: t('naturalResourceQ6'),
-          hide: true,
+          name: 'furtherInfoQ1',
+          label: t('furtherInfoQ1'),
+          hide: false,
           required: true,
         },
       ],
     },
   ];
   const [formOne] = Form.useForm();
-  const [environmentalDetails, setEnvironmentalDetails] = useState<any[]>(
-    environmentalDetailsInitial
-  );
-  const [environmentalUpdatedDetails, setEnvironmentalUpdatedDetails] = useState<any[]>();
-  const [environmentalFormDetails, setEnvironmentalFormDetails] = useState<any>();
+  const [economicDetails, setEconomicDetails] = useState<any[]>(economicDetailsInitial);
+  const [economicFormDetails, setEconomicFormDetails] = useState<any>();
   const onFieldsChange = (changedFields: any) => {
     const changedFieldName = changedFields[0]?.name[0];
     const changedFieldValue = changedFields[0]?.value;
     if (changedFieldName.includes('1')) {
       const sectionName = changedFieldName.replace(/\d/g, '').replace('Q', '');
-      const updatedEnvironmentalDetails = [...environmentalDetails];
-      const sectionIndex = updatedEnvironmentalDetails.findIndex(
+      const updatedEconomicDetails = [...economicDetails];
+      const sectionIndex = updatedEconomicDetails.findIndex(
         (section) => section.section === t(sectionName)
       );
 
-      updatedEnvironmentalDetails[sectionIndex].fields.forEach((field: any) => {
+      updatedEconomicDetails[sectionIndex].fields.forEach((field: any) => {
         if (field.name !== changedFieldName) {
           field.hide = changedFieldValue !== RadioButtonStatus.YES;
         }
       });
 
-      setEnvironmentalDetails(updatedEnvironmentalDetails);
+      setEconomicDetails(updatedEconomicDetails);
     }
   };
 
   useEffect(() => {
-    onFormSubmit(environmentalFormDetails);
-  }, [environmentalFormDetails]);
+    onFormSubmit(economicFormDetails);
+  }, [economicFormDetails]);
 
-  const onEnvironmentalValuesChanged = (changedValues: any) => {
-    setEnvironmentalFormDetails((pre: any) => ({ ...pre, ...changedValues }));
+  const onEconomicValuesChanged = (changedValues: any) => {
+    setEconomicFormDetails((pre: any) => ({ ...pre, ...changedValues }));
   };
 
   useEffect(() => {
-    if (environmentalViewData && viewOnly === true) {
-      const updatedEnvironmentalData: any[] = [
+    if (economicViewData && viewOnly === true) {
+      const updatedEconomicData: any[] = [
         {
-          section: t('air'),
+          section: t('growth'),
           fields: [],
         },
         {
-          section: t('land'),
+          section: t('energy'),
           fields: [],
         },
         {
-          section: t('water'),
+          section: t('techTransfer'),
           fields: [],
         },
         {
-          section: t('naturalResource'),
+          section: t('balanceOfPayments'),
+          fields: [],
+        },
+        {
+          section: t('furtherInfo'),
           fields: [],
         },
       ];
-      for (const key in environmentalViewData) {
+      for (const key in economicViewData) {
         let section = '';
-        if (String(key).includes('air')) {
-          section = t('air');
-        } else if (String(key).includes('land')) {
-          section = t('land');
-        } else if (String(key).includes('water')) {
-          section = t('water');
-        } else if (String(key).includes('naturalResource')) {
-          section = t('naturalResource');
+        if (String(key).includes('growth')) {
+          section = t('growth');
+        } else if (String(key).includes('energy')) {
+          section = t('energy');
+        } else if (String(key).includes('techTransfer')) {
+          section = t('techTransfer');
+        } else if (String(key).includes('balanceOfPayments')) {
+          section = t('balanceOfPayments');
+        } else if (String(key).includes('furtherInfo')) {
+          section = t('furtherInfo');
         }
 
-        const environmentalItem = updatedEnvironmentalData.find((item) => item.section === section);
+        const economicItem = updatedEconomicData.find((item) => item.section === section);
 
-        if (environmentalItem) {
-          environmentalItem.fields.push({
+        if (economicItem) {
+          economicItem.fields.push({
             name: key,
             label: t(key),
             hide: false,
-            value: environmentalViewData[key],
+            value: economicViewData[key],
           });
         }
       }
-      const filteredEconomicData = updatedEnvironmentalData.filter(
-        (item) => item.fields.length > 0
-      );
-      setEnvironmentalUpdatedDetails(filteredEconomicData);
-      setEnvironmentalDetails(filteredEconomicData);
-      console.log(filteredEconomicData);
+      const filteredEconomicData = updatedEconomicData.filter((item) => item.fields.length > 0);
+      setEconomicDetails(filteredEconomicData);
+      console.log(updatedEconomicData);
     }
   }, []);
 
   return (
     <div className="co-benifits-tab-item">
       <Form
-        name="environmental-details"
-        className="benifits-details-environmental"
+        name="economic-details"
+        className="benifits-details-economic"
         labelCol={{ md: 16, lg: 19, xl: 19 }}
         wrapperCol={{ md: 8, lg: 5, xl: 5 }}
         layout="horizontal"
         requiredMark={true}
         form={formOne}
         onFieldsChange={onFieldsChange}
-        onValuesChange={onEnvironmentalValuesChanged}
+        onValuesChange={onEconomicValuesChanged}
       >
-        {environmentalDetails?.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
-        <div className={environmentalViewData ? 'section view-section' : 'section'}>
-          {environmentalDetails?.map((environmentalDetail: any) => (
+        {economicDetails?.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+        <div className={economicViewData ? 'section view-section' : 'section'}>
+          {economicDetails?.map((environmentalDetail: any) => (
             <>
               <div className="title">{environmentalDetail?.section}</div>
               {environmentalDetail?.fields?.map(
@@ -329,9 +292,9 @@ const Environmental = (props: any) => {
                       <Radio.Group
                         size="middle"
                         onChange={() => {}}
-                        disabled={environmentalViewData && true}
+                        disabled={economicViewData && true}
                       >
-                        {environmentalViewData ? (
+                        {economicViewData ? (
                           <>
                             {field?.value === RadioButtonStatus.YES && (
                               <div className="yes-no-radio-container">
@@ -389,4 +352,4 @@ const Environmental = (props: any) => {
   );
 };
 
-export default Environmental;
+export default Economic;

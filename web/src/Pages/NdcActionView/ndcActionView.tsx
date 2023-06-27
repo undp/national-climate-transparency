@@ -13,6 +13,7 @@ import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import * as Icon from 'react-bootstrap-icons';
 import { addCommSep } from '@undp/carbon-library';
 import Chart from 'react-apexcharts';
+import CoBenifitsComponent from '../../Components/CoBenifits/coBenifits';
 
 const NdcActionView = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -22,6 +23,7 @@ const NdcActionView = () => {
   const [ndcActionReportDetails, setNdcActionReportDetails] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
   const [ndcActionDetails, setNdcActionDetails] = useState<NdcAction>();
+  const [coBenifitsComponentDetails, setCoBenifitsComponentnDetails] = useState<any>();
   const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
 
@@ -89,6 +91,7 @@ const NdcActionView = () => {
         //Get Ndc action details using sction id
       } else if (state.record) {
         setNdcActionDetails(state.record);
+        setCoBenifitsComponentnDetails(state?.record?.coBenefitsProperties);
         setEmissionsReductionExpected(
           state.record?.emissionReductionExpected !== null ||
             state.record?.emissionReductionExpected !== undefined
@@ -334,6 +337,21 @@ const NdcActionView = () => {
                   <InfoView
                     data={getNdcActionAdaptationDetails()}
                     title={t('ndcAction:viewAdaptationTitle')}
+                  />
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        )}
+        {state?.record?.coBenefitsProperties && (
+          <Row>
+            <Col lg={24}>
+              <Card className="card-container">
+                <div className="co-benifits-view">
+                  <div className="title">Co-Benifits</div>
+                  <CoBenifitsComponent
+                    viewOnly={true}
+                    coBenifitsViewDetails={state?.record?.coBenefitsProperties}
                   />
                 </div>
               </Card>

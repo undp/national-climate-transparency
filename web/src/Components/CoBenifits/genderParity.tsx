@@ -1,14 +1,13 @@
-import { Col, Form, Input, InputNumber, Radio, Row } from 'antd';
+import { Col, Empty, Form, Input, InputNumber, Radio, Row } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const GenderParity = (props: any) => {
-  const { onFormSubmit } = props;
+  const { onFormSubmit, genderParityViewData, viewOnly } = props;
   const { t } = useTranslation(['genderParity']);
   const [formOne] = Form.useForm();
   const [formTwo] = Form.useForm();
   const [genderParityDetails, setGenderParityDetails] = useState();
-
   const genderParityDetailsOne = [
     {
       label: t('benifit1'),
@@ -67,6 +66,10 @@ const GenderParity = (props: any) => {
       wrapperCol: 11,
     },
   ];
+  const [genderParityFormOneFields, setGenderParityFormOneFields] =
+    useState<any[]>(genderParityDetailsOne);
+  const [genderParityFormTwoFields, setGenderParityFormTwoFields] =
+    useState<any[]>(genderParityDetailsTwo);
 
   useEffect(() => {
     onFormSubmit(genderParityDetails);
@@ -80,6 +83,35 @@ const GenderParity = (props: any) => {
     setGenderParityDetails((pre: any) => ({ ...pre, ...changedValues }));
   };
 
+  useEffect(() => {
+    if (viewOnly === true && !genderParityViewData) {
+      setGenderParityFormOneFields([]);
+      setGenderParityFormTwoFields([]);
+    }
+    if (genderParityViewData) {
+      const updatedGenderParityFormOneFields = genderParityFormOneFields
+        .filter((field) => genderParityViewData.hasOwnProperty(field.name))
+        .map((field) => ({
+          ...field,
+          value: genderParityViewData[field.name],
+        }));
+
+      const updatedGenderParityFormTwoFields = genderParityFormTwoFields
+        .filter((field) => genderParityViewData.hasOwnProperty(field.name))
+        .map((field) => ({
+          ...field,
+          value: genderParityViewData[field.name],
+        }));
+      setGenderParityFormOneFields(updatedGenderParityFormOneFields);
+      setGenderParityFormTwoFields(updatedGenderParityFormTwoFields);
+      if (updatedGenderParityFormTwoFields?.length > 0) {
+        updatedGenderParityFormTwoFields?.map((fieldData: any) => {
+          formTwo.setFieldValue(fieldData?.name, fieldData?.value);
+        });
+      }
+    }
+  }, []);
+
   return (
     <div className="co-benifits-tab-item">
       <Form
@@ -92,8 +124,11 @@ const GenderParity = (props: any) => {
         form={formOne}
         onValuesChange={onGenderParityValuesChanged}
       >
-        <div className="part-one">
-          {genderParityDetailsOne?.map((genderParityItem: any) => {
+        {genderParityFormOneFields?.length === 0 && genderParityFormTwoFields?.length === 0 && (
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        )}
+        <div className="part-one view-section">
+          {genderParityFormOneFields?.map((genderParityItem: any) => {
             return (
               <Form.Item
                 label={genderParityItem?.label}
@@ -105,18 +140,30 @@ const GenderParity = (props: any) => {
                   },
                 ]}
               >
-                <Radio.Group size="middle" onChange={() => {}}>
-                  <div className="yes-no-radio-container">
-                    <Radio.Button className="yes-no-radio" value={genderParityItem?.value}>
-                      {t('yes')}
-                    </Radio.Button>
-                  </div>
-                  <div className="yes-no-radio-container">
-                    <Radio.Button className="yes-no-radio" value={!genderParityItem?.value}>
-                      {t('no')}
-                    </Radio.Button>
-                  </div>
-                </Radio.Group>
+                {genderParityViewData ? (
+                  <>
+                    <Radio.Group size="middle" onChange={() => {}} disabled>
+                      <div className="yes-no-radio-container">
+                        <Radio.Button className="yes-no-radio" value={genderParityItem?.value}>
+                          {genderParityItem?.value === true ? t('yes') : t('no')}
+                        </Radio.Button>
+                      </div>
+                    </Radio.Group>
+                  </>
+                ) : (
+                  <Radio.Group size="middle" onChange={() => {}}>
+                    <div className="yes-no-radio-container">
+                      <Radio.Button className="yes-no-radio" value={genderParityItem?.value}>
+                        {t('yes')}
+                      </Radio.Button>
+                    </div>
+                    <div className="yes-no-radio-container">
+                      <Radio.Button className="yes-no-radio" value={!genderParityItem?.value}>
+                        {t('no')}
+                      </Radio.Button>
+                    </div>
+                  </Radio.Group>
+                )}
               </Form.Item>
             );
           })}
@@ -129,7 +176,7 @@ const GenderParity = (props: any) => {
             onValuesChange={onGenderParityValuesChangedSub}
           >
             <Row gutter={[16, 16]}>
-              {genderParityDetailsTwo?.map((genderDetail: any) => (
+              {genderParityFormTwoFields?.map((genderDetail: any) => (
                 <Col md={genderDetail?.col?.md} lg={genderDetail?.col?.lg}>
                   <Form.Item
                     labelCol={{ span: genderDetail?.labelCol }}
@@ -137,13 +184,14 @@ const GenderParity = (props: any) => {
                     label={genderDetail?.label}
                     className="form-item"
                     name={genderDetail?.name}
+                    initialValue={genderParityViewData ? genderDetail?.value : undefined}
                     rules={[
                       {
                         required: false,
                       },
                     ]}
                   >
-                    <Input size="large" />
+                    <Input disabled={genderParityViewData && true} size="large" />
                   </Form.Item>
                 </Col>
               ))}
