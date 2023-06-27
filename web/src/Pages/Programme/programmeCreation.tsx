@@ -1011,7 +1011,7 @@ export const AddProgrammeComponent = () => {
                         description: current === 3 && (
                           <CoBenifitsComponent
                             onClickedBackBtn={prevOne}
-                            coBenefitsDetails={programmeDetailsObj.coBenefitsProperties}
+                            coBenefitsDetails={programmeDetailsObj?.coBenefitsProperties}
                             onFormSubmit={onCoBenefitFormSubmit}
                           />
                         ),
