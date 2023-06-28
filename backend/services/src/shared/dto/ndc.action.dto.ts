@@ -57,7 +57,6 @@ export class NDCActionDto {
 
   @ApiProperty()
   @ValidateIf(o => o.action === NDCActionType.Adaptation || o.ACADEMICS === NDCActionType.CrossCutting)
-  @IsNotEmptyObject()
   @ValidateNested()
   @Type(() => AdaptationProperties)
   adaptationProperties: AdaptationProperties;
@@ -86,10 +85,12 @@ export class NDCActionDto {
   @ApiPropertyOptional()
   @ValidateNested()
   @Type(() => CoBenefitsProperties)
+  @IsOptional()
   coBenefitsProperties?: CoBenefitsProperties;
 
   @ApiPropertyOptional()
   @ValidateNested()
+  @IsOptional()
   @Type(() => EnablementProperties)
   enablementProperties?: EnablementProperties;
 

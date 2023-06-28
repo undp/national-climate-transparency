@@ -1044,7 +1044,10 @@ export class ProgrammeService {
     if (!programme.certifierId) {
       programme.certifierId = [certifierId]
     } else {
-      programme.certifierId.push(certifierId)
+      const index = programme.certifierId.map(e => Number(e)).indexOf(Number(certifierId));
+      if (index < 0) {
+        programme.certifierId.push(certifierId)
+      }
     }
     if (update) {
       update['certifierId'] = programme.certifierId;
@@ -1062,20 +1065,22 @@ export class ProgrammeService {
   }
 
   async approveDocumentCommit(em: EntityManager, d: ProgrammeDocument, ndc: NDCAction, certifierId: number, program: Programme) {
+    
+    const updT = {}    
     if (
       d.type == DocType.METHODOLOGY_DOCUMENT
     ) {
-      const updT = {
-        currentStage: ProgrammeStage.APPROVED,
-        statusUpdateTime: new Date().getTime(),
-        txTime: new Date().getTime(),
-      };
+      updT['currentStage'] = ProgrammeStage.APPROVED;
+      updT['statusUpdateTime'] = new Date().getTime();
+    }
 
-      if (certifierId && program) {
-       await this.updateProgrammeCertifier(program, certifierId, updT);
-      }
-      console.log('Update T', updT)
-      
+    if (certifierId && program) {
+      await this.updateProgrammeCertifier(program, certifierId, updT);
+    }
+    console.log('Update T', updT)
+     
+    if (Object.keys(updT).length > 0) {
+      updT['txTime'] = new Date().getTime();
       await em.update(
         Programme,
         {
@@ -1085,6 +1090,7 @@ export class ProgrammeService {
       );
     }
 
+    console.log('NDC COmmit', ndc)
     if (ndc) {
       await em.update(
         NDCAction,
@@ -1238,7 +1244,6 @@ export class ProgrammeService {
     if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
       this.logger.log(`Approving document since the user is ${user.companyRole}`)
       dr.status = DocumentStatus.ACCEPTED;
-      let ndc;
       if (dr.actionId) {
         ndc = await this.ndcActionRepo.findOne({
           where: {
@@ -1314,6 +1319,12 @@ export class ProgrammeService {
     await this.calcCreditNDCAction(ndcAction, program);
     console.log("2222", ndcAction);
     this.calcAddNDCFields(ndcAction, program);
+
+    if (ndcAction.action == NDCActionType.Enablement && ndcAction.enablementProperties.report) {
+      const filetype = "pdf";
+      const response: any = await this.fileHandler.uploadFile( `documents/ENABLEMENT_REPORT${ "_" + ndcAction.id}.${filetype}`, ndcAction.enablementProperties.report);
+      ndcAction.enablementProperties.report = response
+    }
 
     if (
       ndcActionDto.action == NDCActionType.Mitigation ||

@@ -41,6 +41,8 @@ const AddNdcAction = () => {
     if (ndcActionDetailsObj.enablementReportData) {
       delete ndcActionDetailsObj.enablementReportData;
     }
+
+    ndcActionDetailsObj.methodology = t('ndcAction:goldStandard');
     const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
     if (response.status === 200 || response.status === 201) {
       navigate('/programmeManagement/view', { state: { record: programmeDetails } });
@@ -65,15 +67,18 @@ const AddNdcAction = () => {
   };
 
   const onProjectReportSubmit = async (projectReportFormValues: any) => {
+    const updatedNdcActionDetails = {
+      ...ndcActionDetails,
+    };
+
     if (projectReportFormValues.monitoringReport) {
       const logoBase64 = await getBase64(
         projectReportFormValues.monitoringReport.file.originFileObj as RcFile
       );
       const logoUrls = logoBase64.split(',');
-      const updatedNdcActionDetails = {
-        ...ndcActionDetails,
-        monitoringReport: logoUrls[1],
-      };
+
+      updatedNdcActionDetails.monitoringReport = logoUrls[1];
+    }
 
       setNdcActionDetails(updatedNdcActionDetails);
       saveNdcAction(updatedNdcActionDetails);
