@@ -245,8 +245,12 @@ export const AddProgrammeComponent = () => {
   const onCoBenefitFormSubmit = async (coBenefitDetails: any) => {
     const updatedProgrammeDetailsObj = {
       ...programmeDetailsObj,
-      coBenefitsProperties: coBenefitDetails,
     };
+
+    if (!updatedProgrammeDetailsObj.ndcAction) {
+      updatedProgrammeDetailsObj.ndcAction = {};
+    }
+    updatedProgrammeDetailsObj.ndcAction.coBenefitsProperties = coBenefitDetails;
     setProgrammeDetailsObj(updatedProgrammeDetailsObj);
     saveNewProgramme(updatedProgrammeDetailsObj);
   };
@@ -1011,7 +1015,7 @@ export const AddProgrammeComponent = () => {
                         description: current === 3 && (
                           <CoBenifitsComponent
                             onClickedBackBtn={prevOne}
-                            coBenefitsDetails={programmeDetailsObj.coBenefitsProperties}
+                            coBenefitsDetails={programmeDetailsObj?.coBenefitsProperties}
                             onFormSubmit={onCoBenefitFormSubmit}
                           />
                         ),

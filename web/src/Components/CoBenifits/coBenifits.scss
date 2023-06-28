@@ -16,7 +16,7 @@
       border-color: rgba(140, 140, 140, 0.7);
     }
 
-    .ant-input[disabled]  {
+    .ant-input[disabled] {
       color: rgba(140, 140, 140, 0.7) !important;
       background-color: #ffffff !important;
       border-color: rgba(140, 140, 140, 0.7) !important;
@@ -329,6 +329,25 @@
         color: #ffffff;
       }
 
+      .radio-container {
+        margin-right: 1rem;
+        width: 35%;
+        text-align: center;
+        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+          color: $dark-text-color !important;
+          border-color: $primary-purple !important;
+          box-shadow: none;
+        }
+      }
+
+      .radio {
+        width: 100%;
+        .ant-radio-button-checked {
+          background: $primary-purple;
+          color: #ffffff;
+        }
+      }
+
       .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
         color: $dark-text-color !important;
         border-color: $primary-purple !important;
@@ -377,6 +396,8 @@
     }
 
     .safeguard-tab-item {
+      width: 95%;
+      margin-left: 3rem;
       .ant-radio-group {
         text-align: center;
         align-items: center;
@@ -385,6 +406,21 @@
 
         .radio-container {
           margin-right: 1rem;
+          width: 35%;
+          text-align: center;
+          .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+            color: $dark-text-color !important;
+            border-color: $primary-purple !important;
+            box-shadow: none;
+          }
+        }
+
+        .radio {
+          width: 100%;
+          .ant-radio-button-checked {
+            background: $primary-purple;
+            color: #ffffff;
+          }
         }
       }
 
@@ -425,6 +461,25 @@
         color: $dark-text-color !important;
         border-color: $primary-purple !important;
         box-shadow: none;
+      }
+
+      .radio-container {
+        margin-right: 1rem;
+        width: 35%;
+        text-align: center;
+        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+          color: $dark-text-color !important;
+          border-color: $primary-purple !important;
+          box-shadow: none;
+        }
+      }
+
+      .radio {
+        width: 100%;
+        .ant-radio-button-checked {
+          background: $primary-purple;
+          color: #ffffff;
+        }
       }
 
       Input {

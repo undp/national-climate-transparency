@@ -179,7 +179,7 @@ const NdcActionManagement = () => {
       };
     } else {
       sort = {
-        key: 'id',
+        key: 'txTime',
         order: 'DESC',
       };
     }
@@ -291,7 +291,7 @@ const NdcActionManagement = () => {
           </Col>
           <Col lg={{ span: 8 }} md={{ span: 8 }}>
             <div className="filter-section">
-              <div className="search-filter">
+              {/* <div className="search-filter">
                 <Checkbox
                   className="label"
                   onChange={(v) =>
@@ -308,7 +308,7 @@ const NdcActionManagement = () => {
                 >
                   {t('ndcAction:seeMine')}
                 </Checkbox>
-              </div>
+              </div> */}
               <div className="search-bar">
                 <Search
                   onPressEnter={onSearch}
