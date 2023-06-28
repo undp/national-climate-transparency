@@ -272,7 +272,11 @@ export class AggregateAPIService {
         let geometry: any = {};
         properties.id = String(index);
         properties.count = parseInt(locationDataItem?.count);
-        properties[groupField] = locationDataItem[groupField];
+        if (locationDataItem[groupField] == null) {
+          properties[groupField] = "Unknown"
+        } else {
+          properties[groupField] = locationDataItem[groupField];
+        }
         geometry.type = "Point";
         geometry.coordinates = location;
         programmeGeoData.properties = properties;
@@ -828,12 +832,17 @@ export class AggregateAPIService {
             whereCW.push(`"createdTime" <= ${stat.statFilter.endTime}`);
           }
   
+          const query = `SELECT p."requestId" as loc, b."type" as type, count(*) AS count
+          FROM  investment_view b, jsonb_array_elements(b."toGeo") p("requestId")
+          ${whereCW.length > 0 ? " where " : " "}
+          ${whereCW.join(" and ")}
+          GROUP  BY p."requestId", b."type"`;
+
+          console.log('INVESTMENT_LOCATION query', query)
           const resultsProgrammeLocationsI = await this.investmentRepo.manager
-            .query(`SELECT p."requestId" as loc, b."type" as type, count(*) AS count
-            FROM  investment_view b, jsonb_array_elements(b."toGeo") p("requestId")
-            ${whereCW.length > 0 ? " where " : " "}
-            ${whereCW.join(" and ")}
-            GROUP  BY p."requestId", b."type"`);
+            .query(query);
+
+          console.log('INVESTMENT_LOCATION resp', resultsProgrammeLocationsI)
           results[key] = await this.programmeLocationDataFormatter(
             resultsProgrammeLocationsI, "type"
           );
