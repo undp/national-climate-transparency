@@ -14,18 +14,51 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RadioButtonStatus, titleList } from '../../Definitions/commonEnums';
+import PhoneInput, { formatPhoneNumberIntl } from 'react-phone-number-input';
 
 const Assessment = (props: any) => {
   const { onFormSubmit, assessmentViewData, viewOnly } = props;
   const { t } = useTranslation(['coBenifits']);
+  const [form1] = Form.useForm();
+  const [form2] = Form.useForm();
+  const [form3] = Form.useForm();
+  const [form4] = Form.useForm();
   const [cobenefitsAssessmentDetails, setCobenefitsAssessmentDetails] = useState();
   const [isVerifyingOrgVisible, setIsVerifyingOrgVisible] = useState(false);
   const [isVerifyingDetailsVisible, setIsVerifyingDetailsVisible] = useState(false);
   const [isPersonListedDetailsVisible, setIsPersonListedDetailsVisible] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   useEffect(() => {
-    onFormSubmit(cobenefitsAssessmentDetails);
-  }, [cobenefitsAssessmentDetails]);
+    onFormSubmit(cobenefitsAssessmentDetails, isFormValid);
+  }, [isFormValid]);
+
+  const validateForms = async () => {
+    setIsFormValid(true);
+    try {
+      await form1.validateFields();
+    } catch (exception: any) {
+      if (exception.errorFields.length > 0) {
+        setIsFormValid(false);
+      }
+    }
+
+    try {
+      await form2.validateFields();
+    } catch (exception: any) {
+      if (exception.errorFields.length > 0) {
+        setIsFormValid(false);
+      }
+    }
+
+    try {
+      await form3.validateFields();
+    } catch (exception: any) {
+      if (exception.errorFields.length > 0) {
+        setIsFormValid(false);
+      }
+    }
+  };
 
   const onFormChanged = (formName: string, info: any) => {
     const changedValues: any = {};
@@ -44,6 +77,7 @@ const Assessment = (props: any) => {
     } else {
       setIsVerifyingOrgVisible(false);
     }
+    validateForms();
   };
 
   const onIsWillingToVerifiedChanged = (e: any) => {
@@ -52,6 +86,7 @@ const Assessment = (props: any) => {
     } else {
       setIsVerifyingDetailsVisible(false);
     }
+    validateForms();
   };
 
   const onIsThePersonListedChanged = (e: any) => {
@@ -60,6 +95,7 @@ const Assessment = (props: any) => {
     } else {
       setIsPersonListedDetailsVisible(false);
     }
+    validateForms();
   };
 
   return (
@@ -76,6 +112,8 @@ const Assessment = (props: any) => {
               wrapperCol={{ span: 5 }}
               layout="horizontal"
               requiredMark={true}
+              form={form1}
+              onValuesChange={() => validateForms()}
             >
               {!viewOnly && (
                 <div className="radio-content">
@@ -86,6 +124,7 @@ const Assessment = (props: any) => {
                     rules={[
                       {
                         required: true,
+                        message: '',
                       },
                     ]}
                   >
@@ -116,7 +155,7 @@ const Assessment = (props: any) => {
                       rules={[
                         {
                           required: true,
-                          message: `${t('information')} ${t('isRequired')}`,
+                          message: '',
                         },
                       ]}
                     >
@@ -130,6 +169,7 @@ const Assessment = (props: any) => {
                     rules={[
                       {
                         required: true,
+                        message: '',
                       },
                     ]}
                   >
@@ -233,6 +273,8 @@ const Assessment = (props: any) => {
               wrapperCol={{ span: 8 }}
               layout="vertical"
               requiredMark={true}
+              form={form2}
+              onValuesChange={() => validateForms()}
             >
               <Row className="mg-bottom-1">
                 <label className="co-sub-title-text">{t('contactInformation')}</label>
@@ -247,7 +289,7 @@ const Assessment = (props: any) => {
                         rules={[
                           {
                             required: true,
-                            message: `${t('assessmentTitle')} ${t('isRequired')}`,
+                            message: '',
                           },
                         ]}
                       >
@@ -281,7 +323,7 @@ const Assessment = (props: any) => {
                         rules={[
                           {
                             required: true,
-                            message: `${t('assessmentFirstName')} ${t('isRequired')}`,
+                            message: '',
                           },
                         ]}
                       >
@@ -308,7 +350,7 @@ const Assessment = (props: any) => {
                         rules={[
                           {
                             required: true,
-                            message: `${t('assessmentLastName')} ${t('isRequired')}`,
+                            message: '',
                           },
                         ]}
                       >
@@ -337,7 +379,7 @@ const Assessment = (props: any) => {
                         rules={[
                           {
                             required: true,
-                            message: `${t('assessmentOrganisation')} ${t('isRequired')}`,
+                            message: '',
                           },
                         ]}
                       >
@@ -364,11 +406,17 @@ const Assessment = (props: any) => {
                         rules={[
                           {
                             required: true,
-                            message: `${t('assessmentTelephone')} ${t('isRequired')}`,
+                            message: '',
                           },
                         ]}
                       >
-                        <Input style={{ width: 303 }} />
+                        <PhoneInput
+                          style={{ width: 303 }}
+                          international
+                          defaultCountry="LK"
+                          countryCallingCodeEditable={false}
+                          onChange={(v) => {}}
+                        />
                       </Form.Item>
                     )}
                     {viewOnly && (
@@ -393,7 +441,29 @@ const Assessment = (props: any) => {
                         rules={[
                           {
                             required: true,
-                            message: `${t('assessmentEmail')} ${t('isRequired')}`,
+                            message: '',
+                          },
+                          {
+                            validator: async (rule, value) => {
+                              if (
+                                String(value).trim() === '' ||
+                                String(value).trim() === undefined ||
+                                value === null ||
+                                value === undefined
+                              ) {
+                                throw new Error(``);
+                              } else {
+                                const val = value.trim();
+                                const reg =
+                                  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                                const matches = val.match(reg) ? val.match(reg) : [];
+                                if (matches.length === 0) {
+                                  throw new Error(
+                                    `${t('addUser:email')} ${t('addUser:isInvalid')}`
+                                  );
+                                }
+                              }
+                            },
                           },
                         ]}
                       >
@@ -420,7 +490,7 @@ const Assessment = (props: any) => {
                         rules={[
                           {
                             required: true,
-                            message: `${t('assessmentAffiliationCDM')} ${t('isRequired')}`,
+                            message: '',
                           },
                         ]}
                       >
@@ -452,6 +522,8 @@ const Assessment = (props: any) => {
                 wrapperCol={{ span: 5 }}
                 layout="horizontal"
                 requiredMark={true}
+                form={form3}
+                onValuesChange={() => validateForms()}
               >
                 {!viewOnly && (
                   <div className="radio-content">
@@ -462,6 +534,7 @@ const Assessment = (props: any) => {
                       rules={[
                         {
                           required: true,
+                          message: '',
                         },
                       ]}
                     >
@@ -492,7 +565,7 @@ const Assessment = (props: any) => {
                         rules={[
                           {
                             required: true,
-                            message: `${t('information')} ${t('isRequired')}`,
+                            message: '',
                           },
                         ]}
                       >
@@ -537,7 +610,7 @@ const Assessment = (props: any) => {
           </Row>
 
           <Row>
-            <Form layout="vertical" name="form4">
+            <Form layout="vertical" name="form4" form={form4}>
               <Row className="mg-bottom-1">
                 <label className="co-sub-title-text">{t('feasibilityReport')}</label>
               </Row>

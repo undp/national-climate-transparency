@@ -55,6 +55,15 @@ const AddNdcAction = () => {
     setCurrent((pre) => pre - 1);
   };
 
+  const onClickBackCoBenefits = (savedCoBenefitsDetails: any) => {
+    const updatedNdcActionDetails = {
+      ...ndcActionDetails,
+      coBenefitsProperties: savedCoBenefitsDetails,
+    };
+    setNdcActionDetails(updatedNdcActionDetails);
+    onClickBack();
+  };
+
   const onProjectReportSubmit = async (projectReportFormValues: any) => {
     const logoBase64 = await getBase64(
       projectReportFormValues.monitoringReport.file.originFileObj as RcFile
@@ -128,7 +137,7 @@ const AddNdcAction = () => {
         ),
         description: current === 2 && (
           <CoBenifitsComponent
-            onClickedBackBtn={onClickBack}
+            onClickedBackBtn={onClickBackCoBenefits}
             coBenefitsDetails={ndcActionDetails.coBenefitsProperties}
             onFormSubmit={onCoBenefitsSubmit}
             submitButtonText={

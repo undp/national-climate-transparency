@@ -7,6 +7,7 @@ const Safeguards = (props: any) => {
   const { onFormSubmit, safeGuardViewData, viewOnly } = props;
   const { t } = useTranslation(['safeguards']);
   const [safeguardDetails, setSafeguardDetails] = useState();
+  const [form] = Form.useForm();
   const initialFormElementList = [
     {
       type: FormElementType.Label,
@@ -423,6 +424,11 @@ const Safeguards = (props: any) => {
         return checkFormSubHeaderVisible(headerItem);
       });
       setUpdatedFormElementList(updatedList);
+    } else {
+      if (safeGuardViewData) {
+        setSafeguardDetails(safeGuardViewData);
+        form.setFieldsValue(safeGuardViewData);
+      }
     }
   }, [safeGuardViewData]);
 
@@ -443,6 +449,7 @@ const Safeguards = (props: any) => {
             labelCol={{ md: 16, lg: 18, xl: 18 }}
             wrapperCol={{ md: 8, lg: 6, xl: 6 }}
             layout="horizontal"
+            form={form}
           >
             {updatedFormElementList.map((sectionItem: any) => {
               return (
