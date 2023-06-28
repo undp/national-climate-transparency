@@ -80,11 +80,8 @@ const AddNdcAction = () => {
       updatedNdcActionDetails.monitoringReport = logoUrls[1];
     }
 
-      setNdcActionDetails(updatedNdcActionDetails);
-      saveNdcAction(updatedNdcActionDetails);
-    } else {
-      saveNdcAction(ndcActionDetails);
-    }
+    setNdcActionDetails(updatedNdcActionDetails);
+    saveNdcAction(updatedNdcActionDetails);
   };
 
   const onNdcActionDetailsSubmit = async (ndcActionDetailsObj: any) => {
@@ -150,7 +147,7 @@ const AddNdcAction = () => {
           <div className={current !== 2 ? 'hide' : ''}>
             <CoBenifitsComponent
               onClickedBackBtn={onClickBackCoBenefits}
-              coBenefitsDetails={ndcActionDetails ? ndcActionDetails.coBenefitsProperties : {}}
+              coBenefitsDetails={ndcActionDetails.coBenefitsProperties}
               onFormSubmit={onCoBenefitsSubmit}
               submitButtonText={
                 isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
