@@ -124,12 +124,14 @@ const AddNdcAction = () => {
             </div>
           </div>
         ),
-        description: current === 1 && (
-          <NdcActionDetails
-            isBackBtnVisible={false}
-            onFormSubmit={onNdcActionDetailsSubmit}
-            ndcActionDetails={ndcActionDetails}
-          ></NdcActionDetails>
+        description: (
+          <div className={current !== 1 ? 'hide' : ''}>
+            <NdcActionDetails
+              isBackBtnVisible={false}
+              onFormSubmit={onNdcActionDetailsSubmit}
+              ndcActionDetails={ndcActionDetails}
+            ></NdcActionDetails>
+          </div>
         ),
       },
       {
