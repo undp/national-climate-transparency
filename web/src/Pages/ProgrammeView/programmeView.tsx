@@ -21,6 +21,7 @@ import Geocoding from '@mapbox/mapbox-sdk/services/geocoding';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import OrganisationStatus from '../../Components/Organisation/organisationStatus';
 import {
+  CompanyRole,
   Loading,
   MapComponent,
   MapTypes,
@@ -491,19 +492,31 @@ const ProgrammeView = () => {
     );
   });
   // genCerts(data);
-  const actionBtns = [
-    <Button
-      type="primary"
-      onClick={() => {
-        navigate('/investmentManagement/addInvestment', { state: { record: data } });
-      }}
-    >
-      {t('view:addInvestment')}
-    </Button>,
-    <Button type="primary" onClick={onClickedAddAction}>
-      {t('view:addAction')}
-    </Button>,
-  ];
+  const actionBtns = [];
+
+  if (userInfoState) {
+    if (
+      userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
+      (userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
+        data.companyId.map((e) => Number(e)).includes(userInfoState?.companyId))
+    ) {
+      actionBtns.push(
+        <Button
+          type="primary"
+          onClick={() => {
+            navigate('/investmentManagement/addInvestment', { state: { record: data } });
+          }}
+        >
+          {t('view:addInvestment')}
+        </Button>
+      );
+      actionBtns.push(
+        <Button type="primary" onClick={onClickedAddAction}>
+          {t('view:addAction')}
+        </Button>
+      );
+    }
+  }
 
   const generalInfo: any = {};
   Object.entries(getGeneralFields(data)).forEach(([k, v]) => {
