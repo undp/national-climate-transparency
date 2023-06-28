@@ -14,6 +14,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RadioButtonStatus, titleList } from '../../Definitions/commonEnums';
+import PhoneInput, { formatPhoneNumberIntl } from 'react-phone-number-input';
 
 const Assessment = (props: any) => {
   const { onFormSubmit, assessmentViewData, viewOnly } = props;
@@ -409,7 +410,13 @@ const Assessment = (props: any) => {
                           },
                         ]}
                       >
-                        <Input style={{ width: 303 }} />
+                        <PhoneInput
+                          style={{ width: 303 }}
+                          international
+                          defaultCountry="LK"
+                          countryCallingCodeEditable={false}
+                          onChange={(v) => {}}
+                        />
                       </Form.Item>
                     )}
                     {viewOnly && (
@@ -435,6 +442,28 @@ const Assessment = (props: any) => {
                           {
                             required: true,
                             message: '',
+                          },
+                          {
+                            validator: async (rule, value) => {
+                              if (
+                                String(value).trim() === '' ||
+                                String(value).trim() === undefined ||
+                                value === null ||
+                                value === undefined
+                              ) {
+                                throw new Error(``);
+                              } else {
+                                const val = value.trim();
+                                const reg =
+                                  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                                const matches = val.match(reg) ? val.match(reg) : [];
+                                if (matches.length === 0) {
+                                  throw new Error(
+                                    `${t('addUser:email')} ${t('addUser:isInvalid')}`
+                                  );
+                                }
+                              }
+                            },
                           },
                         ]}
                       >

@@ -98,7 +98,10 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       key: '3',
       children: (
         <Safeguards
-          safeGuardViewData={viewOnly && coBenifitsViewDetails?.safeguardDetails}
+          safeGuardViewData={
+            (viewOnly && coBenifitsViewDetails?.safeguardDetails) ||
+            (!viewOnly && coBenefitsDetails?.safeguardDetails)
+          }
           viewOnly={viewOnly || false}
           onFormSubmit={onSafeguardFormSubmit}
         />
@@ -163,7 +166,6 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
   ];
 
   const onCoBenefitSubmit = () => {
-    console.log(coBenefitsDetails);
     let economicOverallValidation = true;
     let environmentalOverallValidation = true;
     if (!coBenefitDetails?.economic || !coBenefitDetails?.environmental) {
@@ -281,7 +283,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       {!viewOnly && (
         <div className="steps-actions">
           <Row>
-            <Button onClick={onClickedBackBtn}>{t('back')}</Button>
+            <Button onClick={() => onClickedBackBtn(coBenefitDetails)}>{t('back')}</Button>
             <Button className="mg-left-1" type="primary" onClick={onCoBenefitSubmit}>
               {submitButtonText ? submitButtonText : t('submit')}
             </Button>

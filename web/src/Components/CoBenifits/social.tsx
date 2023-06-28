@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Empty, Form, Input, Radio, Row } from 'antd';
+import { Empty, Form, Input, InputNumber, Radio, Row } from 'antd';
 import { RadioButtonStatus, FormElementType } from '../../Definitions/commonEnums';
 
 const Social = (props: any) => {
@@ -302,7 +302,7 @@ const Social = (props: any) => {
                               label={elementItem.label}
                               name={elementItem.name}
                             >
-                              <Input style={{ width: 303 }} />
+                              <InputNumber style={{ width: 303 }} />
                             </Form.Item>
                           );
                         }
