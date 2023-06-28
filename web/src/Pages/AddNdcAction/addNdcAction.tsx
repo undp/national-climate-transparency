@@ -147,7 +147,7 @@ const AddNdcAction = () => {
           <div className={current !== 2 ? 'hide' : ''}>
             <CoBenifitsComponent
               onClickedBackBtn={onClickBackCoBenefits}
-              coBenefitsDetails={ndcActionDetails.coBenefitsProperties}
+              coBenefitsDetails={ndcActionDetails ? ndcActionDetails.coBenefitsProperties : {}}
               onFormSubmit={onCoBenefitsSubmit}
               submitButtonText={
                 isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
