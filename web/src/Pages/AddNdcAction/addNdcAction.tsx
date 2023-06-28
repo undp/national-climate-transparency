@@ -25,7 +25,7 @@ const AddNdcAction = () => {
   const { post } = useConnection();
 
   useEffect(() => {
-    if (!state.record) {
+    if (!state?.record) {
       navigate('/programmeManagement/viewAll', { replace: true });
     } else {
       setprogrammeDetails(state.record);
@@ -41,7 +41,6 @@ const AddNdcAction = () => {
     if (ndcActionDetailsObj.enablementReportData) {
       delete ndcActionDetailsObj.enablementReportData;
     }
-
     const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
     if (response.status === 200 || response.status === 201) {
       navigate('/programmeManagement/view', { state: { record: programmeDetails } });
@@ -54,6 +53,15 @@ const AddNdcAction = () => {
 
   const onClickBack = () => {
     setCurrent((pre) => pre - 1);
+  };
+
+  const onClickBackCoBenefits = (savedCoBenefitsDetails: any) => {
+    const updatedNdcActionDetails = {
+      ...ndcActionDetails,
+      coBenefitsProperties: savedCoBenefitsDetails,
+    };
+    setNdcActionDetails(updatedNdcActionDetails);
+    onClickBack();
   };
 
   const onProjectReportSubmit = async (projectReportFormValues: any) => {
@@ -72,7 +80,7 @@ const AddNdcAction = () => {
 
   const onNdcActionDetailsSubmit = async (ndcActionDetailsObj: any) => {
     ndcActionDetailsObj.programmeId = programmeDetails?.programmeId;
-    setNdcActionDetails(ndcActionDetailsObj);
+    setNdcActionDetails((pre: any) => ({ ...pre, ...ndcActionDetailsObj }));
     onClickNext();
   };
 
@@ -129,7 +137,7 @@ const AddNdcAction = () => {
         ),
         description: current === 2 && (
           <CoBenifitsComponent
-            onClickedBackBtn={onClickBack}
+            onClickedBackBtn={onClickBackCoBenefits}
             coBenefitsDetails={ndcActionDetails.coBenefitsProperties}
             onFormSubmit={onCoBenefitsSubmit}
             submitButtonText={

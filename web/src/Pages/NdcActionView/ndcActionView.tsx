@@ -211,7 +211,7 @@ const NdcActionView = () => {
                     <Chart
                       id={'creditChart'}
                       options={{
-                        labels: ['Achieved', 'Expected'],
+                        labels: ['Achieved', 'Pending'],
                         legend: {
                           position: 'bottom',
                         },
@@ -278,7 +278,10 @@ const NdcActionView = () => {
                           },
                         ],
                       }}
-                      series={[emissionsReductionAchieved, emissionsReductionExpected]}
+                      series={[
+                        emissionsReductionAchieved,
+                        emissionsReductionExpected - emissionsReductionAchieved,
+                      ]}
                       type="donut"
                       width="100%"
                       fontFamily="inter"

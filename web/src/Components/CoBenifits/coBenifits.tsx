@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './coBenifits.scss';
-import { Button, Row, Tabs } from 'antd';
+import { Button, Row, Tabs, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import GenderParity from './genderParity';
 import Assessment from './assessment';
@@ -9,6 +9,7 @@ import Safeguards from './safeguards';
 import Environmental from './environmental';
 import Economic from './economic';
 import Social from './social';
+import { RadioButtonStatus } from '../../Definitions/commonEnums';
 
 export interface CoBenefitProps {
   onClickedBackBtn?: any;
@@ -29,7 +30,9 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     coBenifitsViewDetails,
   } = props;
   const { t } = useTranslation(['coBenifits']);
-  const [coBenefitDetails, setCoBenefitDetails] = useState();
+  const [coBenefitDetails, setCoBenefitDetails] = useState<any>();
+  const [isSocialFormValid, setIsSocialFormValid] = useState<any>(false);
+  const [isAssessmentFormValid, setIsAssessmentFormValid] = useState<any>(false);
 
   const onSdgGoalsFormSubmit = (sdgGoalsDetails: any) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, sdgGoals: sdgGoalsDetails }));
@@ -47,16 +50,18 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, economic: economicDetails }));
   };
 
-  const onAssessmentFormSubmit = (coBenefitsAssessmentDetails: any) => {
+  const onAssessmentFormSubmit = (coBenefitsAssessmentDetails: any, isFormValid: boolean) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, assessmentDetails: coBenefitsAssessmentDetails }));
+    setIsAssessmentFormValid(isFormValid);
   };
 
   const onSafeguardFormSubmit = (safeguardDetails: any) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, safeguardDetails: safeguardDetails }));
   };
 
-  const onSocialFormSubmit = (socialValueDetails: any) => {
+  const onSocialFormSubmit = (socialValueDetails: any, isFormValid: boolean) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, socialValueDetails: socialValueDetails }));
+    setIsSocialFormValid(isFormValid);
   };
 
   const tabItems = [
@@ -71,7 +76,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
               ? coBenifitsViewDetails?.sdgGoals
                 ? coBenifitsViewDetails?.sdgGoals
                 : []
-              : undefined
+              : coBenefitsDetails?.sdgGoals
           }
           viewOnly={viewOnly || false}
         />
@@ -91,7 +96,16 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:safeguards'),
       key: '3',
-      children: <Safeguards onFormSubmit={onSafeguardFormSubmit} />,
+      children: (
+        <Safeguards
+          safeGuardViewData={
+            (viewOnly && coBenifitsViewDetails?.safeguardDetails) ||
+            (!viewOnly && coBenefitsDetails?.safeguardDetails)
+          }
+          viewOnly={viewOnly || false}
+          onFormSubmit={onSafeguardFormSubmit}
+        />
+      ),
     },
     {
       label: t('coBenifits:environmental'),
@@ -113,7 +127,16 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:social'),
       key: '5',
-      children: <Social onFormSubmit={onSocialFormSubmit} />,
+      children: (
+        <Social
+          onFormSubmit={onSocialFormSubmit}
+          socialViewData={
+            (viewOnly && coBenifitsViewDetails?.socialValueDetails) ||
+            (!viewOnly && coBenefitsDetails?.socialValueDetails)
+          }
+          viewOnly={viewOnly || false}
+        />
+      ),
     },
     {
       label: t('coBenifits:economic'),
@@ -135,9 +158,128 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     {
       label: t('coBenifits:assessment'),
       key: '7',
-      children: <Assessment onFormSubmit={onAssessmentFormSubmit} />,
+      children: (
+        <Assessment
+          onFormSubmit={onAssessmentFormSubmit}
+          assessmentViewData={
+            (viewOnly && coBenifitsViewDetails?.assessmentDetails) ||
+            (!viewOnly && coBenefitsDetails?.assessmentDetails)
+          }
+          viewOnly={viewOnly || false}
+        />
+      ),
     },
   ];
+
+  const onCoBenefitSubmit = () => {
+    let economicOverallValidation = true;
+    let environmentalOverallValidation = true;
+    if (!coBenefitDetails?.economic || !coBenefitDetails?.environmental) {
+      message.open({
+        type: 'error',
+        content: `Fill the required fields in Co-benifits section`,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    } else {
+      const economicDetailsFromForm: any = coBenefitDetails?.economic;
+      const environmentalDetailsFromForm: any = coBenefitDetails?.environmental;
+      const economicSectionValidation: any = {
+        growth: { validation: false, fields: 8, filled: 0, firstFieldValue: 'N/A' },
+        energy: { validation: false, fields: 5, filled: 0, firstFieldValue: 'N/A' },
+        techTransfer: { validation: false, fields: 6, filled: 0, firstFieldValue: 'N/A' },
+        balanceOfPayments: { validation: false, fields: 3, filled: 0, firstFieldValue: 'N/A' },
+        furtherInfo: { validation: false, fields: 1, filled: 0, firstFieldValue: 'N/A' },
+      };
+      const environmentalSectionValidation: any = {
+        air: { validation: false, fields: 9, filled: 0, firstFieldValue: 'N/A' },
+        land: { validation: false, fields: 8, filled: 0, firstFieldValue: 'N/A' },
+        water: { validation: false, fields: 7, filled: 0, firstFieldValue: 'N/A' },
+        naturalResources: { validation: false, fields: 6, filled: 0, firstFieldValue: 'N/A' },
+      };
+      for (const key in economicDetailsFromForm) {
+        const sectionName = key.replace(/Q\d+/, '');
+        const fieldValue = economicDetailsFromForm[key];
+
+        if (economicSectionValidation.hasOwnProperty(sectionName)) {
+          const section = economicSectionValidation[sectionName];
+
+          section.filled += 1;
+
+          if (fieldValue === RadioButtonStatus.YES && key === `${sectionName}Q1`) {
+            section.firstFieldValue = RadioButtonStatus.YES;
+          } else if (fieldValue === RadioButtonStatus.NO && key === `${sectionName}Q1`) {
+            section.firstFieldValue = RadioButtonStatus.NO;
+          } else if (fieldValue === RadioButtonStatus.NA && key === `${sectionName}Q1`) {
+            section.firstFieldValue = RadioButtonStatus.NA;
+          }
+        }
+      }
+      for (const section in economicSectionValidation) {
+        if (
+          economicSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
+          economicSectionValidation[section].fields !== economicSectionValidation[section].filled
+        ) {
+          economicOverallValidation = false;
+        }
+      }
+      for (const key in environmentalDetailsFromForm) {
+        const sectionName = key.replace(/Q\d+/, '');
+        const fieldValue = environmentalDetailsFromForm[key];
+
+        if (environmentalSectionValidation.hasOwnProperty(sectionName)) {
+          const section = environmentalSectionValidation[sectionName];
+
+          section.filled += 1;
+
+          if (fieldValue === RadioButtonStatus.YES && key === `${sectionName}Q1`) {
+            section.firstFieldValue = RadioButtonStatus.YES;
+          } else if (fieldValue === RadioButtonStatus.NO && key === `${sectionName}Q1`) {
+            section.firstFieldValue = RadioButtonStatus.NO;
+          } else if (fieldValue === RadioButtonStatus.NA && key === `${sectionName}Q1`) {
+            section.firstFieldValue = RadioButtonStatus.NA;
+          }
+        }
+      }
+      for (const section in environmentalSectionValidation) {
+        if (
+          environmentalSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
+          environmentalSectionValidation[section].fields !==
+            environmentalSectionValidation[section].filled
+        ) {
+          environmentalOverallValidation = false;
+        }
+      }
+      if (!isSocialFormValid) {
+        message.open({
+          type: 'error',
+          content: `Fill the required fields in Co-benifits Social section`,
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        return;
+      }
+      if (!isAssessmentFormValid) {
+        message.open({
+          type: 'error',
+          content: `Fill the required fields in Co-benifits Assessment section`,
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        return;
+      }
+      if (economicOverallValidation === true && environmentalOverallValidation === true) {
+        onFormSubmit(coBenefitDetails);
+      } else {
+        message.open({
+          type: 'error',
+          content: `Fill the required fields in Co-benifits section`,
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+    }
+  };
 
   return (
     <div className="co-benifits-container">
@@ -147,12 +289,8 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       {!viewOnly && (
         <div className="steps-actions">
           <Row>
-            <Button onClick={onClickedBackBtn}>{t('back')}</Button>
-            <Button
-              className="mg-left-1"
-              type="primary"
-              onClick={() => onFormSubmit(coBenefitDetails)}
-            >
+            <Button onClick={() => onClickedBackBtn(coBenefitDetails)}>{t('back')}</Button>
+            <Button className="mg-left-1" type="primary" onClick={onCoBenefitSubmit}>
               {submitButtonText ? submitButtonText : t('submit')}
             </Button>
           </Row>
