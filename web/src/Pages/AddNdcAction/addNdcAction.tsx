@@ -107,94 +107,90 @@ const AddNdcAction = () => {
     //need to add
   };
 
-  const getStepItems = () => {
-    const stepItems = [
-      {
-        title: (
-          <div className="step-title-container">
-            <div className="step-count">01</div>
-            <div className="title">{t('ndcAction:ndcActionDetailsTitle')}</div>
-            <div className="info-container">
-              <Tooltip
-                arrowPointAtCenter
-                placement="right"
-                trigger="hover"
-                title={t('ndcAction:ndcToolTip')}
-              >
-                <InfoCircle color="#000000" size={17} />
-              </Tooltip>
-            </div>
-          </div>
-        ),
-        description: (
-          <div className={current !== 1 ? 'hide' : ''}>
-            <NdcActionDetails
-              isBackBtnVisible={false}
-              onFormSubmit={onNdcActionDetailsSubmit}
-              ndcActionDetails={ndcActionDetails}
-            ></NdcActionDetails>
-          </div>
-        ),
-      },
-      {
-        title: (
-          <div className="step-title-container">
-            <div className="step-count">02</div>
-            <div className="title">{t('ndcAction:coBenefitsTitle')}</div>
-          </div>
-        ),
-        description: (
-          <div className={current !== 2 ? 'hide' : ''}>
-            <CoBenifitsComponent
-              onClickedBackBtn={onClickBackCoBenefits}
-              coBenefitsDetails={ndcActionDetails ? ndcActionDetails.coBenefitsProperties : {}}
-              onFormSubmit={onCoBenefitsSubmit}
-              submitButtonText={
-                isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
-              }
-            />
-          </div>
-        ),
-      },
-    ];
-
-    if (isProjectReportsVisible()) {
-      stepItems.push({
-        title: (
-          <div className="step-title-container">
-            <div className="step-count">03</div>
-            <div className="title">{t('ndcAction:projectReportsTitle')}</div>
-          </div>
-        ),
-        description: (
-          <div className={current !== 3 ? 'hide' : ''}>
-            <Form
-              name="projectReports"
-              layout="vertical"
-              requiredMark={true}
-              onFinish={onProjectReportSubmit}
+  const stepItems = [
+    {
+      title: (
+        <div className="step-title-container">
+          <div className="step-count">01</div>
+          <div className="title">{t('ndcAction:ndcActionDetailsTitle')}</div>
+          <div className="info-container">
+            <Tooltip
+              arrowPointAtCenter
+              placement="right"
+              trigger="hover"
+              title={t('ndcAction:ndcToolTip')}
             >
-              <Form.Item label={t('ndcAction:monitoringReport')} name="monitoringReport">
-                <Upload {...props}>
-                  <Button icon={<UploadOutlined />}>Upload</Button>
-                </Upload>
-              </Form.Item>
-              <div className="steps-actions">
-                <Row>
-                  <Button onClick={onClickBack}>{t('ndcAction:back')}</Button>
-                  <Button className="mg-left-1" htmlType="submit" type="primary">
-                    {t('ndcAction:submit')}
-                  </Button>
-                </Row>
-              </div>
-            </Form>
+              <InfoCircle color="#000000" size={17} />
+            </Tooltip>
           </div>
-        ),
-      });
-    }
+        </div>
+      ),
+      description: (
+        <div className={current !== 1 ? 'hide' : ''}>
+          <NdcActionDetails
+            isBackBtnVisible={false}
+            onFormSubmit={onNdcActionDetailsSubmit}
+            ndcActionDetails={ndcActionDetails}
+          ></NdcActionDetails>
+        </div>
+      ),
+    },
+    {
+      title: (
+        <div className="step-title-container">
+          <div className="step-count">02</div>
+          <div className="title">{t('ndcAction:coBenefitsTitle')}</div>
+        </div>
+      ),
+      description: (
+        <div className={current !== 2 ? 'hide' : ''}>
+          <CoBenifitsComponent
+            onClickedBackBtn={onClickBackCoBenefits}
+            coBenefitsDetails={ndcActionDetails ? ndcActionDetails.coBenefitsProperties : {}}
+            onFormSubmit={onCoBenefitsSubmit}
+            submitButtonText={
+              isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
+            }
+          />
+        </div>
+      ),
+    },
+  ];
 
-    return stepItems;
-  };
+  if (isProjectReportsVisible()) {
+    stepItems.push({
+      title: (
+        <div className="step-title-container">
+          <div className="step-count">03</div>
+          <div className="title">{t('ndcAction:projectReportsTitle')}</div>
+        </div>
+      ),
+      description: (
+        <div className={current !== 3 ? 'hide' : ''}>
+          <Form
+            name="projectReports"
+            layout="vertical"
+            requiredMark={true}
+            onFinish={onProjectReportSubmit}
+          >
+            <Form.Item label={t('ndcAction:monitoringReport')} name="monitoringReport">
+              <Upload {...props}>
+                <Button icon={<UploadOutlined />}>Upload</Button>
+              </Upload>
+            </Form.Item>
+            <div className="steps-actions">
+              <Row>
+                <Button onClick={onClickBack}>{t('ndcAction:back')}</Button>
+                <Button className="mg-left-1" htmlType="submit" type="primary">
+                  {t('ndcAction:submit')}
+                </Button>
+              </Row>
+            </div>
+          </Form>
+        </div>
+      ),
+    });
+  }
 
   return (
     <div className="add-ndc-main-container">
@@ -204,7 +200,7 @@ const AddNdcAction = () => {
       </div>
       <div className="adding-section">
         <div className="form-section">
-          <Steps progressDot direction="vertical" current={current} items={getStepItems()} />
+          <Steps progressDot direction="vertical" current={current} items={stepItems} />
         </div>
       </div>
     </div>
