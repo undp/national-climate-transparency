@@ -9,6 +9,7 @@ const Social = (props: any) => {
   const [form] = Form.useForm();
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [socialDetails, setSocialDetails] = useState(0);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const SocialElementDetails: any[] = [
     {
@@ -176,17 +177,36 @@ const Social = (props: any) => {
     },
   ];
 
+  const validateForm = async () => {
+    try {
+      form.submit();
+      await form.validateFields();
+    } catch (exception: any) {
+      if (exception.errorFields.length > 0) {
+        setIsFormValid(false);
+      } else {
+        setIsFormValid(true);
+      }
+    }
+  };
+
   const onRadioStatusChanged = () => {
     setRefreshCounter((pre) => pre + 1);
+    validateForm();
   };
 
   useEffect(() => {
-    onFormSubmit(socialDetails);
-  }, [socialDetails]);
+    onFormSubmit(socialDetails, isFormValid);
+  }, [isFormValid]);
 
-  const onSocialValuesChanged = (changedValues: any) => {
+  const onSocialValuesChanged = async (changedValues: any) => {
     setSocialDetails((pre: any) => ({ ...pre, ...changedValues }));
+    validateForm();
   };
+
+  useEffect(() => {
+    validateForm();
+  });
 
   return (
     <div className="social-tab-item">
@@ -217,6 +237,7 @@ const Social = (props: any) => {
                       rules={[
                         {
                           required: true,
+                          message: '',
                         },
                       ]}
                     >
@@ -249,6 +270,7 @@ const Social = (props: any) => {
                               rules={[
                                 {
                                   required: true,
+                                  message: '',
                                 },
                               ]}
                             >

@@ -31,6 +31,8 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
   } = props;
   const { t } = useTranslation(['coBenifits']);
   const [coBenefitDetails, setCoBenefitDetails] = useState<any>();
+  const [isSocialFormValid, setIsSocialFormValid] = useState<any>(false);
+  const [isAssessmentFormValid, setIsAssessmentFormValid] = useState<any>(false);
 
   const onSdgGoalsFormSubmit = (sdgGoalsDetails: any) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, sdgGoals: sdgGoalsDetails }));
@@ -48,16 +50,18 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, economic: economicDetails }));
   };
 
-  const onAssessmentFormSubmit = (coBenefitsAssessmentDetails: any) => {
+  const onAssessmentFormSubmit = (coBenefitsAssessmentDetails: any, isFormValid: boolean) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, assessmentDetails: coBenefitsAssessmentDetails }));
+    setIsAssessmentFormValid(isFormValid);
   };
 
   const onSafeguardFormSubmit = (safeguardDetails: any) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, safeguardDetails: safeguardDetails }));
   };
 
-  const onSocialFormSubmit = (socialValueDetails: any) => {
+  const onSocialFormSubmit = (socialValueDetails: any, isFormValid: boolean) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, socialValueDetails: socialValueDetails }));
+    setIsSocialFormValid(isFormValid);
   };
 
   const tabItems = [
@@ -237,6 +241,24 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
         ) {
           environmentalOverallValidation = false;
         }
+      }
+      if (!isSocialFormValid) {
+        message.open({
+          type: 'error',
+          content: `Fill the required fields in Co-benifits Social section`,
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        return;
+      }
+      if (!isAssessmentFormValid) {
+        message.open({
+          type: 'error',
+          content: `Fill the required fields in Co-benifits Assessment section`,
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        return;
       }
       if (economicOverallValidation === true && environmentalOverallValidation === true) {
         onFormSubmit(coBenefitDetails);
