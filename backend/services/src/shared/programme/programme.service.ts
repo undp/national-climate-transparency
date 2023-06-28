@@ -70,6 +70,7 @@ import { ProgrammeDocumentViewEntity } from "../entities/document.view.entity";
 import { Company } from "../entities/company.entity";
 import { NdcFinancing } from "../dto/ndc.financing";
 import { PRECISION } from "../constants";
+import { ObjectionLetterGen } from "../util/objection.letter.gen";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -90,6 +91,8 @@ export class ProgrammeService {
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
 
+    private letterGen: ObjectionLetterGen,
+    
     private locationService: LocationInterface,
     private fileHandler: FileHandlerInterface,
     private helperService: HelperService,
@@ -699,14 +702,16 @@ export class ProgrammeService {
       }, undefined) ;
 
       console.log('Company names', orgNames)
-      await this.asyncOperationsInterface.addAction({
-        actionType: AsyncActionType.GenerateNoObjectionReport,
-        actionProps: {
-          title: programme.title,
-          programmeId: programme.programmeId,
-          companyNames: orgNames.data.map(e => e['name'])
-        },
-      });
+      const url = await this.letterGen.generateReport(orgNames.data.map(e => e['name']), programme.title, programme.programmeId)
+
+      const dr = new ProgrammeDocument();
+      dr.programmeId = programme.programmeId;
+      dr.externalId = programme.externalId;
+      dr.status = DocumentStatus.ACCEPTED;
+      dr.type = DocType.NO_OBJECTION_LETTER;
+      dr.txTime = new Date().getTime();
+      dr.url = url;
+      await this.documentRepo.save(dr);
     }
 
     await this.asyncOperationsInterface.addAction({

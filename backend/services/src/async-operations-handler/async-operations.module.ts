@@ -26,8 +26,7 @@ import { UtilModule } from "../shared/util/util.module";
     }),
     TypeOrmModule.forFeature([AsyncActionEntity, Counter]),
     RegistryClientModule,
-    EmailModule,
-    UtilModule
+    EmailModule
   ],
   providers: [
     {

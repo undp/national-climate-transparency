@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileHandlerInterface } from '../file-handler/filehandler.interface';
 const PDFDocument = require('pdfkit');
-const util = require('util');
+const fs = require('fs');
 @Injectable()
 export class ObjectionLetterGen {
     constructor(private configService: ConfigService, private fileHandler: FileHandlerInterface,) {
     }
 
-    public generateReport = async (orgs, programmeName, programmeId) => {
+    async generateReport(orgs, programmeName, programmeId) {
 
         const minister = this.configService.get('docGenerate.ministerName')
         const ministry = this.configService.get('docGenerate.ministryName')
@@ -27,22 +27,8 @@ export class ObjectionLetterGen {
         }
         // Create a document
         const doc = new PDFDocument();
-        const endAsync = util.promisify(doc.end.bind(doc));
-        // const buffers = [];
-        // doc.on('data', (chunk) => buffers.push(chunk));
-        // await doc.on('end', async () => {
-        //     // Concatenate all the chunks into a single buffer
-        //     const pdfBytes = Buffer.concat(buffers);
-        //     console.log('PDF generate end', 'documents/' + filepath)
-        //     await this.fileHandler.uploadFile('documents/' + filepath, pdfBytes.toString('base64'))
-        //     console.log('PDF generate done', pdfBytes.toString('base64'))
-        // });
-    
-        // Pipe its output somewhere, like to a file or HTTP response
-        // See below for browser usage
-        // doc.pipe(stream);
-    
-        // Embed a font, set the font size, and render some text
+        const stream = fs.createWriteStream(filepath);
+        doc.pipe(stream);
         doc
         .fontSize(8)
         .text(capital + ', ' + date, {
@@ -74,10 +60,16 @@ export class ObjectionLetterGen {
     
         doc.text(`\n\nSincerely,\nHonorable ${minister}\nMinister\n${ministry}Government of ${country}`)
         // Finalize PDF file
-        await endAsync();
-        const pdfBytes = doc.buffer();
+        doc.end();
+
+        const content = await new Promise<string>(resolve => {
+            stream.on("finish", function() {
+                const contents = fs.readFileSync(filepath, {encoding: 'base64'})
+                resolve(contents);
+            });
+        });
+        const url = await this.fileHandler.uploadFile('documents/' + filepath, content)
         console.log('PDF generate end', 'documents/' + filepath)
-        await this.fileHandler.uploadFile('documents/' + filepath, pdfBytes.toString('base64'))
-        console.log('PDF generate done', pdfBytes.toString('base64'))
+        return url;
     }
 }

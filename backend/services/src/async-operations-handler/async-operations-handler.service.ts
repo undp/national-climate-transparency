@@ -9,7 +9,6 @@ export class AsyncOperationsHandlerService {
   constructor(
     private emailService: EmailService,
     private registryClient: RegistryClientService,
-    private letterGen: ObjectionLetterGen,
     private logger: Logger
   ) {}
 
@@ -20,8 +19,6 @@ export class AsyncOperationsHandlerService {
       switch (actionType.toString()) {
         case AsyncActionType.Email.toString():
           return this.emailService.sendEmail(dataObject);
-        case AsyncActionType.GenerateNoObjectionReport.toString():
-          return this.letterGen.generateReport(dataObject.companyNames, dataObject.title, dataObject.programmeId);
         case AsyncActionType.RegistryCompanyCreate.toString():
           return this.registryClient.createCompany(dataObject);
         case AsyncActionType.ProgrammeCreate.toString():

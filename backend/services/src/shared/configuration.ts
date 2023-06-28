@@ -66,8 +66,8 @@ export default () => ({
     apiToken: process.env.REGISTRY_API_TOKEN
   },
   docGenerate: {
-    ministerName: "Pohamba Penomwenyo Shifeta",
+    ministerName: process.env.MINISTER_NAME || 'Minister X',
     ministryName: "Ministry of Environment, Forestry & Tourism",
-    countryCapital: "Windhoek"
+    countryCapital: process.env.COUNTRY_CAPITAL || "Capital X"
   }
 });
