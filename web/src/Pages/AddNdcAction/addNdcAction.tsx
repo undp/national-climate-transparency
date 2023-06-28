@@ -80,7 +80,7 @@ const AddNdcAction = () => {
 
   const onNdcActionDetailsSubmit = async (ndcActionDetailsObj: any) => {
     ndcActionDetailsObj.programmeId = programmeDetails?.programmeId;
-    setNdcActionDetails(ndcActionDetailsObj);
+    setNdcActionDetails((pre: any) => ({ ...pre, ...ndcActionDetailsObj }));
     onClickNext();
   };
 
