@@ -101,6 +101,10 @@ export const AddInvestmentComponent = () => {
   };
 
   useEffect(() => {
+    if (!state) {
+      navigate('/programmeManagement/viewAll');
+      return;
+    }
     setData(state.record);
   }, []);
 
