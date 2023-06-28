@@ -1044,7 +1044,10 @@ export class ProgrammeService {
     if (!programme.certifierId) {
       programme.certifierId = [certifierId]
     } else {
-      programme.certifierId.push(certifierId)
+      const index = programme.certifierId.map(e => Number(e)).indexOf(Number(certifierId));
+      if (index < 0) {
+        programme.certifierId.push(certifierId)
+      }
     }
     if (update) {
       update['certifierId'] = programme.certifierId;
@@ -1316,6 +1319,12 @@ export class ProgrammeService {
     await this.calcCreditNDCAction(ndcAction, program);
     console.log("2222", ndcAction);
     this.calcAddNDCFields(ndcAction, program);
+
+    if (ndcAction.action == NDCActionType.Enablement && ndcAction.enablementProperties.report) {
+      const filetype = "pdf";
+      const response: any = await this.fileHandler.uploadFile( `documents/ENABLEMENT_REPORT${ "_" + ndcAction.id}.${filetype}`, ndcAction.enablementProperties.report);
+      ndcAction.enablementProperties.report = response
+    }
 
     if (
       ndcActionDto.action == NDCActionType.Mitigation ||

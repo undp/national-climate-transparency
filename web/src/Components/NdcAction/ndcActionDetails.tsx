@@ -132,7 +132,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const onNdcActionDetailsFormSubmit = async (ndcActionFormvalues: any) => {
     const ndcActionDetailObj: any = {};
     ndcActionDetailObj.action = ndcActionFormvalues.ndcActionType;
-    ndcActionDetailObj.methodology = 'methodology';
+    ndcActionDetailObj.methodology = t('ndcAction:goldStandard');
 
     if (
       ndcActionFormvalues.ndcActionType === NdcActionTypes.Mitigation ||
@@ -169,14 +169,17 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     }
 
     if (ndcActionFormvalues.ndcActionType === NdcActionTypes.Enablement) {
-      const enablementReport = await getBase64(
-        ndcActionFormvalues.EnablementReport[0]?.originFileObj as RcFile
-      );
-      const enablementReportData = enablementReport.split(',');
       ndcActionDetailObj.enablementProperties = {
         title: ndcActionFormvalues.EnablementTitle,
-        report: enablementReportData[1],
       };
+
+      if (ndcActionFormvalues.EnablementReport) {
+        const enablementReport = await getBase64(
+          ndcActionFormvalues.EnablementReport[0]?.originFileObj as RcFile
+        );
+        const enablementReportData = enablementReport.split(',');
+        ndcActionDetailObj.enablementProperties.report = enablementReportData[1];
+      }
       ndcActionDetailObj.enablementReportData = ndcActionFormvalues.EnablementReport;
     }
 
@@ -486,13 +489,15 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   {
                     validator: async (rule, file) => {
                       let isCorrectFormat = false;
-                      if (file[0]?.type === 'application/pdf') {
-                        isCorrectFormat = true;
-                      }
-                      if (!isCorrectFormat) {
-                        throw new Error(`${t('ndcAction:invalidFileFormat')}`);
-                      } else if (file[0]?.size > maximumImageSize) {
-                        throw new Error(`${t('ndcAction:maxSizeVal')}`);
+                      if (file && file.length > 0) {
+                        if (file[0]?.type === 'application/pdf') {
+                          isCorrectFormat = true;
+                        }
+                        if (!isCorrectFormat) {
+                          throw new Error(`${t('ndcAction:invalidFileFormat')}`);
+                        } else if (file[0]?.size > maximumImageSize) {
+                          throw new Error(`${t('ndcAction:maxSizeVal')}`);
+                        }
                       }
                     },
                   },

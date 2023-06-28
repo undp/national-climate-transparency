@@ -159,6 +159,16 @@ const NdcActionView = () => {
     return adaptationDetails;
   };
 
+  const getAdaptationProperties = () => {
+    const details: any = {};
+
+    if (ndcActionDetails?.enablementProperties) {
+      details[t('ndcAction:title')] = ndcActionDetails.enablementProperties?.title;
+      details[t('ndcAction:report')] = ndcActionDetails.enablementProperties?.report;
+    }
+    return details;
+  };
+
   const getNdcActionNameTitle = (action: NdcActionTypes) => {
     switch (action) {
       case NdcActionTypes.Adaptation:
@@ -341,6 +351,17 @@ const NdcActionView = () => {
                     data={getNdcActionAdaptationDetails()}
                     title={t('ndcAction:viewAdaptationTitle')}
                   />
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        )}
+        {ndcActionDetails?.action === NdcActionTypes.Enablement && (
+          <Row>
+            <Col lg={24}>
+              <Card className="card-container">
+                <div>
+                  <InfoView data={getAdaptationProperties()} title={t('ndcAction:enablement')} />
                 </div>
               </Card>
             </Col>

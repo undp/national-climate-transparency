@@ -60,5 +60,6 @@
   "ClimateFinance": "Climate Finance",
   "CarbonMarket": "Carbon Market",
   "rejectTip": "Request Adjustments",
-  "invalidFileFormat": "Unsupported file format"
+  "invalidFileFormat": "Unsupported file format",
+  "investmentReqApproved": "The investment request has been accepted."
 }
