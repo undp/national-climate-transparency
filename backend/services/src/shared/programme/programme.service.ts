@@ -1320,6 +1320,12 @@ export class ProgrammeService {
     console.log("2222", ndcAction);
     this.calcAddNDCFields(ndcAction, program);
 
+    if (ndcAction.action == NDCActionType.Enablement && ndcAction.enablementProperties.report) {
+      const filetype = "pdf";
+      const response: any = await this.fileHandler.uploadFile( `documents/ENABLEMENT_REPORT${ "_" + ndcAction.id}.${filetype}`, ndcAction.enablementProperties.report);
+      ndcAction.enablementProperties.report = response
+    }
+
     if (
       ndcActionDto.action == NDCActionType.Mitigation ||
       ndcActionDto.action == NDCActionType.CrossCutting
