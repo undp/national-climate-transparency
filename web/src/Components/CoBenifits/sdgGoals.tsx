@@ -139,13 +139,6 @@ const SdgGoals = (props: any) => {
     return undefined;
   };
 
-  useEffect(() => {
-    if (sdgGoalsViewData && !viewOnly) {
-      setSdgGoals(sdgGoalsViewData);
-      formOne.setFieldsValue(sdgGoalsViewData);
-    }
-  }, [sdgGoalsViewData]);
-
   const goalImageMap = {
     [goal1]: goal1Selected,
     [goal2]: goal2Selected,

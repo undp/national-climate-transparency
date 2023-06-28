@@ -126,12 +126,14 @@ const AddNdcAction = () => {
             </div>
           </div>
         ),
-        description: current === 1 && (
-          <NdcActionDetails
-            isBackBtnVisible={false}
-            onFormSubmit={onNdcActionDetailsSubmit}
-            ndcActionDetails={ndcActionDetails}
-          ></NdcActionDetails>
+        description: (
+          <div className={current !== 1 ? 'hide' : ''}>
+            <NdcActionDetails
+              isBackBtnVisible={false}
+              onFormSubmit={onNdcActionDetailsSubmit}
+              ndcActionDetails={ndcActionDetails}
+            ></NdcActionDetails>
+          </div>
         ),
       },
       {
@@ -141,15 +143,17 @@ const AddNdcAction = () => {
             <div className="title">{t('ndcAction:coBenefitsTitle')}</div>
           </div>
         ),
-        description: current === 2 && (
-          <CoBenifitsComponent
-            onClickedBackBtn={onClickBackCoBenefits}
-            coBenefitsDetails={ndcActionDetails.coBenefitsProperties}
-            onFormSubmit={onCoBenefitsSubmit}
-            submitButtonText={
-              isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
-            }
-          />
+        description: (
+          <div className={current !== 2 ? 'hide' : ''}>
+            <CoBenifitsComponent
+              onClickedBackBtn={onClickBackCoBenefits}
+              coBenefitsDetails={ndcActionDetails ? ndcActionDetails.coBenefitsProperties : {}}
+              onFormSubmit={onCoBenefitsSubmit}
+              submitButtonText={
+                isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
+              }
+            />
+          </div>
         ),
       },
     ];
@@ -162,27 +166,29 @@ const AddNdcAction = () => {
             <div className="title">{t('ndcAction:projectReportsTitle')}</div>
           </div>
         ),
-        description: current === 3 && (
-          <Form
-            name="projectReports"
-            layout="vertical"
-            requiredMark={true}
-            onFinish={onProjectReportSubmit}
-          >
-            <Form.Item label={t('ndcAction:monitoringReport')} name="monitoringReport">
-              <Upload {...props}>
-                <Button icon={<UploadOutlined />}>Upload</Button>
-              </Upload>
-            </Form.Item>
-            <div className="steps-actions">
-              <Row>
-                <Button onClick={onClickBack}>{t('ndcAction:back')}</Button>
-                <Button className="mg-left-1" htmlType="submit" type="primary">
-                  {t('ndcAction:submit')}
-                </Button>
-              </Row>
-            </div>
-          </Form>
+        description: (
+          <div className={current !== 3 ? 'hide' : ''}>
+            <Form
+              name="projectReports"
+              layout="vertical"
+              requiredMark={true}
+              onFinish={onProjectReportSubmit}
+            >
+              <Form.Item label={t('ndcAction:monitoringReport')} name="monitoringReport">
+                <Upload {...props}>
+                  <Button icon={<UploadOutlined />}>Upload</Button>
+                </Upload>
+              </Form.Item>
+              <div className="steps-actions">
+                <Row>
+                  <Button onClick={onClickBack}>{t('ndcAction:back')}</Button>
+                  <Button className="mg-left-1" htmlType="submit" type="primary">
+                    {t('ndcAction:submit')}
+                  </Button>
+                </Row>
+              </div>
+            </Form>
+          </div>
         ),
       });
     }
