@@ -1062,20 +1062,22 @@ export class ProgrammeService {
   }
 
   async approveDocumentCommit(em: EntityManager, d: ProgrammeDocument, ndc: NDCAction, certifierId: number, program: Programme) {
+    
+    const updT = {}    
     if (
       d.type == DocType.METHODOLOGY_DOCUMENT
     ) {
-      const updT = {
-        currentStage: ProgrammeStage.APPROVED,
-        statusUpdateTime: new Date().getTime(),
-        txTime: new Date().getTime(),
-      };
+      updT['currentStage'] = ProgrammeStage.APPROVED;
+      updT['statusUpdateTime'] = new Date().getTime();
+    }
 
-      if (certifierId && program) {
-       await this.updateProgrammeCertifier(program, certifierId, updT);
-      }
-      console.log('Update T', updT)
-      
+    if (certifierId && program) {
+      await this.updateProgrammeCertifier(program, certifierId, updT);
+    }
+    console.log('Update T', updT)
+     
+    if (Object.keys(updT).length > 0) {
+      updT['txTime'] = new Date().getTime();
       await em.update(
         Programme,
         {
@@ -1085,6 +1087,7 @@ export class ProgrammeService {
       );
     }
 
+    console.log('NDC COmmit', ndc)
     if (ndc) {
       await em.update(
         NDCAction,
@@ -1238,7 +1241,6 @@ export class ProgrammeService {
     if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
       this.logger.log(`Approving document since the user is ${user.companyRole}`)
       dr.status = DocumentStatus.ACCEPTED;
-      let ndc;
       if (dr.actionId) {
         ndc = await this.ndcActionRepo.findOne({
           where: {
