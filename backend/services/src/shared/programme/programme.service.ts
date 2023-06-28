@@ -1044,7 +1044,10 @@ export class ProgrammeService {
     if (!programme.certifierId) {
       programme.certifierId = [certifierId]
     } else {
-      programme.certifierId.push(certifierId)
+      const index = programme.certifierId.map(e => Number(e)).indexOf(Number(certifierId));
+      if (index < 0) {
+        programme.certifierId.push(certifierId)
+      }
     }
     if (update) {
       update['certifierId'] = programme.certifierId;
