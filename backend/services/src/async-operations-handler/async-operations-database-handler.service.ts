@@ -20,7 +20,6 @@ export class AsyncOperationsDatabaseHandlerService
   ) {}
 
   async asyncHandler(event: any): Promise<any> {
-    this.logger.log("database asyncHandler started", JSON.stringify(event));
 
     const seqObj = await this.counterRepo.findOneBy({
       id: CounterType.ASYNC_OPERATIONS,
@@ -30,14 +29,19 @@ export class AsyncOperationsDatabaseHandlerService
       lastSeq = seqObj.counter;
     }
 
+    this.logger.log("database asyncHandler started", lastSeq);
+
     setInterval(async () => {
-      const asyncPromises = [];
 
       const notExecutedActions = await this.asyncActionRepo
         .createQueryBuilder("asyncAction")
         .where("asyncAction.actionId > :lastExecuted", {
           lastExecuted: lastSeq,
         })
+        .orderBy(
+          '"actionId"',
+          'ASC',
+        )
         .select(['"actionId"', '"actionType"', '"actionProps"'])
         .getRawMany();
 
@@ -47,6 +51,7 @@ export class AsyncOperationsDatabaseHandlerService
 
       try {
         for (const action of notExecutedActions) {
+          console.log('Action start', action.actionType, action.actionId)
           await this.asyncOperationsHandlerService.handler(
             action.actionType,
             JSON.parse(action.actionProps)
