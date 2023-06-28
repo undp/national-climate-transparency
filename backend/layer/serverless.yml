@@ -26,6 +26,7 @@ layers:
         - '!node_modules/a*/**'
         - '!node_modules/b*/**'
         - '!node_modules/c*/**'
+        - '!node_modules/p*/**'
   service-dependencies-2:
     path: dependency_layer
     name: service-dependencies-${self:provider.stage}-2
@@ -36,3 +37,4 @@ layers:
         - 'node_modules/a*/**'
         - 'node_modules/b*/**'
         - 'node_modules/c*/**'
+        - 'node_modules/p*/**'
