@@ -1012,12 +1012,14 @@ export const AddProgrammeComponent = () => {
                             <div className="title">{t('addProgramme:addProgramme4')}</div>
                           </div>
                         ),
-                        description: current === 3 && (
-                          <CoBenifitsComponent
-                            onClickedBackBtn={prevOne}
-                            coBenefitsDetails={programmeDetailsObj?.coBenefitsProperties}
-                            onFormSubmit={onCoBenefitFormSubmit}
-                          />
+                        description: (
+                          <div className={current !== 3 ? 'hide' : ''}>
+                            <CoBenifitsComponent
+                              onClickedBackBtn={prevOne}
+                              coBenefitsDetails={programmeDetailsObj?.coBenefitsProperties}
+                              onFormSubmit={onCoBenefitFormSubmit}
+                            />
+                          </div>
                         ),
                       },
                     ]
