@@ -15,9 +15,9 @@ provider:
       - sg-03937a2ebf99900ca
 
 layers:
-  service-dependencies-1:
+  service-dependencies-mrv-1:
     path: dependency_layer
-    name: service-dependencies-${self:provider.stage}-1
+    name: service-dependencies-mrv-${self:provider.stage}-1
     description: "Node Modules Dependencies 1"
     package:
       exclude:
@@ -26,10 +26,9 @@ layers:
         - '!node_modules/a*/**'
         - '!node_modules/b*/**'
         - '!node_modules/c*/**'
-        - '!node_modules/p*/**'
-  service-dependencies-2:
+  service-dependencies-mrv-2:
     path: dependency_layer
-    name: service-dependencies-${self:provider.stage}-2
+    name: service-dependencies-mrv-${self:provider.stage}-2
     description: "Node Modules Dependencies 2"
     package:
       exclude:
@@ -37,4 +36,3 @@ layers:
         - 'node_modules/a*/**'
         - 'node_modules/b*/**'
         - 'node_modules/c*/**'
-        - 'node_modules/p*/**'
