@@ -86,10 +86,12 @@ export class NDCActionDto {
   @ApiPropertyOptional()
   @ValidateNested()
   @Type(() => CoBenefitsProperties)
+  @IsOptional()
   coBenefitsProperties?: CoBenefitsProperties;
 
   @ApiPropertyOptional()
   @ValidateNested()
+  @IsOptional()
   @Type(() => EnablementProperties)
   enablementProperties?: EnablementProperties;
 

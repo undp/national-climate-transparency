@@ -316,7 +316,7 @@ const InvestmentManagement = () => {
                       requestId,
                       comment,
                       'investmentApprove',
-                      `${t('creditTransfer:transferReqApproved')}`
+                      `${t('programme:investmentReqApproved')}`
                     ),
                   type: 'primary',
                   remarkRequired: false,
