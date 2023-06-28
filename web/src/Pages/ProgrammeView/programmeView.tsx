@@ -494,7 +494,7 @@ const ProgrammeView = () => {
   // genCerts(data);
   const actionBtns = [];
 
-  if (userInfoState) {
+  if (userInfoState && data.currentStage !== ProgrammeStage.Rejected) {
     if (
       userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
       (userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
