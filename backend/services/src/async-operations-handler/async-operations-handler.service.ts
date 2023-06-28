@@ -2,6 +2,7 @@ import { RegistryClientService } from "src/shared/registry-client/registry-clien
 import { AsyncActionType } from "../shared/enum/async.action.type.enum";
 import { EmailService } from "src/shared/email/email.service";
 import { Injectable, Logger } from "@nestjs/common";
+import { ObjectionLetterGen } from "../shared/util/objection.letter.gen";
 
 @Injectable()
 export class AsyncOperationsHandlerService {
