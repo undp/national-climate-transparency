@@ -31,7 +31,17 @@ const Assessment = (props: any) => {
 
   useEffect(() => {
     onFormSubmit(cobenefitsAssessmentDetails, isFormValid);
-  }, [isFormValid]);
+  }, [cobenefitsAssessmentDetails, isFormValid]);
+
+  useEffect(() => {
+    if (assessmentViewData) {
+      setCobenefitsAssessmentDetails(assessmentViewData);
+      form1.setFieldsValue(assessmentViewData);
+      form2.setFieldsValue(assessmentViewData);
+      form3.setFieldsValue(assessmentViewData);
+      form4.setFieldsValue(assessmentViewData);
+    }
+  }, [assessmentViewData]);
 
   const validateForms = async () => {
     setIsFormValid(true);

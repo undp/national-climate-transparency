@@ -8,7 +8,7 @@ const Social = (props: any) => {
   const { t } = useTranslation(['social']);
   const [form] = Form.useForm();
   const [refreshCounter, setRefreshCounter] = useState(0);
-  const [socialDetails, setSocialDetails] = useState(0);
+  const [socialDetails, setSocialDetails] = useState();
   const [isFormValid, setIsFormValid] = useState(false);
 
   const SocialElementDetails: any[] = [
@@ -177,6 +177,13 @@ const Social = (props: any) => {
     },
   ];
 
+  useEffect(() => {
+    if (socialViewData && !viewOnly) {
+      setSocialDetails(socialViewData);
+      form.setFieldsValue(socialViewData);
+    }
+  }, [socialViewData]);
+
   const validateForm = async () => {
     try {
       form.submit();
@@ -197,7 +204,7 @@ const Social = (props: any) => {
 
   useEffect(() => {
     onFormSubmit(socialDetails, isFormValid);
-  }, [isFormValid]);
+  }, [socialDetails, isFormValid]);
 
   const onSocialValuesChanged = async (changedValues: any) => {
     setSocialDetails((pre: any) => ({ ...pre, ...changedValues }));

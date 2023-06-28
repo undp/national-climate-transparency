@@ -76,7 +76,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
               ? coBenifitsViewDetails?.sdgGoals
                 ? coBenifitsViewDetails?.sdgGoals
                 : []
-              : undefined
+              : coBenefitsDetails?.sdgGoals
           }
           viewOnly={viewOnly || false}
         />
@@ -130,7 +130,10 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       children: (
         <Social
           onFormSubmit={onSocialFormSubmit}
-          socialViewData={viewOnly && coBenifitsViewDetails?.socialValueDetails}
+          socialViewData={
+            (viewOnly && coBenifitsViewDetails?.socialValueDetails) ||
+            (!viewOnly && coBenefitsDetails?.socialValueDetails)
+          }
           viewOnly={viewOnly || false}
         />
       ),
@@ -158,7 +161,10 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
       children: (
         <Assessment
           onFormSubmit={onAssessmentFormSubmit}
-          assessmentViewData={viewOnly && coBenifitsViewDetails?.assessmentDetails}
+          assessmentViewData={
+            (viewOnly && coBenifitsViewDetails?.assessmentDetails) ||
+            (!viewOnly && coBenefitsDetails?.assessmentDetails)
+          }
           viewOnly={viewOnly || false}
         />
       ),
