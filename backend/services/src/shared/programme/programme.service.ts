@@ -142,8 +142,6 @@ export class ProgrammeService {
     const toCompanyIndex = programme.companyId.map(e => Number(e)).indexOf(Number(transfer.toCompanyId));
 
     // Cannot be <= 0 
-
-    console.log('PERC', programme.proponentPercentage, companyIndex)
     if (toCompanyIndex < 0) {
       programme.creditOwnerPercentage[companyIndex] -= transfer.percentage
       programme.creditOwnerPercentage.push(transfer.percentage);
@@ -157,17 +155,23 @@ export class ProgrammeService {
       programme.proponentPercentage[toCompanyIndex] += transfer.percentage
       programme.creditOwnerPercentage[toCompanyIndex] += transfer.percentage
     }
-    
 
-    console.log('PERC', programme.proponentPercentage[companyIndex])
-    // await this.asyncOperationsInterface.addAction({
-    //   actionType: AsyncActionType.OwnershipUpdate,
-    //   actionProps: {
-    //     proponentTaxVatId: programme.proponentTaxVatId,
-    //     proponentPercentage: programme.proponentPercentage,
-    //     externalId: programme.externalId
-    //   },
-    // });
+    let ownerTaxId;
+    if (programme.proponentTaxVatId.length > companyIndex) {
+      ownerTaxId = programme.proponentTaxVatId[companyIndex];
+    }
+    
+    await this.asyncOperationsInterface.addAction({
+      actionType: AsyncActionType.OwnershipUpdate,
+      actionProps: {
+        proponentTaxVatId: programme.proponentTaxVatId,
+        proponentPercentage: programme.proponentPercentage,
+        externalId: programme.externalId,
+        investorTaxId: investor.taxId,
+        shareFromOwner: transfer.shareFromOwner,
+        ownerTaxId: ownerTaxId
+      },
+    });
 
     const savedProgramme = await this.entityManager
       .transaction(async (em) => {
@@ -188,6 +192,7 @@ export class ProgrammeService {
           {
             creditOwnerPercentage: programme.creditOwnerPercentage,
             proponentPercentage: programme.proponentPercentage,
+            proponentTaxVatId: programme.proponentTaxVatId,
             companyId: programme.companyId,
             txTime: new Date().getTime(),
           }
@@ -366,7 +371,11 @@ export class ProgrammeService {
         );
       }
 
-      if (!ownershipMap[fromCompanyId] || ownershipMap[fromCompanyId] < req.percentage[j] || !propPerMap[fromCompanyId] || propPerMap[fromCompanyId] < req.percentage) {
+      if (req.percentage[j] <= 0 ) {
+        continue;
+      }
+
+      if (!ownershipMap[fromCompanyId] ||  ownershipMap[fromCompanyId] < req.percentage[j] || !propPerMap[fromCompanyId] || propPerMap[fromCompanyId] < req.percentage) {
         throw new HttpException(
           this.helperService.formatReqMessagesString(
             "programme.invalidCompPercentageForGivenComp",
@@ -385,6 +394,7 @@ export class ProgrammeService {
       investment.txTime = new Date().getTime();
       investment.createdTime = investment.txTime;
       investment.percentage = req.percentage[j];
+      investment.shareFromOwner = parseFloat((investment.percentage * 100 / propPerMap[fromCompanyId]).toFixed(6))
       investment.amount = Math.round(req.amount * req.percentage[j]/percSum)
       investment.status = InvestmentStatus.PENDING;
       if (requester.companyId == fromCompanyId) {
