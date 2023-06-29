@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import NdcActionDetails from '../../Components/NdcAction/ndcActionDetails';
 import { useTranslation } from 'react-i18next';
-import { Button, Form, Input, Row, Steps, Tooltip, Upload, UploadProps } from 'antd';
+import { Button, Form, Input, Row, Steps, Tooltip, Upload, UploadProps, message } from 'antd';
 import './addNdcAction.scss';
 import { UploadOutlined } from '@ant-design/icons';
 import { FormInstance } from 'rc-field-form';
@@ -23,6 +23,7 @@ const AddNdcAction = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const { post } = useConnection();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!state?.record) {
@@ -38,14 +39,32 @@ const AddNdcAction = () => {
   };
 
   const saveNdcAction = async (ndcActionDetailsObj: any) => {
-    if (ndcActionDetailsObj.enablementReportData) {
-      delete ndcActionDetailsObj.enablementReportData;
-    }
+    setLoading(true);
+    try {
+      if (ndcActionDetailsObj.enablementReportData) {
+        delete ndcActionDetailsObj.enablementReportData;
+      }
 
-    ndcActionDetailsObj.methodology = t('ndcAction:goldStandard');
-    const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
-    if (response.status === 200 || response.status === 201) {
-      navigate('/programmeManagement/view', { state: { record: programmeDetails } });
+      ndcActionDetailsObj.methodology = t('ndcAction:goldStandard');
+      const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: `${t('ndcSuccessfullyCreated')}`,
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        navigate('/programmeManagement/view', { state: { record: programmeDetails } });
+      }
+    } catch (error: any) {
+      message.open({
+        type: 'error',
+        content: `${'ndcCreationFailed'}`,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,7 +92,7 @@ const AddNdcAction = () => {
 
     if (projectReportFormValues.monitoringReport) {
       const logoBase64 = await getBase64(
-        projectReportFormValues.monitoringReport.file.originFileObj as RcFile
+        projectReportFormValues.monitoringReport[0].originFileObj as RcFile
       );
       const logoUrls = logoBase64.split(',');
 
@@ -103,8 +122,12 @@ const AddNdcAction = () => {
     }
   };
 
-  const props: UploadProps = {
-    //need to add
+  const normFile = (e: any) => {
+    console.log('e', e);
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
   };
 
   const stepItems = [
@@ -151,6 +174,7 @@ const AddNdcAction = () => {
             submitButtonText={
               isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
             }
+            loading={loading}
           />
         </div>
       ),
@@ -173,15 +197,32 @@ const AddNdcAction = () => {
             requiredMark={true}
             onFinish={onProjectReportSubmit}
           >
-            <Form.Item label={t('ndcAction:monitoringReport')} name="monitoringReport">
-              <Upload {...props}>
-                <Button icon={<UploadOutlined />}>Upload</Button>
+            <Form.Item
+              label={t('ndcAction:monitoringReport')}
+              name="monitoringReport"
+              valuePropName="fileList"
+              getValueFromEvent={normFile}
+              required={false}
+            >
+              <Upload
+                beforeUpload={(file: any) => {
+                  return false;
+                }}
+                className="design-upload-section"
+                name="monitoringReport"
+                listType="picture"
+                multiple={false}
+                maxCount={1}
+              >
+                <Button className="upload-doc" size="large" icon={<UploadOutlined />}>
+                  Upload
+                </Button>
               </Upload>
             </Form.Item>
             <div className="steps-actions">
               <Row>
                 <Button onClick={onClickBack}>{t('ndcAction:back')}</Button>
-                <Button className="mg-left-1" htmlType="submit" type="primary">
+                <Button className="mg-left-1" htmlType="submit" type="primary" loading={loading}>
                   {t('ndcAction:submit')}
                 </Button>
               </Row>
