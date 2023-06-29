@@ -70,6 +70,10 @@ const Assessment = (props: any) => {
     }
   };
 
+  useEffect(() => {
+    validateForms();
+  }, []);
+
   const onFormChanged = (formName: string, info: any) => {
     const changedValues: any = {};
     if (info.changedFields && info.changedFields.length > 0) {

@@ -209,7 +209,7 @@ const NdcActionView = () => {
       <div className="content-body">
         <Row gutter={16}>
           {(emissionsReductionAchieved !== 0 || emissionsReductionExpected !== 0) && (
-            <Col lg={6} md={24}>
+            <Col lg={8} md={24}>
               <Card className="card-container fix-height">
                 <div className="info-view">
                   <div className="title">
@@ -293,8 +293,8 @@ const NdcActionView = () => {
                         emissionsReductionExpected - emissionsReductionAchieved,
                       ]}
                       type="donut"
-                      width="100%"
                       fontFamily="inter"
+                      height="290px"
                     />
                   </div>
                 </div>

@@ -107,62 +107,66 @@ const AddNdcAction = () => {
     //need to add
   };
 
-  const getStepItems = () => {
-    const stepItems = [
-      {
-        title: (
-          <div className="step-title-container">
-            <div className="step-count">01</div>
-            <div className="title">{t('ndcAction:ndcActionDetailsTitle')}</div>
-            <div className="info-container">
-              <Tooltip
-                arrowPointAtCenter
-                placement="right"
-                trigger="hover"
-                title={t('ndcAction:ndcToolTip')}
-              >
-                <InfoCircle color="#000000" size={17} />
-              </Tooltip>
-            </div>
+  const stepItems = [
+    {
+      title: (
+        <div className="step-title-container">
+          <div className="step-count">01</div>
+          <div className="title">{t('ndcAction:ndcActionDetailsTitle')}</div>
+          <div className="info-container">
+            <Tooltip
+              arrowPointAtCenter
+              placement="right"
+              trigger="hover"
+              title={t('ndcAction:ndcToolTip')}
+            >
+              <InfoCircle color="#000000" size={17} />
+            </Tooltip>
           </div>
-        ),
-        description: current === 1 && (
+        </div>
+      ),
+      description: (
+        <div className={current !== 1 ? 'hide' : ''}>
           <NdcActionDetails
             isBackBtnVisible={false}
             onFormSubmit={onNdcActionDetailsSubmit}
             ndcActionDetails={ndcActionDetails}
           ></NdcActionDetails>
-        ),
-      },
-      {
-        title: (
-          <div className="step-title-container">
-            <div className="step-count">02</div>
-            <div className="title">{t('ndcAction:coBenefitsTitle')}</div>
-          </div>
-        ),
-        description: current === 2 && (
+        </div>
+      ),
+    },
+    {
+      title: (
+        <div className="step-title-container">
+          <div className="step-count">02</div>
+          <div className="title">{t('ndcAction:coBenefitsTitle')}</div>
+        </div>
+      ),
+      description: (
+        <div className={current !== 2 ? 'hide' : ''}>
           <CoBenifitsComponent
             onClickedBackBtn={onClickBackCoBenefits}
-            coBenefitsDetails={ndcActionDetails.coBenefitsProperties}
+            coBenefitsDetails={ndcActionDetails ? ndcActionDetails.coBenefitsProperties : {}}
             onFormSubmit={onCoBenefitsSubmit}
             submitButtonText={
               isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
             }
           />
-        ),
-      },
-    ];
+        </div>
+      ),
+    },
+  ];
 
-    if (isProjectReportsVisible()) {
-      stepItems.push({
-        title: (
-          <div className="step-title-container">
-            <div className="step-count">03</div>
-            <div className="title">{t('ndcAction:projectReportsTitle')}</div>
-          </div>
-        ),
-        description: current === 3 && (
+  if (isProjectReportsVisible()) {
+    stepItems.push({
+      title: (
+        <div className="step-title-container">
+          <div className="step-count">03</div>
+          <div className="title">{t('ndcAction:projectReportsTitle')}</div>
+        </div>
+      ),
+      description: (
+        <div className={current !== 3 ? 'hide' : ''}>
           <Form
             name="projectReports"
             layout="vertical"
@@ -183,12 +187,10 @@ const AddNdcAction = () => {
               </Row>
             </div>
           </Form>
-        ),
-      });
-    }
-
-    return stepItems;
-  };
+        </div>
+      ),
+    });
+  }
 
   return (
     <div className="add-ndc-main-container">
@@ -198,7 +200,7 @@ const AddNdcAction = () => {
       </div>
       <div className="adding-section">
         <div className="form-section">
-          <Steps progressDot direction="vertical" current={current} items={getStepItems()} />
+          <Steps progressDot direction="vertical" current={current} items={stepItems} />
         </div>
       </div>
     </div>
