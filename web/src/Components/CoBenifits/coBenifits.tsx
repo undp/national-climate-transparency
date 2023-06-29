@@ -18,6 +18,7 @@ export interface CoBenefitProps {
   submitButtonText?: any;
   viewOnly?: boolean;
   coBenifitsViewDetails?: any;
+  loading?: any;
 }
 
 const CoBenifitsComponent = (props: CoBenefitProps) => {
@@ -28,6 +29,7 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     submitButtonText,
     viewOnly,
     coBenifitsViewDetails,
+    loading = false,
   } = props;
   const { t } = useTranslation(['coBenifits']);
   const [coBenefitDetails, setCoBenefitDetails] = useState<any>();
@@ -294,7 +296,12 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
         <div className="steps-actions">
           <Row>
             <Button onClick={() => onClickedBackBtn(coBenefitDetails)}>{t('back')}</Button>
-            <Button className="mg-left-1" type="primary" onClick={onCoBenefitSubmit}>
+            <Button
+              className="mg-left-1"
+              type="primary"
+              loading={loading}
+              onClick={onCoBenefitSubmit}
+            >
               {submitButtonText ? submitButtonText : t('submit')}
             </Button>
           </Row>

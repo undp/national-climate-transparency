@@ -1018,6 +1018,7 @@ export const AddProgrammeComponent = () => {
                         onClickedBackBtn={prevOne}
                         coBenefitsDetails={programmeDetailsObj?.coBenefitsProperties}
                         onFormSubmit={onCoBenefitFormSubmit}
+                        loading={loading}
                       />
                     </div>
                   ),

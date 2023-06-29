@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import NdcActionDetails from '../../Components/NdcAction/ndcActionDetails';
 import { useTranslation } from 'react-i18next';
-import { Button, Form, Input, Row, Steps, Tooltip, Upload, UploadProps } from 'antd';
+import { Button, Form, Input, Row, Steps, Tooltip, Upload, UploadProps, message } from 'antd';
 import './addNdcAction.scss';
 import { UploadOutlined } from '@ant-design/icons';
 import { FormInstance } from 'rc-field-form';
@@ -23,6 +23,7 @@ const AddNdcAction = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const { post } = useConnection();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!state?.record) {
@@ -38,14 +39,32 @@ const AddNdcAction = () => {
   };
 
   const saveNdcAction = async (ndcActionDetailsObj: any) => {
-    if (ndcActionDetailsObj.enablementReportData) {
-      delete ndcActionDetailsObj.enablementReportData;
-    }
+    setLoading(true);
+    try {
+      if (ndcActionDetailsObj.enablementReportData) {
+        delete ndcActionDetailsObj.enablementReportData;
+      }
 
-    ndcActionDetailsObj.methodology = t('ndcAction:goldStandard');
-    const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
-    if (response.status === 200 || response.status === 201) {
-      navigate('/programmeManagement/view', { state: { record: programmeDetails } });
+      ndcActionDetailsObj.methodology = t('ndcAction:goldStandard');
+      const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: `${t('ndcSuccessfullyCreated')}`,
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        navigate('/programmeManagement/view', { state: { record: programmeDetails } });
+      }
+    } catch (error: any) {
+      message.open({
+        type: 'error',
+        content: `${'ndcCreationFailed'}`,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -155,6 +174,7 @@ const AddNdcAction = () => {
             submitButtonText={
               isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
             }
+            loading={loading}
           />
         </div>
       ),
@@ -202,7 +222,7 @@ const AddNdcAction = () => {
             <div className="steps-actions">
               <Row>
                 <Button onClick={onClickBack}>{t('ndcAction:back')}</Button>
-                <Button className="mg-left-1" htmlType="submit" type="primary">
+                <Button className="mg-left-1" htmlType="submit" type="primary" loading={loading}>
                   {t('ndcAction:submit')}
                 </Button>
               </Row>
