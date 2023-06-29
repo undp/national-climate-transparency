@@ -73,7 +73,7 @@ const AddNdcAction = () => {
 
     if (projectReportFormValues.monitoringReport) {
       const logoBase64 = await getBase64(
-        projectReportFormValues.monitoringReport.file.originFileObj as RcFile
+        projectReportFormValues.monitoringReport[0].originFileObj as RcFile
       );
       const logoUrls = logoBase64.split(',');
 
@@ -103,8 +103,12 @@ const AddNdcAction = () => {
     }
   };
 
-  const props: UploadProps = {
-    //need to add
+  const normFile = (e: any) => {
+    console.log('e', e);
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
   };
 
   const stepItems = [
@@ -173,9 +177,26 @@ const AddNdcAction = () => {
             requiredMark={true}
             onFinish={onProjectReportSubmit}
           >
-            <Form.Item label={t('ndcAction:monitoringReport')} name="monitoringReport">
-              <Upload {...props}>
-                <Button icon={<UploadOutlined />}>Upload</Button>
+            <Form.Item
+              label={t('ndcAction:monitoringReport')}
+              name="monitoringReport"
+              valuePropName="fileList"
+              getValueFromEvent={normFile}
+              required={false}
+            >
+              <Upload
+                beforeUpload={(file: any) => {
+                  return false;
+                }}
+                className="design-upload-section"
+                name="monitoringReport"
+                listType="picture"
+                multiple={false}
+                maxCount={1}
+              >
+                <Button className="upload-doc" size="large" icon={<UploadOutlined />}>
+                  Upload
+                </Button>
               </Upload>
             </Form.Item>
             <div className="steps-actions">

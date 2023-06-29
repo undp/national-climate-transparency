@@ -15,6 +15,8 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RadioButtonStatus, titleList } from '../../Definitions/commonEnums';
 import PhoneInput, { formatPhoneNumberIntl } from 'react-phone-number-input';
+import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
+import { RcFile } from 'antd/lib/upload';
 
 const Assessment = (props: any) => {
   const { onFormSubmit, assessmentViewData, viewOnly } = props;
@@ -39,7 +41,6 @@ const Assessment = (props: any) => {
       form1.setFieldsValue(assessmentViewData);
       form2.setFieldsValue(assessmentViewData);
       form3.setFieldsValue(assessmentViewData);
-      form4.setFieldsValue(assessmentViewData);
     }
   }, [assessmentViewData]);
 
@@ -74,11 +75,18 @@ const Assessment = (props: any) => {
     validateForms();
   }, []);
 
-  const onFormChanged = (formName: string, info: any) => {
+  const onFormChanged = async (formName: string, info: any) => {
     const changedValues: any = {};
     if (info.changedFields && info.changedFields.length > 0) {
-      info.changedFields.map((changedField: any) => {
-        changedValues[changedField.name[0]] = changedField.value;
+      info.changedFields.map(async (changedField: any) => {
+        if (changedField.name[0] === 'document') {
+          const base64Value = await getBase64(changedField.value[0].originFileObj as RcFile);
+          const values = base64Value.split(',');
+
+          setCobenefitsAssessmentDetails((pre: any) => ({ ...pre, document: values[1] }));
+        } else {
+          changedValues[changedField.name[0]] = changedField.value;
+        }
       });
 
       setCobenefitsAssessmentDetails((pre: any) => ({ ...pre, ...changedValues }));
@@ -110,6 +118,14 @@ const Assessment = (props: any) => {
       setIsPersonListedDetailsVisible(false);
     }
     validateForms();
+  };
+
+  const normFile = (e: any) => {
+    console.log('e', e);
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
   };
 
   return (
@@ -603,7 +619,7 @@ const Assessment = (props: any) => {
                         </div>
                       </Radio.Group>
                     </Form.Item>
-                    {assessmentViewData.isThePersonListed === RadioButtonStatus.YES && (
+                    {assessmentViewData.isThePersonListed === RadioButtonStatus.NO && (
                       <Form.Item
                         labelCol={{ span: 24 }}
                         wrapperCol={{ span: 24 }}
@@ -668,7 +684,13 @@ const Assessment = (props: any) => {
               </Row>
               <Row>
                 {!viewOnly && (
-                  <Form.Item label={t('assessmentDocuments')} name="document">
+                  <Form.Item
+                    label={t('assessmentDocuments')}
+                    name="document"
+                    valuePropName="fileList"
+                    getValueFromEvent={normFile}
+                    required={false}
+                  >
                     <Upload
                       beforeUpload={(file: any) => {
                         return false;
