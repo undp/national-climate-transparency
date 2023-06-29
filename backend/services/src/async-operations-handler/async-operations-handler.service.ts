@@ -29,6 +29,8 @@ export class AsyncOperationsHandlerService {
           return this.registryClient.programmeAccept(dataObject);
         case AsyncActionType.AddMitigation.toString():
           return this.registryClient.addMitigation(dataObject);
+        case AsyncActionType.OwnershipUpdate.toString():
+          return this.registryClient.updateOwnership(dataObject);
       }
     }
   }

@@ -58,7 +58,7 @@ export class ObjectionLetterGen {
     
         doc.text(`\n\nWe confirm that our national process for ascertaining no-objection to the programme as included in the proposal has been duly followed.\n\nWe confirm that our no-objection applies to all projects or activities to be implemented within the scope of the programme.\n\nWe acknowledge that this letter will be made publicly available on the Carbon Transparency website, registered under ${programmeId}.`)
     
-        doc.text(`\n\nSincerely,\nHonorable ${minister}\nMinister\n${ministry}Government of ${country}`)
+        doc.text(`\n\nSincerely,\nHonorable ${minister}\nMinister\n${ministry}\nGovernment of ${country}`)
         // Finalize PDF file
         doc.end();
 
