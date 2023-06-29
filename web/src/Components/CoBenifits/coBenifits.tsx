@@ -174,111 +174,115 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
   const onCoBenefitSubmit = () => {
     let economicOverallValidation = true;
     let environmentalOverallValidation = true;
-    if (!coBenefitDetails?.economic || !coBenefitDetails?.environmental) {
+    const economicDetailsFromForm: any = coBenefitDetails?.economic;
+    const environmentalDetailsFromForm: any = coBenefitDetails?.environmental;
+    const economicSectionValidation: any = {
+      growth: { validation: false, fields: 8, filled: 0, firstFieldValue: 'N/A' },
+      energy: { validation: false, fields: 5, filled: 0, firstFieldValue: 'N/A' },
+      techTransfer: { validation: false, fields: 6, filled: 0, firstFieldValue: 'N/A' },
+      balanceOfPayments: { validation: false, fields: 3, filled: 0, firstFieldValue: 'N/A' },
+      furtherInfo: { validation: false, fields: 1, filled: 0, firstFieldValue: 'N/A' },
+    };
+    const environmentalSectionValidation: any = {
+      air: { validation: false, fields: 9, filled: 0, firstFieldValue: 'N/A' },
+      land: { validation: false, fields: 8, filled: 0, firstFieldValue: 'N/A' },
+      water: { validation: false, fields: 7, filled: 0, firstFieldValue: 'N/A' },
+      naturalResource: { validation: false, fields: 6, filled: 0, firstFieldValue: 'N/A' },
+    };
+    console.log(environmentalDetailsFromForm);
+    for (const key in economicDetailsFromForm) {
+      const sectionName = key.replace(/Q\d+/, '');
+      const fieldValue = economicDetailsFromForm[key];
+
+      if (economicSectionValidation.hasOwnProperty(sectionName)) {
+        const section = economicSectionValidation[sectionName];
+
+        section.filled += 1;
+
+        if (fieldValue === RadioButtonStatus.YES && key === `${sectionName}Q1`) {
+          section.firstFieldValue = RadioButtonStatus.YES;
+        } else if (fieldValue === RadioButtonStatus.NO && key === `${sectionName}Q1`) {
+          section.firstFieldValue = RadioButtonStatus.NO;
+        } else if (fieldValue === RadioButtonStatus.NA && key === `${sectionName}Q1`) {
+          section.firstFieldValue = RadioButtonStatus.NA;
+        }
+      }
+    }
+    for (const section in economicSectionValidation) {
+      if (
+        (economicSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
+          economicSectionValidation[section].fields !==
+            economicSectionValidation[section].filled) ||
+        economicSectionValidation[section].filled === 0
+      ) {
+        economicOverallValidation = false;
+      }
+    }
+    for (const key in environmentalDetailsFromForm) {
+      const sectionName = key.replace(/Q\d+/, '');
+      const fieldValue = environmentalDetailsFromForm[key];
+
+      if (environmentalSectionValidation.hasOwnProperty(sectionName)) {
+        const section = environmentalSectionValidation[sectionName];
+
+        section.filled += 1;
+
+        if (fieldValue === RadioButtonStatus.YES && key === `${sectionName}Q1`) {
+          section.firstFieldValue = RadioButtonStatus.YES;
+        } else if (fieldValue === RadioButtonStatus.NO && key === `${sectionName}Q1`) {
+          section.firstFieldValue = RadioButtonStatus.NO;
+        } else if (fieldValue === RadioButtonStatus.NA && key === `${sectionName}Q1`) {
+          section.firstFieldValue = RadioButtonStatus.NA;
+        }
+      }
+    }
+    for (const section in environmentalSectionValidation) {
+      if (
+        (environmentalSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
+          environmentalSectionValidation[section].fields !==
+            environmentalSectionValidation[section].filled) ||
+        environmentalSectionValidation[section].filled === 0
+      ) {
+        environmentalOverallValidation = false;
+      }
+    }
+    if (environmentalOverallValidation !== true) {
       message.open({
         type: 'error',
-        content: `Fill the required fields in Co-benifits section`,
+        content: `Fill the required fields in Co-benifits Environmental section`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
-    } else {
-      const economicDetailsFromForm: any = coBenefitDetails?.economic;
-      const environmentalDetailsFromForm: any = coBenefitDetails?.environmental;
-      const economicSectionValidation: any = {
-        growth: { validation: false, fields: 8, filled: 0, firstFieldValue: 'N/A' },
-        energy: { validation: false, fields: 5, filled: 0, firstFieldValue: 'N/A' },
-        techTransfer: { validation: false, fields: 6, filled: 0, firstFieldValue: 'N/A' },
-        balanceOfPayments: { validation: false, fields: 3, filled: 0, firstFieldValue: 'N/A' },
-        furtherInfo: { validation: false, fields: 1, filled: 0, firstFieldValue: 'N/A' },
-      };
-      const environmentalSectionValidation: any = {
-        air: { validation: false, fields: 9, filled: 0, firstFieldValue: 'N/A' },
-        land: { validation: false, fields: 8, filled: 0, firstFieldValue: 'N/A' },
-        water: { validation: false, fields: 7, filled: 0, firstFieldValue: 'N/A' },
-        naturalResources: { validation: false, fields: 6, filled: 0, firstFieldValue: 'N/A' },
-      };
-      for (const key in economicDetailsFromForm) {
-        const sectionName = key.replace(/Q\d+/, '');
-        const fieldValue = economicDetailsFromForm[key];
-
-        if (economicSectionValidation.hasOwnProperty(sectionName)) {
-          const section = economicSectionValidation[sectionName];
-
-          section.filled += 1;
-
-          if (fieldValue === RadioButtonStatus.YES && key === `${sectionName}Q1`) {
-            section.firstFieldValue = RadioButtonStatus.YES;
-          } else if (fieldValue === RadioButtonStatus.NO && key === `${sectionName}Q1`) {
-            section.firstFieldValue = RadioButtonStatus.NO;
-          } else if (fieldValue === RadioButtonStatus.NA && key === `${sectionName}Q1`) {
-            section.firstFieldValue = RadioButtonStatus.NA;
-          }
-        }
-      }
-      for (const section in economicSectionValidation) {
-        if (
-          economicSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
-          economicSectionValidation[section].fields !== economicSectionValidation[section].filled
-        ) {
-          economicOverallValidation = false;
-        }
-      }
-      for (const key in environmentalDetailsFromForm) {
-        const sectionName = key.replace(/Q\d+/, '');
-        const fieldValue = environmentalDetailsFromForm[key];
-
-        if (environmentalSectionValidation.hasOwnProperty(sectionName)) {
-          const section = environmentalSectionValidation[sectionName];
-
-          section.filled += 1;
-
-          if (fieldValue === RadioButtonStatus.YES && key === `${sectionName}Q1`) {
-            section.firstFieldValue = RadioButtonStatus.YES;
-          } else if (fieldValue === RadioButtonStatus.NO && key === `${sectionName}Q1`) {
-            section.firstFieldValue = RadioButtonStatus.NO;
-          } else if (fieldValue === RadioButtonStatus.NA && key === `${sectionName}Q1`) {
-            section.firstFieldValue = RadioButtonStatus.NA;
-          }
-        }
-      }
-      for (const section in environmentalSectionValidation) {
-        if (
-          environmentalSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
-          environmentalSectionValidation[section].fields !==
-            environmentalSectionValidation[section].filled
-        ) {
-          environmentalOverallValidation = false;
-        }
-      }
-      if (!isSocialFormValid) {
-        message.open({
-          type: 'error',
-          content: `Fill the required fields in Co-benifits Social section`,
-          duration: 4,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        return;
-      }
-      if (!isAssessmentFormValid) {
-        message.open({
-          type: 'error',
-          content: `Fill the required fields in Co-benifits Assessment section`,
-          duration: 4,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        return;
-      }
-      if (economicOverallValidation === true && environmentalOverallValidation === true) {
-        onFormSubmit(coBenefitDetails);
-      } else {
-        message.open({
-          type: 'error',
-          content: `Fill the required fields in Co-benifits section`,
-          duration: 4,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-      }
+      return;
     }
+    if (!isSocialFormValid) {
+      message.open({
+        type: 'error',
+        content: `Fill the required fields in Co-benifits Social section`,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      return;
+    }
+    if (economicOverallValidation !== true) {
+      message.open({
+        type: 'error',
+        content: `Fill the required fields in Co-benifits Economic section`,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      return;
+    }
+    if (!isAssessmentFormValid) {
+      message.open({
+        type: 'error',
+        content: `Fill the required fields in Co-benifits Assessment section`,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      return;
+    }
+    onFormSubmit(coBenefitDetails);
   };
 
   return (

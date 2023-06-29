@@ -38,200 +38,158 @@ import goal16Selected from '../../Assets/Images/SdgGoalsImages/goal-16-selected.
 import goal17Selected from '../../Assets/Images/SdgGoalsImages/goal-17-selected.png';
 const sdgGoalsDetails = [
   {
-    name: 'noPoverty',
+    name: SdgGoalsEnum.noPoverty,
     image: goal1,
     selected: false,
+    activeImage: goal1Selected,
   },
   {
-    name: 'zeroHunger',
+    name: SdgGoalsEnum.zeroHunger,
     image: goal2,
     selected: false,
+    activeImage: goal2Selected,
   },
   {
-    name: 'gdHealth',
+    name: SdgGoalsEnum.gdHealth,
     image: goal3,
     selected: false,
+    activeImage: goal3Selected,
   },
   {
-    name: 'qualityEducation',
+    name: SdgGoalsEnum.qualityEducation,
     image: goal4,
     selected: false,
+    activeImage: goal4Selected,
   },
   {
-    name: 'genderEq',
+    name: SdgGoalsEnum.genderEq,
     image: goal5,
     selected: false,
+    activeImage: goal5Selected,
   },
   {
-    name: 'cleanWatr',
+    name: SdgGoalsEnum.cleanWatr,
     image: goal6,
     selected: false,
+    activeImage: goal6Selected,
   },
   {
-    name: 'affEnergy',
+    name: SdgGoalsEnum.affEnergy,
     image: goal7,
     selected: false,
+    activeImage: goal7Selected,
   },
   {
-    name: 'decentWork',
+    name: SdgGoalsEnum.decentWork,
     image: goal8,
     selected: false,
+    activeImage: goal8Selected,
   },
   {
-    name: 'industry',
+    name: SdgGoalsEnum.industry,
     image: goal9,
     selected: false,
+    activeImage: goal9Selected,
   },
   {
-    name: 'reducedInEq',
+    name: SdgGoalsEnum.reducedInEq,
     image: goal10,
     selected: false,
+    activeImage: goal10Selected,
   },
   {
-    name: 'sustainableCities',
+    name: SdgGoalsEnum.sustainableCities,
     image: goal11,
     selected: false,
+    activeImage: goal11Selected,
   },
   {
-    name: 'responsibleConsumption',
+    name: SdgGoalsEnum.responsibleConsumption,
     image: goal12,
     selected: false,
+    activeImage: goal12Selected,
   },
   {
-    name: 'climateAction',
+    name: SdgGoalsEnum.climateAction,
     image: goal13,
     selected: false,
+    activeImage: goal13Selected,
   },
   {
-    name: 'lifeBelowWater',
+    name: SdgGoalsEnum.lifeBelowWater,
     image: goal14,
     selected: false,
+    activeImage: goal14Selected,
   },
   {
-    name: 'lifeOnLand',
+    name: SdgGoalsEnum.lifeOnLand,
     image: goal15,
     selected: false,
+    activeImage: goal15Selected,
   },
   {
-    name: 'peace',
+    name: SdgGoalsEnum.peace,
     image: goal16,
     selected: false,
+    activeImage: goal16Selected,
   },
   {
-    name: 'partnership',
+    name: SdgGoalsEnum.partnership,
     image: goal17,
     selected: false,
+    activeImage: goal17Selected,
   },
 ];
+
+const sdgGoalMap: any = {};
+for (const g of sdgGoalsDetails) {
+  sdgGoalMap[g.name] = g;
+}
 
 const SdgGoals = (props: any) => {
   const { onFormSubmit, sdgGoalsViewData, viewOnly } = props;
   const [formOne] = Form.useForm();
   const [sdgGoals, setSdgGoals] = useState<any[]>(sdgGoalsDetails);
-  const [sdgGoalsFromProgramme, setSdgGoalsFromProgramme] = useState<any[]>([]);
 
-  const getKeyByValue = (value: string) => {
-    for (const key in SdgGoalsEnum) {
-      if (SdgGoalsEnum[key as keyof typeof SdgGoalsEnum] === value) {
-        return key;
-      }
+  const handleImageSelect = (imageId: any) => {
+    const g = sdgGoalMap[imageId];
+    if (!g) {
+      return;
     }
-    return undefined;
-  };
+    g.selected = !g.selected;
 
-  useEffect(() => {
-    if (sdgGoalsViewData && !viewOnly) {
-      setSdgGoals(sdgGoalsViewData);
-      formOne.setFieldsValue(sdgGoalsViewData);
-    }
-  }, [sdgGoalsViewData]);
-
-  const goalImageMap = {
-    [goal1]: goal1Selected,
-    [goal2]: goal2Selected,
-    [goal3]: goal3Selected,
-    [goal4]: goal4Selected,
-    [goal5]: goal5Selected,
-    [goal6]: goal6Selected,
-    [goal7]: goal7Selected,
-    [goal8]: goal8Selected,
-    [goal9]: goal9Selected,
-    [goal10]: goal10Selected,
-    [goal11]: goal11Selected,
-    [goal12]: goal12Selected,
-    [goal13]: goal13Selected,
-    [goal14]: goal14Selected,
-    [goal15]: goal15Selected,
-    [goal16]: goal16Selected,
-    [goal17]: goal17Selected,
-    [goal1Selected]: goal1,
-    [goal2Selected]: goal2,
-    [goal3Selected]: goal3,
-    [goal4Selected]: goal4,
-    [goal5Selected]: goal5,
-    [goal6Selected]: goal6,
-    [goal7Selected]: goal7,
-    [goal8Selected]: goal8,
-    [goal9Selected]: goal9,
-    [goal10Selected]: goal10,
-    [goal11Selected]: goal11,
-    [goal12Selected]: goal12,
-    [goal13Selected]: goal13,
-    [goal14Selected]: goal14,
-    [goal15Selected]: goal15,
-    [goal16Selected]: goal16,
-    [goal17Selected]: goal17,
-  };
-
-  const returnSelectedImage = (image: any) => {
-    if (goalImageMap.hasOwnProperty(image)) {
-      return goalImageMap[image];
-    }
-    return image;
-  };
-
-  const handleImageSelect = (imageId: any, image: any) => {
-    setSdgGoals((goals) =>
-      goals.map((goal) =>
-        goal.name === imageId
-          ? {
-              ...goal,
-              selected: !goal.selected,
-              image: returnSelectedImage(goal?.image),
-            }
-          : goal
-      )
-    );
+    const u = [...sdgGoalsDetails];
+    setSdgGoals(u);
   };
 
   useEffect(() => {
     if (sdgGoalsViewData) {
-      const sdgGoalsFromData = sdgGoalsViewData?.map((item: any) => getKeyByValue(item));
-      const updatedSdgGoals = sdgGoals.map((goal) => {
-        if (sdgGoalsFromData.includes(goal.name)) {
-          return {
-            ...goal,
-            selected: true,
-            image: returnSelectedImage(goal?.image),
-          };
+      for (const g of sdgGoalsViewData) {
+        const sdg = sdgGoalMap[g as SdgGoalsEnum];
+        if (sdg) {
+          sdg.selected = true;
         } else {
-          return goal;
+          console.log('AAA', g);
         }
-      });
-      setSdgGoals(updatedSdgGoals);
+      }
+    } else {
+      for (const g of sdgGoalsDetails) {
+        g.selected = false;
+      }
     }
+    const u = [...sdgGoalsDetails];
+    setSdgGoals(u);
   }, []);
 
   useEffect(() => {
-    const selectedGoals = sdgGoals
-      .filter((goal: any) => goal.selected)
-      .map((goal: any) => SdgGoalsEnum[goal.name as keyof typeof SdgGoalsEnum]);
-    setSdgGoalsFromProgramme(selectedGoals);
+    const saveData: any[] = [];
+    for (const g of sdgGoals) {
+      if (g.selected) {
+        saveData.push(g.name.toString());
+      }
+    }
+    onFormSubmit(saveData);
   }, [sdgGoals]);
-
-  useEffect(() => {
-    onFormSubmit(sdgGoalsFromProgramme);
-  }, [sdgGoalsFromProgramme]);
 
   return (
     <div className="co-benifits-tab-item">
@@ -241,13 +199,20 @@ const SdgGoals = (props: any) => {
             <Col sm={12} md={12} lg={4} xl={4} className="col">
               <div className={sdgGoalsViewData ? 'img-container-data' : 'img-container'}>
                 <Form.Item name="images">
-                  <img
-                    src={sdgGoal?.image}
-                    alt={`Image ${sdgGoal?.name}`}
-                    onClick={() =>
-                      !sdgGoalsViewData && handleImageSelect(sdgGoal?.name, sdgGoal?.image)
-                    }
-                  />
+                  {!sdgGoal.selected && (
+                    <img
+                      src={sdgGoal?.image}
+                      alt={`Image ${sdgGoal?.name}`}
+                      onClick={() => !viewOnly && handleImageSelect(sdgGoal?.name)}
+                    />
+                  )}
+                  {sdgGoal.selected && (
+                    <img
+                      src={sdgGoal?.activeImage}
+                      alt={`Image ${sdgGoal?.name}`}
+                      onClick={() => !viewOnly && handleImageSelect(sdgGoal?.name)}
+                    />
+                  )}
                 </Form.Item>
               </div>
             </Col>

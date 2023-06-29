@@ -19,6 +19,8 @@ import { AsyncOperationsModule } from "../async-operations/async-operations.modu
 import { ConfigurationSettingsService } from "./configurationSettings.service";
 import { ConfigurationSettings } from "../entities/configuration.settings";
 import { Region } from "../entities/region.entity";
+import { ObjectionLetterGen } from "./objection.letter.gen";
+import { FileHandlerModule } from "../file-handler/filehandler.module";
 
 @Module({
   imports: [
@@ -50,6 +52,7 @@ import { Region } from "../entities/region.entity";
       Region,
       ConfigurationSettings,
     ]),
+    FileHandlerModule,
     forwardRef(() => AsyncOperationsModule),
   ],
   providers: [
@@ -57,6 +60,7 @@ import { Region } from "../entities/region.entity";
     CountryService,
     IsValidCountryConstraint,
     HelperService,
+    ObjectionLetterGen,
     PasswordResetService,
     Logger,
     ConfigurationSettingsService,
@@ -66,6 +70,7 @@ import { Region } from "../entities/region.entity";
     CountryService,
     HelperService,
     PasswordResetService,
+    ObjectionLetterGen,
     ConfigurationSettingsService,
   ],
 })

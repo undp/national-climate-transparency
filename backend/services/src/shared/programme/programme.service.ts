@@ -70,6 +70,7 @@ import { ProgrammeDocumentViewEntity } from "../entities/document.view.entity";
 import { Company } from "../entities/company.entity";
 import { NdcFinancing } from "../dto/ndc.financing";
 import { PRECISION } from "../constants";
+import { ObjectionLetterGen } from "../util/objection.letter.gen";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -90,6 +91,8 @@ export class ProgrammeService {
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
 
+    private letterGen: ObjectionLetterGen,
+    
     private locationService: LocationInterface,
     private fileHandler: FileHandlerInterface,
     private helperService: HelperService,
@@ -139,8 +142,6 @@ export class ProgrammeService {
     const toCompanyIndex = programme.companyId.map(e => Number(e)).indexOf(Number(transfer.toCompanyId));
 
     // Cannot be <= 0 
-
-    console.log('PERC', programme.proponentPercentage, companyIndex)
     if (toCompanyIndex < 0) {
       programme.creditOwnerPercentage[companyIndex] -= transfer.percentage
       programme.creditOwnerPercentage.push(transfer.percentage);
@@ -154,17 +155,23 @@ export class ProgrammeService {
       programme.proponentPercentage[toCompanyIndex] += transfer.percentage
       programme.creditOwnerPercentage[toCompanyIndex] += transfer.percentage
     }
-    
 
-    console.log('PERC', programme.proponentPercentage[companyIndex])
-    // await this.asyncOperationsInterface.addAction({
-    //   actionType: AsyncActionType.OwnershipUpdate,
-    //   actionProps: {
-    //     proponentTaxVatId: programme.proponentTaxVatId,
-    //     proponentPercentage: programme.proponentPercentage,
-    //     externalId: programme.externalId
-    //   },
-    // });
+    let ownerTaxId;
+    if (programme.proponentTaxVatId.length > companyIndex) {
+      ownerTaxId = programme.proponentTaxVatId[companyIndex];
+    }
+    
+    await this.asyncOperationsInterface.addAction({
+      actionType: AsyncActionType.OwnershipUpdate,
+      actionProps: {
+        proponentTaxVatId: programme.proponentTaxVatId,
+        proponentPercentage: programme.proponentPercentage,
+        externalId: programme.externalId,
+        investorTaxId: investor.taxId,
+        shareFromOwner: transfer.shareFromOwner,
+        ownerTaxId: ownerTaxId
+      },
+    });
 
     const savedProgramme = await this.entityManager
       .transaction(async (em) => {
@@ -185,6 +192,7 @@ export class ProgrammeService {
           {
             creditOwnerPercentage: programme.creditOwnerPercentage,
             proponentPercentage: programme.proponentPercentage,
+            proponentTaxVatId: programme.proponentTaxVatId,
             companyId: programme.companyId,
             txTime: new Date().getTime(),
           }
@@ -363,7 +371,11 @@ export class ProgrammeService {
         );
       }
 
-      if (!ownershipMap[fromCompanyId] || ownershipMap[fromCompanyId] < req.percentage[j] || !propPerMap[fromCompanyId] || propPerMap[fromCompanyId] < req.percentage) {
+      if (req.percentage[j] <= 0 ) {
+        continue;
+      }
+
+      if (!ownershipMap[fromCompanyId] ||  ownershipMap[fromCompanyId] < req.percentage[j] || !propPerMap[fromCompanyId] || propPerMap[fromCompanyId] < req.percentage) {
         throw new HttpException(
           this.helperService.formatReqMessagesString(
             "programme.invalidCompPercentageForGivenComp",
@@ -382,6 +394,7 @@ export class ProgrammeService {
       investment.txTime = new Date().getTime();
       investment.createdTime = investment.txTime;
       investment.percentage = req.percentage[j];
+      investment.shareFromOwner = parseFloat((investment.percentage * 100 / propPerMap[fromCompanyId]).toFixed(6))
       investment.amount = Math.round(req.amount * req.percentage[j]/percSum)
       investment.status = InvestmentStatus.PENDING;
       if (requester.companyId == fromCompanyId) {
@@ -664,7 +677,7 @@ export class ProgrammeService {
     }
   }
 
-  async queueDocument(action: AsyncActionType, req: any, ndcAction: NDCAction, docType: DocType, certifierId: number) {
+  async queueDocument(action: AsyncActionType, req: any, ndcAction: NDCAction, docType: DocType, certifierId: number, programme: Programme) {
 
     if (docType === DocType.MONITORING_REPORT || docType === DocType.VERIFICATION_REPORT) {
       if (!ndcAction) {
@@ -685,12 +698,31 @@ export class ProgrammeService {
       }
     }
 
-    // if (action === AsyncActionType.DocumentUpload && docType === DocType.DESIGN_DOCUMENT) {
-    //   await this.asyncOperationsInterface.addAction({
-    //     actionType: AsyncActionType.GenerateNoObjectionReport,
-    //     actionProps: req,
-    //   });
-    // }
+    if (action === AsyncActionType.DocumentUpload && docType === DocType.DESIGN_DOCUMENT) {
+      const orgNames = await this.companyService.queryNames({
+        size: 10,
+        page: 1,
+        filterAnd: [{
+          key: 'companyId',
+          operation: 'IN',
+          value: programme.companyId
+        }],
+        filterOr: undefined,
+        sort: undefined
+      }, undefined) ;
+
+      console.log('Company names', orgNames)
+      const url = await this.letterGen.generateReport(orgNames.data.map(e => e['name']), programme.title, programme.programmeId)
+
+      const dr = new ProgrammeDocument();
+      dr.programmeId = programme.programmeId;
+      dr.externalId = programme.externalId;
+      dr.status = DocumentStatus.ACCEPTED;
+      dr.type = DocType.NO_OBJECTION_LETTER;
+      dr.txTime = new Date().getTime();
+      dr.url = url;
+      await this.documentRepo.save(dr);
+    }
 
     await this.asyncOperationsInterface.addAction({
       actionType: action,
@@ -911,7 +943,7 @@ export class ProgrammeService {
           data: dr.url,
           externalId: dr.externalId,
           actionId: dr.actionId
-        }, ndcAc, dr.type, certifierId);
+        }, ndcAc, dr.type, certifierId, programme);
 
         if (certifierId) {
           programme.certifierId = [certifierId]
@@ -930,7 +962,7 @@ export class ProgrammeService {
           data: monitoringReport.url,
           externalId: monitoringReport.externalId,
           actionId: monitoringReport.actionId
-        }, ndcAc, monitoringReport.type, user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+        }, ndcAc, monitoringReport.type, user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined, programme);
       }
       
     }
@@ -1022,7 +1054,7 @@ export class ProgrammeService {
         data: d.url,
         externalId: d.externalId,
         creditEst: Number(pr.creditEst)
-      }, ndc, d.type, certifierId);
+      }, ndc, d.type, certifierId, pr);
     } else {
       if (d.type == DocType.VERIFICATION_REPORT) {
         if (ndc) {
@@ -1035,7 +1067,7 @@ export class ProgrammeService {
         data: d.url,
         externalId: d.externalId,
         actionId: d.actionId
-      }, ndc, d.type, certifierId);
+      }, ndc, d.type, certifierId, pr);
     }
     return ndc;
   }
@@ -1367,7 +1399,7 @@ export class ProgrammeService {
           data: dr.url,
           externalId: dr.externalId,
           actionId: dr.actionId
-        }, ndcAction, dr.type, certifierId);
+        }, ndcAction, dr.type, certifierId, program);
       }
     }
     const saved = await this.entityManager

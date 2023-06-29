@@ -987,41 +987,41 @@ export const AddProgrammeComponent = () => {
                     </div>
                   ),
                 },
-                ...(current > 1
-                  ? [
-                      {
-                        title: (
-                          <div className="step-title-container">
-                            <div className="step-count">03</div>
-                            <div className="title">{t('addProgramme:addProgramme3')}</div>
-                          </div>
-                        ),
-                        description: current === 2 && (
-                          <NdcActionDetails
-                            isBackBtnVisible={true}
-                            onClickedBackBtn={prevOne}
-                            onFormSubmit={onNdcActionDetailsSubmit}
-                            ndcActionDetails={programmeDetailsObj?.ndcAction}
-                          ></NdcActionDetails>
-                        ),
-                      },
-                      {
-                        title: (
-                          <div className="step-title-container">
-                            <div className="step-count">04</div>
-                            <div className="title">{t('addProgramme:addProgramme4')}</div>
-                          </div>
-                        ),
-                        description: current === 3 && (
-                          <CoBenifitsComponent
-                            onClickedBackBtn={prevOne}
-                            coBenefitsDetails={programmeDetailsObj?.coBenefitsProperties}
-                            onFormSubmit={onCoBenefitFormSubmit}
-                          />
-                        ),
-                      },
-                    ]
-                  : []),
+                {
+                  title: (
+                    <div className="step-title-container">
+                      <div className="step-count">03</div>
+                      <div className="title">{t('addProgramme:addProgramme3')}</div>
+                    </div>
+                  ),
+                  description: (
+                    <div className={current !== 2 ? 'hide' : ''}>
+                      <NdcActionDetails
+                        isBackBtnVisible={true}
+                        onClickedBackBtn={prevOne}
+                        onFormSubmit={onNdcActionDetailsSubmit}
+                        ndcActionDetails={programmeDetailsObj?.ndcAction}
+                      ></NdcActionDetails>
+                    </div>
+                  ),
+                },
+                {
+                  title: (
+                    <div className="step-title-container">
+                      <div className="step-count">04</div>
+                      <div className="title">{t('addProgramme:addProgramme4')}</div>
+                    </div>
+                  ),
+                  description: (
+                    <div className={current !== 3 ? 'hide' : ''}>
+                      <CoBenifitsComponent
+                        onClickedBackBtn={prevOne}
+                        coBenefitsDetails={programmeDetailsObj?.coBenefitsProperties}
+                        onFormSubmit={onCoBenefitFormSubmit}
+                      />
+                    </div>
+                  ),
+                },
               ]}
             />
           </div>

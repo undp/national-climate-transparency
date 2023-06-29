@@ -81,6 +81,9 @@ export class Investment implements EntitySubject {
   @Column("real")
   percentage: number;
 
+  @Column("real", {nullable: true})
+  shareFromOwner: number;
+
   @Column()
   toCompanyId: number;
 
