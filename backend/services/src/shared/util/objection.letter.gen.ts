@@ -27,7 +27,7 @@ export class ObjectionLetterGen {
         }
         // Create a document
         const doc = new PDFDocument();
-        const stream = fs.createWriteStream(filepath);
+        const stream = fs.createWriteStream('/tmp/' + filepath);
         doc.pipe(stream);
         doc
         .fontSize(8)
@@ -64,7 +64,7 @@ export class ObjectionLetterGen {
 
         const content = await new Promise<string>(resolve => {
             stream.on("finish", function() {
-                const contents = fs.readFileSync(filepath, {encoding: 'base64'})
+                const contents = fs.readFileSync('/tmp/' + filepath, {encoding: 'base64'})
                 resolve(contents);
             });
         });
