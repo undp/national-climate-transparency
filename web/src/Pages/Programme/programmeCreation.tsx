@@ -1001,6 +1001,7 @@ export const AddProgrammeComponent = () => {
                         onClickedBackBtn={prevOne}
                         onFormSubmit={onNdcActionDetailsSubmit}
                         ndcActionDetails={programmeDetailsObj?.ndcAction}
+                        programmeDetails={programmeDetailsObj}
                       ></NdcActionDetails>
                     </div>
                   ),

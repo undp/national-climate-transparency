@@ -123,7 +123,6 @@ const AddNdcAction = () => {
   };
 
   const normFile = (e: any) => {
-    console.log('e', e);
     if (Array.isArray(e)) {
       return e;
     }
@@ -154,6 +153,7 @@ const AddNdcAction = () => {
             isBackBtnVisible={false}
             onFormSubmit={onNdcActionDetailsSubmit}
             ndcActionDetails={ndcActionDetails}
+            programmeDetails={programmeDetails}
           ></NdcActionDetails>
         </div>
       ),

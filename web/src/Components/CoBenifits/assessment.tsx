@@ -605,7 +605,7 @@ const Assessment = (props: any) => {
                   </div>
                 )}
                 {viewOnly && (
-                  <div className="radio-content view-section">
+                  <div className="radio-content">
                     <Form.Item
                       label={t('assesmentIsThePersonListed')}
                       className="form-item"
