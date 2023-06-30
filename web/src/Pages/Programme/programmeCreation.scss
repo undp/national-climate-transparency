@@ -160,6 +160,10 @@
             .ant-input-number {
               width: 80%;
             }
+
+            .ant-form-item-explain-error {
+              width: 250px !important;
+            }
           }
         }
       }
@@ -171,6 +175,7 @@
             .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
               color: $dark-text-color !important;
               border-color: $primary-purple !important;
+              border-radius: 4px;
               box-shadow: none;
             }
           }
@@ -248,13 +253,17 @@
               color: $dark-text-color !important;
               border-color: $primary-purple !important;
               box-shadow: none;
+              border-radius: 4px;
             }
           }
           .ant-radio-button-wrapper::before {
             background-color: transparent;
+            border-radius: 4px;
           }
           .ant-radio-button-wrapper {
             border: 1px solid $common-form-input-border;
+            border-radius: 4px;
+            color: $common-input-color;
           }
 
           .anticon {
