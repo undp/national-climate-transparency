@@ -378,6 +378,12 @@ export const AddInvestmentComponent = () => {
                                           throw new Error(
                                             `${t('programme:paymentPerMetric')} ${t('isRequired')}`
                                           );
+                                        } else if (!isNaN(value)) {
+                                          return Promise.resolve();
+                                        } else {
+                                          throw new Error(
+                                            `${t('programme:paymentPerMetric')} ${t('isInvalid')}`
+                                          );
                                         }
                                       },
                                     },
