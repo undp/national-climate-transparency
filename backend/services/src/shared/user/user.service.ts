@@ -262,6 +262,7 @@ export class UserService {
   }
 
   async regenerateApiKey(email, abilityCondition) {
+    email = email?.toLowerCase()
     this.logger.verbose("Regenerated api key received", email);
     const user = await this.userRepo
       .createQueryBuilder()
