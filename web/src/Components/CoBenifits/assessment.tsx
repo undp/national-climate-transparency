@@ -29,7 +29,7 @@ const Assessment = (props: any) => {
   const [isVerifyingOrgVisible, setIsVerifyingOrgVisible] = useState(false);
   const [isVerifyingDetailsVisible, setIsVerifyingDetailsVisible] = useState(false);
   const [isPersonListedDetailsVisible, setIsPersonListedDetailsVisible] = useState(false);
-  const [isFormValid, setIsFormValid] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(true);
 
   useEffect(() => {
     onFormSubmit(cobenefitsAssessmentDetails, isFormValid);
@@ -46,26 +46,16 @@ const Assessment = (props: any) => {
 
   const validateForms = async () => {
     setIsFormValid(true);
-    try {
-      await form1.validateFields();
-    } catch (exception: any) {
-      if (exception.errorFields.length > 0) {
+    if (isVerifyingOrgVisible) {
+      const verifyingOrgName = form1.getFieldValue('verifyingOrgName');
+      if (verifyingOrgName === undefined || verifyingOrgName === '') {
         setIsFormValid(false);
       }
     }
 
-    try {
-      await form2.validateFields();
-    } catch (exception: any) {
-      if (exception.errorFields.length > 0) {
-        setIsFormValid(false);
-      }
-    }
-
-    try {
-      await form3.validateFields();
-    } catch (exception: any) {
-      if (exception.errorFields.length > 0) {
+    if (isPersonListedDetailsVisible) {
+      const personListedDetails = form1.getFieldValue('personListedDetails');
+      if (personListedDetails === undefined || personListedDetails === '') {
         setIsFormValid(false);
       }
     }
@@ -73,7 +63,7 @@ const Assessment = (props: any) => {
 
   useEffect(() => {
     validateForms();
-  }, []);
+  });
 
   const onFormChanged = async (formName: string, info: any) => {
     const changedValues: any = {};
@@ -99,7 +89,6 @@ const Assessment = (props: any) => {
     } else {
       setIsVerifyingOrgVisible(false);
     }
-    validateForms();
   };
 
   const onIsWillingToVerifiedChanged = (e: any) => {
@@ -108,7 +97,6 @@ const Assessment = (props: any) => {
     } else {
       setIsVerifyingDetailsVisible(false);
     }
-    validateForms();
   };
 
   const onIsThePersonListedChanged = (e: any) => {
@@ -117,11 +105,9 @@ const Assessment = (props: any) => {
     } else {
       setIsPersonListedDetailsVisible(false);
     }
-    validateForms();
   };
 
   const normFile = (e: any) => {
-    console.log('e', e);
     if (Array.isArray(e)) {
       return e;
     }
@@ -151,12 +137,6 @@ const Assessment = (props: any) => {
                     label={t('assessmentIsThirdPartyVerified')}
                     className="form-item"
                     name="IsThirdPartyVerified"
-                    rules={[
-                      {
-                        required: true,
-                        message: '',
-                      },
-                    ]}
                   >
                     <Radio.Group size="middle" onChange={onIsThirdPartyVerifiedChanged}>
                       <div className="radio-container">
@@ -196,12 +176,6 @@ const Assessment = (props: any) => {
                     label={t('assesmentIsWillingToVerified')}
                     className="form-item"
                     name="IsWillingToVerified"
-                    rules={[
-                      {
-                        required: true,
-                        message: '',
-                      },
-                    ]}
                   >
                     <Radio.Group size="middle" onChange={onIsWillingToVerifiedChanged}>
                       <div className="radio-container">
@@ -304,7 +278,6 @@ const Assessment = (props: any) => {
               layout="vertical"
               requiredMark={true}
               form={form2}
-              onValuesChange={() => validateForms()}
             >
               <Row className="mg-bottom-1">
                 <label className="co-sub-title-text">{t('contactInformation')}</label>
@@ -313,16 +286,7 @@ const Assessment = (props: any) => {
                 <Col flex="139px">
                   <>
                     {!viewOnly && (
-                      <Form.Item
-                        label={t('assessmentTitle')}
-                        name="title"
-                        rules={[
-                          {
-                            required: true,
-                            message: '',
-                          },
-                        ]}
-                      >
+                      <Form.Item label={t('assessmentTitle')} name="title">
                         <Select
                           size="large"
                           style={{
@@ -347,16 +311,7 @@ const Assessment = (props: any) => {
                 <Col flex="303px">
                   <>
                     {!viewOnly && (
-                      <Form.Item
-                        label={t('assessmentFirstName')}
-                        name="firstName"
-                        rules={[
-                          {
-                            required: true,
-                            message: '',
-                          },
-                        ]}
-                      >
+                      <Form.Item label={t('assessmentFirstName')} name="firstName">
                         <Input style={{ width: 303 }} />
                       </Form.Item>
                     )}
@@ -374,16 +329,7 @@ const Assessment = (props: any) => {
                 <Col flex="303px">
                   <>
                     {!viewOnly && (
-                      <Form.Item
-                        label={t('assessmentLastName')}
-                        name="lastName"
-                        rules={[
-                          {
-                            required: true,
-                            message: '',
-                          },
-                        ]}
-                      >
+                      <Form.Item label={t('assessmentLastName')} name="lastName">
                         <Input style={{ width: 303 }} />
                       </Form.Item>
                     )}
@@ -403,16 +349,7 @@ const Assessment = (props: any) => {
                 <Col flex="462px">
                   <>
                     {!viewOnly && (
-                      <Form.Item
-                        label={t('assessmentOrganisation')}
-                        name="organisation"
-                        rules={[
-                          {
-                            required: true,
-                            message: '',
-                          },
-                        ]}
-                      >
+                      <Form.Item label={t('assessmentOrganisation')} name="organisation">
                         <Input style={{ width: 462 }} />
                       </Form.Item>
                     )}
@@ -430,16 +367,7 @@ const Assessment = (props: any) => {
                 <Col flex="303px">
                   <>
                     {!viewOnly && (
-                      <Form.Item
-                        label={t('assessmentTelephone')}
-                        name="telephone"
-                        rules={[
-                          {
-                            required: true,
-                            message: '',
-                          },
-                        ]}
-                      >
+                      <Form.Item label={t('assessmentTelephone')} name="telephone">
                         <PhoneInput
                           style={{ width: 303 }}
                           international
@@ -470,19 +398,8 @@ const Assessment = (props: any) => {
                         name="email"
                         rules={[
                           {
-                            required: true,
-                            message: '',
-                          },
-                          {
                             validator: async (rule, value) => {
-                              if (
-                                String(value).trim() === '' ||
-                                String(value).trim() === undefined ||
-                                value === null ||
-                                value === undefined
-                              ) {
-                                throw new Error(``);
-                              } else {
+                              if (value) {
                                 const val = value.trim();
                                 const reg =
                                   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -514,16 +431,7 @@ const Assessment = (props: any) => {
                 <Col flex="462px">
                   <>
                     {!viewOnly && (
-                      <Form.Item
-                        label={t('assessmentAffiliationCDM')}
-                        name="affiliationCDM"
-                        rules={[
-                          {
-                            required: true,
-                            message: '',
-                          },
-                        ]}
-                      >
+                      <Form.Item label={t('assessmentAffiliationCDM')} name="affiliationCDM">
                         <Input style={{ width: 462 }} />
                       </Form.Item>
                     )}
@@ -561,12 +469,6 @@ const Assessment = (props: any) => {
                       label={t('assesmentIsThePersonListed')}
                       className="form-item"
                       name="isThePersonListed"
-                      rules={[
-                        {
-                          required: true,
-                          message: '',
-                        },
-                      ]}
                     >
                       <Radio.Group size="middle" onChange={onIsThePersonListedChanged}>
                         <div className="radio-container">
