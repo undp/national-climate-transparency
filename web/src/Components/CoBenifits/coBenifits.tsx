@@ -210,10 +210,8 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     }
     for (const section in economicSectionValidation) {
       if (
-        (economicSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
-          economicSectionValidation[section].fields !==
-            economicSectionValidation[section].filled) ||
-        economicSectionValidation[section].filled === 0
+        economicSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
+        economicSectionValidation[section].fields !== economicSectionValidation[section].filled
       ) {
         economicOverallValidation = false;
       }
@@ -238,10 +236,9 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     }
     for (const section in environmentalSectionValidation) {
       if (
-        (environmentalSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
-          environmentalSectionValidation[section].fields !==
-            environmentalSectionValidation[section].filled) ||
-        environmentalSectionValidation[section].filled === 0
+        environmentalSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
+        environmentalSectionValidation[section].fields !==
+          environmentalSectionValidation[section].filled
       ) {
         environmentalOverallValidation = false;
       }

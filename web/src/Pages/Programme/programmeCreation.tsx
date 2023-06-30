@@ -320,6 +320,8 @@ export const AddProgrammeComponent = () => {
     }
   };
 
+  const onChangeOrganisation = (value: any) => {};
+
   const ProgrammeDetailsForm = () => {
     const companyRole = state?.record?.companyRole;
     return (
@@ -535,6 +537,7 @@ export const AddProgrammeComponent = () => {
                                   <Select
                                     size="large"
                                     loading={loadingList}
+                                    onChange={onChangeOrganisation}
                                     disabled={
                                       name === 0 &&
                                       userInfoState?.companyRole !== CompanyRole.GOVERNMENT
@@ -640,7 +643,7 @@ export const AddProgrammeComponent = () => {
                     <Select size="large">
                       {Object.entries(SectoralScope).map(([key, value]) => (
                         <Select.Option key={value} value={value}>
-                          {key.replace(/([A-Z])/g, ' $1').trim()}
+                          {key}
                         </Select.Option>
                       ))}
                     </Select>
@@ -748,7 +751,7 @@ export const AddProgrammeComponent = () => {
                   </Col>
                   <Col md={8} lg={6} xl={5} className="included-val">
                     <Radio.Group
-                      size="small"
+                      size="middle"
                       disabled={ndcScopeChanged}
                       defaultValue={
                         ndcScopeChanged
@@ -794,7 +797,7 @@ export const AddProgrammeComponent = () => {
                   </Col>
                   <Col md={8} lg={6} xl={5} className="included-val">
                     <Radio.Group
-                      size="small"
+                      size="middle"
                       onChange={onInCludedNAPChange}
                       defaultValue={
                         includedInNAP ? 'inNAP' : includedInNAP === false ? 'notInNAP' : undefined

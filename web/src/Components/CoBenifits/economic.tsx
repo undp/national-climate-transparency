@@ -14,7 +14,7 @@ const Economic = (props: any) => {
           name: 'growthQ1',
           label: t('growthQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'growthQ2',
@@ -67,7 +67,7 @@ const Economic = (props: any) => {
           name: 'energyQ1',
           label: t('energyQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'energyQ2',
@@ -102,7 +102,7 @@ const Economic = (props: any) => {
           name: 'techTransferQ1',
           label: t('techTransferQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'techTransferQ2',
@@ -143,7 +143,7 @@ const Economic = (props: any) => {
           name: 'balanceOfPaymentsQ1',
           label: t('balanceOfPaymentsQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'balanceOfPaymentsQ2',
@@ -166,7 +166,7 @@ const Economic = (props: any) => {
           name: 'furtherInfoQ1',
           label: t('furtherInfoQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
       ],
     },
