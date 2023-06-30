@@ -472,17 +472,26 @@ body {
   display: inline-block;
 }
 
+
 .popup-primary {
   .icon {
     color: $primary-color !important;
   }
 
   .ant-btn-primary {
-    background: $primary-color !important;
+    background: $primary-color;
     border-radius: $primary-color;
     border: none;
   }
 
+  .transfer-form {
+    .ant-btn-primary {
+      background: $primary-color;
+      border-radius: $primary-color;
+      border: none;
+    }
+  }
+  
   .ant-btn-default {
     color: $body-text-color;
     border-color: $body-text-color;
@@ -769,4 +778,11 @@ body {
 
 .hide {
   display: none;
+}
+
+.required-mark {
+  color: $error-color;
+  vertical-align: super;
+  margin-left: 5px;
+  font-size: 10px;
 }
