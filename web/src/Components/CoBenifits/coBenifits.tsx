@@ -33,8 +33,8 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
   } = props;
   const { t } = useTranslation(['coBenifits']);
   const [coBenefitDetails, setCoBenefitDetails] = useState<any>();
-  const [isSocialFormValid, setIsSocialFormValid] = useState<any>(false);
-  const [isAssessmentFormValid, setIsAssessmentFormValid] = useState<any>(false);
+  const [isSocialFormValid, setIsSocialFormValid] = useState<any>(true);
+  const [isAssessmentFormValid, setIsAssessmentFormValid] = useState<any>(true);
 
   const onSdgGoalsFormSubmit = (sdgGoalsDetails: any) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, sdgGoals: sdgGoalsDetails }));

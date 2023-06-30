@@ -9,7 +9,7 @@ const Social = (props: any) => {
   const [form] = Form.useForm();
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [socialDetails, setSocialDetails] = useState();
-  const [isFormValid, setIsFormValid] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(true);
 
   const SocialElementDetails: any[] = [
     {
@@ -237,17 +237,7 @@ const Social = (props: any) => {
                 </div>
                 {!viewOnly && (
                   <>
-                    <Form.Item
-                      className="mg-left-2"
-                      label={element.label}
-                      name={element.name}
-                      rules={[
-                        {
-                          required: true,
-                          message: '',
-                        },
-                      ]}
-                    >
+                    <Form.Item className="mg-left-2" label={element.label} name={element.name}>
                       <Radio.Group size="middle" onChange={onRadioStatusChanged}>
                         <div className="radio-container">
                           <Radio.Button className="radio" value={RadioButtonStatus.YES}>
