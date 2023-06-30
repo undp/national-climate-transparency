@@ -141,6 +141,8 @@ export class UserService {
     abilityCondition: string
   ): Promise<DataResponseDto | undefined> {
     this.logger.verbose("User update received", abilityCondition);
+
+    userDto.email = userDto.email?.toLowerCase()
     const { id, ...update } = userDto;
     const user = await this.findById(id);
     if (!user) {
@@ -149,7 +151,7 @@ export class UserService {
         HttpStatus.NOT_FOUND
       );
     }
-
+    
     const result = await this.userRepo
       .createQueryBuilder()
       .update(User)
@@ -391,6 +393,8 @@ export class UserService {
     companyRole: CompanyRole
   ): Promise<User | DataResponseMessageDto | undefined> {
     this.logger.verbose(`User create received  ${userDto.email} ${companyId}`);
+
+    userDto.email = userDto.email?.toLowerCase();
     const createdUserDto = {...userDto};
     if(userDto.company){
       createdUserDto.company={...userDto.company}
