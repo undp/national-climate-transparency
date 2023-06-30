@@ -36,6 +36,9 @@ export class Investment implements EntitySubject {
   @Column({nullable: true})
   paymentPerMetric?: number;
 
+  @Column({nullable: true})
+  comments?: string;
+
   @Column({
     type: "enum",
     enum: InvestmentType,

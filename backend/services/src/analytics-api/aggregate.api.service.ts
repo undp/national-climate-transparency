@@ -25,6 +25,7 @@ import { CompanyRole } from "../shared/enum/company.role.enum";
 import { PRECISION } from "../shared/constants";
 import { NDCActionViewEntity } from "../shared/entities/ndc.view.entity";
 import { InvestmentView } from "../shared/entities/investment.view.entity";
+import { InvestmentStatus } from "src/shared/enum/investment.status";
 
 @Injectable()
 export class AggregateAPIService {
@@ -37,7 +38,8 @@ export class AggregateAPIService {
     "programmeCertifierId",
     "initiatorCompanyId",
     "isRetirement",
-    "createdTime"
+    "createdTime",
+    "status"
   ]
 
   constructor(
@@ -831,6 +833,8 @@ export class AggregateAPIService {
           if (stat.statFilter && stat.statFilter.endTime) {
             whereCW.push(`"createdTime" <= ${stat.statFilter.endTime}`);
           }
+
+          whereCW.push(`status = '${InvestmentStatus.APPROVED}'`)
   
           const query = `SELECT p."requestId" as loc, b."type" as type, count(*) AS count
           FROM  investment_view b, jsonb_array_elements(b."toGeo") p("requestId")
@@ -1241,14 +1245,14 @@ export class AggregateAPIService {
       "createdTime"
     );
 
-    // if (!filterAnd) {
-    //   filterAnd = []
-    // }
-    // filterAnd.push({
-    //   value: 'NULL',
-    //   key: "type",
-    //   operation: "is not",
-    // })
+    if (!filterAnd) {
+      filterAnd = []
+    }
+    filterAnd.push({
+      value: 'Approved',
+      key: "status",
+      operation: "=",
+    })
     let filterOr = undefined;
     // if (stat.statFilter && stat.statFilter.onlyMine) {
     //   filterOr = [];

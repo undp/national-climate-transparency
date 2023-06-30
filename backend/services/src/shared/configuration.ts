@@ -5,6 +5,7 @@ export default () => ({
   defaultCreditUnit: process.env.defaultCreditUnit || "ITMO",
   dateTimeFormat: "DD LLLL yyyy @ HH:mm",
   dateFormat: "DD LLLL yyyy",
+  encodePassword: process.env.ENCODE_PASSWORD || false,
   database: {
     type: "postgres",
     host: process.env.DB_HOST || "localhost",
