@@ -6,11 +6,13 @@ const ConnectionContext = createContext<{
   connection?: ConnectionProps;
 }>({});
 import jwt_decode from 'jwt-decode';
+import { useTranslation } from 'react-i18next';
 
 export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
   props: ConnectionContextProviderProps
 ) => {
   const [token, setToken] = useState<string>();
+  const { i18n, t } = useTranslation(['common']);
   const { serverURL, children } = props;
 
   useEffect(() => {
@@ -72,7 +74,7 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
               reject({
                 status: 500,
                 statusText: 'UNKNOWN',
-                message: 'Something went wrong',
+                message: t('common:systemError'),
               });
             }
           })
@@ -93,13 +95,13 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
               } else {
                 reject({
                   statusText: 'ERROR',
-                  message: 'Something went wrong',
+                  message: t('common:systemError'),
                 });
               }
             } else {
               reject({
                 statusText: 'ERROR',
-                message: 'Network error',
+                message: t('common:networkError'),
               });
             }
           });
