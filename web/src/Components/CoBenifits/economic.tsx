@@ -262,8 +262,8 @@ const Economic = (props: any) => {
       <Form
         name="economic-details"
         className="benifits-details-economic"
-        labelCol={{ md: 16, lg: 19, xl: 19 }}
-        wrapperCol={{ md: 8, lg: 5, xl: 5 }}
+        labelCol={{ md: 16, lg: 16, xl: 16 }}
+        wrapperCol={{ md: 8, lg: 6, xl: 6 }}
         layout="horizontal"
         requiredMark={true}
         form={formOne}
@@ -276,11 +276,11 @@ const Economic = (props: any) => {
             <>
               <div className="title">{environmentalDetail?.section}</div>
               {environmentalDetail?.fields?.map(
-                (field: any) =>
+                (field: any, index: any) =>
                   !field?.hide && (
                     <Form.Item
                       label={field?.label}
-                      className="form-item"
+                      className={`form-item ${index !== 0 ? 'field-margin' : ''}`}
                       name={field?.name}
                       rules={[
                         {
@@ -291,6 +291,7 @@ const Economic = (props: any) => {
                     >
                       <Radio.Group
                         size="middle"
+                        className={`${index !== 0 && 'field-padding'}`}
                         onChange={() => {}}
                         disabled={economicViewData && true}
                       >

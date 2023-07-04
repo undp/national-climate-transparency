@@ -178,10 +178,17 @@
             font-weight: 600;
           }
 
+          .field-margin {
+            margin-left: 0.8rem;
+          }
+
+          .field-padding {
+            padding-right: 0.8rem;
+          }
+
           .form-item {
             width: 100%;
             padding-left: 2rem;
-            // margin-left: 2rem;
             .ant-form-item-label {
               display: flex;
               flex-direction: row;
@@ -192,6 +199,7 @@
             }
 
             .ant-radio-group {
+              width: 95%;
               text-align: center;
               align-items: center;
               justify-content: flex-start;
@@ -250,10 +258,17 @@
             font-weight: 600;
           }
 
+          .field-margin {
+            margin-left: 0.8rem;
+          }
+
+          .field-padding {
+            padding-right: 0.8rem;
+          }
+
           .form-item {
             width: 100%;
             padding-left: 2rem;
-            // margin-left: 2rem;
             .ant-form-item-label {
               display: flex;
               flex-direction: row;
@@ -264,6 +279,7 @@
             }
 
             .ant-radio-group {
+              width: 95%;
               text-align: center;
               align-items: center;
               justify-content: flex-start;
