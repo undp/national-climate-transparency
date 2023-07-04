@@ -41,6 +41,7 @@ export const AddProgrammeComponent = () => {
   const { state } = useLocation();
   const [formOne] = Form.useForm();
   const [formTwo] = Form.useForm();
+  const [formThree] = Form.useForm();
   const navigate = useNavigate();
   const [formChecks] = Form.useForm();
   const { put, get, post } = useConnection();
@@ -48,7 +49,8 @@ export const AddProgrammeComponent = () => {
   const { t } = useTranslation(['common', 'addProgramme']);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingList, setLoadingList] = useState<boolean>(false);
-  const [ndcScopeChanged, setNdcScopeChanged] = useState<boolean>(false);
+  const [ndcScopeChanged, setNdcScopeChanged] = useState<any>();
+  const [ndcScopeValue, setNdcScopeValue] = useState<any>();
   const [contactNoInput] = useState<any>();
   const [stepOneData, setStepOneData] = useState<any>();
   const [stepTwoData, setStepTwoData] = useState<any>();
@@ -193,15 +195,19 @@ export const AddProgrammeComponent = () => {
           buyerCountryEligibility: values?.buyerCountryEligibility,
           geographicalLocation: values?.geographicalLocation,
           greenHouseGasses: values?.greenHouseGasses,
-          ndcScope: values?.ndcScope === 'true' ? true : false,
-          includedInNDC: includedInNDC,
-          includedInNap: includedInNDC,
+          ...(values?.ndcScope !== undefined &&
+            values?.ndcScope !== null && { ndcScope: values?.ndcScope === 'true' ? true : false }),
+          ...(includedInNDC !== undefined &&
+            includedInNDC !== null && { includedInNdc: includedInNDC }),
+          ...(includedInNAP !== undefined &&
+            includedInNAP !== null && { includedInNap: includedInNAP }),
         },
       };
       if (logoUrls?.length > 0) {
         programmeDetails.designDocument = logoUrls[1];
       }
       setLoading(false);
+      console.log(programmeDetails);
       nextOne(programmeDetails);
     }
   };
@@ -290,9 +296,34 @@ export const AddProgrammeComponent = () => {
   };
 
   const onChangeNDCScope = (event: any) => {
-    if (event?.target) {
+    const value = event.target.value;
+    if (value === ndcScopeValue) {
+      setNdcScopeValue(null);
+    } else {
       setNdcScopeChanged(true);
       setIncludedInNDC(true);
+      setNdcScopeValue(value);
+    }
+  };
+
+  const onClickNDCScope = (value: any) => {
+    if (value === ndcScopeValue) {
+      setNdcScopeValue(null);
+      formOne.setFieldValue('ndcScope', null);
+      setNdcScopeChanged(undefined);
+      setIncludedInNDC(undefined);
+    }
+  };
+
+  const onClickIncludedInNDCScope = (value: any) => {
+    if (value === includedInNDC) {
+      setIncludedInNDC(undefined);
+    }
+  };
+
+  const onClickIncludedInNAPScope = (value: any) => {
+    if (value === includedInNAP) {
+      setIncludedInNAP(undefined);
     }
   };
 
@@ -366,6 +397,7 @@ export const AddProgrammeComponent = () => {
                     <Input size="large" />
                   </Form.Item>
                   <Form.Item
+                    wrapperCol={{ span: 13 }}
                     label={t('addProgramme:sector')}
                     name="sector"
                     rules={[
@@ -631,6 +663,7 @@ export const AddProgrammeComponent = () => {
                     <Input size="large" />
                   </Form.Item>
                   <Form.Item
+                    wrapperCol={{ span: 13 }}
                     label={t('addProgramme:sectoralScope')}
                     name="sectoralScope"
                     rules={[
@@ -686,21 +719,29 @@ export const AddProgrammeComponent = () => {
                     wrapperCol={{ span: 13 }}
                     className="role-group"
                     name="ndcScope"
-                    initialValue={companyRole}
+                    initialValue={ndcScopeValue}
                     rules={[
                       {
                         required: false,
                       },
                     ]}
                   >
-                    <Radio.Group size="large" onChange={onChangeNDCScope}>
+                    <Radio.Group size="large" onChange={onChangeNDCScope} value={ndcScopeValue}>
                       <div className="condition-radio-container">
-                        <Radio.Button className="condition-radio" value="true">
+                        <Radio.Button
+                          className="condition-radio"
+                          value="true"
+                          onClick={() => onClickNDCScope('true')}
+                        >
                           {t('addProgramme:conditional')}
                         </Radio.Button>
                       </div>
                       <div className="condition-radio-container">
-                        <Radio.Button className="condition-radio" value="false">
+                        <Radio.Button
+                          className="condition-radio"
+                          value="false"
+                          onClick={() => onClickNDCScope('false')}
+                        >
                           {t('addProgramme:unConditional')}
                         </Radio.Button>
                       </div>
@@ -734,7 +775,7 @@ export const AddProgrammeComponent = () => {
             <Row className="selection-details-row" gutter={[16, 16]}>
               <Col md={24} xl={12} className="in-ndc-col">
                 <Row className="in-ndc-row">
-                  <Col md={16} lg={18} xl={19}>
+                  <Col md={16} lg={18} xl={18}>
                     <div className="included-label">
                       <div>{t('addProgramme:inNDC')}</div>
                       <div className="info-container">
@@ -749,7 +790,7 @@ export const AddProgrammeComponent = () => {
                       </div>
                     </div>
                   </Col>
-                  <Col md={8} lg={6} xl={5} className="included-val">
+                  <Col md={8} lg={6} xl={6} className="included-val">
                     <Radio.Group
                       size="middle"
                       disabled={ndcScopeChanged}
@@ -765,12 +806,20 @@ export const AddProgrammeComponent = () => {
                       onChange={onInCludedNDCChange}
                     >
                       <div className="yes-no-radio-container">
-                        <Radio.Button className="yes-no-radio" value="inNDC">
+                        <Radio.Button
+                          className="yes-no-radio"
+                          value="inNDC"
+                          onClick={() => onClickIncludedInNDCScope(true)}
+                        >
                           {t('addProgramme:yes')}
                         </Radio.Button>
                       </div>
                       <div className="yes-no-radio-container">
-                        <Radio.Button className="yes-no-radio" value="notInNDC">
+                        <Radio.Button
+                          className="yes-no-radio"
+                          value="notInNDC"
+                          onClick={() => onClickIncludedInNDCScope(false)}
+                        >
                           {t('addProgramme:no')}
                         </Radio.Button>
                       </div>
@@ -780,7 +829,7 @@ export const AddProgrammeComponent = () => {
               </Col>
               <Col md={24} xl={12} className="in-nap-col">
                 <Row className="in-nap-row">
-                  <Col md={16} lg={18} xl={19}>
+                  <Col md={16} lg={18} xl={18}>
                     <div className="included-label">
                       <div>{t('addProgramme:inNAP')}</div>
                       <div className="info-container">
@@ -795,7 +844,7 @@ export const AddProgrammeComponent = () => {
                       </div>
                     </div>
                   </Col>
-                  <Col md={8} lg={6} xl={5} className="included-val">
+                  <Col md={8} lg={6} xl={6} className="included-val">
                     <Radio.Group
                       size="middle"
                       onChange={onInCludedNAPChange}
@@ -804,12 +853,20 @@ export const AddProgrammeComponent = () => {
                       }
                     >
                       <div className="yes-no-radio-container">
-                        <Radio.Button className="yes-no-radio" value="inNAP">
+                        <Radio.Button
+                          className="yes-no-radio"
+                          value="inNAP"
+                          onClick={() => onClickIncludedInNAPScope(true)}
+                        >
                           {t('addProgramme:yes')}
                         </Radio.Button>
                       </div>
                       <div className="yes-no-radio-container">
-                        <Radio.Button className="yes-no-radio" value="notInNAP">
+                        <Radio.Button
+                          className="yes-no-radio"
+                          value="notInNAP"
+                          onClick={() => onClickIncludedInNAPScope(false)}
+                        >
                           {t('addProgramme:no')}
                         </Radio.Button>
                       </div>
