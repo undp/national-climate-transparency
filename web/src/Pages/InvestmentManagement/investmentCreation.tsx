@@ -178,6 +178,14 @@ export const AddInvestmentComponent = () => {
     }
   };
 
+  const deselectOnClick = (e: any, fieldName: string) => {
+    const { value } = e.target;
+    if (value === formOne.getFieldValue(fieldName)) {
+      console.log('double clicked button', value);
+      formOne.setFieldValue(fieldName, null);
+    }
+  };
+
   return (
     <div className="add-programme-main-container">
       <div className="title-container">
@@ -301,6 +309,10 @@ export const AddInvestmentComponent = () => {
                                   name="interestRate"
                                   rules={[
                                     {
+                                      required: true,
+                                      message: '',
+                                    },
+                                    {
                                       validator: async (rule, value) => {
                                         if (
                                           String(value).trim() === '' ||
@@ -308,7 +320,10 @@ export const AddInvestmentComponent = () => {
                                           value === null ||
                                           value === undefined
                                         ) {
-                                        } else if (!isNaN(value) && Number(value) > 0) {
+                                          throw new Error(
+                                            `${t('programme:interestRate')} ${t('isRequired')}`
+                                          );
+                                        } else if (!isNaN(value)) {
                                           return Promise.resolve();
                                         } else {
                                           throw new Error(
@@ -378,6 +393,46 @@ export const AddInvestmentComponent = () => {
                                           throw new Error(
                                             `${t('programme:paymentPerMetric')} ${t('isRequired')}`
                                           );
+                                        } else if (!isNaN(value)) {
+                                          return Promise.resolve();
+                                        } else {
+                                          throw new Error(
+                                            `${t('programme:paymentPerMetric')} ${t('isInvalid')}`
+                                          );
+                                        }
+                                      },
+                                    },
+                                  ]}
+                                >
+                                  <Input size="large" />
+                                </Form.Item>
+                              </div>
+                            </Col>
+                          </Row>
+                        )}
+                        {instrument && instrument.indexOf(Instrument.OTHER) >= 0 && (
+                          <Row className="row" gutter={[16, 16]}>
+                            <Col xl={12} md={24}>
+                              <div className="details-part-two">
+                                <Form.Item
+                                  label={t('programme:comments')}
+                                  name="comments"
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: '',
+                                    },
+                                    {
+                                      validator: async (rule, value) => {
+                                        if (
+                                          String(value).trim() === '' ||
+                                          String(value).trim() === undefined ||
+                                          value === null ||
+                                          value === undefined
+                                        ) {
+                                          throw new Error(
+                                            `${t('programme:comments')} ${t('isRequired')}`
+                                          );
                                         }
                                       },
                                     },
@@ -405,7 +460,11 @@ export const AddInvestmentComponent = () => {
                               <Radio.Group size="large">
                                 {Object.values(InvestmentType).map((k, index) => (
                                   <div className="condition-radio-container">
-                                    <Radio.Button className="condition-radio" value={k}>
+                                    <Radio.Button
+                                      className="condition-radio"
+                                      value={k}
+                                      onClick={(e: any) => deselectOnClick(e, 'type')}
+                                    >
                                       {t('programme:' + k)}
                                     </Radio.Button>
                                   </div>
@@ -428,7 +487,11 @@ export const AddInvestmentComponent = () => {
                               <Radio.Group size="large">
                                 {Object.values(InvestmentLevel).map((k, index) => (
                                   <div className="condition-radio-container">
-                                    <Radio.Button className="condition-radio" value={k}>
+                                    <Radio.Button
+                                      className="condition-radio"
+                                      value={k}
+                                      onClick={(e: any) => deselectOnClick(e, 'level')}
+                                    >
                                       {t('programme:' + k)}
                                     </Radio.Button>
                                   </div>
@@ -451,7 +514,11 @@ export const AddInvestmentComponent = () => {
                               <Radio.Group size="large">
                                 {Object.values(InvestmentStream).map((k, index) => (
                                   <div className="condition-radio-container">
-                                    <Radio.Button className="condition-radio" value={k}>
+                                    <Radio.Button
+                                      className="condition-radio"
+                                      value={k}
+                                      onClick={(e: any) => deselectOnClick(e, 'stream')}
+                                    >
                                       {t('programme:' + k)}
                                     </Radio.Button>
                                   </div>
@@ -515,7 +582,10 @@ export const AddInvestmentComponent = () => {
                             return (
                               <Row className="row" gutter={[16, 16]}>
                                 <Col xl={8} md={15}>
-                                  <div className="label">{companyName[companyId].name}</div>
+                                  <div className="label">
+                                    {companyName[companyId].name}
+                                    <span className="required-mark">*</span>
+                                  </div>
                                 </Col>
                                 <Col xl={8} md={9}>
                                   <Form.Item

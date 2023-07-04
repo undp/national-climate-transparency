@@ -353,7 +353,7 @@ const InvestmentManagement = () => {
 
   const columns = [
     {
-      title: t('programme:requestID'),
+      title: t('programme:requestId'),
       dataIndex: 'requestId',
       key: 'requestId',
       sorter: true,
