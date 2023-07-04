@@ -1,7 +1,18 @@
-import { Checkbox, Col, Empty, Input, PaginationProps, Row, Table, Tooltip, message } from 'antd';
+import {
+  Checkbox,
+  Col,
+  Empty,
+  Input,
+  PaginationProps,
+  Row,
+  Table,
+  Tag,
+  Tooltip,
+  message,
+} from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NdcActionStatus } from '../../Casl/enums/ndcAction.status';
+import { NdcActionStatus, getNdcStatusTagType } from '../../Casl/enums/ndcAction.status';
 import { ProfileIcon, addSpaces, getCompanyBgColor } from '@undp/carbon-library';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
@@ -10,6 +21,7 @@ import { TooltipColor } from '../Common/role.color.constants';
 import { useNavigate } from 'react-router';
 import './ndcActionManagement.scss';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 
 const NdcActionManagement = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -37,6 +49,21 @@ const NdcActionManagement = () => {
   }));
 
   const [selectedStatus, setSelectedStatus] = useState<any>(statusOptions.map((e) => e.value));
+
+  const getNdcActionNames = (action: NdcActionTypes) => {
+    switch (action) {
+      case NdcActionTypes.Adaptation:
+        return t('ndcAction:adaptation');
+      case NdcActionTypes.Mitigation:
+        return t('ndcAction:mitigation');
+      case NdcActionTypes.CrossCutting:
+        return t('ndcAction:crossCutting');
+      case NdcActionTypes.Enablement:
+        return t('ndcAction:enablement');
+      default:
+        return '';
+    }
+  };
 
   const columns: any = [
     {
@@ -75,6 +102,9 @@ const NdcActionManagement = () => {
       key: 'action',
       sorter: true,
       align: 'left' as const,
+      render: (item: any) => {
+        return getNdcActionNames(item);
+      },
     },
     {
       title: t('ndcAction:ndcColumnsProgrammeName'),
@@ -129,9 +159,18 @@ const NdcActionManagement = () => {
     {
       title: t('ndcAction:ndcColumnsStatus'),
       dataIndex: 'status',
-      align: 'left' as const,
+      align: 'center' as const,
       key: 'status',
       sorter: true,
+      render: (item: any, Obj: any) => {
+        return (
+          <Tooltip title={Obj.status} color={TooltipColor} key={TooltipColor}>
+            <Tag className="clickable" color={getNdcStatusTagType(Obj.status)}>
+              {addSpaces(Obj.status)}
+            </Tag>
+          </Tooltip>
+        );
+      },
     },
   ];
 

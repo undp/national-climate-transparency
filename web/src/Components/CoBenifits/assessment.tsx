@@ -54,7 +54,7 @@ const Assessment = (props: any) => {
     }
 
     if (isPersonListedDetailsVisible) {
-      const personListedDetails = form1.getFieldValue('personListedDetails');
+      const personListedDetails = form3.getFieldValue('personListedDetails');
       if (personListedDetails === undefined || personListedDetails === '') {
         setIsFormValid(false);
       }
