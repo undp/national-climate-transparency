@@ -67,7 +67,9 @@ const NdcActionManagement = () => {
 
   const getCompanyLogos = (companyId: any, itemObj: any) => {
     if (companyId && itemObj.company.length > 0) {
-      const selectedCompany = itemObj.company.find((c: Company) => c.companyId === parseInt(companyId));
+      const selectedCompany = itemObj.company.find(
+        (c: Company) => c.companyId === parseInt(companyId)
+      );
       if (selectedCompany) {
         return (
           <Tooltip title={selectedCompany.name} color={TooltipColor} key={TooltipColor}>
