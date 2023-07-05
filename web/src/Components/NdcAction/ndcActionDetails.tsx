@@ -140,7 +140,10 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     try {
       let creditRequest: any = {};
       const formValues = form.getFieldsValue();
-      if (formValues.ndcActionType === NdcActionTypes.Mitigation) {
+      if (
+        formValues.ndcActionType === NdcActionTypes.Mitigation ||
+        formValues.ndcActionType === NdcActionTypes.CrossCutting
+      ) {
         if (formValues.mitigationType === MitigationTypes.AGRICULTURE) {
           creditRequest = new AgricultureCreationRequest();
           creditRequest.landArea = formValues.eligibleLandArea;

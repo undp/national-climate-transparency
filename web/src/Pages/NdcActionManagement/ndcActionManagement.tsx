@@ -13,7 +13,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NdcActionStatus, getNdcStatusTagType } from '../../Casl/enums/ndcAction.status';
-import { ProfileIcon, addSpaces, getCompanyBgColor } from '@undp/carbon-library';
+import { Company, ProfileIcon, addSpaces, getCompanyBgColor } from '@undp/carbon-library';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { DateTime } from 'luxon';
@@ -62,6 +62,27 @@ const NdcActionManagement = () => {
         return t('ndcAction:enablement');
       default:
         return '';
+    }
+  };
+
+  const getCompanyLogos = (companyId: any, itemObj: any) => {
+    if (companyId && itemObj.company.length > 0) {
+      const selectedCompany = itemObj.company.find((c: Company) => c.companyId === parseInt(companyId));
+      if (selectedCompany) {
+        return (
+          <Tooltip title={selectedCompany.name} color={TooltipColor} key={TooltipColor}>
+            <div>
+              <ProfileIcon
+                icon={selectedCompany.logo}
+                bg={getCompanyBgColor(selectedCompany.companyRole)}
+                name={selectedCompany.name}
+              />
+            </div>
+          </Tooltip>
+        );
+      } else {
+        return <div></div>;
+      }
     }
   };
 
@@ -132,25 +153,15 @@ const NdcActionManagement = () => {
     },
     {
       title: t('ndcAction:ndcColumnsOwners'),
-      key: 'programmeId',
+      key: 'companyId',
       sorter: true,
       align: 'left' as const,
       render: (item: any, itemObj: any) => {
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {itemObj.company &&
-              itemObj.company.map((v: any, i: any) => {
-                return (
-                  <Tooltip title={v.name} color={TooltipColor} key={TooltipColor}>
-                    <div>
-                      <ProfileIcon
-                        icon={v.logo}
-                        bg={getCompanyBgColor(v.companyRole)}
-                        name={v.name}
-                      />
-                    </div>
-                  </Tooltip>
-                );
+            {itemObj.companyId &&
+              itemObj.companyId.map((v: any, i: any) => {
+                return getCompanyLogos(v, itemObj);
               })}
           </div>
         );

@@ -6,7 +6,12 @@ import { Col, Row, Card, message, Skeleton, Tag } from 'antd';
 import InfoView from '../../Components/InfoView/info.view';
 import './ndcActionView.scss';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { CheckCircleOutlined, ExclamationCircleOutlined, FileAddOutlined } from '@ant-design/icons';
+import {
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  FileAddOutlined,
+  LinkOutlined,
+} from '@ant-design/icons';
 import { DocumentStatus } from '../../Casl/enums/document.status';
 import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
 import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
@@ -15,6 +20,7 @@ import { addCommSep, addSpaces } from '@undp/carbon-library';
 import Chart from 'react-apexcharts';
 import CoBenifitsComponent from '../../Components/CoBenifits/coBenifits';
 import { NdcActionStatus, getNdcStatusTagType } from '../../Casl/enums/ndcAction.status';
+import { linkDocVisible } from '../../Casl/documentsPermission';
 
 const NdcActionView = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -30,17 +36,29 @@ const NdcActionView = () => {
 
   const getProjectReportActions = (reportData: any) => {
     return (
-      <div className="icon">
-        {reportData?.status === DocumentStatus.ACCEPTED && (
-          <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
-        )}
-        {reportData?.status === DocumentStatus.REJECTED && (
-          <ExclamationCircleOutlined
-            className="common-progress-icon"
-            style={{ color: '#FD6F70' }}
-          />
-        )}
-      </div>
+      <Row>
+        <div className="icon">
+          {reportData?.status === DocumentStatus.ACCEPTED && (
+            <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
+          )}
+          {reportData?.status === DocumentStatus.REJECTED && (
+            <ExclamationCircleOutlined
+              className="common-progress-icon"
+              style={{ color: '#FD6F70' }}
+            />
+          )}
+        </div>
+        <div className="link mg-left-1">
+          {reportData?.url && linkDocVisible(reportData?.status) && (
+            <a href={reportData?.url} target="_blank" rel="noopener noreferrer" download>
+              <LinkOutlined
+                className="common-progress-icon margin-right-1"
+                style={{ color: '#3F3A47' }}
+              />
+            </a>
+          )}
+        </div>
+      </Row>
     );
   };
 
