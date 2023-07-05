@@ -248,7 +248,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         title: ndcActionFormvalues.EnablementTitle,
       };
 
-      if (ndcActionFormvalues.EnablementReport) {
+      if (ndcActionFormvalues.EnablementReport && ndcActionFormvalues.EnablementReport.length > 0) {
         const enablementReport = await getBase64(
           ndcActionFormvalues.EnablementReport[0]?.originFileObj as RcFile
         );

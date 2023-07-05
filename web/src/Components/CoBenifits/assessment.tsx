@@ -609,6 +609,16 @@ const Assessment = (props: any) => {
                     </Upload>
                   </Form.Item>
                 )}
+                {viewOnly && assessmentViewData.document && (
+                  <a
+                    href={assessmentViewData.document}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                  >
+                    {assessmentViewData.document}
+                  </a>
+                )}
               </Row>
             </Form>
           </Row>
