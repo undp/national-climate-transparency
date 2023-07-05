@@ -106,7 +106,7 @@ const Safeguards = (props: any) => {
       items: [
         {
           type: FormElementType.Radio,
-          label: t('forcedEvictionQ1'),
+          label: t('indegenousPeopleQ1'),
           name: 'indegenousPeopleQ1',
         },
       ],
