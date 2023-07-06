@@ -1346,7 +1346,28 @@ export class ProgrammeService {
 
     const data = instanceToPlain(ndcActionDto);
     const ndcAction: NDCAction = plainToClass(NDCAction, data);
-    ndcAction.id = await this.createNDCActionId(ndcActionDto, program.programmeId);
+    ndcAction.id = await this.createNDCActionId(
+      ndcActionDto,
+      program.programmeId
+    );
+
+    if (
+      ndcActionDto.coBenefitsProperties &&
+      (ndcActionDto.coBenefitsProperties as any).assessmentDetails
+    ) {
+      const document = (ndcActionDto.coBenefitsProperties as any)
+        .assessmentDetails.document;
+      if (document) {
+        const filetype = "pdf";
+        const response: any = await this.fileHandler.uploadFile(
+          `documents/FEASIBILITY_REPORT${"_" + ndcAction.id}.${filetype}`,
+          document
+        );
+        (ndcActionDto.coBenefitsProperties as any).assessmentDetails.document =
+          response;
+      }
+    }
+
     ndcAction.coBenefitsProperties = ndcActionDto.coBenefitsProperties;
     await this.calcCreditNDCAction(ndcAction, program);
     console.log("2222", ndcAction);
