@@ -209,19 +209,21 @@ const Assessment = (props: any) => {
               )}
               {viewOnly && (
                 <div className="radio-content view-section">
-                  <Form.Item
-                    label={t('assessmentIsThirdPartyVerified')}
-                    className="form-item"
-                    name="IsThirdPartyVerified"
-                  >
-                    <Radio.Group size="middle" disabled>
-                      <div className="radio-container">
-                        <Radio.Button className="radio">
-                          {assessmentViewData.IsThirdPartyVerified}
-                        </Radio.Button>
-                      </div>
-                    </Radio.Group>
-                  </Form.Item>
+                  {assessmentViewData.hasOwnProperty('IsThirdPartyVerified') && (
+                    <Form.Item
+                      label={t('assessmentIsThirdPartyVerified')}
+                      className="form-item"
+                      name="IsThirdPartyVerified"
+                    >
+                      <Radio.Group size="middle" disabled>
+                        <div className="radio-container">
+                          <Radio.Button className="radio">
+                            {assessmentViewData.IsThirdPartyVerified}
+                          </Radio.Button>
+                        </div>
+                      </Radio.Group>
+                    </Form.Item>
+                  )}
                   {assessmentViewData.IsThirdPartyVerified === RadioButtonStatus.YES && (
                     <Form.Item
                       labelCol={{ span: 24 }}
@@ -232,23 +234,29 @@ const Assessment = (props: any) => {
                       <Input
                         disabled
                         style={{ width: 303 }}
-                        defaultValue={assessmentViewData.verifyingOrgName}
+                        defaultValue={
+                          assessmentViewData.verifyingOrgName
+                            ? assessmentViewData.verifyingOrgName
+                            : '-'
+                        }
                       />
                     </Form.Item>
                   )}
-                  <Form.Item
-                    label={t('assesmentIsWillingToVerified')}
-                    className="form-item"
-                    name="IsWillingToVerified"
-                  >
-                    <Radio.Group size="middle" disabled>
-                      <div className="radio-container">
-                        <Radio.Button className="radio">
-                          {assessmentViewData.IsWillingToVerified}
-                        </Radio.Button>
-                      </div>
-                    </Radio.Group>
-                  </Form.Item>
+                  {assessmentViewData.hasOwnProperty('IsWillingToVerified') && (
+                    <Form.Item
+                      label={t('assesmentIsWillingToVerified')}
+                      className="form-item"
+                      name="IsWillingToVerified"
+                    >
+                      <Radio.Group size="middle" disabled>
+                        <div className="radio-container">
+                          <Radio.Button className="radio">
+                            {assessmentViewData.IsWillingToVerified}
+                          </Radio.Button>
+                        </div>
+                      </Radio.Group>
+                    </Form.Item>
+                  )}
                   {assessmentViewData.IsWillingToVerified === RadioButtonStatus.YES && (
                     <Form.Item
                       label={t('verifyingDetailslbl')}
@@ -258,7 +266,11 @@ const Assessment = (props: any) => {
                     >
                       <Input
                         disabled
-                        defaultValue={assessmentViewData.verifyingDetails}
+                        defaultValue={
+                          assessmentViewData.verifyingDetails
+                            ? assessmentViewData.verifyingDetails
+                            : '-'
+                        }
                         style={{ width: 303 }}
                       />
                     </Form.Item>
@@ -278,6 +290,7 @@ const Assessment = (props: any) => {
               layout="vertical"
               requiredMark={true}
               form={form2}
+              className="view-section"
             >
               <Row className="mg-bottom-1">
                 <label className="co-sub-title-text">{t('contactInformation')}</label>
@@ -301,7 +314,7 @@ const Assessment = (props: any) => {
                       <Form.Item label={t('assessmentTitle')} name="title">
                         <Input
                           disabled
-                          defaultValue={assessmentViewData.title}
+                          defaultValue={assessmentViewData.title ? assessmentViewData.title : '-'}
                           style={{ width: 303 }}
                         />
                       </Form.Item>
@@ -319,7 +332,9 @@ const Assessment = (props: any) => {
                       <Form.Item label={t('assessmentFirstName')} name="firstName">
                         <Input
                           disabled
-                          defaultValue={assessmentViewData.firstName}
+                          defaultValue={
+                            assessmentViewData.firstName ? assessmentViewData.firstName : '-'
+                          }
                           style={{ width: 303 }}
                         />
                       </Form.Item>
@@ -337,7 +352,9 @@ const Assessment = (props: any) => {
                       <Form.Item label={t('assessmentLastName')} name="lastName">
                         <Input
                           disabled
-                          defaultValue={assessmentViewData.lastName}
+                          defaultValue={
+                            assessmentViewData.lastName ? assessmentViewData.lastName : '-'
+                          }
                           style={{ width: 303 }}
                         />
                       </Form.Item>
@@ -357,7 +374,9 @@ const Assessment = (props: any) => {
                       <Form.Item label={t('assessmentOrganisation')} name="organisation">
                         <Input
                           disabled
-                          defaultValue={assessmentViewData.organisation}
+                          defaultValue={
+                            assessmentViewData.organisation ? assessmentViewData.organisation : '-'
+                          }
                           style={{ width: 462 }}
                         />
                       </Form.Item>
@@ -381,7 +400,9 @@ const Assessment = (props: any) => {
                       <Form.Item label={t('assessmentTelephone')} name="telephone">
                         <Input
                           disabled
-                          defaultValue={assessmentViewData.telephone}
+                          defaultValue={
+                            assessmentViewData.telephone ? assessmentViewData.telephone : '-'
+                          }
                           style={{ width: 303 }}
                         />
                       </Form.Item>
@@ -421,7 +442,7 @@ const Assessment = (props: any) => {
                       <Form.Item label={t('assessmentEmail')} name="email">
                         <Input
                           disabled
-                          defaultValue={assessmentViewData.email}
+                          defaultValue={assessmentViewData.email ? assessmentViewData.email : '-'}
                           style={{ width: 303 }}
                         />
                       </Form.Item>
@@ -439,7 +460,11 @@ const Assessment = (props: any) => {
                       <Form.Item label={t('assessmentAffiliationCDM')} name="affiliationCDM">
                         <Input
                           disabled
-                          defaultValue={assessmentViewData.affiliationCDM}
+                          defaultValue={
+                            assessmentViewData.affiliationCDM
+                              ? assessmentViewData.affiliationCDM
+                              : '-'
+                          }
                           style={{ width: 462 }}
                         />
                       </Form.Item>
@@ -507,20 +532,22 @@ const Assessment = (props: any) => {
                   </div>
                 )}
                 {viewOnly && (
-                  <div className="radio-content">
-                    <Form.Item
-                      label={t('assesmentIsThePersonListed')}
-                      className="form-item"
-                      name="isThePersonListed"
-                    >
-                      <Radio.Group size="middle" disabled>
-                        <div className="radio-container">
-                          <Radio.Button className="radio">
-                            {assessmentViewData.isThePersonListed}
-                          </Radio.Button>
-                        </div>
-                      </Radio.Group>
-                    </Form.Item>
+                  <div className="radio-content view-section">
+                    {assessmentViewData.hasOwnProperty('isThePersonListed') && (
+                      <Form.Item
+                        label={t('assesmentIsThePersonListed')}
+                        className="form-item"
+                        name="isThePersonListed"
+                      >
+                        <Radio.Group size="middle" disabled>
+                          <div className="radio-container">
+                            <Radio.Button className="radio">
+                              {assessmentViewData.isThePersonListed}
+                            </Radio.Button>
+                          </div>
+                        </Radio.Group>
+                      </Form.Item>
+                    )}
                     {assessmentViewData.isThePersonListed === RadioButtonStatus.NO && (
                       <Form.Item
                         labelCol={{ span: 24 }}
@@ -530,7 +557,11 @@ const Assessment = (props: any) => {
                       >
                         <Input
                           disabled
-                          defaultValue={assessmentViewData.personListedDetails}
+                          defaultValue={
+                            assessmentViewData.personListedDetails
+                              ? assessmentViewData.personListedDetails
+                              : '-'
+                          }
                           style={{ width: 303 }}
                         />
                       </Form.Item>
@@ -542,7 +573,7 @@ const Assessment = (props: any) => {
           </Row>
 
           <Row>
-            <Form layout="vertical" name="form4" form={form4}>
+            <Form layout="vertical" name="form4" form={form4} className="view-section">
               <Row className="mg-bottom-1">
                 <label className="co-sub-title-text">{t('feasibilityReport')}</label>
               </Row>
@@ -558,7 +589,9 @@ const Assessment = (props: any) => {
                       <Form.Item label={t('assessmentStudyName')} name="studyName">
                         <Input
                           disabled
-                          defaultValue={assessmentViewData.studyName}
+                          defaultValue={
+                            assessmentViewData.studyName ? assessmentViewData.studyName : '-'
+                          }
                           style={{ width: 303 }}
                         />
                       </Form.Item>
@@ -576,7 +609,7 @@ const Assessment = (props: any) => {
                       <Form.Item label={t('assessmentFunder')} name="funder">
                         <Input
                           disabled
-                          defaultValue={assessmentViewData.funder}
+                          defaultValue={assessmentViewData.funder ? assessmentViewData.funder : '-'}
                           style={{ width: 303 }}
                         />
                       </Form.Item>
@@ -608,6 +641,16 @@ const Assessment = (props: any) => {
                       </Button>
                     </Upload>
                   </Form.Item>
+                )}
+                {viewOnly && assessmentViewData.document && (
+                  <a
+                    href={assessmentViewData.document}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                  >
+                    {assessmentViewData.document}
+                  </a>
                 )}
               </Row>
             </Form>

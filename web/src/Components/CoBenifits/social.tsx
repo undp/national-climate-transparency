@@ -232,9 +232,11 @@ const Social = (props: any) => {
           {SocialElementDetails.map((element: any) => {
             return (
               <>
-                <div style={{ marginBottom: '15px' }}>
-                  <label className="co-sub-title-text">{element.title}</label>
-                </div>
+                {((viewOnly && socialViewData.hasOwnProperty(element?.name)) || !viewOnly) && (
+                  <div style={{ marginBottom: '15px' }}>
+                    <label className="co-sub-title-text">{element.title}</label>
+                  </div>
+                )}
                 {!viewOnly && (
                   <>
                     <Form.Item className="mg-left-2" label={element.label} name={element.name}>
@@ -347,23 +349,25 @@ const Social = (props: any) => {
                           );
                         } else if (elementItem.type === FormElementType.Input) {
                           return (
-                            <>
-                              {socialViewData.hasOwnProperty(elementItem?.name) && (
-                                <Form.Item
-                                  className="mg-left-4"
-                                  labelCol={{ span: 24 }}
-                                  wrapperCol={{ span: 24 }}
-                                  label={elementItem.label}
-                                  name={elementItem.name}
-                                >
-                                  <Input
-                                    disabled
-                                    style={{ width: 303 }}
-                                    defaultValue={socialViewData[elementItem.name]}
-                                  />
-                                </Form.Item>
-                              )}
-                            </>
+                            <div className="view-section">
+                              <Form.Item
+                                className="mg-left-4"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                label={elementItem.label}
+                                name={elementItem.name}
+                              >
+                                <Input
+                                  disabled
+                                  style={{ width: 303 }}
+                                  defaultValue={
+                                    socialViewData.hasOwnProperty(elementItem?.name)
+                                      ? socialViewData[elementItem.name]
+                                      : '-'
+                                  }
+                                />
+                              </Form.Item>
+                            </div>
                           );
                         }
                       })}{' '}

@@ -206,12 +206,23 @@ const NdcActionView = () => {
     return adaptationDetails;
   };
 
-  const getAdaptationProperties = () => {
+  const getEnablementProperties = () => {
     const details: any = {};
 
     if (ndcActionDetails?.enablementProperties) {
       details[t('ndcAction:title')] = ndcActionDetails.enablementProperties?.title;
-      details[t('ndcAction:report')] = ndcActionDetails.enablementProperties?.report;
+      if (ndcActionDetails.enablementProperties?.report) {
+        details[t('ndcAction:report')] = ndcActionDetails.enablementProperties?.report && (
+          <a
+            href={ndcActionDetails.enablementProperties?.report}
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+          >
+            {ndcActionDetails.enablementProperties?.report}
+          </a>
+        );
+      }
     }
     return details;
   };
@@ -393,7 +404,7 @@ const NdcActionView = () => {
             <Col lg={24}>
               <Card className="card-container">
                 <div>
-                  <InfoView data={getAdaptationProperties()} title={t('ndcAction:enablement')} />
+                  <InfoView data={getEnablementProperties()} title={t('ndcAction:enablement')} />
                 </div>
               </Card>
             </Col>
@@ -404,7 +415,7 @@ const NdcActionView = () => {
             <Col lg={24}>
               <Card className="card-container">
                 <div className="co-benifits-view">
-                  <div className="title">Co-Benifits</div>
+                  <div className="title">{t('ndcAction:coBenefitsSubTitle')}</div>
                   <CoBenifitsComponent
                     viewOnly={true}
                     coBenifitsViewDetails={state?.record?.coBenefitsProperties}
