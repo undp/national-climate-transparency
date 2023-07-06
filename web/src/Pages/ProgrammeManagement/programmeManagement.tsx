@@ -39,6 +39,7 @@ const ProgrammeManagement = () => {
       useConnection={useConnection}
       onNavigateToProgrammeView={onNavigateToProgrammeView}
       onClickAddProgramme={onClickAddProgramme}
+      enableAddProgramme
     ></ProgrammeManagementComponent>
   );
 };
