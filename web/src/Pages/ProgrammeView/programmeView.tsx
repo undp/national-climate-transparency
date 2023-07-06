@@ -690,7 +690,6 @@ const ProgrammeView = () => {
                           pie: {
                             expandOnClick: false,
                             donut: {
-                              size: '75%',
                               labels: {
                                 show: true,
                                 total: {
