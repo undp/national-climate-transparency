@@ -781,7 +781,7 @@ export const AddProgrammeComponent = () => {
                       <div className="info-container">
                         <Tooltip
                           arrowPointAtCenter
-                          placement="bottomRight"
+                          placement="topLeft"
                           trigger="hover"
                           title={t('addProgramme:inNDCToolTip')}
                         >
@@ -835,7 +835,7 @@ export const AddProgrammeComponent = () => {
                       <div className="info-container">
                         <Tooltip
                           arrowPointAtCenter
-                          placement="bottomRight"
+                          placement="topLeft"
                           trigger="hover"
                           title={t('addProgramme:inNAPToolTip')}
                         >
