@@ -1,6 +1,6 @@
 export enum NDCActionType {
-  Mitigation = 'mitigation',
-  Adaptation = 'adaptation',
-  Enablement = 'enablement',
-  CrossCutting = 'crosscutting'
+  Adaptation = "adaptation",
+  CrossCutting = "crosscutting",
+  Enablement = "enablement",
+  Mitigation = "mitigation",
 }
