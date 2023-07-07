@@ -5,6 +5,7 @@ import { RcFile } from 'rc-upload/lib/interface';
 
 export enum ProgrammeStage {
   AwaitingAuthorization = 'Pending',
+  Approved = 'Approved',
   Authorised = 'Authorised',
   // Transferred = 'Transferred',
   // Retired = 'Retired',
@@ -109,8 +110,8 @@ export const getStageTagType = (stage: ProgrammeStage) => {
       return 'error';
     case ProgrammeStage.Authorised:
       return 'processing';
-    // case ProgrammeStage.Transferred:
-    //   return 'success';
+    case ProgrammeStage.Approved:
+      return 'success';
     default:
       return 'default';
   }
