@@ -509,7 +509,7 @@ export const AddProgrammeComponent = () => {
                     rules={[
                       {
                         validator: async (rule, file) => {
-                          if (file) {
+                          if (file.length > 0) {
                             let isCorrectFormat = false;
                             if (file[0]?.type === 'application/pdf') {
                               isCorrectFormat = true;
