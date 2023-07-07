@@ -504,12 +504,12 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
               <Form.Item
                 name="userEstimatedCredits"
                 label={t('ndcAction:userEstimatedCredits')}
-                style={{ display: 'inline-block', width: 'calc(100% - 15px)', marginRight: '15px' }}
+                style={{ display: 'inline-block', width: 'calc(100% - 15px)' }}
               >
                 <InputNumber style={{ width: 442, paddingRight: 12 }} />
               </Form.Item>
             </Col>
-            <Col style={{ marginLeft: '28px' }}>
+            <Col style={{ marginLeft: '38px' }}>
               <Form.Item
                 name="methodologyEstimatedCredits"
                 label={t('ndcAction:methodologyEstimatedCredits')}
