@@ -2721,10 +2721,10 @@
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
 
-"@undp/carbon-library@^1.0.36":
-  version "1.0.36"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.36.tgz#05e25e2b1ae24502ac61cbf43617405d849cc189"
-  integrity sha512-Ps5aAL62MEdVXwJAAPjawM7zezkkVtNu8HqZvMvXjI/SNQ3O7SC1cHhrSCXnQqA4lZD5PgcxnuUFqIkwBM836Q==
+"@undp/carbon-library@^1.0.37":
+  version "1.0.37"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.37.tgz#6a5e40bc9a6e96276acc0a1f1c2a25b475f4d4e8"
+  integrity sha512-3qNtXdzmcr1yC6BP9e4EkhTtoeAkw99eMkkOp1kOSLHrBRhaIllLsW34EIGgexYva/bNI5e8NCpf1bAmQrDwbg==
   dependencies:
     "@rollup/plugin-commonjs" "^25.0.0"
     "@rollup/plugin-node-resolve" "^15.0.2"
@@ -10639,9 +10639,9 @@ rollup@^2.43.1:
     fsevents "~2.3.2"
 
 rollup@^3.22.0:
-  version "3.26.1"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.26.1.tgz#b375bf4b3cbb35bdca717e3cee2413894c469397"
-  integrity sha512-I5gJCSpSMr3U9wv4D5YA8g7w7cj3eaSDeo7t+JcaFQOmoOUBgu4K9iMp8k3EZnwbJrjQxUMSKxMyB8qEQzzaSg==
+  version "3.26.2"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.26.2.tgz#2e76a37606cb523fc9fef43e6f59c93f86d95e7c"
+  integrity sha512-6umBIGVz93er97pMgQO08LuH3m6PUb3jlDUUGFsNJB6VgTCUaDFpupf5JfU30529m/UKOgmiX+uY6Sx8cOYpLA==
   optionalDependencies:
     fsevents "~2.3.2"
 
