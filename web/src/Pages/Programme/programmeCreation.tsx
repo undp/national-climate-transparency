@@ -170,10 +170,20 @@ export const AddProgrammeComponent = () => {
       logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
       logoUrls = logoBase64?.split(',');
     }
+    const propTaxIds = [userOrgTaxId, ...proponentTxIds];
+    const duplicateIds = new Set(propTaxIds).size !== propTaxIds.length;
     if (totalPercentage !== 100) {
       message.open({
         type: 'error',
         content: t('addProgramme:proponentPercentValidation'),
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      setLoading(false);
+    } else if (duplicateIds) {
+      message.open({
+        type: 'error',
+        content: t('addProgramme:duplicateOrg'),
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
