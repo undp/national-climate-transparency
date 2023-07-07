@@ -47,7 +47,6 @@
     }
     .options-programme {
       width: 100%;
-      border: 1px solid darkgreen;
       .role-group {
         .ant-radio-group {
           width: 50%;
@@ -86,10 +85,8 @@
     .row {
       width: 100%;
       .org-col {
-        border: 1px solid violet;
         .details-part-three {
           width: 100%;
-          border: 1px solid firebrick;
         }
       }
 
@@ -205,17 +202,14 @@
     .row-org {
       width: 100%;
       .org-col {
-        border: 1px solid violet;
         .details-part-three {
           width: 100%;
-          border: 1px solid firebrick;
         }
       }
     }
     .selection-details-row {
       width: 100%;
       margin-bottom: 1rem;
-
       .in-ndc-col,
       .in-nap-col {
         width: 100%;
