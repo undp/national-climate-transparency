@@ -211,7 +211,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         };
       }
 
-      if (parseFloat(ndcActionFormvalues.methodologyEstimatedCredits) < 0) {
+      if (parseFloat(ndcActionFormvalues.methodologyEstimatedCredits) <= 0) {
         message.open({
           type: 'error',
           content: t('methodologyEstimatedCreditsInvalid'),
