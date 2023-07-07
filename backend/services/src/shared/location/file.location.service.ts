@@ -48,8 +48,14 @@ export class FileLocationService implements LocationInterface {
         region.regionName = columns[nameIndex].trim();
         region.geoCoordinates = [ Number(columns[longitudeIndex].trim()), Number(columns[latitudeIndex].trim()) ];
         region.lang = columns[languageIndex].trim();
-        region.key = region.regionName + '_' + region.lang;
+        region.key = region.regionName + "_" + region.lang;
+        const exist = data.some(
+          (item: any) =>
+            item?.regionName === region.regionName && item?.lang === region.lang
+        );
+        if (!exist) {
         data.push(region);
+        }
       }
 
       await this.regionRepo.save(data);

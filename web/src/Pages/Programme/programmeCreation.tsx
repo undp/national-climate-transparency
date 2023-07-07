@@ -173,7 +173,7 @@ export const AddProgrammeComponent = () => {
         : ownershipPercentage?.map((item: any) => item.organisation);
     let logoBase64 = '';
     let logoUrls: any[] = [];
-    if (values?.designDocument) {
+    if (values?.designDocument?.length > 0) {
       logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
       logoUrls = logoBase64?.split(',');
     }
