@@ -97,7 +97,17 @@ export const AddProgrammeComponent = () => {
   const getRegionList = async () => {
     setLoadingList(true);
     try {
-      const response = await post('national/organisation/regions', { page: 1, size: 100 });
+      const response = await post('national/organisation/regions', {
+        page: 1,
+        size: 100,
+        filterAnd: [
+          {
+            key: 'lang',
+            operation: '=',
+            value: 'en',
+          },
+        ],
+      });
       if (response.data) {
         const regionNames = response.data.map((item: any) => item.regionName);
         setRegionsList(['National', ...regionNames]);
