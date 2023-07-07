@@ -170,7 +170,10 @@ export const AddProgrammeComponent = () => {
       logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
       logoUrls = logoBase64?.split(',');
     }
-    const propTaxIds = [userOrgTaxId, ...proponentTxIds];
+    const propTaxIds =
+      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+        ? [userOrgTaxId, ...proponentTxIds]
+        : proponentTxIds;
     const duplicateIds = new Set(propTaxIds).size !== propTaxIds.length;
     if (totalPercentage !== 100) {
       message.open({
