@@ -97,7 +97,17 @@ export const AddProgrammeComponent = () => {
   const getRegionList = async () => {
     setLoadingList(true);
     try {
-      const response = await post('national/organisation/regions', { page: 1, size: 100 });
+      const response = await post('national/organisation/regions', {
+        page: 1,
+        size: 100,
+        filterAnd: [
+          {
+            key: 'lang',
+            operation: '=',
+            value: 'en',
+          },
+        ],
+      });
       if (response.data) {
         const regionNames = response.data.map((item: any) => item.regionName);
         setRegionsList(['National', ...regionNames]);
@@ -170,10 +180,23 @@ export const AddProgrammeComponent = () => {
       logoBase64 = await getBase64(values?.designDocument[0]?.originFileObj as RcFile);
       logoUrls = logoBase64?.split(',');
     }
+    const propTaxIds =
+      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+        ? [userOrgTaxId, ...proponentTxIds]
+        : proponentTxIds;
+    const duplicateIds = new Set(propTaxIds).size !== propTaxIds.length;
     if (totalPercentage !== 100) {
       message.open({
         type: 'error',
         content: t('addProgramme:proponentPercentValidation'),
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      setLoading(false);
+    } else if (duplicateIds) {
+      message.open({
+        type: 'error',
+        content: t('addProgramme:duplicateOrg'),
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
