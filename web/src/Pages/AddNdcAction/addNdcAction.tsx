@@ -90,7 +90,10 @@ const AddNdcAction = () => {
       ...ndcActionDetails,
     };
 
-    if (projectReportFormValues.monitoringReport) {
+    if (
+      projectReportFormValues.monitoringReport &&
+      projectReportFormValues.monitoringReport.length > 0
+    ) {
       const logoBase64 = await getBase64(
         projectReportFormValues.monitoringReport[0].originFileObj as RcFile
       );
