@@ -8,6 +8,11 @@
     content: none;
   }
 
+  .ant-radio-button-wrapper {
+    border-radius: 4px !important;
+    color: rgba(140, 140, 140, 0.7) !important;
+  }
+
   .view-section {
     .ant-radio-button-wrapper-disabled:first-child,
     .ant-radio-button-wrapper-disabled:hover {
@@ -46,7 +51,6 @@
     font-weight: 400;
     line-height: 18.5px;
   }
-
 
   .benifits-tabs {
     width: 100%;
@@ -188,11 +192,11 @@
           }
 
           .field-margin {
-            margin-left: 0.8rem;
+            margin-left: 2rem;
           }
 
           .field-padding {
-            padding-right: 0.8rem;
+            padding-right: 2rem;
           }
 
           .form-item {
@@ -268,11 +272,11 @@
           }
 
           .field-margin {
-            margin-left: 0.8rem;
+            margin-left: 2rem;
           }
 
           .field-padding {
-            padding-right: 0.8rem;
+            padding-right: 2rem;
           }
 
           .form-item {
