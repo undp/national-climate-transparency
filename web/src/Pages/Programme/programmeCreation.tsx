@@ -846,6 +846,7 @@ export const AddProgrammeComponent = () => {
                                   onChange={onChangeGeoLocation}
                                   loading={loadingList}
                                   className="custom-select"
+                                  allowClear
                                 >
                                   {regionsList.map((region: any) => (
                                     <Select.Option value={region}>{region}</Select.Option>

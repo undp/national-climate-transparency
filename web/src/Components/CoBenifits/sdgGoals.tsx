@@ -36,120 +36,116 @@ import goal14Selected from '../../Assets/Images/SdgGoalsImages/goal-14-selected.
 import goal15Selected from '../../Assets/Images/SdgGoalsImages/goal-15-selected.png';
 import goal16Selected from '../../Assets/Images/SdgGoalsImages/goal-16-selected.png';
 import goal17Selected from '../../Assets/Images/SdgGoalsImages/goal-17-selected.png';
-const sdgGoalsDetails = [
-  {
-    name: SdgGoalsEnum.noPoverty,
-    image: goal1,
-    selected: false,
-    activeImage: goal1Selected,
-  },
-  {
-    name: SdgGoalsEnum.zeroHunger,
-    image: goal2,
-    selected: false,
-    activeImage: goal2Selected,
-  },
-  {
-    name: SdgGoalsEnum.gdHealth,
-    image: goal3,
-    selected: false,
-    activeImage: goal3Selected,
-  },
-  {
-    name: SdgGoalsEnum.qualityEducation,
-    image: goal4,
-    selected: false,
-    activeImage: goal4Selected,
-  },
-  {
-    name: SdgGoalsEnum.genderEq,
-    image: goal5,
-    selected: false,
-    activeImage: goal5Selected,
-  },
-  {
-    name: SdgGoalsEnum.cleanWatr,
-    image: goal6,
-    selected: false,
-    activeImage: goal6Selected,
-  },
-  {
-    name: SdgGoalsEnum.affEnergy,
-    image: goal7,
-    selected: false,
-    activeImage: goal7Selected,
-  },
-  {
-    name: SdgGoalsEnum.decentWork,
-    image: goal8,
-    selected: false,
-    activeImage: goal8Selected,
-  },
-  {
-    name: SdgGoalsEnum.industry,
-    image: goal9,
-    selected: false,
-    activeImage: goal9Selected,
-  },
-  {
-    name: SdgGoalsEnum.reducedInEq,
-    image: goal10,
-    selected: false,
-    activeImage: goal10Selected,
-  },
-  {
-    name: SdgGoalsEnum.sustainableCities,
-    image: goal11,
-    selected: false,
-    activeImage: goal11Selected,
-  },
-  {
-    name: SdgGoalsEnum.responsibleConsumption,
-    image: goal12,
-    selected: false,
-    activeImage: goal12Selected,
-  },
-  {
-    name: SdgGoalsEnum.climateAction,
-    image: goal13,
-    selected: false,
-    activeImage: goal13Selected,
-  },
-  {
-    name: SdgGoalsEnum.lifeBelowWater,
-    image: goal14,
-    selected: false,
-    activeImage: goal14Selected,
-  },
-  {
-    name: SdgGoalsEnum.lifeOnLand,
-    image: goal15,
-    selected: false,
-    activeImage: goal15Selected,
-  },
-  {
-    name: SdgGoalsEnum.peace,
-    image: goal16,
-    selected: false,
-    activeImage: goal16Selected,
-  },
-  {
-    name: SdgGoalsEnum.partnership,
-    image: goal17,
-    selected: false,
-    activeImage: goal17Selected,
-  },
-];
 
 const sdgGoalMap: any = {};
-for (const g of sdgGoalsDetails) {
-  sdgGoalMap[g.name] = g;
-}
 
 const SdgGoals = (props: any) => {
   const { onFormSubmit, sdgGoalsViewData, viewOnly } = props;
   const [formOne] = Form.useForm();
-  const [sdgGoals, setSdgGoals] = useState<any[]>(sdgGoalsDetails);
+  const [sdgGoals, setSdgGoals] = useState<any[]>([
+    {
+      name: SdgGoalsEnum.noPoverty,
+      image: goal1,
+      selected: false,
+      activeImage: goal1Selected,
+    },
+    {
+      name: SdgGoalsEnum.zeroHunger,
+      image: goal2,
+      selected: false,
+      activeImage: goal2Selected,
+    },
+    {
+      name: SdgGoalsEnum.gdHealth,
+      image: goal3,
+      selected: false,
+      activeImage: goal3Selected,
+    },
+    {
+      name: SdgGoalsEnum.qualityEducation,
+      image: goal4,
+      selected: false,
+      activeImage: goal4Selected,
+    },
+    {
+      name: SdgGoalsEnum.genderEq,
+      image: goal5,
+      selected: false,
+      activeImage: goal5Selected,
+    },
+    {
+      name: SdgGoalsEnum.cleanWatr,
+      image: goal6,
+      selected: false,
+      activeImage: goal6Selected,
+    },
+    {
+      name: SdgGoalsEnum.affEnergy,
+      image: goal7,
+      selected: false,
+      activeImage: goal7Selected,
+    },
+    {
+      name: SdgGoalsEnum.decentWork,
+      image: goal8,
+      selected: false,
+      activeImage: goal8Selected,
+    },
+    {
+      name: SdgGoalsEnum.industry,
+      image: goal9,
+      selected: false,
+      activeImage: goal9Selected,
+    },
+    {
+      name: SdgGoalsEnum.reducedInEq,
+      image: goal10,
+      selected: false,
+      activeImage: goal10Selected,
+    },
+    {
+      name: SdgGoalsEnum.sustainableCities,
+      image: goal11,
+      selected: false,
+      activeImage: goal11Selected,
+    },
+    {
+      name: SdgGoalsEnum.responsibleConsumption,
+      image: goal12,
+      selected: false,
+      activeImage: goal12Selected,
+    },
+    {
+      name: SdgGoalsEnum.climateAction,
+      image: goal13,
+      selected: false,
+      activeImage: goal13Selected,
+    },
+    {
+      name: SdgGoalsEnum.lifeBelowWater,
+      image: goal14,
+      selected: false,
+      activeImage: goal14Selected,
+    },
+    {
+      name: SdgGoalsEnum.lifeOnLand,
+      image: goal15,
+      selected: false,
+      activeImage: goal15Selected,
+    },
+    {
+      name: SdgGoalsEnum.peace,
+      image: goal16,
+      selected: false,
+      activeImage: goal16Selected,
+    },
+    {
+      name: SdgGoalsEnum.partnership,
+      image: goal17,
+      selected: false,
+      activeImage: goal17Selected,
+    },
+  ]);
 
   const handleImageSelect = (imageId: any) => {
     const g = sdgGoalMap[imageId];
@@ -158,9 +154,15 @@ const SdgGoals = (props: any) => {
     }
     g.selected = !g.selected;
 
-    const u = [...sdgGoalsDetails];
+    const u = [...sdgGoals];
     setSdgGoals(u);
   };
+
+  useEffect(() => {
+    for (const g of sdgGoals) {
+      sdgGoalMap[g.name] = g;
+    }
+  }, []);
 
   useEffect(() => {
     if (sdgGoalsViewData) {
@@ -173,13 +175,14 @@ const SdgGoals = (props: any) => {
         }
       }
     } else {
-      for (const g of sdgGoalsDetails) {
+      for (const g of sdgGoals) {
         g.selected = false;
       }
     }
-    const u = [...sdgGoalsDetails];
-    setSdgGoals(u);
-  }, []);
+    console.log(sdgGoalMap);
+    const updatedSdgGoals = Object.values(sdgGoalMap);
+    setSdgGoals(updatedSdgGoals);
+  }, [sdgGoalsViewData]);
 
   useEffect(() => {
     const saveData: any[] = [];
