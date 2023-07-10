@@ -80,5 +80,6 @@
     "organisationDeactivated": "This action is unauthorised due to the deactivation of your organisation. You will now be logged out of the system. Log in again to access the system with view-only permissions.",
     "unAuth": "This action is unauthorised",
     "companyIsNotTheOwnerOfProg": "Company {} is not an owner company of the programme",
-    "internalErrorCreditFreezing": "Internal error on credit freezing"
+    "internalErrorCreditFreezing": "Internal error on credit freezing",
+    "totalUserEstimateCreditsInvalidMsg": "Total user estimated credits cannot be greater than the programme estimated credits"
 }

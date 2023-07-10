@@ -59,7 +59,7 @@ const AddNdcAction = () => {
     } catch (error: any) {
       message.open({
         type: 'error',
-        content: `${'ndcCreationFailed'}`,
+        content: error && error.message ? error.message : `${'ndcCreationFailed'}`,
         duration: 4,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });

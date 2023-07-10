@@ -993,6 +993,41 @@ export class ProgrammeService {
     return savedProgramme;
   }
 
+  async checkTotalUserEstimatedCredits(
+    ndcAction: NDCAction,
+    program: Programme
+  ) {
+    const ndcActions = await this.ndcActionRepo.find({
+      where: {
+        programmeId: program.programmeId,
+      },
+    });
+
+    let totalUserEstimatedCredits: number = ndcAction.ndcFinancing
+      ? ndcAction.ndcFinancing.userEstimatedCredits
+      : 0;
+
+    ndcActions.forEach((ndcAction: NDCAction) => {
+      if (
+        ndcAction.ndcFinancing &&
+        ndcAction.ndcFinancing.userEstimatedCredits
+      ) {
+        totalUserEstimatedCredits +=
+          ndcAction.ndcFinancing.userEstimatedCredits;
+      }
+    });
+
+    if (totalUserEstimatedCredits > program.creditEst) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.totalUserEstimateCreditsInvalidMsg",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
   async calcCreditNDCAction(ndcAction: NDCAction, program: Programme) {
 
     if ((ndcAction.action === NDCActionType.Mitigation || ndcAction.action === NDCActionType.CrossCutting) && ndcAction.typeOfMitigation) {
@@ -1369,6 +1404,7 @@ export class ProgrammeService {
     }
 
     ndcAction.coBenefitsProperties = ndcActionDto.coBenefitsProperties;
+    await this.checkTotalUserEstimatedCredits(ndcAction, program);
     await this.calcCreditNDCAction(ndcAction, program);
     console.log("2222", ndcAction);
     this.calcAddNDCFields(ndcAction, program);
