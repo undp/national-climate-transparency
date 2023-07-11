@@ -122,10 +122,10 @@ const Assessment = (props: any) => {
           <Row>
             <Form
               name="from1"
-              labelCol={{ span: 19 }}
+              labelCol={{ span: 18 }}
               labelWrap={true}
               labelAlign="left"
-              wrapperCol={{ span: 5 }}
+              wrapperCol={{ span: 6 }}
               layout="horizontal"
               requiredMark={true}
               form={form1}
@@ -479,10 +479,10 @@ const Assessment = (props: any) => {
             <Col span={24}>
               <Form
                 name="form3"
-                labelCol={{ span: 19 }}
+                labelCol={{ span: 18 }}
                 labelWrap={true}
                 labelAlign="left"
-                wrapperCol={{ span: 5 }}
+                wrapperCol={{ span: 6 }}
                 layout="horizontal"
                 requiredMark={true}
                 form={form3}

@@ -346,45 +346,32 @@
     }
 
     .assesment-tab-item {
+      width: 95%;
+      margin-left: 3rem;
       .ant-radio-group {
         text-align: center;
         align-items: center;
-        justify-content: flex-start;
-        margin-left: 1rem;
+        justify-content: flex-end;
 
         .radio-container {
           margin-right: 1rem;
+          width: 35%;
+          max-width: 90px;
+          text-align: center;
+          .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+            color: $dark-text-color !important;
+            border-color: $primary-purple !important;
+            box-shadow: none;
+          }
         }
-      }
 
-      .ant-radio-button-checked {
-        background: $primary-purple;
-        color: #ffffff;
-      }
-
-      .radio-container {
-        margin-right: 1rem;
-        width: 35%;
-        text-align: center;
-        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-          color: $dark-text-color !important;
-          border-color: $primary-purple !important;
-          box-shadow: none;
+        .radio {
+          width: 100%;
+          .ant-radio-button-checked {
+            background: $primary-purple;
+            color: #ffffff;
+          }
         }
-      }
-
-      .radio {
-        width: 100%;
-        .ant-radio-button-checked {
-          background: $primary-purple;
-          color: #ffffff;
-        }
-      }
-
-      .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-        color: $dark-text-color !important;
-        border-color: $primary-purple !important;
-        box-shadow: none;
       }
 
       Input {
@@ -434,12 +421,12 @@
       .ant-radio-group {
         text-align: center;
         align-items: center;
-        justify-content: flex-start;
-        margin-left: 1rem;
+        justify-content: flex-end;
 
         .radio-container {
           margin-right: 1rem;
           width: 35%;
+          max-width: 90px;
           text-align: center;
           .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
             color: $dark-text-color !important;
@@ -457,61 +444,37 @@
         }
       }
 
-      .ant-radio-button-checked {
-        background: $primary-purple;
-        color: #ffffff;
-      }
-
-      .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-        color: $dark-text-color !important;
-        border-color: $primary-purple !important;
-        box-shadow: none;
-      }
-
       Input {
         height: 40px;
       }
     }
 
     .social-tab-item {
+      width: 95%;
+      margin-left: 3rem;
       .ant-radio-group {
         text-align: center;
         align-items: center;
-        justify-content: flex-start;
-        margin-left: 1rem;
+        justify-content: flex-end;
 
         .radio-container {
           margin-right: 1rem;
+          width: 35%;
+          max-width: 90px;
+          text-align: center;
+          .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+            color: $dark-text-color !important;
+            border-color: $primary-purple !important;
+            box-shadow: none;
+          }
         }
-      }
 
-      .ant-radio-button-checked {
-        background: $primary-purple;
-        color: #ffffff;
-      }
-
-      .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-        color: $dark-text-color !important;
-        border-color: $primary-purple !important;
-        box-shadow: none;
-      }
-
-      .radio-container {
-        margin-right: 1rem;
-        width: 35%;
-        text-align: center;
-        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-          color: $dark-text-color !important;
-          border-color: $primary-purple !important;
-          box-shadow: none;
-        }
-      }
-
-      .radio {
-        width: 100%;
-        .ant-radio-button-checked {
-          background: $primary-purple;
-          color: #ffffff;
+        .radio {
+          width: 100%;
+          .ant-radio-button-checked {
+            background: $primary-purple;
+            color: #ffffff;
+          }
         }
       }
 
