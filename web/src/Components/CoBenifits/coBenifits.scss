@@ -381,7 +381,7 @@
       .design-upload-section {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: start;
         width: 100%;
 
@@ -389,14 +389,11 @@
           color: $primary-color !important;
         }
 
-        .ant-upload {
-          width: 20%;
-        }
-
         .ant-upload-list {
           align-items: center;
           justify-content: center;
-          width: 75%;
+          max-width: 500px;
+          margin-left: 5px;
 
           .ant-upload-list-item {
             margin-top: 0;
@@ -412,6 +409,10 @@
       .ant-upload-list-item {
         border-radius: 5px !important;
         height: 40px !important;
+      }
+
+      .ant-form-item-label-left{
+        padding-right: 5px;
       }
     }
 
@@ -446,6 +447,10 @@
 
       Input {
         height: 40px;
+      }
+
+      .ant-form-item-label-left{
+        padding-right: 5px;
       }
     }
 

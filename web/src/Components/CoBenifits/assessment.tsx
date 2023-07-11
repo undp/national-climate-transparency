@@ -643,14 +643,16 @@ const Assessment = (props: any) => {
                   </Form.Item>
                 )}
                 {viewOnly && assessmentViewData.document && (
-                  <a
-                    href={assessmentViewData.document}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
-                  >
-                    {assessmentViewData.document}
-                  </a>
+                  <Form.Item label={t('assessmentDocuments')} name="assessmentDocuments">
+                    <a
+                      href={assessmentViewData.document}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                    >
+                      {assessmentViewData.document}
+                    </a>
+                  </Form.Item>
                 )}
               </Row>
             </Form>
