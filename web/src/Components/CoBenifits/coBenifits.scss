@@ -215,8 +215,8 @@
               width: 95%;
               text-align: center;
               align-items: center;
-              justify-content: flex-start;
-              margin-left: 0.5rem;
+              justify-content: flex-end;
+              // margin-left: 0.5rem;
 
               .yes-no-radio-container:first-child {
                 margin-right: 1rem;
@@ -230,6 +230,7 @@
             .yes-no-radio-container {
               width: 35%;
               text-align: center;
+              max-width: 90px;
               .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
                 color: $dark-text-color !important;
                 border-color: $primary-purple !important;
@@ -295,8 +296,8 @@
               width: 95%;
               text-align: center;
               align-items: center;
-              justify-content: flex-start;
-              margin-left: 0.5rem;
+              // margin-left: 0.5rem;
+              justify-content: flex-end;
 
               .yes-no-radio-container:first-child {
                 margin-right: 1rem;
@@ -310,6 +311,7 @@
             .yes-no-radio-container {
               width: 35%;
               text-align: center;
+              max-width: 90px;
               .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
                 color: $dark-text-color !important;
                 border-color: $primary-purple !important;

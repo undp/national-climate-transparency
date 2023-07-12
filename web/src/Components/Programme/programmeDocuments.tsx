@@ -249,6 +249,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                     placement="top"
                     trigger="hover"
                     title={t('programme:rejectTip')}
+                    overlayClassName="custom-tooltip"
                   >
                     <ExclamationCircleOutlined
                       className="common-progress-icon"
@@ -404,6 +405,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                     placement="top"
                     trigger="hover"
                     title={t('programme:rejectTip')}
+                    overlayClassName="custom-tooltip"
                   >
                     <ExclamationCircleOutlined
                       className="common-progress-icon"

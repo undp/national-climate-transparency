@@ -49,7 +49,13 @@ const MapStats: FC<MapStatsProps> = (props: MapStatsProps) => {
         <div className="pie-charts-title">{title}</div>
         <div className="info-container">
           <div className="info-container">
-            <Tooltip arrowPointAtCenter placement="bottomRight" trigger="hover" title={toolTipText}>
+            <Tooltip
+              arrowPointAtCenter
+              placement="bottomRight"
+              trigger="hover"
+              title={toolTipText}
+              overlayClassName="custom-tooltip"
+            >
               <InfoCircle color="#000000" size={17} />
             </Tooltip>
           </div>

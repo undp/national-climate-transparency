@@ -144,6 +144,7 @@ const AddNdcAction = () => {
               placement="right"
               trigger="hover"
               title={t('ndcAction:ndcToolTip')}
+              overlayClassName="custom-tooltip"
             >
               <InfoCircle color="#000000" size={17} />
             </Tooltip>
