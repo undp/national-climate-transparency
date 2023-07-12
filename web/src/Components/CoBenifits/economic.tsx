@@ -262,8 +262,8 @@ const Economic = (props: any) => {
       <Form
         name="economic-details"
         className="benifits-details-economic"
-        labelCol={{ md: 16, lg: 16, xl: 16 }}
-        wrapperCol={{ md: 8, lg: 6, xl: 6 }}
+        labelCol={{ md: 16, lg: 19, xl: 17 }}
+        wrapperCol={{ md: 8, lg: 5, xl: 7 }}
         layout="horizontal"
         requiredMark={true}
         form={formOne}
@@ -291,7 +291,6 @@ const Economic = (props: any) => {
                     >
                       <Radio.Group
                         size="middle"
-                        className={`${index !== 0 && 'field-padding'}`}
                         onChange={() => {}}
                         disabled={economicViewData && true}
                       >

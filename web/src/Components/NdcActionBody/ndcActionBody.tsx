@@ -240,6 +240,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                       placement="top"
                       trigger="hover"
                       title={t('programme:rejectTip')}
+                      overlayClassName="custom-tooltip"
                     >
                       <ExclamationCircleOutlined
                         className="common-progress-icon"
@@ -413,6 +414,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                       placement="top"
                       trigger="hover"
                       title={t('programme:rejectTip')}
+                      overlayClassName="custom-tooltip"
                     >
                       <ExclamationCircleOutlined
                         className="common-progress-icon"

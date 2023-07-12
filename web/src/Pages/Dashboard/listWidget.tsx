@@ -41,6 +41,7 @@ const ListWidget: FC<ListWidgetProps> = (props: ListWidgetProps) => {
                 placement="bottomRight"
                 trigger="hover"
                 title={toolTipText}
+                overlayClassName="custom-tooltip"
               >
                 <InfoCircle color="#000000" size={17} />
               </Tooltip>
@@ -64,7 +65,7 @@ const ListWidget: FC<ListWidgetProps> = (props: ListWidgetProps) => {
                 <div className="details">
                   <div className="label-and-value">
                     <div className="label">{item.label}</div>
-                    <div className="value">{addRoundNumber(item.value)}</div>
+                    <div className="value">{addCommSepRound(item.value)}</div>
                   </div>
                   <div className="stastic-bar">
                     <Progress

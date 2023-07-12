@@ -868,6 +868,7 @@ export const AddProgrammeComponent = () => {
                                       placement="topLeft"
                                       trigger="hover"
                                       title={t('addProgramme:inNDCToolTip')}
+                                      overlayClassName="custom-tooltip"
                                     >
                                       <InfoCircle color="#000000" size={17} />
                                     </Tooltip>
@@ -914,6 +915,7 @@ export const AddProgrammeComponent = () => {
                                       placement="topLeft"
                                       trigger="hover"
                                       title={t('addProgramme:inNAPToolTip')}
+                                      overlayClassName="custom-tooltip"
                                     >
                                       <InfoCircle color="#000000" size={17} />
                                     </Tooltip>

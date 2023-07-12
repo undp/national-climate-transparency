@@ -25,6 +25,15 @@ body {
   color: $primary-color !important;
 }
 
+.custom-tooltip .ant-tooltip-inner {
+  border-radius: 5px !important;
+  background-color: $primary-color !important;
+}
+
+.custom-tooltip .ant-tooltip-arrow-content {
+  --antd-arrow-background-color: linear-gradient(to right bottom, #9155fd, #9155fd) !important;
+}
+
 .ant-menu {
   background-color: $background-color;
 }
@@ -472,7 +481,6 @@ body {
   display: inline-block;
 }
 
-
 .popup-primary {
   .icon {
     color: $primary-color !important;
@@ -491,7 +499,7 @@ body {
       border: none;
     }
   }
-  
+
   .ant-btn-default {
     color: $body-text-color;
     border-color: $body-text-color;
