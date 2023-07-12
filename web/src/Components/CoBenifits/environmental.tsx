@@ -328,7 +328,6 @@ const Environmental = (props: any) => {
                     >
                       <Radio.Group
                         size="middle"
-                        className={`${index !== 0 && 'field-padding'}`}
                         onChange={() => {}}
                         disabled={environmentalViewData && true}
                       >

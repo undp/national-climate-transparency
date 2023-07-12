@@ -78,10 +78,10 @@
             }
 
             .ant-radio-group {
+              width: 95%;
               text-align: center;
               align-items: center;
-              justify-content: flex-start;
-              margin-left: 0.5rem;
+              justify-content: flex-end;
 
               .yes-no-radio-container:first-child {
                 margin-right: 1rem;
@@ -91,6 +91,7 @@
             .yes-no-radio-container {
               width: 35%;
               text-align: center;
+              max-width: 90px;
               .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
                 color: $dark-text-color !important;
                 border-color: $primary-purple !important;
@@ -192,17 +193,14 @@
           }
 
           .field-margin {
-            margin-left: 2rem;
-          }
-
-          .field-padding {
-            padding-right: 2rem;
+            padding-left: 2rem;
           }
 
           .form-item {
             width: 100%;
             padding-left: 2rem;
             .ant-form-item-label {
+              width: 100%;
               display: flex;
               flex-direction: row;
               align-items: center;
@@ -216,7 +214,6 @@
               text-align: center;
               align-items: center;
               justify-content: flex-end;
-              // margin-left: 0.5rem;
 
               .yes-no-radio-container:first-child {
                 margin-right: 1rem;
@@ -228,7 +225,7 @@
             }
 
             .yes-no-radio-container {
-              width: 35%;
+              width: 25%;
               text-align: center;
               max-width: 90px;
               .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
@@ -273,17 +270,14 @@
           }
 
           .field-margin {
-            margin-left: 2rem;
-          }
-
-          .field-padding {
-            padding-right: 2rem;
+            padding-left: 2rem;
           }
 
           .form-item {
             width: 100%;
             padding-left: 2rem;
             .ant-form-item-label {
+              width: 100%;
               display: flex;
               flex-direction: row;
               align-items: center;
@@ -296,7 +290,6 @@
               width: 95%;
               text-align: center;
               align-items: center;
-              // margin-left: 0.5rem;
               justify-content: flex-end;
 
               .yes-no-radio-container:first-child {
@@ -309,7 +302,7 @@
             }
 
             .yes-no-radio-container {
-              width: 35%;
+              width: 25%;
               text-align: center;
               max-width: 90px;
               .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
@@ -413,7 +406,7 @@
         height: 40px !important;
       }
 
-      .ant-form-item-label-left{
+      .ant-form-item-label-left {
         padding-right: 5px;
       }
     }
@@ -451,7 +444,7 @@
         height: 40px;
       }
 
-      .ant-form-item-label-left{
+      .ant-form-item-label-left {
         padding-right: 5px;
       }
     }
