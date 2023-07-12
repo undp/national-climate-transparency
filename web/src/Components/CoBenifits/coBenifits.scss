@@ -348,100 +348,17 @@
     }
 
     .assesment-tab-item {
-      .ant-radio-group {
-        text-align: center;
-        align-items: center;
-        justify-content: flex-start;
-        margin-left: 1rem;
-
-        .radio-container {
-          margin-right: 1rem;
-        }
-      }
-
-      .ant-radio-button-checked {
-        background: $primary-purple;
-        color: #ffffff;
-      }
-
-      .radio-container {
-        margin-right: 1rem;
-        width: 35%;
-        text-align: center;
-        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-          color: $dark-text-color !important;
-          border-color: $primary-purple !important;
-          box-shadow: none;
-        }
-      }
-
-      .radio {
-        width: 100%;
-        .ant-radio-button-checked {
-          background: $primary-purple;
-          color: #ffffff;
-        }
-      }
-
-      .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-        color: $dark-text-color !important;
-        border-color: $primary-purple !important;
-        box-shadow: none;
-      }
-
-      Input {
-        height: 40px;
-      }
-
-      .design-upload-section {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: start;
-        width: 100%;
-
-        .icon-color {
-          color: $primary-color !important;
-        }
-
-        .ant-upload {
-          width: 20%;
-        }
-
-        .ant-upload-list {
-          align-items: center;
-          justify-content: center;
-          width: 75%;
-
-          .ant-upload-list-item {
-            margin-top: 0;
-          }
-        }
-      }
-
-      .upload-doc {
-        height: 40px !important;
-        margin-right: 240px;
-      }
-
-      .ant-upload-list-item {
-        border-radius: 5px !important;
-        height: 40px !important;
-      }
-    }
-
-    .safeguard-tab-item {
       width: 95%;
       margin-left: 3rem;
       .ant-radio-group {
         text-align: center;
         align-items: center;
-        justify-content: flex-start;
-        margin-left: 1rem;
+        justify-content: flex-end;
 
         .radio-container {
           margin-right: 1rem;
           width: 35%;
+          max-width: 90px;
           text-align: center;
           .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
             color: $dark-text-color !important;
@@ -459,61 +376,112 @@
         }
       }
 
-      .ant-radio-button-checked {
-        background: $primary-purple;
-        color: #ffffff;
+      Input {
+        height: 40px;
       }
 
-      .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-        color: $dark-text-color !important;
-        border-color: $primary-purple !important;
-        box-shadow: none;
+      .design-upload-section {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: start;
+        width: 100%;
+
+        .icon-color {
+          color: $primary-color !important;
+        }
+
+        .ant-upload-list {
+          align-items: center;
+          justify-content: center;
+          max-width: 500px;
+          margin-left: 5px;
+
+          .ant-upload-list-item {
+            margin-top: 0;
+          }
+        }
+      }
+
+      .upload-doc {
+        height: 40px !important;
+        margin-right: 240px;
+      }
+
+      .ant-upload-list-item {
+        border-radius: 5px !important;
+        height: 40px !important;
+      }
+
+      .ant-form-item-label-left{
+        padding-right: 5px;
+      }
+    }
+
+    .safeguard-tab-item {
+      width: 95%;
+      margin-left: 3rem;
+      .ant-radio-group {
+        text-align: center;
+        align-items: center;
+        justify-content: flex-end;
+
+        .radio-container {
+          margin-right: 1rem;
+          width: 35%;
+          max-width: 90px;
+          text-align: center;
+          .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+            color: $dark-text-color !important;
+            border-color: $primary-purple !important;
+            box-shadow: none;
+          }
+        }
+
+        .radio {
+          width: 100%;
+          .ant-radio-button-checked {
+            background: $primary-purple;
+            color: #ffffff;
+          }
+        }
       }
 
       Input {
         height: 40px;
       }
+
+      .ant-form-item-label-left{
+        padding-right: 5px;
+      }
     }
 
     .social-tab-item {
+      width: 95%;
+      margin-left: 3rem;
       .ant-radio-group {
         text-align: center;
         align-items: center;
-        justify-content: flex-start;
-        margin-left: 1rem;
+        justify-content: flex-end;
 
         .radio-container {
           margin-right: 1rem;
+          width: 35%;
+          max-width: 90px;
+          text-align: center;
+          .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+            color: $dark-text-color !important;
+            border-color: $primary-purple !important;
+            box-shadow: none;
+          }
         }
-      }
 
-      .ant-radio-button-checked {
-        background: $primary-purple;
-        color: #ffffff;
-      }
-
-      .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-        color: $dark-text-color !important;
-        border-color: $primary-purple !important;
-        box-shadow: none;
-      }
-
-      .radio-container {
-        margin-right: 1rem;
-        width: 35%;
-        text-align: center;
-        .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-          color: $dark-text-color !important;
-          border-color: $primary-purple !important;
-          box-shadow: none;
-        }
-      }
-
-      .radio {
-        width: 100%;
-        .ant-radio-button-checked {
-          background: $primary-purple;
-          color: #ffffff;
+        .radio {
+          width: 100%;
+          .ant-radio-button-checked {
+            background: $primary-purple;
+            color: #ffffff;
+          }
         }
       }
 
