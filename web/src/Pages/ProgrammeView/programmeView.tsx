@@ -81,7 +81,7 @@ const ProgrammeView = () => {
   const accessToken =
     mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
       ? process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
-      : 'pk.eyJ1IjoicGFsaW5kYSIsImEiOiJjbGMyNTdqcWEwZHBoM3FxdHhlYTN4ZmF6In0.KBvFaMTjzzvoRCr1Z1dN_g';
+      : '';
 
   const showModal = () => {
     setOpenModal(true);
