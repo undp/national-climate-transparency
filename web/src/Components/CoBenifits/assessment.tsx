@@ -9,7 +9,9 @@ import {
   RadioChangeEvent,
   Row,
   Select,
+  Skeleton,
   Upload,
+  message,
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +19,7 @@ import { RadioButtonStatus, titleList } from '../../Definitions/commonEnums';
 import PhoneInput, { formatPhoneNumberIntl } from 'react-phone-number-input';
 import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
 import { RcFile } from 'antd/lib/upload';
+import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 
 const Assessment = (props: any) => {
   const { onFormSubmit, assessmentViewData, viewOnly } = props;
@@ -30,6 +33,32 @@ const Assessment = (props: any) => {
   const [isVerifyingDetailsVisible, setIsVerifyingDetailsVisible] = useState(false);
   const [isPersonListedDetailsVisible, setIsPersonListedDetailsVisible] = useState(false);
   const [isFormValid, setIsFormValid] = useState(true);
+  const [countries, setCountries] = useState<[]>([]);
+  const { get } = useConnection();
+  const [isCountryListLoading, setIsCountryListLoading] = useState(false);
+
+  const getCountryList = async () => {
+    setIsCountryListLoading(true);
+    try {
+      const response = await get('national/organisation/countries');
+      if (response.data) {
+        const alpha2Names = response.data.map((item: any) => {
+          return item.alpha2;
+        });
+        setCountries(alpha2Names);
+      }
+    } catch (error: any) {
+      console.log('Error in getCountryList', error);
+      message.open({
+        type: 'error',
+        content: `${error.message}`,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    } finally {
+      setIsCountryListLoading(false);
+    }
+  };
 
   useEffect(() => {
     onFormSubmit(cobenefitsAssessmentDetails, isFormValid);
@@ -43,6 +72,10 @@ const Assessment = (props: any) => {
       form3.setFieldsValue(assessmentViewData);
     }
   }, [assessmentViewData]);
+
+  useEffect(() => {
+    getCountryList();
+  }, []);
 
   const validateForms = async () => {
     setIsFormValid(true);
@@ -385,17 +418,20 @@ const Assessment = (props: any) => {
                 </Col>
                 <Col flex="303px">
                   <>
-                    {!viewOnly && (
-                      <Form.Item label={t('assessmentTelephone')} name="telephone">
-                        <PhoneInput
-                          style={{ width: 303 }}
-                          international
-                          defaultCountry="LK"
-                          countryCallingCodeEditable={false}
-                          onChange={(v) => {}}
-                        />
-                      </Form.Item>
-                    )}
+                    <Skeleton loading={isCountryListLoading} active>
+                      {!viewOnly && countries.length > 0 && (
+                        <Form.Item label={t('assessmentTelephone')} name="telephone">
+                          <PhoneInput
+                            style={{ width: 303 }}
+                            international
+                            defaultCountry="LK"
+                            countryCallingCodeEditable={false}
+                            onChange={(v) => {}}
+                            countries={countries}
+                          />
+                        </Form.Item>
+                      )}
+                    </Skeleton>
                     {viewOnly && (
                       <Form.Item label={t('assessmentTelephone')} name="telephone">
                         <Input
