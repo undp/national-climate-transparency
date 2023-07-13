@@ -9,7 +9,6 @@ import { ConfigurationSettingsType, Loading } from '@undp/carbon-library';
 import LayoutHeader from '../Header/layout.header';
 import LayoutSider from '../Sider/layout.sider';
 import './layout.scss';
-import '../../Styles/app.scss';
 import { PauseCircleFill } from 'react-bootstrap-icons';
 
 const CustomLayout = (props: any) => {

@@ -4,7 +4,6 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import { CompanyProfileComponent } from '@undp/carbon-library';
 import { useAbilityContext } from '../../Casl/Can';
 import './companyProfile.scss';
-import '../../Styles/app.scss';
 
 const CompanyProfile = () => {
   const navigate = useNavigate();

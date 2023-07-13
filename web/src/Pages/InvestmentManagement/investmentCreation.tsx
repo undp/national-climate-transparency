@@ -14,7 +14,6 @@ import {
   message,
 } from 'antd';
 import './investmentManagement.scss';
-import '../../Styles/app.scss';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';

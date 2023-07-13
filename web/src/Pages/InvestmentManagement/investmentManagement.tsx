@@ -28,7 +28,6 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 
 import './investmentManagement.scss';
 import '../Common/common.table.scss';
-import '../../Styles/app.scss';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 // import TransferActionModel from '../../Components/Models/TransferActionModel';
 import {
