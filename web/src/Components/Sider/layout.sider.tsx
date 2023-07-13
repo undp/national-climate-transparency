@@ -3,6 +3,7 @@ import { Menu, Layout, MenuProps } from 'antd';
 import sliderLogo from '../../Assets/Images/logo-slider.png';
 import { Link, useNavigate } from 'react-router-dom';
 import './layout.sider.scss';
+import '../../Styles/app.scss';
 import * as Icon from 'react-bootstrap-icons';
 import {
   AppstoreOutlined,

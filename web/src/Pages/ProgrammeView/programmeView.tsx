@@ -3,6 +3,7 @@ import { Row, Col, Card, Progress, Tag, Steps, message, Skeleton, Button } from 
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './programmeView.scss';
+import '../../Styles/app.scss';
 import { isBase64 } from '../../Components/ProfileIcon/profile.icon';
 import Chart from 'react-apexcharts';
 import { useTranslation } from 'react-i18next';
