@@ -3,6 +3,7 @@
   "name": "ORGANISATION NAME",
   "taxId": "TAX ID",
   "companyRole": "ORGANISATION TYPE",
+  "filterByOrgType": "Filter by Organisation Type",
   "viewCompanies": "View Organisations",
   "viewDesc": "View all the visible organisations in the system based on your permissions",
   "addCompany": "Add organisation",
