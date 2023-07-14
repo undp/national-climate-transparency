@@ -17,7 +17,6 @@ import {
 } from 'antd';
 import { DownOutlined, MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import './programmeCreation.scss';
-import '../../Styles/app.scss';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
