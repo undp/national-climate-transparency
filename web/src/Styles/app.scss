@@ -4,21 +4,30 @@ body {
   background-color: $background-color;
   font-family: $primary-font-family;
   font-weight: 400;
+
+  .ant-tooltip-inner {
+    border-radius: 5px !important;
+    background-color: $primary-purple !important;
+  }
+
+  .ant-tooltip-arrow-content {
+    --antd-arrow-background-color: linear-gradient(to right bottom, #9155fd, #9155fd) !important;
+  }
+
+  .login-language-selection-container .ant-select-selector {
+    color: $primary-color !important;
+    border: 1px solid $primary-color !important;
+  }
+
+  .login-language-selection-container .ant-select-selection-item {
+    color: $primary-color !important;
+  }
 }
 
 .layout-content-container .ant-btn-primary {
   background-color: $primary-color !important;
   color: #ffffff;
   border: none;
-}
-
-.ant-tooltip-inner {
-  border-radius: 5px !important;
-  background-color: $primary-purple !important;
-}
-
-.ant-tooltip-arrow-content {
-  --antd-arrow-background-color: linear-gradient(to right bottom, #9155fd, #9155fd) !important;
 }
 
 .stastic-card-main-container .values-section .values-and-unit .value {
@@ -196,22 +205,15 @@ body {
   color: $common-filter-color;
 }
 
-.PhoneInput {
-  .PhoneInputInput:focus-visible,
-  .PhoneInputInput:hover {
-    flex: 1 1;
-    min-width: 0;
-    border-radius: 5px !important;
-    height: 40px;
-    border-right: 1px solid #40a9ff !important;
-    outline: 1px solid #40a9ff;
-  }
+.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-tail::after {
+  background-color: #9155fd;
+  width: 1.7px !important;
 }
 
 .layout-content-container {
   padding-bottom: 100px;
   .ant-btn-primary {
-    background-color: $primary-color;
+    background-color: $primary-purple;
     color: $dark-text-color;
     border: none;
   }
@@ -330,6 +332,10 @@ body {
 .ant-dropdown-menu {
   padding: 1rem 2rem 1rem 1rem !important;
   border-radius: 5px;
+}
+
+.login-language-selection-container .ant-select .ant-select-arrow {
+  color: $primary-color !important;
 }
 
 .ant-dropdown-menu-item-active {
@@ -466,12 +472,12 @@ body {
 
 .popup-success {
   .icon {
-    color: $success-color;
+    color: $primary-color !important;
   }
 
   .ant-btn-primary {
-    background: $primary-color;
-    border-radius: $primary-color;
+    background: $primary-color !important;
+    border-radius: $primary-color !important;
     border: none;
   }
 
