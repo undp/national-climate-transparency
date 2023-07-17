@@ -2,10 +2,6 @@
 @import '../Common/colors.role.scss';
 @import '../../Styles/variables.scss';
 
-.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-tail::after {
-  background-color: #d6cde2;
-}
-
 .programme-details-form-container,
 .programme-sought-form-container {
   width: 100%;
