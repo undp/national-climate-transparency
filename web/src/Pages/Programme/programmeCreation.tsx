@@ -59,6 +59,7 @@ export const AddProgrammeComponent = () => {
   const [userOrgTaxId, setUserOrgTaxId] = useState<any>('');
   const [regionsList, setRegionsList] = useState<any[]>([]);
   const [programmeDetailsObj, setProgrammeDetailsObj] = useState<any>();
+  const [selectedOrgs, setSelectedOrgs] = useState<any[]>();
 
   const initialOrganisationOwnershipValues: any[] = [
     {
@@ -118,7 +119,17 @@ export const AddProgrammeComponent = () => {
   const getOrganisationsDetails = async () => {
     setLoadingList(true);
     try {
-      const response = await post('national/organisation/queryNames', { page: 1, size: 100 });
+      const response = await post('national/organisation/queryNames', {
+        page: 1,
+        size: 100,
+        filterAnd: [
+          {
+            key: 'companyRole',
+            operation: '=',
+            value: CompanyRole.PROGRAMME_DEVELOPER,
+          },
+        ],
+      });
       if (response.data) {
         setOrganisationList(response?.data);
         const userOrganisation = response?.data.find(
@@ -374,6 +385,12 @@ export const AddProgrammeComponent = () => {
     }
   };
 
+  const onChangeStepOne = (changedValues: any, allValues: any) => {
+    const selectedCompanies = allValues?.ownershipPercentage?.map((org: any) => org?.organisation);
+    const uniqueOrgs = new Set(selectedCompanies);
+    setSelectedOrgs([...uniqueOrgs]);
+  };
+
   useEffect(() => {
     getOrganisationsDetails();
   }, []);
@@ -414,6 +431,7 @@ export const AddProgrammeComponent = () => {
                         requiredMark={true}
                         form={formOne}
                         onFinish={onFinishStepOne}
+                        onValuesChange={onChangeStepOne}
                       >
                         <Row className="row" gutter={[16, 16]}>
                           <Col xl={12} md={24}>
@@ -500,6 +518,7 @@ export const AddProgrammeComponent = () => {
                                 />
                               </Form.Item>
                               <Form.Item
+                                wrapperCol={{ span: 13 }}
                                 label={t('addProgramme:ghgCovered')}
                                 name="greenHouseGasses"
                                 rules={[
@@ -509,7 +528,7 @@ export const AddProgrammeComponent = () => {
                                   },
                                 ]}
                               >
-                                <Select size="large" mode="multiple" maxTagCount={2}>
+                                <Select size="large" mode="multiple" maxTagCount={2} allowClear>
                                   <Select.Option value="CO2">
                                     CO<sub>2</sub>
                                   </Select.Option>
@@ -641,6 +660,9 @@ export const AddProgrammeComponent = () => {
                                                     <Select.Option
                                                       key={organisation.companyId}
                                                       value={organisation.taxId}
+                                                      disabled={selectedOrgs?.includes(
+                                                        organisation.taxId
+                                                      )}
                                                     >
                                                       {organisation.name}
                                                     </Select.Option>

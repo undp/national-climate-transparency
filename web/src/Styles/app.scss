@@ -34,6 +34,10 @@ body {
       outline: none;
     }
   }
+
+  .programme-view .company-info .ant-progress-bg {
+    background-color: $primary-color !important;
+  }
 }
 
 .layout-content-container .ant-btn-primary {
