@@ -672,7 +672,7 @@ export const AddProgrammeComponent = () => {
                                                       value={organisation.taxId}
                                                       disabled={
                                                         selectedOrgs?.includes(
-                                                        organisation.taxId
+                                                          organisation.taxId
                                                         ) ||
                                                         (userInfoState?.companyRole !==
                                                           CompanyRole.GOVERNMENT &&
