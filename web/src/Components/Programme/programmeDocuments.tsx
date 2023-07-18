@@ -472,28 +472,44 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                 </div>
               ) : (
                 <>
-                  <FileAddOutlined
-                    className="common-progress-icon"
-                    style={
-                      designDocStatus === DocumentStatus.ACCEPTED &&
-                      uploadDocUserPermission(
-                        userInfoState,
-                        DocType.METHODOLOGY_DOCUMENT,
-                        programmeOwnerId
-                      )
-                        ? { color: '#3F3A47', cursor: 'pointer' }
-                        : { color: '#cacaca', cursor: 'default' }
-                    }
-                    onClick={() =>
-                      designDocStatus === DocumentStatus.ACCEPTED &&
+                  <Tooltip
+                    arrowPointAtCenter
+                    placement="top"
+                    trigger="hover"
+                    title={
+                      designDocStatus !== DocumentStatus.ACCEPTED &&
                       uploadDocUserPermission(
                         userInfoState,
                         DocType.METHODOLOGY_DOCUMENT,
                         programmeOwnerId
                       ) &&
-                      handleMethodologyFileUpload()
+                      'The design document needs to be approved to upload this document'
                     }
-                  />
+                    overlayClassName="custom-tooltip"
+                  >
+                    <FileAddOutlined
+                      className="common-progress-icon"
+                      style={
+                        designDocStatus === DocumentStatus.ACCEPTED &&
+                        uploadDocUserPermission(
+                          userInfoState,
+                          DocType.METHODOLOGY_DOCUMENT,
+                          programmeOwnerId
+                        )
+                          ? { color: '#3F3A47', cursor: 'pointer' }
+                          : { color: '#cacaca', cursor: 'default' }
+                      }
+                      onClick={() =>
+                        designDocStatus === DocumentStatus.ACCEPTED &&
+                        uploadDocUserPermission(
+                          userInfoState,
+                          DocType.METHODOLOGY_DOCUMENT,
+                          programmeOwnerId
+                        ) &&
+                        handleMethodologyFileUpload()
+                      }
+                    />
+                  </Tooltip>
                   <input
                     type="file"
                     ref={fileInputRefMeth}
