@@ -60,6 +60,8 @@ export const AddProgrammeComponent = () => {
   const [regionsList, setRegionsList] = useState<any[]>([]);
   const [programmeDetailsObj, setProgrammeDetailsObj] = useState<any>();
   const [selectedOrgs, setSelectedOrgs] = useState<any[]>();
+  const [ownershipPercentageValidation, setOwnershipPercentageValidation] =
+    useState<boolean>(false);
 
   const initialOrganisationOwnershipValues: any[] = [
     {
@@ -168,7 +170,6 @@ export const AddProgrammeComponent = () => {
   };
 
   const onFinishStepOne = async (values: any) => {
-    console.log(values);
     setLoading(true);
     let programmeDetails: any;
     const ownershipPercentage = values?.ownershipPercentage;
@@ -387,8 +388,17 @@ export const AddProgrammeComponent = () => {
 
   const onChangeStepOne = (changedValues: any, allValues: any) => {
     const selectedCompanies = allValues?.ownershipPercentage?.map((org: any) => org?.organisation);
+    const orgPercentValidation =
+      allValues?.ownershipPercentage[0]?.proponentPercentage === false ? true : false;
+    setOwnershipPercentageValidation(orgPercentValidation);
     const uniqueOrgs = new Set(selectedCompanies);
     setSelectedOrgs([...uniqueOrgs]);
+  };
+
+  const checkOrgPercentageValidation = () => {
+    const orgPercentage = formOne.getFieldValue('ownershipPercentage');
+    const orgPercentValidation = orgPercentage[0]?.proponentPercentage === false ? true : false;
+    setOwnershipPercentageValidation(orgPercentValidation);
   };
 
   useEffect(() => {
@@ -660,9 +670,14 @@ export const AddProgrammeComponent = () => {
                                                     <Select.Option
                                                       key={organisation.companyId}
                                                       value={organisation.taxId}
-                                                      disabled={selectedOrgs?.includes(
+                                                      disabled={
+                                                        selectedOrgs?.includes(
                                                         organisation.taxId
-                                                      )}
+                                                        ) ||
+                                                        (userInfoState?.companyRole !==
+                                                          CompanyRole.GOVERNMENT &&
+                                                          userOrgTaxId === organisation?.taxId)
+                                                      }
                                                     >
                                                       {organisation.name}
                                                     </Select.Option>
@@ -676,13 +691,27 @@ export const AddProgrammeComponent = () => {
                                                 name={[name, 'proponentPercentage']}
                                                 labelCol={{ span: 24 }}
                                                 wrapperCol={{ span: 24 }}
+                                                required={true}
                                                 rules={[
                                                   {
                                                     required: true,
                                                     message: `${t(
                                                       'addProgramme:proponentPercentage'
                                                     )} ${t('isRequired')}`,
-                                                    // validateTrigger: ['onChange', 'onBlur'],
+                                                  },
+                                                  {
+                                                    validator: async (rule, value) => {
+                                                      if (
+                                                        ownershipPercentageValidation &&
+                                                        name === 0
+                                                      ) {
+                                                        throw new Error(
+                                                          `${t(
+                                                            'addProgramme:proponentPercentage'
+                                                          )} ${t('isRequired')}`
+                                                        );
+                                                      }
+                                                    },
                                                   },
                                                 ]}
                                                 shouldUpdate
@@ -973,7 +1002,12 @@ export const AddProgrammeComponent = () => {
                           </Col>
                         </Row>
                         <div className="steps-actions">
-                          <Button type="primary" htmlType="submit" loading={loading}>
+                          <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={loading}
+                            onClick={checkOrgPercentageValidation}
+                          >
                             {t('addProgramme:next')}
                           </Button>
                         </div>
