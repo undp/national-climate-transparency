@@ -154,6 +154,8 @@ export class ProgrammeService {
     } else {
       programme.proponentPercentage[toCompanyIndex] += transfer.percentage
       programme.creditOwnerPercentage[toCompanyIndex] += transfer.percentage
+      programme.creditOwnerPercentage[companyIndex] -= transfer.percentage
+      programme.proponentPercentage[companyIndex] -= transfer.percentage
     }
 
     let ownerTaxId;
@@ -722,6 +724,15 @@ export class ProgrammeService {
       dr.txTime = new Date().getTime();
       dr.url = url;
       await this.documentRepo.save(dr);
+
+      await this.asyncOperationsInterface.addAction({
+        actionType: AsyncActionType.DocumentUpload,
+        actionProps: {
+          type: this.helperService.enumToString(DocType, dr.type),
+          data: dr.url,
+          externalId: dr.externalId
+        },
+      });
     }
 
     await this.asyncOperationsInterface.addAction({
