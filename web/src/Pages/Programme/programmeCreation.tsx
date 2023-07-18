@@ -564,8 +564,14 @@ export const AddProgrammeComponent = () => {
                                 name="designDocument"
                                 valuePropName="fileList"
                                 getValueFromEvent={normFile}
-                                required={false}
+                                required={true}
                                 rules={[
+                                  {
+                                    required: true,
+                                    message: `${t('addProgramme:designDoc')} ${t(
+                                      'addProgramme:isRequired'
+                                    )}`,
+                                  },
                                   {
                                     validator: async (rule, file) => {
                                       if (file?.length > 0) {
@@ -1125,13 +1131,6 @@ export const AddProgrammeComponent = () => {
                           <Button type="primary" htmlType="submit" loading={loading}>
                             {t('addProgramme:submit')}
                           </Button>
-                          <Button
-                            className="action-btn"
-                            loading={loading}
-                            onClick={onOpenNdcCreate}
-                          >
-                            {t('addProgramme:addAction')}
-                          </Button>
                           {current === 1 && (
                             <Button
                               className="back-btn"
@@ -1144,43 +1143,6 @@ export const AddProgrammeComponent = () => {
                         </div>
                       </Form>
                     </div>
-                  </div>
-                ),
-              },
-              {
-                title: (
-                  <div className="step-title-container">
-                    <div className="step-count">03</div>
-                    <div className="title">{t('addProgramme:addProgramme3')}</div>
-                  </div>
-                ),
-                description: (
-                  <div className={current !== 2 ? 'hide' : ''}>
-                    <NdcActionDetails
-                      isBackBtnVisible={true}
-                      onClickedBackBtn={prevOne}
-                      onFormSubmit={onNdcActionDetailsSubmit}
-                      ndcActionDetails={programmeDetailsObj?.ndcAction}
-                      programmeDetails={programmeDetailsObj}
-                    ></NdcActionDetails>
-                  </div>
-                ),
-              },
-              {
-                title: (
-                  <div className="step-title-container">
-                    <div className="step-count">04</div>
-                    <div className="title">{t('addProgramme:addProgramme4')}</div>
-                  </div>
-                ),
-                description: (
-                  <div className={current !== 3 ? 'hide' : ''}>
-                    <CoBenifitsComponent
-                      onClickedBackBtn={prevOne}
-                      coBenefitsDetails={programmeDetailsObj?.coBenefitsProperties}
-                      onFormSubmit={onCoBenefitFormSubmit}
-                      loading={loading}
-                    />
                   </div>
                 ),
               },

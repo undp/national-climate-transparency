@@ -69,7 +69,7 @@ const ProgrammeView = () => {
   const [openModal, setOpenModal] = useState(false);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [centerPoint, setCenterPoint] = useState<number[]>([]);
-  const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : MapTypes.Mapbox;
+  const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : 'None';
   const [isAllOwnersDeactivated, setIsAllOwnersDeactivated] = useState(true);
   const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
