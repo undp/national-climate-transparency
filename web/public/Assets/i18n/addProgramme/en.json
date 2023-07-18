@@ -28,7 +28,7 @@
   "geographicalLocation": "Geographical Location",
   "next": "NEXT",
   "estimatedProgrammeCostUSD": "Estimated Programme Cost (USD)",
-  "minViableCarbonPrice": "Minimum Viable Carbon Price (USD per Ton)",
+  "minViableCarbonPrice": "Minimum Carbon Price (assuming no other revenue)",
   "creditEst": "Estimated Credits",
   "sumbit": "SUBMIT",
   "addAction": "ADD ACTION",
