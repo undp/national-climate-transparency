@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NdcAction } from '../../Definitions/InterfacesAndType/ndcAction.definitions';
 import { useTranslation } from 'react-i18next';
-import { Col, Row, Card, message, Skeleton, Tag } from 'antd';
+import { Col, Row, Card, message, Skeleton, Tag, Tooltip } from 'antd';
 import InfoView from '../../Components/InfoView/info.view';
 import './ndcActionView.scss';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
@@ -16,14 +16,17 @@ import { DocumentStatus } from '../../Casl/enums/document.status';
 import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
 import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import * as Icon from 'react-bootstrap-icons';
-import { addCommSep, addSpaces } from '@undp/carbon-library';
+import { ProgrammeStage, Role, addCommSep, addSpaces } from '@undp/carbon-library';
 import Chart from 'react-apexcharts';
 import CoBenifitsComponent from '../../Components/CoBenifits/coBenifits';
 import { NdcActionStatus, getNdcStatusTagType } from '../../Casl/enums/ndcAction.status';
-import { linkDocVisible } from '../../Casl/documentsPermission';
+import { linkDocVisible, uploadDocUserPermission } from '../../Casl/documentsPermission';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { DocType } from '../../Casl/enums/document.type';
 
 const NdcActionView = () => {
-  const { t } = useTranslation(['ndcAction']);
+  const { userInfoState } = useUserContext();
+  const { t } = useTranslation(['ndcAction', 'programme']);
   const { post } = useConnection();
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -33,6 +36,37 @@ const NdcActionView = () => {
   const [coBenifitsComponentDetails, setCoBenifitsComponentnDetails] = useState<any>();
   const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
+  const [programmeOwnerId, setProgrammeOwnerId] = useState<any[]>([]);
+  const [canUploadMonitorReport, setCanUploadMonitorReport] = useState<boolean>(false);
+  const [monitoringReportAccepted, setMonitoringReportAccepted] = useState<boolean>(false);
+
+  const getProgrammeById = async (programmeId: string) => {
+    setIsLoading(true);
+    try {
+      const response: any = await post('national/programme/query', {
+        page: 1,
+        size: 10,
+        filterAnd: [
+          {
+            key: 'programmeId',
+            operation: '=',
+            value: programmeId,
+          },
+        ],
+      });
+      if (response?.data?.length > 0) {
+        setProgrammeOwnerId(response?.data[0]?.companyId);
+        if (response?.data[0]?.currentStage === ProgrammeStage.Authorised) {
+          setCanUploadMonitorReport(true);
+        }
+        console.log();
+      }
+    } catch (error: any) {
+      console.log('Error in getting programme by id', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getProjectReportActions = (reportData: any) => {
     return (
@@ -65,8 +99,44 @@ const NdcActionView = () => {
   const getProjectReports = async () => {
     setIsLoading(true);
     const reportDetails: any = {
-      [t('ndcAction:viewMoniteringReport')]: <FileAddOutlined />,
-      [t('ndcAction:viewVerificationReport')]: <FileAddOutlined />,
+      [t('ndcAction:viewMoniteringReport')]: (
+        <Tooltip
+          arrowPointAtCenter
+          placement="top"
+          trigger="hover"
+          title={
+            userInfoState?.userRole === Role.ViewOnly
+              ? t('programme:notAuthToUploadDoc')
+              : uploadDocUserPermission(userInfoState, DocType.MONITORING_REPORT, programmeOwnerId)
+              ? !canUploadMonitorReport && t('programme:programmeNotAuth')
+              : t('programme:orgNotAuth')
+          }
+          overlayClassName="custom-tooltip"
+        >
+          <FileAddOutlined />
+        </Tooltip>
+      ),
+      [t('ndcAction:viewVerificationReport')]: (
+        <Tooltip
+          arrowPointAtCenter
+          placement="top"
+          trigger="hover"
+          title={
+            userInfoState?.userRole === Role.ViewOnly
+              ? t('programme:notAuthToUploadDoc')
+              : uploadDocUserPermission(
+                  userInfoState,
+                  DocType.VERIFICATION_REPORT,
+                  programmeOwnerId
+                )
+              ? !monitoringReportAccepted && t('programme:monitoringRepNotApproved')
+              : t('programme:notAuthToUploadDoc')
+          }
+          overlayClassName="custom-tooltip"
+        >
+          <FileAddOutlined />
+        </Tooltip>
+      ),
     };
     try {
       const response: any = await post('national/programme/queryDocs', {
@@ -83,6 +153,9 @@ const NdcActionView = () => {
       if (response?.data?.length > 0) {
         response.data.map((item: any) => {
           if (item?.url?.includes('MONITORING_REPORT')) {
+            if (item?.status === DocumentStatus.ACCEPTED) {
+              setMonitoringReportAccepted(true);
+            }
             reportDetails[t('ndcAction:viewMoniteringReport')] = getProjectReportActions(item);
           } else if (item?.url?.includes('VERIFICATION_REPORT')) {
             reportDetails[t('ndcAction:viewVerificationReport')] = getProjectReportActions(item);
@@ -106,7 +179,7 @@ const NdcActionView = () => {
     if (ndcActionDetails?.id) {
       getProjectReports();
     }
-  }, [ndcActionDetails?.id]);
+  }, [ndcActionDetails?.id, programmeOwnerId]);
 
   useEffect(() => {
     if (!state) {
@@ -115,6 +188,7 @@ const NdcActionView = () => {
       if (!state.record && state.id) {
         //Get Ndc action details using sction id
       } else if (state.record) {
+        getProgrammeById(state?.record?.programmeId);
         setNdcActionDetails(state.record);
         setCoBenifitsComponentnDetails(state?.record?.coBenefitsProperties);
         setEmissionsReductionExpected(
@@ -131,7 +205,7 @@ const NdcActionView = () => {
         );
       }
     }
-  });
+  }, []);
 
   const getNdcActionNames = (action: NdcActionTypes) => {
     switch (action) {
