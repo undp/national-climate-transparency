@@ -26,14 +26,14 @@ import {
   MapComponent,
   MapTypes,
   MarkerData,
-  Programme,
-  ProgrammeStage,
+  ProgrammeStageMRV,
   TypeOfMitigation,
   UnitField,
   addCommSep,
   addSpaces,
   getStageEnumVal,
   getStageTagType,
+  getStageTagTypeMRV,
   sumArray,
 } from '@undp/carbon-library';
 import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
@@ -228,7 +228,7 @@ const ProgrammeView = () => {
           (item: any) =>
             item?.type === DocType.METHODOLOGY_DOCUMENT && item?.status === DocumentStatus.ACCEPTED
         );
-        if (hasAcceptedMethReport && data?.currentStage === ProgrammeStage.Authorised) {
+        if (hasAcceptedMethReport && data?.currentStage === ProgrammeStageMRV.Authorised) {
           setUploadMonitoringReport(true);
         }
         setNdcActionData(objectsWithoutNullActionId);
@@ -491,7 +491,7 @@ const ProgrammeView = () => {
   // genCerts(data);
   const actionBtns = [];
 
-  if (userInfoState && data.currentStage !== ProgrammeStage.Rejected) {
+  if (userInfoState && data.currentStage !== ProgrammeStageMRV.Rejected) {
     if (
       userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
       (userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
@@ -507,11 +507,14 @@ const ProgrammeView = () => {
           {t('view:addInvestment')}
         </Button>
       );
-      actionBtns.push(
-        <Button type="primary" onClick={onClickedAddAction}>
-          {t('view:addAction')}
-        </Button>
-      );
+
+      if (userInfoState && data.currentStage === ProgrammeStageMRV.Approved) {
+        actionBtns.push(
+          <Button type="primary" onClick={onClickedAddAction}>
+            {t('view:addAction')}
+          </Button>
+        );
+      }
     }
   }
 
@@ -520,7 +523,7 @@ const ProgrammeView = () => {
     const text = t('view:' + k);
     if (k === 'currentStatus') {
       generalInfo[text] = (
-        <Tag color={getStageTagType(v as ProgrammeStage)}>{getStageEnumVal(v as string)}</Tag>
+        <Tag color={getStageTagTypeMRV(v as ProgrammeStageMRV)}>{getStageEnumVal(v as string)}</Tag>
       );
     } else if (k === 'sector') {
       generalInfo[text] = (
