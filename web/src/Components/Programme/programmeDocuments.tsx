@@ -277,25 +277,42 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                   )}
                   {designDocStatus !== DocumentStatus.ACCEPTED && (
                     <>
-                      <FileAddOutlined
-                        className="common-progress-icon"
-                        style={
-                          uploadDocUserPermission(
-                            userInfoState,
-                            DocType.DESIGN_DOCUMENT,
-                            programmeOwnerId
-                          )
-                            ? { color: '#3F3A47', cursor: 'pointer' }
-                            : { color: '#cacaca', cursor: 'default' }
+                      <Tooltip
+                        arrowPointAtCenter
+                        placement="top"
+                        trigger="hover"
+                        title={
+                          userInfoState?.userRole === Role.ViewOnly ||
+                          userInfoState?.companyRole === CompanyRole.CERTIFIER
+                            ? t('programme:notAuthToUploadDoc')
+                            : !uploadDocUserPermission(
+                                userInfoState,
+                                DocType.DESIGN_DOCUMENT,
+                                programmeOwnerId
+                              ) && t('programme:orgNotAuth')
                         }
-                        onClick={() =>
-                          uploadDocUserPermission(
-                            userInfoState,
-                            DocType.DESIGN_DOCUMENT,
-                            programmeOwnerId
-                          ) && handleDesignDocFileUpload()
-                        }
-                      />
+                        overlayClassName="custom-tooltip"
+                      >
+                        <FileAddOutlined
+                          className="common-progress-icon"
+                          style={
+                            uploadDocUserPermission(
+                              userInfoState,
+                              DocType.DESIGN_DOCUMENT,
+                              programmeOwnerId
+                            )
+                              ? { color: '#3F3A47', cursor: 'pointer' }
+                              : { color: '#cacaca', cursor: 'default' }
+                          }
+                          onClick={() =>
+                            uploadDocUserPermission(
+                              userInfoState,
+                              DocType.DESIGN_DOCUMENT,
+                              programmeOwnerId
+                            ) && handleDesignDocFileUpload()
+                          }
+                        />
+                      </Tooltip>
                       <input
                         type="file"
                         ref={fileInputRef}
@@ -304,7 +321,6 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                         onChange={(e: any) => {
                           const selectedFile = e.target.files[0];
                           onUploadDocument(selectedFile, DocType.DESIGN_DOCUMENT);
-                          // Handle the selected file here
                         }}
                       />
                     </>
@@ -312,25 +328,42 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                 </div>
               ) : (
                 <>
-                  <FileAddOutlined
-                    className="common-progress-icon"
-                    style={
-                      uploadDocUserPermission(
-                        userInfoState,
-                        DocType.DESIGN_DOCUMENT,
-                        programmeOwnerId
-                      )
-                        ? { color: '#3F3A47', cursor: 'pointer' }
-                        : { color: '#cacaca', cursor: 'default' }
+                  <Tooltip
+                    arrowPointAtCenter
+                    placement="top"
+                    trigger="hover"
+                    title={
+                      userInfoState?.userRole === Role.ViewOnly ||
+                      userInfoState?.companyRole === CompanyRole.CERTIFIER
+                        ? t('programme:notAuthToUploadDoc')
+                        : !uploadDocUserPermission(
+                            userInfoState,
+                            DocType.DESIGN_DOCUMENT,
+                            programmeOwnerId
+                          ) && t('programme:orgNotAuth')
                     }
-                    onClick={() =>
-                      uploadDocUserPermission(
-                        userInfoState,
-                        DocType.DESIGN_DOCUMENT,
-                        programmeOwnerId
-                      ) && handleDesignDocFileUpload()
-                    }
-                  />
+                    overlayClassName="custom-tooltip"
+                  >
+                    <FileAddOutlined
+                      className="common-progress-icon"
+                      style={
+                        uploadDocUserPermission(
+                          userInfoState,
+                          DocType.DESIGN_DOCUMENT,
+                          programmeOwnerId
+                        )
+                          ? { color: '#3F3A47', cursor: 'pointer' }
+                          : { color: '#cacaca', cursor: 'default' }
+                      }
+                      onClick={() =>
+                        uploadDocUserPermission(
+                          userInfoState,
+                          DocType.DESIGN_DOCUMENT,
+                          programmeOwnerId
+                        ) && handleDesignDocFileUpload()
+                      }
+                    />
+                  </Tooltip>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -339,7 +372,6 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
                       onUploadDocument(selectedFile, DocType.DESIGN_DOCUMENT);
-                      // Handle the selected file here
                     }}
                   />
                 </>
@@ -433,28 +465,44 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                   )}
                   {methodDocStatus !== DocumentStatus.ACCEPTED && (
                     <>
-                      <FileAddOutlined
-                        className="common-progress-icon"
-                        style={
-                          designDocStatus === DocumentStatus.ACCEPTED &&
-                          uploadDocUserPermission(
-                            userInfoState,
-                            DocType.METHODOLOGY_DOCUMENT,
-                            programmeOwnerId
-                          )
-                            ? { color: '#3F3A47', cursor: 'pointer' }
-                            : { color: '#cacaca' }
+                      <Tooltip
+                        arrowPointAtCenter
+                        placement="top"
+                        trigger="hover"
+                        title={
+                          userInfoState?.userRole === Role.ViewOnly
+                            ? t('programme:notAuthToUploadDoc')
+                            : !uploadDocUserPermission(
+                                userInfoState,
+                                DocType.METHODOLOGY_DOCUMENT,
+                                programmeOwnerId
+                              ) && t('programme:orgNotAuth')
                         }
-                        onClick={() =>
-                          designDocStatus === DocumentStatus.ACCEPTED &&
-                          uploadDocUserPermission(
-                            userInfoState,
-                            DocType.METHODOLOGY_DOCUMENT,
-                            programmeOwnerId
-                          ) &&
-                          handleMethodologyFileUpload()
-                        }
-                      />
+                        overlayClassName="custom-tooltip"
+                      >
+                        <FileAddOutlined
+                          className="common-progress-icon"
+                          style={
+                            designDocStatus === DocumentStatus.ACCEPTED &&
+                            uploadDocUserPermission(
+                              userInfoState,
+                              DocType.METHODOLOGY_DOCUMENT,
+                              programmeOwnerId
+                            )
+                              ? { color: '#3F3A47', cursor: 'pointer' }
+                              : { color: '#cacaca' }
+                          }
+                          onClick={() =>
+                            designDocStatus === DocumentStatus.ACCEPTED &&
+                            uploadDocUserPermission(
+                              userInfoState,
+                              DocType.METHODOLOGY_DOCUMENT,
+                              programmeOwnerId
+                            ) &&
+                            handleMethodologyFileUpload()
+                          }
+                        />
+                      </Tooltip>
                       <input
                         type="file"
                         ref={fileInputRefMeth}
@@ -464,7 +512,6 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                           const selectedFile = e.target.files[0];
                           if (designDocStatus === DocumentStatus.ACCEPTED)
                             onUploadDocument(selectedFile, DocType.METHODOLOGY_DOCUMENT);
-                          // Handle the selected file here
                         }}
                       />
                     </>
@@ -477,13 +524,16 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                     placement="top"
                     trigger="hover"
                     title={
-                      designDocStatus !== DocumentStatus.ACCEPTED &&
-                      uploadDocUserPermission(
-                        userInfoState,
-                        DocType.METHODOLOGY_DOCUMENT,
-                        programmeOwnerId
-                      ) &&
-                      'The design document needs to be approved to upload this document'
+                      userInfoState?.userRole === Role.ViewOnly
+                        ? t('programme:notAuthToUploadDoc')
+                        : uploadDocUserPermission(
+                            userInfoState,
+                            DocType.METHODOLOGY_DOCUMENT,
+                            programmeOwnerId
+                          )
+                        ? designDocStatus !== DocumentStatus.ACCEPTED &&
+                          t('programme:designDocNotApproved')
+                        : t('programme:orgNotAuth')
                     }
                     overlayClassName="custom-tooltip"
                   >
@@ -519,7 +569,6 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                       const selectedFile = e.target.files[0];
                       if (designDocStatus === DocumentStatus.ACCEPTED)
                         onUploadDocument(selectedFile, DocType.METHODOLOGY_DOCUMENT);
-                      // Handle the selected file here
                     }}
                   />
                 </>

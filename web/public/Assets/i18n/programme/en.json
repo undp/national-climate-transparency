@@ -62,5 +62,10 @@
   "CarbonMarket": "Carbon Market",
   "rejectTip": "Request Adjustments",
   "invalidFileFormat": "Unsupported file format",
-  "investmentReqApproved": "The investment request has been accepted."
+  "investmentReqApproved": "The investment request has been accepted.",
+  "designDocNotApproved": "The design document needs to be approved to upload this document",
+  "programmeNotAuth": "The programme has to be authorised to upload this document",
+  "monitoringRepNotApproved": "The monitoring report has to be approved to upload this document",
+  "notAuthToUploadDoc": "You are not authorised to upload this document",
+  "orgNotAuth": "Your organisation is not authorised to upload or view this document"
 }

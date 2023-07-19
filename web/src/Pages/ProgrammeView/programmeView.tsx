@@ -257,8 +257,6 @@ const ProgrammeView = () => {
           },
         ],
       });
-      console.log('INVESTMENT QUERY --------- ');
-      console.log(response?.data);
       const investmentHisData = response?.data?.map((item: any) => {
         const investmentData: any = {
           invester: item?.receiver[0]?.name,
@@ -306,7 +304,6 @@ const ProgrammeView = () => {
     setLoadingHistory(true);
     setLoadingNDC(true);
     try {
-      // if (programmeId && ndcActionDataItem === null) {
       const response: any = await post('national/programme/queryNdcActions', {
         page: 1,
         size: 100,
