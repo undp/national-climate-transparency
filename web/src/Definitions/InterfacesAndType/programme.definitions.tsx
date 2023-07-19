@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { ProgrammeTransfer } from '@undp/carbon-library';
+import { ProgrammeStageMRV, ProgrammeTransfer } from '@undp/carbon-library';
 import { GovBGColor, CertBGColor, DevBGColor } from '../../Pages/Common/role.color.constants';
 import { RcFile } from 'rc-upload/lib/interface';
 
@@ -193,7 +193,7 @@ export interface Programme {
   sectoralScope: string;
   sector: string;
   countryCodeA2: string;
-  currentStage: ProgrammeStage;
+  currentStage: ProgrammeStageMRV;
   startTime: number;
   endTime: number;
   creditChange: number;
@@ -229,7 +229,7 @@ export interface ProgrammeT {
   sectoralScope: string;
   sector: string;
   countryCodeA2: string;
-  currentStage: ProgrammeStage;
+  currentStage: ProgrammeStageMRV;
   startTime: number;
   endTime: number;
   creditChange: number;
