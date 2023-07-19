@@ -20,7 +20,6 @@ export const uploadDocUserPermission = (
   programmeOwnerId: any[]
 ) => {
   let permission = false;
-  console.log('doc uplaod -- > 20', programmeOwnerId);
   if (docType === DocType.DESIGN_DOCUMENT) {
     if (
       userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
