@@ -161,10 +161,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   }, [data]);
 
   const companyRolePermission =
-    (userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
-      userInfoState?.userRole !== Role.ViewOnly) ||
-    (userInfoState?.companyRole === CompanyRole.CERTIFIER &&
-      userInfoState?.userRole !== Role.ViewOnly);
+    userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
+    userInfoState?.userRole !== Role.ViewOnly;
   const monitoringReportPending = monitoringReportData?.status === DocumentStatus.PENDING;
   const monitoringReportAccepted = monitoringReportData?.status === DocumentStatus.ACCEPTED;
   const monitoringReportRejected = monitoringReportData?.status === DocumentStatus.REJECTED;
@@ -408,7 +406,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                         onClick={() =>
                           docAction(
                             verificationReportData?.id,
-                            verificationReportData?.status,
+                            DocumentStatus.ACCEPTED,
                             verificationReportData?.actionId,
                             verificationReportData?.type
                           )

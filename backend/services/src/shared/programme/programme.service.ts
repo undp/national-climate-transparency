@@ -1319,7 +1319,7 @@ export class ProgrammeService {
 
     let ndc: NDCAction;
     let certifierId;
-    if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
+    if (user.companyRole === CompanyRole.GOVERNMENT) {
       this.logger.log(`Approving document since the user is ${user.companyRole}`)
       dr.status = DocumentStatus.ACCEPTED;
       if (dr.actionId) {
@@ -1329,7 +1329,6 @@ export class ProgrammeService {
           },
         });
       }
-      certifierId = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
       ndc = await this.approveDocumentPre(dr, programme, certifierId, ndc);
     }
 

@@ -507,8 +507,7 @@ const ProgrammeView = () => {
           {t('view:addInvestment')}
         </Button>
       );
-
-      if (userInfoState && data.currentStage === ProgrammeStageMRV.Approved) {
+      if (data.currentStage !== ProgrammeStageMRV.AwaitingAuthorization) {
         actionBtns.push(
           <Button type="primary" onClick={onClickedAddAction}>
             {t('view:addAction')}
