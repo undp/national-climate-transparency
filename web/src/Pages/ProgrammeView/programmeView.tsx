@@ -508,13 +508,13 @@ const ProgrammeView = () => {
         </Button>
       );
 
-      if (userInfoState && data.currentStage === ProgrammeStageMRV.Approved) {
-        actionBtns.push(
-          <Button type="primary" onClick={onClickedAddAction}>
-            {t('view:addAction')}
-          </Button>
-        );
-      }
+      //if (userInfoState && data.currentStage === ProgrammeStageMRV.Approved) {
+      actionBtns.push(
+        <Button type="primary" onClick={onClickedAddAction}>
+          {t('view:addAction')}
+        </Button>
+      );
+      //}
     }
   }
 
