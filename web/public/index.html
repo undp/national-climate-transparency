@@ -64,6 +64,13 @@
       name="twitter:image"
       content="https://www.test.carbreg.org/static/media/thumbnail.5104bd8cc527df632977.png"
     />
+    <script>
+      var isJSsupported = 'querySelector' in document;
+      var isIE = window.navigator.userAgent.match(/(MSIE|Trident)/i);
+      if (!isJSsupported || isIE) {
+        window.location.href = 'fallback.html';
+      }
+    </script>
   </head>
 
   <body>
