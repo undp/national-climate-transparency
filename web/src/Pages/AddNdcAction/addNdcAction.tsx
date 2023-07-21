@@ -25,6 +25,10 @@ const AddNdcAction = () => {
   const { post } = useConnection();
   const [loading, setLoading] = useState(false);
 
+  const maximumImageSize = process.env.MAXIMUM_IMAGE_SIZE
+    ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
+    : 7145728;
+
   useEffect(() => {
     if (!state?.record) {
       navigate('/programmeManagement/viewAll', { replace: true });
@@ -97,9 +101,8 @@ const AddNdcAction = () => {
       const logoBase64 = await getBase64(
         projectReportFormValues.monitoringReport[0].originFileObj as RcFile
       );
-      const logoUrls = logoBase64.split(',');
 
-      updatedNdcActionDetails.monitoringReport = logoUrls[1];
+      updatedNdcActionDetails.monitoringReport = logoBase64;
     }
 
     setNdcActionDetails(updatedNdcActionDetails);
@@ -207,6 +210,31 @@ const AddNdcAction = () => {
               valuePropName="fileList"
               getValueFromEvent={normFile}
               required={false}
+              rules={[
+                {
+                  validator: async (rule, file) => {
+                    if (file?.length > 0) {
+                      let isCorrectFormat = false;
+                      if (file[0]?.type === 'application/pdf') {
+                        isCorrectFormat = true;
+                      } else if (
+                        file[0]?.type ===
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                      ) {
+                        isCorrectFormat = true;
+                      } else if (file[0]?.type === 'text/csv') {
+                        isCorrectFormat = true;
+                      }
+                      if (!isCorrectFormat) {
+                        throw new Error(`${t('ndcAction:invalidFileFormat')}`);
+                      } else if (file[0]?.size > maximumImageSize) {
+                        // default size format of files would be in bytes -> 1MB = 1000000bytes
+                        throw new Error(`${t('ndcAction:maxSizeVal')}`);
+                      }
+                    }
+                  },
+                },
+              ]}
             >
               <Upload
                 beforeUpload={(file: any) => {

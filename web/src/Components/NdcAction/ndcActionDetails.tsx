@@ -596,6 +596,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 ]}
               >
                 <Upload
+                  accept=".pdf"
                   beforeUpload={(file: any) => {
                     return false;
                   }}

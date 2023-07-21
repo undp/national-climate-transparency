@@ -33,7 +33,7 @@
   "monitoringReport": "Monitoring Report",
   "submit": "Submit",
   "invalidFileFormat": "Unsupported file format",
-  "maxSizeVal": "Maximum upload file size is 5MP",
+  "maxSizeVal": "Maximum upload file size is 5MB",
   "isRequired": "is required",
   "ndcToolTip": "Nationally Determined Contributions",
   "noNdcActions": "No NDC Actions Available",
