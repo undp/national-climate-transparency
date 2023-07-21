@@ -30,5 +30,7 @@
   "verifyingDetailslbl":"Details",
   "specify":"Specify",
   "contactInformation":"Contact Information",
-  "feasibilityReport":"Feasibility Report"
+  "feasibilityReport":"Feasibility Report",
+  "invalidFileFormat": "Unsupported file format",
+  "maxSizeVal": "Maximum upload file size is 5MB"
 }

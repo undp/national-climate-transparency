@@ -658,8 +658,28 @@ export class ProgrammeService {
   }
 
   async uploadDocument(type: DocType, id: string, data: string) {
-    console.log('Doc upload', id, data)
-    const filetype = type == DocType.METHODOLOGY_DOCUMENT ? "xlsx" : "pdf";
+    let filetype = type == DocType.METHODOLOGY_DOCUMENT ? "xlsx" : "pdf";
+    if(type === DocType.MONITORING_REPORT){
+      //determine filetype of base64 data
+      try {
+        filetype = data.split(';')[0].split('/')[1];
+        if(filetype === 'vnd.openxmlformats-officedocument.spreadsheetml.sheet'){
+          filetype = 'xlsx'
+        }else if(filetype === 'vnd.ms-excel'){
+          filetype = 'xls'
+        }
+        data = data.split(',')[1];
+      }
+      catch(Exception:any){
+        throw new HttpException(
+          this.helperService.formatReqMessagesString(
+            "programme.invalidDocumentUpload",
+            []
+          ),
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    }
     const response: any = await this.fileHandler.uploadFile(
       `documents/${this.helperService.enumToString(DocType, type)}${
         id ? "_" + id : ""

@@ -37,6 +37,10 @@ const Assessment = (props: any) => {
   const { get } = useConnection();
   const [isCountryListLoading, setIsCountryListLoading] = useState(false);
 
+  const maximumFileSize = process.env.MAXIMUM_IMAGE_SIZE
+    ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
+    : 7145728;
+
   const getCountryList = async () => {
     setIsCountryListLoading(true);
     try {
@@ -661,8 +665,26 @@ const Assessment = (props: any) => {
                     valuePropName="fileList"
                     getValueFromEvent={normFile}
                     required={false}
+                    rules={[
+                      {
+                        validator: async (rule, file) => {
+                          if (file?.length > 0) {
+                            let isCorrectFormat = false;
+                            if (file[0]?.type === 'application/pdf') {
+                              isCorrectFormat = true;
+                            }
+                            if (!isCorrectFormat) {
+                              throw new Error(`${t('invalidFileFormat')}`);
+                            } else if (file[0]?.size > maximumFileSize) {
+                              throw new Error(`${t('maxSizeVal')}`);
+                            }
+                          }
+                        },
+                      },
+                    ]}
                   >
                     <Upload
+                      accept=".pdf"
                       beforeUpload={(file: any) => {
                         return false;
                       }}

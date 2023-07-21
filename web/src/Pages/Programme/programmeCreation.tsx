@@ -591,6 +591,7 @@ export const AddProgrammeComponent = () => {
                                 ]}
                               >
                                 <Upload
+                                  accept=".pdf"
                                   beforeUpload={(file: any) => {
                                     return false;
                                   }}
