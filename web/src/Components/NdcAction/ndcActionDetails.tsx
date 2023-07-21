@@ -48,9 +48,9 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const [mitigationType, setmitigationType] = useState();
   const [form] = Form.useForm();
 
-  const maximumImageSize = process.env.MAXIMUM_IMAGE_SIZE
-    ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
-    : 7145728;
+  const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+    ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+    : 5000000;
 
   useEffect(() => {
     if (ndcActionDetails) {
