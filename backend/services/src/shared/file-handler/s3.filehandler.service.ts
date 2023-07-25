@@ -20,6 +20,9 @@ export class S3FileHandlerService implements FileHandlerInterface {
     if (filename.endsWith('.xlsx') || filename.endsWith('.xls')) {
       return 'application/excel'
     }
+    if (filename.endsWith('.csv')) {
+      return 'text/csv'
+    }
     return "image/png";
   }
 

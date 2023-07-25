@@ -82,7 +82,12 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
     }
 
     try {
-      if (file?.type === 'application/pdf') {
+      if (
+        file?.type === 'application/pdf' ||
+        (type === DocType.MONITORING_REPORT &&
+          (file?.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+            file?.type === 'text/csv'))
+      ) {
         const response: any = await post('national/programme/addDocument', {
           type: type,
           data: imgData,
@@ -313,7 +318,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     type="file"
                     ref={fileInputMonitoringRef}
                     style={{ display: 'none' }}
-                    accept=".pdf"
+                    accept=".pdf,.xlsx,.csv"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
                       onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
@@ -390,7 +395,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     type="file"
                     ref={fileInputMonitoringRef}
                     style={{ display: 'none' }}
-                    accept=".pdf"
+                    accept=".pdf,.xlsx,.csv"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
                       onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
