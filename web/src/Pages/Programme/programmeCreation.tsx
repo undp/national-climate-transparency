@@ -32,9 +32,9 @@ import CoBenifitsComponent from '../../Components/CoBenifits/coBenifits';
 
 type SizeType = Parameters<typeof Form>[0]['size'];
 
-const maximumImageSize = process.env.MAXIMUM_IMAGE_SIZE
-  ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
-  : 7145728;
+const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+  ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+  : 5000000;
 
 export const AddProgrammeComponent = () => {
   const { state } = useLocation();
@@ -583,7 +583,7 @@ export const AddProgrammeComponent = () => {
                                           throw new Error(`${t('addProgramme:invalidFileFormat')}`);
                                         } else if (file[0]?.size > maximumImageSize) {
                                           // default size format of files would be in bytes -> 1MB = 1000000bytes
-                                          throw new Error(`${t('addProgramme:maxSizeVal')}`);
+                                          throw new Error(`${t('common:maxSizeVal')}`);
                                         }
                                       }
                                     },

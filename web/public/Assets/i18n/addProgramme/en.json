@@ -37,7 +37,6 @@
   "unConditional": "UNCONDITIONAL",
   "endTimeVal": "End date cannot be earlier than the start date",
   "invalidFileFormat": "Unsupported file format",
-  "maxSizeVal": "Maximum upload file size is 5MB",
   "duplicateOrg": "This organisation is already selected!",
   "isRequired":"is required!"
 }
