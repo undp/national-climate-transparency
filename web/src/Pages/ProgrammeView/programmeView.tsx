@@ -508,12 +508,12 @@ const ProgrammeView = () => {
         </Button>
       );
       if (data.currentStage !== ProgrammeStageMRV.AwaitingAuthorization) {
-        actionBtns.push(
-          <Button type="primary" onClick={onClickedAddAction}>
-            {t('view:addAction')}
-          </Button>
-        );
-      }
+      actionBtns.push(
+        <Button type="primary" onClick={onClickedAddAction}>
+          {t('view:addAction')}
+        </Button>
+      );
+      //}
     }
   }
 

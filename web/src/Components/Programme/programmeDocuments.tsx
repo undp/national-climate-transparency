@@ -1,5 +1,4 @@
 import { Col, Row, Skeleton, Tooltip, message } from 'antd';
-import { DateTime } from 'luxon';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import './programmeDocuments.scss';
 import {
@@ -55,6 +54,9 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
   const [openRejectDocConfirmationModal, setOpenRejectDocConfirmationModal] = useState(false);
   const [actionInfo, setActionInfo] = useState<any>({});
   const [rejectDocData, setRejectDocData] = useState<any>({});
+  const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+    ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+    : 5000000;
 
   const handleDesignDocFileUpload = () => {
     fileInputRef?.current?.click();
@@ -100,9 +102,24 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
     });
 
   const onUploadDocument = async (file: any, type: any) => {
+    if (file.size > maximumImageSize) {
+      message.open({
+        type: 'error',
+        content: `${t('common:maxSizeVal')}`,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      return;
+    }
+
     setLoading(true);
     const logoBase64 = await getBase64(file as RcFile);
-    const logoUrls = logoBase64.split(',');
+    let imgData = logoBase64;
+    if (type !== DocType.MONITORING_REPORT) {
+      const logoUrls = logoBase64.split(',');
+      imgData = logoUrls[1];
+    }
+
     try {
       if (
         (type === DocType.DESIGN_DOCUMENT && file?.type === 'application/pdf') ||
@@ -111,7 +128,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
       ) {
         const response: any = await post('national/programme/addDocument', {
           type: type,
-          data: logoUrls[1],
+          data: imgData,
           programmeId: programmeId,
         });
         fileInputRefMeth.current = null;

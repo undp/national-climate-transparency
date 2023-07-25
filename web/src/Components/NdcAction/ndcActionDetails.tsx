@@ -48,9 +48,9 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const [mitigationType, setmitigationType] = useState();
   const [form] = Form.useForm();
 
-  const maximumImageSize = process.env.MAXIMUM_IMAGE_SIZE
-    ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
-    : 7145728;
+  const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+    ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+    : 5000000;
 
   useEffect(() => {
     if (ndcActionDetails) {
@@ -588,7 +588,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                         if (!isCorrectFormat) {
                           throw new Error(`${t('ndcAction:invalidFileFormat')}`);
                         } else if (file[0]?.size > maximumImageSize) {
-                          throw new Error(`${t('ndcAction:maxSizeVal')}`);
+                          throw new Error(`${t('common:maxSizeVal')}`);
                         }
                       }
                     },
@@ -596,6 +596,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 ]}
               >
                 <Upload
+                  accept=".pdf"
                   beforeUpload={(file: any) => {
                     return false;
                   }}

@@ -4,12 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Button, Form, Input, Row, Steps, Tooltip, Upload, UploadProps, message } from 'antd';
 import './addNdcAction.scss';
 import { UploadOutlined } from '@ant-design/icons';
-import { FormInstance } from 'rc-field-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { RcFile } from 'rc-upload/lib/interface';
-import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
-import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import { Programme, ProgrammeStage } from '@undp/carbon-library';
 import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
 import { InfoCircle } from 'react-bootstrap-icons';
@@ -24,6 +21,10 @@ const AddNdcAction = () => {
   const navigate = useNavigate();
   const { post } = useConnection();
   const [loading, setLoading] = useState(false);
+
+  const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+    ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+    : 5000000;
 
   useEffect(() => {
     if (!state?.record) {
@@ -97,9 +98,8 @@ const AddNdcAction = () => {
       const logoBase64 = await getBase64(
         projectReportFormValues.monitoringReport[0].originFileObj as RcFile
       );
-      const logoUrls = logoBase64.split(',');
 
-      updatedNdcActionDetails.monitoringReport = logoUrls[1];
+      updatedNdcActionDetails.monitoringReport = logoBase64;
     }
 
     setNdcActionDetails(updatedNdcActionDetails);
@@ -207,6 +207,31 @@ const AddNdcAction = () => {
               valuePropName="fileList"
               getValueFromEvent={normFile}
               required={false}
+              rules={[
+                {
+                  validator: async (rule, file) => {
+                    if (file?.length > 0) {
+                      let isCorrectFormat = false;
+                      if (file[0]?.type === 'application/pdf') {
+                        isCorrectFormat = true;
+                      } else if (
+                        file[0]?.type ===
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                      ) {
+                        isCorrectFormat = true;
+                      } else if (file[0]?.type === 'text/csv') {
+                        isCorrectFormat = true;
+                      }
+                      if (!isCorrectFormat) {
+                        throw new Error(`${t('ndcAction:invalidFileFormat')}`);
+                      } else if (file[0]?.size > maximumImageSize) {
+                        // default size format of files would be in bytes -> 1MB = 1000000bytes
+                        throw new Error(`${t('common:maxSizeVal')}`);
+                      }
+                    }
+                  },
+                },
+              ]}
             >
               <Upload
                 beforeUpload={(file: any) => {
