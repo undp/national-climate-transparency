@@ -10,8 +10,6 @@ import { Programme } from "../entities/programme.entity";
 import { AsyncActionType } from "../enum/async.action.type.enum";
 import { UserService } from "../user/user.service";
 import { HelperService } from "../util/helpers.service";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
 import { ProgrammeService } from "../programme/programme.service";
 
 @Injectable()
