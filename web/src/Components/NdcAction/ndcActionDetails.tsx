@@ -588,7 +588,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                         if (!isCorrectFormat) {
                           throw new Error(`${t('ndcAction:invalidFileFormat')}`);
                         } else if (file[0]?.size > maximumImageSize) {
-                          throw new Error(`${t('ndcAction:maxSizeVal')}`);
+                          throw new Error(`${t('common:maxSizeVal')}`);
                         }
                       }
                     },

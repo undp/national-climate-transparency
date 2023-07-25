@@ -668,7 +668,6 @@ const Assessment = (props: any) => {
                     rules={[
                       {
                         validator: async (rule, file) => {
-                          console.log('size', file[0]?.size, maximumFileSize);
                           if (file?.length > 0) {
                             let isCorrectFormat = false;
                             if (file[0]?.type === 'application/pdf') {
@@ -677,7 +676,7 @@ const Assessment = (props: any) => {
                             if (!isCorrectFormat) {
                               throw new Error(`${t('invalidFileFormat')}`);
                             } else if (file[0]?.size > maximumFileSize) {
-                              throw new Error(`${t('maxSizeVal')}`);
+                              throw new Error(`${t('common:maxSizeVal')}`);
                             }
                           }
                         },

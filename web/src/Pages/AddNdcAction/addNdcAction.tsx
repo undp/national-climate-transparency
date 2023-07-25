@@ -229,7 +229,7 @@ const AddNdcAction = () => {
                         throw new Error(`${t('ndcAction:invalidFileFormat')}`);
                       } else if (file[0]?.size > maximumImageSize) {
                         // default size format of files would be in bytes -> 1MB = 1000000bytes
-                        throw new Error(`${t('ndcAction:maxSizeVal')}`);
+                        throw new Error(`${t('common:maxSizeVal')}`);
                       }
                     }
                   },

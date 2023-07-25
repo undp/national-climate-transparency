@@ -583,7 +583,7 @@ export const AddProgrammeComponent = () => {
                                           throw new Error(`${t('addProgramme:invalidFileFormat')}`);
                                         } else if (file[0]?.size > maximumImageSize) {
                                           // default size format of files would be in bytes -> 1MB = 1000000bytes
-                                          throw new Error(`${t('addProgramme:maxSizeVal')}`);
+                                          throw new Error(`${t('common:maxSizeVal')}`);
                                         }
                                       }
                                     },
