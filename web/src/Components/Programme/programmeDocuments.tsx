@@ -337,6 +337,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                         accept=".pdf"
                         onChange={(e: any) => {
                           const selectedFile = e.target.files[0];
+                          e.target.value = null;
                           onUploadDocument(selectedFile, DocType.DESIGN_DOCUMENT);
                         }}
                       />
@@ -388,6 +389,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                     accept=".pdf"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       onUploadDocument(selectedFile, DocType.DESIGN_DOCUMENT);
                     }}
                   />
@@ -527,6 +529,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                         accept=".xlsx"
                         onChange={(e: any) => {
                           const selectedFile = e.target.files[0];
+                          e.target.value = null;
                           if (designDocStatus === DocumentStatus.ACCEPTED)
                             onUploadDocument(selectedFile, DocType.METHODOLOGY_DOCUMENT);
                         }}
@@ -584,6 +587,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                     accept=".xlsx"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       if (designDocStatus === DocumentStatus.ACCEPTED)
                         onUploadDocument(selectedFile, DocType.METHODOLOGY_DOCUMENT);
                     }}

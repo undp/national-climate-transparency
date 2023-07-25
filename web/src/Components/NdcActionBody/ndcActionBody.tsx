@@ -321,6 +321,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     accept=".pdf,.xlsx,.csv"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
                     }}
                   />
@@ -398,6 +399,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     accept=".pdf,.xlsx,.csv"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
                     }}
                   />
@@ -532,6 +534,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                       accept=".pdf"
                       onChange={(e: any) => {
                         const selectedFile = e.target.files[0];
+                        e.target.value = null;
                         onUploadDocument(selectedFile, DocType.VERIFICATION_REPORT);
                       }}
                     />
@@ -610,6 +613,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     accept=".pdf"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       onUploadDocument(selectedFile, DocType.VERIFICATION_REPORT);
                     }}
                   />
