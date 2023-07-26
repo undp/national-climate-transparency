@@ -526,7 +526,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                         type="file"
                         ref={fileInputRefMeth}
                         style={{ display: 'none' }}
-                        accept=".xlsx"
+                        accept=".xlsx,.xls"
                         onChange={(e: any) => {
                           const selectedFile = e.target.files[0];
                           e.target.value = null;
@@ -584,7 +584,7 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                     type="file"
                     ref={fileInputRefMeth}
                     style={{ display: 'none' }}
-                    accept=".xlsx"
+                    accept=".xlsx,.xls"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
                       e.target.value = null;
