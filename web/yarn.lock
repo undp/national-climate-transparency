@@ -2708,7 +2708,7 @@
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
 
-"@undp/carbon-library@^1.0.44":
+"@undp/carbon-library@^1.0.45":
   version "1.0.45"
   resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.45.tgz#def46e3b03febb92c7c0484a90dd28fbb676f45d"
   integrity sha512-1Q76zIn9uOzyoFX/uSz0VDqUUhW1bAfHBWnpBPrD4JM6FvzQ9H64U2auOHbkDiWhnBMh41vDmNtx/VjSY/ZczQ==
