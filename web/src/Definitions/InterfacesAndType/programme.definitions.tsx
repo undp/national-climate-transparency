@@ -49,7 +49,7 @@ export enum TxType {
 }
 
 export enum SectoralScope {
-  'Energy Industries' = '1',
+  'Energy Industries (Renewable - / Non-Renewable Sources)' = '1',
   'Energy Distribution' = '2',
   'Energy Demand' = '3',
   'Manufacturing Industries' = '4',

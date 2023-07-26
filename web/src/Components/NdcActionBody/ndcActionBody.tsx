@@ -318,7 +318,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     type="file"
                     ref={fileInputMonitoringRef}
                     style={{ display: 'none' }}
-                    accept=".pdf,.xlsx,.csv"
+                    accept=".pdf,.xlsx,.csv,.xls"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
                       e.target.value = null;
@@ -396,7 +396,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     type="file"
                     ref={fileInputMonitoringRef}
                     style={{ display: 'none' }}
-                    accept=".pdf,.xlsx,.csv"
+                    accept=".pdf,.xlsx,.csv,.xls"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
                       e.target.value = null;
