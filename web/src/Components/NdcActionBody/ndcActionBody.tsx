@@ -43,6 +43,9 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   const [openRejectDocConfirmationModal, setOpenRejectDocConfirmationModal] = useState(false);
   const [actionInfo, setActionInfo] = useState<any>({});
   const [rejectDocData, setRejectDocData] = useState<any>({});
+  const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+    ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+    : 5000000;
 
   const getBase64 = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -61,15 +64,33 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   };
 
   const onUploadDocument = async (file: any, type: any) => {
+    if (file.size > maximumImageSize) {
+      message.open({
+        type: 'error',
+        content: `${t('common:maxSizeVal')}`,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      return;
+    }
     setLoading(true);
     const logoBase64 = await getBase64(file as RcFile);
-    const logoUrls = logoBase64.split(',');
-    console.log(logoUrls[1], file);
+    let imgData = logoBase64;
+    if (type !== DocType.MONITORING_REPORT) {
+      const logoUrls = logoBase64.split(',');
+      imgData = logoUrls[1];
+    }
+
     try {
-      if (file?.type === 'application/pdf') {
+      if (
+        file?.type === 'application/pdf' ||
+        (type === DocType.MONITORING_REPORT &&
+          (file?.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+            file?.type === 'text/csv'))
+      ) {
         const response: any = await post('national/programme/addDocument', {
           type: type,
-          data: logoUrls[1],
+          data: imgData,
           programmeId: programmeId,
           actionId: ndcActionId,
         });
@@ -297,9 +318,10 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     type="file"
                     ref={fileInputMonitoringRef}
                     style={{ display: 'none' }}
-                    accept=".pdf"
+                    accept=".pdf,.xlsx,.csv,.xls"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
                     }}
                   />
@@ -374,9 +396,10 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     type="file"
                     ref={fileInputMonitoringRef}
                     style={{ display: 'none' }}
-                    accept=".pdf"
+                    accept=".pdf,.xlsx,.csv,.xls"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
                     }}
                   />
@@ -511,6 +534,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                       accept=".pdf"
                       onChange={(e: any) => {
                         const selectedFile = e.target.files[0];
+                        e.target.value = null;
                         onUploadDocument(selectedFile, DocType.VERIFICATION_REPORT);
                       }}
                     />
@@ -589,6 +613,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     accept=".pdf"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       onUploadDocument(selectedFile, DocType.VERIFICATION_REPORT);
                     }}
                   />

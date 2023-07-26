@@ -37,9 +37,9 @@ const Assessment = (props: any) => {
   const { get } = useConnection();
   const [isCountryListLoading, setIsCountryListLoading] = useState(false);
 
-  const maximumFileSize = process.env.MAXIMUM_IMAGE_SIZE
-    ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
-    : 7145728;
+  const maximumFileSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+    ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+    : 5000000;
 
   const getCountryList = async () => {
     setIsCountryListLoading(true);
@@ -676,7 +676,7 @@ const Assessment = (props: any) => {
                             if (!isCorrectFormat) {
                               throw new Error(`${t('invalidFileFormat')}`);
                             } else if (file[0]?.size > maximumFileSize) {
-                              throw new Error(`${t('maxSizeVal')}`);
+                              throw new Error(`${t('common:maxSizeVal')}`);
                             }
                           }
                         },

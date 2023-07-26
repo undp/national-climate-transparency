@@ -4,12 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Button, Form, Input, Row, Steps, Tooltip, Upload, UploadProps, message } from 'antd';
 import './addNdcAction.scss';
 import { UploadOutlined } from '@ant-design/icons';
-import { FormInstance } from 'rc-field-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { RcFile } from 'rc-upload/lib/interface';
-import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
-import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import { Programme, ProgrammeStage } from '@undp/carbon-library';
 import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
 import { InfoCircle } from 'react-bootstrap-icons';
@@ -25,9 +22,9 @@ const AddNdcAction = () => {
   const { post } = useConnection();
   const [loading, setLoading] = useState(false);
 
-  const maximumImageSize = process.env.MAXIMUM_IMAGE_SIZE
-    ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
-    : 7145728;
+  const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+    ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+    : 5000000;
 
   useEffect(() => {
     if (!state?.record) {
@@ -229,7 +226,7 @@ const AddNdcAction = () => {
                         throw new Error(`${t('ndcAction:invalidFileFormat')}`);
                       } else if (file[0]?.size > maximumImageSize) {
                         // default size format of files would be in bytes -> 1MB = 1000000bytes
-                        throw new Error(`${t('ndcAction:maxSizeVal')}`);
+                        throw new Error(`${t('common:maxSizeVal')}`);
                       }
                     }
                   },
