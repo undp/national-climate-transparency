@@ -203,10 +203,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
   };
 
   const companyRolePermission =
-    (userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
-      userInfoState?.userRole !== Role.ViewOnly) ||
-    (userInfoState?.companyRole === CompanyRole.CERTIFIER &&
-      userInfoState?.userRole !== Role.ViewOnly);
+    userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
+    userInfoState?.userRole !== Role.ViewOnly;
 
   const designDocActionPermission =
     userInfoState?.companyRole === CompanyRole.GOVERNMENT &&

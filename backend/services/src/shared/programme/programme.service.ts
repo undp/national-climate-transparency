@@ -1114,7 +1114,6 @@ export class ProgrammeService {
 
   async approveDocumentPre(d: ProgrammeDocument, pr: Programme, certifierId: number, ndc: NDCAction) {
     if (d.type == DocType.METHODOLOGY_DOCUMENT) {
-
       await this.queueDocument(AsyncActionType.ProgrammeAccept, {
         type: this.helperService.enumToString(DocType, d.type),
         data: d.url,
@@ -1231,8 +1230,15 @@ export class ProgrammeService {
     }
     let ndc: NDCAction;
 
-    let cid;
     let program;
+    let cid;
+    if(d.remark){
+      const documentCreatedUser = await this.userService.findById(Number(d.remark));
+      if(documentCreatedUser){
+        cid = (documentCreatedUser.companyRole === CompanyRole.CERTIFIER ? Number(documentCreatedUser.companyId): undefined);
+      }
+    }
+
     if (documentAction.status == DocumentStatus.ACCEPTED) {
       if (d.actionId) {
         ndc = await this.ndcActionRepo.findOne({
@@ -1241,7 +1247,6 @@ export class ProgrammeService {
           },
         });
       }
-      cid = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
       program = await this.findById(d.programmeId);
       ndc = await this.approveDocumentPre(d, pr, cid, ndc);
     }
@@ -1336,10 +1341,10 @@ export class ProgrammeService {
     dr.actionId = documentDto.actionId;
     dr.txTime = new Date().getTime();
     dr.url = url;
+    dr.remark = user.id.toString();
 
     let ndc: NDCAction;
-    let certifierId;
-    if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
+    if (user.companyRole === CompanyRole.GOVERNMENT) {
       this.logger.log(`Approving document since the user is ${user.companyRole}`)
       dr.status = DocumentStatus.ACCEPTED;
       if (dr.actionId) {
@@ -1349,13 +1354,12 @@ export class ProgrammeService {
           },
         });
       }
-      certifierId = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
-      ndc = await this.approveDocumentPre(dr, programme, certifierId, ndc);
+      ndc = await this.approveDocumentPre(dr, programme, undefined, ndc);
     }
 
     let resp = await this.entityManager.transaction(async (em) => {
       if (dr.status === DocumentStatus.ACCEPTED) {
-        await this.approveDocumentCommit(em, dr, ndc, certifierId, programme);
+        await this.approveDocumentCommit(em, dr, ndc, undefined, programme);
       }
       if (!currentDoc) {
         return await em.save(dr);
@@ -1364,6 +1368,7 @@ export class ProgrammeService {
           status: dr.status,
           txTime: dr.txTime,
           url: dr.url,
+          remark: dr.remark
         });
       }
     });
