@@ -28,7 +28,7 @@
   "geographicalLocation": "Geographical Location",
   "next": "NEXT",
   "estimatedProgrammeCostUSD": "Estimated Programme Cost (USD)",
-  "minViableCarbonPrice": "Minimum Carbon Price (assuming no other revenue)",
+  "minViableCarbonPrice": "Minimum Carbon Price: USD per ton (assuming no other revenue)",
   "creditEst": "Estimated Credits",
   "sumbit": "SUBMIT",
   "addAction": "ADD ACTION",
@@ -38,5 +38,5 @@
   "endTimeVal": "End date cannot be earlier than the start date",
   "invalidFileFormat": "Unsupported file format",
   "duplicateOrg": "This organisation is already selected!",
-  "isRequired":"is required!"
+  "isRequired": "is required!"
 }

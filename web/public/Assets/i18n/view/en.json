@@ -118,7 +118,7 @@
   "investment": "Investment",
   "estimatedProgrammeCostUSD": "Estimated Programme Cost (USD)",
   "creditEst": "Estimated Credits",
-  "carbonPriceUSDPerTon": "Minimum Carbon Price (assuming no other revenue)",
+  "carbonPriceUSDPerTon": "Minimum Carbon Price: USD per ton (assuming no other revenue)",
   "ndcActions": "NDC Actions",
   "emissionsReductionExpected": "Emissions Reductions Expected",
   "emissionsReductionAchieved": "Emissions Reductions Achieved",
