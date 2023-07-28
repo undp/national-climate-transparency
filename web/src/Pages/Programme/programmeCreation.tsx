@@ -36,6 +36,25 @@ const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
   ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
   : 5000000;
 
+const sectoralScopes: any = {
+  Energy: [
+    'Energy Industries (Renewable – / Non-Renewable Sources)',
+    'Energy Distribution',
+    'Energy Demand',
+  ],
+  Transport: ['Transport'],
+  Manufacturing: ['Manufacturing industries', 'Chemical Industries', 'Metal Production'],
+  Forestry: ['Afforestation and Reforestation'],
+  Waste: ['Waste Handling and Disposal', 'Fugitive Emissions From Fuels (Solid, Oil and Gas)'],
+  Agriculture: ['Agriculture'],
+  Other: [
+    'Mining/Mineral Production',
+    'Construction',
+    'Fugitive Emissions From Production and Consumption of Halocarbons and Sulphur Hexafluoride',
+    'Solvent Use',
+  ],
+};
+
 export const AddProgrammeComponent = () => {
   const { state } = useLocation();
   const [formOne] = Form.useForm();
@@ -62,6 +81,7 @@ export const AddProgrammeComponent = () => {
   const [selectedOrgs, setSelectedOrgs] = useState<any[]>();
   const [ownershipPercentageValidation, setOwnershipPercentageValidation] =
     useState<boolean>(false);
+  const [selectedSector, setSelectedSector] = useState<string>('');
 
   const initialOrganisationOwnershipValues: any[] = [
     {
@@ -70,6 +90,13 @@ export const AddProgrammeComponent = () => {
       proponentPercentage: userInfoState?.companyRole !== CompanyRole.GOVERNMENT && 100,
     },
   ];
+
+  const selectedSectoralScopes =
+    selectedSector !== String(Sector.Health) &&
+    selectedSector !== String(Sector.Education) &&
+    selectedSector !== String(Sector.Hospitality)
+      ? sectoralScopes[selectedSector]
+      : Object.entries(SectoralScope).map(([key, value]) => key);
 
   const getBase64 = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -401,6 +428,10 @@ export const AddProgrammeComponent = () => {
     setOwnershipPercentageValidation(orgPercentValidation);
   };
 
+  const onChangeSector = (val: any) => {
+    setSelectedSector(String(val));
+  };
+
   useEffect(() => {
     getOrganisationsDetails();
   }, []);
@@ -484,7 +515,7 @@ export const AddProgrammeComponent = () => {
                                   },
                                 ]}
                               >
-                                <Select size="large">
+                                <Select size="large" onChange={onChangeSector}>
                                   {Object.values(Sector).map((sector: any) => (
                                     <Select.Option value={sector}>{sector}</Select.Option>
                                   ))}
@@ -803,11 +834,20 @@ export const AddProgrammeComponent = () => {
                                 ]}
                               >
                                 <Select size="large">
-                                  {Object.entries(SectoralScope).map(([key, value]) => (
-                                    <Select.Option key={value} value={value}>
-                                      {key}
-                                    </Select.Option>
-                                  ))}
+                                  {selectedSectoralScopes?.map((val: any) => {
+                                    if (val in SectoralScope) {
+                                      const key = val as keyof typeof SectoralScope;
+                                      return (
+                                        <Select.Option
+                                          key={SectoralScope[key]}
+                                          value={SectoralScope[key]}
+                                        >
+                                          {val}
+                                        </Select.Option>
+                                      );
+                                    }
+                                    return null;
+                                  })}
                                 </Select>
                               </Form.Item>
                               <Form.Item
