@@ -638,7 +638,7 @@ export class ProgrammeService {
     const issued =
       parseFloat(String(programme.creditIssued)) + auth.issueAmount;
     const t = new Date().getTime();
-    const resp = await this.programmeRepo.update(
+    const updateResult = await this.programmeRepo.update(
       {
         externalId: auth.externalId,
       },
@@ -653,6 +653,32 @@ export class ProgrammeService {
         txTime: t,
       }
     );
+    
+    if (updateResult && updateResult.affected > 0) {
+      const hostAddress = this.configService.get("host");
+      let authDate = new Date(t);
+      let date = authDate.getDate().toString().padStart(2, "0");
+      let month = authDate.toLocaleString("default", { month: "long" });
+      let year = authDate.getFullYear();
+      let formattedDate = `${date} ${month} ${year}`;
+
+      if (programme.companyId && programme.companyId.length > 0) {
+        programme.companyId.forEach(async (companyId) => {
+          await this.emailHelperService.sendEmailToOrganisationAdmins(
+            companyId,
+            EmailTemplates.PROGRAMME_AUTHORISATION,
+            {
+              programmeName: programme.title,
+              authorisedDate: formattedDate,
+              serialNumber: auth.serialNo,
+              programmePageLink:
+                hostAddress +
+                `/programmeManagement/view?id=${programme.programmeId}`,
+            }
+          );
+        });
+      }
+    }
 
     return new DataResponseDto(HttpStatus.OK, programme);
   }
