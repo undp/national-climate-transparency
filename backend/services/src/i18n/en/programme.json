@@ -81,5 +81,6 @@
     "unAuth": "This action is unauthorised",
     "companyIsNotTheOwnerOfProg": "Company {} is not an owner company of the programme",
     "internalErrorCreditFreezing": "Internal error on credit freezing",
-    "totalUserEstimateCreditsInvalidMsg": "Total user estimated credits cannot be greater than the programme estimated credits"
+    "totalUserEstimateCreditsInvalidMsg": "Total user estimated credits cannot be greater than the programme estimated credits",
+    "wrongSectorAndScopeMapping": "The sectoral scope doesn't match the sector"
 }

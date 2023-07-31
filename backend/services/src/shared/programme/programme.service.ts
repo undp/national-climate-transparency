@@ -71,6 +71,9 @@ import { Company } from "../entities/company.entity";
 import { NdcFinancing } from "../dto/ndc.financing";
 import { PRECISION } from "../constants";
 import { ObjectionLetterGen } from "../util/objection.letter.gen";
+import { Sector } from "../enum/sector.enum";
+import { sectoralScopesMapped } from "../casl/sectoralSecor.mapped";
+import { SectoralScope } from "../enum/sectoral.scope.enum";
 
 export declare function PrimaryGeneratedColumn(
   options: PrimaryGeneratedColumnType
@@ -829,6 +832,25 @@ export class ProgrammeService {
         ),
         HttpStatus.BAD_REQUEST
       );
+    }
+
+    const programmeSector = programmeDto.sector;
+    const programmeSectoralScopeValue = programmeDto.sectoralScope;
+    const programmeSectoralScopeKey = Object.keys(SectoralScope).find((key) => SectoralScope[key] === programmeSectoralScopeValue);
+    if(programmeSector !== String(Sector.Health) &&
+    programmeSector !== String(Sector.Education) &&
+    programmeSector !== String(Sector.Hospitality)) {
+      if(
+        !sectoralScopesMapped[programmeSector].includes(programmeSectoralScopeKey)
+      ){
+        throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.wrongSectorAndScopeMapping",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+      }
     }
 
     const companyIds = [];
