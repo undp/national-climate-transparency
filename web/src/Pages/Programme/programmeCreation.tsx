@@ -43,7 +43,7 @@ const sectoralScopes: any = {
     'Energy Demand',
   ],
   Transport: ['Transport'],
-  Manufacturing: ['Manufacturing industries', 'Chemical Industries', 'Metal Production'],
+  Manufacturing: ['Manufacturing Industries', 'Chemical Industries', 'Metal Production'],
   Forestry: ['Afforestation and Reforestation'],
   Waste: ['Waste Handling and Disposal', 'Fugitive Emissions From Fuels (Solid, Oil and Gas)'],
   Agriculture: ['Agriculture'],
