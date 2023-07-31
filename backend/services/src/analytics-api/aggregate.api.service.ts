@@ -824,7 +824,7 @@ export class AggregateAPIService {
           whereCW.push(`p."requestId" != 'null'`);
           if (stat.statFilter && stat.statFilter.onlyMine) {
             whereCW.push(
-              `${companyId} = b."toCompanyId"`
+              `${companyId} = b."fromCompanyId"`
             );
           }
           if (stat.statFilter && stat.statFilter.startTime) {
@@ -1239,7 +1239,7 @@ export class AggregateAPIService {
       stat.statFilter,
       {
         value: companyId,
-        key: "toCompanyId",
+        key: "fromCompanyId",
         operation: "=",
       },
       "createdTime"
