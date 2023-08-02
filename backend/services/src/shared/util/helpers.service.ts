@@ -447,7 +447,7 @@ export class HelperService {
     }
 
     if(isSubject)
-      return `🏬📐 🇦🇶 Transparency System: ${template}`;
+      return `🏬 📐 🇳🇦 Transparency System: ${template}`;
     else 
       return template;
 }
