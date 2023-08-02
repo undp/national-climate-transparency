@@ -24,3 +24,41 @@ export enum TypeOfMitigation {
     TRANSPORT = 'Transport',
     WIND = 'Wind'
 }
+
+export const sectorMitigationTypesListMapped: any = {
+  Energy: [
+    'BiomassEnergy',
+    'Coal/Mine',
+    'EEHouseholds',
+    'EEIndustry',
+    'EEOwnGeneration',
+    'EEService',
+    'EESupplySide',
+    'EnergyDistribution',
+    'FossilFuel',
+    'Geothermal',
+    'Hydro',
+    'Solar',
+    'Wind',
+  ],
+  Health: [],
+  Education: [],
+  Transport: ['Transport'],
+  Manufacturing: [
+    'Cement',
+    'CCS',
+    'HFC_PFCs_SF6',
+  ],
+  Hospitality: [],
+  Forestry: ['Forestry'],
+  Waste: [
+    'Landfills',
+    'Fugitive',
+    'MethaneAvoidance',
+  ],
+  Agriculture: ['Agriculture'],
+  Other: [
+    'Marine',
+    'N20',
+  ],
+};

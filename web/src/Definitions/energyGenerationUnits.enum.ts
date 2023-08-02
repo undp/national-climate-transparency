@@ -5,7 +5,7 @@ export enum EnergyGenerationUnits {
   MWh = 'MWh/year/unit',
   GWh = 'GWh/year/unit',
   J = 'J/year/unit',
-  KJ = 'KJ/year/unit',
+  KJ = 'kJ/year/unit',
 }
 
 export const energyGenerationUnitList = [

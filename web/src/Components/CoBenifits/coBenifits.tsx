@@ -18,6 +18,7 @@ export interface CoBenefitProps {
   submitButtonText?: any;
   viewOnly?: boolean;
   coBenifitsViewDetails?: any;
+  loading?: any;
 }
 
 const CoBenifitsComponent = (props: CoBenefitProps) => {
@@ -28,11 +29,12 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     submitButtonText,
     viewOnly,
     coBenifitsViewDetails,
+    loading = false,
   } = props;
   const { t } = useTranslation(['coBenifits']);
   const [coBenefitDetails, setCoBenefitDetails] = useState<any>();
-  const [isSocialFormValid, setIsSocialFormValid] = useState<any>(false);
-  const [isAssessmentFormValid, setIsAssessmentFormValid] = useState<any>(false);
+  const [isSocialFormValid, setIsSocialFormValid] = useState<any>(true);
+  const [isAssessmentFormValid, setIsAssessmentFormValid] = useState<any>(true);
 
   const onSdgGoalsFormSubmit = (sdgGoalsDetails: any) => {
     setCoBenefitDetails((pre: any) => ({ ...pre, sdgGoals: sdgGoalsDetails }));
@@ -210,10 +212,8 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     }
     for (const section in economicSectionValidation) {
       if (
-        (economicSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
-          economicSectionValidation[section].fields !==
-            economicSectionValidation[section].filled) ||
-        economicSectionValidation[section].filled === 0
+        economicSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
+        economicSectionValidation[section].fields !== economicSectionValidation[section].filled
       ) {
         economicOverallValidation = false;
       }
@@ -238,10 +238,9 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
     }
     for (const section in environmentalSectionValidation) {
       if (
-        (environmentalSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
-          environmentalSectionValidation[section].fields !==
-            environmentalSectionValidation[section].filled) ||
-        environmentalSectionValidation[section].filled === 0
+        environmentalSectionValidation[section].firstFieldValue === RadioButtonStatus.YES &&
+        environmentalSectionValidation[section].fields !==
+          environmentalSectionValidation[section].filled
       ) {
         environmentalOverallValidation = false;
       }
@@ -294,7 +293,12 @@ const CoBenifitsComponent = (props: CoBenefitProps) => {
         <div className="steps-actions">
           <Row>
             <Button onClick={() => onClickedBackBtn(coBenefitDetails)}>{t('back')}</Button>
-            <Button className="mg-left-1" type="primary" onClick={onCoBenefitSubmit}>
+            <Button
+              className="mg-left-1"
+              type="primary"
+              loading={loading}
+              onClick={onCoBenefitSubmit}
+            >
               {submitButtonText ? submitButtonText : t('submit')}
             </Button>
           </Row>

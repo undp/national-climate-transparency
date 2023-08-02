@@ -14,7 +14,7 @@ const Economic = (props: any) => {
           name: 'growthQ1',
           label: t('growthQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'growthQ2',
@@ -67,7 +67,7 @@ const Economic = (props: any) => {
           name: 'energyQ1',
           label: t('energyQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'energyQ2',
@@ -102,7 +102,7 @@ const Economic = (props: any) => {
           name: 'techTransferQ1',
           label: t('techTransferQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'techTransferQ2',
@@ -143,7 +143,7 @@ const Economic = (props: any) => {
           name: 'balanceOfPaymentsQ1',
           label: t('balanceOfPaymentsQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'balanceOfPaymentsQ2',
@@ -166,7 +166,7 @@ const Economic = (props: any) => {
           name: 'furtherInfoQ1',
           label: t('furtherInfoQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
       ],
     },
@@ -262,8 +262,8 @@ const Economic = (props: any) => {
       <Form
         name="economic-details"
         className="benifits-details-economic"
-        labelCol={{ md: 16, lg: 19, xl: 19 }}
-        wrapperCol={{ md: 8, lg: 5, xl: 5 }}
+        labelCol={{ md: 16, lg: 19, xl: 17 }}
+        wrapperCol={{ md: 8, lg: 5, xl: 7 }}
         layout="horizontal"
         requiredMark={true}
         form={formOne}
@@ -276,11 +276,11 @@ const Economic = (props: any) => {
             <>
               <div className="title">{environmentalDetail?.section}</div>
               {environmentalDetail?.fields?.map(
-                (field: any) =>
+                (field: any, index: any) =>
                   !field?.hide && (
                     <Form.Item
                       label={field?.label}
-                      className="form-item"
+                      className={`form-item ${index !== 0 ? 'field-margin' : ''}`}
                       name={field?.name}
                       rules={[
                         {

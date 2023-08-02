@@ -28,7 +28,7 @@
   "geographicalLocation": "Geographical Location",
   "next": "NEXT",
   "estimatedProgrammeCostUSD": "Estimated Programme Cost (USD)",
-  "minViableCarbonPrice": "Minimum Viable Carbon Price (USD per Ton)",
+  "minViableCarbonPrice": "Minimum Carbon Price (assuming no other revenue)",
   "creditEst": "Estimated Credits",
   "sumbit": "SUBMIT",
   "addAction": "ADD ACTION",
@@ -37,5 +37,6 @@
   "unConditional": "UNCONDITIONAL",
   "endTimeVal": "End date cannot be earlier than the start date",
   "invalidFileFormat": "Unsupported file format",
-  "maxSizeVal": "Maximum upload file size is 5MP"
+  "duplicateOrg": "This organisation is already selected!",
+  "isRequired":"is required!"
 }

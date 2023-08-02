@@ -353,7 +353,7 @@ const InvestmentManagement = () => {
 
   const columns = [
     {
-      title: t('programme:requestID'),
+      title: t('programme:requestId'),
       dataIndex: 'requestId',
       key: 'requestId',
       sorter: true,
@@ -398,7 +398,7 @@ const InvestmentManagement = () => {
           return <span>-</span>;
         }
         return (
-          <Tooltip title={Obj.type} color={TooltipColor} key={TooltipColor}>
+          <Tooltip title={addSpaces(Obj.type)} color={TooltipColor} key={TooltipColor}>
             <div>
               <RoleIcon
                 icon={Obj.type === InvestmentType.PUBLIC ? <Icon.Eye /> : <Icon.EyeSlash />}
@@ -420,7 +420,7 @@ const InvestmentManagement = () => {
           return <span>-</span>;
         }
         return (
-          <Tooltip title={Obj.level} color={TooltipColor} key={TooltipColor}>
+          <Tooltip title={addSpaces(Obj.level)} color={TooltipColor} key={TooltipColor}>
             <div>
               <RoleIcon
                 icon={Obj.level === InvestmentLevel.INTERNATIONAL ? <Icon.Globe2 /> : <Icon.Flag />}
@@ -442,7 +442,7 @@ const InvestmentManagement = () => {
           return <span>-</span>;
         }
         return (
-          <Tooltip title={Obj.stream} color={TooltipColor} key={TooltipColor}>
+          <Tooltip title={addSpaces(Obj.stream)} color={TooltipColor} key={TooltipColor}>
             <div>
               <RoleIcon
                 icon={

@@ -1,10 +1,11 @@
 import { DateTime } from 'luxon';
-import { ProgrammeTransfer } from '@undp/carbon-library';
+import { ProgrammeStageMRV, ProgrammeTransfer } from '@undp/carbon-library';
 import { GovBGColor, CertBGColor, DevBGColor } from '../../Pages/Common/role.color.constants';
 import { RcFile } from 'rc-upload/lib/interface';
 
 export enum ProgrammeStage {
   AwaitingAuthorization = 'Pending',
+  Approved = 'Approved',
   Authorised = 'Authorised',
   // Transferred = 'Transferred',
   // Retired = 'Retired',
@@ -48,7 +49,7 @@ export enum TxType {
 }
 
 export enum SectoralScope {
-  'Energy Industries' = '1',
+  'Energy Industries (Renewable - / Non-Renewable Sources)' = '1',
   'Energy Distribution' = '2',
   'Energy Demand' = '3',
   'Manufacturing Industries' = '4',
@@ -109,8 +110,8 @@ export const getStageTagType = (stage: ProgrammeStage) => {
       return 'error';
     case ProgrammeStage.Authorised:
       return 'processing';
-    // case ProgrammeStage.Transferred:
-    //   return 'success';
+    case ProgrammeStage.Approved:
+      return 'success';
     default:
       return 'default';
   }
@@ -192,7 +193,7 @@ export interface Programme {
   sectoralScope: string;
   sector: string;
   countryCodeA2: string;
-  currentStage: ProgrammeStage;
+  currentStage: ProgrammeStageMRV;
   startTime: number;
   endTime: number;
   creditChange: number;
@@ -228,7 +229,7 @@ export interface ProgrammeT {
   sectoralScope: string;
   sector: string;
   countryCodeA2: string;
-  currentStage: ProgrammeStage;
+  currentStage: ProgrammeStageMRV;
   startTime: number;
   endTime: number;
   creditChange: number;

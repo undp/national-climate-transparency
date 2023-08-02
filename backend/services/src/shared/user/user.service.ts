@@ -141,6 +141,8 @@ export class UserService {
     abilityCondition: string
   ): Promise<DataResponseDto | undefined> {
     this.logger.verbose("User update received", abilityCondition);
+
+    userDto.email = userDto.email?.toLowerCase()
     const { id, ...update } = userDto;
     const user = await this.findById(id);
     if (!user) {
@@ -149,7 +151,7 @@ export class UserService {
         HttpStatus.NOT_FOUND
       );
     }
-
+    
     const result = await this.userRepo
       .createQueryBuilder()
       .update(User)
@@ -260,6 +262,7 @@ export class UserService {
   }
 
   async regenerateApiKey(email, abilityCondition) {
+    email = email?.toLowerCase()
     this.logger.verbose("Regenerated api key received", email);
     const user = await this.userRepo
       .createQueryBuilder()
@@ -391,6 +394,8 @@ export class UserService {
     companyRole: CompanyRole
   ): Promise<User | DataResponseMessageDto | undefined> {
     this.logger.verbose(`User create received  ${userDto.email} ${companyId}`);
+
+    userDto.email = userDto.email?.toLowerCase();
     const createdUserDto = {...userDto};
     if(userDto.company){
       createdUserDto.company={...userDto.company}
@@ -638,9 +643,12 @@ export class UserService {
                 throw new HttpException(
                   `${
                     err.driverError.table == "company"
-                      ? "Company email"
-                      : "Email"
-                  } already exist`,
+                      ? this.helperService.formatReqMessagesString(
+                          "user.orgEmailExist",
+                          []
+                        )
+                      : "Email already exist"
+                  }`,
                   HttpStatus.BAD_REQUEST
                 );
               } else if (err.driverError.detail.includes("taxId")) {

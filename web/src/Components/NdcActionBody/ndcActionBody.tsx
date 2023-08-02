@@ -43,6 +43,9 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   const [openRejectDocConfirmationModal, setOpenRejectDocConfirmationModal] = useState(false);
   const [actionInfo, setActionInfo] = useState<any>({});
   const [rejectDocData, setRejectDocData] = useState<any>({});
+  const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+    ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+    : 5000000;
 
   const getBase64 = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -61,15 +64,33 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   };
 
   const onUploadDocument = async (file: any, type: any) => {
+    if (file.size > maximumImageSize) {
+      message.open({
+        type: 'error',
+        content: `${t('common:maxSizeVal')}`,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      return;
+    }
     setLoading(true);
     const logoBase64 = await getBase64(file as RcFile);
-    const logoUrls = logoBase64.split(',');
-    console.log(logoUrls[1], file);
+    let imgData = logoBase64;
+    if (type !== DocType.MONITORING_REPORT) {
+      const logoUrls = logoBase64.split(',');
+      imgData = logoUrls[1];
+    }
+
     try {
-      if (file?.type === 'application/pdf') {
+      if (
+        file?.type === 'application/pdf' ||
+        (type === DocType.MONITORING_REPORT &&
+          (file?.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+            file?.type === 'text/csv'))
+      ) {
         const response: any = await post('national/programme/addDocument', {
           type: type,
-          data: logoUrls[1],
+          data: imgData,
           programmeId: programmeId,
           actionId: ndcActionId,
         });
@@ -149,7 +170,6 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   };
 
   useEffect(() => {
-    console.log(canUploadMonitorReport, ' --------------- can upload monitor report ------------');
     data?.map((item: any) => {
       setNdcActionId(item?.id);
       if (item?.monitoringReport) {
@@ -162,10 +182,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   }, [data]);
 
   const companyRolePermission =
-    (userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
-      userInfoState?.userRole !== Role.ViewOnly) ||
-    (userInfoState?.companyRole === CompanyRole.CERTIFIER &&
-      userInfoState?.userRole !== Role.ViewOnly);
+    userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
+    userInfoState?.userRole !== Role.ViewOnly;
   const monitoringReportPending = monitoringReportData?.status === DocumentStatus.PENDING;
   const monitoringReportAccepted = monitoringReportData?.status === DocumentStatus.ACCEPTED;
   const monitoringReportRejected = monitoringReportData?.status === DocumentStatus.REJECTED;
@@ -240,6 +258,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                       placement="top"
                       trigger="hover"
                       title={t('programme:rejectTip')}
+                      overlayClassName="custom-tooltip"
                     >
                       <ExclamationCircleOutlined
                         className="common-progress-icon"
@@ -250,38 +269,57 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                 )
               ) : (
                 <>
-                  <FileAddOutlined
-                    className="common-progress-icon"
-                    style={
-                      canUploadMonitorReport &&
-                      uploadDocUserPermission(
-                        userInfoState,
-                        DocType.MONITORING_REPORT,
-                        programmeOwnerId
-                      )
-                        ? { color: '#3F3A47', cursor: 'pointer' }
-                        : { color: '#cacaca', cursor: 'default' }
+                  <Tooltip
+                    arrowPointAtCenter
+                    placement="top"
+                    trigger="hover"
+                    title={
+                      userInfoState?.userRole === Role.ViewOnly
+                        ? t('programme:notAuthToUploadDoc')
+                        : uploadDocUserPermission(
+                            userInfoState,
+                            DocType.MONITORING_REPORT,
+                            programmeOwnerId
+                          )
+                        ? !canUploadMonitorReport && t('programme:programmeNotAuth')
+                        : t('programme:orgNotAuth')
                     }
-                    onClick={() => {
-                      if (
+                    overlayClassName="custom-tooltip"
+                  >
+                    <FileAddOutlined
+                      className="common-progress-icon"
+                      style={
                         canUploadMonitorReport &&
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.MONITORING_REPORT,
                           programmeOwnerId
                         )
-                      ) {
-                        handleFileUploadMonitor();
+                          ? { color: '#3F3A47', cursor: 'pointer' }
+                          : { color: '#cacaca', cursor: 'default' }
                       }
-                    }}
-                  />
+                      onClick={() => {
+                        if (
+                          canUploadMonitorReport &&
+                          uploadDocUserPermission(
+                            userInfoState,
+                            DocType.MONITORING_REPORT,
+                            programmeOwnerId
+                          )
+                        ) {
+                          handleFileUploadMonitor();
+                        }
+                      }}
+                    />
+                  </Tooltip>
                   <input
                     type="file"
                     ref={fileInputMonitoringRef}
                     style={{ display: 'none' }}
-                    accept=".pdf"
+                    accept=".pdf,.xlsx,.csv,.xls"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
                     }}
                   />
@@ -309,38 +347,57 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
               </div>
               {!monitoringReportAccepted && (
                 <>
-                  <FileAddOutlined
-                    className="common-progress-icon"
-                    style={
-                      canUploadMonitorReport &&
-                      uploadDocUserPermission(
-                        userInfoState,
-                        DocType.MONITORING_REPORT,
-                        programmeOwnerId
-                      )
-                        ? { color: '#3F3A47', cursor: 'pointer' }
-                        : { color: '#cacaca', cursor: 'default' }
+                  <Tooltip
+                    arrowPointAtCenter
+                    placement="top"
+                    trigger="hover"
+                    title={
+                      userInfoState?.userRole === Role.ViewOnly
+                        ? t('programme:notAuthToUploadDoc')
+                        : uploadDocUserPermission(
+                            userInfoState,
+                            DocType.MONITORING_REPORT,
+                            programmeOwnerId
+                          )
+                        ? !canUploadMonitorReport && t('programme:programmeNotAuth')
+                        : t('programme:orgNotAuth')
                     }
-                    onClick={() => {
-                      if (
+                    overlayClassName="custom-tooltip"
+                  >
+                    <FileAddOutlined
+                      className="common-progress-icon"
+                      style={
                         canUploadMonitorReport &&
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.MONITORING_REPORT,
                           programmeOwnerId
                         )
-                      ) {
-                        handleFileUploadMonitor();
+                          ? { color: '#3F3A47', cursor: 'pointer' }
+                          : { color: '#cacaca', cursor: 'default' }
                       }
-                    }}
-                  />
+                      onClick={() => {
+                        if (
+                          canUploadMonitorReport &&
+                          uploadDocUserPermission(
+                            userInfoState,
+                            DocType.MONITORING_REPORT,
+                            programmeOwnerId
+                          )
+                        ) {
+                          handleFileUploadMonitor();
+                        }
+                      }}
+                    />
+                  </Tooltip>
                   <input
                     type="file"
                     ref={fileInputMonitoringRef}
                     style={{ display: 'none' }}
-                    accept=".pdf"
+                    accept=".pdf,.xlsx,.csv,.xls"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       onUploadDocument(selectedFile, DocType.MONITORING_REPORT);
                     }}
                   />
@@ -372,7 +429,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                         onClick={() =>
                           docAction(
                             verificationReportData?.id,
-                            verificationReportData?.status,
+                            DocumentStatus.ACCEPTED,
                             verificationReportData?.actionId,
                             verificationReportData?.type
                           )
@@ -413,6 +470,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                       placement="top"
                       trigger="hover"
                       title={t('programme:rejectTip')}
+                      overlayClassName="custom-tooltip"
                     >
                       <ExclamationCircleOutlined
                         className="common-progress-icon"
@@ -423,31 +481,49 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                 )
               ) : (
                 <>
-                  <FileAddOutlined
-                    className="common-progress-icon"
-                    style={
-                      monitoringReportAccepted &&
-                      uploadDocUserPermission(
-                        userInfoState,
-                        DocType.VERIFICATION_REPORT,
-                        programmeOwnerId
-                      )
-                        ? { color: '#3F3A47', cursor: 'pointer' }
-                        : { color: '#cacaca', cursor: 'default' }
+                  <Tooltip
+                    arrowPointAtCenter
+                    placement="top"
+                    trigger="hover"
+                    title={
+                      userInfoState?.userRole === Role.ViewOnly
+                        ? t('programme:notAuthToUploadDoc')
+                        : uploadDocUserPermission(
+                            userInfoState,
+                            DocType.VERIFICATION_REPORT,
+                            programmeOwnerId
+                          )
+                        ? !monitoringReportAccepted && t('programme:monitoringRepNotApproved')
+                        : t('programme:notAuthToUploadDoc')
                     }
-                    onClick={() => {
-                      if (
+                    overlayClassName="custom-tooltip"
+                  >
+                    <FileAddOutlined
+                      className="common-progress-icon"
+                      style={
                         monitoringReportAccepted &&
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.VERIFICATION_REPORT,
                           programmeOwnerId
                         )
-                      ) {
-                        handleFileUploadVerification();
+                          ? { color: '#3F3A47', cursor: 'pointer' }
+                          : { color: '#cacaca', cursor: 'default' }
                       }
-                    }}
-                  />
+                      onClick={() => {
+                        if (
+                          monitoringReportAccepted &&
+                          uploadDocUserPermission(
+                            userInfoState,
+                            DocType.VERIFICATION_REPORT,
+                            programmeOwnerId
+                          )
+                        ) {
+                          handleFileUploadVerification();
+                        }
+                      }}
+                    />
+                  </Tooltip>
                   {monitoringReportAccepted && (
                     <input
                       type="file"
@@ -456,6 +532,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                       accept=".pdf"
                       onChange={(e: any) => {
                         const selectedFile = e.target.files[0];
+                        e.target.value = null;
                         onUploadDocument(selectedFile, DocType.VERIFICATION_REPORT);
                       }}
                     />
@@ -484,31 +561,49 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
               </div>
               {!verificationReportAccepted && monitoringReportAccepted && (
                 <>
-                  <FileAddOutlined
-                    className="common-progress-icon"
-                    style={
-                      monitoringReportAccepted &&
-                      uploadDocUserPermission(
-                        userInfoState,
-                        DocType.VERIFICATION_REPORT,
-                        programmeOwnerId
-                      )
-                        ? { color: '#3F3A47', cursor: 'pointer' }
-                        : { color: '#cacaca', cursor: 'default' }
+                  <Tooltip
+                    arrowPointAtCenter
+                    placement="top"
+                    trigger="hover"
+                    title={
+                      userInfoState?.userRole === Role.ViewOnly
+                        ? t('programme:notAuthToUploadDoc')
+                        : uploadDocUserPermission(
+                            userInfoState,
+                            DocType.VERIFICATION_REPORT,
+                            programmeOwnerId
+                          )
+                        ? !monitoringReportAccepted && t('programme:monitoringRepNotApproved')
+                        : t('programme:notAuthToUploadDoc')
                     }
-                    onClick={() => {
-                      if (
+                    overlayClassName="custom-tooltip"
+                  >
+                    <FileAddOutlined
+                      className="common-progress-icon"
+                      style={
                         monitoringReportAccepted &&
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.VERIFICATION_REPORT,
                           programmeOwnerId
                         )
-                      ) {
-                        handleFileUploadVerification();
+                          ? { color: '#3F3A47', cursor: 'pointer' }
+                          : { color: '#cacaca', cursor: 'default' }
                       }
-                    }}
-                  />
+                      onClick={() => {
+                        if (
+                          monitoringReportAccepted &&
+                          uploadDocUserPermission(
+                            userInfoState,
+                            DocType.VERIFICATION_REPORT,
+                            programmeOwnerId
+                          )
+                        ) {
+                          handleFileUploadVerification();
+                        }
+                      }}
+                    />
+                  </Tooltip>
                   <input
                     type="file"
                     ref={fileInputVerificationRef}
@@ -516,6 +611,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                     accept=".pdf"
                     onChange={(e: any) => {
                       const selectedFile = e.target.files[0];
+                      e.target.value = null;
                       onUploadDocument(selectedFile, DocType.VERIFICATION_REPORT);
                     }}
                   />

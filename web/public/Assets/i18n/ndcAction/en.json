@@ -33,7 +33,6 @@
   "monitoringReport": "Monitoring Report",
   "submit": "Submit",
   "invalidFileFormat": "Unsupported file format",
-  "maxSizeVal": "Maximum upload file size is 5MP",
   "isRequired": "is required",
   "ndcToolTip": "Nationally Determined Contributions",
   "noNdcActions": "No NDC Actions Available",
@@ -65,5 +64,10 @@
   "viewAdaptationNationalPlanCoverage": "National Plan Coverage",
   "searchByProgrammeName": "Search by programme name",
   "seeMine": "Mine Only",
-  "NdcCreditChartTitle":"Emissions Reductions (tCo2E)"
+  "NdcCreditChartTitle":"Emissions Reductions (tCo2E)",
+  "ndcSuccessfullyCreated":"The NDC action has been created successfully",
+  "ndcCreationFailed":"The NDC action creation failed",
+  "methodologyEstimatedCreditsInvalid":"Methodology Estimated Credits should be greater than 0",
+  "userEstimatedCreditsInvalid":"Estimated Credits for the NDC Action cannot be greater than the Estimated Credits for the programme",
+  "coBenefitsSubTitle":"Co-Benefits"
 }

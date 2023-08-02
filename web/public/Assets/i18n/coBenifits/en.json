@@ -30,5 +30,6 @@
   "verifyingDetailslbl":"Details",
   "specify":"Specify",
   "contactInformation":"Contact Information",
-  "feasibilityReport":"Feasibility Report"
+  "feasibilityReport":"Feasibility Report",
+  "invalidFileFormat": "Unsupported file format"
 }

@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import NdcActionDetails from '../../Components/NdcAction/ndcActionDetails';
 import { useTranslation } from 'react-i18next';
-import { Button, Form, Input, Row, Steps, Tooltip, Upload, UploadProps } from 'antd';
+import { Button, Form, Input, Row, Steps, Tooltip, Upload, UploadProps, message } from 'antd';
 import './addNdcAction.scss';
 import { UploadOutlined } from '@ant-design/icons';
-import { FormInstance } from 'rc-field-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { RcFile } from 'rc-upload/lib/interface';
-import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
-import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import { Programme, ProgrammeStage } from '@undp/carbon-library';
 import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
 import { InfoCircle } from 'react-bootstrap-icons';
@@ -23,6 +20,11 @@ const AddNdcAction = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const { post } = useConnection();
+  const [loading, setLoading] = useState(false);
+
+  const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+    ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+    : 5000000;
 
   useEffect(() => {
     if (!state?.record) {
@@ -38,14 +40,32 @@ const AddNdcAction = () => {
   };
 
   const saveNdcAction = async (ndcActionDetailsObj: any) => {
-    if (ndcActionDetailsObj.enablementReportData) {
-      delete ndcActionDetailsObj.enablementReportData;
-    }
+    setLoading(true);
+    try {
+      if (ndcActionDetailsObj.enablementReportData) {
+        delete ndcActionDetailsObj.enablementReportData;
+      }
 
-    ndcActionDetailsObj.methodology = t('ndcAction:goldStandard');
-    const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
-    if (response.status === 200 || response.status === 201) {
-      navigate('/programmeManagement/view', { state: { record: programmeDetails } });
+      ndcActionDetailsObj.methodology = t('ndcAction:goldStandard');
+      const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: `${t('ndcSuccessfullyCreated')}`,
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        navigate('/programmeManagement/view', { state: { record: programmeDetails } });
+      }
+    } catch (error: any) {
+      message.open({
+        type: 'error',
+        content: error && error.message ? error.message : `${'ndcCreationFailed'}`,
+        duration: 4,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,13 +91,15 @@ const AddNdcAction = () => {
       ...ndcActionDetails,
     };
 
-    if (projectReportFormValues.monitoringReport) {
+    if (
+      projectReportFormValues.monitoringReport &&
+      projectReportFormValues.monitoringReport.length > 0
+    ) {
       const logoBase64 = await getBase64(
-        projectReportFormValues.monitoringReport.file.originFileObj as RcFile
+        projectReportFormValues.monitoringReport[0].originFileObj as RcFile
       );
-      const logoUrls = logoBase64.split(',');
 
-      updatedNdcActionDetails.monitoringReport = logoUrls[1];
+      updatedNdcActionDetails.monitoringReport = logoBase64;
     }
 
     setNdcActionDetails(updatedNdcActionDetails);
@@ -103,8 +125,11 @@ const AddNdcAction = () => {
     }
   };
 
-  const props: UploadProps = {
-    //need to add
+  const normFile = (e: any) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
   };
 
   const stepItems = [
@@ -119,6 +144,7 @@ const AddNdcAction = () => {
               placement="right"
               trigger="hover"
               title={t('ndcAction:ndcToolTip')}
+              overlayClassName="custom-tooltip"
             >
               <InfoCircle color="#000000" size={17} />
             </Tooltip>
@@ -131,6 +157,7 @@ const AddNdcAction = () => {
             isBackBtnVisible={false}
             onFormSubmit={onNdcActionDetailsSubmit}
             ndcActionDetails={ndcActionDetails}
+            programmeDetails={programmeDetails}
           ></NdcActionDetails>
         </div>
       ),
@@ -151,6 +178,7 @@ const AddNdcAction = () => {
             submitButtonText={
               isProjectReportsVisible() ? t('ndcAction:next') : t('ndcAction:submit')
             }
+            loading={loading}
           />
         </div>
       ),
@@ -173,15 +201,57 @@ const AddNdcAction = () => {
             requiredMark={true}
             onFinish={onProjectReportSubmit}
           >
-            <Form.Item label={t('ndcAction:monitoringReport')} name="monitoringReport">
-              <Upload {...props}>
-                <Button icon={<UploadOutlined />}>Upload</Button>
+            <Form.Item
+              label={t('ndcAction:monitoringReport')}
+              name="monitoringReport"
+              valuePropName="fileList"
+              getValueFromEvent={normFile}
+              required={false}
+              rules={[
+                {
+                  validator: async (rule, file) => {
+                    if (file?.length > 0) {
+                      let isCorrectFormat = false;
+                      if (file[0]?.type === 'application/pdf') {
+                        isCorrectFormat = true;
+                      } else if (
+                        file[0]?.type ===
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                      ) {
+                        isCorrectFormat = true;
+                      } else if (file[0]?.type === 'text/csv') {
+                        isCorrectFormat = true;
+                      }
+                      if (!isCorrectFormat) {
+                        throw new Error(`${t('ndcAction:invalidFileFormat')}`);
+                      } else if (file[0]?.size > maximumImageSize) {
+                        // default size format of files would be in bytes -> 1MB = 1000000bytes
+                        throw new Error(`${t('common:maxSizeVal')}`);
+                      }
+                    }
+                  },
+                },
+              ]}
+            >
+              <Upload
+                beforeUpload={(file: any) => {
+                  return false;
+                }}
+                className="design-upload-section"
+                name="monitoringReport"
+                listType="picture"
+                multiple={false}
+                maxCount={1}
+              >
+                <Button className="upload-doc" size="large" icon={<UploadOutlined />}>
+                  Upload
+                </Button>
               </Upload>
             </Form.Item>
             <div className="steps-actions">
               <Row>
                 <Button onClick={onClickBack}>{t('ndcAction:back')}</Button>
-                <Button className="mg-left-1" htmlType="submit" type="primary">
+                <Button className="mg-left-1" htmlType="submit" type="primary" loading={loading}>
                   {t('ndcAction:submit')}
                 </Button>
               </Row>

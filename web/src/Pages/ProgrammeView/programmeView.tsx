@@ -26,14 +26,14 @@ import {
   MapComponent,
   MapTypes,
   MarkerData,
-  Programme,
-  ProgrammeStage,
+  ProgrammeStageMRV,
   TypeOfMitigation,
   UnitField,
   addCommSep,
   addSpaces,
   getStageEnumVal,
   getStageTagType,
+  getStageTagTypeMRV,
   sumArray,
 } from '@undp/carbon-library';
 import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
@@ -69,7 +69,7 @@ const ProgrammeView = () => {
   const [openModal, setOpenModal] = useState(false);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [centerPoint, setCenterPoint] = useState<number[]>([]);
-  const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : MapTypes.Mapbox;
+  const mapType = process.env.REACT_APP_MAP_TYPE ? process.env.REACT_APP_MAP_TYPE : 'None';
   const [isAllOwnersDeactivated, setIsAllOwnersDeactivated] = useState(true);
   const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
@@ -122,11 +122,11 @@ const ProgrammeView = () => {
         setMarkers(markerList);
       } else {
         if (!accessToken || !data!.programmeProperties.geographicalLocation) return;
-
-        for (const address of data!.programmeProperties.geographicalLocation) {
+        const locMarkers: MarkerData[] = [];
+        for (const address in data!.programmeProperties.geographicalLocation) {
           const response = await Geocoding({ accessToken: accessToken })
             .forwardGeocode({
-              query: address,
+              query: data!.programmeProperties.geographicalLocation[address],
               autocomplete: false,
               limit: 1,
               types: ['region', 'district'],
@@ -147,10 +147,12 @@ const ProgrammeView = () => {
           const feature = response.body.features[0];
           setCenterPoint(feature.center);
           const marker: MarkerData = {
+            color: locationColors[(Number(address) + 1) % locationColors.length],
             location: feature.center,
           };
-          setMarkers([marker]);
+          locMarkers.push(marker);
         }
+        setMarkers(locMarkers);
       }
     }, 1000);
   };
@@ -228,7 +230,7 @@ const ProgrammeView = () => {
           (item: any) =>
             item?.type === DocType.METHODOLOGY_DOCUMENT && item?.status === DocumentStatus.ACCEPTED
         );
-        if (hasAcceptedMethReport && data?.currentStage === ProgrammeStage.Authorised) {
+        if (hasAcceptedMethReport && data?.currentStage === ProgrammeStageMRV.Authorised) {
           setUploadMonitoringReport(true);
         }
         setNdcActionData(objectsWithoutNullActionId);
@@ -257,8 +259,6 @@ const ProgrammeView = () => {
           },
         ],
       });
-      console.log('INVESTMENT QUERY --------- ');
-      console.log(response?.data);
       const investmentHisData = response?.data?.map((item: any) => {
         const investmentData: any = {
           invester: item?.receiver[0]?.name,
@@ -306,7 +306,6 @@ const ProgrammeView = () => {
     setLoadingHistory(true);
     setLoadingNDC(true);
     try {
-      // if (programmeId && ndcActionDataItem === null) {
       const response: any = await post('national/programme/queryNdcActions', {
         page: 1,
         size: 100,
@@ -494,7 +493,7 @@ const ProgrammeView = () => {
   // genCerts(data);
   const actionBtns = [];
 
-  if (userInfoState && data.currentStage !== ProgrammeStage.Rejected) {
+  if (userInfoState && data.currentStage !== ProgrammeStageMRV.Rejected) {
     if (
       userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
       (userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
@@ -510,11 +509,13 @@ const ProgrammeView = () => {
           {t('view:addInvestment')}
         </Button>
       );
-      actionBtns.push(
-        <Button type="primary" onClick={onClickedAddAction}>
-          {t('view:addAction')}
-        </Button>
-      );
+      if ((data.currentStage as any) !== 'AwaitingAuthorization') {
+        actionBtns.push(
+          <Button type="primary" onClick={onClickedAddAction}>
+            {t('view:addAction')}
+          </Button>
+        );
+      }
     }
   }
 
@@ -523,7 +524,7 @@ const ProgrammeView = () => {
     const text = t('view:' + k);
     if (k === 'currentStatus') {
       generalInfo[text] = (
-        <Tag color={getStageTagType(v as ProgrammeStage)}>{getStageEnumVal(v as string)}</Tag>
+        <Tag color={getStageTagTypeMRV(v as ProgrammeStageMRV)}>{getStageEnumVal(v as string)}</Tag>
       );
     } else if (k === 'sector') {
       generalInfo[text] = (
@@ -615,7 +616,7 @@ const ProgrammeView = () => {
   return loadingAll ? (
     <Loading />
   ) : (
-    <div className="content-container programme-view">
+    <div className="content-container programme-view custom-tooltip">
       <div className="title-bar">
         <div>
           <div className="body-title">{t('view:details')}</div>
@@ -690,7 +691,6 @@ const ProgrammeView = () => {
                           pie: {
                             expandOnClick: false,
                             donut: {
-                              size: '75%',
                               labels: {
                                 show: true,
                                 total: {

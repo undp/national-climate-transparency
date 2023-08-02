@@ -46,6 +46,14 @@ export class InvestmentRequestDto {
   @IsNotEmpty()
   paymentPerMetric?: number;
 
+
+  @ApiPropertyOptional()
+  @ValidateIf(o => (o.instrument && o.instrument.indexOf(Instrument.OTHER) >= 0))
+  @IsString()
+  @IsNotEmpty()
+  comments?: string;
+
+
   @ApiPropertyOptional({ enum: InvestmentType })
   @IsEnum(InvestmentType, {
       message: 'Invalid type. Supported following values:' + Object.values(InvestmentType)

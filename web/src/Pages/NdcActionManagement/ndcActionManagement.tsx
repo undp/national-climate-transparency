@@ -1,8 +1,19 @@
-import { Checkbox, Col, Empty, Input, PaginationProps, Row, Table, Tooltip, message } from 'antd';
+import {
+  Checkbox,
+  Col,
+  Empty,
+  Input,
+  PaginationProps,
+  Row,
+  Table,
+  Tag,
+  Tooltip,
+  message,
+} from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NdcActionStatus } from '../../Casl/enums/ndcAction.status';
-import { ProfileIcon, addSpaces, getCompanyBgColor } from '@undp/carbon-library';
+import { NdcActionStatus, getNdcStatusTagType } from '../../Casl/enums/ndcAction.status';
+import { Company, ProfileIcon, addSpaces, getCompanyBgColor } from '@undp/carbon-library';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { DateTime } from 'luxon';
@@ -10,6 +21,7 @@ import { TooltipColor } from '../Common/role.color.constants';
 import { useNavigate } from 'react-router';
 import './ndcActionManagement.scss';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 
 const NdcActionManagement = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -37,6 +49,44 @@ const NdcActionManagement = () => {
   }));
 
   const [selectedStatus, setSelectedStatus] = useState<any>(statusOptions.map((e) => e.value));
+
+  const getNdcActionNames = (action: NdcActionTypes) => {
+    switch (action) {
+      case NdcActionTypes.Adaptation:
+        return t('ndcAction:adaptation');
+      case NdcActionTypes.Mitigation:
+        return t('ndcAction:mitigation');
+      case NdcActionTypes.CrossCutting:
+        return t('ndcAction:crossCutting');
+      case NdcActionTypes.Enablement:
+        return t('ndcAction:enablement');
+      default:
+        return '';
+    }
+  };
+
+  const getCompanyLogos = (companyId: any, itemObj: any) => {
+    if (companyId && itemObj.company.length > 0) {
+      const selectedCompany = itemObj.company.find(
+        (c: Company) => c.companyId === parseInt(companyId)
+      );
+      if (selectedCompany) {
+        return (
+          <Tooltip title={selectedCompany.name} color={TooltipColor} key={TooltipColor}>
+            <div>
+              <ProfileIcon
+                icon={selectedCompany.logo}
+                bg={getCompanyBgColor(selectedCompany.companyRole)}
+                name={selectedCompany.name}
+              />
+            </div>
+          </Tooltip>
+        );
+      } else {
+        return <div></div>;
+      }
+    }
+  };
 
   const columns: any = [
     {
@@ -75,6 +125,9 @@ const NdcActionManagement = () => {
       key: 'action',
       sorter: true,
       align: 'left' as const,
+      render: (item: any) => {
+        return getNdcActionNames(item);
+      },
     },
     {
       title: t('ndcAction:ndcColumnsProgrammeName'),
@@ -102,25 +155,15 @@ const NdcActionManagement = () => {
     },
     {
       title: t('ndcAction:ndcColumnsOwners'),
-      key: 'programmeId',
+      key: 'companyId',
       sorter: true,
       align: 'left' as const,
       render: (item: any, itemObj: any) => {
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {itemObj.company &&
-              itemObj.company.map((v: any, i: any) => {
-                return (
-                  <Tooltip title={v.name} color={TooltipColor} key={TooltipColor}>
-                    <div>
-                      <ProfileIcon
-                        icon={v.logo}
-                        bg={getCompanyBgColor(v.companyRole)}
-                        name={v.name}
-                      />
-                    </div>
-                  </Tooltip>
-                );
+            {itemObj.companyId &&
+              itemObj.companyId.map((v: any, i: any) => {
+                return getCompanyLogos(v, itemObj);
               })}
           </div>
         );
@@ -129,9 +172,18 @@ const NdcActionManagement = () => {
     {
       title: t('ndcAction:ndcColumnsStatus'),
       dataIndex: 'status',
-      align: 'left' as const,
+      align: 'center' as const,
       key: 'status',
       sorter: true,
+      render: (item: any, Obj: any) => {
+        return (
+          <Tooltip title={Obj.status} color={TooltipColor} key={TooltipColor}>
+            <Tag className="clickable" color={getNdcStatusTagType(Obj.status)}>
+              {addSpaces(Obj.status)}
+            </Tag>
+          </Tooltip>
+        );
+      },
     },
   ];
 

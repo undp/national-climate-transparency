@@ -1,8 +1,23 @@
-import { Button, Col, Form, Input, Row, Select, Upload, UploadFile, UploadProps } from 'antd';
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Select,
+  Upload,
+  UploadFile,
+  UploadProps,
+  message,
+} from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NdcActionTypes, ndcActionTypeList } from '../../Definitions/ndcActionTypes.enum';
-import { MitigationTypes, mitigationTypeList } from '../../Definitions/mitigationTypes.enum';
+import {
+  MitigationTypes,
+  sectorMitigationTypesListMapped,
+} from '../../Definitions/mitigationTypes.enum';
 import {
   EnergyGenerationUnits,
   energyGenerationUnitList,
@@ -14,24 +29,46 @@ import './ndcActionDetails.scss';
 import '../../Pages/Common/common.table.scss';
 import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
 import { RcFile } from 'rc-upload/lib/interface';
+import {
+  AgricultureCreationRequest,
+  SolarCreationRequest,
+  calculateCredit,
+} from '@undp/carbon-credit-calculator';
 
 export interface NdcActionDetailsProps {
   isBackBtnVisible: boolean;
   onClickedBackBtn?: any;
   onFormSubmit: any;
   ndcActionDetails: any;
+  programmeDetails?: any;
 }
 
 const NdcActionDetails = (props: NdcActionDetailsProps) => {
-  const { isBackBtnVisible, onClickedBackBtn, onFormSubmit, ndcActionDetails } = props;
+  const { isBackBtnVisible, onClickedBackBtn, onFormSubmit, ndcActionDetails, programmeDetails } =
+    props;
   const { t } = useTranslation(['ndcAction']);
   const [ndcActionType, setNdcActionType] = useState();
   const [mitigationType, setmitigationType] = useState();
+  const [sector, setSector] = useState<any>('');
+  const [ndcActionTypeListFiltered, setNdcActionTypeListFiltered] =
+    useState<any[]>(ndcActionTypeList);
   const [form] = Form.useForm();
 
-  const maximumImageSize = process.env.MAXIMUM_IMAGE_SIZE
-    ? parseInt(process.env.MAXIMUM_IMAGE_SIZE)
-    : 7145728;
+  const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
+    ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
+    : 5000000;
+
+  useEffect(() => {
+    if (programmeDetails) {
+      setSector(programmeDetails?.sector);
+      if (sectorMitigationTypesListMapped[programmeDetails?.sector]?.length < 1) {
+        const filteredData = ndcActionTypeList.filter(
+          (item) => item.value !== NdcActionTypes.Mitigation.valueOf()
+        );
+        setNdcActionTypeListFiltered(filteredData);
+      }
+    }
+  }, [programmeDetails]);
 
   useEffect(() => {
     if (ndcActionDetails) {
@@ -117,16 +154,52 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     'Climate Hazard ',
   ];
 
-  const uploadProps: UploadProps = {
-    //need to add
+  const calculateMethodologyEstimatedCredits = () => {
+    try {
+      let creditRequest: any = {};
+      const formValues = form.getFieldsValue();
+      if (
+        formValues.ndcActionType === NdcActionTypes.Mitigation ||
+        formValues.ndcActionType === NdcActionTypes.CrossCutting
+      ) {
+        if (formValues.mitigationType === MitigationTypes.AGRICULTURE) {
+          creditRequest = new AgricultureCreationRequest();
+          creditRequest.landArea = formValues.eligibleLandArea;
+          creditRequest.landAreaUnit = formValues.landAreaUnit;
+          creditRequest.duration = programmeDetails.endTime - programmeDetails.startTime;
+          creditRequest.durationUnit = 's';
+        } else if (formValues.mitigationType === MitigationTypes.SOLAR) {
+          creditRequest = new SolarCreationRequest();
+          creditRequest.buildingType = formValues.consumerGroup;
+          creditRequest.energyGeneration = formValues.energyGeneration;
+          creditRequest.energyGenerationUnit = formValues.energyGenerationUnit;
+        }
+      }
+      const creditResponse = calculateCredit(creditRequest);
+      if (!isNaN(creditResponse)) {
+        form.setFieldsValue({
+          methodologyEstimatedCredits: creditResponse,
+        });
+      } else {
+        form.setFieldsValue({
+          methodologyEstimatedCredits: 0,
+        });
+      }
+    } catch (exception) {
+      form.setFieldsValue({
+        methodologyEstimatedCredits: 0,
+      });
+    }
   };
 
   const handleNdcActionChange = (selectedNdcType: any) => {
     setNdcActionType(selectedNdcType);
+    calculateMethodologyEstimatedCredits();
   };
 
   const handleMitigationTypeChange = (selectedMitigationType: any) => {
     setmitigationType(selectedMitigationType);
+    calculateMethodologyEstimatedCredits();
   };
 
   const onNdcActionDetailsFormSubmit = async (ndcActionFormvalues: any) => {
@@ -155,6 +228,26 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
           consumerGroup: ndcActionFormvalues.consumerGroup,
         };
       }
+
+      if (parseFloat(ndcActionFormvalues.methodologyEstimatedCredits) <= 0) {
+        message.open({
+          type: 'error',
+          content: t('methodologyEstimatedCreditsInvalid'),
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        return;
+      }
+
+      if (ndcActionFormvalues.userEstimatedCredits > programmeDetails.creditEst) {
+        message.open({
+          type: 'error',
+          content: t('userEstimatedCreditsInvalid'),
+          duration: 4,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        return;
+      }
     }
 
     if (
@@ -173,7 +266,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         title: ndcActionFormvalues.EnablementTitle,
       };
 
-      if (ndcActionFormvalues.EnablementReport) {
+      if (ndcActionFormvalues.EnablementReport && ndcActionFormvalues.EnablementReport.length > 0) {
         const enablementReport = await getBase64(
           ndcActionFormvalues.EnablementReport[0]?.originFileObj as RcFile
         );
@@ -229,7 +322,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   borderRadius: '4px',
                 }}
                 dropdownStyle={{ color: 'red' }}
-                options={ndcActionTypeList}
+                options={ndcActionTypeListFiltered}
               />
             </Form.Item>
           </Col>
@@ -281,7 +374,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   width: '249px',
                   borderRadius: '4px',
                 }}
-                options={mitigationTypeList}
+                options={sectorMitigationTypesListMapped[sector]}
               ></Select>
             </Form.Item>
           </Row>
@@ -317,7 +410,10 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                     ]}
                     name="energyGeneration"
                   >
-                    <Input style={{ width: 442 }} />
+                    <InputNumber
+                      style={{ width: 442, paddingRight: 12 }}
+                      onChange={calculateMethodologyEstimatedCredits}
+                    />
                   </Form.Item>
                 </Col>
                 <Col style={{ marginLeft: '38px' }}>
@@ -337,6 +433,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                       size="large"
                       style={{ width: 442 }}
                       options={energyGenerationUnitList}
+                      onChange={calculateMethodologyEstimatedCredits}
                     />
                   </Form.Item>
                 </Col>
@@ -351,7 +448,12 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   },
                 ]}
               >
-                <Select size="large" style={{ width: 442 }} options={consumerGroupList} />
+                <Select
+                  size="large"
+                  style={{ width: 442 }}
+                  onChange={calculateMethodologyEstimatedCredits}
+                  options={consumerGroupList}
+                />
               </Form.Item>
             </>
           )}
@@ -385,7 +487,10 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                     },
                   ]}
                 >
-                  <Input style={{ width: 442 }} />
+                  <InputNumber
+                    style={{ width: 442, paddingRight: 12 }}
+                    onChange={calculateMethodologyEstimatedCredits}
+                  />
                 </Form.Item>
               </Col>
               <Col style={{ marginLeft: '38px' }}>
@@ -399,7 +504,12 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                     },
                   ]}
                 >
-                  <Select size="large" style={{ width: 442 }} options={landAreaUnitList} />
+                  <Select
+                    onChange={calculateMethodologyEstimatedCredits}
+                    size="large"
+                    style={{ width: 442 }}
+                    options={landAreaUnitList}
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -408,22 +518,22 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         {(ndcActionType === NdcActionTypes.Mitigation ||
           ndcActionType === NdcActionTypes.CrossCutting) && (
           <Row justify="start" align="middle">
-            <Col span={12}>
+            <Col>
               <Form.Item
                 name="userEstimatedCredits"
                 label={t('ndcAction:userEstimatedCredits')}
-                style={{ display: 'inline-block', width: 'calc(100% - 15px)', marginRight: '15px' }}
+                style={{ display: 'inline-block', width: 'calc(100% - 15px)' }}
               >
-                <Input />
+                <InputNumber style={{ width: 442, paddingRight: 12 }} />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col style={{ marginLeft: '38px' }}>
               <Form.Item
                 name="methodologyEstimatedCredits"
                 label={t('ndcAction:methodologyEstimatedCredits')}
                 style={{ display: 'inline-block', width: '100%' }}
               >
-                <Input disabled />
+                <InputNumber disabled style={{ width: 442, paddingRight: 12 }} />
               </Form.Item>
             </Col>
           </Row>
@@ -496,7 +606,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                         if (!isCorrectFormat) {
                           throw new Error(`${t('ndcAction:invalidFileFormat')}`);
                         } else if (file[0]?.size > maximumImageSize) {
-                          throw new Error(`${t('ndcAction:maxSizeVal')}`);
+                          throw new Error(`${t('common:maxSizeVal')}`);
                         }
                       }
                     },
@@ -504,6 +614,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 ]}
               >
                 <Upload
+                  accept=".pdf"
                   beforeUpload={(file: any) => {
                     return false;
                   }}

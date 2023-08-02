@@ -40,6 +40,7 @@ const PieChartsStat: FC<PieChartStatsProps> = (props: PieChartStatsProps) => {
                 placement="bottomRight"
                 trigger="hover"
                 title={toolTipText}
+                overlayClassName="custom-tooltip"
               >
                 <InfoCircle color="#000000" size={17} />
               </Tooltip>

@@ -14,7 +14,7 @@ const Environmental = (props: any) => {
           name: 'airQ1',
           label: t('airQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'airQ2',
@@ -73,7 +73,7 @@ const Environmental = (props: any) => {
           name: 'landQ1',
           label: t('landQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'landQ2',
@@ -126,7 +126,7 @@ const Environmental = (props: any) => {
           name: 'waterQ1',
           label: t('waterQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'waterQ2',
@@ -173,7 +173,7 @@ const Environmental = (props: any) => {
           name: 'naturalResourceQ1',
           label: t('naturalResourceQ1'),
           hide: false,
-          required: true,
+          required: false,
         },
         {
           name: 'naturalResourceQ2',
@@ -299,8 +299,8 @@ const Environmental = (props: any) => {
       <Form
         name="environmental-details"
         className="benifits-details-environmental"
-        labelCol={{ md: 16, lg: 19, xl: 19 }}
-        wrapperCol={{ md: 8, lg: 5, xl: 5 }}
+        labelCol={{ md: 16, lg: 19, xl: 17 }}
+        wrapperCol={{ md: 8, lg: 5, xl: 7 }}
         layout="horizontal"
         requiredMark={true}
         form={formOne}
@@ -313,11 +313,11 @@ const Environmental = (props: any) => {
             <>
               <div className="title">{environmentalDetail?.section}</div>
               {environmentalDetail?.fields?.map(
-                (field: any) =>
+                (field: any, index: any) =>
                   !field?.hide && (
                     <Form.Item
                       label={field?.label}
-                      className="form-item"
+                      className={`form-item ${index !== 0 ? 'field-margin' : ''}`}
                       name={field?.name}
                       rules={[
                         {

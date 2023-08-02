@@ -2,21 +2,31 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NdcAction } from '../../Definitions/InterfacesAndType/ndcAction.definitions';
 import { useTranslation } from 'react-i18next';
-import { Col, Row, Card, message, Skeleton } from 'antd';
+import { Col, Row, Card, message, Skeleton, Tag, Tooltip } from 'antd';
 import InfoView from '../../Components/InfoView/info.view';
 import './ndcActionView.scss';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { CheckCircleOutlined, FileAddOutlined } from '@ant-design/icons';
+import {
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  FileAddOutlined,
+  LinkOutlined,
+} from '@ant-design/icons';
 import { DocumentStatus } from '../../Casl/enums/document.status';
 import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
 import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import * as Icon from 'react-bootstrap-icons';
-import { addCommSep } from '@undp/carbon-library';
+import { ProgrammeStage, Role, addCommSep, addSpaces } from '@undp/carbon-library';
 import Chart from 'react-apexcharts';
 import CoBenifitsComponent from '../../Components/CoBenifits/coBenifits';
+import { NdcActionStatus, getNdcStatusTagType } from '../../Casl/enums/ndcAction.status';
+import { linkDocVisible, uploadDocUserPermission } from '../../Casl/documentsPermission';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { DocType } from '../../Casl/enums/document.type';
 
 const NdcActionView = () => {
-  const { t } = useTranslation(['ndcAction']);
+  const { userInfoState } = useUserContext();
+  const { t } = useTranslation(['ndcAction', 'programme']);
   const { post } = useConnection();
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -26,22 +36,107 @@ const NdcActionView = () => {
   const [coBenifitsComponentDetails, setCoBenifitsComponentnDetails] = useState<any>();
   const [emissionsReductionExpected, setEmissionsReductionExpected] = useState(0);
   const [emissionsReductionAchieved, setEmissionsReductionAchieved] = useState(0);
+  const [programmeOwnerId, setProgrammeOwnerId] = useState<any[]>([]);
+  const [canUploadMonitorReport, setCanUploadMonitorReport] = useState<boolean>(false);
+  const [monitoringReportAccepted, setMonitoringReportAccepted] = useState<boolean>(false);
+
+  const getProgrammeById = async (programmeId: string) => {
+    setIsLoading(true);
+    try {
+      const response: any = await post('national/programme/query', {
+        page: 1,
+        size: 10,
+        filterAnd: [
+          {
+            key: 'programmeId',
+            operation: '=',
+            value: programmeId,
+          },
+        ],
+      });
+      if (response?.data?.length > 0) {
+        setProgrammeOwnerId(response?.data[0]?.companyId);
+        if (response?.data[0]?.currentStage === ProgrammeStage.Authorised) {
+          setCanUploadMonitorReport(true);
+        }
+        console.log();
+      }
+    } catch (error: any) {
+      console.log('Error in getting programme by id', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getProjectReportActions = (reportData: any) => {
     return (
-      <div className="icon">
-        {reportData?.status === DocumentStatus.ACCEPTED && (
-          <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
-        )}
-      </div>
+      <Row>
+        <div className="icon">
+          {reportData?.status === DocumentStatus.ACCEPTED && (
+            <CheckCircleOutlined className="common-progress-icon" style={{ color: '#5DC380' }} />
+          )}
+          {reportData?.status === DocumentStatus.REJECTED && (
+            <ExclamationCircleOutlined
+              className="common-progress-icon"
+              style={{ color: '#FD6F70' }}
+            />
+          )}
+        </div>
+        <div className="link mg-left-1">
+          {reportData?.url && linkDocVisible(reportData?.status) && (
+            <a href={reportData?.url} target="_blank" rel="noopener noreferrer" download>
+              <LinkOutlined
+                className="common-progress-icon margin-right-1"
+                style={{ color: '#3F3A47' }}
+              />
+            </a>
+          )}
+        </div>
+      </Row>
     );
   };
 
   const getProjectReports = async () => {
     setIsLoading(true);
     const reportDetails: any = {
-      [t('ndcAction:viewMoniteringReport')]: <FileAddOutlined />,
-      [t('ndcAction:viewVerificationReport')]: <FileAddOutlined />,
+      [t('ndcAction:viewMoniteringReport')]: (
+        <Tooltip
+          arrowPointAtCenter
+          placement="top"
+          trigger="hover"
+          title={
+            userInfoState?.userRole === Role.ViewOnly
+              ? t('programme:notAuthToUploadDoc')
+              : uploadDocUserPermission(userInfoState, DocType.MONITORING_REPORT, programmeOwnerId)
+              ? !canUploadMonitorReport && t('programme:programmeNotAuth')
+              : t('programme:orgNotAuth')
+          }
+          overlayClassName="custom-tooltip"
+        >
+          <FileAddOutlined />
+        </Tooltip>
+      ),
+      [t('ndcAction:viewVerificationReport')]: (
+        <Tooltip
+          arrowPointAtCenter
+          placement="top"
+          trigger="hover"
+          title={
+            userInfoState?.userRole === Role.ViewOnly
+              ? t('programme:notAuthToUploadDoc')
+              : uploadDocUserPermission(
+                  userInfoState,
+                  DocType.VERIFICATION_REPORT,
+                  programmeOwnerId
+                )
+              ? !monitoringReportAccepted && t('programme:monitoringRepNotApproved')
+              : t('programme:notAuthToUploadDoc')
+          }
+          overlayClassName="custom-tooltip"
+        >
+          <FileAddOutlined />
+        </Tooltip>
+      ),
     };
     try {
       const response: any = await post('national/programme/queryDocs', {
@@ -58,6 +153,9 @@ const NdcActionView = () => {
       if (response?.data?.length > 0) {
         response.data.map((item: any) => {
           if (item?.url?.includes('MONITORING_REPORT')) {
+            if (item?.status === DocumentStatus.ACCEPTED) {
+              setMonitoringReportAccepted(true);
+            }
             reportDetails[t('ndcAction:viewMoniteringReport')] = getProjectReportActions(item);
           } else if (item?.url?.includes('VERIFICATION_REPORT')) {
             reportDetails[t('ndcAction:viewVerificationReport')] = getProjectReportActions(item);
@@ -81,7 +179,7 @@ const NdcActionView = () => {
     if (ndcActionDetails?.id) {
       getProjectReports();
     }
-  }, [ndcActionDetails?.id]);
+  }, [ndcActionDetails?.id, programmeOwnerId]);
 
   useEffect(() => {
     if (!state) {
@@ -90,6 +188,7 @@ const NdcActionView = () => {
       if (!state.record && state.id) {
         //Get Ndc action details using sction id
       } else if (state.record) {
+        getProgrammeById(state?.record?.programmeId);
         setNdcActionDetails(state.record);
         setCoBenifitsComponentnDetails(state?.record?.coBenefitsProperties);
         setEmissionsReductionExpected(
@@ -106,12 +205,34 @@ const NdcActionView = () => {
         );
       }
     }
-  });
+  }, []);
+
+  const getNdcActionNames = (action: NdcActionTypes) => {
+    switch (action) {
+      case NdcActionTypes.Adaptation:
+        return t('ndcAction:adaptation');
+      case NdcActionTypes.Mitigation:
+        return t('ndcAction:mitigation');
+      case NdcActionTypes.CrossCutting:
+        return t('ndcAction:crossCutting');
+      case NdcActionTypes.Enablement:
+        return t('ndcAction:enablement');
+      default:
+        return '';
+    }
+  };
 
   const ndcActionBasicDetails = {
     [t('ndcAction:viewProgramme')]: ndcActionDetails?.programmeName,
-    [t('ndcAction:viewNdcAction')]: ndcActionDetails?.action,
-    [t('ndcAction:viewCurrentStatus')]: ndcActionDetails?.status,
+    [t('ndcAction:viewNdcAction')]: getNdcActionNames(ndcActionDetails?.action as NdcActionTypes),
+    [t('ndcAction:viewCurrentStatus')]: (
+      <Tag
+        className="clickable"
+        color={getNdcStatusTagType(ndcActionDetails?.status as NdcActionStatus)}
+      >
+        {addSpaces(ndcActionDetails?.status as string)}
+      </Tag>
+    ),
     [t('ndcAction:viewMethodology')]: ndcActionDetails?.methodology,
   };
 
@@ -159,29 +280,25 @@ const NdcActionView = () => {
     return adaptationDetails;
   };
 
-  const getAdaptationProperties = () => {
+  const getEnablementProperties = () => {
     const details: any = {};
 
     if (ndcActionDetails?.enablementProperties) {
       details[t('ndcAction:title')] = ndcActionDetails.enablementProperties?.title;
-      details[t('ndcAction:report')] = ndcActionDetails.enablementProperties?.report;
+      if (ndcActionDetails.enablementProperties?.report) {
+        details[t('ndcAction:report')] = ndcActionDetails.enablementProperties?.report && (
+          <a
+            href={ndcActionDetails.enablementProperties?.report}
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+          >
+            {ndcActionDetails.enablementProperties?.report}
+          </a>
+        );
+      }
     }
     return details;
-  };
-
-  const getNdcActionNameTitle = (action: NdcActionTypes) => {
-    switch (action) {
-      case NdcActionTypes.Adaptation:
-        return t('ndcAction:adaptation');
-      case NdcActionTypes.Mitigation:
-        return t('ndcAction:mitigation');
-      case NdcActionTypes.CrossCutting:
-        return t('ndcAction:crossCutting');
-      case NdcActionTypes.Enablement:
-        return t('ndcAction:enablement');
-      default:
-        return '';
-    }
   };
 
   const formatString = (langTag: string, vargs: any[]) => {
@@ -201,7 +318,7 @@ const NdcActionView = () => {
         <div>
           <div className="body-title">
             {t('ndcAction:NdcDetailsViewTitle')}{' '}
-            {getNdcActionNameTitle(ndcActionDetails?.action as NdcActionTypes)}
+            {getNdcActionNames(ndcActionDetails?.action as NdcActionTypes)}
           </div>
           <div className="body-sub-title">{t('ndcAction:NdcDetailsViewSubTitle')}</div>
         </div>
@@ -361,7 +478,7 @@ const NdcActionView = () => {
             <Col lg={24}>
               <Card className="card-container">
                 <div>
-                  <InfoView data={getAdaptationProperties()} title={t('ndcAction:enablement')} />
+                  <InfoView data={getEnablementProperties()} title={t('ndcAction:enablement')} />
                 </div>
               </Card>
             </Col>
@@ -372,7 +489,7 @@ const NdcActionView = () => {
             <Col lg={24}>
               <Card className="card-container">
                 <div className="co-benifits-view">
-                  <div className="title">Co-Benifits</div>
+                  <div className="title">{t('ndcAction:coBenefitsSubTitle')}</div>
                   <CoBenifitsComponent
                     viewOnly={true}
                     coBenifitsViewDetails={state?.record?.coBenefitsProperties}

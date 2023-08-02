@@ -23,7 +23,7 @@ export class AsyncOperationsQueueService implements AsyncOperationsInterface {
   }
 
   public async addAction(action: AsyncAction): Promise<boolean> {
-
+    this.logger.log("Added New action to queue", JSON.stringify(action));
     if (action.actionType === AsyncActionType.Email) {
       if (this.emailDisabled) {
         return false;
