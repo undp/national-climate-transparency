@@ -25,6 +25,63 @@ export enum MitigationTypes {
   WIND = 'Wind',
 }
 
+export const sectorMitigationTypesListMapped: any = {
+  Energy: [
+    { value: MitigationTypes.BIOMASS_ENERGY.valueOf(), label: 'Biomass energy', disabled: true },
+    {
+      value: MitigationTypes.COAL_MINE.valueOf(),
+      label: 'Coal bed/mine methane',
+      disabled: true,
+    },
+    { value: MitigationTypes.EE_HOUSEHOLDS.valueOf(), label: 'EE households', disabled: true },
+    { value: MitigationTypes.EE_INDUSTRY.valueOf(), label: 'EE industry', disabled: true },
+    {
+      value: MitigationTypes.EE_OWN_GENERATION.valueOf(),
+      label: 'EE own generation',
+      disabled: true,
+    },
+    { value: MitigationTypes.EE_SERVICE.valueOf(), label: 'EE service', disabled: true },
+    { value: MitigationTypes.EE_SUPPLY_SIDE.valueOf(), label: 'EE supply side', disabled: true },
+    {
+      value: MitigationTypes.ENERGY_DISTRIBUTION.valueOf(),
+      label: 'Energy distribution',
+      disabled: true,
+    },
+    {
+      value: MitigationTypes.FOSSIL_FUEL.valueOf(),
+      label: 'Fossil fuel switch',
+      disabled: true,
+    },
+    { value: MitigationTypes.GEOTHERMAL.valueOf(), label: 'Geothermal', disabled: true },
+    { value: MitigationTypes.HYDRO.valueOf(), label: 'Hydro', disabled: true },
+    { value: MitigationTypes.SOLAR.valueOf(), label: 'Solar' },
+    { value: MitigationTypes.WIND.valueOf(), label: 'Wind', disabled: true },
+  ],
+  Health: [],
+  Education: [],
+  Transport: [{ value: MitigationTypes.TRANSPORT.valueOf(), label: 'Transport', disabled: true }],
+  Manufacturing: [
+    { value: MitigationTypes.CCS.valueOf(), label: 'CCS', disabled: true },
+    { value: MitigationTypes.HFC_PFCS_SF6.valueOf(), label: 'HFCs, PFCs, SF6', disabled: true },
+  ],
+  Hospitality: [],
+  Forestry: [{ value: MitigationTypes.FORESTRY.valueOf(), label: 'Forestry', disabled: true }],
+  Waste: [
+    { value: MitigationTypes.LANDFILLS.valueOf(), label: 'Landfills', disabled: true },
+    { value: MitigationTypes.FUGITIVE.valueOf(), label: 'Fugitive', disabled: true },
+    {
+      value: MitigationTypes.METHANE_AVOIDANCE.valueOf(),
+      label: 'Methane avoidance',
+      disabled: true,
+    },
+  ],
+  Agriculture: [{ value: MitigationTypes.AGRICULTURE.valueOf(), label: 'Agriculture' }],
+  Other: [
+    { value: MitigationTypes.MARINE.valueOf(), label: 'Marine', disabled: true },
+    { value: MitigationTypes.N20.valueOf(), label: 'N2O', disabled: true },
+  ],
+};
+
 export const mitigationTypeList = [
   { value: MitigationTypes.AGRICULTURE.valueOf(), label: 'Agriculture' },
   { value: MitigationTypes.SOLAR.valueOf(), label: 'Solar' },

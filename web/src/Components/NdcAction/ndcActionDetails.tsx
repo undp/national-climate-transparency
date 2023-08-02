@@ -14,7 +14,11 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NdcActionTypes, ndcActionTypeList } from '../../Definitions/ndcActionTypes.enum';
-import { MitigationTypes, mitigationTypeList } from '../../Definitions/mitigationTypes.enum';
+import {
+  MitigationTypes,
+  mitigationTypeList,
+  sectorMitigationTypesListMapped,
+} from '../../Definitions/mitigationTypes.enum';
 import {
   EnergyGenerationUnits,
   energyGenerationUnitList,
@@ -46,11 +50,26 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const { t } = useTranslation(['ndcAction']);
   const [ndcActionType, setNdcActionType] = useState();
   const [mitigationType, setmitigationType] = useState();
+  const [sector, setSector] = useState<any>('');
+  const [ndcActionTypeListFiltered, setndcActionTypeListFiltered] =
+    useState<any[]>(ndcActionTypeList);
   const [form] = Form.useForm();
 
   const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
     ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
     : 5000000;
+
+  useEffect(() => {
+    if (programmeDetails) {
+      setSector(programmeDetails?.sector);
+      if (sectorMitigationTypesListMapped[programmeDetails?.sector]?.length < 1) {
+        const filteredData = ndcActionTypeList.filter(
+          (item) => item.value !== NdcActionTypes.Mitigation.valueOf()
+        );
+        setndcActionTypeListFiltered(filteredData);
+      }
+    }
+  }, [programmeDetails]);
 
   useEffect(() => {
     if (ndcActionDetails) {
@@ -304,7 +323,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   borderRadius: '4px',
                 }}
                 dropdownStyle={{ color: 'red' }}
-                options={ndcActionTypeList}
+                options={ndcActionTypeListFiltered}
               />
             </Form.Item>
           </Col>
@@ -356,7 +375,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   width: '249px',
                   borderRadius: '4px',
                 }}
-                options={mitigationTypeList}
+                options={sectorMitigationTypesListMapped[sector]}
               ></Select>
             </Form.Item>
           </Row>
