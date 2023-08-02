@@ -16,7 +16,6 @@ import { useTranslation } from 'react-i18next';
 import { NdcActionTypes, ndcActionTypeList } from '../../Definitions/ndcActionTypes.enum';
 import {
   MitigationTypes,
-  mitigationTypeList,
   sectorMitigationTypesListMapped,
 } from '../../Definitions/mitigationTypes.enum';
 import {
