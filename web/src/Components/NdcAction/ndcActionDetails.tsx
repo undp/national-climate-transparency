@@ -51,7 +51,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const [ndcActionType, setNdcActionType] = useState();
   const [mitigationType, setmitigationType] = useState();
   const [sector, setSector] = useState<any>('');
-  const [ndcActionTypeListFiltered, setndcActionTypeListFiltered] =
+  const [ndcActionTypeListFiltered, setNdcActionTypeListFiltered] =
     useState<any[]>(ndcActionTypeList);
   const [form] = Form.useForm();
 
@@ -66,7 +66,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         const filteredData = ndcActionTypeList.filter(
           (item) => item.value !== NdcActionTypes.Mitigation.valueOf()
         );
-        setndcActionTypeListFiltered(filteredData);
+        setNdcActionTypeListFiltered(filteredData);
       }
     }
   }, [programmeDetails]);
