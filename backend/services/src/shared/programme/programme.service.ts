@@ -21,7 +21,7 @@ import { DataResponseDto } from "../dto/data.response.dto";
 import { ConstantUpdateDto } from "../dto/constants.update.dto";
 import { DataListResponseDto } from "../dto/data.list.response";
 import { ConfigService } from "@nestjs/config";
-import { TypeOfMitigation } from "../enum/typeofmitigation.enum";
+import { TypeOfMitigation, sectorMitigationTypesListMapped } from "../enum/typeofmitigation.enum";
 import { CompanyService } from "../company/company.service";
 import { EmailTemplates } from "../email-helper/email.template";
 import { HelperService } from "../util/helpers.service";
@@ -1446,25 +1446,39 @@ export class ProgrammeService {
         this.helperService.formatReqMessagesString(
           "programme.programmeNotExist",
           []
-        ),
-        HttpStatus.BAD_REQUEST
+          ),
+          HttpStatus.BAD_REQUEST
+          );
+        }
+        
+        const program = await this.findById(ndcActionDto.programmeId);
+        
+        if (!program) {
+          throw new HttpException(
+            this.helperService.formatReqMessagesString(
+              "programme.programmeNotExist",
+              []
+              ),
+              HttpStatus.BAD_REQUEST
       );
     }
-
-    const program = await this.findById(ndcActionDto.programmeId);
-
-    if (!program) {
-      throw new HttpException(
-        this.helperService.formatReqMessagesString(
-          "programme.programmeNotExist",
-          []
-        ),
-        HttpStatus.BAD_REQUEST
-      );
-    }
-
+    
     const data = instanceToPlain(ndcActionDto);
     const ndcAction: NDCAction = plainToClass(NDCAction, data);
+    const programmeId = ndcAction.programmeId;
+    const programmeDetails = await this.findById(programmeId);
+    const programmeSectorFromDetails = programmeDetails?.sector;
+    if(ndcAction.action === NDCActionType.Mitigation) {
+      if(!sectorMitigationTypesListMapped[programmeSectorFromDetails].includes(ndcAction.typeOfMitigation)) {
+        throw new HttpException(
+            this.helperService.formatReqMessagesString(
+              "programme.wrongMItigationSectorMapping",
+              []
+              ),
+              HttpStatus.BAD_REQUEST
+      );
+      }
+    }
     ndcAction.id = await this.createNDCActionId(
       ndcActionDto,
       program.programmeId

@@ -61,6 +61,7 @@ export const sectorMitigationTypesListMapped: any = {
   Education: [],
   Transport: [{ value: MitigationTypes.TRANSPORT.valueOf(), label: 'Transport', disabled: true }],
   Manufacturing: [
+    { value: MitigationTypes.CEMENT.valueOf(), label: 'Cement', disabled: true },
     { value: MitigationTypes.CCS.valueOf(), label: 'CCS', disabled: true },
     { value: MitigationTypes.HFC_PFCS_SF6.valueOf(), label: 'HFCs, PFCs, SF6', disabled: true },
   ],
