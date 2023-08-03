@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { NdcActionTypes, ndcActionTypeList } from '../../Definitions/ndcActionTypes.enum';
 import {
   MitigationTypes,
+  mitigationTypeList,
   sectorMitigationTypesListMapped,
 } from '../../Definitions/mitigationTypes.enum';
 import {
@@ -34,6 +35,7 @@ import {
   SolarCreationRequest,
   calculateCredit,
 } from '@undp/carbon-credit-calculator';
+import { Sector } from '../../Casl/enums/sector.enum';
 
 export interface NdcActionDetailsProps {
   isBackBtnVisible: boolean;
@@ -61,12 +63,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   useEffect(() => {
     if (programmeDetails) {
       setSector(programmeDetails?.sector);
-      if (sectorMitigationTypesListMapped[programmeDetails?.sector]?.length < 1) {
-        const filteredData = ndcActionTypeList.filter(
-          (item) => item.value !== NdcActionTypes.Mitigation.valueOf()
-        );
-        setNdcActionTypeListFiltered(filteredData);
-      }
     }
   }, [programmeDetails]);
 
@@ -374,7 +370,13 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   width: '249px',
                   borderRadius: '4px',
                 }}
-                options={sectorMitigationTypesListMapped[sector]}
+                options={
+                  programmeDetails?.sector === Sector.Health ||
+                  programmeDetails?.sector === Sector.Education ||
+                  programmeDetails?.sector === Sector.Hospitality
+                    ? mitigationTypeList
+                    : sectorMitigationTypesListMapped[sector]
+                }
               ></Select>
             </Form.Item>
           </Row>
