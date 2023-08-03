@@ -214,6 +214,9 @@ export class ProgrammeService {
       });
 
     if (savedProgramme.affected > 0) {
+      if(toCompanyIndex < 0){
+        this.companyService.increaseProgrammeCount(investor.companyId);
+      }
       return new DataResponseDto(HttpStatus.OK, programme);
     }
 
@@ -667,6 +670,9 @@ export class ProgrammeService {
 
       if (programme.companyId && programme.companyId.length > 0) {
         programme.companyId.forEach(async (companyId) => {
+          //update programme count
+          await this.companyService.increaseProgrammeCount(companyId);
+
           await this.emailHelperService.sendEmailToOrganisationAdmins(
             companyId,
             EmailTemplates.PROGRAMME_AUTHORISATION,
