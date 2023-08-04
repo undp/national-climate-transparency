@@ -214,7 +214,7 @@ export class ProgrammeService {
       });
 
     if (savedProgramme.affected > 0) {
-      if(toCompanyIndex < 0){
+      if(toCompanyIndex < 0 && programme.currentStage === ProgrammeStage.AUTHORISED){
         this.companyService.increaseProgrammeCount(investor.companyId);
       }
       return new DataResponseDto(HttpStatus.OK, programme);
