@@ -224,15 +224,19 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
           consumerGroup: ndcActionFormvalues.consumerGroup,
         };
       }
-
-      if (parseFloat(ndcActionFormvalues.methodologyEstimatedCredits) <= 0) {
-        message.open({
-          type: 'error',
-          content: t('methodologyEstimatedCreditsInvalid'),
-          duration: 4,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        return;
+      if (
+        ndcActionFormvalues.mitigationType === MitigationTypes.SOLAR ||
+        ndcActionFormvalues.mitigationType === MitigationTypes.AGRICULTURE
+      ) {
+        if (parseFloat(ndcActionFormvalues.methodologyEstimatedCredits) <= 0) {
+          message.open({
+            type: 'error',
+            content: t('methodologyEstimatedCreditsInvalid'),
+            duration: 4,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+          return;
+        }
       }
 
       if (ndcActionFormvalues.userEstimatedCredits > programmeDetails.creditEst) {
