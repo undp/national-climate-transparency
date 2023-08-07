@@ -210,15 +210,13 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
       ndcActionDetailObj.typeOfMitigation = ndcActionFormvalues.mitigationType;
       if (ndcActionFormvalues.mitigationType === MitigationTypes.AGRICULTURE) {
         ndcActionDetailObj.agricultureProperties = {
-          landArea: Number.isInteger(parseInt(ndcActionFormvalues.eligibleLandArea))
-            ? parseInt(ndcActionFormvalues.eligibleLandArea)
-            : 0,
+          landArea: ndcActionFormvalues.eligibleLandArea ? ndcActionFormvalues.eligibleLandArea : 0,
           landAreaUnit: ndcActionFormvalues.landAreaUnit,
         };
       } else if (ndcActionFormvalues.mitigationType === MitigationTypes.SOLAR) {
         ndcActionDetailObj.solarProperties = {
-          energyGeneration: Number.isInteger(parseInt(ndcActionFormvalues.energyGeneration))
-            ? parseInt(ndcActionFormvalues.energyGeneration)
+          energyGeneration: ndcActionFormvalues.energyGeneration
+            ? ndcActionFormvalues.energyGeneration
             : 0,
           energyGenerationUnit: ndcActionFormvalues.energyGenerationUnit,
           consumerGroup: ndcActionFormvalues.consumerGroup,
@@ -273,8 +271,8 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     }
 
     ndcActionDetailObj.ndcFinancing = {
-      userEstimatedCredits: Number.isInteger(parseInt(ndcActionFormvalues.userEstimatedCredits))
-        ? parseInt(ndcActionFormvalues.userEstimatedCredits)
+      userEstimatedCredits: ndcActionFormvalues.userEstimatedCredits
+        ? ndcActionFormvalues.userEstimatedCredits
         : 0,
       systemEstimatedCredits: ndcActionFormvalues.methodologyEstimatedCredits,
     };

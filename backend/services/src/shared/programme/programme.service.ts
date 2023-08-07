@@ -1126,7 +1126,7 @@ export class ProgrammeService {
           }
           try {
             const crdts = await calculateCredit(req);
-            ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(crdts);
+            ndcAction.ndcFinancing.systemEstimatedCredits = crdts;
           } catch (err) {
             this.logger.log(`Credit calculate failed ${err.message}`);
             ndcAction.ndcFinancing.systemEstimatedCredits = 0;
