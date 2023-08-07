@@ -244,7 +244,7 @@ const NdcActionView = () => {
       ndcActionDetails?.agricultureProperties
     ) {
       mitigationDetails[t('ndcAction:viewMitigationLandArea')] =
-        ndcActionDetails?.agricultureProperties?.landArea +
+        addCommSep(ndcActionDetails?.agricultureProperties?.landArea) +
         ndcActionDetails?.agricultureProperties?.landAreaUnit;
     }
     if (
@@ -252,16 +252,18 @@ const NdcActionView = () => {
       ndcActionDetails?.solarProperties
     ) {
       mitigationDetails[t('ndcAction:viewMitigationEnergyGeneration')] =
-        ndcActionDetails?.solarProperties?.energyGeneration +
+        addCommSep(ndcActionDetails?.solarProperties?.energyGeneration) +
         ndcActionDetails?.solarProperties?.energyGenerationUnit;
       mitigationDetails[t('ndcAction:viewMitigationConsumerGroup')] =
         ndcActionDetails?.solarProperties?.consumerGroup;
     }
     if (ndcActionDetails?.ndcFinancing) {
-      mitigationDetails[t('ndcAction:viewMitigationUserEstimatedCredits')] =
-        ndcActionDetails.ndcFinancing.userEstimatedCredits;
-      mitigationDetails[t('ndcAction:viewMitigationSysEstimatedCredits')] =
-        ndcActionDetails.ndcFinancing.systemEstimatedCredits;
+      mitigationDetails[t('ndcAction:viewMitigationUserEstimatedCredits')] = addCommSep(
+        ndcActionDetails.ndcFinancing.userEstimatedCredits
+      );
+      mitigationDetails[t('ndcAction:viewMitigationSysEstimatedCredits')] = addCommSep(
+        ndcActionDetails.ndcFinancing.systemEstimatedCredits
+      );
     }
     return mitigationDetails;
   };

@@ -210,15 +210,13 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
       ndcActionDetailObj.typeOfMitigation = ndcActionFormvalues.mitigationType;
       if (ndcActionFormvalues.mitigationType === MitigationTypes.AGRICULTURE) {
         ndcActionDetailObj.agricultureProperties = {
-          landArea: Number.isInteger(parseInt(ndcActionFormvalues.eligibleLandArea))
-            ? parseInt(ndcActionFormvalues.eligibleLandArea)
-            : 0,
+          landArea: ndcActionFormvalues.eligibleLandArea ? ndcActionFormvalues.eligibleLandArea : 0,
           landAreaUnit: ndcActionFormvalues.landAreaUnit,
         };
       } else if (ndcActionFormvalues.mitigationType === MitigationTypes.SOLAR) {
         ndcActionDetailObj.solarProperties = {
-          energyGeneration: Number.isInteger(parseInt(ndcActionFormvalues.energyGeneration))
-            ? parseInt(ndcActionFormvalues.energyGeneration)
+          energyGeneration: ndcActionFormvalues.energyGeneration
+            ? ndcActionFormvalues.energyGeneration
             : 0,
           energyGenerationUnit: ndcActionFormvalues.energyGenerationUnit,
           consumerGroup: ndcActionFormvalues.consumerGroup,
@@ -277,8 +275,8 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     }
 
     ndcActionDetailObj.ndcFinancing = {
-      userEstimatedCredits: Number.isInteger(parseInt(ndcActionFormvalues.userEstimatedCredits))
-        ? parseInt(ndcActionFormvalues.userEstimatedCredits)
+      userEstimatedCredits: ndcActionFormvalues.userEstimatedCredits
+        ? ndcActionFormvalues.userEstimatedCredits
         : 0,
       systemEstimatedCredits: ndcActionFormvalues.methodologyEstimatedCredits,
     };
@@ -418,6 +416,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   >
                     <InputNumber
                       style={{ width: 442, paddingRight: 12 }}
+                      formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                       onChange={calculateMethodologyEstimatedCredits}
                     />
                   </Form.Item>
@@ -495,6 +494,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 >
                   <InputNumber
                     style={{ width: 442, paddingRight: 12 }}
+                    formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                     onChange={calculateMethodologyEstimatedCredits}
                   />
                 </Form.Item>
@@ -530,7 +530,10 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 label={t('ndcAction:userEstimatedCredits')}
                 style={{ display: 'inline-block', width: 'calc(100% - 15px)' }}
               >
-                <InputNumber style={{ width: 442, paddingRight: 12 }} />
+                <InputNumber
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  style={{ width: 442, paddingRight: 12 }}
+                />
               </Form.Item>
             </Col>
             <Col style={{ marginLeft: '38px' }}>
@@ -539,7 +542,11 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 label={t('ndcAction:methodologyEstimatedCredits')}
                 style={{ display: 'inline-block', width: '100%' }}
               >
-                <InputNumber disabled style={{ width: 442, paddingRight: 12 }} />
+                <InputNumber
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  disabled
+                  style={{ width: 442, paddingRight: 12 }}
+                />
               </Form.Item>
             </Col>
           </Row>
