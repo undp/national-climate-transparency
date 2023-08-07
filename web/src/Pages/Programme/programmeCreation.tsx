@@ -1121,13 +1121,26 @@ export const AddProgrammeComponent = () => {
                                   },
                                 ]}
                               >
-                                <Input size="large" />
+                                <InputNumber
+                                  size="large"
+                                  style={{ width: '100%', paddingRight: 12 }}
+                                  formatter={(value) =>
+                                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                                  }
+                                />
                               </Form.Item>
                               <Form.Item
                                 label={t('addProgramme:minViableCarbonPrice')}
                                 name="minViableCarbonPrice"
                               >
-                                <Input disabled size="large" />
+                                <InputNumber
+                                  disabled
+                                  size="large"
+                                  style={{ width: '100%', paddingRight: 12 }}
+                                  formatter={(value) =>
+                                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                                  }
+                                />
                               </Form.Item>
                             </div>
                           </Col>
@@ -1163,7 +1176,13 @@ export const AddProgrammeComponent = () => {
                                   },
                                 ]}
                               >
-                                <Input size="large" />
+                                <InputNumber
+                                  size="large"
+                                  style={{ width: '100%', paddingRight: 12 }}
+                                  formatter={(value) =>
+                                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                                  }
+                                />
                               </Form.Item>
                             </div>
                           </Col>

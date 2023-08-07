@@ -414,6 +414,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   >
                     <InputNumber
                       style={{ width: 442, paddingRight: 12 }}
+                      formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                       onChange={calculateMethodologyEstimatedCredits}
                     />
                   </Form.Item>
@@ -491,6 +492,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 >
                   <InputNumber
                     style={{ width: 442, paddingRight: 12 }}
+                    formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                     onChange={calculateMethodologyEstimatedCredits}
                   />
                 </Form.Item>
@@ -526,7 +528,10 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 label={t('ndcAction:userEstimatedCredits')}
                 style={{ display: 'inline-block', width: 'calc(100% - 15px)' }}
               >
-                <InputNumber style={{ width: 442, paddingRight: 12 }} />
+                <InputNumber
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  style={{ width: 442, paddingRight: 12 }}
+                />
               </Form.Item>
             </Col>
             <Col style={{ marginLeft: '38px' }}>
@@ -535,7 +540,11 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 label={t('ndcAction:methodologyEstimatedCredits')}
                 style={{ display: 'inline-block', width: '100%' }}
               >
-                <InputNumber disabled style={{ width: 442, paddingRight: 12 }} />
+                <InputNumber
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  disabled
+                  style={{ width: 442, paddingRight: 12 }}
+                />
               </Form.Item>
             </Col>
           </Row>

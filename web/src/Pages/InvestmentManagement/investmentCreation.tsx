@@ -624,6 +624,9 @@ export const AddInvestmentComponent = () => {
                                           event.preventDefault();
                                         }
                                       }}
+                                      formatter={(value) =>
+                                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                                      }
                                     />
                                   </Form.Item>
                                   <div className="inline separator">{'/'}</div>
@@ -646,6 +649,9 @@ export const AddInvestmentComponent = () => {
                               <Form.Item className="inline" name={['total']}>
                                 <InputNumber
                                   placeholder={currentPercTotal + ''}
+                                  formatter={(value) =>
+                                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                                  }
                                   controls={false}
                                   disabled={true}
                                   onKeyPress={(event) => {
