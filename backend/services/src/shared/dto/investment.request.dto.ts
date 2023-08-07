@@ -28,23 +28,31 @@ export class InvestmentRequestDto {
   instrument: Instrument[];
 
   @ApiPropertyOptional()
-  @ValidateIf(o => o.instrument.indexOf(Instrument.LOAN) >= 0)
+  @ValidateIf(o => (o.instrument && o.instrument.indexOf(Instrument.LOAN) >= 0))
   @IsNumber()
   @IsOptional()
   @IsNotEmpty()
   interestRate?: number;
 
   @ApiPropertyOptional()
-  @ValidateIf(o => o.instrument.indexOf(Instrument.RESULT_BASED) >= 0)
+  @ValidateIf(o => (o.instrument && o.instrument.indexOf(Instrument.RESULT_BASED) >= 0))
   @IsString()
   @IsNotEmpty()
   resultMetric?: string;
 
   @ApiPropertyOptional()
-  @ValidateIf(o => o.instrument.indexOf(Instrument.RESULT_BASED) >= 0)
+  @ValidateIf(o => (o.instrument && o.instrument.indexOf(Instrument.RESULT_BASED) >= 0))
   @IsNumber()
   @IsNotEmpty()
   paymentPerMetric?: number;
+
+
+  @ApiPropertyOptional()
+  @ValidateIf(o => (o.instrument && o.instrument.indexOf(Instrument.OTHER) >= 0))
+  @IsString()
+  @IsNotEmpty()
+  comments?: string;
+
 
   @ApiPropertyOptional({ enum: InvestmentType })
   @IsEnum(InvestmentType, {

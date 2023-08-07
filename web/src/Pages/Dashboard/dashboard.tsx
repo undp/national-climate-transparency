@@ -171,6 +171,7 @@ const Dashboard = () => {
   const mapDataParseInvestment = (statData: any, labelField: string, valueField: string) => {
     const publictype = ['all', ['==', ['get', 'type'], 'Public']];
     const privatetype = ['all', ['==', ['get', 'type'], 'Private']];
+    const unknownType = ['all', ['==', ['get', 'type'], 'Unknown']];
 
     const center = statData?.features[0]?.geometry?.coordinates
       ? statData?.features[0]?.geometry?.coordinates
@@ -188,6 +189,7 @@ const Dashboard = () => {
           count: ['+', ['case', countS, ['get', 'count'], 0]],
           public: ['+', ['case', publictype, ['get', 'count'], 0]],
           private: ['+', ['case', privatetype, ['get', 'count'], 0]],
+          unknown: ['+', ['case', unknownType, ['get', 'count'], 0]],
         },
       },
     };
@@ -198,12 +200,19 @@ const Dashboard = () => {
       source: 'investmentLocations',
       filter: ['!=', 'cluster', true],
       paint: {
-        'circle-color': ['case', publictype, colorsStatus[0], colorsStatus[2]],
+        'circle-color': [
+          'case',
+          publictype,
+          colorsStatus[0],
+          privatetype,
+          colorsStatus[2],
+          colorsStatus[1],
+        ],
         'circle-opacity': 1,
         'circle-radius': 10,
       },
     };
-    return [mapSource, layer, center, ['Public', 'Private']];
+    return [mapSource, layer, center, ['Public', 'Private', 'Unknown']];
   };
 
   const donutSegment = (start: any, end: any, r: any, r0: any, color: any) => {
@@ -305,12 +314,14 @@ const Dashboard = () => {
     }
 
     if (properties.cluster_id) {
-      typeCounts = [properties.public, properties.private];
+      typeCounts = [properties.public, properties.private, properties.unknown];
     } else {
       if (properties?.type === 'Public') {
-        typeCounts = [properties.count, 0];
+        typeCounts = [properties.count, 0, 0];
       } else if (properties?.type === 'Private') {
-        typeCounts = [0, properties.count];
+        typeCounts = [0, properties.count, 0];
+      } else if (properties?.type === 'Unknown') {
+        typeCounts = [0, 0, properties.count];
       }
     }
     let total = 0;
@@ -399,6 +410,7 @@ const Dashboard = () => {
       aggType: StatsCardsTypes.AGG_INVESTMENT_BY_TYPE,
       configs: {
         title: t('totalInvestment'),
+        subTitle: '($)',
         tooltip: t('totalInvestmentTT' + TTSuffix),
         colors: colors,
         dataLabelField: 'type',

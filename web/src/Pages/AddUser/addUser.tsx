@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { AddNewUserComponent } from '@undp/carbon-library';
 import { useAbilityContext } from '../../Casl/Can';
+import './addUser.scss';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const AddUser = () => {
       useUserContext={useUserContext}
       useLocation={useLocation}
       useAbilityContext={useAbilityContext}
+      themeColor="#9155fd"
     ></AddNewUserComponent>
   );
 };

@@ -316,7 +316,7 @@ const InvestmentManagement = () => {
                       requestId,
                       comment,
                       'investmentApprove',
-                      `${t('creditTransfer:transferReqApproved')}`
+                      `${t('programme:investmentReqApproved')}`
                     ),
                   type: 'primary',
                   remarkRequired: false,
@@ -353,7 +353,7 @@ const InvestmentManagement = () => {
 
   const columns = [
     {
-      title: t('programme:requestID'),
+      title: t('programme:requestId'),
       dataIndex: 'requestId',
       key: 'requestId',
       sorter: true,
@@ -380,6 +380,13 @@ const InvestmentManagement = () => {
       render: (item: any) => {
         return <span className="clickable">{item}</span>;
       },
+      onCell: (record: any, rowIndex: any) => {
+        return {
+          onClick: (ev: any) => {
+            navigate('/programmeManagement/view', { state: { id: record.programmeId } });
+          },
+        };
+      },
     },
     {
       title: t('programme:type'),
@@ -387,8 +394,11 @@ const InvestmentManagement = () => {
       sorter: true,
       align: 'center' as const,
       render: (item: any, Obj: any) => {
+        if (!Obj.type) {
+          return <span>-</span>;
+        }
         return (
-          <Tooltip title={Obj.type} color={TooltipColor} key={TooltipColor}>
+          <Tooltip title={addSpaces(Obj.type)} color={TooltipColor} key={TooltipColor}>
             <div>
               <RoleIcon
                 icon={Obj.type === InvestmentType.PUBLIC ? <Icon.Eye /> : <Icon.EyeSlash />}
@@ -406,8 +416,11 @@ const InvestmentManagement = () => {
       sorter: true,
       align: 'center' as const,
       render: (item: any, Obj: any) => {
+        if (!Obj.level) {
+          return <span>-</span>;
+        }
         return (
-          <Tooltip title={Obj.level} color={TooltipColor} key={TooltipColor}>
+          <Tooltip title={addSpaces(Obj.level)} color={TooltipColor} key={TooltipColor}>
             <div>
               <RoleIcon
                 icon={Obj.level === InvestmentLevel.INTERNATIONAL ? <Icon.Globe2 /> : <Icon.Flag />}
@@ -425,8 +438,11 @@ const InvestmentManagement = () => {
       sorter: true,
       align: 'center' as const,
       render: (item: any, Obj: any) => {
+        if (!Obj.stream) {
+          return <span>-</span>;
+        }
         return (
-          <Tooltip title={Obj.stream} color={TooltipColor} key={TooltipColor}>
+          <Tooltip title={addSpaces(Obj.stream)} color={TooltipColor} key={TooltipColor}>
             <div>
               <RoleIcon
                 icon={
@@ -459,8 +475,8 @@ const InvestmentManagement = () => {
       render: (item: any, itemObj: any) => {
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {itemObj.sender &&
-              itemObj.sender.map((v: any, i: any) => {
+            {itemObj.receiver &&
+              itemObj.receiver.map((v: any, i: any) => {
                 return (
                   <Tooltip title={v.name} color={TooltipColor} key={TooltipColor}>
                     <div>

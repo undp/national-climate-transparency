@@ -33,9 +33,6 @@ export class RegistryClientService {
                 if (ex.response?.data?.statusCode == 400 && ex.response?.data?.message?.indexOf('already exist') >= 0 ){
                     return data;
                 }
-                if (ex.response?.data?.statusCode == 400 && ex.response?.data?.message?.indexOf('Mitigation action does not exist') >= 0) {
-                  return data;
-                }
                 
                 throw ex;
             });
@@ -76,12 +73,12 @@ export class RegistryClientService {
     return resp;
   }
 
-  public async updateOwnership(userDto: UserDto) {
+  public async updateOwnership(req: any) {
 
-    // console.log('creating company on registry', userDto)
-    // const resp = await this.sendHttp("/national/programme/add", userDto);
-    // console.log('Successfully create company on registry', userDto.company.name)
-    // return resp;
+    console.log('creating ownership update on registry', req)
+    const resp = await this.sendHttp("/national/programme/updateOwnership", req);
+    console.log('Successfully create updated ownership on registry')
+    return resp;
   }
 
   public async createCompany(userDto: UserDto) {

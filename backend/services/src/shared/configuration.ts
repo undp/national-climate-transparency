@@ -5,6 +5,7 @@ export default () => ({
   defaultCreditUnit: process.env.defaultCreditUnit || "ITMO",
   dateTimeFormat: "DD LLLL yyyy @ HH:mm",
   dateFormat: "DD LLLL yyyy",
+  encodePassword: process.env.ENCODE_PASSWORD || false,
   database: {
     type: "postgres",
     host: process.env.DB_HOST || "localhost",
@@ -64,5 +65,10 @@ export default () => ({
     syncEnable: process.env.REGISTRY_SYNC_ENABLE || false,
     endpoint: process.env.REGISTRY_ENDPOINT || 'https://api.carbreg.org',
     apiToken: process.env.REGISTRY_API_TOKEN
+  },
+  docGenerate: {
+    ministerName: process.env.MINISTER_NAME || 'Minister X',
+    ministryName: "Ministry of Environment, Forestry & Tourism",
+    countryCapital: process.env.COUNTRY_CAPITAL || "Capital X"
   }
 });

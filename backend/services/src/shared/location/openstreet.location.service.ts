@@ -47,10 +47,17 @@ export class OpenStreetLocationService implements LocationInterface {
                 region.countryAlpha2 = countryCode;
                 region.regionName = element.tags[tag];
                 region.geoCoordinates = location;
-                const t = tag.split(':');
-                region.lang = t.length > 1 ? t[1] : 'en';
-                region.key = tag + '_' + element.id;
+                const t = tag.split(":");
+                region.lang = t.length > 1 ? t[1] : "en";
+                region.key = tag + "_" + element.id;
+                const exist = data.some(
+                  (item: any) =>
+                    item?.regionName === region.regionName &&
+                    item?.lang === region.lang
+                );
+                if (!exist) {
                 data.push(region);
+                }
               }
             }
           }

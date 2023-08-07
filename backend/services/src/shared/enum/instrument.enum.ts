@@ -1,7 +1,7 @@
 export enum Instrument {
     LOAN = 'Loan',
     RESULT_BASED = 'ResultBased',
-    GRANT = 'GRANT',
+    GRANT = 'Grant',
     EQUITY = 'Equity',
     GUARANTEE = 'Guarantee',
     OTHER = 'Other'

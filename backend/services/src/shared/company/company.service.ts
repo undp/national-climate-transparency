@@ -437,4 +437,28 @@ export class CompanyService {
   private getUserRefWithRemarks = (user: any, remarks: string) => {
     return `${user.companyId}#${user.companyName}#${user.id}#${remarks}`;
   };
+
+  async increaseProgrammeCount(companyId: any) {
+    const companyDetails = await this.findByCompanyId(companyId);
+    const programmeCount =
+      companyDetails.companyRole === CompanyRole.GOVERNMENT
+        ? null
+        : Number(companyDetails.programmeCount) + 1;
+
+    const response = await this.companyRepo
+      .update(
+        {
+          companyId: parseInt(companyId),
+        },
+        {
+          programmeCount: programmeCount,
+        }
+      )
+      .catch((err: any) => {
+        this.logger.error(err);
+        return err;
+      });
+
+    return response;
+  }
 }

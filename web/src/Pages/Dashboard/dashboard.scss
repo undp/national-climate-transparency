@@ -48,8 +48,8 @@
 }
 
 .ant-tooltip-inner {
-  border-radius: 5px !important;
-  background-color: $primary-purple !important;
+  border-radius: 5px ;
+  background-color: $primary-purple;
 }
 
 .ant-tooltip-arrow-content {
@@ -154,7 +154,7 @@
 
     .apexcharts-legend-series {
       display: flex !important;
-      width: 38%;
+      width: 42%;
     }
   }
 

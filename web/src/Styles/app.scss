@@ -4,6 +4,40 @@ body {
   background-color: $background-color;
   font-family: $primary-font-family;
   font-weight: 400;
+
+  .ant-tooltip-inner {
+    border-radius: 5px !important;
+    background-color: $primary-purple !important;
+  }
+
+  .ant-tooltip-arrow-content {
+    --antd-arrow-background-color: linear-gradient(to right bottom, #9155fd, #9155fd) !important;
+  }
+
+  .login-language-selection-container .ant-select-selector {
+    color: $primary-color !important;
+    border: 1px solid $primary-color !important;
+  }
+
+  .login-language-selection-container .ant-select-selection-item {
+    color: $primary-color !important;
+  }
+
+  .PhoneInput {
+    .PhoneInputInput:focus-visible,
+    .PhoneInputInput:hover {
+      flex: 1 1;
+      min-width: 0;
+      border-radius: 5px !important;
+      height: 40px;
+      border: 1px solid rgba($primary-purple, 0.8) !important;
+      outline: none;
+    }
+  }
+
+  .programme-view .company-info .ant-progress-bg {
+    background-color: $primary-color !important;
+  }
 }
 
 .layout-content-container .ant-btn-primary {
@@ -23,6 +57,15 @@ body {
 
 .content-container .body-title {
   color: $primary-color !important;
+}
+
+.custom-tooltip .ant-tooltip-inner {
+  border-radius: 5px !important;
+  background-color: $primary-color !important;
+}
+
+.custom-tooltip .ant-tooltip-arrow-content {
+  --antd-arrow-background-color: linear-gradient(to right bottom, #9155fd, #9155fd) !important;
 }
 
 .ant-menu {
@@ -178,22 +221,15 @@ body {
   color: $common-filter-color;
 }
 
-.PhoneInput {
-  .PhoneInputInput:focus-visible,
-  .PhoneInputInput:hover {
-    flex: 1 1;
-    min-width: 0;
-    border-radius: 5px !important;
-    height: 40px;
-    border-right: 1px solid #40a9ff !important;
-    outline: 1px solid #40a9ff;
-  }
+.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-tail::after {
+  background-color: #9155fd;
+  width: 1.7px !important;
 }
 
 .layout-content-container {
   padding-bottom: 100px;
   .ant-btn-primary {
-    background-color: $primary-color;
+    background-color: $primary-purple;
     color: $dark-text-color;
     border: none;
   }
@@ -312,6 +348,10 @@ body {
 .ant-dropdown-menu {
   padding: 1rem 2rem 1rem 1rem !important;
   border-radius: 5px;
+}
+
+.login-language-selection-container .ant-select .ant-select-arrow {
+  color: $primary-color !important;
 }
 
 .ant-dropdown-menu-item-active {
@@ -448,12 +488,12 @@ body {
 
 .popup-success {
   .icon {
-    color: $success-color;
+    color: $primary-color !important;
   }
 
   .ant-btn-primary {
-    background: $primary-color;
-    border-radius: $primary-color;
+    background: $primary-color !important;
+    border-radius: $primary-color !important;
     border: none;
   }
 
@@ -478,9 +518,17 @@ body {
   }
 
   .ant-btn-primary {
-    background: $primary-color !important;
+    background: $primary-color;
     border-radius: $primary-color;
     border: none;
+  }
+
+  .transfer-form {
+    .ant-btn-primary {
+      background: $primary-color;
+      border-radius: $primary-color;
+      border: none;
+    }
   }
 
   .ant-btn-default {
@@ -547,6 +595,10 @@ body {
 
 .disabled {
   opacity: 0.5;
+}
+
+.mg-left-4 {
+  margin-left: 4rem;
 }
 
 .mg-left-3 {
@@ -761,4 +813,15 @@ body {
   color: #ffffff !important;
   border-color: $danger-bg-color !important;
   background: $danger-bg-color;
+}
+
+.hide {
+  display: none;
+}
+
+.required-mark {
+  color: $error-color;
+  vertical-align: super;
+  margin-left: 5px;
+  font-size: 10px;
 }

@@ -36,6 +36,9 @@ export class Investment implements EntitySubject {
   @Column({nullable: true})
   paymentPerMetric?: number;
 
+  @Column({nullable: true})
+  comments?: string;
+
   @Column({
     type: "enum",
     enum: InvestmentType,
@@ -80,6 +83,9 @@ export class Investment implements EntitySubject {
 
   @Column("real")
   percentage: number;
+
+  @Column("real", {nullable: true})
+  shareFromOwner: number;
 
   @Column()
   toCompanyId: number;

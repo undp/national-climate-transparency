@@ -25,6 +25,7 @@ import { CompanyRole } from "../shared/enum/company.role.enum";
 import { PRECISION } from "../shared/constants";
 import { NDCActionViewEntity } from "../shared/entities/ndc.view.entity";
 import { InvestmentView } from "../shared/entities/investment.view.entity";
+import { InvestmentStatus } from "src/shared/enum/investment.status";
 
 @Injectable()
 export class AggregateAPIService {
@@ -37,7 +38,8 @@ export class AggregateAPIService {
     "programmeCertifierId",
     "initiatorCompanyId",
     "isRetirement",
-    "createdTime"
+    "createdTime",
+    "status"
   ]
 
   constructor(
@@ -272,7 +274,11 @@ export class AggregateAPIService {
         let geometry: any = {};
         properties.id = String(index);
         properties.count = parseInt(locationDataItem?.count);
-        properties[groupField] = locationDataItem[groupField];
+        if (locationDataItem[groupField] == null) {
+          properties[groupField] = "Unknown"
+        } else {
+          properties[groupField] = locationDataItem[groupField];
+        }
         geometry.type = "Point";
         geometry.coordinates = location;
         programmeGeoData.properties = properties;
@@ -818,7 +824,7 @@ export class AggregateAPIService {
           whereCW.push(`p."requestId" != 'null'`);
           if (stat.statFilter && stat.statFilter.onlyMine) {
             whereCW.push(
-              `${companyId} = b."toCompanyId"`
+              `${companyId} = b."fromCompanyId"`
             );
           }
           if (stat.statFilter && stat.statFilter.startTime) {
@@ -827,13 +833,20 @@ export class AggregateAPIService {
           if (stat.statFilter && stat.statFilter.endTime) {
             whereCW.push(`"createdTime" <= ${stat.statFilter.endTime}`);
           }
+
+          whereCW.push(`status = '${InvestmentStatus.APPROVED}'`)
   
+          const query = `SELECT p."requestId" as loc, b."type" as type, count(*) AS count
+          FROM  investment_view b, jsonb_array_elements(b."toGeo") p("requestId")
+          ${whereCW.length > 0 ? " where " : " "}
+          ${whereCW.join(" and ")}
+          GROUP  BY p."requestId", b."type"`;
+
+          console.log('INVESTMENT_LOCATION query', query)
           const resultsProgrammeLocationsI = await this.investmentRepo.manager
-            .query(`SELECT p."requestId" as loc, b."type" as type, count(*) AS count
-            FROM  investment_view b, jsonb_array_elements(b."toGeo") p("requestId")
-            ${whereCW.length > 0 ? " where " : " "}
-            ${whereCW.join(" and ")}
-            GROUP  BY p."requestId", b."type"`);
+            .query(query);
+
+          console.log('INVESTMENT_LOCATION resp', resultsProgrammeLocationsI)
           results[key] = await this.programmeLocationDataFormatter(
             resultsProgrammeLocationsI, "type"
           );
@@ -1146,7 +1159,7 @@ export class AggregateAPIService {
       abilityCondition,
       lastTimeForWhere,
       statCache,
-      ["createdTime"],
+      ["creditUpdateTime"],
       stat.statFilter?.timeGroup ? "createdAt" : undefined,
       stat.statFilter?.timeGroup ? "day" : undefined
     );
@@ -1226,12 +1239,20 @@ export class AggregateAPIService {
       stat.statFilter,
       {
         value: companyId,
-        key: "toCompanyId",
+        key: "fromCompanyId",
         operation: "=",
       },
       "createdTime"
     );
 
+    if (!filterAnd) {
+      filterAnd = []
+    }
+    filterAnd.push({
+      value: 'Approved',
+      key: "status",
+      operation: "=",
+    })
     let filterOr = undefined;
     // if (stat.statFilter && stat.statFilter.onlyMine) {
     //   filterOr = [];
@@ -1242,7 +1263,7 @@ export class AggregateAPIService {
     //   });
     // }
 
-    return await this.genAggregateTypeOrmQuery(
+    const d = await this.genAggregateTypeOrmQuery(
       this.investmentRepo,
       "investment",
       ["type"],
@@ -1259,6 +1280,14 @@ export class AggregateAPIService {
       stat.statFilter?.timeGroup ? "createdAt" : undefined,
       stat.statFilter?.timeGroup ? "day" : undefined
     );
+    if (d && d.data) {
+      for (const r of d.data) {
+        if (r.type === 0 || r.type === '0') {
+          r.type = 'Unknown'
+        }
+      }
+    }
+    return d;
   }
 
   async generateProgrammeAggregates(
