@@ -15,7 +15,7 @@ import {
 import { Role } from "../casl/role.enum";
 import { CompanyRole } from "../enum/company.role.enum";
 import { IsValidCountry } from "../util/validcountry.decorator";
-import { SectoralScope } from "../enum/sectoral.scope.enum";
+import { SectoralScope } from '@undp/serial-number-gen'
 
 export class OrganisationDto {
   companyId: number;

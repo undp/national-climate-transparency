@@ -14,7 +14,7 @@ import {
 } from "class-validator";
 import { Role } from "../casl/role.enum";
 import { CompanyRole } from "../enum/company.role.enum";
-import { SectoralScope } from "../enum/sectoral.scope.enum";
+import { SectoralScope } from '@undp/serial-number-gen'
 
 export class UserUpdateDto {
   @IsNotEmpty()

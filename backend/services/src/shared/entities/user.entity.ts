@@ -11,7 +11,7 @@ import {
 import { EntitySubject } from "./entity.subject";
 import { CompanyRole } from "../enum/company.role.enum";
 import { Company } from "./company.entity";
-import { SectoralScope } from "../enum/sectoral.scope.enum";
+import { SectoralScope } from '@undp/serial-number-gen'
 
 @Entity()
 export class User implements EntitySubject {

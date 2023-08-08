@@ -2,7 +2,7 @@ import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
 import { CompanyRole } from "../enum/company.role.enum";
 import { CompanyState } from "../enum/company.state.enum";
 import { EntitySubject } from "./entity.subject";
-import { SectoralScope } from "../enum/sectoral.scope.enum";
+import { SectoralScope } from '@undp/serial-number-gen'
 
 @Entity()
 export class Company implements EntitySubject {
