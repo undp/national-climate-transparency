@@ -105,6 +105,17 @@ export class CaslAbilityFactory {
         }
       }
 
+      if (user.companyRole == CompanyRole.MINISTRY) {
+        if (user.role != Role.ViewOnly) {
+          can(Action.Manage, Programme);
+          can(Action.Manage, DocumentAction);
+          can(Action.Manage, Investment);
+        } else {
+          can(Action.Read, Investment);
+          can(Action.Read, Programme);
+        }
+      }
+
       if (
         user.role != Role.ViewOnly &&
         user.companyRole != CompanyRole.PROGRAMME_DEVELOPER
@@ -143,7 +154,9 @@ export class CaslAbilityFactory {
         });
 
         can(Action.Read, Programme, {
-          currentStage: { $in: [ProgrammeStage.AUTHORISED, ProgrammeStage.APPROVED] },
+          currentStage: {
+            $in: [ProgrammeStage.AUTHORISED, ProgrammeStage.APPROVED],
+          },
         });
         can(Action.Read, Investment, {
           status: { $eq: InvestmentStatus.APPROVED },

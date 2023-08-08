@@ -79,19 +79,36 @@ export const PoliciesGuardEx = (
       for (let operator in mongoQuery) {
         if (operator.startsWith("$")) {
           if (operator == "$and" || operator == "$or") {
-            const val = mongoQuery[operator].map(st => this.parseMongoQueryToSQL(st)).join(` ${operator.replace("$", '')} `)
-            final = final == undefined ? val : `${final} and ${val}`
+            const val = mongoQuery[operator]
+              .map((st) => this.parseMongoQueryToSQL(st))
+              .join(` ${operator.replace("$", "")} `);
+            final = final == undefined ? val : `${final} and ${val}`;
           } else if (operator == "$not") {
-            return this.parseMongoQueryToSQL(mongoQuery["$not"], !isNot)
+            return this.parseMongoQueryToSQL(mongoQuery["$not"], !isNot);
           } else if (operator == "$eq") {
-            const value = (typeof mongoQuery["$eq"] === "number") ? String(mongoQuery["$eq"]) : `'${mongoQuery["$eq"]}'`
-            return `"${key}" ${isNot ? "!=" : "="} ${value}`
+            const value =
+              typeof mongoQuery["$eq"] === "number"
+                ? String(mongoQuery["$eq"])
+                : `'${mongoQuery["$eq"]}'`;
+            return `"${key}" ${isNot ? "!=" : "="} ${value}`;
           } else if (operator == "$ne") {
-            const value = (typeof mongoQuery["$ne"] === "number") ? String(mongoQuery["$ne"]) : `'${mongoQuery["$ne"]}'`
-            return `"${key}" ${isNot ? "=" : "!="} ${value}`
+            const value =
+              typeof mongoQuery["$ne"] === "number"
+                ? String(mongoQuery["$ne"])
+                : `'${mongoQuery["$ne"]}'`;
+            return `"${key}" ${isNot ? "=" : "!="} ${value}`;
+          } else if (operator == "$in") {
+            const values = mongoQuery["$in"].map((val) =>
+              typeof val === "number" ? String(val) : `'${val}'`
+            );
+            return `"${key}" ${isNot ? "NOT IN" : "IN"} (${values.join(", ")})`;
           }
         } else {
-          return this.parseMongoQueryToSQL(mongoQuery[operator], isNot, operator)
+          return this.parseMongoQueryToSQL(
+            mongoQuery[operator],
+            isNot,
+            operator
+          );
         }
       }
       return final;

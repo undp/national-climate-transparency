@@ -82,12 +82,20 @@ export const AddProgrammeComponent = () => {
   const [ownershipPercentageValidation, setOwnershipPercentageValidation] =
     useState<boolean>(false);
   const [selectedSector, setSelectedSector] = useState<string>('');
+  const [ministrySectoralScope, setMinistrySectoralScope] = useState<any[]>([]);
+  const [availableSecoralScope, setAvailableSectoralScope] = useState<any[]>([]);
+  const [availableSectar, setAvailableSectar] = useState<any[]>([]);
 
   const initialOrganisationOwnershipValues: any[] = [
     {
       organisation:
-        userInfoState?.companyRole !== CompanyRole.GOVERNMENT && userInfoState?.companyName,
-      proponentPercentage: userInfoState?.companyRole !== CompanyRole.GOVERNMENT && 100,
+        userInfoState?.companyRole !== CompanyRole.GOVERNMENT &&
+        userInfoState?.companyRole !== CompanyRole.MINISTRY &&
+        userInfoState?.companyName,
+      proponentPercentage:
+        userInfoState?.companyRole !== CompanyRole.GOVERNMENT &&
+        userInfoState?.companyRole !== CompanyRole.MINISTRY &&
+        100,
     },
   ];
 
@@ -174,10 +182,68 @@ export const AddProgrammeComponent = () => {
     }
   };
 
+  const getUserDetails = async () => {
+    setLoading(true);
+    try {
+      const response: any = await post('national/user/query', {
+        page: 1,
+        size: 10,
+        filterAnd: [
+          {
+            key: 'id',
+            operation: '=',
+            value: userInfoState?.id,
+          },
+        ],
+      });
+      if (response && response.data) {
+        if (
+          response?.data[0]?.companyRole === CompanyRole.MINISTRY &&
+          response?.data[0]?.sectoralScope
+        ) {
+          setMinistrySectoralScope(response?.data[0]?.sectoralScope);
+          const sectScopeValues: any = [];
+          const sectSScope: any = [];
+          const sectors: any = [];
+          response?.data[0]?.sectoralScope?.map((sScope: any) => {
+            Object.entries(SectoralScope).map(([key, value]) => {
+              if (sScope === String(value)) {
+                sectSScope.push({ key: key, value: value });
+                sectScopeValues.push(key);
+              }
+            });
+          });
+          setAvailableSectoralScope(sectSScope);
+          sectScopeValues?.map((key: any) => {
+            Object.values(Sector).map((sector: any) => {
+              if (sectoralScopes[sector]?.includes(key)) {
+                sectors.push(sector);
+              }
+            });
+          });
+          setAvailableSectar([...sectors, 'Health', 'Education', 'Hospitality']);
+        }
+      }
+      setLoading(false);
+    } catch (error: any) {
+      console.log('Error in getting users', error);
+      message.open({
+        type: 'error',
+        content: error.message,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     getOrganisationsDetails();
     getCountryList();
     getRegionList();
+    if (userInfoState?.companyRole === CompanyRole.MINISTRY) {
+      getUserDetails();
+    }
   }, []);
 
   const normFile = (e: any) => {
@@ -206,7 +272,8 @@ export const AddProgrammeComponent = () => {
     );
     const proponentPercentages = ownershipPercentage.map((item: any) => item.proponentPercentage);
     const proponentTxIds =
-      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+      userInfoState?.companyRole !== CompanyRole.GOVERNMENT &&
+      userInfoState?.companyRole !== CompanyRole.MINISTRY
         ? ownershipPercentage?.slice(1).map((item: any) => item.organisation)
         : ownershipPercentage?.map((item: any) => item.organisation);
     let logoBase64 = '';
@@ -216,7 +283,8 @@ export const AddProgrammeComponent = () => {
       logoUrls = logoBase64?.split(',');
     }
     const propTaxIds =
-      userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+      userInfoState?.companyRole !== CompanyRole.GOVERNMENT &&
+      userInfoState?.companyRole !== CompanyRole.MINISTRY
         ? [userOrgTaxId, ...proponentTxIds]
         : proponentTxIds;
     const duplicateIds = new Set(propTaxIds).size !== propTaxIds.length;
@@ -245,7 +313,8 @@ export const AddProgrammeComponent = () => {
         startTime: moment(values?.startTime).startOf('day').unix(),
         endTime: moment(values?.endTime).endOf('day').unix(),
         proponentTaxVatId:
-          userInfoState?.companyRole !== CompanyRole.GOVERNMENT
+          userInfoState?.companyRole !== CompanyRole.GOVERNMENT &&
+          userInfoState?.companyRole !== CompanyRole.MINISTRY
             ? [userOrgTaxId, ...proponentTxIds]
             : proponentTxIds,
         proponentPercentage: proponentPercentages,
@@ -516,9 +585,13 @@ export const AddProgrammeComponent = () => {
                                 ]}
                               >
                                 <Select size="large" onChange={onChangeSector}>
-                                  {Object.values(Sector).map((sector: any) => (
-                                    <Select.Option value={sector}>{sector}</Select.Option>
-                                  ))}
+                                  {userInfoState?.companyRole === CompanyRole.MINISTRY
+                                    ? availableSectar?.map((sector: any) => (
+                                        <Select.Option value={sector}>{sector}</Select.Option>
+                                      ))
+                                    : Object.values(Sector).map((sector: any) => (
+                                        <Select.Option value={sector}>{sector}</Select.Option>
+                                      ))}
                                 </Select>
                               </Form.Item>
                               <Form.Item
@@ -701,7 +774,9 @@ export const AddProgrammeComponent = () => {
                                                   disabled={
                                                     name === 0 &&
                                                     userInfoState?.companyRole !==
-                                                      CompanyRole.GOVERNMENT
+                                                      CompanyRole.GOVERNMENT &&
+                                                    userInfoState?.companyRole !==
+                                                      CompanyRole.MINISTRY
                                                   }
                                                 >
                                                   {organisationsList.map((organisation) => (
@@ -714,6 +789,8 @@ export const AddProgrammeComponent = () => {
                                                         ) ||
                                                         (userInfoState?.companyRole !==
                                                           CompanyRole.GOVERNMENT &&
+                                                          userInfoState?.companyRole !==
+                                                            CompanyRole.MINISTRY &&
                                                           userOrgTaxId === organisation?.taxId)
                                                       }
                                                     >
@@ -763,7 +840,9 @@ export const AddProgrammeComponent = () => {
                                                   disabled={
                                                     fields?.length < 2 &&
                                                     userInfoState?.companyRole !==
-                                                      CompanyRole.GOVERNMENT
+                                                      CompanyRole.GOVERNMENT &&
+                                                    userInfoState?.companyRole !==
+                                                      CompanyRole.MINISTRY
                                                   }
                                                 />
                                               </Form.Item>
@@ -834,20 +913,26 @@ export const AddProgrammeComponent = () => {
                                 ]}
                               >
                                 <Select size="large">
-                                  {selectedSectoralScopes?.map((val: any) => {
-                                    if (val in SectoralScope) {
-                                      const key = val as keyof typeof SectoralScope;
-                                      return (
-                                        <Select.Option
-                                          key={SectoralScope[key]}
-                                          value={SectoralScope[key]}
-                                        >
-                                          {val}
+                                  {userInfoState?.companyRole === CompanyRole.MINISTRY
+                                    ? availableSecoralScope?.map((item: any) => (
+                                        <Select.Option key={item.value} value={item.value}>
+                                          {item.key}
                                         </Select.Option>
-                                      );
-                                    }
-                                    return null;
-                                  })}
+                                      ))
+                                    : selectedSectoralScopes?.map((val: any) => {
+                                        if (val in SectoralScope) {
+                                          const key = val as keyof typeof SectoralScope;
+                                          return (
+                                            <Select.Option
+                                              key={SectoralScope[key]}
+                                              value={SectoralScope[key]}
+                                            >
+                                              {val}
+                                            </Select.Option>
+                                          );
+                                        }
+                                        return null;
+                                      })}
                                 </Select>
                               </Form.Item>
                               <Form.Item

@@ -1,57 +1,69 @@
-import { Role } from '../casl/role.enum';
-import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, OneToOne, OneToMany, ManyToOne } from 'typeorm';
-import { EntitySubject } from './entity.subject';
-import { CompanyRole } from '../enum/company.role.enum';
-import { Company } from './company.entity';
+import { Role } from "../casl/role.enum";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  JoinColumn,
+  OneToOne,
+  OneToMany,
+  ManyToOne,
+} from "typeorm";
+import { EntitySubject } from "./entity.subject";
+import { CompanyRole } from "../enum/company.role.enum";
+import { Company } from "./company.entity";
+import { SectoralScope } from "../enum/sectoral.scope.enum";
 
 @Entity()
-export class User  implements EntitySubject{
-    @PrimaryGeneratedColumn()
-    id: number;
+export class User implements EntitySubject {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ unique: true })
-    email: string;
+  @Column({ unique: true })
+  email: string;
 
-    @Column({select: false})
-    password: string;
+  @Column({ select: false })
+  password: string;
 
-    @Column({
-        type: "enum",
-        enum: Role,
-        array: false,
-        default: Role.ViewOnly
-    })
-    role: Role;
+  @Column({
+    type: "enum",
+    enum: Role,
+    array: false,
+    default: Role.ViewOnly,
+  })
+  role: Role;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column()
-    country: string;
+  @Column()
+  country: string;
 
-    @Column({nullable: true})
-    phoneNo: string;
+  @Column({ nullable: true })
+  phoneNo: string;
 
-    @Column({nullable: true})
-    companyId: number;
+  @Column({ nullable: true })
+  companyId: number;
 
-    // @ManyToOne(() => Company, (company) => company.companyId)
-    // @JoinColumn({name: "companyId"})
-    // company: Company | null;
+  // @ManyToOne(() => Company, (company) => company.companyId)
+  // @JoinColumn({name: "companyId"})
+  // company: Company | null;
 
-    @Column({
-        type: "enum",
-        enum: CompanyRole,
-        array: false,
-        default: CompanyRole.PROGRAMME_DEVELOPER
-    })
-    companyRole: CompanyRole;
+  @Column({
+    type: "enum",
+    enum: CompanyRole,
+    array: false,
+    default: CompanyRole.PROGRAMME_DEVELOPER,
+  })
+  companyRole: CompanyRole;
 
-    @Column({nullable: true, select: false})
-    apiKey: string;
+  @Column("varchar", { array: true, nullable: true })
+  sectoralScope: SectoralScope[];
 
-    @Column({type: "bigint", nullable: true})
-    createdTime: number;
+  @Column({ nullable: true, select: false })
+  apiKey: string;
 
-    companyState: number;
+  @Column({ type: "bigint", nullable: true })
+  createdTime: number;
+
+  companyState: number;
 }

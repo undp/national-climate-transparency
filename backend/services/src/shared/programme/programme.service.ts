@@ -794,7 +794,17 @@ export class ProgrammeService {
     this.logger.verbose("ProgrammeDTO received", programmeDto);
     const programme: Programme = this.toProgramme(programmeDto);
     this.logger.verbose("Programme create", programme);
-
+    if (user.companyRole === CompanyRole.MINISTRY) {
+      const userDetails = await this.userService.findById(user.id);
+      if (
+        !userDetails?.sectoralScope.includes(programme.sectoralScope as any)
+      ) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString("user.userUnAUth", []),
+          HttpStatus.FORBIDDEN
+        );
+      }
+    }
     const pr = await this.findByExternalId(programmeDto.externalId);
     if (pr) {
       throw new HttpException(
@@ -862,13 +872,19 @@ export class ProgrammeService {
 
     const programmeSector = programmeDto.sector;
     const programmeSectoralScopeValue = programmeDto.sectoralScope;
-    const programmeSectoralScopeKey = Object.keys(SectoralScope).find((key) => SectoralScope[key] === programmeSectoralScopeValue);
-    if(programmeSector !== String(Sector.Health) &&
+    const programmeSectoralScopeKey = Object.keys(SectoralScope).find(
+      (key) => SectoralScope[key] === programmeSectoralScopeValue
+    );
+    if (
+      programmeSector !== String(Sector.Health) &&
     programmeSector !== String(Sector.Education) &&
-    programmeSector !== String(Sector.Hospitality)) {
-      if(
-        !sectoralScopesMapped[programmeSector].includes(programmeSectoralScopeKey)
-      ){
+      programmeSector !== String(Sector.Hospitality)
+    ) {
+      if (
+        !sectoralScopesMapped[programmeSector].includes(
+          programmeSectoralScopeKey
+        )
+      ) {
         throw new HttpException(
         this.helperService.formatReqMessagesString(
           "programme.wrongSectorAndScopeMapping",

@@ -93,6 +93,7 @@ export class UserService {
         "companyId",
         "companyRole",
         "name",
+        "sectoralScope",
       ],
       where: {
         email: username,
@@ -491,6 +492,9 @@ export class UserService {
     const u: User = plainToClass(User, userFields);
     if (userDto.company) {
       u.companyRole = userDto.company.companyRole;
+      if (userDto.company.sectoralScope) {
+        u.sectoralScope = userDto.company.sectoralScope;
+      }
     } else if (u.companyId) {
       const company = await this.companyService.findByCompanyId(u.companyId);
       if (!company) {
@@ -503,6 +507,9 @@ export class UserService {
         );
       }
       u.companyRole = company.companyRole;
+      if (company?.sectoralScope) {
+        u.sectoralScope = company.sectoralScope;
+      }
     } else {
       u.companyId = companyId;
       u.companyRole = companyRole;
