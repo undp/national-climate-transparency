@@ -97,11 +97,6 @@ export const PoliciesGuardEx = (
                 ? String(mongoQuery["$ne"])
                 : `'${mongoQuery["$ne"]}'`;
             return `"${key}" ${isNot ? "=" : "!="} ${value}`;
-          } else if (operator == "$in") {
-            const values = mongoQuery["$in"].map((val) =>
-              typeof val === "number" ? String(val) : `'${val}'`
-            );
-            return `"${key}" ${isNot ? "NOT IN" : "IN"} (${values.join(", ")})`;
           }
         } else {
           return this.parseMongoQueryToSQL(

@@ -56,9 +56,6 @@ export class User implements EntitySubject {
   })
   companyRole: CompanyRole;
 
-  @Column("varchar", { array: true, nullable: true })
-  sectoralScope: SectoralScope[];
-
   @Column({ nullable: true, select: false })
   apiKey: string;
 

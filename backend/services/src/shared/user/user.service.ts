@@ -93,7 +93,6 @@ export class UserService {
         "companyId",
         "companyRole",
         "name",
-        "sectoralScope",
       ],
       where: {
         email: username,

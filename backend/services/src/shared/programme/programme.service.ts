@@ -795,9 +795,9 @@ export class ProgrammeService {
     const programme: Programme = this.toProgramme(programmeDto);
     this.logger.verbose("Programme create", programme);
     if (user.companyRole === CompanyRole.MINISTRY) {
-      const userDetails = await this.userService.findById(user.id);
+      const orgDetails = await this.companyService.findByCompanyId(user.companyId);
       if (
-        !userDetails?.sectoralScope.includes(programme.sectoralScope as any)
+        !orgDetails?.sectoralScope.includes(programme.sectoralScope as any)
       ) {
         throw new HttpException(
           this.helperService.formatReqMessagesString("user.userUnAUth", []),
