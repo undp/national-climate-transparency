@@ -1124,9 +1124,6 @@ export const AddProgrammeComponent = () => {
                                 <InputNumber
                                   size="large"
                                   style={{ width: '100%', paddingRight: 12 }}
-                                  formatter={(value) =>
-                                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                                  }
                                 />
                               </Form.Item>
                               <Form.Item
@@ -1137,9 +1134,6 @@ export const AddProgrammeComponent = () => {
                                   disabled
                                   size="large"
                                   style={{ width: '100%', paddingRight: 12 }}
-                                  formatter={(value) =>
-                                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                                  }
                                 />
                               </Form.Item>
                             </div>
@@ -1179,9 +1173,6 @@ export const AddProgrammeComponent = () => {
                                 <InputNumber
                                   size="large"
                                   style={{ width: '100%', paddingRight: 12 }}
-                                  formatter={(value) =>
-                                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                                  }
                                 />
                               </Form.Item>
                             </div>
