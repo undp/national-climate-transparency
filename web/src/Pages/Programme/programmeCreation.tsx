@@ -344,12 +344,20 @@ export const AddProgrammeComponent = () => {
   };
 
   const onFormTwoValuesChane = (changedValues: any, allValues: any) => {
-    console.log('form two ============== > ', changedValues, allValues);
-    if (allValues?.creditEst !== undefined && allValues?.estimatedProgrammeCostUSD !== undefined) {
-      formTwo.setFieldValue(
-        'minViableCarbonPrice',
-        Number(allValues?.estimatedProgrammeCostUSD / allValues?.creditEst).toFixed(2)
-      );
+    if (
+      allValues?.creditEst !== undefined &&
+      allValues?.creditEst !== null &&
+      allValues?.creditEst > 0 &&
+      allValues?.estimatedProgrammeCostUSD !== undefined &&
+      allValues?.estimatedProgrammeCostUSD !== null &&
+      allValues?.estimatedProgrammeCostUSD > 0
+    ) {
+      const minViableCarbonPrice = Number(
+        allValues?.estimatedProgrammeCostUSD / allValues?.creditEst
+      ).toFixed(2);
+      formTwo.setFieldValue('minViableCarbonPrice', minViableCarbonPrice);
+    } else {
+      formTwo.setFieldValue('minViableCarbonPrice', '');
     }
   };
 
