@@ -117,5 +117,13 @@ export const getChartOptions = (labels: string[], colors: string[]) => {
         },
       },
     ],
+    tooltip: {
+      enabled: true,
+      y: {
+        formatter: function (value: any) {
+          return addCommSepRound(value);
+        },
+      },
+    },
   };
 };

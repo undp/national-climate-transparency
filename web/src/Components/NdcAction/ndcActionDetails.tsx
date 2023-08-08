@@ -524,9 +524,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 label={t('ndcAction:userEstimatedCredits')}
                 style={{ display: 'inline-block', width: 'calc(100% - 15px)' }}
               >
-                <InputNumber
-                  style={{ width: 442, paddingRight: 12 }}
-                />
+                <InputNumber style={{ width: 442, paddingRight: 12 }} />
               </Form.Item>
             </Col>
             <Col style={{ marginLeft: '38px' }}>
@@ -535,10 +533,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 label={t('ndcAction:methodologyEstimatedCredits')}
                 style={{ display: 'inline-block', width: '100%' }}
               >
-                <InputNumber
-                  disabled
-                  style={{ width: 442, paddingRight: 12 }}
-                />
+                <InputNumber disabled style={{ width: 442, paddingRight: 12 }} />
               </Form.Item>
             </Col>
           </Row>

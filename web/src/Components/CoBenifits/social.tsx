@@ -301,9 +301,7 @@ const Social = (props: any) => {
                               label={elementItem.label}
                               name={elementItem.name}
                             >
-                              <InputNumber
-                                style={{ width: 303 }}
-                              />
+                              <InputNumber style={{ width: 303 }} />
                             </Form.Item>
                           );
                         }
