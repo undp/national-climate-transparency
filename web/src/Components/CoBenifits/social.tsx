@@ -302,9 +302,6 @@ const Social = (props: any) => {
                               name={elementItem.name}
                             >
                               <InputNumber
-                                formatter={(value) =>
-                                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                                }
                                 style={{ width: 303 }}
                               />
                             </Form.Item>

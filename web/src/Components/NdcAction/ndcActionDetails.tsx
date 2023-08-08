@@ -412,7 +412,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   >
                     <InputNumber
                       style={{ width: 442, paddingRight: 12 }}
-                      formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                       onChange={calculateMethodologyEstimatedCredits}
                     />
                   </Form.Item>
@@ -490,7 +489,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 >
                   <InputNumber
                     style={{ width: 442, paddingRight: 12 }}
-                    formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                     onChange={calculateMethodologyEstimatedCredits}
                   />
                 </Form.Item>
@@ -527,7 +525,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 style={{ display: 'inline-block', width: 'calc(100% - 15px)' }}
               >
                 <InputNumber
-                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                   style={{ width: 442, paddingRight: 12 }}
                 />
               </Form.Item>
@@ -539,7 +536,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 style={{ display: 'inline-block', width: '100%' }}
               >
                 <InputNumber
-                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                   disabled
                   style={{ width: 442, paddingRight: 12 }}
                 />
