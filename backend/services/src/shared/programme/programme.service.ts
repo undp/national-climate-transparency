@@ -303,6 +303,18 @@ export class ProgrammeService {
       );
     }
 
+    if (requester.companyRole === CompanyRole.MINISTRY) {
+      const orgDetails = await this.companyService.findByCompanyId(requester.companyId);
+      if (
+        !orgDetails?.sectoralScope.includes(programme.sectoralScope as any)
+      ) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString("user.userUnAUth", []),
+          HttpStatus.FORBIDDEN
+        );
+      }
+    }
+
     this.logger.verbose(`Investment on programme ${JSON.stringify(programme)}`);
 
     if (
@@ -1028,20 +1040,34 @@ export class ProgrammeService {
       }
     );
     
-    if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole)) {
-      const certifierId = (user.companyRole === CompanyRole.CERTIFIER ? Number(user.companyId): undefined);
+    if (
+      [CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT, CompanyRole.MINISTRY].includes(user.companyRole)
+    ) {
+      const certifierId =
+        user.companyRole === CompanyRole.CERTIFIER
+          ? Number(user.companyId)
+          : undefined;
       if (dr) {
-        this.logger.log(`Approving design document since the user is ${user.companyRole}`)
+        this.logger.log(
+          `Approving design document since the user is ${user.companyRole}`
+        );
         dr.status = DocumentStatus.ACCEPTED;
-        await this.queueDocument(AsyncActionType.DocumentUpload, {
+        await this.queueDocument(
+          AsyncActionType.DocumentUpload,
+          {
           type: this.helperService.enumToString(DocType, dr.type),
           data: dr.url,
           externalId: dr.externalId,
-          actionId: dr.actionId
-        }, ndcAc, dr.type, certifierId, programme);
+            actionId: dr.actionId,
+          },
+          ndcAc,
+          dr.type,
+          certifierId,
+          programme
+        );
 
         if (certifierId) {
-          programme.certifierId = [certifierId]
+          programme.certifierId = [certifierId];
         }
       }
       if (monitoringReport) {
@@ -1276,12 +1302,23 @@ export class ProgrammeService {
         this.helperService.formatReqMessagesString(
           "programme.documentNotExist",
           []
-        ),
-        HttpStatus.BAD_REQUEST
-      );
+          ),
+          HttpStatus.BAD_REQUEST
+          );
+        }
+    const pr = await this.findById(d.programmeId);
+    if (user.companyRole === CompanyRole.MINISTRY) {
+      const orgDetails = await this.companyService.findByCompanyId(user.companyId);
+      if (
+        !orgDetails?.sectoralScope.includes(pr.sectoralScope as any)
+      ) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString("user.userUnAUth", []),
+          HttpStatus.FORBIDDEN
+        );
+      }
     }
 
-    const pr = await this.findById(d.programmeId);
 
     if (d.status == DocumentStatus.ACCEPTED) {
       throw new HttpException(
@@ -1354,6 +1391,18 @@ export class ProgrammeService {
       );
     }
 
+    if (user.companyRole === CompanyRole.MINISTRY) {
+      const orgDetails = await this.companyService.findByCompanyId(user.companyId);
+      if (
+        !orgDetails?.sectoralScope.includes(programme.sectoralScope as any)
+      ) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString("user.userUnAUth", []),
+          HttpStatus.FORBIDDEN
+        );
+      }
+    }
+
     const expected = this.getExpectedDoc(documentDto.type);
     if (expected) {
       let whr = {
@@ -1408,8 +1457,10 @@ export class ProgrammeService {
     dr.remark = user.id.toString();
 
     let ndc: NDCAction;
-    if (user.companyRole === CompanyRole.GOVERNMENT) {
-      this.logger.log(`Approving document since the user is ${user.companyRole}`)
+    if (user.companyRole === CompanyRole.GOVERNMENT || user.companyRole === CompanyRole.MINISTRY) {
+      this.logger.log(
+        `Approving document since the user is ${user.companyRole}`
+      );
       dr.status = DocumentStatus.ACCEPTED;
       if (dr.actionId) {
         ndc = await this.ndcActionRepo.findOne({
@@ -1468,7 +1519,6 @@ export class ProgrammeService {
         }
         
         const program = await this.findById(ndcActionDto.programmeId);
-        
         if (!program) {
           throw new HttpException(
             this.helperService.formatReqMessagesString(
@@ -1477,6 +1527,17 @@ export class ProgrammeService {
               ),
               HttpStatus.BAD_REQUEST
       );
+    }
+    if (user.companyRole === CompanyRole.MINISTRY) {
+      const orgDetails = await this.companyService.findByCompanyId(user.companyId);
+      if (
+        !orgDetails?.sectoralScope.includes(program.sectoralScope as any)
+      ) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString("user.userUnAUth", []),
+          HttpStatus.FORBIDDEN
+        );
+      }
     }
     
     const data = instanceToPlain(ndcActionDto);

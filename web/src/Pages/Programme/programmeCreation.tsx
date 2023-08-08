@@ -199,13 +199,14 @@ export const AddProgrammeComponent = () => {
       if (response && response.data) {
         if (
           response?.data[0]?.companyRole === CompanyRole.MINISTRY &&
-          response?.data[0]?.sectoralScope
+          response?.data[0]?.company &&
+          response?.data[0]?.company?.sectoralScope
         ) {
-          setMinistrySectoralScope(response?.data[0]?.sectoralScope);
+          setMinistrySectoralScope(response?.data[0]?.company?.sectoralScope);
           const sectScopeValues: any = [];
           const sectSScope: any = [];
           const sectors: any = [];
-          response?.data[0]?.sectoralScope?.map((sScope: any) => {
+          response?.data[0]?.company?.sectoralScope?.map((sScope: any) => {
             Object.entries(SectoralScope).map(([key, value]) => {
               if (sScope === String(value)) {
                 sectSScope.push({ key: key, value: value });
