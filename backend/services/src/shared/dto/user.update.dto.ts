@@ -44,21 +44,4 @@ export class UserUpdateDto {
     message: "Invalid role. Supported following roles:" + Object.values(Role),
   })
   role: Role;
-
-  @ValidateIf((c) => c.companyRole === CompanyRole.MINISTRY)
-  @IsArray()
-  @ArrayMinSize(1)
-  @MaxLength(100, { each: true })
-  @IsNotEmpty({ each: true })
-  @IsEnum(SectoralScope, {
-    each: true,
-    message:
-      "Invalid sectoral scope. Supported following sectoral scope:" +
-      Object.values(SectoralScope),
-  })
-  @ApiProperty({
-    type: [String],
-    enum: Object.values(SectoralScope),
-  })
-  sectoralScope: SectoralScope[];
 }
