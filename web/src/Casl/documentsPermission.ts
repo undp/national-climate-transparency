@@ -22,7 +22,8 @@ export const uploadDocUserPermission = (
   let permission = false;
   if (docType === DocType.DESIGN_DOCUMENT) {
     if (
-      userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
+      (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
+        userInfoState?.companyRole === CompanyRole.MINISTRY) &&
       userInfoState?.userRole !== Role.ViewOnly
     ) {
       permission = true;
@@ -37,7 +38,8 @@ export const uploadDocUserPermission = (
   } else if (docType === DocType.METHODOLOGY_DOCUMENT || docType === DocType.MONITORING_REPORT) {
     if (
       (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-        userInfoState?.companyRole === CompanyRole.CERTIFIER) &&
+        userInfoState?.companyRole === CompanyRole.CERTIFIER ||
+        userInfoState?.companyRole === CompanyRole.MINISTRY) &&
       userInfoState?.userRole !== Role.ViewOnly
     ) {
       permission = true;

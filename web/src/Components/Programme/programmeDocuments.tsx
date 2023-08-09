@@ -203,11 +203,13 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
   };
 
   const companyRolePermission =
-    userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
+    (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
+      userInfoState?.companyRole === CompanyRole.MINISTRY) &&
     userInfoState?.userRole !== Role.ViewOnly;
 
   const designDocActionPermission =
-    userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
+    (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
+      userInfoState?.companyRole === CompanyRole.MINISTRY) &&
     userInfoState?.userRole !== Role.ViewOnly;
 
   const designDocPending = designDocStatus === DocumentStatus.PENDING;
