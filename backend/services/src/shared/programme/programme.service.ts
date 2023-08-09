@@ -214,6 +214,9 @@ export class ProgrammeService {
       });
 
     if (savedProgramme.affected > 0) {
+      if(toCompanyIndex < 0 && programme.currentStage === ProgrammeStage.AUTHORISED){
+        this.companyService.increaseProgrammeCount(investor.companyId);
+      }
       return new DataResponseDto(HttpStatus.OK, programme);
     }
 
@@ -689,6 +692,9 @@ export class ProgrammeService {
 
       if (programme.companyId && programme.companyId.length > 0) {
         programme.companyId.forEach(async (companyId) => {
+          //update programme count
+          await this.companyService.increaseProgrammeCount(companyId);
+
           await this.emailHelperService.sendEmailToOrganisationAdmins(
             companyId,
             EmailTemplates.PROGRAMME_AUTHORISATION,
@@ -1170,7 +1176,7 @@ export class ProgrammeService {
           }
           try {
             const crdts = await calculateCredit(req);
-            ndcAction.ndcFinancing.systemEstimatedCredits = Math.round(crdts);
+            ndcAction.ndcFinancing.systemEstimatedCredits = crdts;
           } catch (err) {
             this.logger.log(`Credit calculate failed ${err.message}`);
             ndcAction.ndcFinancing.systemEstimatedCredits = 0;

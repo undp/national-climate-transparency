@@ -537,6 +537,8 @@ const ProgrammeView = () => {
           <span>{v as string}</span>
         </span>
       );
+    } else if (k === 'emissionsReductionExpected' || k === 'emissionsReductionAchieved') {
+      generalInfo[text] = addCommSep(v);
     } else {
       generalInfo[text] = v;
     }

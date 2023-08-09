@@ -25,6 +25,33 @@ export enum TypeOfMitigation {
     WIND = 'Wind'
 }
 
+export const mitigationTypeList: any = [
+  'Agriculture',
+  'BiomassEnergy',
+  'CCS',
+  'Cement',
+  'Coal/Mine',
+  'EEHouseholds',
+  'EEIndustry',
+  'EEOwnGeneration',
+  'EEService',
+  'EESupplySide',
+  'EnergyDistribution',
+  'Forestry',
+  'FossilFuel',
+  'Fugitive',
+  'Geothermal',
+  'HFC_PFCs_SF6',
+  'Hydro',
+  'Landfills',
+  'Marine',
+  'MethaneAvoidance',
+  'N20',
+  'Solar',
+  'Transport',
+  'Wind'
+ ]
+
 export const sectorMitigationTypesListMapped: any = {
   Energy: [
     'BiomassEnergy',
@@ -41,15 +68,15 @@ export const sectorMitigationTypesListMapped: any = {
     'Solar',
     'Wind',
   ],
-  Health: [],
-  Education: [],
+  Health: [...mitigationTypeList],
+  Education: [...mitigationTypeList],
   Transport: ['Transport'],
   Manufacturing: [
     'Cement',
     'CCS',
     'HFC_PFCs_SF6',
   ],
-  Hospitality: [],
+  Hospitality: [...mitigationTypeList],
   Forestry: ['Forestry'],
   Waste: [
     'Landfills',

@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { NdcActionTypes, ndcActionTypeList } from '../../Definitions/ndcActionTypes.enum';
 import {
   MitigationTypes,
+  mitigationTypeList,
   sectorMitigationTypesListMapped,
 } from '../../Definitions/mitigationTypes.enum';
 import {
@@ -34,6 +35,7 @@ import {
   SolarCreationRequest,
   calculateCredit,
 } from '@undp/carbon-credit-calculator';
+import { Sector } from '../../Casl/enums/sector.enum';
 
 export interface NdcActionDetailsProps {
   isBackBtnVisible: boolean;
@@ -61,12 +63,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   useEffect(() => {
     if (programmeDetails) {
       setSector(programmeDetails?.sector);
-      if (sectorMitigationTypesListMapped[programmeDetails?.sector]?.length < 1) {
-        const filteredData = ndcActionTypeList.filter(
-          (item) => item.value !== NdcActionTypes.Mitigation.valueOf()
-        );
-        setNdcActionTypeListFiltered(filteredData);
-      }
     }
   }, [programmeDetails]);
 
@@ -214,29 +210,31 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
       ndcActionDetailObj.typeOfMitigation = ndcActionFormvalues.mitigationType;
       if (ndcActionFormvalues.mitigationType === MitigationTypes.AGRICULTURE) {
         ndcActionDetailObj.agricultureProperties = {
-          landArea: Number.isInteger(parseInt(ndcActionFormvalues.eligibleLandArea))
-            ? parseInt(ndcActionFormvalues.eligibleLandArea)
-            : 0,
+          landArea: ndcActionFormvalues.eligibleLandArea ? ndcActionFormvalues.eligibleLandArea : 0,
           landAreaUnit: ndcActionFormvalues.landAreaUnit,
         };
       } else if (ndcActionFormvalues.mitigationType === MitigationTypes.SOLAR) {
         ndcActionDetailObj.solarProperties = {
-          energyGeneration: Number.isInteger(parseInt(ndcActionFormvalues.energyGeneration))
-            ? parseInt(ndcActionFormvalues.energyGeneration)
+          energyGeneration: ndcActionFormvalues.energyGeneration
+            ? ndcActionFormvalues.energyGeneration
             : 0,
           energyGenerationUnit: ndcActionFormvalues.energyGenerationUnit,
           consumerGroup: ndcActionFormvalues.consumerGroup,
         };
       }
-
-      if (parseFloat(ndcActionFormvalues.methodologyEstimatedCredits) <= 0) {
-        message.open({
-          type: 'error',
-          content: t('methodologyEstimatedCreditsInvalid'),
-          duration: 4,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        return;
+      if (
+        ndcActionFormvalues.mitigationType === MitigationTypes.SOLAR ||
+        ndcActionFormvalues.mitigationType === MitigationTypes.AGRICULTURE
+      ) {
+        if (parseFloat(ndcActionFormvalues.methodologyEstimatedCredits) <= 0) {
+          message.open({
+            type: 'error',
+            content: t('methodologyEstimatedCreditsInvalid'),
+            duration: 4,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+          return;
+        }
       }
 
       if (ndcActionFormvalues.userEstimatedCredits > programmeDetails.creditEst) {
@@ -277,8 +275,8 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     }
 
     ndcActionDetailObj.ndcFinancing = {
-      userEstimatedCredits: Number.isInteger(parseInt(ndcActionFormvalues.userEstimatedCredits))
-        ? parseInt(ndcActionFormvalues.userEstimatedCredits)
+      userEstimatedCredits: ndcActionFormvalues.userEstimatedCredits
+        ? ndcActionFormvalues.userEstimatedCredits
         : 0,
       systemEstimatedCredits: ndcActionFormvalues.methodologyEstimatedCredits,
     };
@@ -374,7 +372,13 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                   width: '249px',
                   borderRadius: '4px',
                 }}
-                options={sectorMitigationTypesListMapped[sector]}
+                options={
+                  programmeDetails?.sector === Sector.Health ||
+                  programmeDetails?.sector === Sector.Education ||
+                  programmeDetails?.sector === Sector.Hospitality
+                    ? mitigationTypeList
+                    : sectorMitigationTypesListMapped[sector]
+                }
               ></Select>
             </Form.Item>
           </Row>
