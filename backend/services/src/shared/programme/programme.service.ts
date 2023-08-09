@@ -304,10 +304,8 @@ export class ProgrammeService {
     }
 
     if (requester.companyRole === CompanyRole.MINISTRY) {
-      const orgDetails = await this.companyService.findByCompanyId(requester.companyId);
-      if (
-        !orgDetails?.sectoralScope.includes(programme.sectoralScope as any)
-      ) {
+      const permission = await this.findPermissionForMinistryUser(requester, programme.sectoralScope)
+      if(!permission) {
         throw new HttpException(
           this.helperService.formatReqMessagesString("user.userUnAUth", []),
           HttpStatus.FORBIDDEN
@@ -540,6 +538,18 @@ export class ProgrammeService {
     return await this.programmeRepo.findOneBy({
       programmeId: id,
     });
+  }
+
+  async findPermissionForMinistryUser(
+    user: User,
+    programmeSectoralScope: any
+  ): Promise<boolean> {
+    const orgDetails = await this.companyService.findByCompanyId(
+      user.companyId
+    );
+    if (!orgDetails?.sectoralScope.includes(programmeSectoralScope as any)) {
+      return false;
+    } else return true;
   }
 
   async issueCredit(issue: ProgrammeIssue) {
@@ -806,11 +816,9 @@ export class ProgrammeService {
     this.logger.verbose("ProgrammeDTO received", programmeDto);
     const programme: Programme = this.toProgramme(programmeDto);
     this.logger.verbose("Programme create", programme);
-    if (user.companyRole === CompanyRole.MINISTRY) {
-      const orgDetails = await this.companyService.findByCompanyId(user.companyId);
-      if (
-        !orgDetails?.sectoralScope.includes(programme.sectoralScope as any)
-      ) {
+    if(user.companyRole === CompanyRole.MINISTRY) {
+      const permission = await this.findPermissionForMinistryUser(user, programme.sectoralScope);
+      if(!permission) {
         throw new HttpException(
           this.helperService.formatReqMessagesString("user.userUnAUth", []),
           HttpStatus.FORBIDDEN
@@ -1308,10 +1316,14 @@ export class ProgrammeService {
         }
     const pr = await this.findById(d.programmeId);
     if (user.companyRole === CompanyRole.MINISTRY) {
-      const orgDetails = await this.companyService.findByCompanyId(user.companyId);
-      if (
-        !orgDetails?.sectoralScope.includes(pr.sectoralScope as any)
-      ) {
+      if(d.type === DocType.VERIFICATION_REPORT) {
+        throw new HttpException(
+          this.helperService.formatReqMessagesString("user.userUnAUth", []),
+          HttpStatus.FORBIDDEN
+        );
+      }
+      const permission = await this.findPermissionForMinistryUser(user, pr.sectoralScope);
+      if(!permission) {
         throw new HttpException(
           this.helperService.formatReqMessagesString("user.userUnAUth", []),
           HttpStatus.FORBIDDEN
@@ -1391,11 +1403,9 @@ export class ProgrammeService {
       );
     }
 
-    if (user.companyRole === CompanyRole.MINISTRY) {
-      const orgDetails = await this.companyService.findByCompanyId(user.companyId);
-      if (
-        !orgDetails?.sectoralScope.includes(programme.sectoralScope as any)
-      ) {
+    if(user.companyRole === CompanyRole.MINISTRY) {
+      const permission = await this.findPermissionForMinistryUser(user, programme.sectoralScope);
+      if(!permission) {
         throw new HttpException(
           this.helperService.formatReqMessagesString("user.userUnAUth", []),
           HttpStatus.FORBIDDEN
@@ -1529,10 +1539,8 @@ export class ProgrammeService {
       );
     }
     if (user.companyRole === CompanyRole.MINISTRY) {
-      const orgDetails = await this.companyService.findByCompanyId(user.companyId);
-      if (
-        !orgDetails?.sectoralScope.includes(program.sectoralScope as any)
-      ) {
+      const permission = await this.findPermissionForMinistryUser(user, program.sectoralScope);
+      if(!permission) {
         throw new HttpException(
           this.helperService.formatReqMessagesString("user.userUnAUth", []),
           HttpStatus.FORBIDDEN

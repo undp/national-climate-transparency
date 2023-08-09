@@ -54,8 +54,7 @@ export const uploadDocUserPermission = (
   } else if (docType === DocType.VERIFICATION_REPORT) {
     if (
       (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-        userInfoState?.companyRole === CompanyRole.CERTIFIER ||
-        userInfoState?.companyRole === CompanyRole.MINISTRY) &&
+        userInfoState?.companyRole === CompanyRole.CERTIFIER) &&
       userInfoState?.userRole !== Role.ViewOnly
     ) {
       permission = true;
