@@ -14,6 +14,7 @@
   "filterByCompany": "Filter by Organisation Type",
   "gov": "Government",
   "certifier": "Certifier",
+  "min": "Ministry",
   "all": "All",
   "searchMail": "Search by email",
   "searchName": "Search by name"
