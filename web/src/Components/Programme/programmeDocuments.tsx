@@ -42,10 +42,12 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
   const [loading, setLoading] = useState<boolean>(false);
   const [designDocUrl, setDesignDocUrl] = useState<any>('');
   const [noObjectionDocUrl, setNoObjectionDocUrl] = useState<any>('');
+  const [authorisationDocUrl, setAuthorisationDocUrl] = useState<any>('');
   const [methodologyDocUrl, setMethodologyDocUrl] = useState<any>('');
   const [designDocDate, setDesignDocDate] = useState<any>('');
   const [noObjectionDate, setNoObjectionDate] = useState<any>('');
   const [methodologyDate, setMethodologyDate] = useState<any>('');
+  const [authorisationDocDate, setAuthorisationDocDate] = useState<any>('');
   const [designDocStatus, setDesignDocStatus] = useState<any>('');
   const [methodDocStatus, setMethodDocStatus] = useState<any>('');
   const [designDocId, setDesignDocId] = useState<any>('');
@@ -88,6 +90,10 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
         if (item?.url?.includes('OBJECTION')) {
           setNoObjectionDocUrl(item?.url);
           setNoObjectionDate(item?.txTime);
+        }
+        if (item?.url?.includes('AUTHORISATION')) {
+          setAuthorisationDocUrl(item?.url);
+          setAuthorisationDocDate(item?.txTime);
         }
       });
     }
@@ -594,6 +600,23 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
               )}
             </Col>
           </Row>
+          {authorisationDocUrl !== '' && (
+            <Row className="field" key="Authorisation Document" gutter={[16, 16]}>
+              <Col span={14} className="field-key">
+                <div className="label-uploaded">{t('programme:authLetterLabel')}</div>
+                <div className="time">
+                  {moment(parseInt(authorisationDocDate)).format('DD MMMM YYYY @ HH:mm')}
+                </div>
+              </Col>
+              <Col span={10} className="field-value">
+                <div className="link">
+                  <a href={authorisationDocUrl} target="_blank" rel="noopener noreferrer" download>
+                    <LinkOutlined className="common-progress-icon" style={{ color: '#3F3A47' }} />
+                  </a>
+                </div>
+              </Col>
+            </Row>
+          )}
         </div>
       </div>
       <RejectDocumentationConfirmationModel

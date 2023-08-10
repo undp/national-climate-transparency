@@ -452,6 +452,16 @@ export class HelperService {
       return template;
 }
 
+  public generateRandomNumber(length = 6) {
+    var text = "";
+    var possible = "123456789";
+    for (var i = 0; i < length; i++) {
+      var sup = Math.floor(Math.random() * possible.length);
+      text += i > 0 && sup == i ? "0" : possible.charAt(sup);
+    }
+    return Number(text);
+  }
+
   // public async uploadCompanyLogoS3(companyId: number, companyLogo: string) {
   // var AWS = require("aws-sdk");
   // const s3 = new AWS.S3();
