@@ -129,7 +129,11 @@ export const handler: Handler = async (event) => {
           ? CompanyRole.CERTIFIER
           : fields[4] == "API"
           ? CompanyRole.API
+          : fields[4] === "Ministry" 
+          ? CompanyRole.MINISTRY
           : CompanyRole.PROGRAMME_DEVELOPER;
+
+      const secScope = fields[4] === "Ministry" && fields[6] ? fields[6].split("-") : undefined;
 
       try {
         const org = await companyService.create({
@@ -145,8 +149,8 @@ export const handler: Handler = async (event) => {
               companyRole: cr,
               createdTime: undefined,
               regions: ['Lagos'],
-              nameOfMinister: undefined,
-              sectoralScope: undefined
+              nameOfMinister: fields[5] || undefined,
+              sectoralScope: secScope
             });
         console.log('Company created', org)
       } catch (e) {
