@@ -133,9 +133,11 @@ export const handler: Handler = async (event) => {
           ? CompanyRole.MINISTRY
           : CompanyRole.PROGRAMME_DEVELOPER;
 
+      const secScope = fields[4] === "Ministry" && fields[6] ? fields[6].split("-") : undefined;
+
       try {
         const org = await companyService.create({
-              taxId: cr !== CompanyRole.MINISTRY && fields[3],
+              taxId: fields[3],
               companyId: undefined,
               name: fields[0],
               email: fields[1],
@@ -147,8 +149,8 @@ export const handler: Handler = async (event) => {
               companyRole: cr,
               createdTime: undefined,
               regions: ['Lagos'],
-              nameOfMinister: fields[4] || undefined,
-              sectoralScope: fields[5] || undefined
+              nameOfMinister: fields[5] || undefined,
+              sectoralScope: secScope
             });
         console.log('Company created', org)
       } catch (e) {
