@@ -26,7 +26,7 @@ import { InfoCircle } from 'react-bootstrap-icons';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import moment from 'moment';
 import { RcFile } from 'antd/lib/upload';
-import { CompanyRole } from '@undp/carbon-library';
+import { CompanyRole, addCommSepRound } from '@undp/carbon-library';
 import NdcActionDetails from '../../Components/NdcAction/ndcActionDetails';
 import CoBenifitsComponent from '../../Components/CoBenifits/coBenifits';
 
@@ -425,7 +425,7 @@ export const AddProgrammeComponent = () => {
       const minViableCarbonPrice = Number(
         allValues?.estimatedProgrammeCostUSD / allValues?.creditEst
       ).toFixed(2);
-      formTwo.setFieldValue('minViableCarbonPrice', minViableCarbonPrice);
+      formTwo.setFieldValue('minViableCarbonPrice', addCommSepRound(minViableCarbonPrice));
     } else {
       formTwo.setFieldValue('minViableCarbonPrice', '');
     }
