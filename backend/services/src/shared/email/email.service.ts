@@ -37,6 +37,7 @@ export class EmailService {
             subject: emailDataObj?.subject,
             text: emailDataObj?.emailBody,
             html: emailDataObj?.emailBody,
+            attachments: emailDataObj?.attachments
           },
           function (error, info) {
             console.log('SendEmail Response', error, info);

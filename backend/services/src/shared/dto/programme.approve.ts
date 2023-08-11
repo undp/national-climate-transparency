@@ -23,4 +23,9 @@ export class ProgrammeAuth {
     @IsString()
     @IsOptional()
     comment: string;
+
+    @ApiPropertyOptional()
+    @IsString()
+    @IsOptional()
+    authOrganisationName: string;
 }

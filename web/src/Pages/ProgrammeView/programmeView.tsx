@@ -30,6 +30,7 @@ import {
   TypeOfMitigation,
   UnitField,
   addCommSep,
+  addCommSepRound,
   addSpaces,
   getStageEnumVal,
   getStageTagType,
@@ -706,6 +707,12 @@ const ProgrammeView = () => {
                         colors: ['#b3b3ff', '#e0e0eb'],
                         tooltip: {
                           fillSeriesColor: false,
+                          enabled: true,
+                          y: {
+                            formatter: function (value: any) {
+                              return addCommSepRound(value);
+                            },
+                          },
                         },
                         states: {
                           normal: {

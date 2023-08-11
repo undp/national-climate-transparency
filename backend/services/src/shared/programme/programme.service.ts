@@ -71,6 +71,7 @@ import { Company } from "../entities/company.entity";
 import { NdcFinancing } from "../dto/ndc.financing";
 import { PRECISION } from "../constants";
 import { ObjectionLetterGen } from "../util/objection.letter.gen";
+import { AuthorizationLetterGen } from "../util/authorisation.letter.gen";
 import { Sector } from "../enum/sector.enum";
 import { sectoralScopesMapped } from "../casl/sectoralSecor.mapped";
 import { SectoralScope } from "../enum/sectoral.scope.enum";
@@ -95,7 +96,7 @@ export class ProgrammeService {
     private userService: UserService,
 
     private letterGen: ObjectionLetterGen,
-    
+    private authLetterGen: AuthorizationLetterGen,
     private locationService: LocationInterface,
     private fileHandler: FileHandlerInterface,
     private helperService: HelperService,
@@ -683,6 +684,65 @@ export class ProgrammeService {
     );
     
     if (updateResult && updateResult.affected > 0) {
+      const orgNames = await this.companyService.queryNames({
+        size: 10,
+        page: 1,
+        filterAnd: [{
+          key: 'companyId',
+          operation: 'IN',
+          value: programme.companyId
+        }],
+        filterOr: undefined,
+        sort: undefined
+      }, undefined) ;
+
+      const documents = await this.documentRepo.find({
+        where: [
+          { programmeId: programme.programmeId, status: DocumentStatus.ACCEPTED,type: DocType.DESIGN_DOCUMENT },
+          { programmeId: programme.programmeId, status: DocumentStatus.ACCEPTED,type: DocType.METHODOLOGY_DOCUMENT},
+        ]
+      });
+
+      let designDoc, designDocUrl, methodologyDoc, methodologyDocUrl;
+
+      if(documents && documents.length > 0){
+        designDoc = documents.find(d=>d.type === DocType.DESIGN_DOCUMENT);
+        if(designDoc){
+          designDocUrl = designDoc.url;
+        }
+        methodologyDoc = documents.find(d=>d.type === DocType.METHODOLOGY_DOCUMENT);
+        if(methodologyDoc){
+          methodologyDocUrl = methodologyDoc.url;
+        }
+      }
+
+      const authLetterUrl = await this.authLetterGen.generateLetter(
+        programme.programmeId,
+        programme.title,
+        auth.authOrganisationName,
+        orgNames.data.map(e => e['name']),
+        designDocUrl,
+        methodologyDocUrl
+      );
+
+      const dr = new ProgrammeDocument();
+      dr.programmeId = programme.programmeId;
+      dr.externalId = programme.externalId;
+      dr.status = DocumentStatus.ACCEPTED;
+      dr.type = DocType.AUTHORISATION_LETTER;
+      dr.txTime = new Date().getTime();
+      dr.url = authLetterUrl;
+      await this.documentRepo.save(dr);
+
+      await this.asyncOperationsInterface.addAction({
+        actionType: AsyncActionType.DocumentUpload,
+        actionProps: {
+          type: this.helperService.enumToString(DocType, dr.type),
+          data: dr.url,
+          externalId: dr.externalId
+        },
+      });
+
       const hostAddress = this.configService.get("host");
       let authDate = new Date(t);
       let date = authDate.getDate().toString().padStart(2, "0");
@@ -705,6 +765,10 @@ export class ProgrammeService {
               programmePageLink:
                 hostAddress +
                 `/programmeManagement/view?id=${programme.programmeId}`,
+            },undefined,undefined,undefined,
+            {
+              filename: 'AUTHORISATION_LETTER.pdf',
+              path: authLetterUrl
             }
           );
         });
