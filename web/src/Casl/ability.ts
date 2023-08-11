@@ -54,9 +54,10 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Update, Company, ['companyRole']);
       can(Action.Delete, Company);
       can(Action.Create, Company);
-    } else if (user.role === Role.Admin && user.companyRole === CompanyRole.MINISTRY) {
-      can(Action.Create, Company);
     } else if (user.role === Role.Admin && user.companyRole !== CompanyRole.GOVERNMENT) {
+      if (user.companyRole === CompanyRole.MINISTRY) {
+        can(Action.Create, Company);
+      }
       can(Action.Manage, User, { role: { $ne: Role.Root } });
       cannot([Action.Update, Action.Delete, Action.Read], User, {
         companyId: { $ne: user.companyId },
