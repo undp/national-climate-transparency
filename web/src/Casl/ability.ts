@@ -7,7 +7,7 @@ import {
   MongoAbility,
 } from '@casl/ability';
 import { BaseEntity } from './entities/BaseEntity';
-import { Company, User } from '@undp/carbon-library';
+import { Company, ProgrammeEntity, User } from '@undp/carbon-library';
 import { Programme } from './entities/Programme';
 import { ProgrammeCertify } from './entities/ProgrammeCertify';
 import { ProgrammeTransfer } from './entities/ProgrammeTransfer';
@@ -98,9 +98,22 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Manage, ProgrammeTransfer);
     }
 
+    if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.MINISTRY) {
+      can(Action.Manage, ProgrammeTransfer);
+      can(Action.Manage, Programme);
+      can(Action.Manage, ProgrammeEntity);
+    }
+
     if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.GOVERNMENT) {
       can(Action.Manage, ProgrammeTransfer);
       can(Action.Manage, Programme);
+      can(Action.Manage, ProgrammeEntity);
+    }
+
+    if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.PROGRAMME_DEVELOPER) {
+      can(Action.Manage, ProgrammeTransfer);
+      can(Action.Manage, Programme);
+      can(Action.Manage, ProgrammeEntity);
     }
 
     if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.CERTIFIER) {
