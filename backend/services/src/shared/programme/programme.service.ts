@@ -1473,8 +1473,10 @@ export class ProgrammeService {
       );
     }
 
+    let permissionForMinistryLevel = false;
     if(user.companyRole === CompanyRole.MINISTRY) {
       const permission = await this.findPermissionForMinistryUser(user, programme.sectoralScope);
+      permissionForMinistryLevel = permission
       if(!permission) {
         throw new HttpException(
           this.helperService.formatReqMessagesString("user.userUnAUth", []),
@@ -1537,7 +1539,10 @@ export class ProgrammeService {
     dr.remark = user.id.toString();
 
     let ndc: NDCAction;
-    if (user.companyRole === CompanyRole.GOVERNMENT || user.companyRole === CompanyRole.MINISTRY) {
+    if (user.companyRole === CompanyRole.GOVERNMENT || 
+       (documentDto.type !== DocType.VERIFICATION_REPORT && 
+        user.companyRole === CompanyRole.MINISTRY && 
+        permissionForMinistryLevel)) {
       this.logger.log(
         `Approving document since the user is ${user.companyRole}`
       );

@@ -17,13 +17,14 @@ export const linkDocVisible = (docStatus: DocumentStatus) => {
 export const uploadDocUserPermission = (
   userInfoState: any,
   docType: DocType,
-  programmeOwnerId: any[]
+  programmeOwnerId: any[],
+  ministryLevelPermission?: boolean
 ) => {
   let permission = false;
   if (docType === DocType.DESIGN_DOCUMENT) {
     if (
       (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-        userInfoState?.companyRole === CompanyRole.MINISTRY) &&
+        (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
       userInfoState?.userRole !== Role.ViewOnly
     ) {
       permission = true;
@@ -39,7 +40,7 @@ export const uploadDocUserPermission = (
     if (
       (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
         userInfoState?.companyRole === CompanyRole.CERTIFIER ||
-        userInfoState?.companyRole === CompanyRole.MINISTRY) &&
+        (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
       userInfoState?.userRole !== Role.ViewOnly
     ) {
       permission = true;
@@ -54,7 +55,8 @@ export const uploadDocUserPermission = (
   } else if (docType === DocType.VERIFICATION_REPORT) {
     if (
       (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-        userInfoState?.companyRole === CompanyRole.CERTIFIER) &&
+        userInfoState?.companyRole === CompanyRole.CERTIFIER ||
+        (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
       userInfoState?.userRole !== Role.ViewOnly
     ) {
       permission = true;

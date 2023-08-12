@@ -27,10 +27,18 @@ export interface NdcActionBodyProps {
   canUploadMonitorReport?: boolean;
   programmeOwnerId?: any;
   getProgrammeDocs?: any;
+  ministryLevelPermission?: boolean;
 }
 
 const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
-  const { data, programmeId, canUploadMonitorReport, programmeOwnerId, getProgrammeDocs } = props;
+  const {
+    data,
+    programmeId,
+    canUploadMonitorReport,
+    programmeOwnerId,
+    getProgrammeDocs,
+    ministryLevelPermission,
+  } = props;
   const { t } = useTranslation(['programme']);
   const { userInfoState } = useUserContext();
   const fileInputMonitoringRef: any = useRef(null);
@@ -182,8 +190,14 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
   }, [data]);
 
   const companyRolePermission =
+    (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
+      (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
+    userInfoState?.userRole !== Role.ViewOnly;
+
+  const verficationCompanyRolePermission =
     userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
     userInfoState?.userRole !== Role.ViewOnly;
+
   const monitoringReportPending = monitoringReportData?.status === DocumentStatus.PENDING;
   const monitoringReportAccepted = monitoringReportData?.status === DocumentStatus.ACCEPTED;
   const monitoringReportRejected = monitoringReportData?.status === DocumentStatus.REJECTED;
@@ -279,7 +293,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                         : uploadDocUserPermission(
                             userInfoState,
                             DocType.MONITORING_REPORT,
-                            programmeOwnerId
+                            programmeOwnerId,
+                            ministryLevelPermission
                           )
                         ? !canUploadMonitorReport && t('programme:programmeNotAuth')
                         : t('programme:orgNotAuth')
@@ -293,7 +308,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.MONITORING_REPORT,
-                          programmeOwnerId
+                          programmeOwnerId,
+                          ministryLevelPermission
                         )
                           ? { color: '#3F3A47', cursor: 'pointer' }
                           : { color: '#cacaca', cursor: 'default' }
@@ -304,7 +320,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                           uploadDocUserPermission(
                             userInfoState,
                             DocType.MONITORING_REPORT,
-                            programmeOwnerId
+                            programmeOwnerId,
+                            ministryLevelPermission
                           )
                         ) {
                           handleFileUploadMonitor();
@@ -357,7 +374,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                         : uploadDocUserPermission(
                             userInfoState,
                             DocType.MONITORING_REPORT,
-                            programmeOwnerId
+                            programmeOwnerId,
+                            ministryLevelPermission
                           )
                         ? !canUploadMonitorReport && t('programme:programmeNotAuth')
                         : t('programme:orgNotAuth')
@@ -371,7 +389,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.MONITORING_REPORT,
-                          programmeOwnerId
+                          programmeOwnerId,
+                          ministryLevelPermission
                         )
                           ? { color: '#3F3A47', cursor: 'pointer' }
                           : { color: '#cacaca', cursor: 'default' }
@@ -382,7 +401,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                           uploadDocUserPermission(
                             userInfoState,
                             DocType.MONITORING_REPORT,
-                            programmeOwnerId
+                            programmeOwnerId,
+                            ministryLevelPermission
                           )
                         ) {
                           handleFileUploadMonitor();
@@ -423,7 +443,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
             <div className="icon">
               {verificationReportData?.url ? (
                 verifcationReportPending ? (
-                  companyRolePermission && (
+                  verficationCompanyRolePermission && (
                     <>
                       <LikeOutlined
                         onClick={() =>
@@ -491,7 +511,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                         : uploadDocUserPermission(
                             userInfoState,
                             DocType.VERIFICATION_REPORT,
-                            programmeOwnerId
+                            programmeOwnerId,
+                            ministryLevelPermission
                           )
                         ? !monitoringReportAccepted && t('programme:monitoringRepNotApproved')
                         : t('programme:notAuthToUploadDoc')
@@ -505,7 +526,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.VERIFICATION_REPORT,
-                          programmeOwnerId
+                          programmeOwnerId,
+                          ministryLevelPermission
                         )
                           ? { color: '#3F3A47', cursor: 'pointer' }
                           : { color: '#cacaca', cursor: 'default' }
@@ -516,7 +538,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                           uploadDocUserPermission(
                             userInfoState,
                             DocType.VERIFICATION_REPORT,
-                            programmeOwnerId
+                            programmeOwnerId,
+                            ministryLevelPermission
                           )
                         ) {
                           handleFileUploadVerification();
@@ -571,7 +594,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                         : uploadDocUserPermission(
                             userInfoState,
                             DocType.VERIFICATION_REPORT,
-                            programmeOwnerId
+                            programmeOwnerId,
+                            ministryLevelPermission
                           )
                         ? !monitoringReportAccepted && t('programme:monitoringRepNotApproved')
                         : t('programme:notAuthToUploadDoc')
@@ -585,7 +609,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.VERIFICATION_REPORT,
-                          programmeOwnerId
+                          programmeOwnerId,
+                          ministryLevelPermission
                         )
                           ? { color: '#3F3A47', cursor: 'pointer' }
                           : { color: '#cacaca', cursor: 'default' }
@@ -596,7 +621,8 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
                           uploadDocUserPermission(
                             userInfoState,
                             DocType.VERIFICATION_REPORT,
-                            programmeOwnerId
+                            programmeOwnerId,
+                            ministryLevelPermission
                           )
                         ) {
                           handleFileUploadVerification();
