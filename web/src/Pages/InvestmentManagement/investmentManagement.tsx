@@ -646,7 +646,7 @@ const InvestmentManagement = () => {
       </div>
       <div className="content-card">
         <Row>
-          <Col lg={{ span: 16 }} md={{ span: 16 }}>
+          <Col lg={{ span: 15 }} md={{ span: 14 }}>
             <div className="action-bar">
               <Checkbox
                 className="all-check"
@@ -665,7 +665,7 @@ const InvestmentManagement = () => {
               />
             </div>
           </Col>
-          <Col lg={{ span: 8 }} md={{ span: 8 }}>
+          <Col lg={{ span: 9 }} md={{ span: 10 }}>
             <div className="filter-section">
               {userInfoState?.companyRole === CompanyRole.MINISTRY && (
                 <div className="search-filter">
