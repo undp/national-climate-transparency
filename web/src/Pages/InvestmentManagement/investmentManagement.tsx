@@ -100,6 +100,8 @@ const InvestmentManagement = () => {
   const [companyIdsVal, setCompanyIdsVal] = useState<number[]>();
   const [creditAmount, setCreditAmount] = useState<number>(0);
   const { isTransferFrozen, setTransferFrozen } = useSettingsContext();
+  const [ministrySectoralScope, setMinistrySectoralScope] = useState<any[]>([]);
+  const [ministryLevelFilter, setMinistryLevelFilter] = useState<boolean>(false);
 
   const onStatusQuery = async (checkedValues: CheckboxValueType[]) => {
     console.log(checkedValues);
@@ -175,6 +177,14 @@ const InvestmentManagement = () => {
       };
     }
 
+    let filterBy: any;
+    if (ministryLevelFilter) {
+      filterBy = {
+        key: 'ministryLevel',
+        value: ministrySectoralScope,
+      };
+    }
+
     try {
       const response: any = await post('national/programme/investmentQuery', {
         page: currentPage,
@@ -182,6 +192,7 @@ const InvestmentManagement = () => {
         filterAnd: filter,
         filterOr: dataFilter,
         sort: sort,
+        filterBy: filterBy,
       });
 
       console.log(response);
@@ -200,6 +211,42 @@ const InvestmentManagement = () => {
     }
   };
 
+  const getUserDetails = async () => {
+    setLoading(true);
+    try {
+      const response: any = await post('national/user/query', {
+        page: 1,
+        size: 10,
+        filterAnd: [
+          {
+            key: 'id',
+            operation: '=',
+            value: userInfoState?.id,
+          },
+        ],
+      });
+      if (response && response.data) {
+        if (
+          response?.data[0]?.companyRole === CompanyRole.MINISTRY &&
+          response?.data[0]?.company &&
+          response?.data[0]?.company?.sectoralScope
+        ) {
+          setMinistrySectoralScope(response?.data[0]?.company?.sectoralScope);
+        }
+      }
+      setLoading(false);
+    } catch (error: any) {
+      console.log('Error in getting users', error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (userInfoState?.companyRole === CompanyRole.MINISTRY) {
+      getUserDetails();
+    }
+  }, []);
+
   useEffect(() => {
     if (currentPage !== 1) {
       setCurrentPage(1);
@@ -210,7 +257,7 @@ const InvestmentManagement = () => {
 
   useEffect(() => {
     getInvestmentData();
-  }, [currentPage, pageSize, sortField, sortOrder, search]);
+  }, [currentPage, pageSize, sortField, sortOrder, search, ministryLevelFilter]);
 
   const handleRequestOk = async (
     reqId: number,
@@ -620,6 +667,24 @@ const InvestmentManagement = () => {
           </Col>
           <Col lg={{ span: 8 }} md={{ span: 8 }}>
             <div className="filter-section">
+              {userInfoState?.companyRole === CompanyRole.MINISTRY && (
+                <div className="search-filter">
+                  <Checkbox
+                    className="label"
+                    onChange={(v) => {
+                      if (userInfoState.companyRole === CompanyRole.MINISTRY) {
+                        if (v.target.checked) {
+                          setMinistryLevelFilter(true);
+                        } else {
+                          setMinistryLevelFilter(false);
+                        }
+                      }
+                    }}
+                  >
+                    {t('programme:ministryLevel')}
+                  </Checkbox>
+                </div>
+              )}
               <div className="search-bar">
                 <Search
                   onPressEnter={onSearch}

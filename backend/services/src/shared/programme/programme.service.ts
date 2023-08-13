@@ -693,7 +693,8 @@ export class ProgrammeService {
           value: programme.companyId
         }],
         filterOr: undefined,
-        sort: undefined
+        sort: undefined,
+        filterBy: undefined
       }, undefined) ;
 
       const documents = await this.documentRepo.find({
@@ -851,7 +852,8 @@ export class ProgrammeService {
           value: programme.companyId
         }],
         filterOr: undefined,
-        sort: undefined
+        sort: undefined,
+        filterBy: undefined
       }, undefined) ;
 
       console.log('Company names', orgNames)
@@ -1750,7 +1752,7 @@ export class ProgrammeService {
     abilityCondition: string
   ): Promise<DataListResponseDto> {
     const skip = query.size * query.page - query.size;
-    let resp = await this.ndcActionViewRepo
+    let queryBuilder = await this.ndcActionViewRepo
       .createQueryBuilder("ndcaction")
       .where(
         this.helperService.generateWhereSQL(
@@ -1761,8 +1763,20 @@ export class ProgrammeService {
           ),
           "ndcaction"
         )
-      )
-      .orderBy(
+      );
+
+    if (query.filterBy !== null && query.filterBy !== undefined && query.filterBy.key === 'ministryLevel') {
+        queryBuilder = queryBuilder.leftJoinAndMapOne(
+        "ndcaction.programmeDetails",
+        Programme,
+        "programme",
+        "programme.programmeId = ndcaction.programmeId"
+        )
+        .andWhere("programme.sectoralScope IN (:...allowedScopes)", {
+          allowedScopes: query.filterBy.value
+        });
+    }
+    const resp = await  queryBuilder.orderBy(
         query?.sort?.key &&
           `"ndcaction".${this.helperService.generateSortCol(query?.sort?.key)}`,
         query?.sort?.order,
@@ -1987,7 +2001,7 @@ export class ProgrammeService {
   };
 
   async queryInvestment(query: QueryDto, abilityCondition: any, user: User) {
-    const resp = await this.investmentViewRepo
+    let queryBuilder = await this.investmentViewRepo
       .createQueryBuilder("investment")
       .where(
         this.helperService.generateWhereSQL(
@@ -1998,7 +2012,20 @@ export class ProgrammeService {
           )
         )
       )
-      .orderBy(
+
+      if (query.filterBy !== null && query.filterBy !== undefined && query.filterBy.key === 'ministryLevel') {
+        queryBuilder = queryBuilder.leftJoinAndMapOne(
+        "investment.programmeDetails",
+        Programme,
+        "programme",
+        "programme.programmeId = investment.programmeId"
+        )
+        .andWhere("programme.sectoralScope IN (:...allowedScopes)", {
+          allowedScopes: query.filterBy.value
+        });
+      }
+
+      const resp = await  queryBuilder.orderBy(
         query?.sort?.key &&
           this.helperService.generateSortCol(query?.sort?.key),
         query?.sort?.order,
