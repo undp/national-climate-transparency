@@ -12,7 +12,7 @@ services:
     ports:
       - "5433:5433"
     environment:
-      POSTGRES_PASSWORD: "<ANY PASSOWORD>"
+      POSTGRES_PASSWORD: "1234"
       POSTGRES_USER: root
       PGPORT: 5433
       PSQL_USERNAME: root
@@ -32,9 +32,9 @@ services:
     environment:
       DB_HOST: dbmrv
       DB_USER: root
-      DB_PASSWORD: "<ANY PASSOWORD>"
+      DB_PASSWORD: "1234"
       RUN_MODULE: national-api
-      rootEmail: <ROOT EMAIL>
+      rootEmail: lochanaf@xeptagon.com
       systemCountryCode: "NG"
       name: "Antactic Region"
       logoBase64: "sss"
@@ -64,7 +64,7 @@ services:
     environment:
       DB_HOST: dbmrv
       DB_USER: root
-      DB_PASSWORD: "<ANY PASSOWORD>"
+      DB_PASSWORD: "1234"
       RUN_PORT: 3100
       RUN_MODULE: analytics-api
       DOMAIN_MAP: "true"
@@ -82,7 +82,7 @@ services:
     environment:
       DB_HOST: dbmrv
       DB_USER: root
-      DB_PASSWORD: "<ANY PASSOWORD>"
+      DB_PASSWORD: "1234"
       # ,data-importer
       RUN_MODULE: async-operations-handler
       LOCATION_SERVICE: OPENSTREET
