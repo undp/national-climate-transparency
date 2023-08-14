@@ -76,6 +76,7 @@ export const handler: Handler = async (event) => {
           : fields[5] == "Manager"
           ? Role.Manager
           : Role.ViewOnly;
+      const txId = fields[4] !== "Ministry" ? fields[3] : '';
       console.log('Inserting user', fields[0],
       cr,
       fields[3],
@@ -86,7 +87,7 @@ export const handler: Handler = async (event) => {
         await userService.createUserWithPassword(
           fields[0],
           cr,
-          fields[3],
+          txId,
           fields[6],
           fields[1],
           ur,
@@ -137,7 +138,7 @@ export const handler: Handler = async (event) => {
 
       try {
         const org = await companyService.create({
-              taxId: fields[3],
+              taxId: fields[4] !== "Ministry" ?  fields[3] : undefined,
               companyId: undefined,
               name: fields[0],
               email: fields[1],
