@@ -13,10 +13,10 @@ import {
   LinkOutlined,
 } from '@ant-design/icons';
 import { DocumentStatus } from '../../Casl/enums/document.status';
-import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
+import { MitigationTypes, mitigationTypeList } from '../../Definitions/mitigationTypes.enum';
 import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import * as Icon from 'react-bootstrap-icons';
-import { ProgrammeStage, Role, addCommSep, addSpaces } from '@undp/carbon-library';
+import { ProgrammeStage, Role, addCommSep, addCommSepRound, addSpaces } from '@undp/carbon-library';
 import Chart from 'react-apexcharts';
 import CoBenifitsComponent from '../../Components/CoBenifits/coBenifits';
 import { NdcActionStatus, getNdcStatusTagType } from '../../Casl/enums/ndcAction.status';
@@ -238,7 +238,11 @@ const NdcActionView = () => {
 
   const getNdcActionMitigationDetails = () => {
     const mitigationDetails: any = {};
-    mitigationDetails[t('ndcAction:viewMitigationType')] = ndcActionDetails?.typeOfMitigation;
+    mitigationTypeList?.map((type: any) => {
+      if (ndcActionDetails?.typeOfMitigation === type.value) {
+        mitigationDetails[t('ndcAction:viewMitigationType')] = type.label;
+      }
+    });
     if (
       ndcActionDetails?.typeOfMitigation === MitigationTypes.AGRICULTURE &&
       ndcActionDetails?.agricultureProperties
@@ -347,6 +351,12 @@ const NdcActionView = () => {
                         colors: ['#b3b3ff', '#e0e0eb'],
                         tooltip: {
                           fillSeriesColor: false,
+                          enabled: true,
+                          y: {
+                            formatter: function (value: any) {
+                              return addCommSepRound(value);
+                            },
+                          },
                         },
                         states: {
                           normal: {

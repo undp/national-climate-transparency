@@ -78,6 +78,10 @@ export class AuthService {
       companyLogo: organisationDetails.logo,
       ability: JSON.stringify(ability),
       companyState: parseInt(organisationDetails.state),
+      ...(user.sectoralScope !== undefined &&
+        user.sectoralScope && {
+          sectoralScope: user.sectoralScope,
+        }),
     };
   }
 

@@ -30,6 +30,7 @@ import {
   TypeOfMitigation,
   UnitField,
   addCommSep,
+  addCommSepRound,
   addSpaces,
   getStageEnumVal,
   getStageTagType,
@@ -77,6 +78,7 @@ const ProgrammeView = () => {
   const [curentProgrammeStatus, setCurrentProgrammeStatus] = useState<any>('');
   const [uploadMonitoringReport, setUploadMonitoringReport] = useState<boolean>(false);
   const [programmeOwnerId, setProgrammeOwnerId] = useState<any[]>([]);
+  const [ministrySectoralScope, setMinistrySectoralScope] = useState<any[]>([]);
   const accessToken =
     mapType === MapTypes.Mapbox && process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
       ? process.env.REACT_APP_MAPBOXGL_ACCESS_TOKEN
@@ -347,6 +349,11 @@ const ProgrammeView = () => {
             programmeOwnerId={programmeOwnerId}
             canUploadMonitorReport={uploadMonitoringReport}
             getProgrammeDocs={() => getDocuments(String(data?.programmeId))}
+            ministryLevelPermission={
+              data &&
+              userInfoState?.companyRole === CompanyRole.MINISTRY &&
+              ministrySectoralScope.includes(data.sectoralScope)
+            }
           />
         ),
         icon: (
@@ -392,7 +399,46 @@ const ProgrammeView = () => {
     navigate('/programmeManagement/addNdcAction', { state: { record: data } });
   };
 
+  const getUserDetails = async () => {
+    setLoadingAll(true);
+    try {
+      const response: any = await post('national/user/query', {
+        page: 1,
+        size: 10,
+        filterAnd: [
+          {
+            key: 'id',
+            operation: '=',
+            value: userInfoState?.id,
+          },
+        ],
+      });
+      if (response && response.data) {
+        if (
+          response?.data[0]?.companyRole === CompanyRole.MINISTRY &&
+          response?.data[0]?.company &&
+          response?.data[0]?.company?.sectoralScope
+        ) {
+          setMinistrySectoralScope(response?.data[0]?.company?.sectoralScope);
+        }
+      }
+      setLoadingAll(false);
+    } catch (error: any) {
+      console.log('Error in getting users', error);
+      message.open({
+        type: 'error',
+        content: error.message,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      setLoadingAll(false);
+    }
+  };
+
   useEffect(() => {
+    if (userInfoState?.companyRole === CompanyRole.MINISTRY) {
+      getUserDetails();
+    }
     const queryParams = new URLSearchParams(window.location.search);
     const programmeId = queryParams.get('id');
     if (programmeId) {
@@ -497,7 +543,9 @@ const ProgrammeView = () => {
     if (
       userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
       (userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
-        data.companyId.map((e) => Number(e)).includes(userInfoState?.companyId))
+        data.companyId.map((e) => Number(e)).includes(userInfoState?.companyId)) ||
+      (userInfoState?.companyRole === CompanyRole.MINISTRY &&
+        ministrySectoralScope.includes(data.sectoralScope))
     ) {
       actionBtns.push(
         <Button
@@ -664,6 +712,12 @@ const ProgrammeView = () => {
                         colors: ['#b3b3ff', '#e0e0eb'],
                         tooltip: {
                           fillSeriesColor: false,
+                          enabled: true,
+                          y: {
+                            formatter: function (value: any) {
+                              return addCommSepRound(value);
+                            },
+                          },
                         },
                         states: {
                           normal: {
@@ -748,6 +802,11 @@ const ProgrammeView = () => {
                   getProgrammeById={() => {
                     getProgrammeById(data?.programmeId);
                   }}
+                  ministryLevelPermission={
+                    data &&
+                    userInfoState?.companyRole === CompanyRole.MINISTRY &&
+                    ministrySectoralScope.includes(data.sectoralScope)
+                  }
                 />
               </div>
             </Card>

@@ -28,7 +28,10 @@ import { LandAreaUnits, landAreaUnitList } from '../../Definitions/landAreaUnits
 import { UploadOutlined } from '@ant-design/icons';
 import './ndcActionDetails.scss';
 import '../../Pages/Common/common.table.scss';
-import { getBase64 } from '../../Definitions/InterfacesAndType/programme.definitions';
+import {
+  addCommSepRound,
+  getBase64,
+} from '../../Definitions/InterfacesAndType/programme.definitions';
 import { RcFile } from 'rc-upload/lib/interface';
 import {
   AgricultureCreationRequest,
@@ -174,7 +177,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
       const creditResponse = calculateCredit(creditRequest);
       if (!isNaN(creditResponse)) {
         form.setFieldsValue({
-          methodologyEstimatedCredits: creditResponse,
+          methodologyEstimatedCredits: addCommSepRound(creditResponse),
         });
       } else {
         form.setFieldsValue({
@@ -278,7 +281,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
       userEstimatedCredits: ndcActionFormvalues.userEstimatedCredits
         ? ndcActionFormvalues.userEstimatedCredits
         : 0,
-      systemEstimatedCredits: ndcActionFormvalues.methodologyEstimatedCredits,
+      systemEstimatedCredits: Number(ndcActionFormvalues.methodologyEstimatedCredits),
     };
 
     onFormSubmit(ndcActionDetailObj);

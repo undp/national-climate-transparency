@@ -49,7 +49,7 @@ export class CaslAbilityFactory {
         });
       } else if (
         user.role == Role.Admin &&
-        user.companyRole == CompanyRole.GOVERNMENT
+        (user.companyRole == CompanyRole.GOVERNMENT || user.companyRole == CompanyRole.MINISTRY)
       ) {
         can(Action.Manage, User, { role: { $ne: Role.Root } });
         can([Action.Manage], ConfigurationSettings);
@@ -58,6 +58,11 @@ export class CaslAbilityFactory {
           companyId: { $ne: user.companyId },
         });
         cannot(Action.Update, Company, { companyId: { $ne: user.companyId } });
+        if (user.companyRole === CompanyRole.MINISTRY) {
+          cannot([Action.Update, Action.Delete, Action.Read], User, {
+            companyId: { $ne: user.companyId },
+          });
+        }
       } else if (
         user.role == Role.Admin &&
         user.companyRole != CompanyRole.GOVERNMENT
@@ -70,12 +75,13 @@ export class CaslAbilityFactory {
         });
         cannot([Action.Create], Company);
       } else {
-        if (user.companyRole == CompanyRole.GOVERNMENT) {
+        if (user.companyRole == CompanyRole.GOVERNMENT || user.companyRole === CompanyRole.MINISTRY) {
           can(Action.Read, User);
           if (user.role === Role.Manager) {
             can([Action.Delete], Company);
           }
-        } else {
+        } 
+        else {
           can(Action.Read, User, { companyId: { $eq: user.companyId } });
         }
 
@@ -98,6 +104,17 @@ export class CaslAbilityFactory {
           can(Action.Manage, DocumentAction);
           can(Action.Manage, Investment);
           can(Action.Manage, Programme);
+          can(Action.Manage, Investment);
+        } else {
+          can(Action.Read, Investment);
+          can(Action.Read, Programme);
+        }
+      }
+
+      if (user.companyRole == CompanyRole.MINISTRY) {
+        if (user.role != Role.ViewOnly) {
+          can(Action.Manage, Programme);
+          can(Action.Manage, DocumentAction);
           can(Action.Manage, Investment);
         } else {
           can(Action.Read, Investment);
@@ -143,7 +160,9 @@ export class CaslAbilityFactory {
         });
 
         can(Action.Read, Programme, {
-          currentStage: { $in: [ProgrammeStage.AUTHORISED, ProgrammeStage.APPROVED] },
+          currentStage: {
+            $in: [ProgrammeStage.AUTHORISED, ProgrammeStage.APPROVED],
+          },
         });
         can(Action.Read, Investment, {
           status: { $eq: InvestmentStatus.APPROVED },

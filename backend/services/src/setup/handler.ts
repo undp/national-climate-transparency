@@ -67,13 +67,16 @@ export const handler: Handler = async (event) => {
           ? CompanyRole.CERTIFIER
           : fields[4] == "API"
           ? CompanyRole.API
-          :CompanyRole.PROGRAMME_DEVELOPER;
+          : fields[4] === "Ministry" 
+          ? CompanyRole.MINISTRY
+          : CompanyRole.PROGRAMME_DEVELOPER;
       const ur =
         fields[5] == "admin"
           ? Role.Admin
           : fields[5] == "Manager"
           ? Role.Manager
           : Role.ViewOnly;
+      const txId = fields[4] !== "Ministry" ? fields[3] : '';
       console.log('Inserting user', fields[0],
       cr,
       fields[3],
@@ -84,7 +87,7 @@ export const handler: Handler = async (event) => {
         await userService.createUserWithPassword(
           fields[0],
           cr,
-          fields[3],
+          txId,
           fields[6],
           fields[1],
           ur,
@@ -127,11 +130,15 @@ export const handler: Handler = async (event) => {
           ? CompanyRole.CERTIFIER
           : fields[4] == "API"
           ? CompanyRole.API
+          : fields[4] === "Ministry" 
+          ? CompanyRole.MINISTRY
           : CompanyRole.PROGRAMME_DEVELOPER;
+
+      const secScope = fields[4] === "Ministry" && fields[6] ? fields[6].split("-") : undefined;
 
       try {
         const org = await companyService.create({
-              taxId: fields[3],
+              taxId: fields[4] !== "Ministry" ?  fields[3] : undefined,
               companyId: undefined,
               name: fields[0],
               email: fields[1],
@@ -142,7 +149,9 @@ export const handler: Handler = async (event) => {
               country: configService.get("systemCountry"),
               companyRole: cr,
               createdTime: undefined,
-              regions: ['Lagos']
+              regions: ['Lagos'],
+              nameOfMinister: fields[5] || undefined,
+              sectoralScope: secScope
             });
         console.log('Company created', org)
       } catch (e) {

@@ -22,7 +22,10 @@ export class OrganisationUpdateDto {
   name: string;
 
   @ValidateIf(
-    (c) => ![CompanyRole.GOVERNMENT, CompanyRole.API].includes(c.companyRole)
+    (c) =>
+      ![CompanyRole.GOVERNMENT, CompanyRole.API, CompanyRole.MINISTRY].includes(
+        c.companyRole
+      )
   )
   @IsNotEmpty()
   @IsString()
