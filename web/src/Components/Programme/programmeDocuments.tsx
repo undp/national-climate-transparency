@@ -29,11 +29,20 @@ export interface ProgrammeDocumentsProps {
   programmeOwnerId: any[];
   getDocumentDetails: any;
   getProgrammeById: any;
+  ministryLevelPermission?: boolean;
 }
 
 const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumentsProps) => {
-  const { data, title, icon, programmeId, programmeOwnerId, getDocumentDetails, getProgrammeById } =
-    props;
+  const {
+    data,
+    title,
+    icon,
+    programmeId,
+    programmeOwnerId,
+    getDocumentDetails,
+    getProgrammeById,
+    ministryLevelPermission,
+  } = props;
   const { t } = useTranslation(['programme']);
   const { userInfoState } = useUserContext();
   const { delete: del, post } = useConnection();
@@ -210,12 +219,12 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
 
   const companyRolePermission =
     (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-      userInfoState?.companyRole === CompanyRole.MINISTRY) &&
+      (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
     userInfoState?.userRole !== Role.ViewOnly;
 
   const designDocActionPermission =
     (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-      userInfoState?.companyRole === CompanyRole.MINISTRY) &&
+      (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
     userInfoState?.userRole !== Role.ViewOnly;
 
   const designDocPending = designDocStatus === DocumentStatus.PENDING;
@@ -311,7 +320,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                             : !uploadDocUserPermission(
                                 userInfoState,
                                 DocType.DESIGN_DOCUMENT,
-                                programmeOwnerId
+                                programmeOwnerId,
+                                ministryLevelPermission
                               ) && t('programme:orgNotAuth')
                         }
                         overlayClassName="custom-tooltip"
@@ -322,7 +332,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                             uploadDocUserPermission(
                               userInfoState,
                               DocType.DESIGN_DOCUMENT,
-                              programmeOwnerId
+                              programmeOwnerId,
+                              ministryLevelPermission
                             )
                               ? { color: '#3F3A47', cursor: 'pointer' }
                               : { color: '#cacaca', cursor: 'default' }
@@ -331,7 +342,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                             uploadDocUserPermission(
                               userInfoState,
                               DocType.DESIGN_DOCUMENT,
-                              programmeOwnerId
+                              programmeOwnerId,
+                              ministryLevelPermission
                             ) && handleDesignDocFileUpload()
                           }
                         />
@@ -363,7 +375,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                         : !uploadDocUserPermission(
                             userInfoState,
                             DocType.DESIGN_DOCUMENT,
-                            programmeOwnerId
+                            programmeOwnerId,
+                            ministryLevelPermission
                           ) && t('programme:orgNotAuth')
                     }
                     overlayClassName="custom-tooltip"
@@ -374,7 +387,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.DESIGN_DOCUMENT,
-                          programmeOwnerId
+                          programmeOwnerId,
+                          ministryLevelPermission
                         )
                           ? { color: '#3F3A47', cursor: 'pointer' }
                           : { color: '#cacaca', cursor: 'default' }
@@ -383,7 +397,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.DESIGN_DOCUMENT,
-                          programmeOwnerId
+                          programmeOwnerId,
+                          ministryLevelPermission
                         ) && handleDesignDocFileUpload()
                       }
                     />
@@ -500,7 +515,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                             : !uploadDocUserPermission(
                                 userInfoState,
                                 DocType.METHODOLOGY_DOCUMENT,
-                                programmeOwnerId
+                                programmeOwnerId,
+                                ministryLevelPermission
                               ) && t('programme:orgNotAuth')
                         }
                         overlayClassName="custom-tooltip"
@@ -512,7 +528,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                             uploadDocUserPermission(
                               userInfoState,
                               DocType.METHODOLOGY_DOCUMENT,
-                              programmeOwnerId
+                              programmeOwnerId,
+                              ministryLevelPermission
                             )
                               ? { color: '#3F3A47', cursor: 'pointer' }
                               : { color: '#cacaca' }
@@ -522,7 +539,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                             uploadDocUserPermission(
                               userInfoState,
                               DocType.METHODOLOGY_DOCUMENT,
-                              programmeOwnerId
+                              programmeOwnerId,
+                              ministryLevelPermission
                             ) &&
                             handleMethodologyFileUpload()
                           }
@@ -555,7 +573,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                         : uploadDocUserPermission(
                             userInfoState,
                             DocType.METHODOLOGY_DOCUMENT,
-                            programmeOwnerId
+                            programmeOwnerId,
+                            ministryLevelPermission
                           )
                         ? designDocStatus !== DocumentStatus.ACCEPTED &&
                           t('programme:designDocNotApproved')
@@ -570,7 +589,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.METHODOLOGY_DOCUMENT,
-                          programmeOwnerId
+                          programmeOwnerId,
+                          ministryLevelPermission
                         )
                           ? { color: '#3F3A47', cursor: 'pointer' }
                           : { color: '#cacaca', cursor: 'default' }
@@ -580,7 +600,8 @@ const ProgrammeDocuments: FC<ProgrammeDocumentsProps> = (props: ProgrammeDocumen
                         uploadDocUserPermission(
                           userInfoState,
                           DocType.METHODOLOGY_DOCUMENT,
-                          programmeOwnerId
+                          programmeOwnerId,
+                          ministryLevelPermission
                         ) &&
                         handleMethodologyFileUpload()
                       }

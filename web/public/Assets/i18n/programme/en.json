@@ -68,5 +68,6 @@
   "monitoringRepNotApproved": "The monitoring report has to be approved to upload this document",
   "notAuthToUploadDoc": "You are not authorised to upload this document",
   "orgNotAuth": "Your organisation is not authorised to upload or view this document",
-  "authLetterLabel":"Letter of Authorisation"
+  "authLetterLabel": "Letter of Authorisation",
+  "ministryLevel": "Minitry Level"
 }

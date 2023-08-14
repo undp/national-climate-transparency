@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router';
 import './ndcActionManagement.scss';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
+import { CompanyRole } from '../../Casl/enums/company.role.enum';
 
 const NdcActionManagement = () => {
   const { t } = useTranslation(['ndcAction']);
@@ -37,6 +38,8 @@ const NdcActionManagement = () => {
   const [sortOrder, setSortOrder] = useState<string>();
   const [sortField, setSortField] = useState<string>();
   const [dataFilter, setDataFilter] = useState<any>();
+  const [ministrySectoralScope, setMinistrySectoralScope] = useState<any[]>([]);
+  const [ministryLevelFilter, setMinistryLevelFilter] = useState<boolean>(false);
 
   const { Search } = Input;
   const { post } = useConnection();
@@ -236,12 +239,21 @@ const NdcActionManagement = () => {
       };
     }
 
+    let filterBy: any;
+    if (ministryLevelFilter) {
+      filterBy = {
+        key: 'ministryLevel',
+        value: ministrySectoralScope,
+      };
+    }
+
     try {
       const response: any = await post('national/programme/queryNdcActions', {
         page: currentPage,
         size: pageSize,
         filterAnd: filter,
         sort: sort,
+        filterBy: filterBy,
       });
 
       setTableData(response.data);
@@ -259,6 +271,42 @@ const NdcActionManagement = () => {
     }
   };
 
+  const getUserDetails = async () => {
+    setLoading(true);
+    try {
+      const response: any = await post('national/user/query', {
+        page: 1,
+        size: 10,
+        filterAnd: [
+          {
+            key: 'id',
+            operation: '=',
+            value: userInfoState?.id,
+          },
+        ],
+      });
+      if (response && response.data) {
+        if (
+          response?.data[0]?.companyRole === CompanyRole.MINISTRY &&
+          response?.data[0]?.company &&
+          response?.data[0]?.company?.sectoralScope
+        ) {
+          setMinistrySectoralScope(response?.data[0]?.company?.sectoralScope);
+        }
+      }
+      setLoading(false);
+    } catch (error: any) {
+      console.log('Error in getting users', error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (userInfoState?.companyRole === CompanyRole.MINISTRY) {
+      getUserDetails();
+    }
+  }, []);
+
   useEffect(() => {
     if (currentPage !== 1) {
       setCurrentPage(1);
@@ -269,7 +317,7 @@ const NdcActionManagement = () => {
 
   useEffect(() => {
     getNdcActionData();
-  }, [currentPage, pageSize, sortField, sortOrder, search]);
+  }, [currentPage, pageSize, sortField, sortOrder, search, ministryLevelFilter]);
 
   const onStatusQuery = async (checkedValues: CheckboxValueType[]) => {
     if (checkedValues !== selectedStatus) {
@@ -323,7 +371,7 @@ const NdcActionManagement = () => {
       </div>
       <div className="content-card">
         <Row>
-          <Col lg={{ span: 16 }} md={{ span: 16 }}>
+          <Col lg={{ span: 15 }} md={{ span: 14 }}>
             <div className="action-bar">
               <Checkbox
                 className="all-check"
@@ -341,26 +389,26 @@ const NdcActionManagement = () => {
               />
             </div>
           </Col>
-          <Col lg={{ span: 8 }} md={{ span: 8 }}>
+          <Col lg={{ span: 9 }} md={{ span: 10 }}>
             <div className="filter-section">
-              {/* <div className="search-filter">
-                <Checkbox
-                  className="label"
-                  onChange={(v) =>
-                    setDataFilter(
-                      v.target.checked
-                        ? {
-                            key: 'companyId',
-                            operation: 'ANY',
-                            value: userInfoState?.companyId,
-                          }
-                        : undefined
-                    )
-                  }
-                >
-                  {t('ndcAction:seeMine')}
-                </Checkbox>
-              </div> */}
+              {userInfoState?.companyRole === CompanyRole.MINISTRY && (
+                <div className="search-filter">
+                  <Checkbox
+                    className="label"
+                    onChange={(v) => {
+                      if (userInfoState.companyRole === CompanyRole.MINISTRY) {
+                        if (v.target.checked) {
+                          setMinistryLevelFilter(true);
+                        } else {
+                          setMinistryLevelFilter(false);
+                        }
+                      }
+                    }}
+                  >
+                    {t('ndcAction:ministryLevel')}
+                  </Checkbox>
+                </div>
+              )}
               <div className="search-bar">
                 <Search
                   onPressEnter={onSearch}
