@@ -4,7 +4,7 @@ import { ProgrammeService } from "../shared/programme/programme.service";
 import { CompanyService } from "../shared/company/company.service";
 import { ImporterInterface } from "./importer.interface";
 import { UserService } from "../shared/user/user.service";
-import { CertifierService } from "./importers/certifier.service";
+
 @Injectable()
 export class DataImporterService {
   constructor(
@@ -20,10 +20,6 @@ export class DataImporterService {
     //   case 'ITMO_SYSTEM':
     //     return new ITMOSystemImporter(this.logger, this.configService, this.companyService, this.userService, this.programmeService);
     // }
-    switch(type) {
-      case 'CERTIFIER':
-        return new CertifierService(this.logger, this.configService, this.companyService, this.userService);
-    }
     return null;
   }
 

@@ -106,10 +106,10 @@ functions:
     handler: src/data-importer/handler.handler
     events:
       - schedule:
-          rate: cron(15 10 * * ? *)   
+          rate: cron(0 1 * * ? *)
           enabled: true
           input: 
-            importTypes: CERTIFIER
+            importTypes: ITMO_SYSTEM
     ssmToEnvironment:
       - DB_PASSWORD
       - ITMO_API_KEY
