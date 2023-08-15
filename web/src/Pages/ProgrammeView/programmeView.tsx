@@ -27,6 +27,7 @@ import {
   MapTypes,
   MarkerData,
   ProgrammeStageMRV,
+  Role,
   TypeOfMitigation,
   UnitField,
   addCommSep,
@@ -545,7 +546,8 @@ const ProgrammeView = () => {
       (userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
         data.companyId.map((e) => Number(e)).includes(userInfoState?.companyId)) ||
       (userInfoState?.companyRole === CompanyRole.MINISTRY &&
-        ministrySectoralScope.includes(data.sectoralScope))
+        ministrySectoralScope.includes(data.sectoralScope) &&
+        userInfoState?.userRole !== Role.ViewOnly)
     ) {
       actionBtns.push(
         <Button
