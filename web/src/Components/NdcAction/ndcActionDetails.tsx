@@ -281,7 +281,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
       userEstimatedCredits: ndcActionFormvalues.userEstimatedCredits
         ? ndcActionFormvalues.userEstimatedCredits
         : 0,
-      systemEstimatedCredits: ndcActionFormvalues.methodologyEstimatedCredits,
+      systemEstimatedCredits: Number(ndcActionFormvalues.methodologyEstimatedCredits),
     };
 
     onFormSubmit(ndcActionDetailObj);

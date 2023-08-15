@@ -23,10 +23,11 @@ export class AuthorizationLetterGen {
   ) {
     const country = this.configService.get("systemCountryName");
     const minister = this.configService.get("docGenerate.ministerName");
-    const filepath = `AUTHORISATION_LETTER_${programmeId}.pdf`;
+    const ministry = this.configService.get('docGenerate.ministryName');
+    const filepath = `LETTER_OF_AUTHORISATION_${programmeId}.pdf`;
     const date = new Date().toDateString();
     const refNo = this.helperService.generateRandomNumber();
-    let orgName;
+    let orgName;  
     if (orgs.length > 2) {
       orgName = orgs.slice(0, orgs.length - 1).join(", ");
       orgName += " and " + orgs[orgs.length - 1];
@@ -248,7 +249,7 @@ export class AuthorizationLetterGen {
     );
 
     doc.text(
-      `\n\n Sincerely,\n Honorable ${minister}\n Minister \n Government of ${country}`
+      `\n\nSincerely,\nHonorable ${minister}\nMinister\n${ministry}\nGovernment of ${country}`
     );
 
     doc.font("fonts/Inter-Bold.ttf").text("\n\n Appendices", {

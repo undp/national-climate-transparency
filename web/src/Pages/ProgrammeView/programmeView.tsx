@@ -349,6 +349,11 @@ const ProgrammeView = () => {
             programmeOwnerId={programmeOwnerId}
             canUploadMonitorReport={uploadMonitoringReport}
             getProgrammeDocs={() => getDocuments(String(data?.programmeId))}
+            ministryLevelPermission={
+              data &&
+              userInfoState?.companyRole === CompanyRole.MINISTRY &&
+              ministrySectoralScope.includes(data.sectoralScope)
+            }
           />
         ),
         icon: (
@@ -797,6 +802,11 @@ const ProgrammeView = () => {
                   getProgrammeById={() => {
                     getProgrammeById(data?.programmeId);
                   }}
+                  ministryLevelPermission={
+                    data &&
+                    userInfoState?.companyRole === CompanyRole.MINISTRY &&
+                    ministrySectoralScope.includes(data.sectoralScope)
+                  }
                 />
               </div>
             </Card>

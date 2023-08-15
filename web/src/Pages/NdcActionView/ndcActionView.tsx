@@ -13,7 +13,7 @@ import {
   LinkOutlined,
 } from '@ant-design/icons';
 import { DocumentStatus } from '../../Casl/enums/document.status';
-import { MitigationTypes } from '../../Definitions/mitigationTypes.enum';
+import { MitigationTypes, mitigationTypeList } from '../../Definitions/mitigationTypes.enum';
 import { NdcActionTypes } from '../../Definitions/ndcActionTypes.enum';
 import * as Icon from 'react-bootstrap-icons';
 import { ProgrammeStage, Role, addCommSep, addCommSepRound, addSpaces } from '@undp/carbon-library';
@@ -238,7 +238,11 @@ const NdcActionView = () => {
 
   const getNdcActionMitigationDetails = () => {
     const mitigationDetails: any = {};
-    mitigationDetails[t('ndcAction:viewMitigationType')] = ndcActionDetails?.typeOfMitigation;
+    mitigationTypeList?.map((type: any) => {
+      if (ndcActionDetails?.typeOfMitigation === type.value) {
+        mitigationDetails[t('ndcAction:viewMitigationType')] = type.label;
+      }
+    });
     if (
       ndcActionDetails?.typeOfMitigation === MitigationTypes.AGRICULTURE &&
       ndcActionDetails?.agricultureProperties
