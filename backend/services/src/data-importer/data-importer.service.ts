@@ -22,7 +22,7 @@ export class DataImporterService {
     // }
     switch(type) {
       case 'CERTIFIER':
-        return new CertifierService(this.logger, this.companyService, this.userService);
+        return new CertifierService(this.logger, this.configService, this.companyService, this.userService);
     }
     return null;
   }
