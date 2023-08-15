@@ -50,7 +50,6 @@ services:
       FILE_SERVICE: local
       DISABLE_LOW_PRIORITY_EMAIL: "true"
       BACKEND_HOST: "http://192.168.1.37:9000"
-
     volumes:
       - filestore:/app/backend/services/public
       - ./users.csv:/app/backend/services/users.csv
@@ -87,20 +86,19 @@ services:
       DB_USER: root
       DB_PASSWORD: "<ANY PASSOWORD>"
       # ,data-importer
-      RUN_MODULE: async-operations-handler,data-importer
-      LOCATION_SERVICE: https://mrv-common-dev.s3.amazonaws.com/flag.png
-      CERTIFIER_IMAGE : "https://mrv-common-dev.s3.amazonaws.com/flag.png"
+      RUN_MODULE: async-operations-handler
+      LOCATION_SERVICE: OPENSTREET
       SMTP_ENDPOINT: email-smtp.us-east-1.amazonaws.com
       SMTP_PASSWORD: ""
       SMTP_USERNAME: AKIAUMXKTXDJPDYDJ76J
       IS_EMAIL_DISABLED: "true"
       ASYNC_OPERATIONS_TYPE: Database
       ITMO_API_KEY: ""
-      ITMO_EMAIL: ""                      
+      ITMO_EMAIL: ""
       ITMO_PASSWORD: ""
       DB_PORT: "5433"
       DB_NAME: "carbondev"
-      REGISTRY_ENDPOINT: 'http://192.168.1.195:3000'
+      REGISTRY_ENDPOINT: 'http://192.168.8.195:3000'
       REGISTRY_SYNC_ENABLE: true
       NODE_ENV: 'dev'
       REGISTRY_API_TOKEN: ''
