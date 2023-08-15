@@ -113,9 +113,9 @@ export class CertifierService implements ImporterInterface {
         //  console.log('CSV conversion completed.');
       return {activeRowsfinal,deactiveRowsfinal}
     } 
-      catch (error) {
-        this.logger.error('Error while scraping the certifier list', error);
-      }
+        catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     async start(): Promise<any>{
@@ -146,7 +146,7 @@ export class CertifierService implements ImporterInterface {
                 number = "00"
             }   
             try {
-              this.logger.log("Certifier Creation Started "+certifier)
+              this.logger.log("Certifier Creation Started "+certifier.oraganization)
               const company = new OrganisationDto();
               company.name = certifier.oraganization;
               company.taxId = certifier.oraganization;
