@@ -320,7 +320,7 @@ export class ProgrammeService {
     this.logger.verbose(`Investment on programme ${JSON.stringify(programme)}`);
 
     if (
-      requester.companyRole != CompanyRole.GOVERNMENT &&
+      requester.companyRole != CompanyRole.GOVERNMENT && requester.companyRole != CompanyRole.MINISTRY &&
       ![...req.fromCompanyIds, req.toCompanyId].includes(requester.companyId)
     ) {
       throw new HttpException(
@@ -1702,7 +1702,7 @@ export class ProgrammeService {
         ndcActionDto.monitoringReport
       );
 
-      if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole) && dr) {
+      if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT, CompanyRole.MINISTRY].includes(user.companyRole) && dr) {
         this.logger.log(`Approving document since the user is ${user.companyRole}`)
         dr.status = DocumentStatus.ACCEPTED;
 
