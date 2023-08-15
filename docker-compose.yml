@@ -12,7 +12,7 @@ services:
     ports:
       - "5433:5433"
     environment:
-      POSTGRES_PASSWORD: "9652"
+      POSTGRES_PASSWORD: "<ANY PASSOWORD>"
       POSTGRES_USER: root
       PGPORT: 5433
       PSQL_USERNAME: root
@@ -32,9 +32,9 @@ services:
     environment:
       DB_HOST: dbmrv
       DB_USER: root
-      DB_PASSWORD: "9652"
+      DB_PASSWORD: "<ANY PASSOWORD>"
       RUN_MODULE: national-api
-      rootEmail: gayanathr@xeptagon.com
+      rootEmail: <ROOT EMAIL>
       systemCountryCode: "NG"
       name: "Antactic Region"
       logoBase64: "sss"
@@ -67,7 +67,7 @@ services:
     environment:
       DB_HOST: dbmrv
       DB_USER: root
-      DB_PASSWORD: "9652"
+      DB_PASSWORD: "<ANY PASSOWORD>"
       RUN_PORT: 3100
       RUN_MODULE: analytics-api
       DOMAIN_MAP: "true"
@@ -85,7 +85,7 @@ services:
     environment:
       DB_HOST: dbmrv
       DB_USER: root
-      DB_PASSWORD: "9652"
+      DB_PASSWORD: "<ANY PASSOWORD>"
       # ,data-importer
       RUN_MODULE: async-operations-handler,data-importer
       LOCATION_SERVICE: https://mrv-common-dev.s3.amazonaws.com/flag.png
@@ -100,10 +100,10 @@ services:
       ITMO_PASSWORD: ""
       DB_PORT: "5433"
       DB_NAME: "carbondev"
-      REGISTRY_ENDPOINT: 'http://192.168.1.34:3000'
+      REGISTRY_ENDPOINT: 'http://192.168.1.195:3000'
       REGISTRY_SYNC_ENABLE: true
       NODE_ENV: 'dev'
-      REGISTRY_API_TOKEN: 'cGFsaW5kYSthcGlAeGVwdGFnb24uY29tX19fMTIzNDU='
+      REGISTRY_API_TOKEN: ''
       FILE_SERVICE: local
       DISABLE_LOW_PRIORITY_EMAIL: "true"
   # async-operations-handler:
@@ -116,10 +116,10 @@ services:
   #   environment:
   #     DB_HOST: db
   #     DB_USER: root
-  #     DB_PASSWORD: "9652"
+  #     DB_PASSWORD: "<ANY PASSOWORD>"
   #     RUN_MODULE: async-operations-handler
   #     SMTP_ENDPOINT: email-smtp.us-east-1.amazonaws.com
-  #     SMTP_PASSWORD: "9652"
+  #     SMTP_PASSWORD: "<ANY PASSOWORD>"
   #     ASYNC_OPERATIONS_TYPE: Database
   web:
     build:
