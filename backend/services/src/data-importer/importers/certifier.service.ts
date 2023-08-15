@@ -1,5 +1,4 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import axios from "axios";
 import { CompanyService } from "../../shared/company/company.service";
 import { ImporterInterface } from "../importer.interface";
@@ -15,10 +14,8 @@ import { OrganisationUpdateDto } from "../../shared/dto/organisation.update.dto"
 export class CertifierService implements ImporterInterface {
     constructor(
         private logger: Logger,
-        private configService: ConfigService,
         private companyService: CompanyService,
         private userService: UserService,
-        
     ){}
     async scrape() {
       try {
@@ -150,7 +147,6 @@ export class CertifierService implements ImporterInterface {
               const company = new OrganisationDto();
               company.name = certifier.oraganization;
               company.taxId = certifier.oraganization;
-              company.logo = this.configService.get("CERTIFIER.image");
               company.email = 'nce.digital+'+intials+'@undp.org' ;
               company.phoneNo = number;
               company.address = certifier.address;
