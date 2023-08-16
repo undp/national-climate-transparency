@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   Col,
   Form,
   Input,
@@ -39,6 +40,7 @@ import {
   calculateCredit,
 } from '@undp/carbon-credit-calculator';
 import { Sector } from '../../Casl/enums/sector.enum';
+import { error } from 'console';
 
 export interface NdcActionDetailsProps {
   isBackBtnVisible: boolean;
@@ -57,11 +59,18 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const [sector, setSector] = useState<any>('');
   const [ndcActionTypeListFiltered, setNdcActionTypeListFiltered] =
     useState<any[]>(ndcActionTypeList);
+  const [checkedOptionsGhgReduced, setCheckedOptionsGhgReduced] = useState<any[]>([]);
+  const [inputNumberValueGhgReduced, setInputNumberValueGhgReduced] = useState<any[]>([]);
+  const [checkedOptionsGhgAvoided, setCheckedOptionsGhgAvoided] = useState<any[]>([]);
+  const [inputNumberValueGhgAvoided, setInputNumberValueGhgAvoided] = useState<any[]>([]);
+  const [ghgEmissionAvoidedErrors, setGhgEmissionAvoidedErrors] = useState<any>('');
   const [form] = Form.useForm();
 
   const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
     ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
     : 5000000;
+
+  const ghgEmissionsGas = ['CO2', 'CH4', 'N20', 'HFCs', 'PFCs', 'SF6'];
 
   useEffect(() => {
     if (programmeDetails) {
@@ -293,6 +302,13 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     }
     return e?.fileList;
   };
+
+  useEffect(() => {}, [
+    checkedOptionsGhgAvoided,
+    checkedOptionsGhgReduced,
+    inputNumberValueGhgAvoided,
+    inputNumberValueGhgReduced,
+  ]);
 
   return (
     <div className="ndc-action-details-container">
@@ -587,6 +603,97 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 </Form.Item>
               </Col>
             </Row>
+            {ndcActionType === NdcActionTypes.Adaptation && (
+              <Row justify="start" align="middle">
+                <Col>
+                  <Form.Item
+                    label={t('ndcAction:ghgEmiReduced')}
+                    name="ghgEmissionsReduced"
+                    style={{ width: 442 }}
+                  >
+                    {ghgEmissionsGas.map((option: any, i: any) => (
+                      <div key={option} className="row-custom">
+                        <Checkbox
+                          value={option}
+                          checked={checkedOptionsGhgReduced.includes(option)}
+                          onChange={(e: any) => {
+                            if (e?.target?.checked) {
+                              setInputNumberValueGhgReduced([...inputNumberValueGhgReduced, 0]);
+                              setCheckedOptionsGhgReduced([...checkedOptionsGhgReduced, option]);
+                            } else if (!e?.target?.checked) {
+                              setInputNumberValueGhgReduced([
+                                ...inputNumberValueGhgReduced.filter((value) => value !== option),
+                              ]);
+                              setCheckedOptionsGhgReduced([
+                                ...checkedOptionsGhgReduced.filter((value) => value !== option),
+                              ]);
+                            }
+                          }}
+                        >
+                          {option}
+                        </Checkbox>
+                        <InputNumber
+                          size="small"
+                          disabled={!checkedOptionsGhgReduced.includes(option)}
+                          onChange={(e: any) => {
+                            setInputNumberValueGhgReduced([
+                              ...inputNumberValueGhgReduced,
+                              e?.target?.value,
+                            ]);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </Form.Item>
+                </Col>
+                <Col style={{ marginLeft: '38px' }}>
+                  <Form.Item
+                    label={t('ndcAction:ghgEmiAvoided')}
+                    name="ghgEmissionsAvoided"
+                    style={{ width: 442 }}
+                  >
+                    {ghgEmissionsGas.map((option, i) => (
+                      <div key={option} className="row-custom">
+                        <Checkbox
+                          value={option}
+                          checked={checkedOptionsGhgAvoided.includes(option)}
+                          onChange={(e: any) => {
+                            if (e?.target?.checked) {
+                              setInputNumberValueGhgAvoided([...inputNumberValueGhgAvoided, 0]);
+                              setCheckedOptionsGhgAvoided([...checkedOptionsGhgAvoided, option]);
+                            } else if (!e?.target?.checked) {
+                              setInputNumberValueGhgAvoided([
+                                ...inputNumberValueGhgAvoided.filter((value) => value !== option),
+                              ]);
+                              setCheckedOptionsGhgAvoided([
+                                ...checkedOptionsGhgAvoided.filter((value) => value !== option),
+                              ]);
+                            }
+                          }}
+                        >
+                          {option}
+                        </Checkbox>
+                        <InputNumber
+                          size="small"
+                          disabled={!checkedOptionsGhgAvoided.includes(option)}
+                          onChange={(e: any) => {
+                            setInputNumberValueGhgAvoided([
+                              ...inputNumberValueGhgAvoided,
+                              e?.target?.value,
+                            ]);
+                          }}
+                        />
+                      </div>
+                    ))}
+                    {ghgEmissionAvoidedErrors !== '' && (
+                      <div className="validator">{`${t('ndcAction:landAreaUnit')} ${t(
+                        'ndcAction:isRequired'
+                      )}`}</div>
+                    )}
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
           </>
         )}
 

@@ -5,6 +5,26 @@
     height: 40px;
   }
 
+  .row-custom-1 {
+    display: flex;
+    margin-bottom: 2px;
+  }
+
+  .row-custom {
+    display: flex;
+    width: 200px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+
+    .ant-input-number {
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
   .ant-select-selection-item {
     color: #949599 !important;
   }
