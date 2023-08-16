@@ -78,7 +78,6 @@ export const getChartOptions = (labels: string[], colors: string[]) => {
       offsetX: 0,
       offsetY: 5,
       labels: {
-        colors: colors,
         useSeriesColors: false,
       },
       markers: {
