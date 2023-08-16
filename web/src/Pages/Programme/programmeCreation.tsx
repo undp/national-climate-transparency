@@ -218,7 +218,9 @@ export const AddProgrammeComponent = () => {
           sectScopeValues?.map((key: any) => {
             Object.values(Sector).map((sector: any) => {
               if (sectoralScopes[sector]?.includes(key)) {
-                sectors.push(sector);
+                if (!sectors.includes(sector)) {
+                  sectors.push(sector);
+                }
               }
             });
           });
