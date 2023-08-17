@@ -220,7 +220,9 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const onNdcActionDetailsFormSubmit = async (ndcActionFormvalues: any) => {
     const ndcActionDetailObj: any = {};
     ndcActionDetailObj.action = ndcActionFormvalues.ndcActionType;
-    ndcActionDetailObj.methodology = t('ndcAction:goldStandard');
+    if (ndcActionFormvalues.ndcActionType === NdcActionTypes.Mitigation) {
+      ndcActionDetailObj.methodology = t('ndcAction:goldStandard');
+    }
 
     if (
       ndcActionFormvalues.ndcActionType === NdcActionTypes.Mitigation ||
@@ -361,26 +363,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
               />
             </Form.Item>
           </Col>
-          <Col style={{ marginLeft: '38px' }}>
-            <Form.Item label={t('ndcAction:methodology')} name="methodology">
-              <span
-                style={{
-                  display: 'inline-block',
-                  border: '1px solid #D9D9D9',
-                  width: '154px',
-                  height: '38px',
-                  borderRadius: '4px',
-                  padding: '7px 8px',
-                  fontSize: '14px',
-                  backgroundColor: '#F0F0F0',
-                  color: '#8C8C8C',
-                }}
-              >
-                {' '}
-                {t('ndcAction:goldStandard')}
-              </span>
-            </Form.Item>
-          </Col>
         </Row>
 
         {ndcActionType === NdcActionTypes.CrossCutting && (
@@ -391,34 +373,60 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
 
         {(ndcActionType === NdcActionTypes.Mitigation ||
           ndcActionType === NdcActionTypes.CrossCutting) && (
-          <Row justify="start" align="middle">
-            <Form.Item
-              label={t('ndcAction:mitigationType')}
-              name="mitigationType"
-              rules={[
-                {
-                  required: true,
-                  message: `${t('ndcAction:mitigationType')} ${t('ndcAction:isRequired')}`,
-                },
-              ]}
-            >
-              <Select
-                size="large"
-                onChange={handleMitigationTypeChange}
-                style={{
-                  width: '249px',
-                  borderRadius: '4px',
-                }}
-                options={
-                  programmeDetails?.sector === Sector.Health ||
-                  programmeDetails?.sector === Sector.Education ||
-                  programmeDetails?.sector === Sector.Hospitality
-                    ? mitigationTypeList
-                    : sectorMitigationTypesListMapped[sector]
-                }
-              ></Select>
-            </Form.Item>
-          </Row>
+          <>
+            <Row justify="start" align="middle">
+              <Col>
+                <Form.Item
+                  label={t('ndcAction:mitigationType')}
+                  name="mitigationType"
+                  rules={[
+                    {
+                      required: true,
+                      message: `${t('ndcAction:mitigationType')} ${t('ndcAction:isRequired')}`,
+                    },
+                  ]}
+                >
+                  <Select
+                    size="large"
+                    onChange={handleMitigationTypeChange}
+                    style={{
+                      width: '249px',
+                      borderRadius: '4px',
+                    }}
+                    options={
+                      programmeDetails?.sector === Sector.Health ||
+                      programmeDetails?.sector === Sector.Education ||
+                      programmeDetails?.sector === Sector.Hospitality
+                        ? mitigationTypeList
+                        : sectorMitigationTypesListMapped[sector]
+                    }
+                  ></Select>
+                </Form.Item>
+              </Col>
+              {ndcActionType === NdcActionTypes.Mitigation && (
+                <Col style={{ marginLeft: '38px' }}>
+                  <Form.Item label={t('ndcAction:methodology')} name="methodology">
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        border: '1px solid #D9D9D9',
+                        width: '154px',
+                        height: '38px',
+                        borderRadius: '4px',
+                        padding: '7px 8px',
+                        fontSize: '14px',
+                        backgroundColor: '#F0F0F0',
+                        color: '#8C8C8C',
+                      }}
+                    >
+                      {' '}
+                      {t('ndcAction:goldStandard')}
+                    </span>
+                  </Form.Item>
+                </Col>
+              )}
+            </Row>
+          </>
         )}
 
         {(ndcActionType === NdcActionTypes.Mitigation ||
