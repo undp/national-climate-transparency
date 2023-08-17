@@ -25,6 +25,29 @@
     }
   }
 
+  .enablement-type-item {
+    display: flex;
+    width: 100%;
+
+    .ant-form-item-row {
+      display: flex;
+      width: 100%;
+    }
+    .ant-checkbox-wrapper {
+      color: rgba(58, 53, 65, 0.5);
+      font-size: 14px;
+    }
+    .type-checkbox-grp {
+      display: flex;
+      width: 100%;
+
+      .grp-row {
+        display: flex;
+        width: 100%;
+      }
+    }
+  }
+
   .ant-select-selection-item {
     color: #949599 !important;
   }

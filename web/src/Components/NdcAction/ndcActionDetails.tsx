@@ -71,6 +71,12 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     : 5000000;
 
   const ghgEmissionsGas = ['CO2', 'CH4', 'N20', 'HFCs', 'PFCs', 'SF6'];
+  const enablementTypesAndValues = [
+    { type: t('ndcAction:capacityBuilding'), value: 'capacityBuilding', col: 4 },
+    { type: t('ndcAction:instiArrangement'), value: 'institutionalArrangement', col: 5 },
+    { type: t('ndcAction:stakeholderFramework'), value: 'stakeholderFramework', col: 5 },
+    { type: t('ndcAction:techTransfer'), value: 'technologyTransfer', col: 4 },
+  ];
 
   useEffect(() => {
     if (programmeDetails) {
@@ -99,6 +105,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         nationalPlanObjectives: ndcActionDetails?.adaptationProperties?.nationalPlanObjectives,
         nationalPlanCoverage: ndcActionDetails?.adaptationProperties?.nationalPlanCoverage,
         EnablementTitle: ndcActionDetails?.enablementProperties?.title,
+        EnablementType: ndcActionDetails?.enablementProperties?.type,
         EnablementReport: ndcActionDetails?.enablementReportData,
         userEstimatedCredits: ndcActionDetails?.ndcFinancing?.userEstimatedCredits,
         methodologyEstimatedCredits: 0,
@@ -276,6 +283,9 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         title: ndcActionFormvalues.EnablementTitle,
       };
 
+      if (ndcActionFormvalues.EnablementType && ndcActionFormvalues.EnablementType.length > 0) {
+        ndcActionDetailObj.enablementProperties.type = ndcActionFormvalues.EnablementType;
+      }
       if (ndcActionFormvalues.EnablementReport && ndcActionFormvalues.EnablementReport.length > 0) {
         const enablementReport = await getBase64(
           ndcActionFormvalues.EnablementReport[0]?.originFileObj as RcFile
@@ -303,7 +313,15 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     return e?.fileList;
   };
 
-  useEffect(() => {}, [
+  useEffect(() => {
+    console.log('checkedOptionsGhgAvoided ------  ', checkedOptionsGhgAvoided);
+    console.log('inputNumberValueGhgAvoided ------  ', inputNumberValueGhgAvoided);
+    console.log('checkedOptionsGhgAvoided ------  ', checkedOptionsGhgReduced);
+    console.log('inputNumberValueGhgAvoided ------  ', inputNumberValueGhgReduced);
+    if (checkedOptionsGhgAvoided?.length < 1) {
+      setGhgEmissionAvoidedErrors(`${t('ndcAction:landAreaUnit')} ${t('ndcAction:isRequired')}`);
+    }
+  }, [
     checkedOptionsGhgAvoided,
     checkedOptionsGhgReduced,
     inputNumberValueGhgAvoided,
@@ -685,11 +703,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                         />
                       </div>
                     ))}
-                    {ghgEmissionAvoidedErrors !== '' && (
-                      <div className="validator">{`${t('ndcAction:landAreaUnit')} ${t(
-                        'ndcAction:isRequired'
-                      )}`}</div>
-                    )}
                   </Form.Item>
                 </Col>
               </Row>
@@ -701,6 +714,23 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
           <>
             <Form.Item label={t('ndcAction:title')} name="EnablementTitle">
               <Input style={{ width: 442 }} />
+            </Form.Item>
+            <Form.Item
+              label={t('ndcAction:type')}
+              name="EnablementType"
+              className="enablement-type-item"
+            >
+              <Checkbox.Group className="type-checkbox-grp">
+                <Row className="grp-row">
+                  {enablementTypesAndValues?.map((type: any) => (
+                    <Col lg={type.col} md={type.col + 1}>
+                      <Checkbox value={type.value} style={{ lineHeight: '32px' }}>
+                        {type.type}
+                      </Checkbox>
+                    </Col>
+                  ))}
+                </Row>
+              </Checkbox.Group>
             </Form.Item>
             <Row justify="space-between" align="middle">
               <Form.Item

@@ -72,5 +72,10 @@
   "coBenefitsSubTitle": "Co-Benefits",
   "ministryLevel": "Minitry Level",
   "ghgEmiReduced": "GHG emissions reduced( tCO2E )",
-  "ghgEmiAvoided": "GHG emissions avoided( tCO2E )"
+  "ghgEmiAvoided": "GHG emissions avoided( tCO2E )",
+  "type": "Type",
+  "capacityBuilding": "Capacity Building",
+  "instiArrangement": "Institutional Arrangement",
+  "stakeholderFramework": "Stakeholder Framework",
+  "techTransfer": "Technology Transfer"
 }
