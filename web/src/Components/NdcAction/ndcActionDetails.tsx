@@ -44,6 +44,7 @@ import {
 import { Sector } from '../../Casl/enums/sector.enum';
 import { error } from 'console';
 import { InfoCircle } from 'react-bootstrap-icons';
+import { enablementTypesAndValues } from '../../Definitions/enablementTypes.enum';
 
 export interface NdcActionDetailsProps {
   isBackBtnVisible: boolean;
@@ -74,12 +75,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     : 5000000;
 
   const ghgEmissionsGas = ['CO2', 'CH4', 'N20', 'HFCs', 'PFCs', 'SF6'];
-  const enablementTypesAndValues = [
-    { type: t('ndcAction:capacityBuilding'), value: 'capacityBuilding', col: 4 },
-    { type: t('ndcAction:instiArrangement'), value: 'institutionalArrangement', col: 5 },
-    { type: t('ndcAction:stakeholderFramework'), value: 'stakeholderFramework', col: 5 },
-    { type: t('ndcAction:techTransfer'), value: 'technologyTransfer', col: 4 },
-  ];
 
   useEffect(() => {
     if (programmeDetails) {
@@ -864,7 +859,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 <Row className="grp-row">
                   {enablementTypesAndValues?.map((type: any) => (
                     <Col lg={type.col} md={type.col + 1}>
-                      <Checkbox value={type.value} style={{ lineHeight: '32px' }}>
+                      <Checkbox value={type.type} style={{ lineHeight: '32px' }}>
                         {type.type}
                       </Checkbox>
                     </Col>
