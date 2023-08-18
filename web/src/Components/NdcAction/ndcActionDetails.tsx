@@ -707,13 +707,16 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                         }
                         let isMissingValue = false;
                         value?.map((item: any) => {
-                          if (!inputNumberValueGhgReducedGas[item]) {
+                          if (
+                            inputNumberValueGhgReducedGas === undefined ||
+                            !inputNumberValueGhgReducedGas[item]
+                          ) {
                             isMissingValue = true;
                           }
                         });
                         if (isMissingValue) {
                           return Promise.reject(
-                            `${t('ndcAction:ghgEmiReduced')} ${t('ndcAction:isRequired')}`
+                            `${t('ndcAction:value')} ${t('ndcAction:isRequired')}`
                           );
                         }
                         return Promise.resolve();
@@ -781,13 +784,16 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                         }
                         let isMissingValue = false;
                         value?.map((item: any) => {
-                          if (!inputNumberValueGhgAvoidedGas[item]) {
+                          if (
+                            inputNumberValueGhgAvoidedGas === undefined ||
+                            !inputNumberValueGhgAvoidedGas[item]
+                          ) {
                             isMissingValue = true;
                           }
                         });
                         if (isMissingValue) {
                           return Promise.reject(
-                            `${t('ndcAction:ghgEmiAvoided')} ${t('ndcAction:isRequired')}`
+                            `${t('ndcAction:value')} ${t('ndcAction:isRequired')}`
                           );
                         }
                         return Promise.resolve();

@@ -81,5 +81,6 @@
   "inNAP": "Included in NAP",
   "inNAPToolTip": "National Adaptation Plan (NAP)",
   "yes": "YES",
-  "no": "NO"
+  "no": "NO",
+  "value": "Value"
 }
