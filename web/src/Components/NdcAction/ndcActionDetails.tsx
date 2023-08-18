@@ -1,11 +1,14 @@
 import {
   Button,
+  Checkbox,
   Col,
   Form,
   Input,
   InputNumber,
+  Radio,
   Row,
   Select,
+  Tooltip,
   Upload,
   UploadFile,
   UploadProps,
@@ -39,6 +42,9 @@ import {
   calculateCredit,
 } from '@undp/carbon-credit-calculator';
 import { Sector } from '../../Casl/enums/sector.enum';
+import { error } from 'console';
+import { InfoCircle } from 'react-bootstrap-icons';
+import { enablementTypesAndValues } from '../../Definitions/enablementTypes.enum';
 
 export interface NdcActionDetailsProps {
   isBackBtnVisible: boolean;
@@ -57,11 +63,18 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const [sector, setSector] = useState<any>('');
   const [ndcActionTypeListFiltered, setNdcActionTypeListFiltered] =
     useState<any[]>(ndcActionTypeList);
+  const [checkedOptionsGhgReduced, setCheckedOptionsGhgReduced] = useState<any[]>([]);
+  const [checkedOptionsGhgAvoided, setCheckedOptionsGhgAvoided] = useState<any[]>([]);
+  const [inputNumberValueGhgAvoidedGas, setInputNumberValueGhgAvoidedGas] = useState<any>();
+  const [inputNumberValueGhgReducedGas, setInputNumberValueGhgReducedGas] = useState<any>();
+  const [includedInNAP, setIncludedInNAP] = useState<any>();
   const [form] = Form.useForm();
 
   const maximumImageSize = process.env.REACT_APP_MAXIMUM_FILE_SIZE
     ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
     : 5000000;
+
+  const ghgEmissionsGas = ['CO2', 'CH4', 'N20', 'HFCs', 'PFCs', 'SF6'];
 
   useEffect(() => {
     if (programmeDetails) {
@@ -78,6 +91,15 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         setmitigationType(ndcActionDetails?.typeOfMitigation);
       }
 
+      if (ndcActionDetails?.includedInNAP) {
+        setIncludedInNAP(ndcActionDetails?.includedInNAP);
+      }
+      if (ndcActionDetails?.inputNumberValueGhgAvoidedGas) {
+        setInputNumberValueGhgAvoidedGas(ndcActionDetails?.inputNumberValueGhgAvoidedGas);
+      }
+      if (ndcActionDetails?.inputNumberValueGhgReducedGas) {
+        setInputNumberValueGhgReducedGas(ndcActionDetails?.inputNumberValueGhgReducedGas);
+      }
       form.setFieldsValue({
         ndcActionType: ndcActionDetails?.action,
         mitigationType: ndcActionDetails?.typeOfMitigation,
@@ -90,6 +112,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         nationalPlanObjectives: ndcActionDetails?.adaptationProperties?.nationalPlanObjectives,
         nationalPlanCoverage: ndcActionDetails?.adaptationProperties?.nationalPlanCoverage,
         EnablementTitle: ndcActionDetails?.enablementProperties?.title,
+        EnablementType: ndcActionDetails?.enablementProperties?.type,
         EnablementReport: ndcActionDetails?.enablementReportData,
         userEstimatedCredits: ndcActionDetails?.ndcFinancing?.userEstimatedCredits,
         methodologyEstimatedCredits: 0,
@@ -204,12 +227,11 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const onNdcActionDetailsFormSubmit = async (ndcActionFormvalues: any) => {
     const ndcActionDetailObj: any = {};
     ndcActionDetailObj.action = ndcActionFormvalues.ndcActionType;
-    ndcActionDetailObj.methodology = t('ndcAction:goldStandard');
-
     if (
       ndcActionFormvalues.ndcActionType === NdcActionTypes.Mitigation ||
       ndcActionFormvalues.ndcActionType === NdcActionTypes.CrossCutting
     ) {
+      ndcActionDetailObj.methodology = t('ndcAction:goldStandard');
       ndcActionDetailObj.typeOfMitigation = ndcActionFormvalues.mitigationType;
       if (ndcActionFormvalues.mitigationType === MitigationTypes.AGRICULTURE) {
         ndcActionDetailObj.agricultureProperties = {
@@ -260,6 +282,15 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         nationalPlanObjectives: ndcActionFormvalues.nationalPlanObjectives,
         nationalPlanCoverage: ndcActionFormvalues.nationalPlanCoverage,
       };
+      if (includedInNAP === true || includedInNAP === false) {
+        ndcActionDetailObj.adaptationProperties.includedInNAP = includedInNAP;
+      }
+      if (inputNumberValueGhgAvoidedGas !== null || inputNumberValueGhgAvoidedGas !== undefined) {
+        ndcActionDetailObj.adaptationProperties.ghgEmissionsAvoided = inputNumberValueGhgAvoidedGas;
+      }
+      if (inputNumberValueGhgReducedGas !== null || inputNumberValueGhgReducedGas !== undefined) {
+        ndcActionDetailObj.adaptationProperties.ghgEmissionsReduced = inputNumberValueGhgReducedGas;
+      }
     }
 
     if (ndcActionFormvalues.ndcActionType === NdcActionTypes.Enablement) {
@@ -267,6 +298,9 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         title: ndcActionFormvalues.EnablementTitle,
       };
 
+      if (ndcActionFormvalues.EnablementType && ndcActionFormvalues.EnablementType.length > 0) {
+        ndcActionDetailObj.enablementProperties.type = ndcActionFormvalues.EnablementType;
+      }
       if (ndcActionFormvalues.EnablementReport && ndcActionFormvalues.EnablementReport.length > 0) {
         const enablementReport = await getBase64(
           ndcActionFormvalues.EnablementReport[0]?.originFileObj as RcFile
@@ -283,7 +317,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         : 0,
       systemEstimatedCredits: Number(ndcActionFormvalues.methodologyEstimatedCredits),
     };
-
     onFormSubmit(ndcActionDetailObj);
   };
 
@@ -292,6 +325,22 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
       return e;
     }
     return e?.fileList;
+  };
+
+  const onClickIncludedInNAPScope = (value: any) => {
+    if (value === includedInNAP) {
+      setIncludedInNAP(undefined);
+    } else {
+      setIncludedInNAP(value);
+    }
+  };
+
+  const onInCludedNAPChange = (event: any) => {
+    if (event?.target?.value === 'inNAP') {
+      setIncludedInNAP(true);
+    } else if (event?.target?.value === 'notInNAP') {
+      setIncludedInNAP(false);
+    }
   };
 
   return (
@@ -327,26 +376,6 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
               />
             </Form.Item>
           </Col>
-          <Col style={{ marginLeft: '38px' }}>
-            <Form.Item label={t('ndcAction:methodology')} name="methodology">
-              <span
-                style={{
-                  display: 'inline-block',
-                  border: '1px solid #D9D9D9',
-                  width: '154px',
-                  height: '38px',
-                  borderRadius: '4px',
-                  padding: '7px 8px',
-                  fontSize: '14px',
-                  backgroundColor: '#F0F0F0',
-                  color: '#8C8C8C',
-                }}
-              >
-                {' '}
-                {t('ndcAction:goldStandard')}
-              </span>
-            </Form.Item>
-          </Col>
         </Row>
 
         {ndcActionType === NdcActionTypes.CrossCutting && (
@@ -357,34 +386,58 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
 
         {(ndcActionType === NdcActionTypes.Mitigation ||
           ndcActionType === NdcActionTypes.CrossCutting) && (
-          <Row justify="start" align="middle">
-            <Form.Item
-              label={t('ndcAction:mitigationType')}
-              name="mitigationType"
-              rules={[
-                {
-                  required: true,
-                  message: `${t('ndcAction:mitigationType')} ${t('ndcAction:isRequired')}`,
-                },
-              ]}
-            >
-              <Select
-                size="large"
-                onChange={handleMitigationTypeChange}
-                style={{
-                  width: '249px',
-                  borderRadius: '4px',
-                }}
-                options={
-                  programmeDetails?.sector === Sector.Health ||
-                  programmeDetails?.sector === Sector.Education ||
-                  programmeDetails?.sector === Sector.Hospitality
-                    ? mitigationTypeList
-                    : sectorMitigationTypesListMapped[sector]
-                }
-              ></Select>
-            </Form.Item>
-          </Row>
+          <>
+            <Row justify="start" align="middle">
+              <Col>
+                <Form.Item
+                  label={t('ndcAction:mitigationType')}
+                  name="mitigationType"
+                  rules={[
+                    {
+                      required: true,
+                      message: `${t('ndcAction:mitigationType')} ${t('ndcAction:isRequired')}`,
+                    },
+                  ]}
+                >
+                  <Select
+                    size="large"
+                    onChange={handleMitigationTypeChange}
+                    style={{
+                      width: '249px',
+                      borderRadius: '4px',
+                    }}
+                    options={
+                      programmeDetails?.sector === Sector.Health ||
+                      programmeDetails?.sector === Sector.Education ||
+                      programmeDetails?.sector === Sector.Hospitality
+                        ? mitigationTypeList
+                        : sectorMitigationTypesListMapped[sector]
+                    }
+                  ></Select>
+                </Form.Item>
+              </Col>
+              <Col style={{ marginLeft: '38px' }}>
+                <Form.Item label={t('ndcAction:methodology')} name="methodology">
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      border: '1px solid #D9D9D9',
+                      width: '154px',
+                      height: '38px',
+                      borderRadius: '4px',
+                      padding: '7px 8px',
+                      fontSize: '14px',
+                      backgroundColor: '#F0F0F0',
+                      color: '#8C8C8C',
+                    }}
+                  >
+                    {' '}
+                    {t('ndcAction:goldStandard')}
+                  </span>
+                </Form.Item>
+              </Col>
+            </Row>
+          </>
         )}
 
         {(ndcActionType === NdcActionTypes.Mitigation ||
@@ -556,13 +609,57 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
           ndcActionType === NdcActionTypes.CrossCutting) && (
           <>
             <Row justify="start" align="middle">
-              <Form.Item label={t('ndcAction:implementingAgency')} name="implementingAgency">
-                <Select
-                  style={{ width: 442 }}
-                  size="large"
-                  options={implementingAgencyList.map((item) => ({ value: item, label: item }))}
-                />
-              </Form.Item>
+              <Col>
+                <Form.Item label={t('ndcAction:implementingAgency')} name="implementingAgency">
+                  <Select
+                    style={{ width: 442 }}
+                    size="large"
+                    options={implementingAgencyList.map((item) => ({ value: item, label: item }))}
+                  />
+                </Form.Item>
+              </Col>
+              <Col style={{ marginLeft: '38px' }} className="included-nap-col">
+                <Row className="in-nap-row">
+                  <Col span={9}>
+                    <div className="included-label">
+                      <div>{t('ndcAction:inNAP')}</div>
+                      <div className="info-container">
+                        <Tooltip
+                          arrowPointAtCenter
+                          placement="topLeft"
+                          trigger="hover"
+                          title={t('ndcAction:inNAPToolTip')}
+                          overlayClassName="custom-tooltip"
+                        >
+                          <InfoCircle color="#000000" size={17} />
+                        </Tooltip>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col span={8} className="included-val">
+                    <Radio.Group size="middle" onChange={onInCludedNAPChange} value={includedInNAP}>
+                      <div className="yes-no-radio-container">
+                        <Radio.Button
+                          className="yes-no-radio"
+                          value={true}
+                          onClick={() => onClickIncludedInNAPScope(true)}
+                        >
+                          {t('ndcAction:yes')}
+                        </Radio.Button>
+                      </div>
+                      <div className="yes-no-radio-container">
+                        <Radio.Button
+                          className="yes-no-radio"
+                          value={false}
+                          onClick={() => onClickIncludedInNAPScope(false)}
+                        >
+                          {t('ndcAction:no')}
+                        </Radio.Button>
+                      </div>
+                    </Radio.Group>
+                  </Col>
+                </Row>
+              </Col>
             </Row>
             <Row justify="start" align="middle">
               <Col>
@@ -587,6 +684,164 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                 </Form.Item>
               </Col>
             </Row>
+            <Row justify="start" align="middle">
+              <Col>
+                <Form.Item
+                  label={t('ndcAction:ghgEmiReduced')}
+                  name="ghgEmissionsReduced"
+                  style={{ width: 442 }}
+                  rules={[
+                    {
+                      required: true,
+                      validateTrigger: 'onBlur',
+                      validator: (rule, value) => {
+                        if (!value || value.length === 0) {
+                          return Promise.reject(
+                            `${t('ndcAction:ghgEmiReduced')} ${t('ndcAction:isRequired')}`
+                          );
+                        }
+                        let isMissingValue = false;
+                        value?.map((item: any) => {
+                          if (
+                            inputNumberValueGhgReducedGas === undefined ||
+                            !inputNumberValueGhgReducedGas[item]
+                          ) {
+                            isMissingValue = true;
+                          }
+                        });
+                        if (isMissingValue) {
+                          return Promise.reject(
+                            `${t('ndcAction:value')} ${t('ndcAction:isRequired')}`
+                          );
+                        }
+                        return Promise.resolve();
+                      },
+                    },
+                  ]}
+                >
+                  <Checkbox.Group>
+                    {ghgEmissionsGas.map((option: any, i: any) => (
+                      <div key={option} className="row-custom">
+                        <Checkbox
+                          value={option}
+                          checked={checkedOptionsGhgReduced.includes(option)}
+                          onChange={(e: any) => {
+                            if (e?.target?.checked) {
+                              setCheckedOptionsGhgReduced([...checkedOptionsGhgReduced, option]);
+                            } else if (!e?.target?.checked) {
+                              const reducedGasAndVal: any = inputNumberValueGhgReducedGas;
+                              if (reducedGasAndVal && reducedGasAndVal[option]) {
+                                delete reducedGasAndVal[option];
+                              }
+                              setInputNumberValueGhgReducedGas(reducedGasAndVal);
+                              setCheckedOptionsGhgReduced([
+                                ...checkedOptionsGhgReduced.filter((value) => value !== option),
+                              ]);
+                            }
+                          }}
+                        >
+                          {option}
+                        </Checkbox>
+                        <InputNumber
+                          value={
+                            inputNumberValueGhgReducedGas && inputNumberValueGhgReducedGas[option]
+                              ? inputNumberValueGhgReducedGas[option]
+                              : null
+                          }
+                          size="small"
+                          min={0}
+                          disabled={!checkedOptionsGhgReduced.includes(option)}
+                          onChange={(e: any) => {
+                            setInputNumberValueGhgReducedGas({
+                              ...inputNumberValueGhgReducedGas,
+                              [option]: e,
+                            });
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </Checkbox.Group>
+                </Form.Item>
+              </Col>
+              <Col style={{ marginLeft: '38px' }}>
+                <Form.Item
+                  label={t('ndcAction:ghgEmiAvoided')}
+                  name="ghgEmissionsAvoided"
+                  style={{ width: 442 }}
+                  rules={[
+                    {
+                      required: true,
+                      validateTrigger: 'onBlur',
+                      validator: (rule, value) => {
+                        if (!value || value.length === 0) {
+                          return Promise.reject(
+                            `${t('ndcAction:ghgEmiAvoided')} ${t('ndcAction:isRequired')}`
+                          );
+                        }
+                        let isMissingValue = false;
+                        value?.map((item: any) => {
+                          if (
+                            inputNumberValueGhgAvoidedGas === undefined ||
+                            !inputNumberValueGhgAvoidedGas[item]
+                          ) {
+                            isMissingValue = true;
+                          }
+                        });
+                        if (isMissingValue) {
+                          return Promise.reject(
+                            `${t('ndcAction:value')} ${t('ndcAction:isRequired')}`
+                          );
+                        }
+                        return Promise.resolve();
+                      },
+                    },
+                  ]}
+                >
+                  <Checkbox.Group>
+                    {ghgEmissionsGas.map((option, i) => (
+                      <div key={option} className="row-custom">
+                        <Checkbox
+                          value={option}
+                          checked={checkedOptionsGhgAvoided.includes(option)}
+                          onChange={(e: any) => {
+                            if (e?.target?.checked) {
+                              setCheckedOptionsGhgAvoided([...checkedOptionsGhgAvoided, option]);
+                            } else if (!e?.target?.checked) {
+                              const avaoidedGasAndVal: any = inputNumberValueGhgAvoidedGas;
+                              if (avaoidedGasAndVal && avaoidedGasAndVal[option]) {
+                                delete avaoidedGasAndVal[option];
+                              }
+                              setInputNumberValueGhgAvoidedGas(avaoidedGasAndVal);
+                              setCheckedOptionsGhgAvoided([
+                                ...checkedOptionsGhgAvoided.filter((value) => value !== option),
+                              ]);
+                            }
+                          }}
+                        >
+                          {option}
+                        </Checkbox>
+                        <InputNumber
+                          value={
+                            inputNumberValueGhgAvoidedGas && inputNumberValueGhgAvoidedGas[option]
+                              ? inputNumberValueGhgAvoidedGas[option]
+                              : null
+                          }
+                          size="small"
+                          min={0}
+                          disabled={!checkedOptionsGhgAvoided.includes(option)}
+                          onChange={(e: any) => {
+                            setInputNumberValueGhgAvoidedGas({
+                              ...inputNumberValueGhgAvoidedGas,
+                              [option]: e,
+                            });
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </Checkbox.Group>
+                </Form.Item>
+              </Col>
+            </Row>
           </>
         )}
 
@@ -594,6 +849,23 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
           <>
             <Form.Item label={t('ndcAction:title')} name="EnablementTitle">
               <Input style={{ width: 442 }} />
+            </Form.Item>
+            <Form.Item
+              label={t('ndcAction:type')}
+              name="EnablementType"
+              className="enablement-type-item"
+            >
+              <Checkbox.Group className="type-checkbox-grp">
+                <Row className="grp-row">
+                  {enablementTypesAndValues?.map((type: any) => (
+                    <Col lg={type.col} md={type.col + 1}>
+                      <Checkbox value={type.type} style={{ lineHeight: '32px' }}>
+                        {type.type}
+                      </Checkbox>
+                    </Col>
+                  ))}
+                </Row>
+              </Checkbox.Group>
             </Form.Item>
             <Row justify="space-between" align="middle">
               <Form.Item

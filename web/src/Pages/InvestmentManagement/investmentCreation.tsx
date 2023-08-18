@@ -409,6 +409,26 @@ export const AddInvestmentComponent = () => {
                             </Col>
                           </Row>
                         )}
+                        {instrument && instrument.indexOf(Instrument.INKIND) >= 0 && (
+                          <Row className="row" gutter={[16, 16]}>
+                            <Col xl={12} md={24}>
+                              <div className="details-part-two">
+                                <Form.Item
+                                  label={t('programme:description')}
+                                  name="description"
+                                  rules={[
+                                    {
+                                      required: false,
+                                      message: '',
+                                    },
+                                  ]}
+                                >
+                                  <Input size="large" />
+                                </Form.Item>
+                              </div>
+                            </Col>
+                          </Row>
+                        )}
                         {instrument && instrument.indexOf(Instrument.OTHER) >= 0 && (
                           <Row className="row" gutter={[16, 16]}>
                             <Col xl={12} md={24}>

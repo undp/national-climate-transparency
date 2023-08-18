@@ -72,7 +72,6 @@ export const AddProgrammeComponent = () => {
   const [current, setCurrent] = useState<number>(0);
   const [isUpdate, setIsUpdate] = useState(false);
   const [includedInNDC, setIncludedInNDC] = useState<any>();
-  const [includedInNAP, setIncludedInNAP] = useState<any>();
   const [countries, setCountries] = useState<[]>([]);
   const [organisationsList, setOrganisationList] = useState<any[]>([]);
   const [userOrgTaxId, setUserOrgTaxId] = useState<any>('');
@@ -330,8 +329,6 @@ export const AddProgrammeComponent = () => {
             values?.ndcScope !== null && { ndcScope: values?.ndcScope === 'true' ? true : false }),
           ...(includedInNDC !== undefined &&
             includedInNDC !== null && { includedInNdc: includedInNDC }),
-          ...(includedInNAP !== undefined &&
-            includedInNAP !== null && { includedInNap: includedInNAP }),
         },
       };
       if (logoUrls?.length > 0) {
@@ -462,27 +459,11 @@ export const AddProgrammeComponent = () => {
     }
   };
 
-  const onClickIncludedInNAPScope = (value: any) => {
-    if (value === includedInNAP) {
-      setIncludedInNAP(undefined);
-    } else {
-      setIncludedInNAP(value);
-    }
-  };
-
   const onChangeGeoLocation = (values: any[]) => {
     if (values.includes('National')) {
       const buyerCountryValues = regionsList;
       const newBuyerValues = buyerCountryValues?.filter((item: any) => item !== 'National');
       formOne.setFieldValue('geographicalLocation', [...newBuyerValues]);
-    }
-  };
-
-  const onInCludedNAPChange = (event: any) => {
-    if (event?.target?.value === 'inNAP') {
-      setIncludedInNAP(true);
-    } else if (event?.target?.value === 'notInNAP') {
-      setIncludedInNAP(false);
     }
   };
 
@@ -1109,52 +1090,6 @@ export const AddProgrammeComponent = () => {
                                       className="yes-no-radio"
                                       value={false}
                                       onClick={() => onClickIncludedInNDCScope(false)}
-                                    >
-                                      {t('addProgramme:no')}
-                                    </Radio.Button>
-                                  </div>
-                                </Radio.Group>
-                              </Col>
-                            </Row>
-                          </Col>
-                          <Col md={24} xl={12} className="in-nap-col">
-                            <Row className="in-nap-row">
-                              <Col md={16} lg={18} xl={18}>
-                                <div className="included-label">
-                                  <div>{t('addProgramme:inNAP')}</div>
-                                  <div className="info-container">
-                                    <Tooltip
-                                      arrowPointAtCenter
-                                      placement="topLeft"
-                                      trigger="hover"
-                                      title={t('addProgramme:inNAPToolTip')}
-                                      overlayClassName="custom-tooltip"
-                                    >
-                                      <InfoCircle color="#000000" size={17} />
-                                    </Tooltip>
-                                  </div>
-                                </div>
-                              </Col>
-                              <Col md={8} lg={6} xl={6} className="included-val">
-                                <Radio.Group
-                                  size="middle"
-                                  onChange={onInCludedNAPChange}
-                                  value={includedInNAP}
-                                >
-                                  <div className="yes-no-radio-container">
-                                    <Radio.Button
-                                      className="yes-no-radio"
-                                      value={true}
-                                      onClick={() => onClickIncludedInNAPScope(true)}
-                                    >
-                                      {t('addProgramme:yes')}
-                                    </Radio.Button>
-                                  </div>
-                                  <div className="yes-no-radio-container">
-                                    <Radio.Button
-                                      className="yes-no-radio"
-                                      value={false}
-                                      onClick={() => onClickIncludedInNAPScope(false)}
                                     >
                                       {t('addProgramme:no')}
                                     </Radio.Button>
