@@ -18,6 +18,8 @@ export interface AdaptationProperties {
   implementingAgency: string;
   nationalPlanObjectives: string;
   nationalPlanCoverage: string;
+  ghgEmissionsReduced: any;
+  ghgEmissionsAvoided: any;
 }
 
 export interface CoBenefitsProperties {}

@@ -280,8 +280,10 @@ const NdcActionView = () => {
         ndcActionDetails.adaptationProperties.implementingAgency;
       adaptationDetails[t('ndcAction:viewAdaptationNationalPlanObjectives')] =
         ndcActionDetails.adaptationProperties.nationalPlanObjectives;
-      adaptationDetails[t('ndcAction:viewAdaptationNationalPlanCoverage')] =
-        ndcActionDetails.adaptationProperties.nationalPlanCoverage;
+      adaptationDetails[t('ndcAction:viewGhgEmissionsAvoided')] =
+        ndcActionDetails.adaptationProperties.ghgEmissionsAvoided;
+      adaptationDetails[t('ndcAction:viewGhgEmissionsReduced')] =
+        ndcActionDetails.adaptationProperties.ghgEmissionsReduced;
     }
     return adaptationDetails;
   };
