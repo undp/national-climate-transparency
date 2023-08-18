@@ -233,7 +233,6 @@ const NdcActionView = () => {
         {addSpaces(ndcActionDetails?.status as string)}
       </Tag>
     ),
-    [t('ndcAction:viewMethodology')]: ndcActionDetails?.methodology,
   };
 
   const getNdcActionMitigationDetails = () => {
@@ -269,6 +268,7 @@ const NdcActionView = () => {
         ndcActionDetails.ndcFinancing.systemEstimatedCredits
       );
     }
+    mitigationDetails[t('ndcAction:viewMethodology')] = ndcActionDetails?.methodology;
     return mitigationDetails;
   };
 
@@ -291,6 +291,9 @@ const NdcActionView = () => {
 
     if (ndcActionDetails?.enablementProperties) {
       details[t('ndcAction:title')] = ndcActionDetails.enablementProperties?.title;
+      details[t('ndcAction:type')] = ndcActionDetails.enablementProperties?.type
+        ? ndcActionDetails.enablementProperties?.type.join(', ')
+        : '-';
       if (ndcActionDetails.enablementProperties?.report) {
         details[t('ndcAction:report')] = ndcActionDetails.enablementProperties?.report && (
           <a
