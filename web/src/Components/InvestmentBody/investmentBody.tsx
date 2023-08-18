@@ -56,37 +56,43 @@ const InvestmentBody: FC<InvestmentBodyProps> = (props: InvestmentBodyProps) => 
       </div>
       <div className="amount">${addCommSep(investmentData?.amount)}</div>
       <div className="actions">
-        <div className="actions-icon-container">
-          <Tooltip title={investmentData?.type} color={TooltipColor} key={TooltipColor}>
-            {investmentData?.type === InvestmentType.PUBLIC ? (
-              <EyeOutlined className="action-icons" />
-            ) : (
-              <EyeInvisibleOutlined className="action-icons" />
-            )}
-          </Tooltip>
-        </div>
-        <div className="actions-icon-container">
-          <Tooltip title={investmentData?.level} color={TooltipColor} key={TooltipColor}>
-            {investmentData?.level === InvestmentLevel.INTERNATIONAL ? (
-              <GlobalOutlined className="action-icons" />
-            ) : (
-              <FlagOutlined className="action-icons" />
-            )}
-          </Tooltip>
-        </div>
-        <div className="actions-icon-container">
-          <Tooltip
-            title={addSpaces(investmentData?.stream)}
-            color={TooltipColor}
-            key={TooltipColor}
-          >
-            {investmentData?.stream === InvestmentStream.CLIMATE_FINANCE ? (
-              <BankOutlined className="action-icons" />
-            ) : (
-              <LineChartOutlined className="action-icons" />
-            )}
-          </Tooltip>
-        </div>
+        {investmentData?.type !== null && (
+          <div className="actions-icon-container">
+            <Tooltip title={investmentData?.type} color={TooltipColor} key={TooltipColor}>
+              {investmentData?.type === InvestmentType.PUBLIC ? (
+                <EyeOutlined className="action-icons" />
+              ) : (
+                <EyeInvisibleOutlined className="action-icons" />
+              )}
+            </Tooltip>
+          </div>
+        )}
+        {investmentData?.level !== null && (
+          <div className="actions-icon-container">
+            <Tooltip title={investmentData?.level} color={TooltipColor} key={TooltipColor}>
+              {investmentData?.level === InvestmentLevel.INTERNATIONAL ? (
+                <GlobalOutlined className="action-icons" />
+              ) : (
+                <FlagOutlined className="action-icons" />
+              )}
+            </Tooltip>
+          </div>
+        )}
+        {investmentData?.stream !== null && (
+          <div className="actions-icon-container">
+            <Tooltip
+              title={addSpaces(investmentData?.stream)}
+              color={TooltipColor}
+              key={TooltipColor}
+            >
+              {investmentData?.stream === InvestmentStream.CLIMATE_FINANCE ? (
+                <BankOutlined className="action-icons" />
+              ) : (
+                <LineChartOutlined className="action-icons" />
+              )}
+            </Tooltip>
+          </div>
+        )}
       </div>
     </div>
   );
