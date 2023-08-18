@@ -84,6 +84,7 @@ export const AddProgrammeComponent = () => {
   const [selectedSector, setSelectedSector] = useState<string>('');
   const [ministrySectoralScope, setMinistrySectoralScope] = useState<any[]>([]);
   const [availableSecoralScope, setAvailableSectoralScope] = useState<any[]>([]);
+  const [selectableSectoralScope, setSelectableSectoralScope] = useState<any[]>([]);
   const [availableSectar, setAvailableSectar] = useState<any[]>([]);
 
   const initialOrganisationOwnershipValues: any[] = [
@@ -513,8 +514,27 @@ export const AddProgrammeComponent = () => {
   };
 
   useEffect(() => {
-    getOrganisationsDetails();
-  }, []);
+    if (selectedSector !== '' && userInfoState?.companyRole === CompanyRole.MINISTRY) {
+      formOne.setFieldValue('sectoralScope', '');
+      if (
+        selectedSector === String(Sector.Health) ||
+        selectedSector === String(Sector.Education) ||
+        selectedSector === String(Sector.Hospitality)
+      ) {
+        setSelectableSectoralScope(availableSecoralScope);
+      } else {
+        const sScopes: any = [];
+        availableSecoralScope?.map((sectoralScope: any) => {
+          if (sectoralScopes[selectedSector]?.includes(sectoralScope?.key)) {
+            sScopes.push(sectoralScope);
+          }
+        });
+        setSelectableSectoralScope([...sScopes]);
+      }
+    } else if (selectedSector !== '') {
+      formOne.setFieldValue('sectoralScope', '');
+    }
+  }, [selectedSector]);
 
   return (
     <div className="add-programme-main-container">
@@ -925,7 +945,7 @@ export const AddProgrammeComponent = () => {
                               >
                                 <Select size="large">
                                   {userInfoState?.companyRole === CompanyRole.MINISTRY
-                                    ? availableSecoralScope?.map((item: any) => (
+                                    ? selectableSectoralScope?.map((item: any) => (
                                         <Select.Option key={item.value} value={item.value}>
                                           {item.key}
                                         </Select.Option>
