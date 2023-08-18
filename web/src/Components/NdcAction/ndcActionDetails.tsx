@@ -5,8 +5,10 @@ import {
   Form,
   Input,
   InputNumber,
+  Radio,
   Row,
   Select,
+  Tooltip,
   Upload,
   UploadFile,
   UploadProps,
@@ -41,6 +43,7 @@ import {
 } from '@undp/carbon-credit-calculator';
 import { Sector } from '../../Casl/enums/sector.enum';
 import { error } from 'console';
+import { InfoCircle } from 'react-bootstrap-icons';
 
 export interface NdcActionDetailsProps {
   isBackBtnVisible: boolean;
@@ -63,6 +66,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
   const [inputNumberValueGhgReduced, setInputNumberValueGhgReduced] = useState<any[]>([]);
   const [checkedOptionsGhgAvoided, setCheckedOptionsGhgAvoided] = useState<any[]>([]);
   const [inputNumberValueGhgAvoided, setInputNumberValueGhgAvoided] = useState<any[]>([]);
+  const [includedInNAP, setIncludedInNAP] = useState<any>();
   const [ghgEmissionAvoidedErrors, setGhgEmissionAvoidedErrors] = useState<any>('');
   const [form] = Form.useForm();
 
@@ -304,6 +308,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         : 0,
       systemEstimatedCredits: Number(ndcActionFormvalues.methodologyEstimatedCredits),
     };
+    console.log('ndc action form values -------- > ', ndcActionDetailObj);
 
     onFormSubmit(ndcActionDetailObj);
   };
@@ -329,6 +334,22 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     inputNumberValueGhgAvoided,
     inputNumberValueGhgReduced,
   ]);
+
+  const onClickIncludedInNAPScope = (value: any) => {
+    if (value === includedInNAP) {
+      setIncludedInNAP(undefined);
+    } else {
+      setIncludedInNAP(value);
+    }
+  };
+
+  const onInCludedNAPChange = (event: any) => {
+    if (event?.target?.value === 'inNAP') {
+      setIncludedInNAP(true);
+    } else if (event?.target?.value === 'notInNAP') {
+      setIncludedInNAP(false);
+    }
+  };
 
   return (
     <div className="ndc-action-details-container">
@@ -598,13 +619,57 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
           ndcActionType === NdcActionTypes.CrossCutting) && (
           <>
             <Row justify="start" align="middle">
-              <Form.Item label={t('ndcAction:implementingAgency')} name="implementingAgency">
-                <Select
-                  style={{ width: 442 }}
-                  size="large"
-                  options={implementingAgencyList.map((item) => ({ value: item, label: item }))}
-                />
-              </Form.Item>
+              <Col>
+                <Form.Item label={t('ndcAction:implementingAgency')} name="implementingAgency">
+                  <Select
+                    style={{ width: 442 }}
+                    size="large"
+                    options={implementingAgencyList.map((item) => ({ value: item, label: item }))}
+                  />
+                </Form.Item>
+              </Col>
+              <Col style={{ marginLeft: '38px' }} className="included-nap-col">
+                <Row className="in-nap-row">
+                  <Col span={9}>
+                    <div className="included-label">
+                      <div>{t('ndcAction:inNAP')}</div>
+                      <div className="info-container">
+                        <Tooltip
+                          arrowPointAtCenter
+                          placement="topLeft"
+                          trigger="hover"
+                          title={t('ndcAction:inNAPToolTip')}
+                          overlayClassName="custom-tooltip"
+                        >
+                          <InfoCircle color="#000000" size={17} />
+                        </Tooltip>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col span={8} className="included-val">
+                    <Radio.Group size="middle" onChange={onInCludedNAPChange} value={includedInNAP}>
+                      <div className="yes-no-radio-container">
+                        <Radio.Button
+                          className="yes-no-radio"
+                          value={true}
+                          onClick={() => onClickIncludedInNAPScope(true)}
+                        >
+                          {t('ndcAction:yes')}
+                        </Radio.Button>
+                      </div>
+                      <div className="yes-no-radio-container">
+                        <Radio.Button
+                          className="yes-no-radio"
+                          value={false}
+                          onClick={() => onClickIncludedInNAPScope(false)}
+                        >
+                          {t('ndcAction:no')}
+                        </Radio.Button>
+                      </div>
+                    </Radio.Group>
+                  </Col>
+                </Row>
+              </Col>
             </Row>
             <Row justify="start" align="middle">
               <Col>
