@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import './investmentBody.scss';
-import { addCommSep } from '@undp/carbon-library';
+import { addCommSep, addSpaces } from '@undp/carbon-library';
 import {
   BankOutlined,
   CheckCircleOutlined,
@@ -17,8 +17,9 @@ import { InvestmentStream } from '../../Casl/enums/investment.stream';
 import moment from 'moment';
 import { InvestmentStatus } from '../../Casl/enums/investment.status';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { Skeleton } from 'antd';
+import { Skeleton, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { TooltipColor } from '../../Pages/Common/role.color.constants';
 
 export interface InvestmentBodyProps {
   data: any;
@@ -56,25 +57,35 @@ const InvestmentBody: FC<InvestmentBodyProps> = (props: InvestmentBodyProps) => 
       <div className="amount">${addCommSep(investmentData?.amount)}</div>
       <div className="actions">
         <div className="actions-icon-container">
-          {investmentData?.type === InvestmentType.PUBLIC ? (
-            <EyeOutlined className="action-icons" />
-          ) : (
-            <EyeInvisibleOutlined className="action-icons" />
-          )}
+          <Tooltip title={investmentData?.type} color={TooltipColor} key={TooltipColor}>
+            {investmentData?.type === InvestmentType.PUBLIC ? (
+              <EyeOutlined className="action-icons" />
+            ) : (
+              <EyeInvisibleOutlined className="action-icons" />
+            )}
+          </Tooltip>
         </div>
         <div className="actions-icon-container">
-          {investmentData?.level === InvestmentLevel.INTERNATIONAL ? (
-            <GlobalOutlined className="action-icons" />
-          ) : (
-            <FlagOutlined className="action-icons" />
-          )}
+          <Tooltip title={investmentData?.level} color={TooltipColor} key={TooltipColor}>
+            {investmentData?.level === InvestmentLevel.INTERNATIONAL ? (
+              <GlobalOutlined className="action-icons" />
+            ) : (
+              <FlagOutlined className="action-icons" />
+            )}
+          </Tooltip>
         </div>
         <div className="actions-icon-container">
-          {investmentData?.stream === InvestmentStream.CLIMATE_FINANCE ? (
-            <BankOutlined className="action-icons" />
-          ) : (
-            <LineChartOutlined className="action-icons" />
-          )}
+          <Tooltip
+            title={addSpaces(investmentData?.stream)}
+            color={TooltipColor}
+            key={TooltipColor}
+          >
+            {investmentData?.stream === InvestmentStream.CLIMATE_FINANCE ? (
+              <BankOutlined className="action-icons" />
+            ) : (
+              <LineChartOutlined className="action-icons" />
+            )}
+          </Tooltip>
         </div>
       </div>
     </div>

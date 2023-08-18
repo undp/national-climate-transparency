@@ -97,6 +97,10 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         setmitigationType(ndcActionDetails?.typeOfMitigation);
       }
 
+      if (ndcActionDetails?.includedInNAP) {
+        setIncludedInNAP(ndcActionDetails?.includedInNAP);
+      }
+
       form.setFieldsValue({
         ndcActionType: ndcActionDetails?.action,
         mitigationType: ndcActionDetails?.typeOfMitigation,
@@ -225,7 +229,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
     const ndcActionDetailObj: any = {};
     ndcActionDetailObj.action = ndcActionFormvalues.ndcActionType;
     if (ndcActionFormvalues.ndcActionType === NdcActionTypes.Mitigation) {
-      ndcActionDetailObj.methodology = t('ndcAction:goldStandard');
+      ndcActionDetailObj.mitigationProperties.methodology = t('ndcAction:goldStandard');
     }
 
     if (
@@ -282,6 +286,9 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
         nationalPlanObjectives: ndcActionFormvalues.nationalPlanObjectives,
         nationalPlanCoverage: ndcActionFormvalues.nationalPlanCoverage,
       };
+      if (includedInNAP === true || includedInNAP === false) {
+        ndcActionDetailObj.adaptationProperties.includedInNAP = includedInNAP;
+      }
     }
 
     if (ndcActionFormvalues.ndcActionType === NdcActionTypes.Enablement) {
