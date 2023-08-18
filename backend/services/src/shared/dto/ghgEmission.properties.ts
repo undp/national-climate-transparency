@@ -1,38 +1,42 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { BuildingType } from "@undp/carbon-credit-calculator";
 import { IsNotEmpty, IsPositive, IsNumber, IsEnum, IsOptional, IsString } from "class-validator";
-import { GhgEmissionDataProperties } from "./ghgEmission.properties";
 
-export class AdaptationProperties {
+export class GhgEmissionDataProperties {
     
     @ApiPropertyOptional()
     @IsNotEmpty()
     @IsOptional()
     @IsString()
-    implementingAgency: string;
+    CO2: number
 
     @ApiPropertyOptional()
     @IsNotEmpty()
     @IsOptional()
     @IsString()
-    nationalPlanObjectives: string;
+    CH4: number
 
+   @ApiPropertyOptional()
+    @IsNotEmpty()
+    @IsOptional()
+    @IsString()
+    N2O: number
+    
+   @ApiPropertyOptional()
+    @IsNotEmpty()
+    @IsOptional()
+    @IsString()
+    HFCs: number
+    
     @ApiPropertyOptional()
     @IsNotEmpty()
     @IsOptional()
     @IsString()
-    nationalPlanCoverage: string;
+    PFCs:number
     
-    @IsNotEmpty()
-    @ApiProperty()
-    ghgEmissionsAvoided: GhgEmissionDataProperties;
-    
-    @IsNotEmpty()
-    @ApiProperty()
-    ghgEmissionsReduced:GhgEmissionDataProperties;
-
     @ApiPropertyOptional()
     @IsNotEmpty()
     @IsOptional()
-    includedInNAP: boolean;
+    @IsString()
+    SF6: number
 }

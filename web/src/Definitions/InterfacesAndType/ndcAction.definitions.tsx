@@ -24,6 +24,7 @@ export interface CoBenefitsProperties {}
 
 export interface EnablementProperties {
   title: string;
+  type?: any[];
   report?: string;
 }
 
