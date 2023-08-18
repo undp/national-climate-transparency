@@ -754,6 +754,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                               : null
                           }
                           size="small"
+                          min={0}
                           disabled={!checkedOptionsGhgReduced.includes(option)}
                           onChange={(e: any) => {
                             setInputNumberValueGhgReducedGas({
@@ -831,6 +832,7 @@ const NdcActionDetails = (props: NdcActionDetailsProps) => {
                               : null
                           }
                           size="small"
+                          min={0}
                           disabled={!checkedOptionsGhgAvoided.includes(option)}
                           onChange={(e: any) => {
                             setInputNumberValueGhgAvoidedGas({
