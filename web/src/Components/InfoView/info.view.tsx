@@ -29,11 +29,24 @@ const InfoView: FC<InfoViewProps> = (props: InfoViewProps) => {
                   {k}
                 </Col>
                 <Col span={12} className="field-value">
-                  {data[k] instanceof DateTime
-                    ? data[k].toFormat(dateFormat)
-                    : data[k] === '' || !data[k] || data[k] === 'NaN'
-                    ? '-'
-                    : data[k]}
+                  {k.includes('GHG emissions') ? (
+                    Object.entries(data[k]).map(([key, value]) => {
+                      return (
+                        <div className="row">
+                          <div className="key">{key}</div>
+                          <div className="data">{data[k][key]}</div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <span>
+                      {data[k] instanceof DateTime
+                        ? data[k].toFormat(dateFormat)
+                        : data[k] === '' || !data[k] || data[k] === 'NaN'
+                        ? '-'
+                        : data[k]}
+                    </span>
+                  )}
                 </Col>
               </Row>
             );

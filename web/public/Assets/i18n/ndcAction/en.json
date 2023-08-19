@@ -82,5 +82,7 @@
   "inNAPToolTip": "National Adaptation Plan (NAP)",
   "yes": "YES",
   "no": "NO",
-  "value": "Value"
+  "value": "Value",
+  "viewGhgEmissionsAvoided": "GHG emissions avoided (tCO2E)",
+  "viewGhgEmissionsReduced": "GHG emissions reduced (tCO2E)"
 }
