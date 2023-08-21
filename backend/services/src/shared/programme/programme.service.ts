@@ -1388,12 +1388,6 @@ export class ProgrammeService {
         }
     const pr = await this.findById(d.programmeId);
     if (user.companyRole === CompanyRole.MINISTRY) {
-      if(d.type === DocType.VERIFICATION_REPORT) {
-        throw new HttpException(
-          this.helperService.formatReqMessagesString("user.userUnAUth", []),
-          HttpStatus.FORBIDDEN
-        );
-      }
       const permission = await this.findPermissionForMinistryUser(user, pr.sectoralScope);
       if(!permission) {
         throw new HttpException(
@@ -1542,8 +1536,7 @@ export class ProgrammeService {
 
     let ndc: NDCAction;
     if (user.companyRole === CompanyRole.GOVERNMENT || 
-       (documentDto.type !== DocType.VERIFICATION_REPORT && 
-        user.companyRole === CompanyRole.MINISTRY && 
+       (user.companyRole === CompanyRole.MINISTRY && 
         permissionForMinistryLevel)) {
       this.logger.log(
         `Approving document since the user is ${user.companyRole}`
