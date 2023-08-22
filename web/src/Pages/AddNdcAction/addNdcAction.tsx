@@ -45,8 +45,6 @@ const AddNdcAction = () => {
       if (ndcActionDetailsObj.enablementReportData) {
         delete ndcActionDetailsObj.enablementReportData;
       }
-
-      ndcActionDetailsObj.methodology = t('ndcAction:goldStandard');
       const response: any = await post('national/programme/addNDCAction', ndcActionDetailsObj);
       if (response.status === 200 || response.status === 201) {
         message.open({
