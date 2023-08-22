@@ -280,10 +280,22 @@ const NdcActionView = () => {
         ndcActionDetails.adaptationProperties.implementingAgency;
       adaptationDetails[t('ndcAction:viewAdaptationNationalPlanObjectives')] =
         ndcActionDetails.adaptationProperties.nationalPlanObjectives;
-      adaptationDetails[t('ndcAction:viewGhgEmissionsAvoided')] =
-        ndcActionDetails.adaptationProperties.ghgEmissionsAvoided;
-      adaptationDetails[t('ndcAction:viewGhgEmissionsReduced')] =
-        ndcActionDetails.adaptationProperties.ghgEmissionsReduced;
+      adaptationDetails[t('ndcAction:viewAdaptationNationalPlanCoverage')] =
+        ndcActionDetails.adaptationProperties.nationalPlanCoverage;
+      adaptationDetails[t('ndcAction:viewIncludedInNAP')] = ndcActionDetails?.adaptationProperties
+        ?.includedInNAP
+        ? 'Yes'
+        : ndcActionDetails?.adaptationProperties?.includedInNAP === false
+        ? 'No'
+        : '-';
+      adaptationDetails[t('ndcAction:viewGhgEmissionsAvoided')] = ndcActionDetails
+        ?.adaptationProperties?.ghgEmissionsAvoided
+        ? ndcActionDetails.adaptationProperties.ghgEmissionsAvoided
+        : {};
+      adaptationDetails[t('ndcAction:viewGhgEmissionsReduced')] = ndcActionDetails
+        ?.adaptationProperties?.ghgEmissionsReduced
+        ? ndcActionDetails.adaptationProperties.ghgEmissionsReduced
+        : {};
     }
     return adaptationDetails;
   };

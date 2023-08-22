@@ -18,6 +18,7 @@ export interface AdaptationProperties {
   implementingAgency: string;
   nationalPlanObjectives: string;
   nationalPlanCoverage: string;
+  includedInNAP: any;
   ghgEmissionsReduced: any;
   ghgEmissionsAvoided: any;
 }
