@@ -194,10 +194,6 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
       (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
     userInfoState?.userRole !== Role.ViewOnly;
 
-  const verficationCompanyRolePermission =
-    userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
-    userInfoState?.userRole !== Role.ViewOnly;
-
   const monitoringReportPending = monitoringReportData?.status === DocumentStatus.PENDING;
   const monitoringReportAccepted = monitoringReportData?.status === DocumentStatus.ACCEPTED;
   const monitoringReportRejected = monitoringReportData?.status === DocumentStatus.REJECTED;
@@ -443,7 +439,7 @@ const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps) => {
             <div className="icon">
               {verificationReportData?.url ? (
                 verifcationReportPending ? (
-                  verficationCompanyRolePermission && (
+                  companyRolePermission && (
                     <>
                       <LikeOutlined
                         onClick={() =>
