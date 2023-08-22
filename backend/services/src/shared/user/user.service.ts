@@ -463,7 +463,7 @@ export class UserService {
             "user.minUserCannotCreateMin",
             []
           ),
-          HttpStatus.BAD_REQUEST
+          HttpStatus.FORBIDDEN
         );
       }
 
