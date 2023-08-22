@@ -71,8 +71,8 @@
   "userEstimatedCreditsInvalid": "Estimated Credits for the NDC Action cannot be greater than the Estimated Credits for the programme",
   "coBenefitsSubTitle": "Co-Benefits",
   "ministryLevel": "Minitry Level",
-  "ghgEmiReduced": "GHG emissions reduced( tCO2E )",
-  "ghgEmiAvoided": "GHG emissions avoided( tCO2E )",
+  "ghgEmiReduced": "GHG Emissions Reduced (tCO2e)",
+  "ghgEmiAvoided": "GHG Emissions Avoided (tCO2e)",
   "type": "Type",
   "capacityBuilding": "Capacity Building",
   "instiArrangement": "Institutional Arrangement",
@@ -83,7 +83,7 @@
   "yes": "YES",
   "no": "NO",
   "value": "Value",
-  "viewGhgEmissionsAvoided": "GHG Emissions Avoided (tCO2E)",
-  "viewGhgEmissionsReduced": "GHG Emissions Reduced (tCO2E)",
+  "viewGhgEmissionsAvoided": "GHG Emissions Avoided (tCO2e)",
+  "viewGhgEmissionsReduced": "GHG Emissions Reduced (tCO2e)",
   "viewIncludedInNAP": "Included in NAP"
 }
