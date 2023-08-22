@@ -83,6 +83,7 @@
   "yes": "YES",
   "no": "NO",
   "value": "Value",
-  "viewGhgEmissionsAvoided": "GHG emissions avoided (tCO2E)",
-  "viewGhgEmissionsReduced": "GHG emissions reduced (tCO2E)"
+  "viewGhgEmissionsAvoided": "GHG Emissions Avoided (tCO2E)",
+  "viewGhgEmissionsReduced": "GHG Emissions Reduced (tCO2E)",
+  "viewIncludedInNAP": "Included in NAP"
 }

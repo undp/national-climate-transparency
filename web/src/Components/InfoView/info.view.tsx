@@ -29,15 +29,19 @@ const InfoView: FC<InfoViewProps> = (props: InfoViewProps) => {
                   {k}
                 </Col>
                 <Col span={12} className="field-value">
-                  {k.includes('GHG emissions') ? (
-                    Object.entries(data[k]).map(([key, value]) => {
-                      return (
-                        <div className="row">
-                          <div className="key">{key}</div>
-                          <div className="data">{data[k][key]}</div>
-                        </div>
-                      );
-                    })
+                  {k.includes('GHG Emissions') ? (
+                    Object.values(data[k])?.length > 0 ? (
+                      Object.entries(data[k]).map(([key, value]) => {
+                        return (
+                          <div className="row">
+                            <div className="key">{key}</div>
+                            <div className="data">{data[k][key]}</div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div>-</div>
+                    )
                   ) : (
                     <span>
                       {data[k] instanceof DateTime
