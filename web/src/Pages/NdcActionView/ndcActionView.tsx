@@ -284,9 +284,9 @@ const NdcActionView = () => {
         ndcActionDetails.adaptationProperties.nationalPlanCoverage;
       adaptationDetails[t('ndcAction:viewIncludedInNAP')] = ndcActionDetails?.adaptationProperties
         ?.includedInNAP
-        ? ndcActionDetails.adaptationProperties.includedInNAP
-          ? 'Yes'
-          : 'No'
+        ? 'Yes'
+        : ndcActionDetails?.adaptationProperties?.includedInNAP === false
+        ? 'No'
         : '-';
       adaptationDetails[t('ndcAction:viewGhgEmissionsAvoided')] = ndcActionDetails
         ?.adaptationProperties?.ghgEmissionsAvoided
