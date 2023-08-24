@@ -49,24 +49,38 @@ export class CertifierService implements ImporterInterface {
                 const numberTable = $('table.formTable:nth-child(1) tbody:nth-child(1) tr:nth-child(5)');
                 let number:string
                 numberTable.each( function() {
-                    let numberspan = $(this).find('td:nth-child(2)').text().trim();
-                    const numbermatch = String(numberspan.match(/Tel:\s*([+0-9\s-]+)/g))
-                    const numbers = numbermatch.replace(/^Tel:\s*/, '').trim()
-                    const onenumber = numbers.split('\n')
-                    const stringnumber = String(onenumber).trim()
-                    number = stringnumber.split(',')[0]
-                    if (number.startsWith("00")){
-                      number = number.replace(/^00/, "+");
-                    }
-                    
-                });
+                  let numberspan = $(this).find('td:nth-child(2)').text().trim();
+                  const numbermatch = String(numberspan.match(/Tel:\s*([+0-9\s-]+)/g))
+                  const numbers = numbermatch.replace(/^Tel:\s*/, '').trim()
+                  const onenumber = numbers.split('\n')
+                  const stringnumber = String(onenumber).trim()
+                  number = stringnumber.split(',')[0]
+                  if (number=="null"){
+                    const mobnumbermatch = String(numberspan.match(/Mobile:\s*([+0-9\s-]+)/g))
+                    const mobnumbers = mobnumbermatch.replace(/^Mobile:\s*/, '').trim()
+                    const mobonenumber = mobnumbers.split('\n')
+                    const mobstringnumber = String(mobonenumber).trim()
+                    number = mobstringnumber.split(',')[0]
+                  }
+                  if (number.startsWith("00")){
+                    number = number.replace(/^00/, "+");
+                  }
+              });
                 const addressTable = $('table.address');
                 const alternativeAddress = $('table.formTable:nth-child(1) tbody:nth-child(1) tr:nth-child(4)')
                 let address:string
                 addressTable.each( function() {
-                    let addressspan = $(this).find('tbody:nth-child(1)').text().trim();
-                    const addressmatch = String(addressspan.match(/Address:\s*([\s\S]*)/g))
-                    address = addressmatch.replace(/^Address:\s*/, '').trim()
+                  let addressspan = $(this).find('tbody:nth-child(1)').text().trim();
+                  const addrsreplace = /Address:([\s\S]*?)(?=Postal code:|\n\n|$)/.exec(addressspan)
+                  const postcodereplace =/Postal code:([\s\S]*?)(?=City:|\n\n|$)/.exec(addressspan)
+                  const cityreplace = /City:([\s\S]*?)(?=Country:|\n\n|$)/.exec(addressspan)
+                  const countrymatch = String(addressspan.match(/Country:\s*([\s\S]*)/g))
+                  const countryreplace = countrymatch.replace(/^Country:\s*/, '').trim()
+                  address = addrsreplace[1].trim()+","+cityreplace[1].trim()+","+countryreplace+","+postcodereplace[1].trim()
+                  if (address.trim().length>0){
+                    return false;
+                  }
+                  
                   });
                   if (!address){
                     alternativeAddress.each( function(){
@@ -79,7 +93,7 @@ export class CertifierService implements ImporterInterface {
                   }
                   activeRows.push({
                     refNumber,
-                    oraganization,
+                    entity,
                     initials,
                     number,
                     address
@@ -102,7 +116,7 @@ export class CertifierService implements ImporterInterface {
           if (typeof refNumber == "string" && refNumber.trim().length != 0){ 
             deactiveRows.push({
               refNumber,
-              oraganization,
+              entity,
             });
           }
                   
@@ -126,7 +140,7 @@ export class CertifierService implements ImporterInterface {
           const email = 'nce.digital+'+certifier.initials+'@undp.org'
           intials = certifier.initials 
           number = certifier.number
-          const c = await this.companyService.findByTaxId(certifier.oraganization);
+          const c = await this.companyService.findByTaxId(certifier.entity);
           //Detail Update
           // if(c)
           //   {if(c.name == certifier.oraganization && (c.phoneNo != certifier.number || c.address != certifier.address) ){
@@ -148,8 +162,8 @@ export class CertifierService implements ImporterInterface {
             try {
               this.logger.log("Certifier Creation Started "+certifier)
               const company = new OrganisationDto();
-              company.name = certifier.oraganization;
-              company.taxId = certifier.oraganization;
+              company.name = certifier.entity;
+              company.taxId = certifier.entity;
               company.logo = this.configService.get("CERTIFIER.image");
               company.email = 'nce.digital+'+intials+'@undp.org' ;
               company.phoneNo = number;
@@ -158,7 +172,7 @@ export class CertifierService implements ImporterInterface {
                     
               const user = new UserDto();
               user.email = 'nce.digital+'+intials+'@undp.org' ;
-              user.name = certifier.oraganization;
+              user.name = certifier.entity;
               user.role = Role.Admin;
               user.phoneNo = number;
               user.company = company;
@@ -167,16 +181,16 @@ export class CertifierService implements ImporterInterface {
               console.log("Adding user", user);
           
               await this.userService.create(user, -1, CompanyRole.GOVERNMENT);
-              this.logger.log("Certifier Creation "+certifier.oraganization+" Complete.")
+              this.logger.log("Certifier Creation "+certifier.entity+" Complete.")
             } catch (e) {
-              this.logger.error(`User ${certifier.oraganization} failed to create`, e);
+              this.logger.error(`User ${certifier.entity} failed to create`, e);
             }
           }         
         }
         for(const deac_certifiers of deactiveRowsfinal){
-          const c = await this.companyService.findByTaxId(deac_certifiers.oraganization);
+          const c = await this.companyService.findByTaxId(deac_certifiers.entity);
           if(c){
-            this.logger.error(deac_certifiers.oraganization+" This Certifer is withdrawn Deactivate the Account")
+            this.logger.error(deac_certifiers.entity+" This Certifer is withdrawn Deactivate the Account")
           }
         }
     }
