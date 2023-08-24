@@ -237,6 +237,14 @@ export class ProgrammeService {
       } received ${JSON.stringify(req)}`
     );
 
+    const companyDetails = await this.companyService.findByCompanyId(req.toCompanyId);
+    if(companyDetails && companyDetails.companyRole !== CompanyRole.PROGRAMME_DEVELOPER) {
+      throw new HttpException(
+          this.helperService.formatReqMessagesString("user.investerUserAuth", []),
+          HttpStatus.FORBIDDEN
+        );
+    }
+
     if (
       req.percentage &&
       req.percentage.reduce((a, b) => a + b, 0) <= 0
