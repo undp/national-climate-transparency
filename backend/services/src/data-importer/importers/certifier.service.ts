@@ -1,6 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
+import { Repository } from "typeorm";
 import { CompanyService } from "../../shared/company/company.service";
 import { ImporterInterface } from "../importer.interface";
 import { UserService } from "../../shared/user/user.service";
@@ -9,11 +11,13 @@ import { CompanyRole } from "../../shared/enum/company.role.enum";
 import { Role } from "../../shared/casl/role.enum";
 import { OrganisationDto } from "../../shared/dto/organisation.dto";
 import { UserDto } from "../../shared/dto/user.dto";
+import { Company } from "../../shared/entities/company.entity";
 import { UserUpdateDto } from "../../shared/dto/user.update.dto";
 import { OrganisationUpdateDto } from "../../shared/dto/organisation.update.dto";
 @Injectable()
 export class CertifierService implements ImporterInterface {
     constructor(
+        @InjectRepository(Company) private companyRepo: Repository<Company>,
         private logger: Logger,
         private configService: ConfigService,
         private companyService: CompanyService,
@@ -134,11 +138,10 @@ export class CertifierService implements ImporterInterface {
 
     async start(): Promise<any>{
         const {activeRowsfinal,deactiveRowsfinal} = await this.scrape();
-        let intials:string
+        let intial:string
         let number:string
         for(const certifier of activeRowsfinal){
-          const email = 'nce.digital+'+certifier.initials+'@undp.org'
-          intials = certifier.initials 
+          intial = certifier.initials 
           number = certifier.number
           const c = await this.companyService.findByTaxId(certifier.entity);
           //Detail Update
@@ -149,13 +152,19 @@ export class CertifierService implements ImporterInterface {
           //       user.phoneNo = certifier.number;
           //   }}
           if (!c) {
-            // If email already exist
-            let suf=1;
-            const u = await this.userService.findOne(email);
-            if(u){
-              intials = certifier.initials+suf    
+            const qry= 'SELECT "email" FROM "company" WHERE "email" LIKE '+"'%"+intial+"%'"+' ORDER BY "email" DESC LIMIT 1'
+            const existemails = await this.companyRepo.query(qry)
+            let suf = 1;
+            if (existemails){
+                const existinitial = String(/\+(.*)@/.exec(existemails))
+                const existsuf = String(alert(existinitial.split("_").pop()))
+                if(existsuf.trim(),length>0){
+                  intial = intial+"_"+String(Number(existsuf)+1)
+                }
+                else{
+                  intial=intial+"_"+suf
+                }
             }
-            
             if(number=="null"){
                 number = "00"
             }   
@@ -165,13 +174,13 @@ export class CertifierService implements ImporterInterface {
               company.name = certifier.entity;
               company.taxId = certifier.entity;
               company.logo = this.configService.get("CERTIFIER.image");
-              company.email = 'nce.digital+'+intials+'@undp.org' ;
+              company.email = 'nce.digital+'+intial+'@undp.org' ;
               company.phoneNo = number;
               company.address = certifier.address;
               company.companyRole = CompanyRole.CERTIFIER;
                     
               const user = new UserDto();
-              user.email = 'nce.digital+'+intials+'@undp.org' ;
+              user.email = 'nce.digital+'+intial+'@undp.org' ;
               user.name = certifier.entity;
               user.role = Role.Admin;
               user.phoneNo = number;
