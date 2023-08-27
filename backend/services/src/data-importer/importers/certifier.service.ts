@@ -156,10 +156,10 @@ export class CertifierService implements ImporterInterface {
             const existemails = await this.companyRepo.query(qry)
             let suf = 1;
             if (existemails){
-                const existinitial = String(/\+(.*)@/.exec(existemails))
-                const existsuf = String(alert(existinitial.split("_").pop()))
-                if(existsuf.trim(),length>0){
-                  intial = intial+"_"+String(Number(existsuf)+1)
+                const existinitial = existemails[0].email.match(/\+(.*)@/)
+                const existsuf = String((existinitial[1].split("_").pop()))
+                if(existsuf.trim()!=null){
+                  intial = intial+"_"+(Number(existsuf)+1)
                 }
                 else{
                   intial=intial+"_"+suf
