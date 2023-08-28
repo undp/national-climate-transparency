@@ -152,19 +152,23 @@ export class CertifierService implements ImporterInterface {
           //       user.phoneNo = certifier.number;
           //   }}
           if (!c) {
-            const qry= 'SELECT "email" FROM "company" WHERE "email" LIKE '+"'%"+intial+"%'"+' ORDER BY "email" DESC LIMIT 1'
-            const existemails = await this.companyRepo.query(qry)
-            let suf = 1;
-            if (existemails){
-                const existinitial = existemails[0].email.match(/\+(.*)@/)
-                const existsuf = String((existinitial[1].split("_").pop()))
-                if(existsuf.trim()!=null){
-                  intial = intial+"_"+(Number(existsuf)+1)
-                }
-                else{
-                  intial=intial+"_"+suf
-                }
-            }
+            const emailcheck = 'nce.digital+'+intial+'@undp.org'
+            const qry0 = 'SELECT "email" FROM "company" WHERE "email" LIKE '+"'%"+emailcheck+"%'"+''
+            const u = await this.companyRepo.query(qry0)
+            if (u){
+              const qry= 'SELECT "email" FROM "company" WHERE "email" LIKE '+"'%"+intial+"%'"+' ORDER BY "email" DESC LIMIT 1'
+              const existemails = await this.companyRepo.query(qry)
+              if (existemails){
+                  const existinitial = existemails[0].email.match(/\+(.*)@/)
+                  const existsuf = String((existinitial[1].split("_").pop()))
+                  if(existsuf.trim()!=intial.trim() && existsuf.trim()!=null){
+                    intial = intial+"_"+(Number(existsuf)+1)
+                  }
+                  else if(existsuf.trim()==intial.trim()){
+                    intial=intial+"_1"
+                  }
+              }
+            }  
             if(number=="null"){
                 number = "00"
             }   
