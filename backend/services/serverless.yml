@@ -109,7 +109,7 @@ functions:
           rate: cron(15 10 * * ? *)   
           enabled: true
           input: 
-            importTypes: CERTIFIER
+            importTypes: CERTIFIER_SCRAPING
     ssmToEnvironment:
       - DB_PASSWORD
       - ITMO_API_KEY

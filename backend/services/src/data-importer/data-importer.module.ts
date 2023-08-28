@@ -9,7 +9,7 @@ import { ProgrammeModule } from '../shared/programme/programme.module';
 import { DataImporterService } from './data-importer.service';
 import { CompanyModule } from '../shared/company/company.module';
 import { UserModule } from '../shared/user/user.module';
-import { Company } from '../../src/shared/entities/company.entity';
+import { Company } from '../shared/entities/company.entity';
 
 @Module({
   imports: [

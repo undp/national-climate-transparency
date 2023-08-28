@@ -2678,14 +2678,15 @@
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
 
-"@undp/carbon-library@^1.0.61":
-  version "1.0.61"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.61.tgz#8cf3f3c1e13dba186a35df7ed882f102de46d0d6"
-  integrity sha512-gBkjMuxRzLLECZ/4AEIUXYsRSXXlauDcZ+SEMkbFgAqsBw7B1rHjN9CLtwMGCSORoly2kJUhj8v6VJELDjxtXw==
+"@undp/carbon-library@^1.0.77":
+  version "1.0.77"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.77.tgz#8b425970d974ccc3352fb8fdcee891c65ec3a6b4"
+  integrity sha512-kGRx3qldo8qvVngBZtp/JK8aFqL4skwMyNH59HAFqd3xJfxqJc+oF22G2LPZP0yRfZWCBNCumBrg/UWPsM6ZQw==
   dependencies:
     "@rollup/plugin-commonjs" "^25.0.0"
     "@rollup/plugin-node-resolve" "^15.0.2"
     "@rollup/plugin-typescript" "^11.1.1"
+    "@undp/carbon-credit-calculator" "^1.0.0"
     node-sass "^7.0.3"
     postcss "^8.4.23"
     rollup "^3.22.0"
