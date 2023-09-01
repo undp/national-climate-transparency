@@ -74,7 +74,7 @@ export class CertifierScrapeService implements ImporterInterface {
                 const alternativeAddress = $('table.formTable:nth-child(1) tbody:nth-child(1) tr:nth-child(4)')
                 let address:string
                 addressTable.each( function() {
-                  let addressspan = $(this).find('tbody:nth-child(1)').text().trim().replaceAll('\n', ' ');
+                  let addressspan = $(this).find('tbody:nth-child(1)').text().trim().replace(/\n/g, ' ');
                   const addrsreplace = /Address:([\s\S]*?)(?=Postal code:|\n\n|$)/.exec(addressspan)
                   const postcodereplace =/Postal code:([\s\S]*?)(?=City:|\n\n|$)/.exec(addressspan)
                   const cityreplace = /City:([\s\S]*?)(?=Country:|\n\n|$)/.exec(addressspan)
