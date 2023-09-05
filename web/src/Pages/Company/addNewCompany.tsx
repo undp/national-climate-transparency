@@ -3,8 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { AddNewCompanyComponent } from '@undp/carbon-library';
-import './addNewCompany.scss';
-import '../../Styles/app.scss';
 
 const AddNewCompany = () => {
   const navigate = useNavigate();
