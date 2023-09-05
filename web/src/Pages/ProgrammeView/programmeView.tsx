@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Chart from 'react-apexcharts';
 import { useTranslation } from 'react-i18next';
 import * as Icon from 'react-bootstrap-icons';
+import './programmeView.scss';
 import {
   BlockOutlined,
   BulbOutlined,
