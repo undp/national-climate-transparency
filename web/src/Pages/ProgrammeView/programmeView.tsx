@@ -61,6 +61,7 @@ const ProgrammeView = () => {
   const [ndcActionHistoryDataGrouped, setNdcActionHistoryDataGrouped] = useState<any>();
   const [ndcActionData, setNdcActionData] = useState<any>([]);
   const { i18n, t } = useTranslation(['view']);
+  const { t: companyProfileTranslations } = useTranslation(['companyProfile']);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
   const [loadingAll, setLoadingAll] = useState<boolean>(true);
   const [loadingNDC, setLoadingNDC] = useState<boolean>(true);
@@ -536,7 +537,7 @@ const ProgrammeView = () => {
           </div>
           <OrganisationStatus
             organisationStatus={parseInt(ele.company.state)}
-            t={t}
+            t={companyProfileTranslations}
           ></OrganisationStatus>
         </div>
       </div>
