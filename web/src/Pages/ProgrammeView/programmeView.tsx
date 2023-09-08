@@ -17,6 +17,7 @@ import {
 import Geocoding from '@mapbox/mapbox-sdk/services/geocoding';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import {
+  CarbonSystemType,
   CompanyRole,
   CompanyState,
   DevBGColor,
@@ -576,7 +577,7 @@ const ProgrammeView = () => {
   }
 
   const generalInfo: any = {};
-  Object.entries(getGeneralFields(data)).forEach(([k, v]) => {
+  Object.entries(getGeneralFields(data,CarbonSystemType.MRV)).forEach(([k, v]) => {
     const text = t('view:' + k);
     if (k === 'currentStatus') {
       generalInfo[text] = (
