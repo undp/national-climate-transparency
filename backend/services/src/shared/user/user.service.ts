@@ -598,6 +598,15 @@ export class UserService {
         };
         await this.asyncOperationsInterface.addAction(action);
       }
+
+      if(company.regions){
+        company.geographicalLocationCordintes = await this.locationService
+        .getCoordinatesForRegion(company.regions)
+        .then((response: any) => {
+          console.log("response from forwardGeoCoding function -> ", response);
+          return  [...response];
+        });
+      }
     }
 
     const templateData = {
@@ -640,13 +649,6 @@ export class UserService {
         registryCompanyCreateAction
       );
     }
-
-    company.geographicalLocationCordintes = await this.locationService
-    .getCoordinatesForRegion(company.regions)
-    .then((response: any) => {
-      console.log("response from forwardGeoCoding function -> ", response);
-      return  [...response];
-    });
 
     const usr = await this.entityManger
       .transaction(async (em) => {
