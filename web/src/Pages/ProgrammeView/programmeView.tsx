@@ -577,7 +577,7 @@ const ProgrammeView = () => {
   }
 
   const generalInfo: any = {};
-  Object.entries(getGeneralFields(data,CarbonSystemType.MRV)).forEach(([k, v]) => {
+  Object.entries(getGeneralFields(data, CarbonSystemType.MRV)).forEach(([k, v]) => {
     const text = t('view:' + k);
     if (k === 'currentStatus') {
       generalInfo[text] = (
