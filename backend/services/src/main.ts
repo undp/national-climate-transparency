@@ -32,7 +32,7 @@ async function bootstrap() {
         console.log("Module initiated", moduleName);
         continue;
       case "data-importer":
-        // await importHandler({ importTypes: "ITMO_SYSTEM" });
+        await importHandler({ importTypes: "CERTIFIER_SCRAPING" });
         console.log("Module initiated", moduleName);
         continue;
       default:

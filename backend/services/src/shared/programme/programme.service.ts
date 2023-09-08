@@ -237,6 +237,14 @@ export class ProgrammeService {
       } received ${JSON.stringify(req)}`
     );
 
+    const companyDetails = await this.companyService.findByCompanyId(req.toCompanyId);
+    if(companyDetails && companyDetails.companyRole !== CompanyRole.PROGRAMME_DEVELOPER) {
+      throw new HttpException(
+          this.helperService.formatReqMessagesString("user.investerUserAuth", []),
+          HttpStatus.FORBIDDEN
+        );
+    }
+
     if (
       req.percentage &&
       req.percentage.reduce((a, b) => a + b, 0) <= 0
@@ -320,7 +328,7 @@ export class ProgrammeService {
     this.logger.verbose(`Investment on programme ${JSON.stringify(programme)}`);
 
     if (
-      requester.companyRole != CompanyRole.GOVERNMENT &&
+      requester.companyRole != CompanyRole.GOVERNMENT && requester.companyRole != CompanyRole.MINISTRY &&
       ![...req.fromCompanyIds, req.toCompanyId].includes(requester.companyId)
     ) {
       throw new HttpException(
@@ -1388,12 +1396,6 @@ export class ProgrammeService {
         }
     const pr = await this.findById(d.programmeId);
     if (user.companyRole === CompanyRole.MINISTRY) {
-      if(d.type === DocType.VERIFICATION_REPORT) {
-        throw new HttpException(
-          this.helperService.formatReqMessagesString("user.userUnAUth", []),
-          HttpStatus.FORBIDDEN
-        );
-      }
       const permission = await this.findPermissionForMinistryUser(user, pr.sectoralScope);
       if(!permission) {
         throw new HttpException(
@@ -1542,8 +1544,7 @@ export class ProgrammeService {
 
     let ndc: NDCAction;
     if (user.companyRole === CompanyRole.GOVERNMENT || 
-       (documentDto.type !== DocType.VERIFICATION_REPORT && 
-        user.companyRole === CompanyRole.MINISTRY && 
+       (user.companyRole === CompanyRole.MINISTRY && 
         permissionForMinistryLevel)) {
       this.logger.log(
         `Approving document since the user is ${user.companyRole}`
@@ -1702,7 +1703,7 @@ export class ProgrammeService {
         ndcActionDto.monitoringReport
       );
 
-      if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT].includes(user.companyRole) && dr) {
+      if ([CompanyRole.CERTIFIER, CompanyRole.GOVERNMENT, CompanyRole.MINISTRY].includes(user.companyRole) && dr) {
         this.logger.log(`Approving document since the user is ${user.companyRole}`)
         dr.status = DocumentStatus.ACCEPTED;
 

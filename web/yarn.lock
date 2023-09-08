@@ -1813,9 +1813,9 @@
     rimraf "^3.0.2"
 
 "@pmmmwh/react-refresh-webpack-plugin@^0.5.3":
-  version "0.5.10"
-  resolved "https://registry.yarnpkg.com/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.5.10.tgz#2eba163b8e7dbabb4ce3609ab5e32ab63dda3ef8"
-  integrity sha512-j0Ya0hCFZPd4x40qLzbhGsh9TMtdb+CJQiso+WxLOPNasohq9cc5SNUcwsZaRH6++Xh91Xkm/xHCkuIiIu0LUA==
+  version "0.5.11"
+  resolved "https://registry.yarnpkg.com/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.5.11.tgz#7c2268cedaa0644d677e8c4f377bc8fb304f714a"
+  integrity sha512-7j/6vdTym0+qZ6u4XbSAxrWBGYSdCfTzySkj7WAFgDLmSyWlOrWvpyzxlFh5jtw9dn0oL/jtW+06XfFiisN3JQ==
   dependencies:
     ansi-html-community "^0.0.8"
     common-path-prefix "^3.0.0"
@@ -2678,16 +2678,18 @@
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
 
-"@undp/carbon-library@^1.0.57":
-  version "1.0.57"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.57.tgz#30fc0129514ad89d005df8eb74c201453f54e02e"
-  integrity sha512-HMimSkPwKBJ4Se8G1wnOpCkor4XyjUZ1Q/dcmdDbXRcgi0DHxoLRc50B6fGDwUp2GYV+Zr3sWlH3cL/JzOoXRQ==
+"@undp/carbon-library@^1.0.93":
+  version "1.0.93"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.93.tgz#fe246f28654a00bc6ad76660f860622f58531c3d"
+  integrity sha512-qdb645QxInI5PuaScVHGvS8lW/N6WhwAerqTg/OXUETJgdZz+ZboaS+RDP6FH5+4Qju1hzVRhm3aStVlkOw5uw==
   dependencies:
     "@rollup/plugin-commonjs" "^25.0.0"
     "@rollup/plugin-node-resolve" "^15.0.2"
     "@rollup/plugin-typescript" "^11.1.1"
+    "@undp/carbon-credit-calculator" "^1.0.0"
     node-sass "^7.0.3"
     postcss "^8.4.23"
+    react-circle-flags "^0.0.19"
     rollup "^3.22.0"
     rollup-plugin-dts "^5.3.0"
     rollup-plugin-peer-deps-external "^2.2.4"
@@ -4781,9 +4783,9 @@ ejs@^3.1.6:
     jake "^10.8.5"
 
 electron-to-chromium@^1.4.477:
-  version "1.4.490"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.490.tgz#d99286f6e915667fa18ea4554def1aa60eb4d5f1"
-  integrity sha512-6s7NVJz+sATdYnIwhdshx/N/9O6rvMxmhVoDSDFdj6iA45gHR8EQje70+RYsF4GeB+k0IeNSBnP7yG9ZXJFr7A==
+  version "1.4.491"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.491.tgz#53de4625bde1e75b5b7804a36c68b2c39f6a0c1f"
+  integrity sha512-ZzPqGKghdVzlQJ+qpfE+r6EB321zed7e5JsvHIlMM4zPFF8okXUkF5Of7h7F3l3cltPL0rG7YVmlp5Qro7RQLA==
 
 emittery@^0.10.2:
   version "0.10.2"
@@ -10027,6 +10029,11 @@ react-circle-flags@^0.0.18:
   version "0.0.18"
   resolved "https://registry.yarnpkg.com/react-circle-flags/-/react-circle-flags-0.0.18.tgz#ab48b410435dd2bb4419cda6f59b4378019fbbec"
   integrity sha512-3taT04bifZ2oSARDfoO4bMDfdIDfAxW6MeOaJ6fR17OcEn+/dGivE/nrtUYwfGKFp9/Sq92yo4FTT2I+DqAIqA==
+
+react-circle-flags@^0.0.19:
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/react-circle-flags/-/react-circle-flags-0.0.19.tgz#365451ce666cd9cd85e3055c411b6f1eb91ddb92"
+  integrity sha512-QJ96+CIEpHZ/QmgB7tXaaHFvaCNGS06kJHQJ7q7a60bXjcImQTrPxcO//b/d4hFrVmHeL61viJtUYYHKcLZszQ==
 
 react-dev-utils@^12.0.1:
   version "12.0.1"

@@ -3,7 +3,6 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import { useAbilityContext } from '../../Casl/Can';
 import { CompanyManagementComponent, CompanyManagementColumns } from '@undp/carbon-library';
 import { useTranslation } from 'react-i18next';
-import './companyManagement.scss';
 
 const CompanyManagement = () => {
   const navigate = useNavigate();

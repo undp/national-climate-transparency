@@ -9,6 +9,7 @@
   "createUserUnAuthorized": "This action is unauthorised",
   "createUserToOtherCompaniesUnAuth": "This action is unauthorised",
   "companyCreateUserShouldbeAdmin": "The initial user must be an admin",
+  "minUserCannotCreateMin": "This action is unauthorised",
   "governmentUserAlreadyExist": "Government already exist for the country code {}",
   "companyCreateNotPermittedForTheCompanyRole": "Company create does not permitted for your company role",
   "companyUpdateFailed": "Company update failed. Please try again",
@@ -32,5 +33,6 @@
   "reqIdFound": "Reset request id found",
   "resetEmailSent": "User found, An email was sent",
   "invalidCountry": "Country is invalid",
-  "editUserSuccess": "The user account has been updated successfully"
+  "editUserSuccess": "The user account has been updated successfully",
+  "investerUserAuth": "Invester should be a programme developer"
 }

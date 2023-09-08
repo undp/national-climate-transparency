@@ -1,13 +1,18 @@
 import { Injectable, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 import { ConfigService } from "@nestjs/config";
 import { ProgrammeService } from "../shared/programme/programme.service";
 import { CompanyService } from "../shared/company/company.service";
 import { ImporterInterface } from "./importer.interface";
 import { UserService } from "../shared/user/user.service";
+import { CertifierScrapeService } from "./importers/certifier.service";
+import { Company } from "../shared/entities/company.entity";
 
 @Injectable()
 export class DataImporterService {
   constructor(
+    @InjectRepository(Company) private companyRepo: Repository<Company>,
     private logger: Logger,
     private configService: ConfigService,
     private companyService: CompanyService,
@@ -20,6 +25,10 @@ export class DataImporterService {
     //   case 'ITMO_SYSTEM':
     //     return new ITMOSystemImporter(this.logger, this.configService, this.companyService, this.userService, this.programmeService);
     // }
+    switch(type) {
+      case 'CERTIFIER_SCRAPING':
+        return new CertifierScrapeService(this.companyRepo, this.logger, this.configService, this.companyService, this.userService);
+    }
     return null;
   }
 

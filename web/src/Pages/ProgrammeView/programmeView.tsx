@@ -2,12 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { Row, Col, Card, Progress, Tag, Steps, message, Skeleton, Button } from 'antd';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './programmeView.scss';
-import { isBase64 } from '../../Components/ProfileIcon/profile.icon';
 import Chart from 'react-apexcharts';
 import { useTranslation } from 'react-i18next';
-import InfoView from '../../Components/InfoView/info.view';
 import * as Icon from 'react-bootstrap-icons';
+import './programmeView.scss';
 import {
   BlockOutlined,
   BulbOutlined,
@@ -16,40 +14,41 @@ import {
   ExperimentOutlined,
   QrcodeOutlined,
 } from '@ant-design/icons';
-import { DevBGColor, DevColor } from '../Common/role.color.constants';
 import Geocoding from '@mapbox/mapbox-sdk/services/geocoding';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
-import OrganisationStatus from '../../Components/Organisation/organisationStatus';
 import {
+  CarbonSystemType,
   CompanyRole,
+  CompanyState,
+  DevBGColor,
+  DevColor,
+  DocType,
+  DocumentStatus,
+  InfoView,
+  InvestmentBody,
   Loading,
   MapComponent,
   MapTypes,
   MarkerData,
+  NdcActionBody,
+  OrganisationStatus,
+  ProgrammeDocuments,
   ProgrammeStageMRV,
+  ProgrammeT,
+  Role,
+  RoleIcon,
   TypeOfMitigation,
   UnitField,
   addCommSep,
   addCommSepRound,
   addSpaces,
-  getStageEnumVal,
-  getStageTagType,
-  getStageTagTypeMRV,
-  sumArray,
-} from '@undp/carbon-library';
-import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
-import RoleIcon from '../../Components/RoleIcon/role.icon';
-import { CompanyState } from '../../Casl/enums/company.state.enum';
-import ProgrammeDocuments from '../../Components/Programme/programmeDocuments';
-import InvestmentBody from '../../Components/InvestmentBody/investmentBody';
-import {
-  ProgrammeT,
   getFinancialFields,
   getGeneralFields,
-} from '../../Definitions/InterfacesAndType/programme.definitions';
-import NdcActionBody from '../../Components/NdcActionBody/ndcActionBody';
-import { DocType } from '../../Casl/enums/document.type';
-import { DocumentStatus } from '../../Casl/enums/document.status';
+  getStageEnumVal,
+  getStageTagTypeMRV,
+  isBase64,
+} from '@undp/carbon-library';
+import { linkDocVisible, uploadDocUserPermission } from '../../Casl/documentsPermission';
 
 const ProgrammeView = () => {
   const { get, put, post } = useConnection();
@@ -63,6 +62,7 @@ const ProgrammeView = () => {
   const [ndcActionHistoryDataGrouped, setNdcActionHistoryDataGrouped] = useState<any>();
   const [ndcActionData, setNdcActionData] = useState<any>([]);
   const { i18n, t } = useTranslation(['view']);
+  const { t: companyProfileTranslations } = useTranslation(['companyProfile']);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
   const [loadingAll, setLoadingAll] = useState<boolean>(true);
   const [loadingNDC, setLoadingNDC] = useState<boolean>(true);
@@ -280,7 +280,7 @@ const ProgrammeView = () => {
           status: 'process',
           title: t('view:investment') + ' - ' + String(investmentData?.requestId), // Extracting the last 3 characters from actionNo
           subTitle: '',
-          description: <InvestmentBody data={investmentData} />,
+          description: <InvestmentBody data={investmentData} translator={i18n} />,
           icon: (
             <span className="step-icon freeze-step">
               <Icon.Circle />
@@ -354,6 +354,11 @@ const ProgrammeView = () => {
               userInfoState?.companyRole === CompanyRole.MINISTRY &&
               ministrySectoralScope.includes(data.sectoralScope)
             }
+            translator={i18n}
+            useConnection={useConnection}
+            useUserContext={useUserContext}
+            linkDocVisible={linkDocVisible}
+            uploadDocUserPermission={uploadDocUserPermission}
           />
         ),
         icon: (
@@ -474,7 +479,7 @@ const ProgrammeView = () => {
       drawMap();
       for (const company of data.company) {
         if (
-          String(company.state) === CompanyState.ACTIVE.valueOf() &&
+          parseInt(company.state) === CompanyState.ACTIVE.valueOf() &&
           company.companyId !== userInfoState?.companyId
         ) {
           setIsAllOwnersDeactivated(false);
@@ -531,7 +536,10 @@ const ProgrammeView = () => {
             </div>
             <Progress percent={ele.percentage} strokeWidth={7} status="active" showInfo={false} />
           </div>
-          <OrganisationStatus organisationStatus={parseInt(ele.company.state)}></OrganisationStatus>
+          <OrganisationStatus
+            organisationStatus={parseInt(ele.company.state)}
+            t={companyProfileTranslations}
+          ></OrganisationStatus>
         </div>
       </div>
     );
@@ -545,7 +553,8 @@ const ProgrammeView = () => {
       (userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
         data.companyId.map((e) => Number(e)).includes(userInfoState?.companyId)) ||
       (userInfoState?.companyRole === CompanyRole.MINISTRY &&
-        ministrySectoralScope.includes(data.sectoralScope))
+        ministrySectoralScope.includes(data.sectoralScope) &&
+        userInfoState?.userRole !== Role.ViewOnly)
     ) {
       actionBtns.push(
         <Button
@@ -568,7 +577,7 @@ const ProgrammeView = () => {
   }
 
   const generalInfo: any = {};
-  Object.entries(getGeneralFields(data)).forEach(([k, v]) => {
+  Object.entries(getGeneralFields(data, CarbonSystemType.MRV)).forEach(([k, v]) => {
     const text = t('view:' + k);
     if (k === 'currentStatus') {
       generalInfo[text] = (
@@ -807,6 +816,11 @@ const ProgrammeView = () => {
                     userInfoState?.companyRole === CompanyRole.MINISTRY &&
                     ministrySectoralScope.includes(data.sectoralScope)
                   }
+                  linkDocVisible={linkDocVisible}
+                  uploadDocUserPermission={uploadDocUserPermission}
+                  useConnection={useConnection}
+                  useUserContext={useUserContext}
+                  translator={i18n}
                 />
               </div>
             </Card>

@@ -56,7 +56,8 @@ export class RegistryClientService {
     return {
         typeOfMitigation: ndc.typeOfMitigation,
         userEstimatedCredits: ndc.ndcFinancing?.userEstimatedCredits,
-        systemEstimatedCredits: ndc.ndcFinancing?.systemEstimatedCredits,
+        methodology: ndc?.methodology ? ndc?.methodology : '-',
+        systemEstimatedCredits: ndc.ndcFinancing?.systemEstimatedCredits ? ndc.ndcFinancing?.systemEstimatedCredits : 0,
         actionId: ndc.id,
         constantVersion: '' + ndc.constantVersion,
         properties: (ndc.agricultureProperties ? ndc.agricultureProperties : ndc.solarProperties ? ndc.solarProperties : undefined)
