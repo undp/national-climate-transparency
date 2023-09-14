@@ -24,6 +24,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@aws-sdk/node-http-handler": "^3.374.0",
+    "@aws-sdk/smithy-client": "^3.374.0",
     "@casl/ability": "^6.3.2",
     "@drdgvhbh/postgres-error-codes": "^0.0.6",
     "@nestjs/common": "^9.0.0",
@@ -39,7 +41,7 @@
     "aws-lambda": "^1.0.7",
     "aws-serverless-express": "^3.4.0",
     "axios": "^1.2.4",
-    "carbon-services-lib": "^0.0.144",
+    "carbon-services-lib": "^0.0.145",
     "cheerio": "^1.0.0-rc.12",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
@@ -63,7 +65,7 @@
     "winston": "^3.8.2"
   },
   "devDependencies": {
-    "@aws-sdk/client-qldb": "^3.391.0",
+    "@aws-sdk/client-qldb": "^3.410.0",
     "@aws-sdk/client-qldb-session": "^3.391.0",
     "@nestjs/cli": "^9.0.0",
     "@nestjs/schematics": "^9.0.0",
