@@ -12,6 +12,9 @@ export class Company implements EntitySubject {
   @Column({ unique: true, nullable: true })
   taxId: string;
 
+  @Column({ unique: true, nullable: true })
+  paymentId: string;
+
   @Column()
   name: string;
 

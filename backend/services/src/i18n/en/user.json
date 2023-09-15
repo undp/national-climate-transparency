@@ -15,6 +15,7 @@
   "companyUpdateFailed": "Company update failed. Please try again",
   "propValueAlreadyExist": "{} already exist",
   "taxIdExistAlready": "The organisation already exists with the given Tax ID",
+  "paymentIdExistAlready": "The organisation already exists with the given Registration Payment ID",
   "deleteUserSuccess": "The user has been deleted successfully",
   "deleteOneAdminWhenOnlyOneAdmin": "The user cannot be deleted as the user is the only admin",
   "userUnAUth": "This action is unauthorised",
