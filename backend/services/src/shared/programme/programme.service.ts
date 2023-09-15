@@ -128,6 +128,19 @@ export class ProgrammeService {
     private logger: Logger
   ) {}
 
+  private fileExtensionMap = new Map([
+    ["pdf", "pdf"],
+    ["vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx"],
+    ["vnd.ms-excel", "xls"],
+    ["vnd.ms-powerpoint", "ppt"],
+    ["vnd.openxmlformats-officedocument.presentationml.presentation", "pptx"],
+    ["msword", "doc"],
+    ["vnd.openxmlformats-officedocument.wordprocessingml.document", "docx"],
+    ["csv", "cvs"],
+    ["png", "png"],
+    ["jpeg" , "jpg"]
+  ]);
+
   private toProgramme(programmeDto: ProgrammeDto): Programme {
     const data = instanceToPlain(programmeDto);
     this.logger.verbose("Converted programme", JSON.stringify(data));
@@ -787,18 +800,26 @@ export class ProgrammeService {
     return new DataResponseDto(HttpStatus.OK, programme);
   }
 
+  getFileExtension = (file: string): string => {
+    let fileType = file.split(';')[0].split('/')[1];
+    fileType = this.fileExtensionMap.get(fileType);
+    return fileType;
+  }
+
   async uploadDocument(type: DocType, id: string, data: string) {
-    let filetype = type == DocType.METHODOLOGY_DOCUMENT ? "xlsx" : "pdf";
-    if(type === DocType.MONITORING_REPORT){
-      //determine filetype of base64 data
+    let filetype;
       try {
-        filetype = data.split(';')[0].split('/')[1];
-        if(filetype === 'vnd.openxmlformats-officedocument.spreadsheetml.sheet'){
-          filetype = 'xlsx'
-        }else if(filetype === 'vnd.ms-excel'){
-          filetype = 'xls'
-        }
+        filetype = this.getFileExtension(data);
         data = data.split(',')[1];
+        if (filetype == undefined) {
+          throw new HttpException(
+            this.helperService.formatReqMessagesString(
+              "programme.invalidDocumentUpload",
+              []
+            ),
+            HttpStatus.INTERNAL_SERVER_ERROR
+          );
+        }
       }
       catch(Exception:any){
         throw new HttpException(
@@ -809,7 +830,6 @@ export class ProgrammeService {
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
-    }
     const response: any = await this.fileHandler.uploadFile(
       `documents/${this.helperService.enumToString(DocType, type)}${
         id ? "_" + id : ""
@@ -1654,7 +1674,7 @@ export class ProgrammeService {
       const document = (ndcActionDto.coBenefitsProperties as any)
         .assessmentDetails.document;
       if (document) {
-        const filetype = "pdf";
+        const filetype = this.getFileExtension(document);
         const response: any = await this.fileHandler.uploadFile(
           `documents/FEASIBILITY_REPORT${"_" + ndcAction.id}.${filetype}`,
           document
@@ -1667,11 +1687,10 @@ export class ProgrammeService {
     ndcAction.coBenefitsProperties = ndcActionDto.coBenefitsProperties;
     await this.checkTotalUserEstimatedCredits(ndcAction, program);
     await this.calcCreditNDCAction(ndcAction, program);
-    console.log("2222", ndcAction);
     this.calcAddNDCFields(ndcAction, program);
 
     if (ndcAction.action == NDCActionType.Enablement && ndcAction.enablementProperties.report) {
-      const filetype = "pdf";
+      const filetype = this.getFileExtension(ndcAction.enablementProperties.report);
       const response: any = await this.fileHandler.uploadFile( `documents/ENABLEMENT_REPORT${ "_" + ndcAction.id}.${filetype}`, ndcAction.enablementProperties.report);
       ndcAction.enablementProperties.report = response
     }
