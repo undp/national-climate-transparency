@@ -688,6 +688,14 @@ export class UserService {
                   ),
                   HttpStatus.BAD_REQUEST
                 );
+              } else if (err.driverError.detail.includes("paymentId")) {
+                throw new HttpException(
+                  this.helperService.formatReqMessagesString(
+                    "user.paymentIdExistAlready",
+                    []
+                  ),
+                  HttpStatus.BAD_REQUEST
+                );
               }
           }
           this.logger.error(`User add error ${err}`);
