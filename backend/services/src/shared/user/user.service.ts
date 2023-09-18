@@ -598,6 +598,15 @@ export class UserService {
         };
         await this.asyncOperationsInterface.addAction(action);
       }
+
+      if(company.regions){
+        company.geographicalLocationCordintes = await this.locationService
+        .getCoordinatesForRegion(company.regions)
+        .then((response: any) => {
+          console.log("response from forwardGeoCoding function -> ", response);
+          return  [...response];
+        });
+      }
     }
 
     const templateData = {
@@ -641,13 +650,6 @@ export class UserService {
       );
     }
 
-    company.geographicalLocationCordintes = await this.locationService
-    .getCoordinatesForRegion(company.regions)
-    .then((response: any) => {
-      console.log("response from forwardGeoCoding function -> ", response);
-      return  [...response];
-    });
-
     const usr = await this.entityManger
       .transaction(async (em) => {
         if (company) {
@@ -682,6 +684,14 @@ export class UserService {
                 throw new HttpException(
                   this.helperService.formatReqMessagesString(
                     "user.taxIdExistAlready",
+                    []
+                  ),
+                  HttpStatus.BAD_REQUEST
+                );
+              } else if (err.driverError.detail.includes("paymentId")) {
+                throw new HttpException(
+                  this.helperService.formatReqMessagesString(
+                    "user.paymentIdExistAlready",
                     []
                   ),
                   HttpStatus.BAD_REQUEST

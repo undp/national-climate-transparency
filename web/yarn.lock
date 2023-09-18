@@ -2678,10 +2678,10 @@
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
 
-"@undp/carbon-library@^1.0.93":
-  version "1.0.93"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.93.tgz#fe246f28654a00bc6ad76660f860622f58531c3d"
-  integrity sha512-qdb645QxInI5PuaScVHGvS8lW/N6WhwAerqTg/OXUETJgdZz+ZboaS+RDP6FH5+4Qju1hzVRhm3aStVlkOw5uw==
+"@undp/carbon-library@^1.0.97":
+  version "1.0.97"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.97.tgz#d7d37436b31689ed4e7ae6cc95097873aabffa26"
+  integrity sha512-rdcGq3kA70/UiIfBCAPLCLSs+oVuKafQSaEHRo10LOI0kd/YfWeAtbh2ZckAz7kmi+cSHHSwuNhZDTYnowfdbw==
   dependencies:
     "@rollup/plugin-commonjs" "^25.0.0"
     "@rollup/plugin-node-resolve" "^15.0.2"
@@ -4459,8 +4459,6 @@ date-fns@2.x:
   version "2.30.0"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.30.0.tgz#f367e644839ff57894ec6ac480de40cae4b0f4d0"
   integrity sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==
-  dependencies:
-    "@babel/runtime" "^7.21.0"
 
 dayjs@1.x:
   version "1.11.9"
