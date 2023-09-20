@@ -131,7 +131,7 @@ functions:
     ssmToEnvironment:
       - SMTP_PASSWORD
       - DB_PASSWORD
-      - REGISTRY_API_TOKEN
+      - SYNC_API_TOKEN
     environment:
       NODE_PATH: "./:/opt/node_modules"
     layers:
