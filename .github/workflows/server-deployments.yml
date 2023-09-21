@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - backend/**
+      - .github/workflows/server*
     
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
