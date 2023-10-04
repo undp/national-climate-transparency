@@ -68,7 +68,9 @@ const App = () => {
     <AbilityContext.Provider value={ability}>
       <ConnectionContextProvider
         serverURL={
-          process.env.REACT_APP_BACKEND ? process.env.REACT_APP_BACKEND : 'http://localhost:9000'
+          process.env.REACT_APP_BACKEND
+            ? process.env.REACT_APP_BACKEND
+            : 'http://localhost:3000/local'
         }
       >
         <UserInformationContextProvider>

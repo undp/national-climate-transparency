@@ -150,21 +150,18 @@ export class CompanyController {
     return await this.companyService.update(company, req.abilityCondition);
   }
 
-  // @UseGuards(JwtAuthGuard)
   @Post("countries")
   async getCountries(@Body() query: QueryDto, @Request() req) {
     return await this.countryService.getCountryList(query);
   }
 
 
-  // @UseGuards(JwtAuthGuard)
   @Post("regions")
   async getRegionList(@Body() query: QueryDto, @Request() req) {
     return await this.countryService.getRegionList(query);
   }
 
 
-  // @UseGuards(JwtAuthGuard)
   @Get("countries")
   async getAvailableCountries(@Request() req) {
     return await this.countryService.getAvailableCountries();
