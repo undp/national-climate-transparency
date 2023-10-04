@@ -29,6 +29,7 @@
   "companyAdminDetailsTitle": "Organisation Admin Details",
   "cancel": "CANCEL",
   "companyAddedSuccess": "The organisation has been created successfully",
+  "companyRegisteredSuccess": "User registration request has been sent",
   "companyUpdatedSuccess": "The organisation has been updated successfully ",
   "errorInAddUser": "Error in adding user!",
   "errorInUpdatingCompany": "Error in updating company!",

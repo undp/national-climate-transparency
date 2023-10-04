@@ -106,6 +106,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Manage, ProgrammeTransfer);
     }
 
+    if (user.role === Role.Admin && user.companyRole === CompanyRole.GOVERNMENT) {
+      can(Action.Approve, Company);
+      can(Action.Reject, Company);
+    }
+
     if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.MINISTRY) {
       can(Action.Manage, ProgrammeTransfer);
       can(Action.Manage, ProgrammeEntity);
