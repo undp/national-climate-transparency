@@ -133,7 +133,6 @@ jobs:
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-      - uses: actions/checkout@v2
       - name: Deploy docker image to Amazon EC2
         if: github.ref == 'refs/heads/develop'
         env:
