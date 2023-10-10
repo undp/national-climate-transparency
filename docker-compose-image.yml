@@ -5,15 +5,16 @@ volumes:
   filestore:
     driver: local
 services:
-  db:
-    container_name: db
+  dbmrv:
+    container_name: dbmrv
     image: postgres
     restart: always
     ports:
-      - "5432:5432"
+      - "5433:5433"
     environment:
       POSTGRES_PASSWORD: "<ANY PASSWORD>"
       POSTGRES_USER: root
+      PGPORT: 5433
       PSQL_USERNAME: root
       # POSTGRES_HOST_AUTH_METHOD: trust
       PGDATA: /data/postgres
@@ -21,16 +22,16 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - data:/data/postgres
   national:
-    image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/carbon-services:latest
+    image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-services:v1
     # build:
     # context: .
     # dockerfile: ./backend/services/Dockerfile
     ports:
-      - "3000:3000"
+      - "9000:3000"
     depends_on:
-      - db
+      - dbmrv
     environment:
-      DB_HOST: db
+      DB_HOST: dbmrv
       DB_USER: root
       DB_PASSWORD: "<ANY PASSWORD>"
       RUN_MODULE: national-api
@@ -40,50 +41,81 @@ services:
       logoBase64: "sss"
       IS_EMAIL_DISABLED: "true"
       LOCATION_SERVICE: OPENSTREET
-      HOST: "http://localhost:3030"
+      ASYNC_OPERATIONS_TYPE: Database
+      HOST: "http://localhost:80"
+      DOMAIN_MAP: "true"
       EXPIRES_IN: "7200"
+      DB_PORT: "5433"
+      DB_NAME: "carbondev"
+      NODE_ENV: 'dev'
+      FILE_SERVICE: local
+      DISABLE_LOW_PRIORITY_EMAIL: "true"
+      SYSTEM_TYPE: CARBON_TRANSPARENCY_SYSTEM
+      SYSTEM_SYNC: true
+      SYNC_ENABLE: true
+      BACKEND_HOST: http://localhost:9000
     volumes:
       - filestore:/app/backend/services/public
+      - ./users.csv:/app/backend/services/users.csv
+      - ./organisations.csv:/app/backend/services/organisations.csv
   stats:
     # build:
     #   context: .
     #   dockerfile: ./backend/services/Dockerfile
-    image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/carbon-services:latest
+    image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-services:v1
     ports:
-      - "3100:3100"
+      - "9100:3100"
     depends_on:
-      - db
+      - dbmrv
       - national
     environment:
-      DB_HOST: db
+      DB_HOST: dbmrv
       DB_USER: root
       DB_PASSWORD: "<ANY PASSWORD>"
       RUN_PORT: 3100
       RUN_MODULE: analytics-api
-  replicator:
-    image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/carbon-services:latest
+      DOMAIN_MAP: "true"
+      DB_PORT: "5433"
+      DB_NAME: "carbondev"
+      NODE_ENV: 'dev'
+      FILE_SERVICE: local
+  async-operations-handler:
+    image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-services:v1
     # build:
     #   context: .
     #   dockerfile: ./backend/services/Dockerfile
     depends_on:
-      - db
+      - dbmrv
       - national
     environment:
-      DB_HOST: db
+      DB_HOST: dbmrv
       DB_USER: root
-      DB_PASSWORD: "<ANY PASSOWORD>"
-      IS_EMAIL_DISABLED: "true"
+      DB_PASSWORD: "<ANY PASSWORD>"
       # ,data-importer
-      RUN_MODULE: replicator,async-operations-handler
-      LOCATION_SERVICE: OPENSTREET
+      RUN_MODULE: async-operations-handler,data-importer
+      LOCATION_SERVICE: https://mrv-common-dev.s3.amazonaws.com/flag.png
+      CERTIFIER_IMAGE : "https://mrv-common-dev.s3.amazonaws.com/flag.png"
       SMTP_ENDPOINT: email-smtp.us-east-1.amazonaws.com
       SMTP_PASSWORD: ""
+      SMTP_USERNAME: AKIAUMXKTXDJPDYDJ76J
+      IS_EMAIL_DISABLED: "true"
       ASYNC_OPERATIONS_TYPE: Database
       ITMO_API_KEY: ""
-      ITMO_EMAIL: ""
+      ITMO_EMAIL: ""                      
       ITMO_PASSWORD: ""
+      DB_PORT: "5433"
+      DB_NAME: "carbondev"
+      REGISTRY_SYNC_ENABLE: true
+      NODE_ENV: 'dev'
+      SYNC_ENDPOINT: 'http://192.168.1.43:3000'      
+      SYNC_API_TOKEN: ''
+      FILE_SERVICE: local
+      DISABLE_LOW_PRIORITY_EMAIL: "true"
+      SYSTEM_TYPE: CARBON_TRANSPARENCY_SYSTEM
+      SYNC_ENABLE: true
+      BACKEND_HOST: http://localhost:9000
   web:
-    image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/carbon-web:latest
+    image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-web:v1
     # build:
     #   context: .
     #   dockerfile: ./web/Dockerfile
@@ -95,7 +127,7 @@ services:
     #     REACT_APP_COUNTRY_FLAG_URL: "https://mrv-common-dev.s3.amazonaws.com/flag.png"
     #     COUNTRY_CODE: "NG"
     ports:
-      - "3030:3030"
+      - "80:9030"
     depends_on:
-      - db
+      - dbmrv
       - national

@@ -1,6 +1,6 @@
 import { Col, Divider, Row } from 'antd';
 import { useTranslation } from 'react-i18next';
-import sliderLogo from '../../Assets/Images/logo-slider.png';
+import sliderLogo from '../../Assets/Images/mrvlogo.svg';
 import './layout.footer.scss';
 import { CcCircle } from 'react-bootstrap-icons';
 
@@ -18,7 +18,7 @@ const LayoutFooter = () => {
             <div>
               <div style={{ display: 'flex' }}>
                 <div className="title">{'TRANSPARENCY'}</div>
-                {/* <div className="title-sub">{'REGISTRY'}</div> */}
+                <div className="title-sub">{'SYSTEM'}</div>
               </div>
               <div className="footer-country-name">
                 {process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}
@@ -42,7 +42,11 @@ const LayoutFooter = () => {
         </Col>
         <Col md={14} lg={14}>
           <div className="footertext-link-container">
-            <a href="/help" target={'blank'} className="footertext-links">
+            <a
+              href="https://nationalcarbonregistrydemo.tawk.help/"
+              target={'_blank'}
+              className="footertext-links"
+            >
               {t('homepage:Help')}
             </a>
             <a href="https://status.carbreg.org/" target={'blank'} className="footertext-links">

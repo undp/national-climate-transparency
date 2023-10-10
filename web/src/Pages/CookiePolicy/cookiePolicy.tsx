@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
-import sliderLogo from '../../Assets/Images/logo-slider.png';
+import sliderLogo from '../../Assets/Images/mrvlogo.svg';
 import './cookiePolicy.scss';
 import { CcCircle } from 'react-bootstrap-icons';
 import LayoutFooter from '../../Components/Footer/layout.footer';
@@ -31,7 +31,7 @@ const CookiePolicy = () => {
             <div>
               <div style={{ display: 'flex' }}>
                 <div className="title">{'TRANSPARENCY'}</div>
-                {/* <div className="title-sub">{'REGISTRY'}</div> */}
+                <div className="title-sub">{'SYSTEM'}</div>
               </div>
               <div className="country-name">{process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}</div>
             </div>

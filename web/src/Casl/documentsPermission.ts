@@ -1,6 +1,4 @@
-import { CompanyRole, Role } from '@undp/carbon-library';
-import { DocType } from './enums/document.type';
-import { DocumentStatus } from './enums/document.status';
+import { CompanyRole, DocType, DocumentStatus, Role } from '@undp/carbon-library';
 
 export const linkDocVisible = (docStatus: DocumentStatus) => {
   let visible = false;
@@ -17,12 +15,14 @@ export const linkDocVisible = (docStatus: DocumentStatus) => {
 export const uploadDocUserPermission = (
   userInfoState: any,
   docType: DocType,
-  programmeOwnerId: any[]
+  programmeOwnerId: any[],
+  ministryLevelPermission?: boolean
 ) => {
   let permission = false;
-  if (docType === DocType.DESIGN_DOCUMENT) {
+  if (docType === DocType.DESIGN_DOCUMENT || docType === DocType.ENVIRONMENTAL_IMPACT_ASSESSMENT) {
     if (
-      userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
+      (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
+        (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
       userInfoState?.userRole !== Role.ViewOnly
     ) {
       permission = true;
@@ -37,7 +37,8 @@ export const uploadDocUserPermission = (
   } else if (docType === DocType.METHODOLOGY_DOCUMENT || docType === DocType.MONITORING_REPORT) {
     if (
       (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-        userInfoState?.companyRole === CompanyRole.CERTIFIER) &&
+        userInfoState?.companyRole === CompanyRole.CERTIFIER ||
+        (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
       userInfoState?.userRole !== Role.ViewOnly
     ) {
       permission = true;
@@ -52,7 +53,8 @@ export const uploadDocUserPermission = (
   } else if (docType === DocType.VERIFICATION_REPORT) {
     if (
       (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-        userInfoState?.companyRole === CompanyRole.CERTIFIER) &&
+        userInfoState?.companyRole === CompanyRole.CERTIFIER ||
+        (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
       userInfoState?.userRole !== Role.ViewOnly
     ) {
       permission = true;

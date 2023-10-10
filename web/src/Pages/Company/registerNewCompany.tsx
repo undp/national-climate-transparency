@@ -3,8 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { AddNewCompanyComponent } from '@undp/carbon-library';
+import { Suspense } from 'react';
 
-const AddNewCompany = () => {
+const RegisterNewCompany = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['addCompany']);
 
@@ -12,21 +13,22 @@ const AddNewCompany = () => {
     ? parseInt(process.env.REACT_APP_MAXIMUM_FILE_SIZE)
     : 5000000;
 
-  const onNavigateToCompanyManagement = () => {
-    navigate('/companyManagement/viewAll', { replace: true });
+  const onNavigateToHome = () => {
+    navigate('/', { replace: true });
   };
 
   return (
     <AddNewCompanyComponent
       t={t}
-      onNavigateToCompanyManagement={onNavigateToCompanyManagement}
       maximumImageSize={maximumImageSize}
       useConnection={useConnection}
       useUserContext={useUserContext}
       useLocation={useLocation}
       regionField
+      isGuest={true}
+      onNavigateToHome={onNavigateToHome}
     ></AddNewCompanyComponent>
   );
 };
 
-export default AddNewCompany;
+export default RegisterNewCompany;

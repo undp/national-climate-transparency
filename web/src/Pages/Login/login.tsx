@@ -2,7 +2,7 @@ import { Button, Col, Form, Input, message, Row, Select, Spin } from 'antd';
 import React, { FC, Suspense, useContext, useEffect, useState } from 'react';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import './login.scss';
-import countryLogo from '../../Assets/Images/logo-slider.png';
+import countryLogo from '../../Assets/Images/mrvlogo.svg';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
@@ -30,6 +30,9 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
   const ability = useContext(AbilityContext);
   const { state } = useLocation();
   const [errorMsg, setErrorMsg] = useState<string>();
+  const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION
+    ? process.env.REACT_APP_ENABLE_REGISTRATION
+    : true;
 
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -123,7 +126,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                     <div className="login-country-name">
                       <div className="title">
                         {'TRANSPARENCY'}
-                        {/* <span className="title-sub">{'REGISTRY'}</span> */}
+                        <span className="title-sub">{'SYSTEM'}</span>
                       </div>
 
                       <span className="country-name">
@@ -254,12 +257,19 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                           </div>
                         )}
                       </Form>
-                      {/* <div className="login-register-new-container">
-                  <span className="login-register-new-txt">
-                    {t('login:register-acc')}?&nbsp;&nbsp;
-                    <span className="login-register-new-txt-span">{t('common:signUp')}</span>
-                  </span>
-                </div> */}
+                      {enableRegistration && (
+                        <div className="login-register-new-container">
+                          <span className="login-register-new-txt">
+                            {t('login:register-acc')}?&nbsp;&nbsp;
+                            <span
+                              className="login-register-new-txt-span"
+                              onClick={() => navigate('/registerCompany')}
+                            >
+                              {t('login:register-here')}
+                            </span>
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </Col>
                 </Row>

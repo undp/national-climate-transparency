@@ -1,31 +1,10 @@
 import { Body, Controller, Post, UseGuards, Request, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Programme } from '../shared/entities/programme.entity';
-import { Action } from '../shared/casl/action.enum';
-import { AppAbility } from '../shared/casl/casl-ability.factory';
-import { CheckPolicies } from '../shared/casl/policy.decorator';
-import { PoliciesGuard, PoliciesGuardEx } from '../shared/casl/policy.guard';
-import { ProgrammeDto } from '../shared/dto/programme.dto';
-import { ProgrammeService } from '../shared/programme/programme.service';
-import { QueryDto } from '../shared/dto/query.dto';
-import { ConstantUpdateDto } from '../shared/dto/constants.update.dto';
-import { ApiKeyJwtAuthGuard } from '../shared/auth/guards/api-jwt-key.guard';
-import { NDCActionDto } from '../shared/dto/ndc.action.dto';
-import { JwtAuthGuard } from '../shared/auth/guards/jwt-auth.guard';
-import { ProgrammeDocumentDto } from '../shared/dto/programme.document.dto';
-import { DocumentAction } from '../shared/dto/document.action';
-import { ProgrammeAuth } from '../shared/dto/programme.approve';
-import { ProgrammeIssue } from '../shared/dto/programme.issue';
-import { ProgrammeReject } from '../shared/dto/programme.reject';
-import { InvestmentRequestDto } from '../shared/dto/investment.request.dto';
-import { Investment } from '../shared/entities/investment.entity';
-import { InvestmentApprove } from '../shared/dto/investment.approve';
-import { InvestmentCancel } from '../shared/dto/investment.cancel';
-import { InvestmentReject } from '../shared/dto/investment.reject';
-import { ProgrammeDocument } from '../shared/entities/programme.document';
-import { NDCAction } from '../shared/entities/ndc.action.entity';
-import { NDCActionViewEntity } from '../shared/entities/ndc.view.entity';
-import { ProgrammeDocumentViewEntity } from '../shared/entities/document.view.entity';
+import {Programme,Action,AppAbility,CheckPolicies,PoliciesGuard, PoliciesGuardEx,ProgrammeDto,ProgrammeService,
+  QueryDto,ConstantUpdateDto,ApiKeyJwtAuthGuard,NDCActionDto,JwtAuthGuard,ProgrammeDocumentDto,DocumentAction,ProgrammeAuth,ProgrammeIssue,ProgrammeReject,
+  InvestmentRequestDto,Investment,InvestmentApprove,InvestmentCancel,InvestmentReject,NDCActionViewEntity,ProgrammeDocumentViewEntity} from "carbon-services-lib";
+
+
 
 @ApiTags('Programme')
 @ApiBearerAuth()
@@ -42,7 +21,7 @@ export class ProgrammeController {
     @Post('create')
     async addProgramme(@Body()programme: ProgrammeDto, @Request() req) {
       global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-      return this.programmeService.create(programme, req.user)
+      return this.programmeService.create(programme, req.user) 
     }
 
     @ApiBearerAuth()
@@ -133,7 +112,7 @@ export class ProgrammeController {
     @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
     @Put('rejectProgramme')
     async rejectProgramme(@Body() rej: ProgrammeReject) {
-        return this.programmeService.rejectProgramme(rej);
+        return this.programmeService.rejectProgramme(rej,undefined);
     }
 
 

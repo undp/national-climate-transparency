@@ -29,12 +29,13 @@ import CompanyProfile from './Pages/CompanyProfile/companyProfile';
 import { AbilityContext } from './Casl/Can';
 import { defineAbility, updateUserAbility } from './Casl/ability';
 import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
-import { AddProgrammeComponent } from './Pages/Programme/programmeCreation';
+import AddProgramme from './Pages/Programme/programmeCreation';
 import InvestmentManagement from './Pages/InvestmentManagement/investmentManagement';
 import AddNdcAction from './Pages/AddNdcAction/addNdcAction';
-import { AddInvestmentComponent } from './Pages/InvestmentManagement/investmentCreation';
+import AddInvestmentComponent from './Pages/InvestmentManagement/investmentCreation';
 import NdcActionManagement from './Pages/NdcActionManagement/ndcActionManagement';
 import NdcActionView from './Pages/NdcActionView/ndcActionView';
+import RegisterNewCompany from './Pages/Company/registerNewCompany';
 
 // message.config({
 //   duration: 60,
@@ -42,6 +43,9 @@ import NdcActionView from './Pages/NdcActionView/ndcActionView';
 
 const App = () => {
   const ability = defineAbility();
+  const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION
+    ? process.env.REACT_APP_ENABLE_REGISTRATION
+    : true;
   useEffect(() => {
     console.log(process.env.REACT_APP_BACKEND);
     console.log(process.env.REACT_APP_STAT_URL);
@@ -93,7 +97,7 @@ const App = () => {
                   >
                     <Route path="viewAll" element={<ProgrammeManagement />} />
                     <Route path="view" element={<ProgrammeView />} />
-                    <Route path="addProgramme" element={<AddProgrammeComponent />} />
+                    <Route path="addProgramme" element={<AddProgramme />} />
                     <Route path="addNdcAction" element={<AddNdcAction />} />
                   </Route>
                   <Route
@@ -147,6 +151,16 @@ const App = () => {
                       <Route path="updateUser" element={<UpdateUser />} />
                     </Route> */}
                 </Route>
+                {enableRegistration && (
+                  <Route
+                    path="registerCompany"
+                    element={
+                      <Suspense fallback={<div>"Loading..."</div>}>
+                        <RegisterNewCompany />
+                      </Suspense>
+                    }
+                  />
+                )}
                 <Route path="/*" element={<Navigate to="/" replace />} />
               </Routes>
             </BrowserRouter>

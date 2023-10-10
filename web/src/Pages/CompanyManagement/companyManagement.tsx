@@ -3,12 +3,11 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import { useAbilityContext } from '../../Casl/Can';
 import { CompanyManagementComponent, CompanyManagementColumns } from '@undp/carbon-library';
 import { useTranslation } from 'react-i18next';
-import './companyManagement.scss';
 
 const CompanyManagement = () => {
   const navigate = useNavigate();
   const { post } = useConnection();
-  const { t } = useTranslation(['company']);
+  const { t } = useTranslation(['company', 'companyProfile']);
 
   const visibleColumns = [
     CompanyManagementColumns.logo,
@@ -16,6 +15,7 @@ const CompanyManagement = () => {
     CompanyManagementColumns.taxId,
     CompanyManagementColumns.companyRole,
     CompanyManagementColumns.programmeCount,
+    CompanyManagementColumns.companyState,
   ];
 
   const navigateToCompanyProfile = (record: any) => {

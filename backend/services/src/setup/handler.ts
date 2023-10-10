@@ -1,23 +1,9 @@
 import { NestFactory } from "@nestjs/core";
-import { Role } from "../shared/casl/role.enum";
-import { UserDto } from "../shared/dto/user.dto";
-import { getLogger } from "../shared/server";
-import { UtilModule } from "../shared/util/util.module";
-import { Country } from "../shared/entities/country.entity";
-import { CountryService } from "../shared/util/country.service";
-import { CreditOverall } from "../shared/entities/credit.overall.entity";
-import { CompanyModule } from "../shared/company/company.module";
-import { OrganisationDto as OrganisationDto } from "../shared/dto/organisation.dto";
-import { CompanyRole } from "../shared/enum/company.role.enum";
-import { CompanyService } from "../shared/company/company.service";
-import { UserModule } from "../shared/user/user.module";
-import { UserService } from "../shared/user/user.service";
-import { TxType } from "../shared/enum/txtype.enum";
+import { UserDto } from "carbon-services-lib";
+import { getLogger } from "carbon-services-lib";
+import { ProgrammeService,ProgrammeModule,CompanyRole,Country,UtilModule, LocationInterface,LocationModule,CountryService ,CompanyModule,CompanyService,UserModule,UserService,Role} from "carbon-services-lib";
+import { OrganisationDto as OrganisationDto } from "carbon-services-lib";
 import { Handler } from "aws-lambda";
-import { LocationModule } from "../shared/location/location.module";
-import { LocationInterface } from "../shared/location/location.interface";
-import { ProgrammeModule } from "../shared/programme/programme.module";
-import { ProgrammeService } from "../shared/programme/programme.service";
 import { ConfigService } from "@nestjs/config";
 // import { LedgerDbModule } from "../shared/ledger-db/ledger-db.module";
 // import { LedgerDBInterface } from "../shared/ledger-db/ledger.db.interface";
@@ -42,7 +28,8 @@ export const handler: Handler = async (event) => {
     }
   );
   const locationInterface = locationApp.get(LocationInterface);
-  await locationInterface.init();
+  const regionRawData = fs.readFileSync('regions.csv', 'utf8');
+  await locationInterface.init(regionRawData);
 
   if (event.type === "IMPORT_USERS" && event.body) {
 
@@ -67,13 +54,16 @@ export const handler: Handler = async (event) => {
           ? CompanyRole.CERTIFIER
           : fields[4] == "API"
           ? CompanyRole.API
-          :CompanyRole.PROGRAMME_DEVELOPER;
+          : fields[4] === "Ministry" 
+          ? CompanyRole.MINISTRY
+          : CompanyRole.PROGRAMME_DEVELOPER;
       const ur =
         fields[5] == "admin"
           ? Role.Admin
           : fields[5] == "Manager"
           ? Role.Manager
           : Role.ViewOnly;
+      const txId = fields[4] !== "Ministry" ? fields[3] : '';
       console.log('Inserting user', fields[0],
       cr,
       fields[3],
@@ -84,7 +74,7 @@ export const handler: Handler = async (event) => {
         await userService.createUserWithPassword(
           fields[0],
           cr,
-          fields[3],
+          txId,
           fields[6],
           fields[1],
           ur,
@@ -127,11 +117,16 @@ export const handler: Handler = async (event) => {
           ? CompanyRole.CERTIFIER
           : fields[4] == "API"
           ? CompanyRole.API
+          : fields[4] === "Ministry" 
+          ? CompanyRole.MINISTRY
           : CompanyRole.PROGRAMME_DEVELOPER;
+
+      const secScope = fields[4] === "Ministry" && fields[6] ? fields[6].split("-") : undefined;
 
       try {
         const org = await companyService.create({
-              taxId: fields[3],
+              taxId: fields[4] !== "Ministry" ?  fields[3] : undefined,
+              paymentId: undefined,
               companyId: undefined,
               name: fields[0],
               email: fields[1],
@@ -142,7 +137,10 @@ export const handler: Handler = async (event) => {
               country: configService.get("systemCountry"),
               companyRole: cr,
               createdTime: undefined,
-              regions: ['Lagos']
+              regions: ['Lagos'],
+              nameOfMinister: fields[5] || undefined,
+              sectoralScope: secScope,
+              state: undefined //double check this
             });
         console.log('Company created', org)
       } catch (e) {

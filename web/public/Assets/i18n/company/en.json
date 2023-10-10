@@ -3,6 +3,7 @@
   "name": "ORGANISATION NAME",
   "taxId": "TAX ID",
   "companyRole": "ORGANISATION TYPE",
+  "companyState": "STATE",
   "filterByOrgType": "Filter by Organisation Type",
   "viewCompanies": "View Organisations",
   "viewDesc": "View all the visible organisations in the system based on your permissions",
@@ -14,6 +15,7 @@
   "filterByCompany": "Filter by Organisation Type",
   "gov": "Government",
   "certifier": "Certifier",
+  "min": "Ministry",
   "all": "All",
   "searchMail": "Search by email",
   "searchName": "Search by name"

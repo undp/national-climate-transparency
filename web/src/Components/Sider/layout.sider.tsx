@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Menu, Layout, MenuProps } from 'antd';
-import sliderLogo from '../../Assets/Images/logo-slider.png';
+import sliderLogo from '../../Assets/Images/mrvlogo.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import './layout.sider.scss';
 import * as Icon from 'react-bootstrap-icons';
@@ -78,7 +78,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
             <div>
               <div style={{ display: 'flex' }}>
                 <div className="title">{collapsed ? '' : 'TRANSPARENCY'}</div>
-                {/* <div className="title-sub">{collapsed ? '' : 'REGISTRY'}</div> */}
+                <div className="title-sub">{collapsed ? '' : 'SYSTEM'}</div>
               </div>
               <div className="country-name">{process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}</div>
             </div>

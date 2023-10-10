@@ -12,7 +12,7 @@ services:
     ports:
       - "5433:5433"
     environment:
-      POSTGRES_PASSWORD: "<ANY PASSOWORD>"
+      POSTGRES_PASSWORD: "<ANY PASSWORD>"
       POSTGRES_USER: root
       PGPORT: 5433
       PSQL_USERNAME: root
@@ -32,7 +32,7 @@ services:
     environment:
       DB_HOST: dbmrv
       DB_USER: root
-      DB_PASSWORD: "<ANY PASSOWORD>"
+      DB_PASSWORD: "<ANY PASSWORD>"
       RUN_MODULE: national-api
       rootEmail: <ROOT EMAIL>
       systemCountryCode: "NG"
@@ -48,6 +48,11 @@ services:
       DB_NAME: "carbondev"
       NODE_ENV: 'dev'
       FILE_SERVICE: local
+      DISABLE_LOW_PRIORITY_EMAIL: "true"
+      SYSTEM_TYPE: CARBON_TRANSPARENCY_SYSTEM
+      SYSTEM_SYNC: true
+      SYNC_ENABLE: true
+      BACKEND_HOST: http://localhost:9000
     volumes:
       - filestore:/app/backend/services/public
       - ./users.csv:/app/backend/services/users.csv
@@ -64,7 +69,7 @@ services:
     environment:
       DB_HOST: dbmrv
       DB_USER: root
-      DB_PASSWORD: "<ANY PASSOWORD>"
+      DB_PASSWORD: "<ANY PASSWORD>"
       RUN_PORT: 3100
       RUN_MODULE: analytics-api
       DOMAIN_MAP: "true"
@@ -82,24 +87,30 @@ services:
     environment:
       DB_HOST: dbmrv
       DB_USER: root
-      DB_PASSWORD: "<ANY PASSOWORD>"
+      DB_PASSWORD: "<ANY PASSWORD>"
       # ,data-importer
-      RUN_MODULE: async-operations-handler
-      LOCATION_SERVICE: OPENSTREET
+      RUN_MODULE: async-operations-handler,data-importer
+      LOCATION_SERVICE: https://mrv-common-dev.s3.amazonaws.com/flag.png
+      CERTIFIER_IMAGE : "https://mrv-common-dev.s3.amazonaws.com/flag.png"
       SMTP_ENDPOINT: email-smtp.us-east-1.amazonaws.com
       SMTP_PASSWORD: ""
+      SMTP_USERNAME: AKIAUMXKTXDJPDYDJ76J
       IS_EMAIL_DISABLED: "true"
       ASYNC_OPERATIONS_TYPE: Database
       ITMO_API_KEY: ""
-      ITMO_EMAIL: ""
+      ITMO_EMAIL: ""                      
       ITMO_PASSWORD: ""
       DB_PORT: "5433"
       DB_NAME: "carbondev"
-      REGISTRY_ENDPOINT: 'http://192.168.8.195:3000'
       REGISTRY_SYNC_ENABLE: true
       NODE_ENV: 'dev'
-      REGISTRY_API_TOKEN: ''
+      SYNC_ENDPOINT: 'http://192.168.1.43:3000'      
+      SYNC_API_TOKEN: ''
       FILE_SERVICE: local
+      DISABLE_LOW_PRIORITY_EMAIL: "true"
+      SYSTEM_TYPE: CARBON_TRANSPARENCY_SYSTEM
+      SYNC_ENABLE: true
+      BACKEND_HOST: http://localhost:9000
   # async-operations-handler:
   #   build:
   #     context: .

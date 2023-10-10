@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { CompanyProfileComponent } from '@undp/carbon-library';
 import { useAbilityContext } from '../../Casl/Can';
-import './companyProfile.scss';
 
 const CompanyProfile = () => {
   const navigate = useNavigate();

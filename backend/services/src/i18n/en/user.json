@@ -9,11 +9,13 @@
   "createUserUnAuthorized": "This action is unauthorised",
   "createUserToOtherCompaniesUnAuth": "This action is unauthorised",
   "companyCreateUserShouldbeAdmin": "The initial user must be an admin",
+  "minUserCannotCreateMin": "This action is unauthorised",
   "governmentUserAlreadyExist": "Government already exist for the country code {}",
   "companyCreateNotPermittedForTheCompanyRole": "Company create does not permitted for your company role",
   "companyUpdateFailed": "Company update failed. Please try again",
   "propValueAlreadyExist": "{} already exist",
   "taxIdExistAlready": "The organisation already exists with the given Tax ID",
+  "paymentIdExistAlready": "The organisation already exists with the given Registration Payment ID",
   "deleteUserSuccess": "The user has been deleted successfully",
   "deleteOneAdminWhenOnlyOneAdmin": "The user cannot be deleted as the user is the only admin",
   "userUnAUth": "This action is unauthorised",
@@ -32,5 +34,6 @@
   "reqIdFound": "Reset request id found",
   "resetEmailSent": "User found, An email was sent",
   "invalidCountry": "Country is invalid",
-  "editUserSuccess": "The user account has been updated successfully"
+  "editUserSuccess": "The user account has been updated successfully",
+  "investerUserAuth": "Invester should be a programme developer"
 }
