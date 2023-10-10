@@ -71,5 +71,6 @@
   "authLetterLabel": "Letter of Authorisation",
   "ministryLevel": "Minitry Level",
   "description": "Description",
-  "programmeExistsWithAssessmentRegId": "Programme already exist with the given environmental assessment registration number"
+  "programmeExistsWithAssessmentRegId": "Programme already exist with the given environmental assessment registration number",
+  "environmentalImpactAssessment": "Environmental Impact Assessment"
 }
