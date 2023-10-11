@@ -150,7 +150,7 @@ jobs:
             cd repos/carbon-transparency &&
             sudo $(aws ecr get-login --no-include-email --region us-east-1) &&
             sudo docker stop carbon-transparency-national-1 carbon-transparency-async-operations-handler-1 carbon-transparency-stats-1 || true &&
-            sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG &&
+            sudo docker pull ${{ECR_REGISTRY}}/${{ECR_REPOSITORY}}:${{IMAGE_TAG}} &&
             docker compose -f docker-compose-image.yml up -d national stats async-operations-handler '
 
   # automated-api-tests:
