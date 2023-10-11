@@ -146,7 +146,7 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-            
+            echo "sudo docker pull ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}" && 
             cd repos/carbon-transparency &&
             sudo $(aws ecr get-login --no-include-email --region us-east-1) &&
             sudo docker stop carbon-transparency-national-1 carbon-transparency-async-operations-handler-1 carbon-transparency-stats-1 || true &&
