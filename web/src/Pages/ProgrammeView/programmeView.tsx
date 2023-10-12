@@ -358,7 +358,8 @@ const ProgrammeView = () => {
             ministryLevelPermission={
               data &&
               userInfoState?.companyRole === CompanyRole.MINISTRY &&
-              ministrySectoralScope.includes(data.sectoralScope)
+              ministrySectoralScope.includes(data.sectoralScope) &&
+              userInfoState?.userRole !== Role.ViewOnly
             }
             translator={i18n}
             useConnection={useConnection}
@@ -820,7 +821,8 @@ const ProgrammeView = () => {
                   ministryLevelPermission={
                     data &&
                     userInfoState?.companyRole === CompanyRole.MINISTRY &&
-                    ministrySectoralScope.includes(data.sectoralScope)
+                    ministrySectoralScope.includes(data.sectoralScope) &&
+                    userInfoState?.userRole !== Role.ViewOnly
                   }
                   linkDocVisible={linkDocVisible}
                   uploadDocUserPermission={uploadDocUserPermission}
