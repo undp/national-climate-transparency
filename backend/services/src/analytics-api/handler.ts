@@ -3,7 +3,6 @@ import { Handler, Context } from "aws-lambda";
 import { Server } from "http";
 import { proxy } from "aws-serverless-express";
 import { AnalyticsAPIModule, bootstrapServer } from "carbon-services-lib";
-
 let cachedServer: Server;
 
 export const handler: Handler = async (event: any, context: Context) => {
