@@ -45,7 +45,7 @@ const CookiePolicy = () => {
             <div className="cookie-sub">Last updated February 02, 2023</div>
             <div className="cookie-body">
               This Cookie Policy explains how {process.env.REACT_APP_COUNTRY_NAME || 'CountryX'} (
-              <b>"Company"</b>, "<b>we</b>","<b>us</b>", and "<b>our</b>") uses cookies and similar
+              <b>"Company"</b>, "<b>we</b>", "<b>us</b>", and "<b>our</b>") uses cookies and similar
               technologies to recognize you when you visit our websites at{' '}
               <a target="_blank" href="https://carbreg.org">
                 https://carbreg.org
@@ -67,7 +67,7 @@ const CookiePolicy = () => {
               you visit a website. Cookies are widely used by website owners in order to make their
               websites work, or to work more efficiently, as well as to provide reporting
               information.
-              <br /> Cookies set by the website owner (in this case,
+              <br /> Cookies set by the website owner (in this case,{' '}
               {process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}) are called "first party cookies".
               Cookies set by parties other than the website owner are called "third party cookies".
               Third party cookies enable third party features or functionality to be provided on or
@@ -616,7 +616,7 @@ const CookiePolicy = () => {
               <br />
               <br />
               <br />
-              United Nations Development Programme
+              {process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}
               <br />1 United Nations Plaza
               <br />
               New York, New York
