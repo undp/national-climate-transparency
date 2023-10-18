@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Row, Col, Card, Progress, Tag, Steps, message, Skeleton, Button } from 'antd';
+import { Row, Col, Card, Progress, Tag, Steps, message, Skeleton, Button, Tooltip } from 'antd';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Chart from 'react-apexcharts';
@@ -37,6 +37,7 @@ import {
   ProgrammeT,
   Role,
   RoleIcon,
+  TooltipColor,
   TypeOfMitigation,
   UnitField,
   addCommSep,
@@ -572,7 +573,17 @@ const ProgrammeView = () => {
           {t('view:addInvestment')}
         </Button>
       );
+      actionBtns.push(
+        <Tooltip
+          title={'Cannot submit until methodology document is approved.'}
+          color={TooltipColor}
+          key={TooltipColor}
+        >
+          <Button disabled>{t('view:addAction')}</Button>
+        </Tooltip>
+      );
       if ((data.currentStage as any) !== 'AwaitingAuthorization') {
+        actionBtns.pop();
         actionBtns.push(
           <Button type="primary" onClick={onClickedAddAction}>
             {t('view:addAction')}
