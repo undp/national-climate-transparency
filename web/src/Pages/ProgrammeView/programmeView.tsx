@@ -37,6 +37,7 @@ import {
   ProgrammeT,
   Role,
   RoleIcon,
+  TooltipColor,
   TypeOfMitigation,
   UnitField,
   addCommSep,
@@ -575,8 +576,8 @@ const ProgrammeView = () => {
       actionBtns.push(
         <Tooltip
           title={'Cannot submit until methodology document is approved.'}
-          color={'#6ACDFF'}
-          key={'#6ACDFF'}
+          color={TooltipColor}
+          key={TooltipColor}
         >
           <Button disabled>{t('view:addAction')}</Button>
         </Tooltip>
