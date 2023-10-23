@@ -49,7 +49,6 @@ import {
   getStageTagTypeMRV,
   isBase64,
 } from '@undp/carbon-library';
-import { linkDocVisible, uploadDocUserPermission } from '../../Casl/documentsPermission';
 
 const ProgrammeView = () => {
   const { get, put, post } = useConnection();
@@ -364,8 +363,6 @@ const ProgrammeView = () => {
             translator={i18n}
             useConnection={useConnection}
             useUserContext={useUserContext}
-            linkDocVisible={linkDocVisible}
-            uploadDocUserPermission={uploadDocUserPermission}
           />
         ),
         icon: (
@@ -833,12 +830,11 @@ const ProgrammeView = () => {
                     userInfoState?.companyRole === CompanyRole.MINISTRY &&
                     ministrySectoralScope.includes(data.sectoralScope)
                   }
-                  linkDocVisible={linkDocVisible}
-                  uploadDocUserPermission={uploadDocUserPermission}
                   useConnection={useConnection}
                   useUserContext={useUserContext}
                   translator={i18n}
                   methodologyDocumentUpdated={methodologyDocumentApproved}
+                  programmeStatus={data?.currentStage}
                 />
               </div>
             </Card>
