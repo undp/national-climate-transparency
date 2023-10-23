@@ -65,7 +65,7 @@
     "winston": "^3.8.2"
   },
   "devDependencies": {
-    "@aws-sdk/client-qldb": "^3.410.0",
+    "@aws-sdk/client-qldb": "^3.433.0",
     "@aws-sdk/client-qldb-session": "^3.391.0",
     "@nestjs/cli": "^9.0.0",
     "@nestjs/schematics": "^9.0.0",
