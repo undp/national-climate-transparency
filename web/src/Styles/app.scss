@@ -112,6 +112,7 @@ body {
 .ant-btn {
   border-radius: 5px !important;
 }
+
 .ant-input-group-addon:first-child {
   border-radius: 5px !important;
 }
@@ -518,8 +519,8 @@ body {
   }
 
   .ant-btn-primary {
-    background: $primary-color;
-    border-radius: $primary-color;
+    background: $primary-color !important;
+    border-radius: $primary-color !important;
     border: none;
   }
 
