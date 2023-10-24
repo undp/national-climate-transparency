@@ -14,7 +14,7 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
-import { User } from "carbon-services-lib";
+import { DataExportQueryDto, User } from "carbon-services-lib";
 import { UserDto } from "carbon-services-lib";
 import { UserService,Action ,AppAbility,CaslAbilityFactory,CheckPolicies, PoliciesGuard, PoliciesGuardEx, Role} from "carbon-services-lib";
 import { QueryDto } from "carbon-services-lib";
@@ -115,6 +115,18 @@ export class UserController {
   queryUser(@Body() query: QueryDto, @Request() req) {
     console.log(req.abilityCondition);
     return this.userService.query(query, req.abilityCondition);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
+  // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
+  @Post('download')
+  async getDownload(@Body()query: DataExportQueryDto, @Request() req) {
+    try {
+      return this.userService.download(query, req.abilityCondition); // Return the filePath as a JSON response
+    } catch (err) {
+      return { error: 'Error generating the CSV file.' };
+    }
   }
 
   @ApiBearerAuth()

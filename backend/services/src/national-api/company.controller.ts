@@ -11,7 +11,7 @@ import {
   Body,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { Company } from "carbon-services-lib";
+import { Company, DataExportQueryDto } from "carbon-services-lib";
 import { QueryDto } from "carbon-services-lib";
 import { OrganisationSuspendDto } from "carbon-services-lib";
 import { FindOrganisationQueryDto } from "carbon-services-lib";
@@ -44,6 +44,17 @@ export class CompanyController {
   queryNames(@Body() query: QueryDto, @Request() req) {
     console.log(req.abilityCondition);
     return this.companyService.queryNames(query, req.abilityCondition);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, Company, true))
+  @Post('download')
+  async getDownload(@Body()query: DataExportQueryDto, @Request() req) {
+    try {
+      return this.companyService.download(query, req.abilityCondition, req.user.companyRole); // Return the filePath as a JSON response
+    } catch (err) {
+      return { error: 'Error generating the CSV file.' };
+    }
   }
 
   @ApiBearerAuth()
