@@ -122,11 +122,7 @@ export class UserController {
   // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
   @Post('download')
   async getDownload(@Body()query: DataExportQueryDto, @Request() req) {
-    try {
-      return this.userService.download(query, req.abilityCondition); // Return the filePath as a JSON response
-    } catch (err) {
-      return { error: 'Error generating the CSV file.' };
-    }
+    return this.userService.download(query, req.abilityCondition); // Return the filePath as a JSON response
   }
 
   @ApiBearerAuth()

@@ -49,11 +49,7 @@ export class CompanyController {
   @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, Company, true))
   @Post('download')
   async getDownload(@Body()query: DataExportQueryDto, @Request() req) {
-    try {
-      return this.companyService.download(query, req.abilityCondition, req.user.companyRole); // Return the filePath as a JSON response
-    } catch (err) {
-      return { error: 'Error generating the CSV file.' };
-    }
+    return this.companyService.download(query, req.abilityCondition, req.user.companyRole); // Return the filePath as a JSON response
   }
 
   @ApiBearerAuth()

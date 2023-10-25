@@ -64,11 +64,7 @@ export class ProgrammeController {
     // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
     @Post('download')
     async getDownload(@Body()query: DataExportQueryDto, @Request() req) {
-      try {
-        return this.programmeService.downloadProgrammes(query, req.abilityCondition); // Return the filePath as a JSON response
-      } catch (err) {
-        return { error: 'Error generating the CSV file.' };
-      }
+      return this.programmeService.downloadProgrammes(query, req.abilityCondition); // Return the filePath as a JSON response
     }
 
     @ApiBearerAuth()
@@ -92,11 +88,7 @@ export class ProgrammeController {
     // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
     @Post('queryNdcActions/download')
     async getNdcDownload(@Body()query: DataExportQueryDto, @Request() req) {
-      try {
-        return this.programmeService.downloadNdcActions(query, req.abilityCondition); // Return the filePath as a JSON response
-      } catch (err) {
-        return { error: 'Error generating the CSV file.' };
-      }
+      return this.programmeService.downloadNdcActions(query, req.abilityCondition); // Return the filePath as a JSON response
     }
 
     // @ApiBearerAuth('api_key')
@@ -180,10 +172,6 @@ export class ProgrammeController {
     @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Investment, true))
     @Post('investments/download')
     async getInvestmentsDownload(@Body()query: DataExportQueryDto, @Request() req) {
-      try {
-        return this.programmeService.downloadInvestments(query, req.abilityCondition); // Return the filePath as a JSON response
-      } catch (err) {
-        return { error: 'Error generating the CSV file.' };
-      }
+      return this.programmeService.downloadInvestments(query, req.abilityCondition); // Return the filePath as a JSON response
     }
 }
