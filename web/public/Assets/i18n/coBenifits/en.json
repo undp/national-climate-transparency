@@ -31,5 +31,6 @@
   "specify":"Specify",
   "contactInformation":"Contact Information",
   "feasibilityReport":"Feasibility Report",
-  "invalidFileFormat": "Unsupported file format"
+  "invalidFileFormat": "Unsupported file format",
+  "socialEnvironmentalRisk": "Social & Environmental Risk"
 }
