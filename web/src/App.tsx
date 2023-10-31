@@ -37,6 +37,7 @@ import NdcActionManagement from './Pages/NdcActionManagement/ndcActionManagement
 import NdcActionView from './Pages/NdcActionView/ndcActionView';
 import RegisterNewCompany from './Pages/Company/registerNewCompany';
 import { Loading } from '@undp/carbon-library';
+import NdcDetails from './Pages/NdcDetails/ndcDetails';
 
 // message.config({
 //   duration: 60,
@@ -68,9 +69,7 @@ const App = () => {
     <AbilityContext.Provider value={ability}>
       <ConnectionContextProvider
         serverURL={
-          process.env.REACT_APP_BACKEND
-            ? process.env.REACT_APP_BACKEND
-            : 'http://localhost:3000/local'
+          process.env.REACT_APP_BACKEND ? process.env.REACT_APP_BACKEND : 'http://localhost:9000'
         }
       >
         <UserInformationContextProvider>
@@ -113,6 +112,12 @@ const App = () => {
                   >
                     <Route path="viewAll" element={<NdcActionManagement />} />
                     <Route path="view" element={<NdcActionView />} />
+                  </Route>
+                  <Route
+                    path="/ndcDetails"
+                    element={<CustomLayout selectedKey="ndcDetails/viewAll" />}
+                  >
+                    <Route path="viewAll" element={<NdcDetails />} />
                   </Route>
                   <Route
                     path="/companyManagement"
