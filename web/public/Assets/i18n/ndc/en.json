@@ -1,8 +1,10 @@
 {
-    "NdcTitle": "NDC ACTIONS",
-    "NdcSubTitle": "Ndc Actions Of The System",
+    "ndcTitle": "NDC ACTIONS",
+    "ndcSubTitle": "Ndc Actions Of The System",
     "ndcColumnsStartDate": "Start Date",
     "ndcColumnsEndDate": "End Date",
     "ndcColumnsNationalPlanObj": "National Plan Objectives",
-    "ndcColumnsKpi": "KPI"
+    "ndcColumnsKpi": "KPI",
+    "rangeAlreadyExists": "Selected Range Already exists",
+    "addNdcAction": "ADD NDC ACTION"
 }
