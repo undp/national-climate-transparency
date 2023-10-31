@@ -22,40 +22,92 @@ type Period = {
 const NdcDetailsComponent = (props: any) => {
   const { t, useConnection } = props;
   const { RangePicker } = DatePicker;
-  const [ndcDetailsData, setNdcDetailsData] = useState<any[]>([]);
+  const [ndcDetailsData, setNdcDetailsData] = useState<any[]>([
+    {
+      startDate: '2022-03-25',
+      endDate: '2023-03-25',
+      nationalPlanObj: 'sample text1',
+      kpi: 23,
+    },
+    {
+      startDate: '2023-03-25',
+      endDate: '2024-03-25',
+      nationalPlanObj: 'sample text2',
+      kpi: 34,
+    },
+    {
+      startDate: '2024-03-25',
+      endDate: '2025-03-25',
+      nationalPlanObj: 'sample text3',
+      kpi: 25,
+    },
+  ]);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [periodItems, setPeriodItems] = useState([] as any[]);
+  const [selectedTab, setSelectedTab] = useState('add_new');
   const selectedPeriod = useRef({} as any);
 
   console.log('d1 rendered');
 
+  const handleSave = (row: any) => {
+    const newData = [...ndcDetailsData];
+    const index = newData.findIndex((item) => row.key === item.key);
+    const item = newData[index];
+    newData.splice(index, 1, {
+      ...item,
+      ...row,
+    });
+    setNdcDetailsData(newData);
+  };
+
   const { post } = useConnection();
-  const columns: any = [
+  const defaultColumns: any = [
     {
       title: t('ndc:ndcColumnsStartDate'),
       dataIndex: 'startDate',
       key: 'startDate',
       align: 'left' as const,
+      editable: true,
     },
     {
       title: t('ndc:ndcColumnsEndDate'),
       dataIndex: 'endDate',
       key: 'endDate',
       align: 'left' as const,
+      editable: true,
     },
     {
       title: t('ndc:ndcColumnsNationalPlanObj'),
       dataIndex: 'nationalPlanObj',
       key: 'nationalPlanObj',
       align: 'left' as const,
+      editable: true,
     },
     {
       title: t('ndc:ndcColumnsKpi'),
       dataIndex: 'kpi',
       key: 'kpi',
       align: 'left' as const,
+      editable: true,
     },
   ];
+
+  const columns = defaultColumns.map((col: any) => {
+    if (!col.editable) {
+      return col;
+    }
+    return {
+      ...col,
+      onCell: (record: any) => ({
+        record,
+        editable: col.editable,
+        dataIndex: col.dataIndex,
+        title: col.title,
+        handleSave,
+      }),
+    };
+  });
 
   function onAddNewNdcDetail() {
     const newData = {
@@ -77,24 +129,25 @@ const NdcDetailsComponent = (props: any) => {
 
   function ndcDetailsTableContent() {
     return (
-      <div>
-        <Button
-          onClick={onAddNewNdcDetail}
-          type="primary"
-          style={{
-            marginBottom: 16,
-          }}
-        >
-          Add a row
-        </Button>
-        <Table
-          components={components}
-          rowClassName={() => 'editable-row'}
-          bordered
-          dataSource={ndcDetailsData}
-          columns={columns}
-        />
-      </div>
+      <div></div>
+      // <div>
+      //   <Button
+      //     onClick={onAddNewNdcDetail}
+      //     type="primary"
+      //     style={{
+      //       marginBottom: 16,
+      //     }}
+      //   >
+      //     Add a row
+      //   </Button>
+      //   <Table
+      //     components={components}
+      //     rowClassName={() => 'editable-row'}
+      //     bordered
+      //     dataSource={ndcDetailsData}
+      //     columns={columns}
+      //   />
+      // </div>
     );
   }
 
@@ -140,7 +193,8 @@ const NdcDetailsComponent = (props: any) => {
   }
 
   const onTabChange = (key: string) => {
-    console.log(key);
+    console.log('d1 onTabChange', key);
+    setSelectedTab(key);
   };
 
   useEffect(() => {
@@ -150,26 +204,6 @@ const NdcDetailsComponent = (props: any) => {
       children: addNewPeriodContent(),
     };
     setPeriodItems([addNewItem]);
-    setNdcDetailsData([
-      {
-        startDate: '2022-03-25',
-        endDate: '2023-03-25',
-        nationalPlanObj: 'sample text1',
-        kpi: 23,
-      },
-      {
-        startDate: '2023-03-25',
-        endDate: '2024-03-25',
-        nationalPlanObj: 'sample text2',
-        kpi: 34,
-      },
-      {
-        startDate: '2024-03-25',
-        endDate: '2025-03-25',
-        nationalPlanObj: 'sample text3',
-        kpi: 25,
-      },
-    ]);
   }, []);
 
   return (
@@ -185,6 +219,28 @@ const NdcDetailsComponent = (props: any) => {
       <div>
         <Tabs defaultActiveKey="1" items={periodItems} onChange={onTabChange} />
       </div>
+      {selectedTab !== 'add_new' && (
+        <div>
+          <div>
+            <Button
+              onClick={onAddNewNdcDetail}
+              type="primary"
+              style={{
+                marginBottom: 16,
+              }}
+            >
+              Add a row
+            </Button>
+            <Table
+              components={components}
+              rowClassName={() => 'editable-row'}
+              bordered
+              dataSource={ndcDetailsData}
+              columns={columns}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
