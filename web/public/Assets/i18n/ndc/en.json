@@ -1,4 +1,8 @@
 {
     "NdcTitle": "NDC ACTIONS",
-    "NdcSubTitle": "Ndc Actions Of The System"
+    "NdcSubTitle": "Ndc Actions Of The System",
+    "ndcColumnsStartDate": "Start Date",
+    "ndcColumnsEndDate": "End Date",
+    "ndcColumnsNationalPlanObj": "National Plan Objectives",
+    "ndcColumnsKpi": "KPI"
 }
