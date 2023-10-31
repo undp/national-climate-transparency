@@ -1,11 +1,11 @@
 {
   "dashboard": "Dashboard",
-  "programmes": "Programmes",
+  "programmes": "Projects",
   "investments": "Investments",
   "companies": "Organisations",
   "users": "Users",
   "viewAll": "View All",
   "addNew": "Add New",
-  "ndcActions": "NDC Actions",
+  "ndcActions": "Activities"
   "ndcDetails": "NDC Actions"
 }
