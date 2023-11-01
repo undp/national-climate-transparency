@@ -40,6 +40,8 @@ import { Loading } from '@undp/carbon-library';
 import AddSupportComponent from './Pages/SupportManagement/supportCreation';
 import SupportManagement from './Pages/SupportManagement/supportManagement';
 import NdcDetails from './Pages/NdcDetails/ndcDetails';
+import GHGInventory from './Pages/GHGInventory/ghgInventory';
+import ReportSection from './Pages/ReportSection/reportsSection';
 
 // message.config({
 //   duration: 60,
@@ -91,6 +93,9 @@ const App = () => {
                 <Route path="/" element={<PrivateRoute />}>
                   <Route path="/dashboard" element={<CustomLayout selectedKey="dashboard" />}>
                     <Route index element={<Dashboard />} />
+                  </Route>
+                  <Route path="/ghgInventory" element={<CustomLayout selectedKey="ghgInventory" />}>
+                    <Route index element={<GHGInventory />} />
                   </Route>
                   <Route
                     path="/programmeManagement"
@@ -155,6 +160,9 @@ const App = () => {
                     element={<CustomLayout selectedKey="companyManagement/viewAll" />}
                   >
                     <Route path="view" element={<CompanyProfile />} />
+                  </Route>
+                  <Route path="/reports" element={<CustomLayout selectedKey="reports" />}>
+                    <Route index element={<ReportSection />} />
                   </Route>
                   {/* <Route
                       path="/userManagement"
