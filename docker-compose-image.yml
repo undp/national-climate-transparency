@@ -127,7 +127,7 @@ services:
     #     REACT_APP_COUNTRY_FLAG_URL: "https://mrv-common-dev.s3.amazonaws.com/flag.png"
     #     COUNTRY_CODE: "NG"
     ports:
-      - "80:9030"
+      - "9030:3030"
     depends_on:
       - dbmrv
       - national

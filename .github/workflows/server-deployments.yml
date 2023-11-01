@@ -67,12 +67,12 @@ jobs:
       #   run: |
       #     cp -r node_modules ./dependency_layer
       #     ls
-      - name: serverless deploy develop
-        if: ${{ needs.check_dependency_change.outputs.deps_changed == 'True'}}
-        uses: serverless/github-action@v3.1
-        with:
-          args: -c "cd ./backend/layer && serverless deploy --stage ${{ needs.check_dependency_change.outputs.stage }}"
-          entrypoint: /bin/sh
+      # - name: serverless deploy develop
+      #   if: ${{ needs.check_dependency_change.outputs.deps_changed == 'True'}}
+      #   uses: serverless/github-action@v3.1
+      #   with:
+      #     args: -c "cd ./backend/layer && serverless deploy --stage ${{ needs.check_dependency_change.outputs.stage }}"
+      #     entrypoint: /bin/sh
       # - name: serverless deploy main
       #   if: ${{ needs.check_dependency_change.outputs.deps_changed == 'True' && github.ref == 'refs/heads/main'}}
       #   uses: serverless/github-action@v3.1
@@ -85,24 +85,24 @@ jobs:
     needs: [layer, check_dependency_change]
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install Dependency
-        working-directory: ./backend/services
-        run: yarn install --frozen-lockfile
-      - name: version
-        run: |
-          echo "ARN1=$(aws lambda list-layer-versions --layer-name service-dependencies-mrv-${{ needs.check_dependency_change.outputs.stage }}-1 --region us-east-1 --query 'LayerVersions[0].LayerVersionArn')" >> $GITHUB_OUTPUT
-          echo "ARN2=$(aws lambda list-layer-versions --layer-name service-dependencies-mrv-${{ needs.check_dependency_change.outputs.stage }}-2 --region us-east-1 --query 'LayerVersions[0].LayerVersionArn')" >> $GITHUB_OUTPUT
-        id: layerArn
-      - name: serverless deploy develop
+      # - name: Use Node.js ${{ matrix.node-version }}
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: ${{ matrix.node-version }}
+      # - name: Install Dependency
+      #   working-directory: ./backend/services
+      #   run: yarn install --frozen-lockfile
+      # - name: version
+      #   run: |
+      #     echo "ARN1=$(aws lambda list-layer-versions --layer-name service-dependencies-mrv-${{ needs.check_dependency_change.outputs.stage }}-1 --region us-east-1 --query 'LayerVersions[0].LayerVersionArn')" >> $GITHUB_OUTPUT
+      #     echo "ARN2=$(aws lambda list-layer-versions --layer-name service-dependencies-mrv-${{ needs.check_dependency_change.outputs.stage }}-2 --region us-east-1 --query 'LayerVersions[0].LayerVersionArn')" >> $GITHUB_OUTPUT
+      #   id: layerArn
+      # - name: serverless deploy develop
         # if: github.ref == 'refs/heads/develop'
-        uses: serverless/github-action@v3.1
-        with:
-          args: -c "cd ./backend/services && serverless deploy --stage ${{ needs.check_dependency_change.outputs.stage }} --param='depLayerArn1=${{ steps.layerArn.outputs.ARN1 }}' --param='depLayerArn2=${{ steps.layerArn.outputs.ARN2 }}'"
-          entrypoint: /bin/sh
+        # uses: serverless/github-action@v3.1
+        # with:
+        #   args: -c "cd ./backend/services && serverless deploy --stage ${{ needs.check_dependency_change.outputs.stage }} --param='depLayerArn1=${{ steps.layerArn.outputs.ARN1 }}' --param='depLayerArn2=${{ steps.layerArn.outputs.ARN2 }}'"
+        #   entrypoint: /bin/sh
       # - name: serverless deploy main
       #   if: github.ref == 'refs/heads/main'
       #   uses: serverless/github-action@v3.1
@@ -142,16 +142,15 @@ jobs:
           PRIVATE_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE }}
           HOSTNAME: ${{secrets.HOST_IP}}
           USER_NAME: ec2-user
-
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-            
             cd repos/carbon-transparency &&
             sudo $(aws ecr get-login --no-include-email --region us-east-1) &&
             sudo docker stop carbon-transparency-national-1 carbon-transparency-async-operations-handler-1 carbon-transparency-stats-1 || true &&
-            sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG &&
-            docker compose -f docker-compose-image.yml up -d national stats async-operations-handler '
+            sudo docker rm carbon-transparency-national-1 carbon-transparency-async-operations-handler-1 carbon-transparency-stats-1 &&
+            sudo docker pull 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-services:v1 &&
+            docker-compose -f docker-compose-image.yml up -d national stats async-operations-handler '
 
   # automated-api-tests:
   #   runs-on: ubuntu-latest

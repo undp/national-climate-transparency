@@ -1,9 +1,9 @@
 // lambda.ts
 import { Handler, Context } from 'aws-lambda';
 import { NestFactory } from '@nestjs/core';
-import { getLogger } from 'carbon-services-lib';
-import { DataImporterModule } from 'carbon-services-lib';
-import { DataImporterService } from 'carbon-services-lib';
+import { getLogger } from '@undp/carbon-services-lib';
+import { DataImporterModule } from '@undp/carbon-services-lib';
+import { DataImporterService } from '@undp/carbon-services-lib';
 
 export const handler: Handler = async (event: any, context: Context) => {
    const app = await NestFactory.createApplicationContext(DataImporterModule, {
