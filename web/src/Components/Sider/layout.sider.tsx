@@ -11,6 +11,7 @@ import {
   ShopOutlined,
   UnorderedListOutlined,
   UserOutlined,
+  MoneyCollectOutlined,
 } from '@ant-design/icons';
 import { LayoutSiderProps } from '@undp/carbon-library';
 import { useTranslation } from 'react-i18next';
@@ -46,6 +47,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
     getItem(t('nav:ndcActions'), 'ndcManagement/viewAll', <Icon.Clipboard2Data />),
     getItem(t('nav:ndcDetails'), 'ndcDetails/viewAll', <Icon.Clipboard2Data />),
     getItem(t('nav:investments'), 'investmentManagement/viewAll', <Icon.Cash />),
+    getItem(t('nav:support'), 'supportManagement/viewAll', <MoneyCollectOutlined />),
     getItem(t('nav:companies'), 'companyManagement/viewAll', <ShopOutlined />),
     getItem(t('nav:users'), 'userManagement/viewAll', <UserOutlined />),
     // getItem('Team', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
@@ -62,10 +64,6 @@ const LayoutSider = (props: LayoutSiderProps) => {
       className="layout-sider-container"
       breakpoint={collapsed ? undefined : 'lg'}
       collapsed={collapsed}
-      // collapsedWidth="70"
-      // onCollapse={(col) => {
-      //   setCollapsed(col);
-      // }}
     >
       <div className="layout-sider-div-container">
         <div

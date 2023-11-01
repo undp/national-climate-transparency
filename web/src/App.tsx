@@ -37,6 +37,8 @@ import NdcActionManagement from './Pages/NdcActionManagement/ndcActionManagement
 import NdcActionView from './Pages/NdcActionView/ndcActionView';
 import RegisterNewCompany from './Pages/Company/registerNewCompany';
 import { Loading } from '@undp/carbon-library';
+import AddSupportComponent from './Pages/SupportManagement/supportCreation';
+import SupportManagement from './Pages/SupportManagement/supportManagement';
 import NdcDetails from './Pages/NdcDetails/ndcDetails';
 
 // message.config({
@@ -105,6 +107,13 @@ const App = () => {
                   >
                     <Route path="viewAll" element={<InvestmentManagement />} />
                     <Route path="addInvestment" element={<AddInvestmentComponent />} />
+                  </Route>
+                  <Route
+                    path="/supportManagement"
+                    element={<CustomLayout selectedKey="supportManagement/viewAll" />}
+                  >
+                    <Route path="viewAll" element={<SupportManagement />} />
+                    <Route path="addSupport" element={<AddSupportComponent />} />
                   </Route>
                   <Route
                     path="/ndcManagement"
