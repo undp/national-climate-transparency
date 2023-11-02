@@ -75,6 +75,13 @@ export class ProgrammeController {
       return this.programmeService.queryNdcActions(query, req.abilityCondition)
     }
 
+    @ApiBearerAuth()
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, NDCActionViewEntity, true))
+    @Post('queryNdcDetails')
+    async queryNdcDetails(@Body()query: QueryDto, @Request() req) {
+      return this.programmeService.queryNdcDetails(query, req.abilityCondition)
+    }
+
     // @ApiBearerAuth('api_key')
     // @ApiBearerAuth()
     // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
