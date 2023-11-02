@@ -101,7 +101,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
             <div className="login-img-container container-image">
               <div className="text-ctn">
                 <span>
-                  {t('login:carbon')} <br /> {t('login:credit')} <br />
+                  {t('login:nationalNdc')} <br /> {t('login:credit')} <br />
                   {t('login:management')}
                 </span>
               </div>
