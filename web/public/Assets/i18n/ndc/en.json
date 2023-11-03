@@ -7,5 +7,6 @@
     "ndcColumnsKpi": "KPI",
     "rangeAlreadyExists": "Selected Range Already exists",
     "addNdcAction": "+ Add NDC Action",
-    "enterNewPlanTxt": "Please add the National Plan Objective"
+    "enterNewPlanTxt": "Please add the National Plan Objective",
+    "addSubNdcAction": "+ Add Sub NDC Action"
 }
