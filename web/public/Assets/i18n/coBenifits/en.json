@@ -34,5 +34,6 @@
   "contactInformation":"Contact Information",
   "feasibilityReport":"Feasibility Report",
   "invalidFileFormat": "Unsupported file format",
-  "socialEnvironmentalRisk": "Social & Environmental Risk"
+  "socialEnvironmentalRisk": "Social & Environmental Risk",
+  "balanceOfPayments": "Balance of Payments"
 }
