@@ -17,6 +17,7 @@ const AddNdcAction = () => {
     'safeguards',
     'social',
     'unfcccSdTool',
+    'socialEnvironmentalRisk',
   ]);
   const sdgGoalImages = getSdgGoalImages();
 
