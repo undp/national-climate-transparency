@@ -36,7 +36,7 @@
   "isRequired": "is required",
   "ndcToolTip": "Nationally Determined Contributions",
   "noNdcActions": "No Activities Available",
-  "ndcColumnsActionId": "ACTION ID",
+  "ndcColumnsActionId": "ACTIVITY ID",
   "ndcColumnsDate": "DATE",
   "ndcColumnsNdcAction": "Activity",
   "ndcColumnsProgrammeName": "PROJECT NAME",
