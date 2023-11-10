@@ -1,10 +1,14 @@
 {
   "dashboard": "Dashboard",
-  "programmes": "Programmes",
-  "investments": "Investments",
+  "ghgInventory": "GHG Inventory",
+  "programmes": "Projects",
+  "investments": "Financing",
   "companies": "Organisations",
   "users": "Users",
   "viewAll": "View All",
   "addNew": "Add New",
-  "ndcActions": "NDC Actions"
+  "ndcActions": "Activities",
+  "support": "Financing",
+  "ndcDetails": "NDC Actions",
+  "reports": "Reports"
 }

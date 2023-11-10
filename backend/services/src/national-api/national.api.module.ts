@@ -8,7 +8,7 @@ import { UserController } from './user.controller';
 import { AuthController } from './auth.controller';
 import { ProgrammeController } from './programme.controller';
 import { SettingsController } from './settings.controller';
-import {ProgrammeModule,TypeOrmConfigService,configuration, AuthModule ,CompanyModule,UserModule,UtilModule,CaslModule} from "carbon-services-lib";
+import {ProgrammeModule,TypeOrmConfigService,configuration, AuthModule ,CompanyModule,UserModule,UtilModule,CaslModule} from "@undp/carbon-services-lib";
 
 
 @Module({

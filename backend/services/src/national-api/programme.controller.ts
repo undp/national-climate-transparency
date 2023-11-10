@@ -2,7 +2,7 @@ import { Body, Controller, Post, UseGuards, Request, Put } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {Programme,Action,AppAbility,CheckPolicies,PoliciesGuard, PoliciesGuardEx,ProgrammeDto,ProgrammeService,
   QueryDto,ConstantUpdateDto,ApiKeyJwtAuthGuard,NDCActionDto,JwtAuthGuard,ProgrammeDocumentDto,DocumentAction,ProgrammeAuth,ProgrammeIssue,ProgrammeReject,
-  InvestmentRequestDto,Investment,InvestmentApprove,InvestmentCancel,InvestmentReject,NDCActionViewEntity,ProgrammeDocumentViewEntity} from "carbon-services-lib";
+  InvestmentRequestDto,Investment,InvestmentApprove,InvestmentCancel,InvestmentReject,NDCActionViewEntity,ProgrammeDocumentViewEntity} from "@undp/carbon-services-lib";
 
 
 
@@ -73,6 +73,13 @@ export class ProgrammeController {
     @Post('queryNdcActions')
     async queryNdcActions(@Body()query: QueryDto, @Request() req) {
       return this.programmeService.queryNdcActions(query, req.abilityCondition)
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, NDCActionViewEntity, true))
+    @Post('queryNdcDetails')
+    async queryNdcDetails(@Body()query: QueryDto, @Request() req) {
+      return this.programmeService.queryNdcDetails(query, req.abilityCondition)
     }
 
     // @ApiBearerAuth('api_key')
