@@ -36,6 +36,12 @@ import AddInvestmentComponent from './Pages/InvestmentManagement/investmentCreat
 import NdcActionManagement from './Pages/NdcActionManagement/ndcActionManagement';
 import NdcActionView from './Pages/NdcActionView/ndcActionView';
 import RegisterNewCompany from './Pages/Company/registerNewCompany';
+import { Loading } from '@undp/carbon-library';
+import AddSupportComponent from './Pages/SupportManagement/supportCreation';
+import SupportManagement from './Pages/SupportManagement/supportManagement';
+import NdcDetails from './Pages/NdcDetails/ndcDetails';
+import GHGInventory from './Pages/GHGInventory/ghgInventory';
+import ReportSection from './Pages/ReportSection/reportsSection';
 
 // message.config({
 //   duration: 60,
@@ -43,9 +49,8 @@ import RegisterNewCompany from './Pages/Company/registerNewCompany';
 
 const App = () => {
   const ability = defineAbility();
-  const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION
-    ? process.env.REACT_APP_ENABLE_REGISTRATION
-    : true;
+  const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION || 'true';
+
   useEffect(() => {
     console.log(process.env.REACT_APP_BACKEND);
     console.log(process.env.REACT_APP_STAT_URL);
@@ -68,9 +73,7 @@ const App = () => {
     <AbilityContext.Provider value={ability}>
       <ConnectionContextProvider
         serverURL={
-          process.env.REACT_APP_BACKEND
-            ? process.env.REACT_APP_BACKEND
-            : 'http://localhost:3000/local'
+          process.env.REACT_APP_BACKEND ? process.env.REACT_APP_BACKEND : 'http://localhost:9000'
         }
       >
         <UserInformationContextProvider>
@@ -91,6 +94,9 @@ const App = () => {
                   <Route path="/dashboard" element={<CustomLayout selectedKey="dashboard" />}>
                     <Route index element={<Dashboard />} />
                   </Route>
+                  <Route path="/ghgInventory" element={<CustomLayout selectedKey="ghgInventory" />}>
+                    <Route index element={<GHGInventory />} />
+                  </Route>
                   <Route
                     path="/programmeManagement"
                     element={<CustomLayout selectedKey="programmeManagement/viewAll" />}
@@ -108,11 +114,24 @@ const App = () => {
                     <Route path="addInvestment" element={<AddInvestmentComponent />} />
                   </Route>
                   <Route
+                    path="/supportManagement"
+                    element={<CustomLayout selectedKey="supportManagement/viewAll" />}
+                  >
+                    <Route path="viewAll" element={<SupportManagement />} />
+                    <Route path="addSupport" element={<AddSupportComponent />} />
+                  </Route>
+                  <Route
                     path="/ndcManagement"
                     element={<CustomLayout selectedKey="ndcManagement/viewAll" />}
                   >
                     <Route path="viewAll" element={<NdcActionManagement />} />
                     <Route path="view" element={<NdcActionView />} />
+                  </Route>
+                  <Route
+                    path="/ndcDetails"
+                    element={<CustomLayout selectedKey="ndcDetails/viewAll" />}
+                  >
+                    <Route path="viewAll" element={<NdcDetails />} />
                   </Route>
                   <Route
                     path="/companyManagement"
@@ -142,6 +161,9 @@ const App = () => {
                   >
                     <Route path="view" element={<CompanyProfile />} />
                   </Route>
+                  <Route path="/reports" element={<CustomLayout selectedKey="reports" />}>
+                    <Route index element={<ReportSection />} />
+                  </Route>
                   {/* <Route
                       path="/userManagement"
                       element={<CustomLayout selectedKey="userManagement" />}
@@ -151,11 +173,11 @@ const App = () => {
                       <Route path="updateUser" element={<UpdateUser />} />
                     </Route> */}
                 </Route>
-                {enableRegistration && (
+                {enableRegistration === 'true' && (
                   <Route
                     path="registerCompany"
                     element={
-                      <Suspense fallback={<div>"Loading..."</div>}>
+                      <Suspense fallback={<Loading />}>
                         <RegisterNewCompany />
                       </Suspense>
                     }
