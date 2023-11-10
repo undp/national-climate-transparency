@@ -453,6 +453,24 @@
     .undplogocontainer {
       padding-top: 40px;
 
+      .align-to-end {
+        @media (max-width: 767px) {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          padding-right: 20px;
+        }
+      }
+
+      .align-to-start {
+        @media (max-width: 767px) {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          padding-left: 20px;
+        }
+      }
+
       .erbd {
         width: 14.5rem;
       }
@@ -469,10 +487,14 @@
         width: 14.5rem;
 
         @media (max-width: 876px) {
-          width: 13rem;
+          width: 12rem;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 820px) {
+          width: 11rem;
+        }
+
+        @media (max-width: 750px) {
           width: 14.5rem;
         }
       }
@@ -481,10 +503,14 @@
         width: 14.5rem;
 
         @media (max-width: 876px) {
-          width: 11.5rem;
+          width: 11rem;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 820px) {
+          width: 10rem;
+        }
+
+        @media (max-width: 750px) {
           width: 12.5rem;
         }
       }
@@ -515,7 +541,7 @@
       height: 33.75rem;
       width: 58.5rem;
 
-      @media (max-width: 768px) {
+      @media (max-width: 767px) {
         display: none;
       }
     }
@@ -612,7 +638,7 @@
       width: 28.125rem;
       height: 23.438rem;
 
-      @media (max-width: 768px) {
+      @media (max-width: 767px) {
         display: none;
       }
     }
