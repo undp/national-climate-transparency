@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Row, Col, Card, Progress, Tag, Steps, message, Skeleton, Button } from 'antd';
+import { Row, Col, Card, Progress, Tag, Steps, message, Skeleton, Button, Tooltip } from 'antd';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Chart from 'react-apexcharts';
@@ -37,6 +37,7 @@ import {
   ProgrammeT,
   Role,
   RoleIcon,
+  TooltipColor,
   TypeOfMitigation,
   UnitField,
   addCommSep,
@@ -48,7 +49,6 @@ import {
   getStageTagTypeMRV,
   isBase64,
 } from '@undp/carbon-library';
-import { linkDocVisible, uploadDocUserPermission } from '../../Casl/documentsPermission';
 
 const ProgrammeView = () => {
   const { get, put, post } = useConnection();
@@ -358,13 +358,12 @@ const ProgrammeView = () => {
             ministryLevelPermission={
               data &&
               userInfoState?.companyRole === CompanyRole.MINISTRY &&
-              ministrySectoralScope.includes(data.sectoralScope)
+              ministrySectoralScope.includes(data.sectoralScope) &&
+              userInfoState?.userRole !== Role.ViewOnly
             }
             translator={i18n}
             useConnection={useConnection}
             useUserContext={useUserContext}
-            linkDocVisible={linkDocVisible}
-            uploadDocUserPermission={uploadDocUserPermission}
           />
         ),
         icon: (
@@ -572,7 +571,17 @@ const ProgrammeView = () => {
           {t('view:addInvestment')}
         </Button>
       );
+      actionBtns.push(
+        <Tooltip
+          title={'Cannot submit until methodology document is approved.'}
+          color={TooltipColor}
+          key={TooltipColor}
+        >
+          <Button disabled>{t('view:addAction')}</Button>
+        </Tooltip>
+      );
       if ((data.currentStage as any) !== 'AwaitingAuthorization') {
+        actionBtns.pop();
         actionBtns.push(
           <Button type="primary" onClick={onClickedAddAction}>
             {t('view:addAction')}
@@ -820,14 +829,14 @@ const ProgrammeView = () => {
                   ministryLevelPermission={
                     data &&
                     userInfoState?.companyRole === CompanyRole.MINISTRY &&
-                    ministrySectoralScope.includes(data.sectoralScope)
+                    ministrySectoralScope.includes(data.sectoralScope) &&
+                    userInfoState?.userRole !== Role.ViewOnly
                   }
-                  linkDocVisible={linkDocVisible}
-                  uploadDocUserPermission={uploadDocUserPermission}
                   useConnection={useConnection}
                   useUserContext={useUserContext}
                   translator={i18n}
                   methodologyDocumentUpdated={methodologyDocumentApproved}
+                  programmeStatus={data?.currentStage}
                 />
               </div>
             </Card>

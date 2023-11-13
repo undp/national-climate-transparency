@@ -1,0 +1,16 @@
+@import '../../Assets/Fonts/fonts.scss';
+@import '../../Styles/variables.scss';
+
+.register-company-container {
+    margin-top: 30px;
+}
+
+.add-company-main-container {
+    .title-container {
+      .main {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: $primary-color !important;
+      }
+    }
+}
