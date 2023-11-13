@@ -117,18 +117,26 @@
       margin-left: 0.5rem;
 
       @media (max-width: 645px) {
-        font-size: 1.6rem;
+        font-size: 1.45rem;
+      }
+
+      @media (max-width: 370px) {
+        font-size: 1.35rem;
       }
     }
 
     .title-sub {
       font-weight: 100 !important;
       font-family: 'MuseoSans';
-      font-size: 1.8rem;
+      font-size: 2rem;
       color: $dark-text-color;
 
       @media (max-width: 645px) {
-        font-size: 1.6rem;
+        font-size: 1.45rem;
+      }
+
+      @media (max-width: 370px) {
+        font-size: 1.35rem;
       }
     }
 
