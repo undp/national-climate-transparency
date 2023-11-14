@@ -53,7 +53,7 @@ services:
       SYSTEM_SYNC: true
       SYNC_ENABLE: true
       BACKEND_HOST: http://localhost:9000
-      SYSTEM_NAME: Carbon Transparency System
+      SYSTEM_NAME: National NDC Transparency System
     volumes:
       - filestore:/app/backend/services/public
       - ./users.csv:/app/backend/services/users.csv
