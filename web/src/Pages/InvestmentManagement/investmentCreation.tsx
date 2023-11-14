@@ -9,8 +9,8 @@ const AddInvestmentComponent = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['common', 'programme']);
 
-  const onNavigateToProgrammeView = () => {
-    navigate('/programmeManagement/view');
+  const onNavigateToProgrammeView = (programmeId: any) => {
+    navigate(`/programmeManagement/view/${programmeId}`);
   };
 
   const onNavigateToProgrammeManagementView = () => {
