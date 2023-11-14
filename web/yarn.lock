@@ -2685,10 +2685,10 @@
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
 
-"@undp/carbon-library@1.0.166-CARBON-323.0":
-  version "1.0.166-CARBON-323.0"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.166-CARBON-323.0.tgz#372a1e1635986a5560df843d9e6fa5b9007163a1"
-  integrity sha512-e8cHr+6bP9klEXRCRGCi7hdRM7D89cMVbvA9Pwu5DEDFOZOH7lqCVOCEEHX1DV0982xKYW1H4qa+3xlQf3UaFQ==
+"@undp/carbon-library@1.0.166-CARBON-359.12":
+  version "1.0.166-CARBON-359.12"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.166-CARBON-359.12.tgz#05126534b44d28ec4efa3d50b5771a2746f6a9aa"
+  integrity sha512-PveazCbSRE5dDKMPGQkPNvOq+03j/OyQlvoQjFTJPsxDcexcxp8WLEAGYYj8vERlSLbdYc3TEOG/ANzlQgCW/A==
   dependencies:
     "@rollup/plugin-commonjs" "^25.0.0"
     "@rollup/plugin-node-resolve" "^15.0.2"
