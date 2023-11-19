@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {Programme,Action,AppAbility,CheckPolicies,PoliciesGuard, PoliciesGuardEx,ProgrammeDto,ProgrammeService,
   QueryDto,ConstantUpdateDto,ApiKeyJwtAuthGuard,NDCActionDto,JwtAuthGuard,ProgrammeDocumentDto,DocumentAction,ProgrammeAuth,ProgrammeIssue,ProgrammeReject,
   InvestmentRequestDto,Investment,InvestmentApprove,InvestmentCancel,InvestmentReject,NDCActionViewEntity,ProgrammeDocumentViewEntity, NdcDetailsPeriodDto} from "@undp/carbon-services-lib";
+import { NdcDetailsActionDto } from '@undp/carbon-services-lib/shared/dto/ndc.details.action.dto';
 
 
 
@@ -175,5 +176,23 @@ export class ProgrammeController {
     @Post("deleteNdcDetailsPeriod")
     deleteNdcDetailsPeriod(@Body() id: number,@Request() req){
       return this.programmeService.deleteNdcDetailsPeriod(id,req.abilityCondition, req.user)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('queryNdcDetailsAction')
+    getNdcDetailActions(@Request() req){
+      return this.programmeService.getNdcDetailActions(req.abilityCondition, req.user);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('addNdcDetailsAction')
+    addNdcDetailsAction(@Body() body: NdcDetailsActionDto, @Request() req){
+      return this.programmeService.addNdcDetailAction(body,req.abilityCondition, req.user)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put('updateNdcDetailsAction')
+    updateNdcDetailsAction(@Body() body: NdcDetailsActionDto, @Request() req){
+      return this.programmeService.updateNdcDetailsAction(body,req.abilityCondition, req.user)
     }
 }
