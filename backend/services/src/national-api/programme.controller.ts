@@ -179,6 +179,12 @@ export class ProgrammeController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @Post("finalizeNdcDetailsPeriod")
+    finalizeNdcDetailsPeriod(@Body() id: number,@Request() req){
+      return this.programmeService.finalizeNdcDetailsPeriod(id,req.abilityCondition, req.user)
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Get('queryNdcDetailsAction')
     getNdcDetailActions(@Request() req){
       return this.programmeService.getNdcDetailActions(req.abilityCondition, req.user);
