@@ -11,6 +11,11 @@ import {
   ShopOutlined,
   UnorderedListOutlined,
   UserOutlined,
+  MoneyCollectOutlined,
+  BankOutlined,
+  CloudOutlined,
+  CompassOutlined,
+  PaperClipOutlined,
 } from '@ant-design/icons';
 import { LayoutSiderProps } from '@undp/carbon-library';
 import { useTranslation } from 'react-i18next';
@@ -42,11 +47,15 @@ const LayoutSider = (props: LayoutSiderProps) => {
 
   const items: MenuItem[] = [
     getItem(t('nav:dashboard'), 'dashboard', <DashboardOutlined />),
+    getItem(t('nav:ghgInventory'), 'ghgInventory', <CloudOutlined />),
+    getItem(t('nav:ndcDetails'), 'ndcDetails/viewAll', <CompassOutlined />),
     getItem(t('nav:programmes'), 'programmeManagement/viewAll', <AppstoreOutlined />),
     getItem(t('nav:ndcActions'), 'ndcManagement/viewAll', <Icon.Clipboard2Data />),
     getItem(t('nav:investments'), 'investmentManagement/viewAll', <Icon.Cash />),
+    // getItem(t('nav:support'), 'supportManagement/viewAll', <BankOutlined />),
     getItem(t('nav:companies'), 'companyManagement/viewAll', <ShopOutlined />),
     getItem(t('nav:users'), 'userManagement/viewAll', <UserOutlined />),
+    getItem(t('nav:reports'), 'reports', <PaperClipOutlined />),
     // getItem('Team', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
   ];
 
@@ -61,10 +70,6 @@ const LayoutSider = (props: LayoutSiderProps) => {
       className="layout-sider-container"
       breakpoint={collapsed ? undefined : 'lg'}
       collapsed={collapsed}
-      // collapsedWidth="70"
-      // onCollapse={(col) => {
-      //   setCollapsed(col);
-      // }}
     >
       <div className="layout-sider-div-container">
         <div

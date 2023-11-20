@@ -1,34 +1,34 @@
-import { InvestmentManagementComponent } from '@undp/carbon-library';
+import { SupportManagementComponent } from '@undp/carbon-library';
 import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { useTranslation } from 'react-i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
-import './investmentCreationStyles.scss';
+import './supportCreationStyles.scss';
 
-const InvestmentManagement = () => {
+const SupportManagement = () => {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation(['common', 'programme', 'creditTransfer', 'view']);
+  const { t, i18n } = useTranslation(['common', 'programme']);
 
   const onNavigateToProgrammeView = (programmeId: any) => {
-    navigate(`/programmeManagement/view/${programmeId}`);
+    navigate('/programmeManagement/view', { state: { id: programmeId } });
   };
 
-  const onNavigateToInvestmentCreation = () => {
-    navigate('/investmentManagement/addInvestment', { state: { ownership: true } });
+  const onNavigateAddSupport = () => {
+    navigate('/supportManagement/addSupport');
   };
 
   return (
-    <InvestmentManagementComponent
+    <SupportManagementComponent
       translator={i18n}
       useConnection={useConnection}
       onNavigateToProgrammeView={onNavigateToProgrammeView}
       useUserContext={useUserContext}
       useSettingsContext={useSettingsContext}
-      onClickAddOwnership={onNavigateToInvestmentCreation}
-      enableAddOwnership={true}
-    ></InvestmentManagementComponent>
+      enableAddSupport={true}
+      onClickAddSupport={onNavigateAddSupport}
+    ></SupportManagementComponent>
   );
 };
 
-export default InvestmentManagement;
+export default SupportManagement;
