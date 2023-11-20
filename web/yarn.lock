@@ -2677,23 +2677,23 @@
   dependencies:
     "@ucast/core" "^1.4.1"
 
-"@undp/carbon-credit-calculator@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-credit-calculator/-/carbon-credit-calculator-1.0.0.tgz#fbdfbb606cb7bd402ed74887dfc1f0861cfca892"
-  integrity sha512-7wbGm7uEYdRBWlKzATKIhFLd9Zip8yxLCi3cfAcufb5kACw8ZKqtbn+08EyZQiJbDoPB3ouM6Dx8Dl+FnqqPVg==
+"@undp/carbon-credit-calculator@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-credit-calculator/-/carbon-credit-calculator-1.1.1.tgz#af3d295abf0ebb4af9d5be04f09067b9247197e5"
+  integrity sha512-H6AoaICkxQO+tbin1faZb4RbGVfQ9kbH228b5Vaz4Zomlo+AWIhYAPl/3CXE3tbdd465KH2RPczMzC+DeRnlFg==
   dependencies:
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
 
-"@undp/carbon-library@1.0.168":
-  version "1.0.168"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.168.tgz#8e1917c66229f5d2fb697f2886e13407393097bb"
-  integrity sha512-r3DqgnS85re0PpY1EepQ2l70yzQIeK61tujMRzFqAlqG+ldvBsNibOoikdXKI2/PFHdyN+EaWsyOzsWw2HtxfA==
+"@undp/carbon-library@1.0.172":
+  version "1.0.172"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.172.tgz#fc5d0d7d64a2472507608ee2208dc7bf08dc61d4"
+  integrity sha512-dbVaifNE4WrGuNwq/7j4vJWLTHJED/vyjNoBjOmfo54skyjZynhd4Z86liU+igkR7noinU9Sg8W316n+huWdZA==
   dependencies:
     "@rollup/plugin-commonjs" "^25.0.0"
     "@rollup/plugin-node-resolve" "^15.0.2"
     "@rollup/plugin-typescript" "^11.1.1"
-    "@undp/carbon-credit-calculator" "^1.0.0"
+    "@undp/carbon-credit-calculator" "^1.1.1"
     node-sass "^7.0.3"
     postcss "^8.4.23"
     react-circle-flags "^0.0.19"
