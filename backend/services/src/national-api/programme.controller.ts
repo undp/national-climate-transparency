@@ -202,13 +202,13 @@ export class ProgrammeController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Put('approveNdcDetailsAction')
+    @Post('approveNdcDetailsAction')
     approveNdcDetailsAction(@Body() id: number, @Request() req){
       return this.programmeService.approveNdcDetailsAction(id,req.abilityCondition, req.user)
     }
 
     @UseGuards(JwtAuthGuard)
-    @Put('rejectNdcDetailsAction')
+    @Post('rejectNdcDetailsAction')
     rejectNdcDetailsAction(@Body() id: number, @Request() req){
       return this.programmeService.rejectNdcDetailsAction(id,req.abilityCondition, req.user)
     }
