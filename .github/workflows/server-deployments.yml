@@ -137,7 +137,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: transparency-services
-          IMAGE_TAG: v1
+          IMAGE_TAG: develop
         run: |
           # Build a docker container and push it to ECR 
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f backend/services/Dockerfile .
@@ -149,7 +149,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: transparency-services
-          IMAGE_TAG: v1
+          IMAGE_TAG: develop
           PRIVATE_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE }}
           HOSTNAME: ${{secrets.HOST_IP}}
           USER_NAME: ec2-user
@@ -159,7 +159,7 @@ jobs:
             cd repos/carbon-transparency &&
             sudo $(aws ecr get-login --no-include-email --region us-east-1) &&
             (docker stop carbon-transparency-national-1 carbon-transparency-async-operations-handler-1 carbon-transparency-stats-1 > /dev/null &&   docker rm carbon-transparency-national-1 carbon-transparency-async-operations-handler-1 carbon-transparency-stats-1 ) 2>/dev/null || true &&
-            sudo docker pull 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-services:v1 &&
+            sudo docker pull 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-services:develop &&
             docker-compose -f docker-compose-image.yml up -d national stats async-operations-handler '
 
   # automated-api-tests:
