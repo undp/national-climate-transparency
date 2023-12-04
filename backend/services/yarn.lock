@@ -5385,17 +5385,25 @@
     "@ucast/core" "^1.4.1"
 
 "@undp/carbon-credit-calculator@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-credit-calculator/-/carbon-credit-calculator-1.0.0.tgz#fbdfbb606cb7bd402ed74887dfc1f0861cfca892"
-  integrity sha512-7wbGm7uEYdRBWlKzATKIhFLd9Zip8yxLCi3cfAcufb5kACw8ZKqtbn+08EyZQiJbDoPB3ouM6Dx8Dl+FnqqPVg==
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-credit-calculator/-/carbon-credit-calculator-1.1.2.tgz#a72f7d632e88e2fe5b15148548b1c4145d68dbc8"
+  integrity sha512-8tFp3DkHDZb6HIKVsJd7QRtx2rH1gCvE5aDAq/IinJ4HLOAnufkfPBRCmXG2mfCL5LY2icXjU0X+4Nz/zteiMA==
   dependencies:
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
 
-"@undp/carbon-services-lib@0.0.246":
-  version "0.0.246"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-services-lib/-/carbon-services-lib-0.0.246.tgz#d62349920bb7d6f7795c23430b8611c1cbc523d7"
-  integrity sha512-UhtY6QpHLlAwzde3D1XBVSdUs9i+uuumoWZQ5+yrRcyLAh8I/NNGBReRUFzvmObQrwwTyrnkSZlVwLaDm89ylw==
+"@undp/carbon-credit-calculator@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-credit-calculator/-/carbon-credit-calculator-1.1.1.tgz#af3d295abf0ebb4af9d5be04f09067b9247197e5"
+  integrity sha512-H6AoaICkxQO+tbin1faZb4RbGVfQ9kbH228b5Vaz4Zomlo+AWIhYAPl/3CXE3tbdd465KH2RPczMzC+DeRnlFg==
+  dependencies:
+    "@types/node" "^18.11.9"
+    convert-units "^2.3.4"
+
+"@undp/carbon-services-lib@0.0.254":
+  version "0.0.254"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-services-lib/-/carbon-services-lib-0.0.254.tgz#a3468e3ac3a66c5a3b2709a8fc87c296fe320208"
+  integrity sha512-/iyoFwoRTkZcK5FQgfHeD1OMF+iRi8j4Kw785Bj/PnkZWg+QO8inctnvgG30pQQq2aR71ZwTVXGNALgnI14+8Q==
   dependencies:
     "@aws-sdk/client-qldb" "^3.408.0"
     "@aws-sdk/client-qldb-session" "^3.408.0"
@@ -5411,7 +5419,7 @@
     "@nestjs/platform-express" "^9.0.0"
     "@nestjs/swagger" "^6.1.3"
     "@nestjs/typeorm" "^9.0.1"
-    "@undp/carbon-credit-calculator" "^1.0.0"
+    "@undp/carbon-credit-calculator" "^1.1.1"
     "@undp/serial-number-gen" "^1.0.0"
     amazon-qldb-driver-nodejs "^3.0.1"
     aws-kinesis-agg "^4.2.6"
