@@ -1,4 +1,6 @@
 const CracoLessPlugin = require('craco-less');
+const path = require('path');
+const fs = require('fs-extra');
 
 module.exports = {
   babel: {
@@ -25,5 +27,22 @@ module.exports = {
         },
       },
     },
+    {
+      plugin: {
+        overrideWebpackConfig: ({ webpackConfig }) => {
+
+          // Copying locale files from carbon-library dist in the node_modules folder to public folder  
+          const localeSrcDir = path.resolve(__dirname, 'node_modules/@undp/carbon-library/dist/locales');
+          const localeDestDir = path.resolve(__dirname, 'public/locales');
+
+          // Ensure the destination directory exists, then copy the files
+          if (fs.existsSync(localeSrcDir)) {
+            fs.ensureDirSync(localeDestDir);
+            fs.copySync(localeSrcDir, localeDestDir);
+          }
+          return webpackConfig;
+        }
+      }
+    }
   ],
 };
