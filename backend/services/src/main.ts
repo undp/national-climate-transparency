@@ -53,7 +53,7 @@ async function bootstrap() {
         console.log("Inserting users", users);
         await setupHandler.handler({ type: "IMPORT_USERS", body: users });
       }
-
+      // await setupHandler.handler({type:"UPDATE_COORDINATES"})
       const staticPath = join(__dirname, "..", "public");
       console.log("Static file path:", staticPath);
       app.useStaticAssets(staticPath);
