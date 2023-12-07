@@ -16,6 +16,8 @@ const AddNdcAction = () => {
     'genderParity',
     'safeguards',
     'social',
+    'unfcccSdTool',
+    'socialEnvironmentalRisk',
   ]);
   const sdgGoalImages = getSdgGoalImages();
 
@@ -24,7 +26,9 @@ const AddNdcAction = () => {
   };
 
   const onNavigateToProgrammeView = (programmeDetails: any) => {
-    navigate('/programmeManagement/view', { state: { record: programmeDetails } });
+    navigate(`/programmeManagement/view/${programmeDetails.programmeId}`, {
+      state: { record: programmeDetails },
+    });
   };
 
   return (
