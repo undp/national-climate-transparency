@@ -1,16 +1,16 @@
-import { InvestmentCreationComponent } from '@undp/carbon-library';
+import { SupportCreationComponent } from '@undp/carbon-library';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { useTranslation } from 'react-i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
 
-const AddInvestmentComponent = () => {
+const AddSupportComponent = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['common', 'programme']);
 
-  const onNavigateToProgrammeView = (programmeId: any) => {
-    navigate(`/programmeManagement/view/${programmeId}`);
+  const onNavigateToProgrammeView = () => {
+    navigate('/programmeManagement/view');
   };
 
   const onNavigateToProgrammeManagementView = () => {
@@ -18,7 +18,7 @@ const AddInvestmentComponent = () => {
   };
 
   return (
-    <InvestmentCreationComponent
+    <SupportCreationComponent
       t={t}
       useConnection={useConnection}
       userInfoState={useUserContext}
@@ -26,8 +26,8 @@ const AddInvestmentComponent = () => {
       useSettingsContext={useSettingsContext}
       onNavigateToProgrammeManagementView={onNavigateToProgrammeManagementView}
       onNavigateToProgrammeView={onNavigateToProgrammeView}
-    ></InvestmentCreationComponent>
+    ></SupportCreationComponent>
   );
 };
 
-export default AddInvestmentComponent;
+export default AddSupportComponent;

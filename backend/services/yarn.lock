@@ -5384,6 +5384,14 @@
   dependencies:
     "@ucast/core" "^1.4.1"
 
+"@undp/carbon-credit-calculator@^1.0.0":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-credit-calculator/-/carbon-credit-calculator-1.1.2.tgz#a72f7d632e88e2fe5b15148548b1c4145d68dbc8"
+  integrity sha512-8tFp3DkHDZb6HIKVsJd7QRtx2rH1gCvE5aDAq/IinJ4HLOAnufkfPBRCmXG2mfCL5LY2icXjU0X+4Nz/zteiMA==
+  dependencies:
+    "@types/node" "^18.11.9"
+    convert-units "^2.3.4"
+
 "@undp/carbon-credit-calculator@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@undp/carbon-credit-calculator/-/carbon-credit-calculator-1.1.1.tgz#af3d295abf0ebb4af9d5be04f09067b9247197e5"
@@ -5392,10 +5400,10 @@
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
 
-"@undp/carbon-services-lib@0.0.232-CARBON-325.3":
-  version "0.0.232-CARBON-325.3"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-services-lib/-/carbon-services-lib-0.0.232-CARBON-325.3.tgz#31d5a4af1d515ddf57cf85f1c8d08997f9a677ed"
-  integrity sha512-UyKjqlYDTMYpvAt9VlUkpdBYl4OKNUON+U/FjeRMgqq4x4AP2M8qbmjQcGqNP0kC/foyKoC+p/LaqHTCVuif8w==
+"@undp/carbon-services-lib@0.0.232-CARBON-325.6":
+  version "0.0.232-CARBON-325.6"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-services-lib/-/carbon-services-lib-0.0.232-CARBON-325.6.tgz#4d4b02a7341a0319dad378933a1f30b065ce717a"
+  integrity sha512-NUygEhyzsF9FhB19sTVLnw074dAT1mK8prVh1ALX1rSMA21lgY80sHMbQgN5I1AY/3aJGUKlfsjF/tWSKzx2hg==
   dependencies:
     "@aws-sdk/client-qldb" "^3.408.0"
     "@aws-sdk/client-qldb-session" "^3.408.0"
@@ -6730,10 +6738,10 @@ caniuse-lite@^1.0.30001449:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001474.tgz#13b6fe301a831fe666cce8ca4ef89352334133d5"
   integrity sha512-iaIZ8gVrWfemh5DG3T9/YqarVZoYf0r188IjaGwx68j4Pf0SGY6CQkmJUIE+NZHkkecQGohzXmBGEwWDr9aM3Q==
 
-carbon-services-lib@0.0.223-NAM-17.1:
-  version "0.0.223-NAM-17.1"
-  resolved "https://registry.yarnpkg.com/carbon-services-lib/-/carbon-services-lib-0.0.223-NAM-17.1.tgz#05893fae9704dfa564667833c9aa743cf0cef69b"
-  integrity sha512-dD2BMQe3HqQvdcAtCCV9nh0Q0HsYYYGXDKG4uhnLQg+X221Z3/JJhLDWjr1UcskvfXJGJoCMNDXXZxd/pZmZaQ==
+carbon-services-lib@0.0.231-CARBON-323.2:
+  version "0.0.231-CARBON-323.2"
+  resolved "https://registry.yarnpkg.com/carbon-services-lib/-/carbon-services-lib-0.0.231-CARBON-323.2.tgz#b4a33fc0955ef8839e5e4bf857c5215872df2f43"
+  integrity sha512-IR0d1s7T4jUneQ6eH1muqdXJNwHaIGVhDL66X7I1dJSIvQqQ1ajG1ZZMWyMvwk/SsQB+EWeQEFCwPVYTYBEjXQ==
   dependencies:
     "@aws-sdk/client-qldb" "^3.408.0"
     "@aws-sdk/client-qldb-session" "^3.408.0"
@@ -6749,7 +6757,7 @@ carbon-services-lib@0.0.223-NAM-17.1:
     "@nestjs/platform-express" "^9.0.0"
     "@nestjs/swagger" "^6.1.3"
     "@nestjs/typeorm" "^9.0.1"
-    "@undp/carbon-credit-calculator" "^1.1.1"
+    "@undp/carbon-credit-calculator" "^1.0.0"
     "@undp/serial-number-gen" "^1.0.0"
     amazon-qldb-driver-nodejs "^3.0.1"
     aws-kinesis-agg "^4.2.6"
