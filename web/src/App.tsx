@@ -80,6 +80,9 @@ const App = () => {
           process.env.REACT_APP_BACKEND ? process.env.REACT_APP_BACKEND : 'http://localhost:9000'
         }
         t={t}
+        statServerUrl={
+          process.env.REACT_APP_STAT_URL ? process.env.REACT_APP_STAT_URL : 'http://localhost:9100'
+        }
       >
         <UserInformationContextProvider>
           <SettingsContextProvider>
