@@ -166,4 +166,10 @@ export class CompanyController {
   async getAvailableCountries(@Request() req) {
     return await this.countryService.getAvailableCountries();
   }
+
+  @ApiBearerAuth()
+  @Get("getMinistries")
+  getMinistryUser(@Request() req) {
+    return this.companyService.getMinistries();
+  }
 }
