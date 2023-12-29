@@ -1,10 +1,8 @@
-import { Body, Controller, Post, UseGuards, Request, Put, Res } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request, Put, Get, Delete } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {Programme,Action,AppAbility,CheckPolicies,PoliciesGuard, PoliciesGuardEx,ProgrammeDto,ProgrammeService,
   QueryDto,ConstantUpdateDto,ApiKeyJwtAuthGuard,NDCActionDto,JwtAuthGuard,ProgrammeDocumentDto,DocumentAction,ProgrammeAuth,ProgrammeIssue,ProgrammeReject,
-  InvestmentRequestDto,Investment,InvestmentApprove,InvestmentCancel,InvestmentReject,NDCActionViewEntity,ProgrammeDocumentViewEntity, ProgrammeMitigationIssue, DataExportQueryDto} from "@undp/carbon-services-lib";
-
-
+  InvestmentRequestDto,Investment,InvestmentApprove,InvestmentCancel,InvestmentReject,NDCActionViewEntity,ProgrammeDocumentViewEntity, ProgrammeMitigationIssue, NdcDetailsPeriodDto, NdcDetailsActionDto, BaseIdDto, DataExportQueryDto} from "@undp/carbon-services-lib";
 
 @ApiTags('Programme')
 @ApiBearerAuth()
@@ -175,10 +173,65 @@ export class ProgrammeController {
       return this.programmeService.queryInvestment(query, req.abilityCondition, req.user)
     }
 
+
     @ApiBearerAuth()
     @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Investment, true))
     @Post('investments/download')
     async getInvestmentsDownload(@Body()query: DataExportQueryDto, @Request() req) {
       return this.programmeService.downloadInvestments(query, req.abilityCondition); // Return the filePath as a JSON response
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get("queryNdcDetailsPeriod")
+    getNdcDetailsPeriods(@Request() req){
+      return this.programmeService.getNdcDetailsPeriods(req.abilityCondition, req.user)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post("addNdcDetailsPeriod")
+    addNdcDetailsPeriod(@Body() body: NdcDetailsPeriodDto, @Request() req){
+      return this.programmeService.addNdcDetailsPeriod(body,req.abilityCondition, req.user)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post("deleteNdcDetailsPeriod")
+    deleteNdcDetailsPeriod(@Body() id: number,@Request() req){
+      return this.programmeService.deleteNdcDetailsPeriod(id,req.abilityCondition, req.user)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post("finalizeNdcDetailsPeriod")
+    finalizeNdcDetailsPeriod(@Body() id: number,@Request() req){
+      return this.programmeService.finalizeNdcDetailsPeriod(id,req.abilityCondition, req.user)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('queryNdcDetailsAction')
+    getNdcDetailActions(@Request() req){
+      return this.programmeService.getNdcDetailActions(req.abilityCondition, req.user);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('addNdcDetailsAction')
+    addNdcDetailsAction(@Body() body: NdcDetailsActionDto, @Request() req){
+      return this.programmeService.addNdcDetailAction(body,req.abilityCondition, req.user)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put('updateNdcDetailsAction')
+    updateNdcDetailsAction(@Body() body: NdcDetailsActionDto, @Request() req){
+      return this.programmeService.updateNdcDetailsAction(body,req.abilityCondition, req.user)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('approveNdcDetailsAction')
+    approveNdcDetailsAction(@Body() baseIdDto: BaseIdDto, @Request() req){
+      return this.programmeService.approveNdcDetailsAction(baseIdDto,req.abilityCondition, req.user)
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('rejectNdcDetailsAction')
+    rejectNdcDetailsAction(@Body() baseIdDto: BaseIdDto, @Request() req){
+      return this.programmeService.rejectNdcDetailsAction(baseIdDto,req.abilityCondition, req.user)
     }
 }
