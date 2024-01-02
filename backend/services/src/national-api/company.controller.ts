@@ -173,4 +173,10 @@ export class CompanyController {
   async addInvestment(@Body() investment: InvestmentDto, @Request() req) {
       return this.companyService.addNationalInvestment(investment, req.user);
   }
+
+  @ApiBearerAuth()
+  @Get("getMinistries")
+  getMinistryUser(@Request() req) {
+    return this.companyService.getMinistries();
+  }
 }
