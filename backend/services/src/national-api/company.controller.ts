@@ -11,13 +11,12 @@ import {
   Body,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { Company } from "@undp/carbon-services-lib";
+import { Company, DataExportQueryDto } from "@undp/carbon-services-lib";
 import { QueryDto } from "@undp/carbon-services-lib";
 import { OrganisationSuspendDto } from "@undp/carbon-services-lib";
 import { FindOrganisationQueryDto } from "@undp/carbon-services-lib";
 import { OrganisationUpdateDto } from "@undp/carbon-services-lib";
 import { HelperService,CountryService,CompanyService ,JwtAuthGuard,Action,PoliciesGuardEx,CaslAbilityFactory} from '@undp/carbon-services-lib';
-
 
 @ApiTags("Organisation")
 @ApiBearerAuth()
@@ -44,6 +43,13 @@ export class CompanyController {
   queryNames(@Body() query: QueryDto, @Request() req) {
     console.log(req.abilityCondition);
     return this.companyService.queryNames(query, req.abilityCondition);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, Company, true))
+  @Post('download')
+  async getDownload(@Body()query: DataExportQueryDto, @Request() req) {
+    return this.companyService.download(query, req.abilityCondition, req.user.companyRole); // Return the filePath as a JSON response
   }
 
   @ApiBearerAuth()
@@ -165,5 +171,11 @@ export class CompanyController {
   @Get("countries")
   async getAvailableCountries(@Request() req) {
     return await this.countryService.getAvailableCountries();
+  }
+
+  @ApiBearerAuth()
+  @Get("getMinistries")
+  getMinistryUser(@Request() req) {
+    return this.companyService.getMinistries();
   }
 }
