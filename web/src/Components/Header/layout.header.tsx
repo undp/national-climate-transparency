@@ -2,9 +2,7 @@ import { MenuProps } from 'antd';
 import { useState } from 'react';
 import './layout.header.scss';
 import { useTranslation } from 'react-i18next';
-import { HeaderProps } from '@undp/carbon-library';
-import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { HeaderProps, useConnection, useUserContext } from '@undp/carbon-library';
 import { useNavigate } from 'react-router-dom';
 import thumbnail from '../../Assets/Images/thumbnail.png';
 
