@@ -21,16 +21,20 @@ const RegisterNewCompany = () => {
     <div className="register-company-container">
       <Row className="header-row">
         <Col md={18} lg={21} xs={17} flex="auto">
-          <div className="homepage-header-container" onClick={() => navigate('/')}>
-            <div className="logo">
-              <img src={sliderLogo} alt="slider-logo" />
-            </div>
-            <div>
-              <div style={{ display: 'flex' }}>
-                <div className="title">{'TRANSPARENCY'}</div>
-                <div className="title-sub">{'SYSTEM'}</div>
+          <div className="homepage-header-container">
+            <div className="homepage-header-container-logo" onClick={() => navigate('/')}>
+              <div className="logo">
+                <img src={sliderLogo} alt="slider-logo" />
               </div>
-              <div className="country-name">{process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}</div>
+              <div>
+                <div style={{ display: 'flex' }}>
+                  <div className="title">{'TRANSPARENCY'}</div>
+                  <div className="title-sub">{'SYSTEM'}</div>
+                </div>
+                <div className="country-name">
+                  {process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}
+                </div>
+              </div>
             </div>
           </div>
         </Col>
