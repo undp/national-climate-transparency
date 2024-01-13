@@ -23,7 +23,7 @@ const RegisterNewCompany = () => {
     <div className="register-company-container">
       <Row className="header-row">
         <Col md={18} lg={21} xs={17} flex="auto">
-          <div className="homepage-header-container">
+          <div className="homepage-header-container" onClick={() => navigate('/')}>
             <div className="logo">
               <img src={sliderLogo} alt="slider-logo" />
             </div>
