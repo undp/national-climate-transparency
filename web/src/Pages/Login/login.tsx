@@ -1,12 +1,10 @@
 import { Button, Col, Form, Input, message, Row, Select, Spin } from 'antd';
 import React, { FC, Suspense, useContext, useEffect, useState } from 'react';
-import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import './login.scss';
 import countryLogo from '../../Assets/Images/mrvlogo.svg';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
-import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
-import { LoginProps } from '@undp/carbon-library';
+import { LoginProps, useConnection, useUserContext } from '@undp/carbon-library';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { AbilityContext } from '../../Casl/Can';
@@ -101,7 +99,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
             <div className="login-img-container container-image">
               <div className="text-ctn">
                 <span>
-                  {t('login:nationalNdc')} <br /> {t('login:credit')} <br />
+                  {t('login:nationalNdc')} <br /> {t('login:creditMrv')} <br />
                   {t('login:management')}
                 </span>
               </div>

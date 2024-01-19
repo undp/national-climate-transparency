@@ -1,9 +1,6 @@
 import { SupportManagementComponent } from '@undp/carbon-library';
 import { useNavigate } from 'react-router-dom';
-import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { useTranslation } from 'react-i18next';
-import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
 import './supportCreationStyles.scss';
 
 const SupportManagement = () => {
@@ -21,10 +18,7 @@ const SupportManagement = () => {
   return (
     <SupportManagementComponent
       translator={i18n}
-      useConnection={useConnection}
       onNavigateToProgrammeView={onNavigateToProgrammeView}
-      useUserContext={useUserContext}
-      useSettingsContext={useSettingsContext}
       enableAddSupport={true}
       onClickAddSupport={onNavigateAddSupport}
     ></SupportManagementComponent>
