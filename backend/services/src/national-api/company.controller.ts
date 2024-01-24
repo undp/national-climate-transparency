@@ -11,7 +11,7 @@ import {
   Body,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { Company, DataExportQueryDto } from "@undp/carbon-services-lib";
+import { ApiKeyJwtAuthGuard, Company, DataExportQueryDto, OrganisationDuplicateCheckDto } from "@undp/carbon-services-lib";
 import { QueryDto } from "@undp/carbon-services-lib";
 import { OrganisationSuspendDto } from "@undp/carbon-services-lib";
 import { FindOrganisationQueryDto } from "@undp/carbon-services-lib";
@@ -177,5 +177,13 @@ export class CompanyController {
   @Get("getMinistries")
   getMinistryUser(@Request() req) {
     return this.companyService.getMinistries();
+  }
+
+  @ApiBearerAuth('api_key')
+  @ApiBearerAuth()
+  @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Company))
+  @Post('exists')
+  async checkCompanyExist(@Body() organisationDuplicateCheckDto: OrganisationDuplicateCheckDto) {
+    return this.companyService.findCompanyByTaxIdPaymentIdOrEmail(organisationDuplicateCheckDto);
   }
 }
