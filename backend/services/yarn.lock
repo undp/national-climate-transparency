@@ -5399,7 +5399,7 @@
   dependencies:
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
-    
+
 "@undp/carbon-services-lib@0.0.307-CARBON-347.0":
   version "0.0.307-CARBON-347.0"
   resolved "https://registry.yarnpkg.com/@undp/carbon-services-lib/-/carbon-services-lib-0.0.307-CARBON-347.0.tgz#4972b2d463038da3744600c47a9a4c155f60298c"
