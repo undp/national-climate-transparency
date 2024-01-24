@@ -548,12 +548,12 @@ const ProgrammeView = () => {
 
   if (userInfoState && data.currentStage !== ProgrammeStageMRV.Rejected) {
     if (
-      userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-      (userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
-        data.companyId.map((e) => Number(e)).includes(userInfoState?.companyId)) ||
-      (userInfoState?.companyRole === CompanyRole.MINISTRY &&
-        ministrySectoralScope.includes(data.sectoralScope) &&
-        userInfoState?.userRole !== Role.ViewOnly)
+      (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
+        (userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
+          data.companyId.map((e) => Number(e)).includes(userInfoState?.companyId)) ||
+        (userInfoState?.companyRole === CompanyRole.MINISTRY &&
+          ministrySectoralScope.includes(data.sectoralScope))) &&
+      userInfoState?.userRole !== Role.ViewOnly
     ) {
       actionBtns.push(
         <Button

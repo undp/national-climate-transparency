@@ -1924,7 +1924,16 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
-"@rollup/pluginutils@^5.0.1", "@rollup/pluginutils@^5.1.0":
+"@rollup/pluginutils@^5.0.1":
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/@rollup/pluginutils/-/pluginutils-5.0.5.tgz#bbb4c175e19ebfeeb8c132c2eea0ecb89941a66c"
+  integrity sha512-6aEYR910NyP73oHiJglti74iRyOwgFU4x3meH/H8OJx6Ry0j6cOVZ5X/wTvub7G7Ao6qaHBEaNsV3GLJkSsF+Q==
+  dependencies:
+    "@types/estree" "^1.0.0"
+    estree-walker "^2.0.2"
+    picomatch "^2.3.1"
+
+"@rollup/pluginutils@^5.1.0":
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@rollup/pluginutils/-/pluginutils-5.1.0.tgz#7e53eddc8c7f483a4ad0b94afb1f7f5fd3c771e0"
   integrity sha512-XTIWOPPcpvyKI6L1NHo0lFlCyznUEyPmPY1mc3KpPVDYulHSTvyeLNVW00QTLIAFNhR3kYnJTQHeGqU4M3n09g==
@@ -2724,10 +2733,10 @@
     "@types/node" "^18.11.9"
     convert-units "^2.3.4"
 
-"@undp/carbon-library@1.0.292-CARBON-428.0":
-  version "1.0.292-CARBON-428.0"
-  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.292-CARBON-428.0.tgz#4b5aaaf5c1fc46536ff4cb5a7fc6a820bbbf0342"
-  integrity sha512-xu2LnZiT9+DVV4JThgwEnjAHaiJBsbY5+txgFPa2AgEyLTanaNc0F/YVhaZr/T3Guh6aDuzb17V1BrJPFkIlzA==
+"@undp/carbon-library@1.0.293-CARBON-401.0":
+  version "1.0.293-CARBON-401.0"
+  resolved "https://registry.yarnpkg.com/@undp/carbon-library/-/carbon-library-1.0.293-CARBON-401.0.tgz#ad095026834bbf345f59e4edd6ef6abcb0e6aaaa"
+  integrity sha512-BvYYojIFDF1PYAPWHBtPIkjfGUUNFPpze8zdw3pHtB2UcTkk2jhjAOr+AROFEoKDF2uaM0Cdg02eZeMw8/AWFQ==
   dependencies:
     "@rollup/plugin-commonjs" "^25.0.0"
     "@rollup/plugin-json" "^6.0.1"
