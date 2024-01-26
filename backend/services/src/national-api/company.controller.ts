@@ -11,7 +11,7 @@ import {
   Body,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { ApiKeyJwtAuthGuard, Company, DataExportQueryDto, OrganisationDuplicateCheckDto, Investment } from "@undp/carbon-services-lib";
+import { ApiKeyJwtAuthGuard, Company, DataExportQueryDto, OrganisationDuplicateCheckDto, Investment, InvestmentDto} from "@undp/carbon-services-lib";
 import { QueryDto } from "@undp/carbon-services-lib";
 import { OrganisationSuspendDto } from "@undp/carbon-services-lib";
 import { FindOrganisationQueryDto } from "@undp/carbon-services-lib";
