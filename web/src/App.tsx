@@ -1,4 +1,3 @@
-import { Suspense, useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import 'antd/dist/antd.css';
 import './Styles/theme.less';
@@ -7,14 +6,11 @@ import Login from './Pages/Login/login';
 import PrivateRoute from './Components/PrivateRoute/privateRoute';
 import SignUp from './Pages/Signup/signup';
 import CustomLayout from './Components/Layout/layout';
-import AddUser from './Pages/AddUser/addUser';
-import UserManagement from './Pages/UserManagement/userManagement';
+import AddUser from './Pages/Users/AddUser/addUser';
+import UserManagement from './Pages/Users/UserManagement/userManagement';
 import Dashboard from './Pages/Dashboard/dashboard';
-import AddNewCompany from './Pages/Company/addNewCompany';
-import CompanyManagement from './Pages/CompanyManagement/companyManagement';
-import ProgrammeManagement from './Pages/ProgrammeManagement/programmeManagement';
-import ProgrammeView from './Pages/ProgrammeView/programmeView';
-import i18next from 'i18next';
+import AddNewCompany from './Pages/Company/AddCompany/addNewCompany';
+import CompanyManagement from './Pages/Company/CompanyManagement/companyManagement';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Homepage from './Pages/Homepage/homepage';
 import PrivacyPolicy from './Pages/PrivacyPolicy/privacyPolicy';
@@ -22,29 +18,29 @@ import CodeOfConduct from './Pages/CodeofConduct/codeofConduct';
 import CookiePolicy from './Pages/CookiePolicy/cookiePolicy';
 import TermsOfUse from './Pages/TermsofUse/termsofUse';
 import CarbonHelp from './Pages/Help/help';
-import UserProfile from './Pages/UserProfile/UserProfile';
-import CompanyProfile from './Pages/CompanyProfile/companyProfile';
+import UserProfile from './Pages/Users/UserProfile/UserProfile';
+import CompanyProfile from './Pages/Company/CompanyProfile/companyProfile';
 import { AbilityContext } from './Casl/Can';
 import { defineAbility, updateUserAbility } from './Casl/ability';
-import AddProgramme from './Pages/Programme/programmeCreation';
-import InvestmentManagement from './Pages/InvestmentManagement/investmentManagement';
-import AddNdcAction from './Pages/AddNdcAction/addNdcAction';
-import AddInvestmentComponent from './Pages/InvestmentManagement/investmentCreation';
-import NdcActionManagement from './Pages/NdcActionManagement/ndcActionManagement';
-import NdcActionView from './Pages/NdcActionView/ndcActionView';
-import RegisterNewCompany from './Pages/Company/registerNewCompany';
 import {
-  Loading,
   ConnectionContextProvider,
   UserInformationContextProvider,
   SettingsContextProvider,
 } from '@undp/carbon-library';
-import AddSupportComponent from './Pages/SupportManagement/supportCreation';
-import SupportManagement from './Pages/SupportManagement/supportManagement';
-import NdcDetails from './Pages/NdcDetails/ndcDetails';
-import GHGInventory from './Pages/GHGInventory/ghgInventory';
-import ReportSection from './Pages/ReportSection/reportsSection';
+import ReportSection from './Pages/OldComponents/ReportSection/reportsSection';
 import { useTranslation } from 'react-i18next';
+import ActionList from './Pages/Actions/ActionList/actionList';
+import ActionForm from './Pages/Actions/ActionForm/actionForm';
+import ProgrammeList from './Pages/Programmes/ProgrammeList/programmeList';
+import ProgrammeForm from './Pages/Programmes/ProgrammeForm/programmeForm';
+import ProjectList from './Pages/Projects/ProjectList/projectList';
+import ProjectForm from './Pages/Projects/ProjectForm/projectForm';
+import ActivityList from './Pages/Activities/ActivityList/activityList';
+import ActivityForm from './Pages/Activities/ActivityForm/activityForm';
+import SupportList from './Pages/Support/SupportList/supportList';
+import SupportForm from './Pages/Support/SupportForm/supportForm';
+import ReportList from './Pages/Reporting/reportList';
+import Faq from './Pages/Faq/faq';
 
 // message.config({
 //   duration: 60,
@@ -97,19 +93,43 @@ const App = () => {
                   <Route path="/dashboard" element={<CustomLayout selectedKey="dashboard" />}>
                     <Route index element={<Dashboard />} />
                   </Route>
-                  <Route path="/ghgInventory" element={<CustomLayout selectedKey="ghgInventory" />}>
-                    <Route index element={<GHGInventory />} />
+                  <Route path="/actions" element={<CustomLayout selectedKey="actions" />}>
+                    <Route path="" element={<ActionList />} />
+                    <Route path="add" element={<ActionForm />} />
+                    <Route path="view/:id" element={<ActionForm />} />
                   </Route>
-                  <Route
-                    path="/programmeManagement"
-                    element={<CustomLayout selectedKey="programmeManagement/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<ProgrammeManagement />} />
-                    <Route path="view/:id" element={<ProgrammeView />} />
-                    <Route path="addProgramme" element={<AddProgramme />} />
-                    <Route path="addNdcAction" element={<AddNdcAction />} />
+                  <Route path="/programmes" element={<CustomLayout selectedKey="programmes" />}>
+                    <Route path="" element={<ProgrammeList />} />
+                    <Route path="view/:id" element={<ProgrammeForm />} />
+                    <Route path="add" element={<ProgrammeForm />} />
                   </Route>
-                  <Route
+                  <Route path="/projects" element={<CustomLayout selectedKey="projects" />}>
+                    <Route path="" element={<ProjectList />} />
+                    <Route path="view/:id" element={<ProjectForm />} />
+                    <Route path="add" element={<ProjectForm />} />
+                  </Route>
+
+                  <Route path="/activities" element={<CustomLayout selectedKey="activities" />}>
+                    <Route path="" element={<ActivityList />} />
+                    <Route path="view/:id" element={<ActivityForm />} />
+                    <Route path="add" element={<ActivityForm />} />
+                  </Route>
+
+                  <Route path="/support" element={<CustomLayout selectedKey="support" />}>
+                    <Route path="" element={<SupportList />} />
+                    <Route path="view/:id" element={<SupportForm />} />
+                    <Route path="add" element={<SupportForm />} />
+                  </Route>
+
+                  <Route path="/reportings" element={<CustomLayout selectedKey="reportings" />}>
+                    <Route index element={<ReportList />} />
+                  </Route>
+
+                  <Route path="/faqs" element={<CustomLayout selectedKey="faqs" />}>
+                    <Route index element={<Faq />} />
+                  </Route>
+
+                  {/* <Route
                     path="/investmentManagement"
                     element={<CustomLayout selectedKey="investmentManagement/viewAll" />}
                   >
@@ -135,7 +155,7 @@ const App = () => {
                     element={<CustomLayout selectedKey="ndcDetails/viewAll" />}
                   >
                     <Route path="viewAll" element={<NdcDetails />} />
-                  </Route>
+                  </Route> */}
                   <Route
                     path="/companyManagement"
                     element={<CustomLayout selectedKey="companyManagement/viewAll" />}
@@ -176,7 +196,7 @@ const App = () => {
                       <Route path="updateUser" element={<UpdateUser />} />
                     </Route> */}
                 </Route>
-                {enableRegistration === 'true' && (
+                {/* {enableRegistration === 'true' && (
                   <Route
                     path="registerCompany"
                     element={
@@ -185,7 +205,7 @@ const App = () => {
                       </Suspense>
                     }
                   />
-                )}
+                )} */}
                 <Route path="/*" element={<Navigate to="/" replace />} />
               </Routes>
             </BrowserRouter>

@@ -125,23 +125,25 @@ export const handler: Handler = async (event) => {
 
       try {
         const org = await companyService.create({
-              taxId: fields[4] !== "Ministry" ?  fields[3] : undefined,
-              paymentId: undefined,
-              companyId: undefined,
-              name: fields[0],
-              email: fields[1],
-              phoneNo: fields[2],
-              website: undefined,
-              address: configService.get("systemCountryName"),
-              logo: undefined,
-              country: configService.get("systemCountry"),
-              companyRole: cr,
-              createdTime: undefined,
-              regions: ['Lagos'],
-              nameOfMinister: fields[5] || undefined,
-              sectoralScope: secScope,
-              state: undefined //double check this
-            });
+          taxId: fields[3],
+          companyId: undefined,
+          paymentId: undefined,
+          name: fields[0],
+          email: fields[1],
+          phoneNo: fields[2],
+          nameOfMinister: undefined,
+          sectoralScope: undefined,
+          ministry: undefined,
+          govDep: undefined,
+          website: undefined,
+          address: configService.get("systemCountryName"),
+          logo: undefined,
+          country: configService.get("systemCountry"),
+          companyRole: cr,
+          createdTime: undefined,
+          regions: [],
+          state: undefined //double check this
+        });
         console.log('Company created', org)
       } catch (e) {
         console.log('Fail to create company', fields[1], e)
