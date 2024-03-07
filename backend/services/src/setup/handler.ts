@@ -1,10 +1,22 @@
 import { NestFactory } from "@nestjs/core";
-import { UserDto } from "@undp/carbon-services-lib";
-import { getLogger } from "@undp/carbon-services-lib";
-import { ProgrammeService,ProgrammeModule,CompanyRole,Country,UtilModule, LocationInterface,LocationModule,CountryService ,CompanyModule,CompanyService,UserModule,UserService,Role} from "@undp/carbon-services-lib";
-import { OrganisationDto as OrganisationDto } from "@undp/carbon-services-lib";
+// import { LocationInterface, LocationModule, getLogger } from "@undp/carbon-services-lib";
+// import { ProgrammeService,ProgrammeModule,Country,UtilModule, LocationInterface,LocationModule,CountryService} from "@undp/carbon-services-lib";
+import { OrganisationDto as OrganisationDto } from "../dtos/organisation.dto";
 import { Handler } from "aws-lambda";
 import { ConfigService } from "@nestjs/config";
+import { UserModule } from "src/user/user.module";
+import { UserService } from "src/user/user.service";
+import { OrganisationType } from "src/enums/organisation.type.enum";
+import { Role } from "src/casl/role.enum";
+import { OrganisationModule } from "src/organisation/organisation.module";
+import { OrganisationService } from "src/organisation/organisation.service";
+import { UserDto } from "src/dtos/user.dto";
+import { UtilModule } from "src/util/util.module";
+import { CountryService } from "src/util/country.service";
+import { Country } from "src/entities/country.entity";
+import { getLogger } from "src/server";
+import { LocationModule } from "src/location/location.module";
+import { LocationInterface } from "src/location/location.interface";
 // import { LedgerDbModule } from "../shared/ledger-db/ledger-db.module";
 // import { LedgerDBInterface } from "../shared/ledger-db/ledger.db.interface";
 const fs = require("fs");
@@ -16,10 +28,19 @@ export const handler: Handler = async (event) => {
     event = process.env;
   }
 
+  const companyApp = await NestFactory.createApplicationContext(
+    OrganisationModule,
+    {
+      logger: getLogger(OrganisationModule),
+    }
+  );
+
   const userApp = await NestFactory.createApplicationContext(UserModule, {
     logger: getLogger(UserModule),
   });
   const userService = userApp.get(UserService);
+  const companyService = companyApp.get(OrganisationService);
+  const configService = companyApp.get(ConfigService);
 
   const locationApp = await NestFactory.createApplicationContext(
     LocationModule,
@@ -49,21 +70,17 @@ export const handler: Handler = async (event) => {
       // (name: string, companyRole: CompanyRole, taxId: string, password: string, email: string, userRole: string
       const cr =
         fields[4] == "Government"
-          ? CompanyRole.GOVERNMENT
-          : fields[4] == "Certifier"
-          ? CompanyRole.CERTIFIER
-          : fields[4] == "API"
-          ? CompanyRole.API
-          : fields[4] === "Ministry" 
-          ? CompanyRole.MINISTRY
-          : CompanyRole.PROGRAMME_DEVELOPER;
+          ? OrganisationType.GOVERNMENT
+          : fields[4] == "Department"
+          ? OrganisationType.DEPARTMENT
+          : OrganisationType.API;
       const ur =
         fields[5] == "admin"
           ? Role.Admin
-          : fields[5] == "Manager"
-          ? Role.Manager
+          : fields[5] == "DepartmentUser"
+          ? Role.DepartmentUser
           : Role.ViewOnly;
-      const txId = fields[4] !== "Ministry" ? fields[3] : '';
+      const txId = fields[3];
       console.log('Inserting user', fields[0],
       cr,
       fields[3],
@@ -79,7 +96,7 @@ export const handler: Handler = async (event) => {
           fields[1],
           ur,
           fields[2],
-          (cr === CompanyRole.API && fields.length > 7) ? fields[7] : undefined
+          (cr === OrganisationType.API && fields.length > 7) ? fields[7] : undefined
         );
       } catch (e) {
         console.log('Fail to create user', fields[1])
@@ -90,14 +107,7 @@ export const handler: Handler = async (event) => {
   }
 
   if (event.type === "IMPORT_ORG" && event.body) {
-    const companyApp = await NestFactory.createApplicationContext(
-      CompanyModule,
-      {
-        logger: getLogger(CompanyModule),
-      }
-    );
-    const companyService = companyApp.get(CompanyService);
-    const configService = companyApp.get(ConfigService);
+    
 
     const companies = event.body.split("\n");
 
@@ -113,36 +123,32 @@ export const handler: Handler = async (event) => {
       }
       fields = fields.map(f => f.trim())
       // (name: string, companyRole: CompanyRole, taxId: string, password: string, email: string, userRole: string
-      const cr = fields[4] == "Certifier"
-          ? CompanyRole.CERTIFIER
-          : fields[4] == "API"
-          ? CompanyRole.API
-          : fields[4] === "Ministry" 
-          ? CompanyRole.MINISTRY
-          : CompanyRole.PROGRAMME_DEVELOPER;
+      const cr = fields[4] == "API"
+          ? OrganisationType.API
+          : OrganisationType.DEPARTMENT;
 
-      const secScope = fields[4] === "Ministry" && fields[6] ? fields[6].split("-") : undefined;
+      const secScope = fields[4] === "Department" && fields[5] ? fields[5].split("-") : undefined;
 
       try {
         const org = await companyService.create({
-          taxId: fields[3],
-          companyId: undefined,
-          paymentId: undefined,
+          // taxId: fields[3],
+          organisationId: fields[3],
+          // paymentId: undefined,
           name: fields[0],
           email: fields[1],
           phoneNo: fields[2],
-          nameOfMinister: undefined,
-          sectoralScope: undefined,
-          ministry: undefined,
-          govDep: undefined,
+          // nameOfMinister: undefined,
+          sector: secScope,
+          // ministry: undefined,
+          // govDep: undefined,
           website: undefined,
           address: configService.get("systemCountryName"),
           logo: undefined,
           country: configService.get("systemCountry"),
-          companyRole: cr,
+          organisationType: cr,
           createdTime: undefined,
           regions: [],
-          state: undefined //double check this
+          // state: undefined //double check this
         });
         console.log('Company created', org)
       } catch (e) {
@@ -152,14 +158,14 @@ export const handler: Handler = async (event) => {
     return;
   }
 
-  if (event.type === "UPDATE_COORDINATES") {
-    const prApp = await NestFactory.createApplicationContext(ProgrammeModule, {
-      logger: getLogger(ProgrammeModule),
-    });
-    const programmeService = prApp.get(ProgrammeService);
-    await programmeService.regenerateRegionCoordinates();
-    return;
-  }
+  // if (event.type === "UPDATE_COORDINATES") {
+  //   const prApp = await NestFactory.createApplicationContext(ProgrammeModule, {
+  //     logger: getLogger(ProgrammeModule),
+  //   });
+  //   const programmeService = prApp.get(ProgrammeService);
+  //   await programmeService.regenerateRegionCoordinates();
+  //   return;
+  // }
 
   const u = await userService.findOne(event["rootEmail"]);
   if (u != undefined) {
@@ -195,20 +201,25 @@ export const handler: Handler = async (event) => {
     company.country = event["systemCountryCode"];
     company.name = event["name"];
     company.logo = event["logoBase64"];
-    company.companyRole = CompanyRole.GOVERNMENT;
-    company.taxId = `00000${event["systemCountryCode"]}`
+    company.organisationType = OrganisationType.GOVERNMENT;
+    company.email = event["rootEmail"];
+    // company.taxId = `00000${event["systemCountryCode"]}`
+
+    console.log("Adding company", company);
+    
+
+    const gov = await companyService.create(company, true);
 
     const user = new UserDto();
     user.email = event["rootEmail"];
     user.name = "Root";
     user.role = Role.Root;
     user.phoneNo = "-";
-    user.company = company;
-
-    console.log("Adding company", company);
+    user.organisationId = gov.organisationId;
+    user.country = event["systemCountryCode"];
     console.log("Adding user", user);
-
-    await userService.create(user, -1, CompanyRole.GOVERNMENT);
+    await userService.create(user, gov.organisationId, OrganisationType.GOVERNMENT);
+    
   } catch (e) {
     console.log(`User ${event["rootEmail"]} failed to create`, e);
   }

@@ -49,9 +49,9 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
       updateUserAbility(ability, {
         id: response.data.id,
         role: response.data.role,
-        companyId: response.data.companyId,
-        companyState: response.data.companyState,
-        companyRole: response.data.companyRole,
+        organisationId: response.data.companyId,
+        // companyState: response.data.companyState,
+        organisationType: response.data.companyRole,
       });
 
       if (response.status === 200 || response.status === 201) {
