@@ -58,6 +58,9 @@ export class Organisation implements EntitySubject {
   })
   state: OrganisationState;
 
+  @Column("bigint", { nullable: true })
+  userCount: number;
+
   // @Column("real", { nullable: true })
   // creditBalance: number;
 
@@ -91,10 +94,17 @@ export class Organisation implements EntitySubject {
   regions: string[];
 
   @Column("varchar", { array: true, nullable: true })
-  sector: Sector[];;
+  sector: Sector[];
 
   // @OneToMany(type => User, user => user.organisation)
   // users: User[]
-
+  @BeforeInsert()
+  setDefaultState() {
+    if (this.organisationType === OrganisationType.GOVERNMENT) {
+      this.userCount = null;
+    } else if (this.organisationType === OrganisationType.DEPARTMENT) {
+      this.userCount = 0;
+    }
+  }
 
 }
