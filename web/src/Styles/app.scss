@@ -42,7 +42,7 @@ body {
 }
 
 .layout-content-container .ant-btn-primary {
-  background-color: $primary-color !important;
+  background-color: $primary-button-background !important;
   color: #ffffff;
   border: none;
 }
@@ -157,7 +157,7 @@ body {
 }
 
 .ant-btn {
-  border-radius: 5px !important;
+  border-radius: 4px !important;
 }
 
 .ant-input-group-addon:first-child {
@@ -349,18 +349,18 @@ body {
     .filter-bar {
       display: flex;
       flex-direction: row-reverse;
-      margin-top: 0.8rem;
+      margin-top: 0.3rem;
       width: 5%;
     }
 
     .ant-input-affix-wrapper {
-      border-radius: 0.313rem 0 0 0.313rem !important;
+      // border-radius: 0.313rem 0 0 0.313rem;
     }
 
     .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button {
       padding-top: 0;
       padding-bottom: 0;
-      border-radius: 0 0.313rem 0.313rem 0 !important;
+      border-radius: 0 0.313rem 0.313rem 0;
     }
   }
 }

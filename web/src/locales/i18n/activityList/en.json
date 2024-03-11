@@ -1,0 +1,13 @@
+{
+  "viewTitle": "Activity List",
+  "viewDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+  "addButtonType": "ADD activity",
+  "searchBarText": "Search by Activity Title",
+  "activityId": "Activity ID",
+  "projectId": "Project ID",
+  "titleOfActivity": "Type of Support",
+  "activityStatus": "Activity Status",
+  "recipientEntity": "Recipient Entity (s)",
+  "internationalImplementingEntity": "International Implementing Entity (s)",
+  "nationalImplementingEntity": "National Implementing Entity (s)"
+}

@@ -1,0 +1,14 @@
+{
+  "viewTitle": "Programme List",
+  "viewDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+  "addButtonType": "ADD Programme",
+  "searchBarText": "Search by Programme Title",
+  "programmeId": "Programme ID",
+  "actionId": "Action ID",
+  "activityId": "Activity ID(s)",
+  "titleOfProgramme": "Title of Programme",
+  "type": "Type",
+  "programmeStatus": "Programme Status",
+  "subSectorAffected": "Sub-Sector Affected",
+  "estimatedInvestment": "Estimated investment needs (USD)"
+}

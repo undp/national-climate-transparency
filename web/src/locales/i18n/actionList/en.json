@@ -1,0 +1,15 @@
+{
+  "viewTitle": "Action List",
+  "viewDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+  "addButtonType": "ADD ACTION",
+  "searchBarText": "Search by Action Title",
+  "actionId": "Action ID",
+  "activityId": "Activity ID(s)",
+  "titleOfAction": "Title of Action",
+  "actionType": "Type",
+  "sectorAffected": "Sector Affected",
+  "financeNeeded": "Finance Needed (USD)",
+  "financeReceived": "Finance Received (USD)",
+  "actionStatus": "Action Status",
+  "nationalImplementingEntity": "National Implementing Entity(s)"
+}
