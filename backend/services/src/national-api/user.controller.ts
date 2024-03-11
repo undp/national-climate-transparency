@@ -14,15 +14,27 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
-import { DataExportQueryDto, User } from "@undp/carbon-services-lib";
-import { UserDto } from "@undp/carbon-services-lib";
-import { UserService,Action ,AppAbility,CaslAbilityFactory,CheckPolicies, PoliciesGuard, PoliciesGuardEx, Role} from "@undp/carbon-services-lib";
-import { QueryDto } from "@undp/carbon-services-lib";
-import { UserUpdateDto } from "@undp/carbon-services-lib";
-import { PasswordUpdateDto } from "@undp/carbon-services-lib";
-import { JwtAuthGuard } from "@undp/carbon-services-lib";
-import { HelperService } from '@undp/carbon-services-lib';
-import { ApiKeyJwtAuthGuard } from "@undp/carbon-services-lib";
+// import { DataExportQueryDto } from "@undp/carbon-services-lib";
+// import { UserDto } from "@undp/carbon-services-lib";
+// import { QueryDto } from "@undp/carbon-services-lib";
+// import { PasswordUpdateDto } from "@undp/carbon-services-lib";
+
+// import { HelperService } from '@undp/carbon-services-lib';
+import { ApiKeyJwtAuthGuard } from "src/auth/guards/api-jwt-key.guard";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+
+import { Action } from "src/casl/action.enum";
+import { CaslAbilityFactory } from "src/casl/casl-ability.factory";
+import { CheckPolicies } from "src/casl/policy.decorator";
+import { PoliciesGuard, PoliciesGuardEx } from "src/casl/policy.guard";
+import { Role } from "src/casl/role.enum";
+import { PasswordUpdateDto } from "src/dtos/password.update.dto";
+import { QueryDto } from "src/dtos/query.dto";
+import { UserDto } from "src/dtos/user.dto";
+import { UserUpdateDto } from "src/dtos/user.update.dto";
+import { User } from "src/entities/user.entity";
+import { UserService } from "src/user/user.service";
+import { HelperService } from "src/util/helpers.service";
 
 @ApiTags("User")
 @ApiBearerAuth()
@@ -63,44 +75,44 @@ export class UserController {
     );
   }
 
-  @ApiBearerAuth('api_key')
-  @ApiBearerAuth()
-  @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
-  @CheckPolicies((ability, body) =>
-    ability.can(Action.Create, Object.assign(new User(), body))
-  )
-  @Post("sync")
-  syncUser(@Body() user: UserDto, @Request() req) {
-    if (user.role == Role.Root) {
-      throw new HttpException(
-        this.helperService.formatReqMessagesString("user.rootCreatesRoot", []),
-        HttpStatus.FORBIDDEN
-      );
-    }
-    global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-    return this.userService.create(
-      user,
-      req.user.companyId,
-      req.user.companyRole
-    );
-  }
+  // @ApiBearerAuth('api_key')
+  // @ApiBearerAuth()
+  // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
+  // @CheckPolicies((ability, body) =>
+  //   ability.can(Action.Create, Object.assign(new User(), body))
+  // )
+  // @Post("sync")
+  // syncUser(@Body() user: UserDto, @Request() req) {
+  //   if (user.role == Role.SuperUser) {
+  //     throw new HttpException(
+  //       this.helperService.formatReqMessagesString("user.rootCreatesRoot", []),
+  //       HttpStatus.FORBIDDEN
+  //     );
+  //   }
+  //   global.baseUrl = `${req.protocol}://${req.get("Host")}`;
+  //   return this.userService.create(
+  //     user,
+  //     req.user.companyId,
+  //     req.user.companyRole
+  //   );
+  // }
 
-  @Post("register")
-  registerUser(@Body() user: UserDto, @Request() req) {
-    if (user.role == Role.Root) {
-      throw new HttpException(
-        this.helperService.formatReqMessagesString("user.rootCreatesRoot", []),
-        HttpStatus.FORBIDDEN
-      );
-    }
-    global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-    return this.userService.validateAndCreateUser(
-      user,
-      null,
-      user.company.companyRole,
-      true
-    );
-  }
+  // @Post("register")
+  // registerUser(@Body() user: UserDto, @Request() req) {
+  //   if (user.role == Role.SuperUser) {
+  //     throw new HttpException(
+  //       this.helperService.formatReqMessagesString("user.rootCreatesRoot", []),
+  //       HttpStatus.FORBIDDEN
+  //     );
+  //   }
+  //   global.baseUrl = `${req.protocol}://${req.get("Host")}`;
+  //   return this.userService.validateAndCreateUser(
+  //     user,
+  //     user,
+  //     user.,
+  //     true
+  //   );
+  // }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, User))
@@ -139,26 +151,26 @@ export class UserController {
     return this.userService.query(query, req.abilityCondition);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
+  // @ApiBearerAuth()
   // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
-  @Post('download')
-  async getDownload(@Body()query: DataExportQueryDto, @Request() req) {
-    return this.userService.download(query, req.abilityCondition); // Return the filePath as a JSON response
-  }
+  // // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
+  // @Post('download')
+  // async getDownload(@Body()query: DataExportQueryDto, @Request() req) {
+  //   return this.userService.download(query, req.abilityCondition); // Return the filePath as a JSON response
+  // }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Delete, User))
-  @Delete("delete")
-  deleteUser(@Query("userId") userId: number, @Request() req) {
-    return this.userService.delete(userId, req.abilityCondition);
-  }
+  // @ApiBearerAuth()
+  // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Delete, User))
+  // @Delete("delete")
+  // deleteUser(@Query("userId") userId: number, @Request() req) {
+  //   return this.userService.delete(userId, req.abilityCondition);
+  // }
 
-  @ApiBearerAuth('api_key')
-  @ApiBearerAuth()
-  @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, User))
-  @Post('exists')
-  async checkUserExist(@Body() body: any) {
-    return this.userService.checkUserExists(body.email);
-  }
+  // @ApiBearerAuth('api_key')
+  // @ApiBearerAuth()
+  // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, User))
+  // @Post('exists')
+  // async checkUserExist(@Body() body: any) {
+  //   return this.userService.checkUserExists(body.email);
+  // }
 }

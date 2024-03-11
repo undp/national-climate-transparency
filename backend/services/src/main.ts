@@ -1,9 +1,12 @@
 import { handler as asyncHandler } from "./async-operations-handler/handler";
-import { handler as importHandler } from "./data-importer/handler";
+// import { handler as importHandler } from "./data-importer/handler";
 import * as setupHandler from "./setup/handler";
 import { NationalAPIModule } from "./national-api/national.api.module";
-import { AnalyticsAPIModule, buildNestApp } from "@undp/carbon-services-lib";
+// import { AnalyticsAPIModule, buildNestApp } from "@undp/carbon-services-lib";
 import { join } from "path";
+import { buildNestApp } from "./server";
+import { AnalyticsAPIModule } from "./analytics-api/analytics.api.module";
+// import { AnalyticsAPIModule } from "@undp/carbon-services-lib";
 const fs = require("fs");
 
 async function bootstrap() {
@@ -31,9 +34,9 @@ async function bootstrap() {
         console.log("Module initiated", moduleName);
         continue;
       case "data-importer":
-        await importHandler({ importTypes: process.env.DATA_IMPORT_TYPES });
-        console.log("Module initiated", moduleName);
-        continue;
+        // await importHandler({ importTypes: process.env.DATA_IMPORT_TYPES });
+        // console.log("Module initiated", moduleName);
+        // continue;
       default:
         module = NationalAPIModule;
         httpPath = "national";

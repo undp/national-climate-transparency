@@ -9,12 +9,13 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { LoginDto } from "@undp/carbon-services-lib";
-import { AuthService } from "@undp/carbon-services-lib";
-import { ForgotPasswordDto } from "@undp/carbon-services-lib";
-import { PasswordResetDto } from "@undp/carbon-services-lib";
-import { PasswordResetService } from '@undp/carbon-services-lib';
-import { HelperService } from '@undp/carbon-services-lib';
+
+import { AuthService } from "src/auth/auth.service";
+import { ForgotPasswordDto } from "src/dtos/forgotPassword.dto";
+import { LoginDto } from "src/dtos/login.dto";
+import { PasswordResetDto } from "src/dtos/passwordReset.dto";
+import { HelperService } from "src/util/helpers.service";
+import { PasswordResetService } from "src/util/passwordReset.service";
 
 @ApiTags("Auth")
 @Controller("auth")
