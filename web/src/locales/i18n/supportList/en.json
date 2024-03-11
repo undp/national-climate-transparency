@@ -1,0 +1,14 @@
+{
+  "viewTitle": "Support List",
+  "viewDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+  "addButtonType": "ADD support",
+  "searchBarText": "Search by Support Title",
+  "supportId": "Support ID",
+  "activityId": "Activity ID",
+  "supportNeededORReceived": "Support Needed or Received",
+  "internationalORNationalFinance": "International or National Finance",
+  "internationalChannelOFSupport": "International Channel of Support",
+  "internationalFinancialInstrument": "International Financial Instrument",
+  "financingStatus": "Financing Status",
+  "internationalSource": "International Source"
+}
