@@ -1,4 +1,5 @@
 export enum NatImplementor {}
+export enum IntImplementor {}
 
 export enum EntityType {
   ACTION = "action",
