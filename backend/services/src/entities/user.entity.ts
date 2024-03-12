@@ -8,22 +8,18 @@ import {
   OneToMany,
 } from "typeorm";
 import { EntitySubject } from "./entity.subject";
-import { OrganizationEntity } from "./organization.entity";
+import { Organisation } from "./organisation.entity";
 import { LogEntity } from "./log.entity";
+import { OrganisationType } from "src/enums/organisation.type.enum";
+import { UserState } from "src/enums/user.state.enum";
 
 @Entity()
-export class UserEntity implements EntitySubject {
+export class User implements EntitySubject {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string;
-
   @Column({ unique: true })
   email: string;
-
-  @Column({ nullable: true })
-  phone: string;
 
   @Column({ select: false })
   password: string;
@@ -36,20 +32,50 @@ export class UserEntity implements EntitySubject {
   })
   role: Role;
 
-  @ManyToOne(() => OrganizationEntity, (organization) => organization.users, {
+  @Column()
+  name: string;
+
+  @Column({ nullable: true })
+  phoneNo: string;
+
+  @ManyToOne(() => Organisation, (organisation) => organisation.users, {
     nullable: false,
   })
   @JoinColumn([
     { name: "organization_id", referencedColumnName: "organization_id" },
   ])
-  organization: OrganizationEntity;
+  organisation: Organisation;
 
   @OneToMany(() => LogEntity, (logEntity) => logEntity.user)
   logs?: LogEntity[];
+
+  // All the below fields were merged from the existing user entity
+
+  @Column()
+  country: string;
+
+  @Column({ nullable: true })
+  organisationId: number;
+
+  @Column({
+    type: "enum",
+    enum: OrganisationType,
+    array: false,
+    default: OrganisationType.DEPARTMENT,
+  })
+  organisationType: OrganisationType;
 
   @Column({ nullable: true, select: false })
   apiKey: string;
 
   @Column({ type: "bigint", nullable: true })
   createdTime: number;
+
+  @Column({
+    type: "enum",
+    enum: UserState,
+    array: false,
+    default: UserState.ACTIVE,
+  })
+  state: UserState;
 }
