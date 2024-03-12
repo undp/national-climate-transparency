@@ -1,66 +1,50 @@
-import { Role } from '../casl/role.enum';
-import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, OneToOne, OneToMany, ManyToOne } from 'typeorm';
-import { EntitySubject } from './entity.subject';
-import { OrganisationType } from '../enums/organisation.type.enum'
-import { Organisation } from './organisation.entity';
-import { UserState } from 'src/enums/user.state.enum';
+import { Role } from "../casl/role.enum";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  JoinColumn,
+  ManyToOne,
+} from "typeorm";
+import { EntitySubject } from "./entity.subject";
+import { OrganizationEntity } from "./organization.entity";
 
 @Entity()
-export class User  implements EntitySubject{
-    @PrimaryGeneratedColumn()
-    id: number;
+export class User implements EntitySubject {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ unique: true })
-    email: string;
+  @Column()
+  name: string;
 
-    @Column({select: false})
-    password: string;
+  @Column({ unique: true })
+  email: string;
 
-    @Column({
-        type: "enum",
-        enum: Role,
-        array: false,
-        default: Role.ViewOnly
-    })
-    role: Role;
+  @Column({ nullable: true })
+  phone: string;
 
-    @Column()
-    name: string;
+  @Column({ select: false })
+  password: string;
 
-    @Column()
-    country: string;
+  @Column({
+    type: "enum",
+    enum: Role,
+    array: false,
+    default: Role.ViewOnly,
+  })
+  role: Role;
 
-    @Column({nullable: true})
-    phoneNo: string;
+  @ManyToOne(() => OrganizationEntity, (organization) => organization.users, {
+    nullable: false,
+  })
+  @JoinColumn([
+    { name: "organization_id", referencedColumnName: "organization_id" },
+  ])
+  organization: OrganizationEntity;
 
-    @Column({nullable: true})
-    organisationId: number;
+  @Column({ nullable: true, select: false })
+  apiKey: string;
 
-    // @ManyToOne(type => Organisation, (organisation) => organisation.users)
-    // // @JoinColumn({name: "organisationId"})
-    // organisation: Organisation;
-
-    @Column({
-        type: "enum",
-        enum: OrganisationType,
-        array: false,
-        default: OrganisationType.DEPARTMENT
-    })
-    organisationType: OrganisationType;
-
-    @Column({nullable: true, select: false})
-    apiKey: string;
-
-    @Column({type: "bigint", nullable: true})
-    createdTime: number;
-
-    companyState: number;
-
-    @Column({
-        type: "enum",
-        enum: UserState,
-        array: false,
-        default: UserState.ACTIVE,
-      })
-      state: UserState;
+  @Column({ type: "bigint", nullable: true })
+  createdTime: number;
 }
