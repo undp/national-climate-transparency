@@ -22,8 +22,8 @@ export class Organisation {
   @Column({ type: "enum", enum: OrgType })
   type: string;
 
-  @Column({ type: "enum", enum: Sector })
-  sector: string;
+  @Column("varchar", { array: true, nullable: true })
+  sector: Sector[];
 
   @Column()
   phoneNo: string;
