@@ -5,12 +5,14 @@ import {
   PrimaryGeneratedColumn,
   JoinColumn,
   ManyToOne,
+  OneToMany,
 } from "typeorm";
 import { EntitySubject } from "./entity.subject";
 import { OrganizationEntity } from "./organization.entity";
+import { LogEntity } from "./log.entity";
 
 @Entity()
-export class User implements EntitySubject {
+export class UserEntity implements EntitySubject {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -41,6 +43,9 @@ export class User implements EntitySubject {
     { name: "organization_id", referencedColumnName: "organization_id" },
   ])
   organization: OrganizationEntity;
+
+  @OneToMany(() => LogEntity, (logEntity) => logEntity.user)
+  logs?: LogEntity[];
 
   @Column({ nullable: true, select: false })
   apiKey: string;

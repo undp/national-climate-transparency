@@ -1,7 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
-import { ParentTypeEnum } from 'src/utils/enums/parentType.enum';
+import { EntityType } from 'src/enums/shared.enum';
 import { AchievementEntity } from './achievement.entity';
 import { SupportEntity } from './support.entity';
+
 @Entity('activity')
 export class ActivityEntity {
   @PrimaryColumn()
@@ -13,7 +14,7 @@ export class ActivityEntity {
   @Column()
   description: string;
 
-  @Column({ type: 'enum', enum: ParentTypeEnum })
+  @Column({ type: 'enum', enum: EntityType })
   parent_type: string;
 
   @Column()

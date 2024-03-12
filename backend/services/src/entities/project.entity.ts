@@ -1,8 +1,13 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { ParentTypeEnum } from 'src/utils/enums/parentType.enum';
-import { ProgramEntity } from './program.entity';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import {
+  ProjectType,
+  ProjectStatus,
+  Recipient,
+  IntImplementor,
+} from "src/enums/project.enum";
+import { ProgramEntity } from "./program.entity";
 
-@Entity('project')
+@Entity("project")
 export class ProjectEntity {
   @PrimaryColumn()
   project_id: string;
@@ -13,13 +18,13 @@ export class ProjectEntity {
   @Column()
   description: string;
 
-  @Column({ type: 'enum', enum: ParentTypeEnum })
+  @Column({ type: "enum", enum: ProjectType })
   type: string;
 
   @Column()
   additional_project: string;
 
-  @Column({ type: 'enum', enum: ParentTypeEnum })
+  @Column({ type: "enum", enum: ProjectStatus })
   project_status: string;
 
   @Column()
@@ -31,10 +36,10 @@ export class ProjectEntity {
   @Column()
   time_frame: number;
 
-  @Column({ type: 'enum', enum: ParentTypeEnum })
+  @Column({ type: "enum", enum: Recipient })
   recipient: string;
 
-  @Column({ type: 'enum', enum: ParentTypeEnum })
+  @Column({ type: "enum", enum: IntImplementor })
   int_implementor: string;
 
   @Column()
@@ -49,12 +54,12 @@ export class ProjectEntity {
   @Column()
   comment: string;
 
-  @Column({ type: 'ltree' })
+  @Column({ type: "ltree" })
   path: string;
 
   @ManyToOne(() => ProgramEntity, (program) => program.projects, {
     nullable: false,
   })
-  @JoinColumn([{ name: 'program_id', referencedColumnName: 'program_id' }])
+  @JoinColumn([{ name: "program_id", referencedColumnName: "program_id" }])
   program: ProgramEntity;
 }

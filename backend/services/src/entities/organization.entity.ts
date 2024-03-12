@@ -1,10 +1,9 @@
-import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
-import { InstrumentEnum } from 'src/utils/enums/instrument.enum';
-import { ActionStatusEnum } from 'src/utils/enums/actionStatus.enum';
-import { NatAnchorEnum } from 'src/utils/enums/natAnchor.enum';
-import { UserEntity } from './user.entity';
+import { Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
+import { Sector } from "src/enums/shared.enum";
+import { OrgType } from "src/enums/shared.enum";
+import { UserEntity } from "./user.entity";
 
-@Entity('organization')
+@Entity("organization")
 export class OrganizationEntity {
   @PrimaryColumn()
   organization_id: string;
@@ -12,10 +11,10 @@ export class OrganizationEntity {
   @Column()
   name: string;
 
-  @Column({ type: 'enum', enum: InstrumentEnum })
+  @Column({ type: "enum", enum: OrgType })
   type: string;
 
-  @Column({ type: 'enum', enum: ActionStatusEnum })
+  @Column({ type: "enum", enum: Sector })
   sector: string;
 
   @Column()
@@ -24,7 +23,7 @@ export class OrganizationEntity {
   @Column()
   email: string;
 
-  @Column({ type: 'enum', enum: NatAnchorEnum })
+  @Column()
   region: string;
 
   @Column()

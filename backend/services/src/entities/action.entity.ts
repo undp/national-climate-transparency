@@ -1,10 +1,10 @@
-import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
-import { InstrumentEnum } from 'src/utils/enums/instrument.enum';
-import { ActionStatusEnum } from 'src/utils/enums/actionStatus.enum';
-import { NatAnchorEnum } from 'src/utils/enums/natAnchor.enum';
-import { ProgramEntity } from './program.entity';
+import { Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
+import { InstrumentType } from "src/enums/action.enum";
+import { ActionStatus } from "src/enums/action.enum";
+import { NatAnchor } from "src/enums/action.enum";
+import { ProgramEntity } from "./program.entity";
 
-@Entity('action')
+@Entity("action")
 export class ActionEntity {
   @PrimaryColumn()
   action_id: string;
@@ -18,16 +18,16 @@ export class ActionEntity {
   @Column()
   objective: string;
 
-  @Column({ type: 'enum', enum: InstrumentEnum })
+  @Column({ type: "enum", enum: InstrumentType })
   instrument_type: string;
 
-  @Column({ type: 'enum', enum: ActionStatusEnum })
+  @Column({ type: "enum", enum: ActionStatus })
   status: string;
 
   @Column()
   start_year: string;
 
-  @Column({ type: 'enum', enum: NatAnchorEnum })
+  @Column({ type: "enum", enum: NatAnchor })
   nat_anchor: string;
 
   @Column()

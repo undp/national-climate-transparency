@@ -1,4 +1,4 @@
-import { ParentTypeEnum } from 'src/utils/enums/parentType.enum';
+import { EntityType } from 'src/enums/shared.enum';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { AchievementEntity } from './achievement.entity';
 
@@ -10,7 +10,7 @@ export class KpiEntity {
   @Column()
   name: string;
 
-  @Column({ type: 'enum', enum: ParentTypeEnum })
+  @Column({ type: 'enum', enum: EntityType })
   creator_type: string;
 
   @Column()
