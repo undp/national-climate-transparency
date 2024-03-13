@@ -1,10 +1,15 @@
 @import "../../../Styles/variables.scss";
 
 $margin-bottom: 10px;
+$colHeight: 500px;
 
 .form-card {
     background-color: $outside-background-color;
     border-radius: 10px;
     width: 100%;
     margin-bottom: $margin-bottom;
+    padding-top: 45px; 
+    padding-left: 60px; 
+    padding-right: 30px;
+    padding-bottom: 30px;
 }
