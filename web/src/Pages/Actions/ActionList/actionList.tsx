@@ -26,6 +26,7 @@ const { Search } = Input;
 // import { useConnection, useUserContext } from '../../../Context';
 
 import data from '../../../Testing/actionList.json';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface Item {
   key: number;
@@ -42,6 +43,7 @@ interface Item {
 
 const actionList = () => {
   // const { post, delete: del } = useConnection();
+  const navigate = useNavigate();
   const { t } = useTranslation(['actionList']);
   const [tableData, setTableData] = useState<Item[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -263,8 +265,16 @@ const actionList = () => {
         <Row className="table-actions-section">
           <Col md={8} xs={24}>
             <div className="action-bar">
-              <Button type="primary" size="large" block icon={<PlusOutlined />} onClick={() => {}}>
-                {t('addButtonType')}
+              <Button
+                type="primary"
+                size="large"
+                block
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  navigate('/actions/add');
+                }}
+              >
+                {t('Add Action')}
               </Button>
             </div>
           </Col>

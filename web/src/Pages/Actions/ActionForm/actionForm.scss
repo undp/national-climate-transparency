@@ -1,0 +1,10 @@
+@import "../../../Styles/variables.scss";
+
+$margin-bottom: 10px;
+
+.form-card {
+    background-color: $outside-background-color;
+    border-radius: 10px;
+    width: 100%;
+    margin-bottom: $margin-bottom;
+}
