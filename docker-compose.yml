@@ -21,6 +21,19 @@ services:
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - data:/data/postgres
+  migration:
+    build:
+      context: .
+      dockerfile: ./backend/services/Dockerfile
+    depends_on:
+      - dbmrv
+    command: ['yarn', 'migration:run']
+    environment:
+      DB_HOST: dbmrv
+      DB_PORT: 5433
+      DB_USER: root
+      DB_PASSWORD: "<ANY PASSWORD>"
+      DB_NAME: "carbondev"
   national:
     build:
       context: .

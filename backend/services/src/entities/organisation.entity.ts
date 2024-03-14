@@ -1,25 +1,13 @@
-import { BeforeInsert, Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
 import { OrganisationType } from '../enums/organisation.type.enum'
-// import { CompanyState } from "../enum/company.state.enum";
 import { EntitySubject } from "./entity.subject";
-import { SectoralScope } from "@undp/serial-number-gen";
-import { User } from "./user.entity";
-import { use } from "passport";
 import { OrganisationState } from "../enums/organisation.state.enum";
 import { Sector } from "src/enums/sector.enum";
-// import { Ministry } from "../enum/ministry.enum";
-// import { GovDepartment } from "../enum/govDep.enum";
 
 @Entity()
 export class Organisation implements EntitySubject {
   @PrimaryColumn()
   organisationId: number;
-
-  // @Column({ unique: true, nullable: true })
-  // taxId: string;
-
-  // @Column({ unique: true, nullable: true })
-  // paymentId: string;
 
   @Column()
   name: string;
@@ -61,16 +49,6 @@ export class Organisation implements EntitySubject {
   @Column("bigint", { nullable: true })
   userCount: number;
 
-  // @Column("real", { nullable: true })
-  // creditBalance: number;
-
-  // @Column({
-  //   type: "jsonb",
-  //   array: false,
-  //   nullable: true,
-  // })
-  // secondaryAccountBalance: any;
-
   @Column("bigint", { nullable: true })
   lastUpdateVersion: number;
 
@@ -96,8 +74,6 @@ export class Organisation implements EntitySubject {
   @Column("varchar", { array: true, nullable: true })
   sector: Sector[];
 
-  // @OneToMany(type => User, user => user.organisation)
-  // users: User[]
   @BeforeInsert()
   setDefaultState() {
     if (this.organisationType === OrganisationType.GOVERNMENT) {

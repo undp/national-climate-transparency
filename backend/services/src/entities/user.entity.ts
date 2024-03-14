@@ -1,8 +1,7 @@
 import { Role } from '../casl/role.enum';
-import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, OneToOne, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { EntitySubject } from './entity.subject';
 import { OrganisationType } from '../enums/organisation.type.enum'
-import { Organisation } from './organisation.entity';
 import { UserState } from 'src/enums/user.state.enum';
 
 @Entity()
@@ -35,10 +34,6 @@ export class User  implements EntitySubject{
 
     @Column({nullable: true})
     organisationId: number;
-
-    // @ManyToOne(type => Organisation, (organisation) => organisation.users)
-    // // @JoinColumn({name: "organisationId"})
-    // organisation: Organisation;
 
     @Column({
         type: "enum",

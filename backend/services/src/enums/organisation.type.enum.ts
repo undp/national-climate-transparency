@@ -1,5 +1,5 @@
 export enum OrganisationType {
-    GOVERNMENT = 'Government',
-    DEPARTMENT = 'Department',
-    API = 'API'
+  GOVERNMENT = "Government",
+  DEPARTMENT = "Department",
+  API = "API",
 }

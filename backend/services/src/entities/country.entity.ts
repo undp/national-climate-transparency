@@ -1,5 +1,4 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
-import { CounterType } from "../enums/counter.type.enum";
 
 @Entity()
 export class Country {
