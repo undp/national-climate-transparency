@@ -145,6 +145,7 @@ export class UserService {
     const u: User = plainToClass(User, userDto);
     u.organisationId = organisation.organisationId;
     u.organisationType = organisation.organisationType;
+    u.country = this.configService.get("systemCountry");
 
     let generatedPassword = this.helperService.generateRandomPassword();
     u.password = this.passwordHashService.getPasswordHash(generatedPassword);
@@ -211,29 +212,19 @@ export class UserService {
                   }`,
                   HttpStatus.BAD_REQUEST
                 );
-              } else if (err.driverError.detail.includes("taxId")) {
-                throw new HttpException(
-                  this.helperService.formatReqMessagesString(
-                    "user.taxIdExistAlready",
-                    []
-                  ),
-                  HttpStatus.BAD_REQUEST
-                );
-              } else if (err.driverError.detail.includes("paymentId")) {
-                throw new HttpException(
-                  this.helperService.formatReqMessagesString(
-                    "user.paymentIdExistAlready",
-                    []
-                  ),
-                  HttpStatus.BAD_REQUEST
-                );
               }
           }
           this.logger.error(`User add error ${err}`);
         } else {
           this.logger.error(`User add error ${err}`);
         }
-        return err;
+        throw new HttpException(
+          this.helperService.formatReqMessagesString(
+            "user.userCreationFailed",
+            []
+          ),
+          HttpStatus.BAD_REQUEST
+        );
       });
 
     const { apiKey, password, ...resp } = usr;
@@ -534,13 +525,12 @@ export class UserService {
   }
 
   private async notifyUserStateUpdate(userDto: UserUpdateDto) {
-
     const user = await this.findById(userDto.id);
     const govOrg = await this.organisationService.findGovByCountry(user.country);
 
     const templateData = {
       name: user.name,
-      countryName: this.configService.get("systemCountryName"),
+      countryName: this.configService.get("systemCountry"),
       remarks: userDto.remarks,
       government: govOrg.name
     };
@@ -609,9 +599,7 @@ export class UserService {
       )
       .execute();
       const userAfter = await this.findOne(user.email)
-      console.log('------------------------- res', res)
     if (!userBefore && userAfter) {
-      console.log('------------------------- Inside IF', res)
       await this.organisationService.increaseUserCount(organisationId);
     }
     return res;
@@ -639,7 +627,6 @@ export class UserService {
 
     return await this.create(userDto, organisationId, organisationType, isRegistration);
   };
-
 
   async query(query: QueryDto, abilityCondition: string): Promise<any> {
     const resp = await this.userRepo

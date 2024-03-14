@@ -20,5 +20,9 @@
     "updateUserError": "Error in updating user!",
     "adminToolTip": "Full access to all permitted functions",
     "managerToolTip": "Access to all permitted functions except user management",
-    "viewerToolTip": "Read-only access to all permitted functionalities"
+    "viewerToolTip": "Read-only access to all permitted functionalities",
+    "organisationType": "Organisation Type" ,
+    "government": "Government",
+    "department": "Department",
+    "observer": "Observer"
 }
