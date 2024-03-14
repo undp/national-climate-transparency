@@ -6,7 +6,8 @@ import {
   OneToMany,
   PrimaryColumn,
 } from "typeorm";
-import { Sector, SubSector } from "src/enums/shared.enum";
+import { SubSector } from "src/enums/shared.enum";
+import { Sector } from "src/enums/sector.enum";
 import { NatImplementor } from "src/enums/shared.enum";
 import { ActionEntity } from "./action.entity";
 import { ProjectEntity } from "./project.entity";

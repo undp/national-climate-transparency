@@ -1,40 +1,40 @@
 export enum SupportType {
-  MIT = "Mitigation",
-  ADP = "Adaption",
-  CC = "Cross-cutting",
-  ENB = "Enabling",
+  MITIGATION = "Mitigation",
+  ADAPTION = "Adaption",
+  CROSSCUT = "Cross-cutting",
+  ENABLING = "Enabling",
 }
 
 export enum Measure {
-  WM = "With Measures",
-  WAM = "With Additional Measures",
-  WOM = "Without Measures",
+  WITH_MEASURE = "With Measures",
+  WITH_ADD_MEASURES = "With Additional Measures",
+  WITHOUT_MEASURES = "Without Measures",
 }
 
 export enum ActivityStatus {
-  PLN = "Planned",
-  ONG = "Ongoing",
-  COM = "Completed",
+  PLANNED = "Planned",
+  ONGOING = "Ongoing",
+  COMPLETED = "Completed",
 }
 
 export enum ImpleMeans {
-  FIN = "Financing",
-  TECHDEV = "Technology Development & Transfer",
-  CAPBLD = "Capacity Building",
+  FINANCE = "Financing",
+  TECH_DEV = "Technology Development & Transfer",
+  CAPACITY_BUILD = "Capacity Building",
   TRANSP = "Transparency",
-  NON = "None",
+  NONE = "None",
 }
 
 export enum TechnologyType {
-  EE = "Energy Efficiency",
-  REN = "Renewable Energy",
-  EA = "Emissions Abatement",
-  NBS = "Nature Based Solution",
-  CS = "Carbon Storage",
-  IT = "IT Solutions",
-  SYSMGT = "Systems Management",
-  RES = "Resilience",
-  CM = "Coastal Management",
-  CIV = "Civil",
-  OTH = "other",
+  ENERGY_EFI = "Energy Efficiency",
+  REN_ENERGY = "Renewable Energy",
+  EMISSION_ABT = "Emissions Abatement",
+  NATURE_BASED = "Nature Based Solution",
+  CARBON_STORAGE = "Carbon Storage",
+  IT_SOLUTION = "IT Solutions",
+  SYSTEM_MGT = "Systems Management",
+  RESILIENCE = "Resilience",
+  COASTAL_MGT = "Coastal Management",
+  CIVIL = "Civil",
+  OTHER = "other",
 }

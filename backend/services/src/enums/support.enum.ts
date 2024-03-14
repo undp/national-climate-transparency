@@ -4,21 +4,21 @@ export enum SupportDirection {
 }
 
 export enum FinanceNature {
-  INT = "International",
-  NAT = "National",
+  INTERNATIONAL = "International",
+  NATIONAL = "National",
 }
 
 export enum IntSupChannel {
-  MLT = "Multilateral",
-  BLT = "Bilateral",
-  REG = "Regional",
-  OTH = "Other",
+  MULTILATERAL = "Multilateral",
+  BILATERAL = "Bilateral",
+  REGIONAL = "Regional",
+  OTHER = "Other",
 }
 
 export enum IntFinInstrument {
   GRANT = "Grant",
-  CONCLOAN = "Concessional Loan",
-  NONCONCLOAN = "Non-concessional loan",
+  CONCES_LOAN = "Concessional Loan",
+  NON_CONCES_LOAN = "Non-concessional loan",
   EQUITY = "Equity",
   GUARANTEE = "Guarantee",
   INSURANCE = "Insurance",
@@ -28,11 +28,11 @@ export enum IntFinInstrument {
 export enum NatFinInstrument {
   GRANT = "Grant",
   EQUITY = "Equity",
-  COMMBONDS = "Commercial Bonds (private sector)",
-  COMMLOAN = "Commercial Loan (private sector)",
-  NATBUDGET = "National Budget",
-  NATFISC = "National Fiscal Policy",
-  NATMON = "National Monetary Policy",
+  COMM_BONDS = "Commercial Bonds (private sector)",
+  COMM_LOAN = "Commercial Loan (private sector)",
+  NAT_BUDGET = "National Budget",
+  NAT_FISCAL = "National Fiscal Policy",
+  NAT_MONETARY = "National Monetary Policy",
   OTHERS = "Others",
 }
 
