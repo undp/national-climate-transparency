@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
-import { Row, Col, Input, Dropdown, MenuProps, Button } from 'antd';
+import { Row, Col, Input, Dropdown, MenuProps, Button, Upload, Card } from 'antd';
+import { DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import { UploadFile } from 'antd/lib/upload/interface';
+import { useState } from 'react';
 
 const gutterSize = 30;
 const rowHeight = '80px';
@@ -27,6 +30,24 @@ const items: MenuProps['items'] = [
 
 const actionForm = () => {
   const { t } = useTranslation(['actionList']);
+
+  // form state
+  const [documentList, setDocumentList] = useState<UploadFile[]>([]);
+
+  const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
+    setDocumentList(newFileList);
+  };
+
+  const handleDelete = (fileToRemove: any) => {
+    setDocumentList((prevList) => prevList.filter((file) => file.uid !== fileToRemove.uid));
+  };
+
+  const props = {
+    onChange,
+    documentList,
+    showUploadList: false,
+  };
+
   return (
     <div className="content-container">
       <div className="title-bar">
@@ -75,6 +96,19 @@ const actionForm = () => {
         <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
           <Col span={12} style={{ height: rowHeight }}>
             <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+              {'GHG (s) Affected'}
+            </div>
+            <Dropdown
+              menu={{
+                items,
+                selectable: true,
+              }}
+            >
+              <Input style={{ height: fieldHeight }} />
+            </Dropdown>
+          </Col>
+          <Col span={6} style={{ height: rowHeight }}>
+            <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
               {'Type of Instruments'}
             </div>
             <Dropdown
@@ -86,7 +120,7 @@ const actionForm = () => {
               <Input style={{ height: fieldHeight }} />
             </Dropdown>
           </Col>
-          <Col span={12} style={{ height: rowHeight }}>
+          <Col span={6} style={{ height: rowHeight }}>
             <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Action Status'}</div>
             <Dropdown
               menu={{
@@ -101,7 +135,7 @@ const actionForm = () => {
         <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
           <Col span={12} style={{ height: rowHeight }}>
             <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-              {'GHG (s) Affected'}
+              {'National Implementing Entity (s)'}
             </div>
             <Dropdown
               menu={{
@@ -140,7 +174,7 @@ const actionForm = () => {
         <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
           <Col span={12} style={{ height: rowHeight }}>
             <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-              {'National Implementing Entity (s)'}
+              {'Estimated Investment Needs (USD)'}
             </div>
             <Dropdown
               menu={{
@@ -165,31 +199,36 @@ const actionForm = () => {
             </Dropdown>
           </Col>
         </Row>
-        <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-          <Col span={12} style={{ height: rowHeight }}>
-            <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-              {'Estimated Investment Needs (USD)'}
-            </div>
-            <Dropdown
-              menu={{
-                items,
-                selectable: true,
-              }}
-            >
-              <Input style={{ height: fieldHeight }} />
-            </Dropdown>
+        <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin, marginTop: '20px' }}>
+          <Col span={3} style={{ height: fieldHeight }}>
+            <Upload {...props}>
+              <Button icon={<UploadOutlined />} style={{ width: '120px', height: fieldHeight }}>
+                Upload
+              </Button>
+            </Upload>
           </Col>
-          <Col span={2} style={{ height: rowHeight }}>
-            <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Documents'}</div>
-            <Button style={{ height: fieldHeight }}>Upload</Button>
-          </Col>
-          <Col span={10} style={{ height: rowHeight }}>
-            <Button
-              style={{ marginTop: '38px', height: fieldHeight, width: '100%', overflow: 'hidden' }}
-            >
-              Seychelles’ Updated Nationally Determined Contribution July 2021.pdf
-            </Button>
-          </Col>
+          {documentList.map((file: any) => (
+            <Col span={7} style={{ height: fieldHeight }}>
+              <Card
+                style={{
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderWidth: '1px',
+                  borderColor: '#d9d9d9',
+                }}
+              >
+                <div style={{ color: '#3A3541', opacity: '0.8' }}>
+                  {file.name}
+                  <DeleteOutlined
+                    style={{ cursor: 'pointer', marginLeft: '30px' }}
+                    onClick={() => handleDelete(file)}
+                  />
+                </div>
+              </Card>
+            </Col>
+          ))}
         </Row>
       </div>
       <div className="form-card">
