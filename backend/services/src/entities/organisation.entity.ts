@@ -1,52 +1,31 @@
-import {
-  Entity,
-  Column,
-  PrimaryColumn,
-  OneToMany,
-  BeforeInsert,
-} from "typeorm";
-import { Sector } from "src/enums/shared.enum";
-import { OrgType } from "src/enums/shared.enum";
-import { User } from "./user.entity";
-import { OrganisationType } from "src/enums/organisation.type.enum";
-import { OrganisationState } from "src/enums/organisation.state.enum";
+import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
+import { OrganisationType } from '../enums/organisation.type.enum'
+import { EntitySubject } from "./entity.subject";
+import { OrganisationState } from "../enums/organisation.state.enum";
+import { Sector } from "src/enums/sector.enum";
 
-@Entity("organisation")
-export class Organisation {
+@Entity()
+export class Organisation implements EntitySubject {
   @PrimaryColumn()
   organisationId: number;
 
   @Column()
   name: string;
 
-  @Column({ type: "enum", enum: OrgType })
-  type: string;
-
-  @Column("varchar", { array: true, nullable: true })
-  sector: Sector[];
-
-  @Column()
-  phoneNo: string;
-
-  @Column()
+  @Column({ unique: true, nullable: true })
   email: string;
 
-  @Column("varchar", { array: true, nullable: true })
-  regions: string[];
+  @Column({ nullable: true })
+  phoneNo: string;
 
-  @Column()
+  @Column({ nullable: true })
   website: string;
 
-  @Column()
+  @Column({ nullable: true })
   address: string;
 
-  @Column()
+  @Column({ nullable: true })
   logo: string;
-
-  @OneToMany(() => User, (userEntity) => userEntity.organisation)
-  users?: User[];
-
-  // All the below fields were merged from the existing organisation entity
 
   @Column({ nullable: false })
   country: string;
@@ -54,9 +33,10 @@ export class Organisation {
   @Column({
     type: "enum",
     enum: OrganisationType,
-    array: false,
+    array: false
   })
   organisationType: OrganisationType;
+
 
   @Column({
     type: "enum",
@@ -88,6 +68,12 @@ export class Organisation {
   })
   geographicalLocationCordintes: any;
 
+  @Column("varchar", { array: true, nullable: true })
+  regions: string[];
+
+  @Column("varchar", { array: true, nullable: true })
+  sector: Sector[];
+
   @BeforeInsert()
   setDefaultState() {
     if (this.organisationType === OrganisationType.GOVERNMENT) {
@@ -96,4 +82,5 @@ export class Organisation {
       this.userCount = 0;
     }
   }
+
 }
