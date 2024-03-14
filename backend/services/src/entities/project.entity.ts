@@ -1,10 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-import {
-  ProjectType,
-  ProjectStatus,
-  Recipient,
-  IntImplementor,
-} from "src/enums/project.enum";
+import { ProjectType, ProjectStatus } from "src/enums/project.enum";
+import { Recipient, IntImplementor } from "src/enums/shared.enum";
 import { ProgramEntity } from "./program.entity";
 
 @Entity("project")
