@@ -13,49 +13,49 @@ import { ActivityEntity } from "./activity.entity";
 @Entity("support")
 export class SupportEntity {
   @PrimaryColumn()
-  support_id: string;
+  supportId: string;
 
   @Column({ type: "enum", enum: SupportDirection })
   direction: string;
 
   @Column({ type: "enum", enum: FinanceNature })
-  finance_nature: string;
+  financeNature: string;
 
   @Column({ type: "enum", enum: IntSupChannel })
-  int_sup_channel: string;
+  intSupChannel: string;
 
   @Column({ type: "enum", enum: IntFinInstrument })
-  int_fin_instrument: string;
+  intFinInstrument: string;
 
   @Column({ type: "enum", enum: NatFinInstrument })
-  nat_fin_instrument: string;
+  natFinInstrument: string;
 
   @Column()
-  other_int_sup_channel: string;
+  otherIntSupChannel: string;
 
   @Column()
-  other_int_fin_instrument: string;
+  otherIntFinInstrument: string;
 
   @Column()
-  other_nat_fin_instrument: string;
+  otherNatFinInstrument: string;
 
   @Column({ type: "enum", enum: FinancingStatus })
-  financing_status: string;
+  financingStatus: string;
 
   @Column({ type: "enum", enum: IntSource })
-  int_source: string;
+  intSource: string;
 
   @Column()
-  nat_source: string;
+  natSource: string;
 
   @Column()
-  required_amount: number;
+  requiredAmount: number;
 
   @Column()
-  recieved_amount: number;
+  recievedAmount: number;
 
   @Column()
-  exch_rate: number;
+  exchRate: number;
 
   @ManyToOne(() => ActivityEntity, (activity) => activity.support, {
     nullable: false,

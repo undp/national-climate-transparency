@@ -7,7 +7,7 @@ import { ProgramEntity } from "./program.entity";
 @Entity("action")
 export class ActionEntity {
   @PrimaryColumn()
-  action_id: string;
+  actionId: string;
 
   @Column()
   title: string;
@@ -19,16 +19,16 @@ export class ActionEntity {
   objective: string;
 
   @Column({ type: "enum", enum: InstrumentType })
-  instrument_type: string;
+  instrumentType: string;
 
   @Column({ type: "enum", enum: ActionStatus })
   status: string;
 
   @Column()
-  start_year: string;
+  startYear: string;
 
   @Column({ type: "enum", enum: NatAnchor })
-  nat_anchor: string;
+  natAnchor: string;
 
   @Column()
   document: string;

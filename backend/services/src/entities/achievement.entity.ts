@@ -32,5 +32,5 @@ export class AchievementEntity {
   achieved: number;
 
   @Column({ type: "ltree" })
-  activity_path: string;
+  activityPath: string;
 }

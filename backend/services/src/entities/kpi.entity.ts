@@ -11,10 +11,10 @@ export class KpiEntity {
   name: string;
 
   @Column({ type: 'enum', enum: EntityType })
-  creator_type: string;
+  creatorType: string;
 
   @Column()
-  creator_id: string;
+  creatorId: string;
 
   @Column()
   expected: number;
