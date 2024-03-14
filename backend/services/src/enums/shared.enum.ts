@@ -117,10 +117,3 @@ export enum SubSector {
   MULTI_SUB_SEC = "Multi-Subsector",
   NA = "Not Applicable",
 }
-
-export enum Role {
-  SADMIN = "Super Admin",
-  ADMIN = "Admin",
-  OBSERVER = "Observer",
-  USER = "User",
-}
