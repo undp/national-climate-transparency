@@ -1,9 +1,7 @@
 import { PG_UNIQUE_VIOLATION } from '@drdgvhbh/postgres-error-codes';
 import {
-  forwardRef,
   HttpException,
   HttpStatus,
-  Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
@@ -14,10 +12,8 @@ import { QueryFailedError, Repository } from 'typeorm';
 import { Organisation } from '../entities/organisation.entity';
 import { OrganisationType } from '../enums/organisation.type.enum';
 import { OrganisationUpdateDto } from '../dtos/organisation.update.dto';
-import { UserService } from '../user/user.service';
 import { HelperService } from '../util/helpers.service';
 import { CounterService } from '../util/counter.service';
-import { HttpUtilService } from '../util/http.util.service';
 import { QueryDto } from '../dtos/query.dto';
 import { FilterEntry } from '../dtos/filter.entry';
 import { DataListResponseDto } from '../dtos/data.list.response';
@@ -36,20 +32,14 @@ export class OrganisationService {
     private helperService: HelperService,
     private fileHandler: FileHandlerInterface,
     private counterService: CounterService,
-    @Inject(forwardRef(() => UserService))
-    private userService: UserService,
-    private locationService: LocationInterface,
-    private httpUtilService: HttpUtilService
-  ) {}
+    private locationService: LocationInterface  ) {}
 
   async query(
     query: QueryDto,
     abilityCondition: string,
     companyRole: string,
   ): Promise<any> {
-    let filterWithCompanyStatesIn: number[];
-    const resp = await this.organisationRepo
-      .createQueryBuilder()
+    const queryBuilder = this.organisationRepo.createQueryBuilder()
       .where(
         this.helperService.generateWhereSQL(
           query,
@@ -64,10 +54,14 @@ export class OrganisationService {
             ? 'NULLS FIRST'
             : 'NULLS LAST'
           : undefined,
-      )
-      .offset(query.size * query.page - query.size)
-      .limit(query.size)
-      .getManyAndCount();
+      );
+
+    if (query.size && query.page) {
+      queryBuilder.offset(query.size * query.page - query.size)
+        .limit(query.size);
+    }
+
+    const resp = await queryBuilder.getManyAndCount();
 
     return new DataListResponseDto(
       resp.length > 0 ? resp[0] : undefined,
@@ -181,6 +175,8 @@ export class OrganisationService {
       );
     }
 
+    organisationDto.country = this.configService.get("systemCountry");
+
     if (organisationDto.logo && this.helperService.isBase64(organisationDto.logo)) {
       const response: any = await this.fileHandler.uploadFile(
         `profile_images/${organisationDto.organisationId}_${new Date().getTime()}.png`,
@@ -191,7 +187,7 @@ export class OrganisationService {
       } else {
         throw new HttpException(
           this.helperService.formatReqMessagesString(
-            "user.companyUpdateFailed",
+            "user.companyLogoUploadFailed",
             []
           ),
           HttpStatus.INTERNAL_SERVER_ERROR
@@ -205,7 +201,7 @@ export class OrganisationService {
           case PG_UNIQUE_VIOLATION:
             throw new HttpException(
               this.helperService.formatReqMessagesString(
-                'company.companyTaxIdExist',
+                'company.companyExist',
                 [],
               ),
               HttpStatus.BAD_REQUEST,
@@ -236,6 +232,16 @@ export class OrganisationService {
       throw new HttpException(
         this.helperService.formatReqMessagesString(
           'company.noActiveCompany',
+          [],
+        ),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (organisationUpdateDto.organisationType !== organisation.organisationType) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          'company.orgTypeCannotBeUpdated',
           [],
         ),
         HttpStatus.BAD_REQUEST,

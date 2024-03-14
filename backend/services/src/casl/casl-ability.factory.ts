@@ -32,7 +32,7 @@ export class CaslAbilityFactory {
         can(Action.Create, Organisation);
         can(Action.Update, Organisation);
         can(Action.Delete, Organisation);
-        cannot(Action.Update, Organisation, ['organisationType']);
+        // cannot(Action.Update, Organisation, ['organisationType']);
 
         can(Action.Read, User);
         can(Action.Create, User);
@@ -48,7 +48,7 @@ export class CaslAbilityFactory {
         can(Action.Create, Organisation);
         can(Action.Update, Organisation);
         can(Action.Delete, Organisation);
-        cannot(Action.Update, Organisation, ['organisationType']);
+        // cannot(Action.Update, Organisation, ['organisationType']);
 
         can(Action.Read, User);
         can(Action.Create, User);

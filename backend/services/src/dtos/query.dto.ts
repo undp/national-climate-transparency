@@ -9,22 +9,32 @@ import {
   IsNumber,
   IsOptional,
   IsPositive,
+  ValidateIf,
   ValidateNested,
+  ValidationArguments,
 } from "class-validator";
 import { FilterEntry } from "./filter.entry";
 import { SortEntry } from "./sort.entry";
 import { FilterBy } from "./filter.by";
 
 export class QueryDto {
+  @IsOptional()
   @IsPositive()
   @IsInt()
   @Type(() => Number)
+  @ValidateIf(
+    (c) => c.size !== undefined
+  )
   @ApiProperty()
   page: number;
 
+  @IsOptional()
   @IsPositive()
   @IsInt()
   @Type(() => Number)
+  @ValidateIf(
+    (c) => c.page !== undefined
+  )
   @ApiProperty()
   size: number;
 

@@ -40,6 +40,13 @@ export class OrganisationUpdateDto {
   @ApiProperty()
   email: string;
 
+  @ApiProperty({ enum: OrganisationType })
+  @IsEnum(OrganisationType, {
+    message:
+      "Invalid role. Supported following roles:" + Object.values(OrganisationType),
+  })
+  organisationType: OrganisationType;
+
   // @ValidateIf(
   //   (c) => ![OrganisationType.GOVERNMENT, OrganisationType.API].includes(c.organisationType)
   // )
