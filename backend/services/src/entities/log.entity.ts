@@ -12,10 +12,7 @@ export class LogEntity {
 
   @Column()
   record_id: string;
-
-  @ManyToOne(() => User, (user) => user.logs, {
-    nullable: false,
-  })
-  @JoinColumn([{ name: "user_id", referencedColumnName: "user_id" }])
-  user: User;
+  
+  @Column()
+  user_id: User;
 }
