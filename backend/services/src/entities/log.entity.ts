@@ -5,14 +5,14 @@ import { User } from "./user.entity";
 @Entity("log")
 export class LogEntity {
   @PrimaryColumn()
-  log_id: number;
+  logId: number;
 
   @Column({ type: "enum", enum: EntityType })
-  record_type: string;
+  recordType: string;
 
   @Column()
-  record_id: string;
+  recordId: string;
   
   @Column()
-  user_id: User;
+  userId: User;
 }

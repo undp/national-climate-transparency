@@ -14,7 +14,7 @@ import { NatImplementor, IntImplementor } from "src/enums/shared.enum";
 @Entity("activity")
 export class ActivityEntity {
   @PrimaryColumn()
-  activity_id: string;
+  activityId: string;
 
   @Column()
   title: string;
@@ -23,13 +23,13 @@ export class ActivityEntity {
   description: string;
 
   @Column({ type: "enum", enum: EntityType })
-  parent_type: string;
+  parentType: string;
 
   @Column()
-  parent_id: string;
+  parentId: string;
 
   @Column({ type: "enum", enum: SupportType })
-  support_type: string;
+  supportType: string;
 
   @Column({ type: "enum", enum: Measure })
   measure: string;
@@ -38,40 +38,40 @@ export class ActivityEntity {
   status: string;
 
   @Column({ type: "enum", enum: IntImplementor })
-  int_implementor: string;
+  intImplementor: string;
 
   @Column({ type: "enum", enum: NatImplementor })
-  nat_implementor: string;
+  natImplementor: string;
 
   @Column()
   isAnchored: boolean;
 
   @Column({ type: "enum", enum: ImpleMeans })
-  impl_means: string;
+  implMeans: string;
 
   @Column({ type: "enum", enum: TechnologyType })
-  technology_type: string;
+  technologyType: string;
 
   @Column()
   document: string;
 
   @Column()
-  etf_description: string;
+  etfDescription: string;
 
   @Column()
   comment: string;
 
   @Column()
-  achieved_reduct: number;
+  achievedReduct: number;
 
   @Column()
-  expected_reduct: number;
+  expectedReduct: number;
 
   @Column("jsonb", { nullable: true })
-  mg_data: JSON;
+  mgData: JSON;
 
   @Column("jsonb", { nullable: true })
-  mg_timeline: JSON;
+  mgTimeline: JSON;
 
   @Column({ type: "ltree" })
   path: string;

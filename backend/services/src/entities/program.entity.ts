@@ -15,7 +15,7 @@ import { ProjectEntity } from "./project.entity";
 @Entity("program")
 export class ProgramEntity {
   @PrimaryColumn()
-  program_id: string;
+  programId: string;
 
   @Column()
   title: string;
@@ -27,16 +27,16 @@ export class ProgramEntity {
   objective: string;
 
   @Column({ type: "enum", enum: Sector })
-  affected_sector: string;
+  affectedSector: string;
 
   @Column({ type: "enum", enum: SubSector })
-  affected_sub_sector: string;
+  affectedSubSector: string;
 
   @Column()
-  start_year: number;
+  startYear: number;
 
   @Column({ type: "enum", enum: NatImplementor })
-  nat_implementor: string;
+  natImplementor: string;
 
   @Column()
   investment: number;

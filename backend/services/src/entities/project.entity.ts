@@ -6,7 +6,7 @@ import { ProgramEntity } from "./program.entity";
 @Entity("project")
 export class ProjectEntity {
   @PrimaryColumn()
-  project_id: string;
+  projectId: string;
 
   @Column()
   title: string;
@@ -18,34 +18,34 @@ export class ProjectEntity {
   type: string;
 
   @Column()
-  additional_project: string;
+  additionalProject: string;
 
   @Column({ type: "enum", enum: ProjectStatus })
-  project_status: string;
+  projectStatus: string;
 
   @Column()
-  start_year: number;
+  startYear: number;
 
   @Column()
-  end_year: number;
+  endYear: number;
 
   @Column()
-  time_frame: number;
+  timeFrame: number;
 
   @Column({ type: "enum", enum: Recipient })
   recipient: string;
 
   @Column({ type: "enum", enum: IntImplementor })
-  int_implementor: string;
+  intImplementor: string;
 
   @Column()
   document: string;
 
   @Column()
-  achieved_reduct: number;
+  achievedReduct: number;
 
   @Column()
-  expected_reduct: number;
+  expectedReduct: number;
 
   @Column()
   comment: string;
