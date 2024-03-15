@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
-import { Row, Col, Input, Dropdown, MenuProps, Button, Upload, Card } from 'antd';
-import { DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Dropdown, MenuProps, Button, Upload } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import { UploadFile } from 'antd/lib/upload/interface';
 import { useState } from 'react';
+import DeleteCard from '../../../Components/Card/deleteCard';
 
 const gutterSize = 30;
 const rowHeight = '80px';
@@ -34,17 +35,19 @@ const actionForm = () => {
   // form state
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
 
+  // Upload functionality
   const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
     setDocumentList(newFileList);
+    console.log(newFileList);
   };
 
-  const handleDelete = (fileToRemove: any) => {
-    setDocumentList((prevList) => prevList.filter((file) => file.uid !== fileToRemove.uid));
+  const handleDelete = (fileId: any) => {
+    setDocumentList((prevList) => prevList.filter((file) => file.uid !== fileId));
   };
 
   const props = {
     onChange,
-    documentList,
+    fileList: documentList,
     showUploadList: false,
   };
 
@@ -199,7 +202,7 @@ const actionForm = () => {
             </Dropdown>
           </Col>
         </Row>
-        <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin, marginTop: '20px' }}>
+        <Row gutter={[gutterSize, 8]} style={{ marginBottom: rowBottomMargin, marginTop: '20px' }}>
           <Col span={3} style={{ height: fieldHeight }}>
             <Upload {...props}>
               <Button icon={<UploadOutlined />} style={{ width: '120px', height: fieldHeight }}>
@@ -207,28 +210,19 @@ const actionForm = () => {
               </Button>
             </Upload>
           </Col>
-          {documentList.map((file: any) => (
-            <Col span={7} style={{ height: fieldHeight }}>
-              <Card
-                style={{
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderWidth: '1px',
-                  borderColor: '#d9d9d9',
-                }}
-              >
-                <div style={{ color: '#3A3541', opacity: '0.8' }}>
-                  {file.name}
-                  <DeleteOutlined
-                    style={{ cursor: 'pointer', marginLeft: '30px' }}
-                    onClick={() => handleDelete(file)}
-                  />
-                </div>
-              </Card>
-            </Col>
-          ))}
+          <Col span={21}>
+            <Row gutter={[gutterSize, 10]}>
+              {documentList.map((file: any) => (
+                <Col span={8} style={{ height: fieldHeight }}>
+                  <DeleteCard
+                    fileName={file.name.slice(0, 26)}
+                    fileId={file.uid}
+                    handleDelete={handleDelete}
+                  ></DeleteCard>
+                </Col>
+              ))}
+            </Row>
+          </Col>
         </Row>
       </div>
       <div className="form-card">
