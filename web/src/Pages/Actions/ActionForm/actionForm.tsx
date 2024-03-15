@@ -12,7 +12,12 @@ import {
   List,
   Typography,
 } from 'antd';
-import { EditOutlined, EllipsisOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import {
+  CloseCircleOutlined,
+  EllipsisOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from '@ant-design/icons';
 import { UploadFile } from 'antd/lib/upload/interface';
 import { useState } from 'react';
 import DeleteCard from '../../../Components/Card/deleteCard';
@@ -54,6 +59,7 @@ const actionForm = () => {
   const [pageSize, setPageSize] = useState<number>(10);
 
   // Upload functionality
+
   const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
     setDocumentList(newFileList);
     console.log(newFileList);
@@ -78,17 +84,8 @@ const actionForm = () => {
         size="small"
         dataSource={[
           {
-            text: 'Attach Programme',
-            icon: <PlusOutlined />,
-            isDisabled: false,
-            click: () => {
-              {
-              }
-            },
-          },
-          {
-            text: 'Edit Action',
-            icon: <EditOutlined />,
+            text: 'Detach',
+            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
             isDisabled: false,
             click: () => {
               {
@@ -324,9 +321,20 @@ const actionForm = () => {
         </Row>
       </div>
       <div className="form-card">
-        <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
-          {'List of Programme under the Action'}
-        </div>
+        <Row>
+          <Col span={6}>
+            <div
+              style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
+            >
+              {'List of Programme under the Action'}
+            </div>
+          </Col>
+          <Col span={5}>
+            <Button type="primary" size="large" block icon={<PlusOutlined />}>
+              {t('ATTACH PROGRAMMES')}
+            </Button>
+          </Col>
+        </Row>
         <Row>
           <Col span={24}>
             <LayoutTable
@@ -392,6 +400,18 @@ const actionForm = () => {
           rowBottomMargin={rowBottomMargin}
         ></KpiGrid>
       </div>
+      <Row gutter={20} justify={'end'}>
+        <Col span={2} style={{ height: rowHeight }}>
+          <Button type="default" size="large" block>
+            {t('CANCEL')}
+          </Button>
+        </Col>
+        <Col span={2} style={{ height: rowHeight }}>
+          <Button type="primary" size="large" block>
+            {t('ADD')}
+          </Button>
+        </Col>
+      </Row>
     </div>
   );
 };
