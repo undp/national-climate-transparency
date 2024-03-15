@@ -333,6 +333,7 @@ const actionList = () => {
                 onChange: onChange,
               }} // Set pagination configuration
               handleTableChange={handleTableChange}
+              emptyMessage="No Actions Available"
             />
           </Col>
         </Row>

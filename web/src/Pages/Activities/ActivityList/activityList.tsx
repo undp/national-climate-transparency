@@ -300,6 +300,7 @@ const activityList = () => {
                 onChange: onChange,
               }} // Set pagination configuration
               handleTableChange={handleTableChange}
+              emptyMessage="No Activities Available"
             />
           </Col>
         </Row>
