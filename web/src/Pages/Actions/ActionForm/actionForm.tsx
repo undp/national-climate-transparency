@@ -27,7 +27,7 @@ import KpiGrid from '../../../Components/KPI/KpiGrid';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 
 const gutterSize = 30;
-const rowHeight = '80px';
+const rowHeight = '85px';
 const rowBottomMargin = '10px';
 const multiLineHeight = '114px';
 const fieldHeight = '40px';
@@ -36,20 +36,27 @@ const validation = { required: { required: true, message: 'Required Field' } };
 
 const { TextArea } = Input;
 
-const items: MenuProps['items'] = [
-  {
-    key: '1',
-    label: 'Item 1',
-  },
-  {
-    key: '2',
-    label: 'Item 2',
-  },
-  {
-    key: '3',
-    label: 'Item 3',
-  },
-];
+type ActionMigratedData = {
+  type: string[];
+  ghgsAffected: string[];
+  natImplementor: string;
+  sectoredAffected: string[];
+  estimatedInvestment: number;
+  achievedReduct: number;
+  expectedReduct: number;
+};
+
+enum InstrumentType {
+  POLICY = 'Policy',
+  REGULATORY = 'Regulatory',
+  ECONOMIC = 'Economic',
+  OTHER = 'Other',
+}
+
+const items: MenuProps['items'] = Object.keys(InstrumentType).map((key) => ({
+  key,
+  label: InstrumentType[key as keyof typeof InstrumentType],
+}));
 
 const actionForm = () => {
   const { t } = useTranslation(['actionList']);
@@ -58,11 +65,15 @@ const actionForm = () => {
 
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
   const [kpiList, setKpiList] = useState<any[]>([]);
-  const [mitigationInfo, setMitigationInfo] = useState<{
-    ghgs: string[];
-    ach: number;
-    exp: number;
-  }>({ ghgs: ['CO2', 'N2O'], ach: 6, exp: 100 });
+  const [migratedData, setMigratedData] = useState<ActionMigratedData>({
+    type: ['Mitigation'],
+    ghgsAffected: ['CO2', 'N2O'],
+    natImplementor: 'Department of Energy',
+    sectoredAffected: ['Energy'],
+    estimatedInvestment: 1000,
+    achievedReduct: 6,
+    expectedReduct: 100,
+  });
 
   const [programList, setProgramList] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState<any>(1);
@@ -190,8 +201,10 @@ const actionForm = () => {
                   items,
                   selectable: true,
                 }}
+                trigger={['click']}
+                disabled={true}
               >
-                <Input style={{ height: fieldHeight }} />
+                <Input style={{ height: fieldHeight }} value={migratedData?.type} />
               </Dropdown>
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
@@ -231,8 +244,9 @@ const actionForm = () => {
                   items,
                   selectable: true,
                 }}
+                disabled={true}
               >
-                <Input style={{ height: fieldHeight }} />
+                <Input style={{ height: fieldHeight }} value={migratedData?.ghgsAffected[0]} />
               </Dropdown>
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
@@ -244,6 +258,7 @@ const actionForm = () => {
                   items,
                   selectable: true,
                 }}
+                trigger={['click']}
               >
                 <Form.Item name="instrumentType" rules={[validation.required]}>
                   <Input style={{ height: fieldHeight }} />
@@ -276,8 +291,9 @@ const actionForm = () => {
                   items,
                   selectable: true,
                 }}
+                disabled={true}
               >
-                <Input style={{ height: fieldHeight }} />
+                <Input style={{ height: fieldHeight }} value={migratedData?.natImplementor} />
               </Dropdown>
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
@@ -289,8 +305,9 @@ const actionForm = () => {
                   items,
                   selectable: true,
                 }}
+                disabled={true}
               >
-                <Input style={{ height: fieldHeight }} />
+                <Input style={{ height: fieldHeight }} value={migratedData?.sectoredAffected[0]} />
               </Dropdown>
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
@@ -317,8 +334,9 @@ const actionForm = () => {
                   items,
                   selectable: true,
                 }}
+                disabled={true}
               >
-                <Input style={{ height: fieldHeight }} />
+                <Input style={{ height: fieldHeight }} value={migratedData?.estimatedInvestment} />
               </Dropdown>
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
@@ -421,10 +439,11 @@ const actionForm = () => {
                   items,
                   selectable: true,
                 }}
+                disabled={true}
               >
                 <Input
                   style={{ height: fieldHeight }}
-                  value={mitigationInfo.ghgs[0]}
+                  value={migratedData?.ghgsAffected[0]}
                   disabled={true}
                 />
               </Dropdown>
@@ -436,11 +455,19 @@ const actionForm = () => {
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Achieved'}</div>
-              <Input style={{ height: fieldHeight }} value={mitigationInfo.ach} disabled={true} />
+              <Input
+                style={{ height: fieldHeight }}
+                value={migratedData?.achievedReduct}
+                disabled={true}
+              />
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Expected'}</div>
-              <Input style={{ height: fieldHeight }} value={mitigationInfo.exp} disabled={true} />
+              <Input
+                style={{ height: fieldHeight }}
+                value={migratedData?.expectedReduct}
+                disabled={true}
+              />
             </Col>
           </Row>
           <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '25px', marginBottom: '10px' }}>
