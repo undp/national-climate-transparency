@@ -12,8 +12,11 @@ import {
   Form,
   Select,
   Card,
+  Modal,
+  SelectProps,
 } from 'antd';
 import {
+  AppstoreAddOutlined,
   CloseCircleOutlined,
   DeleteOutlined,
   EllipsisOutlined,
@@ -22,7 +25,7 @@ import {
   UploadOutlined,
 } from '@ant-design/icons';
 import { UploadFile } from 'antd/lib/upload/interface';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DeleteCard from '../../../Components/Card/deleteCard';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 
@@ -38,6 +41,10 @@ const { Option } = Select;
 
 const { TextArea } = Input;
 
+interface Props {
+  method: 'create' | 'view' | 'update';
+}
+
 type ActionMigratedData = {
   type: string[];
   ghgsAffected: string[];
@@ -51,9 +58,20 @@ type ActionMigratedData = {
 type KpiData = {
   index: number;
   name: string;
+  unit: string;
   creatorType: string;
   achieved: number;
   expected: number;
+};
+
+type ProgrammeData = {
+  programmeId: string;
+  actionId: string;
+  title: string;
+  type: string;
+  status: string;
+  subSectorsAffected: string;
+  estimatedInvestment: number;
 };
 
 enum InstrumentType {
@@ -63,27 +81,50 @@ enum InstrumentType {
   OTHER = 'Other',
 }
 
-const actionForm = () => {
+const actionForm: React.FC<Props> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['actionList']);
 
   // form state
 
+  const [programIdList, setProgramIdList] = useState<SelectProps['options']>([]);
+  const [migratedData, setMigratedData] = useState<ActionMigratedData>();
+
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
   const [kpiList, setKpiList] = useState<KpiData[]>([]);
-  const [migratedData, setMigratedData] = useState<ActionMigratedData>({
-    type: ['Mitigation'],
-    ghgsAffected: ['CO2', 'N2O'],
-    natImplementor: 'Department of Energy',
-    sectoredAffected: ['Energy'],
-    estimatedInvestment: 1000,
-    achievedReduct: 6,
-    expectedReduct: 100,
-  });
 
-  const [programList, setProgramList] = useState<any[]>([]);
+  const [pendingProgrammes, setPendingProgrammes] = useState<string[]>([]);
+  const [programList, setProgramList] = useState<ProgrammeData[]>([]);
+
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+
+  // Initialization Logic
+
+  useEffect(() => {
+    const newProgramIdList: SelectProps['options'] = [];
+    for (let i = 0; i < 20; i++) {
+      newProgramIdList.push({
+        label: `P00${i}`,
+        value: `P00${i}`,
+      });
+    }
+    setProgramIdList(newProgramIdList);
+  }, [programList]);
+
+  useEffect(() => {
+    const updatedMigData = {
+      type: ['Mitigation'],
+      ghgsAffected: ['CO2', 'N2O'],
+      natImplementor: 'Department of Energy',
+      sectoredAffected: ['Energy'],
+      estimatedInvestment: 1000,
+      achievedReduct: 6,
+      expectedReduct: 100,
+    };
+
+    setMigratedData(updatedMigData);
+  }, [programList, kpiList]);
 
   // Form Submit
 
@@ -108,12 +149,53 @@ const actionForm = () => {
     showUploadList: false,
   };
 
+  // Attach Programme
+
+  const [open, setOpen] = useState(false);
+
+  const showModal = () => {
+    setOpen(true);
+  };
+
+  const attachProgramme = () => {
+    setOpen(false);
+    const updatedPrgData: ProgrammeData[] = [];
+    // Fetch Data from the backend related to the programmes attached
+    for (const prgId of pendingProgrammes) {
+      updatedPrgData.push({
+        programmeId: prgId,
+        actionId: 'action id',
+        title: 'test title',
+        type: 'test type',
+        status: 'test status',
+        subSectorsAffected: 'sub sec',
+        estimatedInvestment: 500,
+      });
+    }
+    setProgramList(updatedPrgData);
+  };
+
+  const detachProgramme = (prgId: string) => {
+    const filteredData = programList.filter((prg) => prg.programmeId !== prgId);
+    setProgramList(filteredData);
+    setPendingProgrammes(pendingProgrammes.filter((item) => item !== prgId));
+  };
+
+  const attachCancel = () => {
+    setOpen(false);
+  };
+
+  const handleProgSelect = (pIds: string[]) => {
+    setPendingProgrammes(pIds);
+  };
+
   // Add New KPI
 
   const createKPI = () => {
     const newItem: KpiData = {
       index: kpiList.length,
       name: '',
+      unit: 'kTCO2e',
       creatorType: 'action',
       expected: 0,
       achieved: 0,
@@ -123,7 +205,7 @@ const actionForm = () => {
 
   // Action Menu definition
 
-  const actionMenu = () => {
+  const actionMenu = (record: any) => {
     return (
       <List
         className="action-menu"
@@ -132,50 +214,48 @@ const actionForm = () => {
           {
             text: 'Detach',
             icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            isDisabled: false,
             click: () => {
               {
+                detachProgramme(record.programmeId);
               }
             },
           },
         ]}
-        renderItem={(item) =>
-          !item.isDisabled && (
-            <List.Item onClick={item.click}>
-              <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-              <span>{item.text}</span>
-            </List.Item>
-          )
-        }
+        renderItem={(item) => (
+          <List.Item onClick={item.click}>
+            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
+            <span>{'Detach'}</span>
+          </List.Item>
+        )}
       />
     );
   };
 
   // Column Definition
   const columns = [
-    { title: t('Programme ID'), dataIndex: 'programmeId', key: 'actionId' },
-    { title: t('Action ID'), dataIndex: 'actionId', key: 'activityId' },
-    { title: t('Title of Index'), dataIndex: 'title', key: 'titleOfAction' },
-    { title: t('Type'), dataIndex: 'type', key: 'actionType' },
-    { title: t('Programme Status'), dataIndex: 'activityId', key: 'activityId' },
+    { title: t('Programme ID'), dataIndex: 'programmeId', key: 'programmeId' },
+    { title: t('Action ID'), dataIndex: 'actionId', key: 'actionId' },
+    { title: t('Title of Programme'), dataIndex: 'title', key: 'title' },
+    { title: t('Type'), dataIndex: 'type', key: 'type' },
+    { title: t('Programme Status'), dataIndex: 'status', key: 'status' },
     {
       title: t('Sub-Sector Affected'),
-      dataIndex: 'titleOfAction',
+      dataIndex: 'subSectorsAffected',
       key: 'titleOfAction',
     },
     {
       title: t('Esimated investment needs (USD)'),
-      dataIndex: 'actionType',
-      key: 'actionType',
+      dataIndex: 'estimatedInvestment',
+      key: 'estimatedInvestment',
     },
     {
       title: '',
-      key: 'activityId',
+      key: 'programmeId',
       align: 'right' as const,
       width: 6,
-      render: () => {
+      render: (record: any) => {
         return (
-          <Popover placement="bottomRight" trigger="click" content={actionMenu()}>
+          <Popover placement="bottomRight" trigger="click" content={actionMenu(record)}>
             <EllipsisOutlined
               rotate={90}
               style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
@@ -189,7 +269,8 @@ const actionForm = () => {
   // Table Behaviour
 
   const handleTableChange = (pagination: any) => {
-    console.log('Pagination:', pagination);
+    setCurrentPage(pagination.current);
+    setPageSize(pagination.pageSize);
   };
 
   return (
@@ -379,9 +460,48 @@ const actionForm = () => {
                 block
                 icon={<LinkOutlined />}
                 style={{ padding: 0 }}
+                onClick={showModal}
               >
                 {t('ATTACH PROGRAMMES')}
               </Button>
+              <Modal
+                open={open}
+                onCancel={attachCancel}
+                footer={[
+                  <Button onClick={attachCancel}>Cancel</Button>,
+                  <Button type="primary" onClick={attachProgramme}>
+                    Attach
+                  </Button>,
+                ]}
+              >
+                <div style={{ color: '#16B1FF', marginTop: '15px' }}>
+                  <AppstoreAddOutlined style={{ fontSize: '120px' }} />
+                </div>
+                <div
+                  style={{ color: '#3A3541', opacity: 0.8, marginTop: '30px', fontSize: '15px' }}
+                >
+                  <strong>{'Attach Programme'}</strong>
+                </div>
+                <div
+                  style={{
+                    color: '#3A3541',
+                    opacity: 0.8,
+                    marginTop: '20px',
+                    marginBottom: '8px',
+                    textAlign: 'left',
+                  }}
+                >
+                  {'Programme List'}
+                </div>
+                <Select
+                  mode="multiple"
+                  allowClear
+                  style={{ width: '100%' }}
+                  value={pendingProgrammes}
+                  onChange={handleProgSelect}
+                  options={programIdList}
+                />
+              </Modal>
             </Col>
           </Row>
           <Row>
