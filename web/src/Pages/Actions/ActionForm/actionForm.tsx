@@ -29,6 +29,9 @@ import { useEffect, useState } from 'react';
 import DeleteCard from '../../../Components/Card/deleteCard';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 
+const { Option } = Select;
+const { TextArea } = Input;
+
 const gutterSize = 30;
 const rowHeight = '75px';
 const rowBottomMargin = '10px';
@@ -36,10 +39,6 @@ const multiLineHeight = '114px';
 const fieldHeight = '32px';
 
 const validation = { required: { required: true, message: 'Required Field' } };
-
-const { Option } = Select;
-
-const { TextArea } = Input;
 
 interface Props {
   method: 'create' | 'view' | 'update';
@@ -84,6 +83,7 @@ enum InstrumentType {
 const actionForm: React.FC<Props> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['actionList']);
+  const isView: boolean = method === 'view' ? true : false;
 
   // form state
 
@@ -113,6 +113,9 @@ const actionForm: React.FC<Props> = ({ method }) => {
   }, [programList]);
 
   useEffect(() => {
+    if (method !== 'create') {
+      console.log('Get the Action Information and load them');
+    }
     const updatedMigData = {
       type: ['Mitigation'],
       ghgsAffected: ['CO2', 'N2O'],
@@ -296,7 +299,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 {'Title of Action'}
               </div>
               <Form.Item name="title" rules={[validation.required]}>
-                <Input style={{ height: fieldHeight }} />
+                <Input style={{ height: fieldHeight }} disabled={isView} />
               </Form.Item>
             </Col>
           </Row>
@@ -306,7 +309,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 {'Short Description of Action'}
               </div>
               <Form.Item name="description" rules={[validation.required]}>
-                <TextArea rows={3} />
+                <TextArea rows={3} disabled={isView} />
               </Form.Item>
             </Col>
             <Col span={12} style={{ height: multiLineHeight }}>
@@ -314,7 +317,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 {'Action Objectives'}
               </div>
               <Form.Item name="objective" rules={[validation.required]}>
-                <TextArea rows={3} />
+                <TextArea rows={3} disabled={isView} />
               </Form.Item>
             </Col>
           </Row>
@@ -334,7 +337,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 {'Type of Instruments'}
               </div>
               <Form.Item name="instrumentType" rules={[validation.required]}>
-                <Select allowClear>
+                <Select allowClear disabled={isView}>
                   {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -348,7 +351,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 {'Action Status'}
               </div>
               <Form.Item name="status" rules={[validation.required]}>
-                <Select allowClear>
+                <Select allowClear disabled={isView}>
                   {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -382,7 +385,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Start Year'}</div>
               <Form.Item name="startYear" rules={[validation.required]}>
-                <Select allowClear>
+                <Select allowClear disabled={isView}>
                   {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -408,7 +411,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 {'Anchored in a National Strategy'}
               </div>
               <Form.Item name="natAnchor" rules={[validation.required]}>
-                <Select allowClear>
+                <Select allowClear disabled={isView}>
                   {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -424,7 +427,11 @@ const actionForm: React.FC<Props> = ({ method }) => {
           >
             <Col span={3} style={{ height: fieldHeight }}>
               <Upload {...props}>
-                <Button icon={<UploadOutlined />} style={{ width: '120px', height: fieldHeight }}>
+                <Button
+                  icon={<UploadOutlined />}
+                  style={{ width: '120px', height: fieldHeight }}
+                  disabled={isView}
+                >
                   Upload
                 </Button>
               </Upload>
@@ -454,16 +461,18 @@ const actionForm: React.FC<Props> = ({ method }) => {
               </div>
             </Col>
             <Col span={4}>
-              <Button
-                type="primary"
-                size="large"
-                block
-                icon={<LinkOutlined />}
-                style={{ padding: 0 }}
-                onClick={showModal}
-              >
-                {t('ATTACH PROGRAMMES')}
-              </Button>
+              {!isView && (
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  icon={<LinkOutlined />}
+                  style={{ padding: 0 }}
+                  onClick={showModal}
+                >
+                  {t('ATTACH PROGRAMMES')}
+                </Button>
+              )}
               <Modal
                 open={open}
                 onCancel={attachCancel}
@@ -539,7 +548,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               <Input
                 style={{ height: fieldHeight }}
                 value={migratedData?.ghgsAffected[0]}
-                disabled={true}
+                disabled
               />
             </Col>
           </Row>
@@ -552,7 +561,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               <Input
                 style={{ height: fieldHeight }}
                 value={migratedData?.achievedReduct}
-                disabled={true}
+                disabled
               />
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
@@ -560,7 +569,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               <Input
                 style={{ height: fieldHeight }}
                 value={migratedData?.expectedReduct}
-                disabled={true}
+                disabled
               />
             </Col>
           </Row>
@@ -579,7 +588,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                       name={`kpi_name_${kpi.index}`}
                       rules={[{ required: true, message: 'Required Field' }]}
                     >
-                      <Input style={{ height: fieldHeight }} disabled={false} />
+                      <Input style={{ height: fieldHeight }} disabled={isView} />
                     </Form.Item>
                   </Col>
                   <Col span={12} style={{ height: rowHeight }}>
@@ -590,7 +599,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                       name={`kpi_unit_${kpi.index}`}
                       rules={[{ required: true, message: 'Required Field' }]}
                     >
-                      <Input style={{ height: fieldHeight }} disabled={false} />
+                      <Input style={{ height: fieldHeight }} disabled={isView} />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -614,7 +623,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                       <Input
                         style={{ height: fieldHeight }}
                         value={kpi.achieved}
-                        disabled={false}
+                        disabled={isView}
                       />
                     </Form.Item>
                   </Col>
@@ -644,39 +653,52 @@ const actionForm: React.FC<Props> = ({ method }) => {
           ))}
           <Row justify={'start'}>
             <Col span={2} style={{ height: fieldHeight }}>
-              <Button
-                type="default"
-                size="large"
-                block
-                icon={<PlusCircleOutlined />}
-                style={{
-                  border: 'none',
-                  color: '#3A3541',
-                  opacity: 0.8,
-                  marginTop: '15px',
-                  padding: 0,
-                }}
-                onClick={createKPI}
-              >
-                {t('Add KPI')}
-              </Button>
+              {!isView && (
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  icon={<PlusCircleOutlined />}
+                  style={{
+                    border: 'none',
+                    color: '#3A3541',
+                    opacity: 0.8,
+                    marginTop: '15px',
+                    padding: 0,
+                  }}
+                  onClick={createKPI}
+                >
+                  {t('Add KPI')}
+                </Button>
+              )}
             </Col>
           </Row>
         </div>
-        <Row gutter={20} justify={'end'}>
-          <Col span={2} style={{ height: fieldHeight }}>
-            <Button type="default" size="large" block>
-              {t('CANCEL')}
-            </Button>
-          </Col>
-          <Col span={2} style={{ height: fieldHeight }}>
-            <Form.Item>
-              <Button type="primary" size="large" block htmlType="submit">
-                {t('ADD')}
+        {isView && (
+          <div className="form-card">
+            <div
+              style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
+            >
+              {'Updates'}
+            </div>
+          </div>
+        )}
+        {!isView && (
+          <Row gutter={20} justify={'end'}>
+            <Col span={2} style={{ height: fieldHeight }}>
+              <Button type="default" size="large" block>
+                {t('CANCEL')}
               </Button>
-            </Form.Item>
-          </Col>
-        </Row>
+            </Col>
+            <Col span={2} style={{ height: fieldHeight }}>
+              <Form.Item>
+                <Button type="primary" size="large" block htmlType="submit">
+                  {t('ADD')}
+                </Button>
+              </Form.Item>
+            </Col>
+          </Row>
+        )}
       </Form>
     </div>
   );
