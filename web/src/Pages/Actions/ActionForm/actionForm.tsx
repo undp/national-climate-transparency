@@ -12,6 +12,7 @@ import {
   List,
   Typography,
   Form,
+  Select,
 } from 'antd';
 import {
   CloseCircleOutlined,
@@ -27,12 +28,14 @@ import KpiGrid from '../../../Components/KPI/KpiGrid';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 
 const gutterSize = 30;
-const rowHeight = '85px';
+const rowHeight = '75px';
 const rowBottomMargin = '10px';
 const multiLineHeight = '114px';
-const fieldHeight = '40px';
+const fieldHeight = '32px';
 
 const validation = { required: { required: true, message: 'Required Field' } };
+
+const { Option } = Select;
 
 const { TextArea } = Input;
 
@@ -45,6 +48,17 @@ type ActionMigratedData = {
   achievedReduct: number;
   expectedReduct: number;
 };
+
+type KpiData = {
+  name: string;
+  creatorType: string;
+  expected: number;
+};
+
+interface DropDownSelect {
+  item: string;
+  key: string;
+}
 
 enum InstrumentType {
   POLICY = 'Policy',
@@ -64,7 +78,7 @@ const actionForm = () => {
   // form state
 
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
-  const [kpiList, setKpiList] = useState<any[]>([]);
+  const [kpiList, setKpiList] = useState<KpiData[]>([]);
   const [migratedData, setMigratedData] = useState<ActionMigratedData>({
     type: ['Mitigation'],
     ghgsAffected: ['CO2', 'N2O'],
@@ -83,6 +97,12 @@ const actionForm = () => {
 
   const handleSubmit = (values: any) => {
     console.log('Form submitted with values:', values);
+  };
+
+  // Form Set Value
+
+  const onSelect: MenuProps['onSelect'] = ({ key }) => {
+    console.log(`Click on item ${key}`);
   };
 
   // Upload functionality
@@ -105,7 +125,7 @@ const actionForm = () => {
   // Add New KPI
 
   const createKPI = () => {
-    const newItem = { name: 'name', unit: 'ktco2', ach: 0, exp: 0 };
+    const newItem: KpiData = { name: 'name', creatorType: 'action', expected: 0 };
     setKpiList((prevList) => [...prevList, newItem]);
   };
 
@@ -196,16 +216,7 @@ const actionForm = () => {
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Type (s)'}</div>
-              <Dropdown
-                menu={{
-                  items,
-                  selectable: true,
-                }}
-                trigger={['click']}
-                disabled={true}
-              >
-                <Input style={{ height: fieldHeight }} value={migratedData?.type} />
-              </Dropdown>
+              <Input style={{ height: fieldHeight }} value={migratedData?.type} disabled />
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
@@ -239,46 +250,39 @@ const actionForm = () => {
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                 {'GHG (s) Affected'}
               </div>
-              <Dropdown
-                menu={{
-                  items,
-                  selectable: true,
-                }}
-                disabled={true}
-              >
-                <Input style={{ height: fieldHeight }} value={migratedData?.ghgsAffected[0]} />
-              </Dropdown>
+              <Input
+                style={{ height: fieldHeight }}
+                value={migratedData?.ghgsAffected[0]}
+                disabled
+              />
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                 {'Type of Instruments'}
               </div>
-              <Dropdown
-                menu={{
-                  items,
-                  selectable: true,
-                }}
-                trigger={['click']}
-              >
-                <Form.Item name="instrumentType" rules={[validation.required]}>
-                  <Input style={{ height: fieldHeight }} />
-                </Form.Item>
-              </Dropdown>
+              <Form.Item name="instrumentType" rules={[validation.required]}>
+                <Select allowClear>
+                  {Object.values(InstrumentType).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                 {'Action Status'}
               </div>
-              <Dropdown
-                menu={{
-                  items,
-                  selectable: true,
-                }}
-              >
-                <Form.Item name="actionStatus" rules={[validation.required]}>
-                  <Input style={{ height: fieldHeight }} />
-                </Form.Item>
-              </Dropdown>
+              <Form.Item name="status" rules={[validation.required]}>
+                <Select allowClear>
+                  {Object.values(InstrumentType).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
@@ -286,42 +290,33 @@ const actionForm = () => {
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                 {'National Implementing Entity (s)'}
               </div>
-              <Dropdown
-                menu={{
-                  items,
-                  selectable: true,
-                }}
-                disabled={true}
-              >
-                <Input style={{ height: fieldHeight }} value={migratedData?.natImplementor} />
-              </Dropdown>
+              <Input
+                style={{ height: fieldHeight }}
+                value={migratedData?.natImplementor}
+                disabled
+              />
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                 {'Sector (s) Affected'}
               </div>
-              <Dropdown
-                menu={{
-                  items,
-                  selectable: true,
-                }}
-                disabled={true}
-              >
-                <Input style={{ height: fieldHeight }} value={migratedData?.sectoredAffected[0]} />
-              </Dropdown>
+              <Input
+                style={{ height: fieldHeight }}
+                value={migratedData?.sectoredAffected[0]}
+                disabled
+              />
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Start Year'}</div>
-              <Dropdown
-                menu={{
-                  items,
-                  selectable: true,
-                }}
-              >
-                <Form.Item name="startYear" rules={[validation.required]}>
-                  <Input style={{ height: fieldHeight }} />
-                </Form.Item>
-              </Dropdown>
+              <Form.Item name="startYear" rules={[validation.required]}>
+                <Select allowClear>
+                  {Object.values(InstrumentType).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
@@ -329,30 +324,25 @@ const actionForm = () => {
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                 {'Estimated Investment Needs (USD)'}
               </div>
-              <Dropdown
-                menu={{
-                  items,
-                  selectable: true,
-                }}
-                disabled={true}
-              >
-                <Input style={{ height: fieldHeight }} value={migratedData?.estimatedInvestment} />
-              </Dropdown>
+              <Input
+                style={{ height: fieldHeight }}
+                value={migratedData?.estimatedInvestment}
+                disabled
+              />
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                 {'Anchored in a National Strategy'}
               </div>
-              <Dropdown
-                menu={{
-                  items,
-                  selectable: true,
-                }}
-              >
-                <Form.Item name="natAnchor" rules={[validation.required]}>
-                  <Input style={{ height: fieldHeight }} />
-                </Form.Item>
-              </Dropdown>
+              <Form.Item name="natAnchor" rules={[validation.required]}>
+                <Select allowClear>
+                  {Object.values(InstrumentType).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
             </Col>
           </Row>
           <Row
