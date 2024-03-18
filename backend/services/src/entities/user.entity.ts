@@ -2,7 +2,7 @@ import { Role } from '../casl/role.enum';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { EntitySubject } from './entity.subject';
 import { OrganisationType } from '../enums/organisation.type.enum'
-import { UserState } from 'src/enums/user.state.enum';
+import { UserState } from '../enums/user.state.enum';
 
 @Entity()
 export class User  implements EntitySubject{

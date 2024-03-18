@@ -13,13 +13,6 @@ import {
   Put,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-
-// import { DataExportQueryDto } from "@undp/carbon-services-lib";
-// import { UserDto } from "@undp/carbon-services-lib";
-// import { QueryDto } from "@undp/carbon-services-lib";
-// import { PasswordUpdateDto } from "@undp/carbon-services-lib";
-
-// import { HelperService } from '@undp/carbon-services-lib';
 import { ApiKeyJwtAuthGuard } from "src/auth/guards/api-jwt-key.guard";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 
@@ -75,45 +68,6 @@ export class UserController {
     );
   }
 
-  // @ApiBearerAuth('api_key')
-  // @ApiBearerAuth()
-  // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies((ability, body) =>
-  //   ability.can(Action.Create, Object.assign(new User(), body))
-  // )
-  // @Post("sync")
-  // syncUser(@Body() user: UserDto, @Request() req) {
-  //   if (user.role == Role.SuperUser) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString("user.rootCreatesRoot", []),
-  //       HttpStatus.FORBIDDEN
-  //     );
-  //   }
-  //   global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-  //   return this.userService.create(
-  //     user,
-  //     req.user.companyId,
-  //     req.user.companyRole
-  //   );
-  // }
-
-  // @Post("register")
-  // registerUser(@Body() user: UserDto, @Request() req) {
-  //   if (user.role == Role.SuperUser) {
-  //     throw new HttpException(
-  //       this.helperService.formatReqMessagesString("user.rootCreatesRoot", []),
-  //       HttpStatus.FORBIDDEN
-  //     );
-  //   }
-  //   global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-  //   return this.userService.validateAndCreateUser(
-  //     user,
-  //     user,
-  //     user.,
-  //     true
-  //   );
-  // }
-
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, User))
   // @CheckPolicies((ability, body) => ability.can(Action.Update, Object.assign(new User(), body)))
@@ -150,27 +104,4 @@ export class UserController {
     console.log(req.abilityCondition);
     return this.userService.query(query, req.abilityCondition);
   }
-
-  // @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
-  // // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
-  // @Post('download')
-  // async getDownload(@Body()query: DataExportQueryDto, @Request() req) {
-  //   return this.userService.download(query, req.abilityCondition); // Return the filePath as a JSON response
-  // }
-
-  // @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Delete, User))
-  // @Delete("delete")
-  // deleteUser(@Query("userId") userId: number, @Request() req) {
-  //   return this.userService.delete(userId, req.abilityCondition);
-  // }
-
-  // @ApiBearerAuth('api_key')
-  // @ApiBearerAuth()
-  // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, User))
-  // @Post('exists')
-  // async checkUserExist(@Body() body: any) {
-  //   return this.userService.checkUserExists(body.email);
-  // }
 }

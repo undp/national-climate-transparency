@@ -7,7 +7,7 @@ import {
   NatFinInstrument,
   FinancingStatus,
   IntSource,
-} from "src/enums/support.enum";
+} from "../enums/support.enum";
 import { ActivityEntity } from "./activity.entity";
 
 @Entity("support")
@@ -60,6 +60,6 @@ export class SupportEntity {
   @ManyToOne(() => ActivityEntity, (activity) => activity.support, {
     nullable: false,
   })
-  @JoinColumn([{ name: "activity_id", referencedColumnName: "activity_id" }])
+  @JoinColumn([{ name: "activityId", referencedColumnName: "activityId" }])
   activity: ActivityEntity;
 }

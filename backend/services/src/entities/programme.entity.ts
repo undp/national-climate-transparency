@@ -6,14 +6,14 @@ import {
   OneToMany,
   PrimaryColumn,
 } from "typeorm";
-import { SubSector } from "src/enums/shared.enum";
-import { Sector } from "src/enums/sector.enum";
-import { NatImplementor } from "src/enums/shared.enum";
+import { SubSector } from "../enums/shared.enum";
+import { Sector } from "../enums/sector.enum";
+import { NatImplementor } from "../enums/shared.enum";
 import { ActionEntity } from "./action.entity";
 import { ProjectEntity } from "./project.entity";
 
-@Entity("program")
-export class ProgramEntity {
+@Entity("programme")
+export class ProgrammeEntity {
   @PrimaryColumn()
   programId: string;
 
@@ -50,12 +50,12 @@ export class ProgramEntity {
   @Column({ type: "ltree" })
   path: string;
 
-  @ManyToOne(() => ActionEntity, (action) => action.programs, {
+  @ManyToOne(() => ActionEntity, (action) => action.programmes, {
     nullable: false,
   })
-  @JoinColumn([{ name: "action_id", referencedColumnName: "action_id" }])
+  @JoinColumn([{ name: "actionId", referencedColumnName: "actionId" }])
   action: ActionEntity;
 
-  @OneToMany(() => ProjectEntity, (projectEntity) => projectEntity.program)
+  @OneToMany(() => ProjectEntity, (projectEntity) => projectEntity.programme)
   projects?: ProjectEntity[];
 }

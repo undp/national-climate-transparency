@@ -42,7 +42,7 @@ body {
 }
 
 .layout-content-container .ant-btn-primary {
-  background-color: $primary-button-background !important;
+  background-color: $primary-color !important;
   color: #ffffff;
   border: none;
 }
@@ -633,7 +633,7 @@ body {
 .ant-tag-processing {
   color: $primary-color;
   background: rgba($color: #b9e2f4, $alpha: 0.4);
-  border-color: $primary-blue !important;
+  border-color: $primary-color !important;
 }
 
 .filter-section input {

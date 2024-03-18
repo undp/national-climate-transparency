@@ -1,11 +1,11 @@
-import { EntityType } from 'src/enums/shared.enum';
+import { EntityType } from '../enums/shared.enum';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { AchievementEntity } from './achievement.entity';
 
 @Entity('kpi')
 export class KpiEntity {
   @PrimaryGeneratedColumn()
-  kpi_id: number;
+  kpiId: number;
 
   @Column()
   name: string;

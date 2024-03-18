@@ -76,6 +76,14 @@ export enum EntityType {
   ACTIVITY = "activity",
 }
 
+export enum LogEventType {
+  ACTION_CREATED,
+  KPI_ADDED,
+  KPI_UPDATED,
+  PROGRAMME_LINKED,
+  ACTION_UPDATED
+}
+
 export enum GHGS {
   CO = "CO2",
   CH = "CH4",

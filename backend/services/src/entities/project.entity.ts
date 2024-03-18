@@ -1,7 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-import { ProjectType, ProjectStatus } from "src/enums/project.enum";
-import { Recipient, IntImplementor } from "src/enums/shared.enum";
-import { ProgramEntity } from "./program.entity";
+import { ProjectType, ProjectStatus } from "../enums/project.enum";
+import { Recipient, IntImplementor } from "../enums/shared.enum";
+import { ProgrammeEntity } from "./programme.entity";
+
 
 @Entity("project")
 export class ProjectEntity {
@@ -53,9 +54,9 @@ export class ProjectEntity {
   @Column({ type: "ltree" })
   path: string;
 
-  @ManyToOne(() => ProgramEntity, (program) => program.projects, {
+  @ManyToOne(() => ProgrammeEntity, (programme) => programme.projects, {
     nullable: false,
   })
-  @JoinColumn([{ name: "program_id", referencedColumnName: "program_id" }])
-  program: ProgramEntity;
+  @JoinColumn([{ name: "programId", referencedColumnName: "programId" }])
+  programme: ProgrammeEntity;
 }

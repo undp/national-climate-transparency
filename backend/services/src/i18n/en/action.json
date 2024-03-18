@@ -1,0 +1,9 @@
+{
+    "actionCreationFailed": "Action creation failed due to {}",
+    "createActionSuccess": "Action created successfully",
+    "docUploadFailed": "Document/s upload failed",
+    "unsupportedFileType": "Uploaded document/s type is not supported",
+    "creatorTypeCannotBeNull": "KPI creatorType field cannot be null or empty",
+    "expectedCannotBeNull" : "KPI expected field cannot be null or empty",
+    "kpiNameCannotBeNull" : "KPI name field cannot be null or empty"
+}
