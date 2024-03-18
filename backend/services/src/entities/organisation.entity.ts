@@ -2,7 +2,7 @@ import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
 import { OrganisationType } from '../enums/organisation.type.enum'
 import { EntitySubject } from "./entity.subject";
 import { OrganisationState } from "../enums/organisation.state.enum";
-import { Sector } from "src/enums/sector.enum";
+import { Sector } from "../enums/sector.enum";
 
 @Entity()
 export class Organisation implements EntitySubject {

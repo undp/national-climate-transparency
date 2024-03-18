@@ -14,6 +14,8 @@ import { OrganisationModule } from '../organisation/organisation.module';
 import { TypeOrmConfigService } from '../typeorm.config.service';
 import { UtilModule } from '../util/util.module';
 import configuration from '../configuration';
+import { ActionController } from './action.controller';
+import { ActionModule } from '../action/action.module';
 
 
 @Module({
@@ -31,9 +33,10 @@ import configuration from '../configuration';
     UserModule,
     CaslModule,
     OrganisationModule,
-    UtilModule
+    UtilModule,
+    ActionModule
   ],
-  controllers: [ NationalAPIController, UserController, AuthController, CompanyController, SettingsController ],
+  controllers: [ NationalAPIController, UserController, AuthController, CompanyController, SettingsController, ActionController ],
   providers: [
     NationalAPIService, 
     Logger

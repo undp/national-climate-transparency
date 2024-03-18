@@ -19,13 +19,13 @@ export class AchievementEntity {
   @ManyToOne(() => KpiEntity, (kpi) => kpi.achievements, {
     nullable: false,
   })
-  @JoinColumn([{ name: "kpi_id", referencedColumnName: "kpi_id" }])
+  @JoinColumn([{ name: "kpiId", referencedColumnName: "kpiId" }])
   kpi: KpiEntity;
 
   @ManyToOne(() => ActivityEntity, (activity) => activity.achievements, {
     nullable: false,
   })
-  @JoinColumn([{ name: "activity_id", referencedColumnName: "activity_id" }])
+  @JoinColumn([{ name: "activityId", referencedColumnName: "activityId" }])
   activity: ActivityEntity;
 
   @Column()

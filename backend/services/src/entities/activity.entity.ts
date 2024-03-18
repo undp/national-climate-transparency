@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
-import { EntityType } from "src/enums/shared.enum";
+import { EntityType } from "../enums/shared.enum";
 import { AchievementEntity } from "./achievement.entity";
 import { SupportEntity } from "./support.entity";
 import {
@@ -8,8 +8,8 @@ import {
   ImpleMeans,
   SupportType,
   ActivityStatus,
-} from "src/enums/activity.enum";
-import { NatImplementor, IntImplementor } from "src/enums/shared.enum";
+} from "../enums/activity.enum";
+import { NatImplementor, IntImplementor } from "../enums/shared.enum";
 
 @Entity("activity")
 export class ActivityEntity {

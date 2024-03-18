@@ -1,8 +1,8 @@
-import { Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
-import { InstrumentType } from "src/enums/action.enum";
-import { ActionStatus } from "src/enums/action.enum";
-import { NatAnchor } from "src/enums/action.enum";
-import { ProgramEntity } from "./program.entity";
+import { Entity, Column, PrimaryColumn, OneToMany, BeforeInsert, BeforeUpdate } from "typeorm";
+import { InstrumentType } from "../enums/action.enum";
+import { ActionStatus } from "../enums/action.enum";
+import { NatAnchor } from "../enums/action.enum";
+import { ProgrammeEntity } from "./programme.entity";
 
 @Entity("action")
 export class ActionEntity {
@@ -30,9 +30,10 @@ export class ActionEntity {
   @Column({ type: "enum", enum: NatAnchor })
   natAnchor: string;
 
-  @Column()
-  document: string;
+  @Column({ type: 'jsonb', nullable: true })
+  documents: any;
 
-  @OneToMany(() => ProgramEntity, (programEntity) => programEntity.action)
-  programs?: ProgramEntity[];
+  @OneToMany(() => ProgrammeEntity, (programmeEntity) => programmeEntity.action)
+  programmes?: ProgrammeEntity[];
+
 }
