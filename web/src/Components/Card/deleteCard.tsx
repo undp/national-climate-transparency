@@ -27,7 +27,7 @@ const DeleteCard: React.FC<Props> = ({ fileName, fileId, handleDelete }) => {
           style={{
             cursor: 'pointer',
             position: 'absolute',
-            top: '13px',
+            top: '8px',
             right: '20px',
           }}
           onClick={() => handleDelete(fileId)}

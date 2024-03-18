@@ -4,8 +4,6 @@ import {
   Row,
   Col,
   Input,
-  Dropdown,
-  MenuProps,
   Button,
   Upload,
   Popover,
@@ -13,9 +11,11 @@ import {
   Typography,
   Form,
   Select,
+  Card,
 } from 'antd';
 import {
   CloseCircleOutlined,
+  DeleteOutlined,
   EllipsisOutlined,
   LinkOutlined,
   PlusCircleOutlined,
@@ -24,7 +24,6 @@ import {
 import { UploadFile } from 'antd/lib/upload/interface';
 import { useState } from 'react';
 import DeleteCard from '../../../Components/Card/deleteCard';
-import KpiGrid from '../../../Components/KPI/KpiGrid';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 
 const gutterSize = 30;
@@ -50,15 +49,12 @@ type ActionMigratedData = {
 };
 
 type KpiData = {
+  index: number;
   name: string;
   creatorType: string;
+  achieved: number;
   expected: number;
 };
-
-interface DropDownSelect {
-  item: string;
-  key: string;
-}
 
 enum InstrumentType {
   POLICY = 'Policy',
@@ -67,12 +63,8 @@ enum InstrumentType {
   OTHER = 'Other',
 }
 
-const items: MenuProps['items'] = Object.keys(InstrumentType).map((key) => ({
-  key,
-  label: InstrumentType[key as keyof typeof InstrumentType],
-}));
-
 const actionForm = () => {
+  const [form] = Form.useForm();
   const { t } = useTranslation(['actionList']);
 
   // form state
@@ -99,12 +91,6 @@ const actionForm = () => {
     console.log('Form submitted with values:', values);
   };
 
-  // Form Set Value
-
-  const onSelect: MenuProps['onSelect'] = ({ key }) => {
-    console.log(`Click on item ${key}`);
-  };
-
   // Upload functionality
 
   const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
@@ -125,7 +111,13 @@ const actionForm = () => {
   // Add New KPI
 
   const createKPI = () => {
-    const newItem: KpiData = { name: 'name', creatorType: 'action', expected: 0 };
+    const newItem: KpiData = {
+      index: kpiList.length,
+      name: '',
+      creatorType: 'action',
+      expected: 0,
+      achieved: 0,
+    };
     setKpiList((prevList) => [...prevList, newItem]);
   };
 
@@ -208,7 +200,7 @@ const actionForm = () => {
           {t('Lorem ipsum dolor sit amet, consectetur adipiscing elit,')}
         </div>
       </div>
-      <Form onFinish={handleSubmit}>
+      <Form form={form} onFinish={handleSubmit}>
         <div className="form-card">
           <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
             {'General Action Information'}
@@ -361,7 +353,7 @@ const actionForm = () => {
                 {documentList.map((file: any) => (
                   <Col span={8} style={{ height: fieldHeight }}>
                     <DeleteCard
-                      fileName={file.name.slice(0, 26)}
+                      fileName={file.name.slice(0, 20)}
                       fileId={file.uid}
                       handleDelete={handleDelete}
                     ></DeleteCard>
@@ -424,19 +416,11 @@ const actionForm = () => {
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                 {'GHG(s) Affected'}
               </div>
-              <Dropdown
-                menu={{
-                  items,
-                  selectable: true,
-                }}
+              <Input
+                style={{ height: fieldHeight }}
+                value={migratedData?.ghgsAffected[0]}
                 disabled={true}
-              >
-                <Input
-                  style={{ height: fieldHeight }}
-                  value={migratedData?.ghgsAffected[0]}
-                  disabled={true}
-                />
-              </Dropdown>
+              />
             </Col>
           </Row>
           <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '25px', marginBottom: '10px' }}>
@@ -464,14 +448,79 @@ const actionForm = () => {
             {'Other Programme KPI Value'}
           </div>
           {kpiList.map((kpi: any) => (
-            <KpiGrid
-              kpiData={kpi}
-              gutterSize={gutterSize}
-              rowHeight={rowHeight}
-              fieldHeight={fieldHeight}
-              rowBottomMargin={rowBottomMargin}
-              shownAt="creator"
-            ></KpiGrid>
+            <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+              <Col span={12} style={{ height: rowHeight }}>
+                <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+                  <Col span={12} style={{ height: rowHeight }}>
+                    <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                      {'KPI Name'}
+                    </div>
+                    <Form.Item
+                      name={`kpi_name_${kpi.index}`}
+                      rules={[{ required: true, message: 'Required Field' }]}
+                    >
+                      <Input style={{ height: fieldHeight }} disabled={false} />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12} style={{ height: rowHeight }}>
+                    <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                      {'KPI Unit'}
+                    </div>
+                    <Form.Item
+                      name={`kpi_unit_${kpi.index}`}
+                      rules={[{ required: true, message: 'Required Field' }]}
+                    >
+                      <Input style={{ height: fieldHeight }} disabled={false} />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Col>
+              <Col span={12} style={{ height: rowHeight }}>
+                <Row gutter={15} style={{ marginBottom: rowBottomMargin }}>
+                  <Col span={11} style={{ height: rowHeight }}>
+                    <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                      {'Achieved'}
+                    </div>
+                    <Input style={{ height: fieldHeight }} value={kpi.achieved} disabled={true} />
+                  </Col>
+                  <Col span={11} style={{ height: rowHeight }}>
+                    <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                      {'Expected'}
+                    </div>
+                    <Form.Item
+                      name={`kpi_exp_${kpi.index}`}
+                      rules={[{ required: true, message: 'Required Field' }]}
+                    >
+                      <Input
+                        style={{ height: fieldHeight }}
+                        value={kpi.achieved}
+                        disabled={false}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={2} style={{ height: rowHeight }}>
+                    <Card
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: '0px',
+                        width: '31px',
+                        height: '31px',
+                        marginTop: '43px',
+                        borderWidth: '1px',
+                        borderRadius: '4px',
+                        borderColor: '#d9d9d9',
+                      }}
+                    >
+                      <DeleteOutlined
+                        style={{ cursor: 'pointer', color: '#3A3541', opacity: 0.8 }}
+                      />
+                    </Card>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
           ))}
           <Row justify={'start'}>
             <Col span={2} style={{ height: fieldHeight }}>
