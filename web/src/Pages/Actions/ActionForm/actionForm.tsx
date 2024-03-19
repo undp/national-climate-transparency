@@ -424,7 +424,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 {'Type of Instruments'}
               </div>
               <Form.Item name="instrumentType" rules={[validation.required]}>
-                <Select allowClear disabled={isView}>
+                <Select allowClear disabled={isView} showSearch>
                   {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -438,7 +438,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 {'Action Status'}
               </div>
               <Form.Item name="status" rules={[validation.required]}>
-                <Select allowClear disabled={isView}>
+                <Select allowClear disabled={isView} showSearch>
                   {Object.values(ActionStatus).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -472,7 +472,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Start Year'}</div>
               <Form.Item name="startYear" rules={[validation.required]}>
-                <Select allowClear disabled={isView}>
+                <Select allowClear disabled={isView} showSearch>
                   {yearsList.map((year) => (
                     <Option key={year} value={year}>
                       {year}
@@ -498,7 +498,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 {'Anchored in a National Strategy'}
               </div>
               <Form.Item name="natAnchor" rules={[validation.required]}>
-                <Select allowClear disabled={isView}>
+                <Select allowClear disabled={isView} showSearch>
                   {Object.values(NatAnchor).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -590,6 +590,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                   {'Programme List'}
                 </div>
                 <Select
+                  showSearch
                   mode="multiple"
                   allowClear
                   style={{ width: '100%' }}
