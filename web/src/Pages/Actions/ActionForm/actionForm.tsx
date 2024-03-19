@@ -146,11 +146,17 @@ const actionForm: React.FC<Props> = ({ method }) => {
 
   const handleSubmit = async (payload: any) => {
     try {
+      for (const key in payload) {
+        if (key.startsWith('kpi_')) {
+          delete payload[key];
+        }
+      }
       payload.documents = [];
-      payload.kpis = [];
       uploadedFiles.forEach((file) => {
         payload.documents.push({ title: file.title, data: file.data });
       });
+
+      payload.kpis = [];
       kpiList.forEach((kpi) => {
         payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
       });
@@ -186,8 +192,6 @@ const actionForm: React.FC<Props> = ({ method }) => {
       reader.onerror = (error) => reject(error);
     });
 
-  //
-
   const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
     setDocumentList(newFileList);
   };
@@ -208,6 +212,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
     fileList: documentList,
     showUploadList: false,
     beforeUpload,
+    accept: '.xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg',
   };
 
   // Attach Programme
@@ -256,12 +261,28 @@ const actionForm: React.FC<Props> = ({ method }) => {
     const newItem: KpiData = {
       index: kpiList.length,
       name: '',
-      unit: 'kTCO2e',
+      unit: '',
       creatorType: 'action',
       expected: 0,
       achieved: 0,
     };
     setKpiList((prevList) => [...prevList, newItem]);
+  };
+
+  const removeKPI = (kpiIndex: number) => {
+    setKpiList(kpiList.filter((obj) => obj.index !== kpiIndex));
+  };
+
+  const updateKPI = (id: number, property: keyof KpiData, value: any): void => {
+    setKpiList((prevKpiList) => {
+      const updatedKpiList = prevKpiList.map((kpi) => {
+        if (kpi.index === id) {
+          return { ...kpi, [property]: value };
+        }
+        return kpi;
+      });
+      return updatedKpiList;
+    });
   };
 
   // Action Menu definition
@@ -646,7 +667,13 @@ const actionForm: React.FC<Props> = ({ method }) => {
                       name={`kpi_name_${kpi.index}`}
                       rules={[{ required: true, message: 'Required Field' }]}
                     >
-                      <Input style={{ height: fieldHeight }} disabled={isView} />
+                      <Input
+                        style={{ height: fieldHeight }}
+                        disabled={isView}
+                        onChange={(e) => {
+                          updateKPI(kpi.index, 'name', e.target.value);
+                        }}
+                      />
                     </Form.Item>
                   </Col>
                   <Col span={12} style={{ height: rowHeight }}>
@@ -657,7 +684,13 @@ const actionForm: React.FC<Props> = ({ method }) => {
                       name={`kpi_unit_${kpi.index}`}
                       rules={[{ required: true, message: 'Required Field' }]}
                     >
-                      <Input style={{ height: fieldHeight }} disabled={isView} />
+                      <Input
+                        style={{ height: fieldHeight }}
+                        disabled={isView}
+                        onChange={(e) => {
+                          updateKPI(kpi.index, 'unit', e.target.value);
+                        }}
+                      />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -682,6 +715,9 @@ const actionForm: React.FC<Props> = ({ method }) => {
                         style={{ height: fieldHeight }}
                         value={kpi.achieved}
                         disabled={isView}
+                        onChange={(e) => {
+                          updateKPI(kpi.index, 'expected', e.target.value);
+                        }}
                       />
                     </Form.Item>
                   </Col>
@@ -694,7 +730,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                         padding: '0px',
                         width: '31px',
                         height: '31px',
-                        marginTop: '43px',
+                        marginTop: '38px',
                         borderWidth: '1px',
                         borderRadius: '4px',
                         borderColor: '#d9d9d9',
@@ -702,6 +738,9 @@ const actionForm: React.FC<Props> = ({ method }) => {
                     >
                       <DeleteOutlined
                         style={{ cursor: 'pointer', color: '#3A3541', opacity: 0.8 }}
+                        onClick={() => {
+                          removeKPI(kpi.index);
+                        }}
                       />
                     </Card>
                   </Col>
