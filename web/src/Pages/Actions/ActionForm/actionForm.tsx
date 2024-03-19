@@ -14,6 +14,7 @@ import {
   Card,
   Modal,
   SelectProps,
+  message,
 } from 'antd';
 import {
   AppstoreAddOutlined,
@@ -29,6 +30,8 @@ import { useEffect, useState } from 'react';
 import DeleteCard from '../../../Components/Card/deleteCard';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { InstrumentType, ActionStatus, NatAnchor } from '../../../Enums/action.enum';
+import { useNavigate } from 'react-router-dom';
+import { useConnection } from '@undp/carbon-library';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -85,6 +88,9 @@ const actionForm: React.FC<Props> = ({ method }) => {
     yearsList.push(year.toString());
   }
 
+  const navigate = useNavigate();
+  const { post } = useConnection();
+
   // form state
 
   const [programIdList, setProgramIdList] = useState<SelectProps['options']>([]);
@@ -139,15 +145,35 @@ const actionForm: React.FC<Props> = ({ method }) => {
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
-    payload.documents = [];
-    payload.kpis = [];
-    uploadedFiles.forEach((file) => {
-      payload.documents.push({ title: file.title, data: file.data });
-    });
-    kpiList.forEach((kpi) => {
-      payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
-    });
-    console.log('Form submitted with values:', payload);
+    try {
+      payload.documents = [];
+      payload.kpis = [];
+      uploadedFiles.forEach((file) => {
+        payload.documents.push({ title: file.title, data: file.data });
+      });
+      kpiList.forEach((kpi) => {
+        payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
+      });
+
+      const response = await post('national/action/add', payload);
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: t('Action Added Succesfully'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        navigate('/actions');
+      }
+    } catch (error: any) {
+      console.log('Error in action creation', error);
+      message.open({
+        type: 'error',
+        content: `${error.message}`,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    }
   };
 
   // Upload functionality
