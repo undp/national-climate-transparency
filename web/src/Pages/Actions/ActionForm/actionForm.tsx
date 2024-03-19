@@ -42,7 +42,10 @@ const rowBottomMargin = '10px';
 const multiLineHeight = '114px';
 const fieldHeight = '32px';
 
-const validation = { required: { required: true, message: 'Required Field' } };
+const validation = {
+  required: { required: true, message: 'Required Field' },
+  number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
+};
 
 interface Props {
   method: 'create' | 'view' | 'update';
@@ -663,10 +666,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                     <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                       {'KPI Name'}
                     </div>
-                    <Form.Item
-                      name={`kpi_name_${kpi.index}`}
-                      rules={[{ required: true, message: 'Required Field' }]}
-                    >
+                    <Form.Item name={`kpi_name_${kpi.index}`} rules={[validation.required]}>
                       <Input
                         style={{ height: fieldHeight }}
                         disabled={isView}
@@ -709,7 +709,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                     </div>
                     <Form.Item
                       name={`kpi_exp_${kpi.index}`}
-                      rules={[{ required: true, message: 'Required Field' }]}
+                      rules={[validation.required, validation.number]}
                     >
                       <Input
                         style={{ height: fieldHeight }}
