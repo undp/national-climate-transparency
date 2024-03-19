@@ -664,7 +664,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             {t('kpiInfoTitle')}
           </div>
           {kpiList.map((kpi: any) => (
-            <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+            <Row key={kpi.index} gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
               <Col span={12} style={{ height: rowHeight }}>
                 <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
                   <Col span={12} style={{ height: rowHeight }}>
