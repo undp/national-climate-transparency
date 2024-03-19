@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import '../../../Styles/app.scss';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import './actionList.scss';
+import { Action } from '../../../Enums/action.enum';
 import {
   Button,
   Col,
@@ -14,19 +15,13 @@ import {
   message,
   PaginationProps,
 } from 'antd';
-import {
-  EditOutlined,
-  EllipsisOutlined,
-  FilterOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { EditOutlined, EllipsisOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 const { Search } = Input;
-// import { useConnection, useUserContext } from '../../../Context';
-
 import data from '../../../Testing/actionList.json';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAbilityContext } from '../../../Casl/Can';
+import { ActionEntity } from '../../../Entities/action';
 
 interface Item {
   key: number;
@@ -44,6 +39,7 @@ interface Item {
 const actionList = () => {
   // const { post, delete: del } = useConnection();
   const navigate = useNavigate();
+  const ability = useAbilityContext();
   const { t } = useTranslation(['actionList']);
   const [tableData, setTableData] = useState<Item[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -178,29 +174,21 @@ const actionList = () => {
     setValueOnSearch(searchValue);
   };
 
-  const sort = () => {
-    if (sortOrder !== '' && sortField !== '') {
-      return {
-        key: sortField,
-        order: sortOrder,
-      };
-    } else
-      return {
-        key: 'id',
-        order: 'DESC',
-      };
-  };
+  // const sort = () => {
+  //   if (sortOrder !== '' && sortField !== '') {
+  //     return {
+  //       key: sortField,
+  //       order: sortOrder,
+  //     };
+  //   } else
+  //     return {
+  //       key: 'id',
+  //       order: 'DESC',
+  //     };
+  // };
 
   // get All Data Params
-  const getAllDataParams = () => {
-    return {
-      page: currentPage,
-      size: pageSize,
-      // filterOr: filterOr(),
-      // filterAnd: filterAnd(),
-      sort: sort(),
-    };
-  };
+
   const dummyDataQuery = () => {
     console.log('dummyDataQuery', currentPage, pageSize, sortField, sortOrder, valueOnSearch);
     if (sortField) {
@@ -265,17 +253,19 @@ const actionList = () => {
         <Row className="table-actions-section">
           <Col md={8} xs={24}>
             <div className="action-bar">
-              <Button
-                type="primary"
-                size="large"
-                block
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  navigate('/actions/add');
-                }}
-              >
-                {t('Add Action')}
-              </Button>
+              {ability.can(Action.Create, ActionEntity) && (
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    navigate('/actions/add');
+                  }}
+                >
+                  {t('Add Action')}
+                </Button>
+              )}
             </div>
           </Col>
           <Col md={16} xs={24}>
@@ -300,7 +290,7 @@ const actionList = () => {
                   open={filterVisible}
                   onOpenChange={handleFilterVisibleChange}
                 >
-                  <a className="ant-dropdown-link" onClick={(e) => {}}>
+                  <a className="ant-dropdown-link" onClick={() => {}}>
                     <FilterOutlined
                       style={{
                         color: 'rgba(58, 53, 65, 0.3)',
