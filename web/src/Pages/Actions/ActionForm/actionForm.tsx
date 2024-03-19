@@ -24,7 +24,7 @@ import {
   PlusCircleOutlined,
   UploadOutlined,
 } from '@ant-design/icons';
-import { UploadFile } from 'antd/lib/upload/interface';
+import { RcFile, UploadFile } from 'antd/lib/upload/interface';
 import { useEffect, useState } from 'react';
 import DeleteCard from '../../../Components/Card/deleteCard';
 import LayoutTable from '../../../Components/common/Table/layout.table';
@@ -91,6 +91,9 @@ const actionForm: React.FC<Props> = ({ method }) => {
   const [migratedData, setMigratedData] = useState<ActionMigratedData>();
 
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
+    []
+  );
   const [kpiList, setKpiList] = useState<KpiData[]>([]);
 
   const [pendingProgrammes, setPendingProgrammes] = useState<string[]>([]);
@@ -113,6 +116,10 @@ const actionForm: React.FC<Props> = ({ method }) => {
   }, [programList]);
 
   useEffect(() => {
+    console.log(documentList[0]);
+  }, [documentList]);
+
+  useEffect(() => {
     if (method !== 'create') {
       console.log('Get the Action Information and load them');
     }
@@ -131,25 +138,50 @@ const actionForm: React.FC<Props> = ({ method }) => {
 
   // Form Submit
 
-  const handleSubmit = (values: any) => {
-    console.log('Form submitted with values:', values);
+  const handleSubmit = async (payload: any) => {
+    payload.documents = [];
+    payload.kpis = [];
+    uploadedFiles.forEach((file) => {
+      payload.documents.push({ title: file.title, data: file.data });
+    });
+    kpiList.forEach((kpi) => {
+      payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
+    });
+    console.log('Form submitted with values:', payload);
   };
 
   // Upload functionality
 
+  const handleFileRead = (file: RcFile): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+
+  //
+
   const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
     setDocumentList(newFileList);
-    console.log(newFileList);
   };
 
   const handleDelete = (fileId: any) => {
     setDocumentList((prevList) => prevList.filter((file) => file.uid !== fileId));
+    setUploadedFiles((prevList) => prevList.filter((file) => file.id !== fileId));
+  };
+
+  const beforeUpload = async (file: RcFile): Promise<boolean> => {
+    const base64 = await handleFileRead(file);
+    setUploadedFiles([...uploadedFiles, { id: file.uid, title: file.name, data: base64 }]);
+    return false;
   };
 
   const props = {
     onChange,
     fileList: documentList,
     showUploadList: false,
+    beforeUpload,
   };
 
   // Attach Programme
