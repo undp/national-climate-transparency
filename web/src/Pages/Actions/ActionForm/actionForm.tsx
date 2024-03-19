@@ -28,6 +28,7 @@ import { UploadFile } from 'antd/lib/upload/interface';
 import { useEffect, useState } from 'react';
 import DeleteCard from '../../../Components/Card/deleteCard';
 import LayoutTable from '../../../Components/common/Table/layout.table';
+import { InstrumentType, ActionStatus, NatAnchor } from '../../../Enums/action.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -73,17 +74,16 @@ type ProgrammeData = {
   estimatedInvestment: number;
 };
 
-enum InstrumentType {
-  POLICY = 'Policy',
-  REGULATORY = 'Regulatory',
-  ECONOMIC = 'Economic',
-  OTHER = 'Other',
-}
-
 const actionForm: React.FC<Props> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['actionList']);
   const isView: boolean = method === 'view' ? true : false;
+
+  const yearsList: string[] = [];
+
+  for (let year = 2013; year <= 2050; year++) {
+    yearsList.push(year.toString());
+  }
 
   // form state
 
@@ -352,7 +352,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               </div>
               <Form.Item name="status" rules={[validation.required]}>
                 <Select allowClear disabled={isView}>
-                  {Object.values(InstrumentType).map((instrument) => (
+                  {Object.values(ActionStatus).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
                     </Option>
@@ -386,9 +386,9 @@ const actionForm: React.FC<Props> = ({ method }) => {
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Start Year'}</div>
               <Form.Item name="startYear" rules={[validation.required]}>
                 <Select allowClear disabled={isView}>
-                  {Object.values(InstrumentType).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
+                  {yearsList.map((year) => (
+                    <Option key={year} value={year.toString()}>
+                      {year}
                     </Option>
                   ))}
                 </Select>
@@ -412,7 +412,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               </div>
               <Form.Item name="natAnchor" rules={[validation.required]}>
                 <Select allowClear disabled={isView}>
-                  {Object.values(InstrumentType).map((instrument) => (
+                  {Object.values(NatAnchor).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
                     </Option>
