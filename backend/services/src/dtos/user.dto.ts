@@ -1,20 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { Type } from "class-transformer";
 import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  IsNotEmptyObject,
   IsNumber,
-  IsObject,
   IsOptional,
   IsString,
-  ValidateIf,
-  ValidateNested,
 } from "class-validator";
 import { Role } from "../casl/role.enum";
-import { OrganisationType } from "src/enums/organisation.type.enum";
-import { IsValidCountry } from "src/util/validcountry.decorator";
+import { OrganisationType } from "../enums/organisation.type.enum";
+import { IsValidCountry } from "../util/validcountry.decorator";
 
 export class UserDto {
   @IsNotEmpty()

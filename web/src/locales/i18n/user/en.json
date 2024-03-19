@@ -8,8 +8,10 @@
     "addUser": "Add User",
     "viewUsers": "View Users",
     "viewDesc": "View the users registered with the Carbon Registry based on your permissions",
-    "deleteConfirmHeaderText": "Are you sure you want to permanently delete this user?",
-    "deleteConfirmText": "You can’t undo this action",
+    "activateConfirmHeaderText": "Are you sure you want to reactivate this user?",
+    "activateConfirmText": "Note: Please provide any remarks for reactivation in the field below",
+    "deactivateConfirmHeaderText": "Are you sure you want to deactivate this User?",
+    "deactivateConfirmText": "Note: Please provide any remarks for deactivation in the field below. ",
     "searchBy": "Search by",
     "filterByRole": "Filter by Role",
     "filterByCompanyRole": "Filter by Organisation Type"

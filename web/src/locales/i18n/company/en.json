@@ -3,12 +3,12 @@
   "name": "ORGANISATION NAME",
   "taxId": "TAX ID",
   "filterByOrgType": "Filter by Organisation Type",
-  "companyRole": "ORGANISATION TYPE",
+  "organisationType": "ORGANISATION TYPE",
   "companyState": "STATUS",
   "viewCompanies": "View Organisations",
   "viewDesc": "View all the visible organisations in the system based on your permissions",
   "addCompany": "Add organisation",
-  "numberOfProgrammes": "NUMBER OF PROJECTS",
+  "numberOfUsers": "NUMBER OF USERS",
   "creditBalance": "CREDIT BALANCE",
   "date": "Date",
   "getCompanyError": "Error in getting company",
@@ -18,7 +18,7 @@
   "all": "All",
   "searchMail": "Search by email",
   "searchName": "Search by name",
-  "min": "Ministry",
+  "dep": "Department",
   "nationalSopValue": "National Share of Proceeds",
   "omgePercentage":"Overall Mitigation in Global Emissions (OMGE) Account"
 }

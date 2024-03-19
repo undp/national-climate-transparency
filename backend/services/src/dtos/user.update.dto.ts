@@ -29,7 +29,7 @@ export class UserUpdateDto {
     @IsOptional()
     @ApiPropertyOptional({ enum: UserState })
     @IsEnum(UserState, {
-        message: 'Invalid role. Supported following roles:' + Object.values(UserState)
+        message: 'Invalid user state. Supported following roles:' + Object.values(UserState)
     })
     state: UserState;
 

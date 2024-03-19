@@ -41,7 +41,7 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Create, User);
       can(Action.Update, User);
       can(Action.Delete, User);
-      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
+      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'organisationType']);
     }
 
     if (user.role == Role.Admin) {
@@ -53,9 +53,9 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
 
       can(Action.Read, User);
       can(Action.Create, User);
-      can(Action.Update, User);
+      can(Action.Update, User, { role: { $ne: Role.Root } });
       can(Action.Delete, User);
-      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
+      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'organisationType']);
     }
 
     if (user.role == Role.DepartmentUser) {
@@ -68,7 +68,7 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Create, User);
       cannot(Action.Delete, User);
       can(Action.Update, User, { id: { $eq: user.id } });
-      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
+      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'organisationType'], {
         id: { $eq: user.id },
       });
     }
@@ -83,141 +83,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Create, User);
 
       can(Action.Update, User, { id: { $eq: user.id } });
-      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
+      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'organisationType'], {
         id: { $eq: user.id },
       });
     }
   }
-  // if (user) {
-  //   if (user.role === Role.Root) {
-  //     can(Action.Manage, 'all');
-
-  //     cannot(Action.Update, User, ['role', 'apiKey', 'password', 'companyRole', 'email'], {
-  //       id: { $eq: user.id },
-  //     });
-  //     cannot([Action.Update], User, { companyId: { $ne: user.companyId } });
-  //     cannot([Action.Update], Company);
-  //     can([Action.Delete], Company);
-  //     can([Action.Create], Company);
-  //     can(Action.Update, Company, { companyId: { $eq: user.companyId } });
-  //   } else if (
-  //     user.role === Role.Admin &&
-  //     (user.companyRole === CompanyRole.GOVERNMENT || user.companyRole === CompanyRole.MINISTRY)
-  //   ) {
-  //     can(Action.Manage, User, { role: { $ne: Role.Root } });
-  //     cannot(Action.Update, User, ['role', 'apiKey', 'password', 'companyRole', 'email'], {
-  //       id: { $eq: user.id },
-  //     });
-  //     cannot([Action.Update, Action.Delete], User, { companyId: { $ne: user.companyId } });
-  //     can(Action.Update, Company, { companyId: { $eq: user.companyId } });
-  //     cannot(Action.Update, Company, { companyId: { $ne: user.companyId } });
-  //     cannot(Action.Update, Company, ['companyRole']);
-  //     can(Action.Delete, Company);
-  //     can(Action.Create, Company);
-  //     if (user.companyRole === CompanyRole.MINISTRY) {
-  //       cannot([Action.Update, Action.Delete], User, {
-  //         companyId: { $ne: user.companyId },
-  //       });
-  //       cannot(Action.Delete, Company, { companyRole: { $eq: user.companyRole } });
-  //       cannot(Action.Delete, Company, { companyId: { $eq: user.companyId } });
-  //     }
-  //   } else if (user.role === Role.Admin && user.companyRole !== CompanyRole.GOVERNMENT) {
-  //     if (user.companyRole === CompanyRole.MINISTRY) {
-  //       can(Action.Create, Company);
-  //     }
-  //     can(Action.Manage, User, { role: { $ne: Role.Root } });
-  //     cannot([Action.Update, Action.Delete, Action.Read], User, {
-  //       companyId: { $ne: user.companyId },
-  //     });
-  //     cannot(Action.Update, User, ['role', 'apiKey', 'password', 'companyRole', 'email'], {
-  //       id: { $eq: user.id },
-  //     });
-
-  //     can(Action.Read, Company);
-  //     can(Action.Update, Company, { companyId: { $eq: user.companyId } });
-  //     cannot(Action.Update, Company, { companyId: { $ne: user.companyId } });
-  //     cannot(Action.Update, Company, ['companyRole']);
-  //     cannot(Action.Create, Company);
-  //   } else {
-  //     if (
-  //       user.companyRole === CompanyRole.GOVERNMENT ||
-  //       user.companyRole === CompanyRole.MINISTRY
-  //     ) {
-  //       can(Action.Read, User);
-  //     } else {
-  //       can(Action.Read, User, { companyId: { $eq: user.companyId } });
-  //     }
-  //     can(Action.Update, User, { id: { $eq: user.id } });
-  //     cannot(Action.Update, User, ['email', 'role', 'apiKey', 'password', 'companyRole']);
-  //     can(Action.Read, Company);
-  //   }
-
-  //   if (user.role === Role.Manager && user.companyRole === CompanyRole.GOVERNMENT) {
-  //     can([Action.Delete], Company);
-  //   }
-
-  //   if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.PROGRAMME_DEVELOPER) {
-  //     can(Action.Manage, ProgrammeTransfer);
-  //   }
-
-  //   if (user.role === Role.Admin && user.companyRole === CompanyRole.GOVERNMENT) {
-  //     can(Action.Approve, Company);
-  //     can(Action.Reject, Company);
-  //   }
-
-  //   if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.MINISTRY) {
-  //     can(Action.Manage, ProgrammeTransfer);
-  //     can(Action.Manage, ProgrammeEntity);
-  //     can(Action.Manage, ProgrammeEntity);
-  //   }
-
-  //   if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.GOVERNMENT) {
-  //     can(Action.Manage, ProgrammeTransfer);
-  //     can(Action.Manage, ProgrammeEntity);
-  //     can(Action.Manage, ProgrammeEntity);
-  //   }
-
-  //   if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.PROGRAMME_DEVELOPER) {
-  //     can(Action.Manage, ProgrammeTransfer);
-  //     can(Action.Manage, ProgrammeEntity);
-  //     can(Action.Manage, ProgrammeEntity);
-  //   }
-
-  //   if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.CERTIFIER) {
-  //     can(Action.Manage, ProgrammeCertify);
-  //   }
-
-  //   if (user.companyRole === CompanyRole.CERTIFIER) {
-  //     can(Action.Read, ProgrammeEntity, { currentStage: { $in: [ProgrammeStageMRV.Authorised] } });
-  //     can(Action.Read, ProgrammeEntity, { certifierId: { $elemMatch: { $eq: user.companyId } } });
-  //   } else if (user.companyRole === CompanyRole.PROGRAMME_DEVELOPER) {
-  //     can(Action.Read, ProgrammeEntity, { currentStage: { $eq: ProgrammeStageMRV.Authorised } });
-  //     can(Action.Read, ProgrammeEntity, { companyId: { $elemMatch: { $eq: user.companyId } } });
-  //   }
-
-  //   // cannot(Action.Delete, User, { id: { $eq: user.id } })
-  //   cannot(Action.Update, User, ['companyRole']);
-
-  //   cannot([Action.Delete], Company, { companyRole: { $eq: CompanyRole.GOVERNMENT } });
-
-  //   //MRV related permissions
-  //   cannot([Action.Delete], Company);
-
-  //   if (user.role === Role.Admin || user.role === Role.Root) {
-  //     can(Action.Create, User);
-  //   } else {
-  //     cannot(Action.Create, User);
-  //     cannot(Action.Update, User, { id: { $ne: user.id } });
-  //     cannot(Action.Delete, User, { id: { $ne: user.id } });
-  //     cannot(Action.Create, Company);
-  //   }
-
-  //   if (user.companyState === 0) {
-  //     cannot(Action.Create, 'all');
-  //     cannot(Action.Delete, 'all');
-  //     cannot(Action.Update, 'all');
-  //   }
-  // }
 
   ability.update(rules);
 };
