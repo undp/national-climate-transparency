@@ -82,7 +82,7 @@ type ProgrammeData = {
 
 const actionForm: React.FC<Props> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['actionList']);
+  const { t } = useTranslation(['actionForm']);
   const isView: boolean = method === 'view' ? true : false;
 
   const yearsList: number[] = [];
@@ -170,7 +170,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
-          content: t('Action Added Succesfully'),
+          content: t('actionCreationSuccess'),
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -320,18 +320,18 @@ const actionForm: React.FC<Props> = ({ method }) => {
 
   // Column Definition
   const columns = [
-    { title: t('Programme ID'), dataIndex: 'programmeId', key: 'programmeId' },
-    { title: t('Action ID'), dataIndex: 'actionId', key: 'actionId' },
-    { title: t('Title of Programme'), dataIndex: 'title', key: 'title' },
-    { title: t('Type'), dataIndex: 'type', key: 'type' },
-    { title: t('Programme Status'), dataIndex: 'status', key: 'status' },
+    { title: t('programmeId'), dataIndex: 'programmeId', key: 'programmeId' },
+    { title: t('actionId'), dataIndex: 'actionId', key: 'actionId' },
+    { title: t('programmeTitle'), dataIndex: 'title', key: 'title' },
+    { title: t('programmeType'), dataIndex: 'type', key: 'type' },
+    { title: t('programmeStatus'), dataIndex: 'status', key: 'status' },
     {
-      title: t('Sub-Sector Affected'),
+      title: t('subSectorAffected'),
       dataIndex: 'subSectorsAffected',
       key: 'titleOfAction',
     },
     {
-      title: t('Esimated investment needs (USD)'),
+      title: t('investmentNeeds'),
       dataIndex: 'estimatedInvestment',
       key: 'estimatedInvestment',
     },
@@ -363,24 +363,24 @@ const actionForm: React.FC<Props> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('Add New Action')}</div>
-        <div className="body-sub-title">
-          {t('Lorem ipsum dolor sit amet, consectetur adipiscing elit,')}
-        </div>
+        <div className="body-title">{t('addActionTitle')}</div>
+        <div className="body-sub-title">{t('addActionDesc')}</div>
       </div>
       <Form form={form} onFinish={handleSubmit}>
         <div className="form-card">
           <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
-            {'General Action Information'}
+            {t('generalInfoTitle')}
           </div>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Type (s)'}</div>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                {t('typesTitle')}
+              </div>
               <Input style={{ height: fieldHeight }} value={migratedData?.type} disabled />
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'Title of Action'}
+                {t('actionTitle')}
               </div>
               <Form.Item name="title" rules={[validation.required]}>
                 <Input style={{ height: fieldHeight }} disabled={isView} />
@@ -390,7 +390,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: multiLineHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'Short Description of Action'}
+                {t('actionDescTitle')}
               </div>
               <Form.Item name="description" rules={[validation.required]}>
                 <TextArea rows={3} disabled={isView} />
@@ -398,7 +398,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={12} style={{ height: multiLineHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'Action Objectives'}
+                {t('actionObjectivesTitle')}
               </div>
               <Form.Item name="objective" rules={[validation.required]}>
                 <TextArea rows={3} disabled={isView} />
@@ -408,7 +408,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'GHG (s) Affected'}
+                {t('ghgAffected')}
               </div>
               <Input
                 style={{ height: fieldHeight }}
@@ -418,7 +418,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'Type of Instruments'}
+                {t('instrTypeTitle')}
               </div>
               <Form.Item name="instrumentType" rules={[validation.required]}>
                 <Select allowClear disabled={isView} showSearch>
@@ -432,7 +432,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'Action Status'}
+                {t('actionStatusTitle')}
               </div>
               <Form.Item name="status" rules={[validation.required]}>
                 <Select allowClear disabled={isView} showSearch>
@@ -448,7 +448,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'National Implementing Entity (s)'}
+                {t('natImplementorTitle')}
               </div>
               <Input
                 style={{ height: fieldHeight }}
@@ -458,7 +458,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'Sector (s) Affected'}
+                {t('sectorsAffectedTitle')}
               </div>
               <Input
                 style={{ height: fieldHeight }}
@@ -467,7 +467,9 @@ const actionForm: React.FC<Props> = ({ method }) => {
               />
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Start Year'}</div>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                {t('startYearTitle')}
+              </div>
               <Form.Item name="startYear" rules={[validation.required]}>
                 <Select allowClear disabled={isView} showSearch>
                   {yearsList.map((year) => (
@@ -482,7 +484,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'Estimated Investment Needs (USD)'}
+                {t('investmentNeeds')}
               </div>
               <Input
                 style={{ height: fieldHeight }}
@@ -492,7 +494,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'Anchored in a National Strategy'}
+                {t('natAnchorTitle')}
               </div>
               <Form.Item name="natAnchor" rules={[validation.required]}>
                 <Select allowClear disabled={isView} showSearch>
@@ -516,7 +518,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                   style={{ width: '120px', height: fieldHeight }}
                   disabled={isView}
                 >
-                  Upload
+                  {t('upload')}
                 </Button>
               </Upload>
             </Col>
@@ -541,7 +543,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               <div
                 style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
               >
-                {'List of Programme under the Action'}
+                {t('programInfoTitle')}
               </div>
             </Col>
             <Col span={4}>
@@ -554,7 +556,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                   style={{ padding: 0 }}
                   onClick={showModal}
                 >
-                  {t('ATTACH PROGRAMMES')}
+                  {t('attachProgramme')}
                 </Button>
               )}
               <Modal
@@ -563,7 +565,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 footer={[
                   <Button onClick={attachCancel}>Cancel</Button>,
                   <Button type="primary" onClick={attachProgramme}>
-                    Attach
+                    {t('attach')}
                   </Button>,
                 ]}
               >
@@ -573,7 +575,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 <div
                   style={{ color: '#3A3541', opacity: 0.8, marginTop: '30px', fontSize: '15px' }}
                 >
-                  <strong>{'Attach Programme'}</strong>
+                  <strong>{t('attachProgramme')}</strong>
                 </div>
                 <div
                   style={{
@@ -584,7 +586,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                     textAlign: 'left',
                   }}
                 >
-                  {'Programme List'}
+                  {t('programmeList')}
                 </div>
                 <Select
                   showSearch
@@ -616,19 +618,19 @@ const actionForm: React.FC<Props> = ({ method }) => {
                   position: ['bottomRight'],
                 }}
                 handleTableChange={handleTableChange}
-                emptyMessage={'No Programmes Attached'}
+                emptyMessage={t('noProgramsMessage')}
               />
             </Col>
           </Row>
         </div>
         <div className="form-card">
           <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
-            {'Mitigation Information'}
+            {t('mitigationInfoTitle')}
           </div>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {'GHG(s) Affected'}
+                {t('ghgAffected')}
               </div>
               <Input
                 style={{ height: fieldHeight }}
@@ -638,11 +640,11 @@ const actionForm: React.FC<Props> = ({ method }) => {
             </Col>
           </Row>
           <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '25px', marginBottom: '10px' }}>
-            {'Estimates of GHG emission reductions (ktCO2e)'}
+            {t('emmissionInfoTitle')}
           </div>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Achieved'}</div>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{t('achieved')}</div>
               <Input
                 style={{ height: fieldHeight }}
                 value={migratedData?.achievedReduct}
@@ -650,7 +652,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               />
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{'Expected'}</div>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{t('expected')}</div>
               <Input
                 style={{ height: fieldHeight }}
                 value={migratedData?.expectedReduct}
@@ -659,7 +661,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             </Col>
           </Row>
           <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '25px', marginBottom: '10px' }}>
-            {'Other Programme KPI Value'}
+            {t('kpiInfoTitle')}
           </div>
           {kpiList.map((kpi: any) => (
             <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
@@ -667,7 +669,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
                   <Col span={12} style={{ height: rowHeight }}>
                     <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                      {'KPI Name'}
+                      {t('kpiName')}
                     </div>
                     <Form.Item name={`kpi_name_${kpi.index}`} rules={[validation.required]}>
                       <Input
@@ -681,7 +683,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                   </Col>
                   <Col span={12} style={{ height: rowHeight }}>
                     <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                      {'KPI Unit'}
+                      {t('kpiUnit')}
                     </div>
                     <Form.Item
                       name={`kpi_unit_${kpi.index}`}
@@ -702,13 +704,13 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 <Row gutter={15} style={{ marginBottom: rowBottomMargin }}>
                   <Col span={11} style={{ height: rowHeight }}>
                     <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                      {'Achieved'}
+                      {t('achieved')}
                     </div>
                     <Input style={{ height: fieldHeight }} value={kpi.achieved} disabled={true} />
                   </Col>
                   <Col span={11} style={{ height: rowHeight }}>
                     <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                      {'Expected'}
+                      {t('expected')}
                     </div>
                     <Form.Item
                       name={`kpi_exp_${kpi.index}`}
@@ -768,7 +770,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                   }}
                   onClick={createKPI}
                 >
-                  {t('Add KPI')}
+                  {t('addKPI')}
                 </Button>
               )}
             </Col>
@@ -779,7 +781,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             <div
               style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
             >
-              {'Updates'}
+              {t('updatesInfoTitle')}
             </div>
           </div>
         )}
@@ -794,13 +796,13 @@ const actionForm: React.FC<Props> = ({ method }) => {
                   navigate('/actions');
                 }}
               >
-                {t('CANCEL')}
+                {t('cancel')}
               </Button>
             </Col>
             <Col span={2} style={{ height: fieldHeight }}>
               <Form.Item>
                 <Button type="primary" size="large" block htmlType="submit">
-                  {t('ADD')}
+                  {t('add')}
                 </Button>
               </Form.Item>
             </Col>
