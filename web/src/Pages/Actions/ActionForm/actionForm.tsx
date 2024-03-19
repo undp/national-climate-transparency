@@ -111,6 +111,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
+  // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
 
   useEffect(() => {
@@ -123,10 +124,6 @@ const actionForm: React.FC<Props> = ({ method }) => {
     }
     setProgramIdList(newProgramIdList);
   }, [programList]);
-
-  useEffect(() => {
-    console.log(documentList[0]);
-  }, [documentList]);
 
   useEffect(() => {
     if (method !== 'create') {
