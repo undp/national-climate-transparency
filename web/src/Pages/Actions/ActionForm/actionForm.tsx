@@ -299,7 +299,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
         size="small"
         dataSource={[
           {
-            text: 'Detach',
+            text: t('detach'),
             icon: <CloseCircleOutlined style={{ color: 'red' }} />,
             click: () => {
               {
@@ -311,7 +311,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
         renderItem={(item) => (
           <List.Item onClick={item.click}>
             <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{'Detach'}</span>
+            <span>{item.text}</span>
           </List.Item>
         )}
       />
@@ -319,7 +319,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
   };
 
   // Column Definition
-  const columns = [
+  const progTableColumns = [
     { title: t('programmeId'), dataIndex: 'programmeId', key: 'programmeId' },
     { title: t('actionId'), dataIndex: 'actionId', key: 'actionId' },
     { title: t('programmeTitle'), dataIndex: 'title', key: 'title' },
@@ -604,7 +604,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             <Col span={24}>
               <LayoutTable
                 tableData={programList}
-                columns={columns}
+                columns={progTableColumns}
                 loading={false}
                 pagination={{
                   current: currentPage,
