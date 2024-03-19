@@ -85,10 +85,10 @@ const actionForm: React.FC<Props> = ({ method }) => {
   const { t } = useTranslation(['actionList']);
   const isView: boolean = method === 'view' ? true : false;
 
-  const yearsList: string[] = [];
+  const yearsList: number[] = [];
 
   for (let year = 2013; year <= 2050; year++) {
-    yearsList.push(year.toString());
+    yearsList.push(year);
   }
 
   const navigate = useNavigate();
@@ -162,6 +162,11 @@ const actionForm: React.FC<Props> = ({ method }) => {
       payload.kpis = [];
       kpiList.forEach((kpi) => {
         payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
+      });
+
+      payload.linkedProgrammes = [];
+      programList.forEach((program) => {
+        payload.linkedProgrammes.push(program.programmeId);
       });
 
       const response = await post('national/action/add', payload);
@@ -469,7 +474,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               <Form.Item name="startYear" rules={[validation.required]}>
                 <Select allowClear disabled={isView}>
                   {yearsList.map((year) => (
-                    <Option key={year} value={year.toString()}>
+                    <Option key={year} value={year}>
                       {year}
                     </Option>
                   ))}
