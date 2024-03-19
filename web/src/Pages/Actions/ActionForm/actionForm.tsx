@@ -783,7 +783,14 @@ const actionForm: React.FC<Props> = ({ method }) => {
         {!isView && (
           <Row gutter={20} justify={'end'}>
             <Col span={2} style={{ height: fieldHeight }}>
-              <Button type="default" size="large" block>
+              <Button
+                type="default"
+                size="large"
+                block
+                onClick={() => {
+                  navigate('/actions');
+                }}
+              >
                 {t('CANCEL')}
               </Button>
             </Col>
