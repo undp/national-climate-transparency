@@ -11,7 +11,7 @@ import { RcFile, UploadFile } from 'antd/lib/upload/interface';
 import { useEffect, useState } from 'react';
 import DeleteCard from '../../../Components/Card/deleteCard';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import { InstrumentType, ActionStatus, NatAnchor } from '../../../Enums/action.enum';
+import { InstrumentType } from '../../../Enums/action.enum';
 import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
@@ -32,12 +32,10 @@ interface Props {
   method: 'create' | 'view' | 'update';
 }
 
-type ActionMigratedData = {
-  type: string[];
+type ProgrammeMigratedData = {
+  intImplementor: string;
+  recipientEntity: string;
   ghgsAffected: string[];
-  natImplementor: string;
-  sectoredAffected: string[];
-  estimatedInvestment: number;
   achievedReduct: number;
   expectedReduct: number;
 };
@@ -72,7 +70,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   // form state
 
   const [programIdList, setProgramIdList] = useState<SelectProps['options']>([]);
-  const [migratedData, setMigratedData] = useState<ActionMigratedData>();
+  const [migratedData, setMigratedData] = useState<ProgrammeMigratedData>();
 
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
@@ -105,11 +103,9 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
       console.log('Get the Action Information and load them');
     }
     const updatedMigData = {
-      type: ['Mitigation'],
+      intImplementor: 'AFDB',
+      recipientEntity: 'Ministry of Agriculture, Climate Change and Environment',
       ghgsAffected: ['CO2', 'N2O'],
-      natImplementor: 'Department of Energy',
-      sectoredAffected: ['Energy'],
-      estimatedInvestment: 1000,
       achievedReduct: 6,
       expectedReduct: 100,
     };
@@ -240,25 +236,45 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             {t('generalInfoTitle')}
           </div>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={12} style={{ height: rowHeight }}>
+            <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('typesTitle')}
+                {t('selectActionHeader')}
               </div>
-              <Input style={{ height: fieldHeight }} value={migratedData?.type} disabled />
+              <Form.Item name="actionId" rules={[validation.required]}>
+                <Select allowClear disabled={isView} showSearch>
+                  <Option key={'check'} value={'check'}>
+                    {'action'}
+                  </Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={6} style={{ height: rowHeight }}>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                {t('typesHeader')}
+              </div>
+              <Form.Item name="type" rules={[validation.required]}>
+                <Select allowClear disabled={isView} showSearch>
+                  {Object.values(InstrumentType).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('actionTitle')}
+                {t('programmeTitleHeader')}
               </div>
               <Form.Item name="title" rules={[validation.required]}>
-                <Input style={{ height: fieldHeight }} disabled={isView} />
+                <Input style={{ height: fieldHeight }} />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: multiLineHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('actionDescTitle')}
+                {t('programmeDescTitle')}
               </div>
               <Form.Item name="description" rules={[validation.required]}>
                 <TextArea rows={3} disabled={isView} />
@@ -266,7 +282,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={12} style={{ height: multiLineHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('actionObjectivesTitle')}
+                {t('programmeObjectivesTitle')}
               </div>
               <Form.Item name="objective" rules={[validation.required]}>
                 <TextArea rows={3} disabled={isView} />
@@ -274,19 +290,9 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('ghgAffected')}
-              </div>
-              <Input
-                style={{ height: fieldHeight }}
-                value={migratedData?.ghgsAffected[0]}
-                disabled
-              />
-            </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('instrTypeTitle')}
+                {t('instrumentType')}
               </div>
               <Form.Item name="instrumentType" rules={[validation.required]}>
                 <Select allowClear disabled={isView} showSearch>
@@ -300,11 +306,39 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('actionStatusTitle')}
+                {t('programmeStatus')}
               </div>
               <Form.Item name="status" rules={[validation.required]}>
                 <Select allowClear disabled={isView} showSearch>
-                  {Object.values(ActionStatus).map((instrument) => (
+                  {Object.values(InstrumentType).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={6} style={{ height: rowHeight }}>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                {t('sectorsAffected')}
+              </div>
+              <Form.Item name="sectorsAffected" rules={[validation.required]}>
+                <Select allowClear disabled={isView} showSearch>
+                  {Object.values(InstrumentType).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={6} style={{ height: rowHeight }}>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                {t('subSectorsAffected')}
+              </div>
+              <Form.Item name="subSectorsAffected" rules={[validation.required]}>
+                <Select allowClear disabled={isView} showSearch>
+                  {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
                     </Option>
@@ -314,26 +348,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('natImplementorTitle')}
-              </div>
-              <Input
-                style={{ height: fieldHeight }}
-                value={migratedData?.natImplementor}
-                disabled
-              />
-            </Col>
-            <Col span={6} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('sectorsAffectedTitle')}
-              </div>
-              <Input
-                style={{ height: fieldHeight }}
-                value={migratedData?.sectoredAffected[0]}
-                disabled
-              />
-            </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                 {t('startYearTitle')}
@@ -348,30 +362,42 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 </Select>
               </Form.Item>
             </Col>
-          </Row>
-          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={12} style={{ height: rowHeight }}>
+            <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('investmentNeeds')}
+                {t('intImplementorTitle')}
               </div>
               <Input
                 style={{ height: fieldHeight }}
-                value={migratedData?.estimatedInvestment}
+                value={migratedData?.intImplementor}
                 disabled
               />
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('natAnchorTitle')}
+                {t('recipientEntityTitle')}
               </div>
-              <Form.Item name="natAnchor" rules={[validation.required]}>
-                <Select allowClear disabled={isView} showSearch>
-                  {Object.values(NatAnchor).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
-                    </Option>
-                  ))}
-                </Select>
+              <Input
+                style={{ height: fieldHeight }}
+                value={migratedData?.recipientEntity}
+                disabled
+              />
+            </Col>
+          </Row>
+          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+            <Col span={12} style={{ height: rowHeight }}>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                {t('natImplementorTitle')}
+              </div>
+              <Form.Item name="natImplementor" rules={[validation.required]}>
+                <Input style={{ height: fieldHeight }} />
+              </Form.Item>
+            </Col>
+            <Col span={12} style={{ height: rowHeight }}>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                {t('investmentNeedsTitle')}
+              </div>
+              <Form.Item name="investmentNeeds" rules={[validation.required]}>
+                <Input style={{ height: fieldHeight }} />
               </Form.Item>
             </Col>
           </Row>
@@ -404,15 +430,39 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Row>
             </Col>
           </Row>
-        </div>
-        <div className="form-card">
-          <Row>
-            <Col span={6}>
-              <div
-                style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
-              >
-                {t('projectInfoTitle')}
+          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+            <Col span={24} style={{ height: multiLineHeight }}>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                {t('programmeCommentsTitle')}
               </div>
+              <Form.Item name="comments" rules={[validation.required]}>
+                <TextArea rows={3} disabled={isView} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+            <Col span={12}>
+              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                {t('projectListTitle')}
+              </div>
+              <LayoutTable
+                tableData={projectList}
+                columns={projTableColumns}
+                loading={false}
+                pagination={{
+                  current: currentPage,
+                  pageSize: pageSize,
+                  total: projectList.length,
+                  showQuickJumper: true,
+                  pageSizeOptions: ['10', '20', '30'],
+                  showSizeChanger: true,
+                  style: { textAlign: 'center' },
+                  locale: { page: '' },
+                  position: ['bottomRight'],
+                }}
+                handleTableChange={handleTableChange}
+                emptyMessage={t('noProjectsMessage')}
+              />
             </Col>
             <Col span={4}>
               {!isView && (
@@ -466,28 +516,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                   options={programIdList}
                 />
               </Modal>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={24}>
-              <LayoutTable
-                tableData={projectList}
-                columns={projTableColumns}
-                loading={false}
-                pagination={{
-                  current: currentPage,
-                  pageSize: pageSize,
-                  total: projectList.length,
-                  showQuickJumper: true,
-                  pageSizeOptions: ['10', '20', '30'],
-                  showSizeChanger: true,
-                  style: { textAlign: 'center' },
-                  locale: { page: '' },
-                  position: ['bottomRight'],
-                }}
-                handleTableChange={handleTableChange}
-                emptyMessage={t('noProjectsMessage')}
-              />
             </Col>
           </Row>
         </div>
