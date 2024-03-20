@@ -30,14 +30,6 @@ interface Props {
   method: 'create' | 'view' | 'update';
 }
 
-type ProgrammeMigratedData = {
-  intImplementor: string;
-  recipientEntity: string;
-  ghgsAffected: string[];
-  achievedReduct: number;
-  expectedReduct: number;
-};
-
 type KpiData = {
   index: number;
   name: string;
@@ -68,7 +60,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   // form state
 
   const [programIdList, setProgramIdList] = useState<SelectProps['options']>([]);
-  const [migratedData, setMigratedData] = useState<ProgrammeMigratedData>();
 
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
@@ -99,15 +90,14 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
     if (method !== 'create') {
       console.log('Get the Action Information and load them');
     }
-    const updatedMigData = {
+
+    form.setFieldsValue({
       intImplementor: 'AFDB',
       recipientEntity: 'Ministry of Agriculture, Climate Change and Environment',
       ghgsAffected: ['CO2', 'N2O'],
       achievedReduct: 6,
       expectedReduct: 100,
-    };
-
-    setMigratedData(updatedMigData);
+    });
   }, [projectList, kpiList]);
 
   // Form Submit
@@ -194,17 +184,22 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
         <div className="body-title">{t('addProgTitle')}</div>
         <div className="body-sub-title">{t('addProgDesc')}</div>
       </div>
-      <Form form={form} onFinish={handleSubmit}>
+      <Form form={form} onFinish={handleSubmit} layout="vertical">
         <div className="form-card">
           <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
             {t('generalInfoTitle')}
           </div>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={6} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('selectActionHeader')}
-              </div>
-              <Form.Item name="actionId" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
+                    {t('selectActionHeader')}
+                  </label>
+                }
+                name="actionId"
+                rules={[validation.required]}
+              >
                 <Select allowClear disabled={isView} showSearch>
                   <Option key={'check'} value={'check'}>
                     {'action'}
@@ -213,10 +208,11 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('typesHeader')}
-              </div>
-              <Form.Item name="type" rules={[validation.required]}>
+              <Form.Item
+                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('typesHeader')}</label>}
+                name="type"
+                rules={[validation.required]}
+              >
                 <Select allowClear disabled={isView} showSearch>
                   {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
@@ -227,38 +223,52 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('progTitleHeader')}
-              </div>
-              <Form.Item name="title" rules={[validation.required]}>
-                <Input style={{ height: fieldHeight }} />
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('progTitleHeader')}</label>
+                }
+                name="title"
+                rules={[validation.required]}
+              >
+                <Input style={{ height: fieldHeight }} status="error" />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: multiLineHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('progDescTitle')}
-              </div>
-              <Form.Item name="description" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('progDescTitle')}</label>
+                }
+                name="description"
+                rules={[validation.required]}
+              >
                 <TextArea rows={3} disabled={isView} />
               </Form.Item>
             </Col>
             <Col span={12} style={{ height: multiLineHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('progObjectivesTitle')}
-              </div>
-              <Form.Item name="objective" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
+                    {t('progObjectivesTitle')}
+                  </label>
+                }
+                name="objective"
+                rules={[validation.required]}
+              >
                 <TextArea rows={3} disabled={isView} />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={6} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('instrTypeTitle')}
-              </div>
-              <Form.Item name="instrumentType" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('instrTypeTitle')}</label>
+                }
+                name="instrumentType"
+                rules={[validation.required]}
+              >
                 <Select allowClear disabled={isView} showSearch>
                   {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
@@ -269,10 +279,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('progStatusTitle')}
-              </div>
-              <Form.Item name="status" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('progStatusTitle')}</label>
+                }
+                name="status"
+                rules={[validation.required]}
+              >
                 <Select allowClear disabled={isView} showSearch>
                   {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
@@ -283,10 +296,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('sectorsAffTitle')}
-              </div>
-              <Form.Item name="sectorsAffected" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('sectorsAffTitle')}</label>
+                }
+                name="sectorsAffected"
+                rules={[validation.required]}
+              >
                 <Select allowClear disabled={isView} showSearch>
                   {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
@@ -297,10 +313,15 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('subSectorsAffTitle')}
-              </div>
-              <Form.Item name="subSectorsAffected" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
+                    {t('subSectorsAffTitle')}
+                  </label>
+                }
+                name="subSectorsAffected"
+                rules={[validation.required]}
+              >
                 <Select allowClear disabled={isView} showSearch>
                   {Object.values(InstrumentType).map((instrument) => (
                     <Option key={instrument} value={instrument}>
@@ -313,10 +334,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={6} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('startYearTitle')}
-              </div>
-              <Form.Item name="startYear" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('startYearTitle')}</label>
+                }
+                name="startYear"
+                rules={[validation.required]}
+              >
                 <Select allowClear disabled={isView} showSearch>
                   {yearsList.map((year) => (
                     <Option key={year} value={year}>
@@ -327,40 +351,54 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('intImplementorTitle')}
-              </div>
-              <Input
-                style={{ height: fieldHeight }}
-                value={migratedData?.intImplementor}
-                disabled
-              />
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
+                    {t('intImplementorTitle')}
+                  </label>
+                }
+                name="intImplementor"
+              >
+                <Input style={{ height: fieldHeight }} disabled />
+              </Form.Item>
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('recipientEntityTitle')}
-              </div>
-              <Input
-                style={{ height: fieldHeight }}
-                value={migratedData?.recipientEntity}
-                disabled
-              />
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
+                    {t('recipientEntityTitle')}
+                  </label>
+                }
+                name="recipientEntity"
+              >
+                <Input style={{ height: fieldHeight }} disabled />
+              </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('natImplementorTitle')}
-              </div>
-              <Form.Item name="natImplementor" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
+                    {t('natImplementorTitle')}
+                  </label>
+                }
+                name="natImplementor"
+                rules={[validation.required]}
+              >
                 <Input style={{ height: fieldHeight }} />
               </Form.Item>
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('investmentNeedsTitle')}
-              </div>
-              <Form.Item name="investmentNeeds" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
+                    {t('investmentNeedsTitle')}
+                  </label>
+                }
+                name="investmentNeeds"
+                rules={[validation.required]}
+              >
                 <Input style={{ height: fieldHeight }} />
               </Form.Item>
             </Col>
@@ -372,15 +410,20 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             buttonText={t('upload')}
             height={fieldHeight}
             acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
-            style={{ marginBottom: rowBottomMargin, marginTop: '20px' }}
+            style={{ marginBottom: '25px', marginTop: '20px' }}
             setUploadedFiles={setUploadedFiles}
           ></UploadFileGrid>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={24} style={{ height: multiLineHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('programmeCommentsTitle')}
-              </div>
-              <Form.Item name="comments" rules={[validation.required]}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
+                    {t('programmeCommentsTitle')}
+                  </label>
+                }
+                name="comments"
+                rules={[validation.required]}
+              >
                 <TextArea rows={3} disabled={isView} />
               </Form.Item>
             </Col>
@@ -473,14 +516,12 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
           </div>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('ghgAffected')}
-              </div>
-              <Input
-                style={{ height: fieldHeight }}
-                value={migratedData?.ghgsAffected[0]}
-                disabled
-              />
+              <Form.Item
+                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('ghgAffected')}</label>}
+                name="ghgsAffected"
+              >
+                <Input style={{ height: fieldHeight }} disabled />
+              </Form.Item>
             </Col>
           </Row>
           <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '25px', marginBottom: '10px' }}>
@@ -488,20 +529,20 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
           </div>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{t('achieved')}</div>
-              <Input
-                style={{ height: fieldHeight }}
-                value={migratedData?.achievedReduct}
-                disabled
-              />
+              <Form.Item
+                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>}
+                name="achievedReduct"
+              >
+                <Input style={{ height: fieldHeight }} disabled />
+              </Form.Item>
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
-              <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>{t('expected')}</div>
-              <Input
-                style={{ height: fieldHeight }}
-                value={migratedData?.expectedReduct}
-                disabled
-              />
+              <Form.Item
+                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>}
+                name="expectedReduct"
+              >
+                <Input style={{ height: fieldHeight }} disabled />
+              </Form.Item>
             </Col>
           </Row>
           <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '25px', marginBottom: '10px' }}>
@@ -512,10 +553,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               <Col span={12} style={{ height: rowHeight }}>
                 <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
                   <Col span={12} style={{ height: rowHeight }}>
-                    <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                      {t('kpiName')}
-                    </div>
-                    <Form.Item name={`kpi_name_${kpi.index}`} rules={[validation.required]}>
+                    <Form.Item
+                      label={
+                        <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('kpiName')}</label>
+                      }
+                      name={`kpi_name_${kpi.index}`}
+                      rules={[validation.required]}
+                    >
                       <Input
                         style={{ height: fieldHeight }}
                         disabled={isView}
@@ -526,10 +570,10 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                     </Form.Item>
                   </Col>
                   <Col span={12} style={{ height: rowHeight }}>
-                    <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                      {t('kpiUnit')}
-                    </div>
                     <Form.Item
+                      label={
+                        <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('kpiUnit')}</label>
+                      }
                       name={`kpi_unit_${kpi.index}`}
                       rules={[{ required: true, message: 'Required Field' }]}
                     >
@@ -547,16 +591,20 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               <Col span={12} style={{ height: rowHeight }}>
                 <Row gutter={15} style={{ marginBottom: rowBottomMargin }}>
                   <Col span={11} style={{ height: rowHeight }}>
-                    <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                      {t('achieved')}
-                    </div>
-                    <Input style={{ height: fieldHeight }} value={kpi.achieved} disabled={true} />
+                    <Form.Item
+                      label={
+                        <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>
+                      }
+                      name={`kpi_ach_${kpi.index}`}
+                    >
+                      <Input style={{ height: fieldHeight }} value={kpi.achieved} disabled={true} />
+                    </Form.Item>
                   </Col>
                   <Col span={11} style={{ height: rowHeight }}>
-                    <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                      {t('expected')}
-                    </div>
                     <Form.Item
+                      label={
+                        <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>
+                      }
                       name={`kpi_exp_${kpi.index}`}
                       rules={[validation.required, validation.number]}
                     >
