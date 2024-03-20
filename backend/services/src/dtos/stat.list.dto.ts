@@ -1,17 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import {
-  IsNotEmpty,
-  IsNotEmptyObject,
   IsNumber,
-  IsObject,
   IsOptional,
   IsPositive,
-  IsString,
   ValidateNested,
 } from "class-validator";
 import { Stat } from "./stat.dto";
-// import { SYSTEM_TYPE } from "../enums/system.names.enum";
 
 export class StatList {
   @ApiProperty({ isArray: true, type: Stat })
@@ -33,9 +28,4 @@ export class StatList {
   @ApiPropertyOptional()
   @IsOptional()
   endTime: number;
-
-  // @ApiProperty()
-  // @IsString()
-  // @IsNotEmpty()
-  // system: SYSTEM_TYPE
 }

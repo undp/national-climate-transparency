@@ -71,17 +71,19 @@ export enum Recipient {
 
 export enum EntityType {
   ACTION = "action",
-  PROGRAM = "program",
+  PROGRAMME = "programme",
   PROJECT = "project",
   ACTIVITY = "activity",
 }
 
 export enum LogEventType {
-  ACTION_CREATED,
-  KPI_ADDED,
-  KPI_UPDATED,
-  PROGRAMME_LINKED,
-  ACTION_UPDATED
+  ACTION_CREATED = 0,
+  KPI_ADDED = 1,
+  KPI_UPDATED = 2,
+  PROGRAMME_LINKED = 3,
+  ACTION_UPDATED = 4,
+  PROGRAMME_CREATED = 5,
+  LINKED_TO_ACTION = 6
 }
 
 export enum GHGS {

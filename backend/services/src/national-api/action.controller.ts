@@ -26,7 +26,7 @@ export class ActionController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ActionEntity))
   @Post("add")
-  addUser(@Body() actionDto: ActionDto, @Request() req) {
+  addAction(@Body() actionDto: ActionDto, @Request() req) {
     return this.actionService.createAction(actionDto, req.user);
   }
 }

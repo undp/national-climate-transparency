@@ -16,6 +16,8 @@ import { UtilModule } from '../util/util.module';
 import configuration from '../configuration';
 import { ActionController } from './action.controller';
 import { ActionModule } from '../action/action.module';
+import { ProgrammeModule } from '../programme/programme.module';
+import { ProgrammeController } from './programme.controller';
 
 
 @Module({
@@ -34,9 +36,18 @@ import { ActionModule } from '../action/action.module';
     CaslModule,
     OrganisationModule,
     UtilModule,
-    ActionModule
+    ActionModule,
+    ProgrammeModule
   ],
-  controllers: [ NationalAPIController, UserController, AuthController, CompanyController, SettingsController, ActionController ],
+  controllers: [ 
+    NationalAPIController, 
+    UserController, 
+    AuthController, 
+    CompanyController, 
+    SettingsController, 
+    ActionController, 
+    ProgrammeController 
+  ],
   providers: [
     NationalAPIService, 
     Logger

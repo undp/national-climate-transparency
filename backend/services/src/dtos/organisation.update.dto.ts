@@ -4,23 +4,15 @@ import {
   IsArray,
   IsEmail,
   IsEnum,
-  IsInt,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
-  IsPositive,
   IsString,
   IsUrl,
-  Max,
   MaxLength,
-  Min,
   ValidateIf,
-  max,
 } from "class-validator";
 import { OrganisationType } from "../enums/organisation.type.enum";
 import { Sector } from "src/enums/sector.enum";
-// import { GovDepartment } from "../enum/govDep.enum";
-// import { Ministry } from "../enum/ministry.enum";
 
 export class OrganisationUpdateDto {
   @IsNotEmpty()
@@ -47,9 +39,6 @@ export class OrganisationUpdateDto {
   })
   organisationType: OrganisationType;
 
-  // @ValidateIf(
-  //   (c) => ![OrganisationType.GOVERNMENT, OrganisationType.API].includes(c.organisationType)
-  // )
   @IsUrl()
   @IsOptional()
   @ApiPropertyOptional()
@@ -70,30 +59,6 @@ export class OrganisationUpdateDto {
   @IsString()
   @ApiPropertyOptional()
   address: string;
-
-  // @ValidateIf((c) => [CompanyRole.GOVERNMENT, CompanyRole.MINISTRY].includes(c.companyRole))
-  // @ApiProperty({ enum: GovDepartment })
-  // @IsNotEmpty()
-  // @IsEnum(GovDepartment, {
-  //     message: 'Invalid Government Department. Supported following Departments:' + Object.values(GovDepartment)
-  // })
-  // govDep: GovDepartment;
-  
-  // @ValidateIf((c) => [CompanyRole.GOVERNMENT, CompanyRole.MINISTRY].includes(c.companyRole))
-  // @ApiProperty({ enum: Ministry })
-  // @IsNotEmpty()
-  // @IsEnum(Ministry, {
-  //     message: 'Invalid sector. Supported following sector:' + Object.values(Ministry)
-  // })
-  // ministry: Ministry;  
-
-  // @IsNotEmpty()
-  // @ApiProperty({ enum: OrganisationType })
-  // @IsEnum(OrganisationType, {
-  //   message:
-  //     "Invalid role. Supported following roles:" + Object.values(OrganisationType),
-  // })
-  // organisationType: OrganisationType;
 
   @ApiPropertyOptional()
   @IsArray()
@@ -119,26 +84,4 @@ export class OrganisationUpdateDto {
     enum: Object.values(Sector),
   })
   sector: Sector[];
-
-  // @ValidateIf(
-  //   (c) => CompanyRole.GOVERNMENT==c.companyRole
-  // )
-  // @IsNotEmpty()
-  // @IsNumber()
-  // @IsInt()
-  // @Min(0)
-  // @Max(99)
-  // @ApiProperty()
-  // omgePercentage: number;
-
-  // @ValidateIf(
-  //   (c) => CompanyRole.GOVERNMENT==c.companyRole
-  // )
-  // @IsNotEmpty()
-  // @IsNumber()
-  // @IsInt()
-  // @Min(0)
-  // @Max(99)
-  // @ApiProperty()
-  // nationalSopValue: number;
 }
