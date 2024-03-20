@@ -74,7 +74,7 @@ export class ProgrammeService {
             throw new HttpException(
                 this.helperService.formatReqMessagesString(
                   "programme.actionNotFound",
-                  []
+                  [programmeDto.actionId]
                 ),
                 HttpStatus.BAD_REQUEST
               );
