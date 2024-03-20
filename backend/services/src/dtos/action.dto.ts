@@ -1,6 +1,5 @@
-import { Optional } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString, IsOptional, ValidateNested, IsNumber, Min, Max } from "class-validator";
 import { ActionStatus, InstrumentType, NatAnchor } from "../enums/action.enum";
 import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
@@ -39,9 +38,11 @@ export class ActionDto {
     status: ActionStatus;
 
     @IsNotEmpty()
-    @IsString()
+    @IsNumber()
+    @Min(2013)
+    @Max(2050)
     @ApiProperty()
-    startYear: string;
+    startYear: number;
 
     @IsNotEmpty()
     @ApiProperty({ enum: NatAnchor })
@@ -50,15 +51,16 @@ export class ActionDto {
     })
     natAnchor: NatAnchor;
 
-    @Optional()
+    @IsOptional()
     @ApiProperty()
     documents: DocumentDto[];
 
-    @Optional()
+    @IsOptional()
     @ApiProperty()
     linkedProgrammes: string[];
 
-    @Optional()
+    @IsOptional()
+    @ValidateNested()
     @ApiProperty()
     kpis: KpiDto[];
 

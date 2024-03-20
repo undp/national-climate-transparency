@@ -57,6 +57,6 @@ export class ProjectEntity {
   @ManyToOne(() => ProgrammeEntity, (programme) => programme.projects, {
     nullable: false,
   })
-  @JoinColumn([{ name: "programId", referencedColumnName: "programId" }])
+  @JoinColumn([{ name: "programmeId", referencedColumnName: "programmeId" }])
   programme: ProgrammeEntity;
 }

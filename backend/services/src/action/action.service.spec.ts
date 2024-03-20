@@ -8,11 +8,12 @@ import { ActionService } from "./action.service";
 import { ActionDto } from "../dtos/action.dto";
 import { ActionStatus, InstrumentType, NatAnchor } from "../enums/action.enum";
 import { User } from "../entities/user.entity";
-import { FileHandlerInterface } from "../file-handler/filehandler.interface";
 import { DataResponseMessageDto } from "../dtos/data.response.message";
 import { KpiDto } from "../dtos/kpi.dto";
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { DocumentDto } from "../dtos/document.dto";
+import { FileUploadService } from "../util/fileUpload.service";
+import { PayloadValidator } from "../validation/payload.validator";
 
 describe('ActionService', () => {
     let service: ActionService;
@@ -20,7 +21,8 @@ describe('ActionService', () => {
     let actionRepositoryMock: Partial<Repository<ActionEntity>>;
     let counterServiceMock: Partial<CounterService>;
     let helperServiceMock: Partial<HelperService>;
-    let fileHandlerMock: Partial<FileHandlerInterface>;
+    let fileUploadServiceMock: Partial<FileUploadService>;
+    let payloadValidatorMock: Partial<PayloadValidator>;
 
     const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -39,8 +41,12 @@ describe('ActionService', () => {
         helperServiceMock = {
             formatReqMessagesString: jest.fn(),
         };
-        fileHandlerMock = {
-            uploadFile: jest.fn().mockResolvedValue('http://test.com/documents/action_documents/test.csv'),
+        fileUploadServiceMock = {
+            uploadDocument: jest.fn().mockResolvedValue('http://test.com/documents/action_documents/test.csv'),
+        };
+
+        payloadValidatorMock = {
+            validateKpiPayload: jest.fn(),
         };
 
         const module: TestingModule = await Test.createTestingModule({
@@ -63,8 +69,12 @@ describe('ActionService', () => {
                     useValue: helperServiceMock,
                 },
                 {
-                    provide: FileHandlerInterface,
-                    useValue: fileHandlerMock,
+                    provide: FileUploadService,
+                    useValue: fileUploadServiceMock,
+                },
+                {
+                    provide: PayloadValidator,
+                    useValue: payloadValidatorMock,
                 },
             ],
         }).compile();
@@ -82,7 +92,7 @@ describe('ActionService', () => {
         actionDto.objective = "test objective";
         actionDto.instrumentType = InstrumentType.POLICY;
         actionDto.status = ActionStatus.PLANNED;
-        actionDto.startYear = "2024";
+        actionDto.startYear = 2024;
         actionDto.natAnchor = NatAnchor.NDC;
 
         const actionEntity = new ActionEntity();
@@ -91,7 +101,7 @@ describe('ActionService', () => {
         actionEntity.objective = "test objective";
         actionEntity.instrumentType = InstrumentType.POLICY;
         actionEntity.status = ActionStatus.PLANNED;
-        actionEntity.startYear = "2024";
+        actionEntity.startYear = 2024;
         actionEntity.natAnchor = NatAnchor.NDC;
         actionEntity.actionId = "A001";
 
@@ -101,7 +111,7 @@ describe('ActionService', () => {
             "objective": "test objective",
             "instrumentType": "Policy",
             "status": "Planned",
-            "startYear": "2024",
+            "startYear": 2024,
             "natAnchor": "NDC",
             "actionId": "A001"
         };
@@ -128,7 +138,7 @@ describe('ActionService', () => {
 
         expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 
-        expect(fileHandlerMock.uploadFile).toHaveBeenCalledTimes(0);
+        expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
     });
 
     it('should create an action with documents and kpis', async () => {
@@ -155,7 +165,7 @@ describe('ActionService', () => {
         actionDto.objective = "test objective";
         actionDto.instrumentType = InstrumentType.POLICY;
         actionDto.status = ActionStatus.PLANNED;
-        actionDto.startYear = "2024";
+        actionDto.startYear = 2024;
         actionDto.natAnchor = NatAnchor.NDC;
         actionDto.kpis = [kpiDto1, kpiDto2];
         actionDto.documents = [documentDto];
@@ -166,7 +176,7 @@ describe('ActionService', () => {
             "objective": "test objective",
             "instrumentType": "Policy",
             "status": "Planned",
-            "startYear": "2024",
+            "startYear": 2024,
             "natAnchor": "NDC",
             "actionId": "A001",
             "kpis": [
@@ -212,7 +222,7 @@ describe('ActionService', () => {
         expect(result.statusCode).toEqual(expectedResponse.statusCode);
 
         expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
-        expect(fileHandlerMock.uploadFile).toHaveBeenCalledTimes(1);
+        expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
 
     });
 
@@ -231,7 +241,7 @@ describe('ActionService', () => {
         actionDto.objective = "test objective";
         actionDto.instrumentType = InstrumentType.POLICY;
         actionDto.status = ActionStatus.PLANNED;
-        actionDto.startYear = "2024";
+        actionDto.startYear = 2024;
         actionDto.natAnchor = NatAnchor.NDC;
         actionDto.kpis = [kpiDto1]
 
@@ -241,7 +251,7 @@ describe('ActionService', () => {
             "objective": "test objective",
             "instrumentType": "Policy",
             "status": "Planned",
-            "startYear": "2024",
+            "startYear": 2024,
             "natAnchor": "NDC",
             "actionId": "A001",
             "kpis": [
@@ -274,46 +284,6 @@ describe('ActionService', () => {
 
         try {
             await service.createAction(actionDto, user);
-        } catch (error) {
-            expect(error).toBeInstanceOf(HttpException);
-            expect(error.status).toBe(HttpStatus.BAD_REQUEST);
-        }
-    });
-
-    it('should upload document successfully', async () => {
-        const data = 'base64_encoded_data';
-        const fileName = 'test';
-        const fileType = 'pdf';
-        const expectedUrl = 'http://example.com/document.pdf';
-
-        jest.spyOn(service, 'getFileExtension').mockReturnValueOnce(fileType);
-
-        fileHandlerMock.uploadFile = jest.fn().mockImplementation(async (path: string, content: string) => {
-            const expectedUrl = "http://example.com/document.pdf"; 
-            return expectedUrl;
-        });
-
-        const response = await service.uploadDocument(data, fileName);
-
-        expect(fileHandlerMock.uploadFile).toBeCalledTimes(1);
-        expect(response).toBe(expectedUrl);
-    });
-
-    it('should throw unknown file type error', async () => {
-        const data = 'base64_encoded_data';
-        const fileName = 'test';
-        const fileType = 'pdf';
-        const expectedUrl = 'http://example.com/document.pdf';
-
-        jest.spyOn(service, 'getFileExtension').mockReturnValueOnce(null);
-
-        fileHandlerMock.uploadFile = jest.fn().mockImplementation(async (path: string, content: string) => {
-            const expectedUrl = "http://example.com/document.pdf";
-            return expectedUrl;
-        });
-
-        try {
-            await service.uploadDocument(data, fileName);
         } catch (error) {
             expect(error).toBeInstanceOf(HttpException);
             expect(error.status).toBe(HttpStatus.BAD_REQUEST);

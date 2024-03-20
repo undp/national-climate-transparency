@@ -1,15 +1,19 @@
 import { Module } from '@nestjs/common';
 import { TrimPipe } from './trim-pipe.transform';
-// import { CreditCalculationPropertyValidator } from './credit.calculation.property.validator';
+import { PayloadValidator } from './payload.validator';
+import { UtilModule } from '../util/util.module';
 
 @Module({
+  imports: [
+    UtilModule,
+  ],
   providers: [
     TrimPipe,
-    // CreditCalculationPropertyValidator
+    PayloadValidator
   ],
   exports: [
     TrimPipe,
-    // CreditCalculationPropertyValidator
+    PayloadValidator
   ]
 })
 export class ValidationModule {}

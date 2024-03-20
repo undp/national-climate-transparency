@@ -6,12 +6,10 @@ import {
 import { Type } from "class-transformer";
 import {
   IsInt,
-  IsNumber,
   IsOptional,
   IsPositive,
   ValidateIf,
   ValidateNested,
-  ValidationArguments,
 } from "class-validator";
 import { FilterEntry } from "./filter.entry";
 import { SortEntry } from "./sort.entry";

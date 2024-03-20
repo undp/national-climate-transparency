@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ActionService } from './action.service';
 import { ConfigModule } from '@nestjs/config';
 import configuration from '../configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,7 +13,9 @@ import { ActivityEntity } from '../entities/activity.entity';
 import { SupportEntity } from '../entities/support.entity';
 import { UtilModule } from '../util/util.module';
 import { FileHandlerModule } from '../file-handler/filehandler.module';
+import { ProgrammeService } from './programme.service';
 import { ValidationModule } from '../validation/validation.module';
+import { ActionModule } from '../action/action.module';
 
 @Module({
     imports: [
@@ -39,11 +40,12 @@ import { ValidationModule } from '../validation/validation.module';
         ]),
         UtilModule,
         FileHandlerModule,
-        ValidationModule
+        ValidationModule,
+        ActionModule
     ],
     providers: [
-        ActionService
+        ProgrammeService
     ],
-    exports: [ActionService],
+    exports: [ProgrammeService],
 })
-export class ActionModule { }
+export class ProgrammeModule { }
