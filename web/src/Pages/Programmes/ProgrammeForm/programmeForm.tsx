@@ -1,18 +1,16 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Upload, Form, Select, Card, Modal, SelectProps } from 'antd';
+import { Row, Col, Input, Button, Form, Select, Card, Modal, SelectProps } from 'antd';
 import {
   AppstoreAddOutlined,
   DeleteOutlined,
   LinkOutlined,
   PlusCircleOutlined,
-  UploadOutlined,
 } from '@ant-design/icons';
-import { RcFile, UploadFile } from 'antd/lib/upload/interface';
 import { useEffect, useState } from 'react';
-import DeleteCard from '../../../Components/Card/deleteCard';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { InstrumentType } from '../../../Enums/action.enum';
 import { useNavigate } from 'react-router-dom';
+import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -72,7 +70,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   const [programIdList, setProgramIdList] = useState<SelectProps['options']>([]);
   const [migratedData, setMigratedData] = useState<ProgrammeMigratedData>();
 
-  const [documentList, setDocumentList] = useState<UploadFile[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
   );
@@ -117,39 +114,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
 
   const handleSubmit = async (payload: any) => {
     console.log(payload);
-  };
-
-  // Upload functionality
-
-  const handleFileRead = (file: RcFile): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-
-  const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
-    setDocumentList(newFileList);
-  };
-
-  const handleDelete = (fileId: any) => {
-    setDocumentList((prevList) => prevList.filter((file) => file.uid !== fileId));
-    setUploadedFiles((prevList) => prevList.filter((file) => file.id !== fileId));
-  };
-
-  const beforeUpload = async (file: RcFile): Promise<boolean> => {
-    const base64 = await handleFileRead(file);
-    setUploadedFiles([...uploadedFiles, { id: file.uid, title: file.name, data: base64 }]);
-    return false;
-  };
-
-  const props = {
-    onChange,
-    fileList: documentList,
-    showUploadList: false,
-    beforeUpload,
-    accept: '.xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg',
   };
 
   // Attach Project
@@ -227,8 +191,8 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addActionTitle')}</div>
-        <div className="body-sub-title">{t('addActionDesc')}</div>
+        <div className="body-title">{t('addProgTitle')}</div>
+        <div className="body-sub-title">{t('addProgDesc')}</div>
       </div>
       <Form form={form} onFinish={handleSubmit}>
         <div className="form-card">
@@ -264,7 +228,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('programmeTitleHeader')}
+                {t('progTitleHeader')}
               </div>
               <Form.Item name="title" rules={[validation.required]}>
                 <Input style={{ height: fieldHeight }} />
@@ -274,7 +238,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={12} style={{ height: multiLineHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('programmeDescTitle')}
+                {t('progDescTitle')}
               </div>
               <Form.Item name="description" rules={[validation.required]}>
                 <TextArea rows={3} disabled={isView} />
@@ -282,7 +246,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={12} style={{ height: multiLineHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('programmeObjectivesTitle')}
+                {t('progObjectivesTitle')}
               </div>
               <Form.Item name="objective" rules={[validation.required]}>
                 <TextArea rows={3} disabled={isView} />
@@ -292,7 +256,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('instrumentType')}
+                {t('instrTypeTitle')}
               </div>
               <Form.Item name="instrumentType" rules={[validation.required]}>
                 <Select allowClear disabled={isView} showSearch>
@@ -306,7 +270,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('programmeStatus')}
+                {t('progStatusTitle')}
               </div>
               <Form.Item name="status" rules={[validation.required]}>
                 <Select allowClear disabled={isView} showSearch>
@@ -320,7 +284,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('sectorsAffected')}
+                {t('sectorsAffTitle')}
               </div>
               <Form.Item name="sectorsAffected" rules={[validation.required]}>
                 <Select allowClear disabled={isView} showSearch>
@@ -334,7 +298,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                {t('subSectorsAffected')}
+                {t('subSectorsAffTitle')}
               </div>
               <Form.Item name="subSectorsAffected" rules={[validation.required]}>
                 <Select allowClear disabled={isView} showSearch>
@@ -401,35 +365,16 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
           </Row>
-          <Row
-            gutter={[gutterSize, 8]}
+          <UploadFileGrid
+            uploadedFiles={uploadedFiles}
+            horizontalGutter={gutterSize}
+            verticalGutter={10}
+            buttonText={t('upload')}
+            height={fieldHeight}
+            acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
             style={{ marginBottom: rowBottomMargin, marginTop: '20px' }}
-          >
-            <Col span={3} style={{ height: fieldHeight }}>
-              <Upload {...props}>
-                <Button
-                  icon={<UploadOutlined />}
-                  style={{ width: '120px', height: fieldHeight }}
-                  disabled={isView}
-                >
-                  {t('upload')}
-                </Button>
-              </Upload>
-            </Col>
-            <Col span={21}>
-              <Row gutter={[gutterSize, 10]}>
-                {documentList.map((file: any) => (
-                  <Col span={8} style={{ height: fieldHeight }}>
-                    <DeleteCard
-                      fileName={file.name.slice(0, 20)}
-                      fileId={file.uid}
-                      handleDelete={handleDelete}
-                    ></DeleteCard>
-                  </Col>
-                ))}
-              </Row>
-            </Col>
-          </Row>
+            setUploadedFiles={setUploadedFiles}
+          ></UploadFileGrid>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={24} style={{ height: multiLineHeight }}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
@@ -464,7 +409,10 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 emptyMessage={t('noProjectsMessage')}
               />
             </Col>
-            <Col span={4}>
+            <Col
+              span={5}
+              style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
+            >
               {!isView && (
                 <Button
                   type="primary"
@@ -474,7 +422,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                   style={{ padding: 0 }}
                   onClick={showModal}
                 >
-                  {t('attachProgramme')}
+                  {t('attachProjects')}
                 </Button>
               )}
               <Modal
@@ -493,7 +441,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 <div
                   style={{ color: '#3A3541', opacity: 0.8, marginTop: '30px', fontSize: '15px' }}
                 >
-                  <strong>{t('attachProject')}</strong>
+                  <strong>{t('attachProjects')}</strong>
                 </div>
                 <div
                   style={{
