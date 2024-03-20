@@ -23,6 +23,7 @@ import {
 import { useEffect, useState } from 'react';
 const { Search } = Input;
 import data from '../../../Testing/programmeList.json';
+import { useNavigate } from 'react-router-dom';
 
 interface Item {
   key: string;
@@ -49,6 +50,8 @@ const programmeList = () => {
   const [valueOnSearch, setValueOnSearch] = useState<string>('');
   const [totalUser, setTotalUser] = useState<number>();
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const actionMenu = (record: any) => {
     return (
@@ -268,7 +271,15 @@ const programmeList = () => {
         <Row className="table-actions-section">
           <Col md={8} xs={24}>
             <div className="action-bar">
-              <Button type="primary" size="large" block icon={<PlusOutlined />} onClick={() => {}}>
+              <Button
+                type="primary"
+                size="large"
+                block
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  navigate('/programmes/add');
+                }}
+              >
                 {t('addButtonType')}
               </Button>
             </div>
