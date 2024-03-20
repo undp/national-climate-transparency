@@ -7,6 +7,7 @@ interface Props {
   loading: boolean;
   pagination: TablePaginationConfig; // Define the type of pagination
   handleTableChange: (pagination: TablePaginationConfig, filters: any, sorter: any) => void;
+  emptyMessage: string;
 }
 
 const LayoutTable: React.FC<Props> = ({
@@ -15,6 +16,7 @@ const LayoutTable: React.FC<Props> = ({
   loading,
   pagination,
   handleTableChange,
+  emptyMessage,
 }) => {
   return (
     <Table
@@ -28,7 +30,7 @@ const LayoutTable: React.FC<Props> = ({
         emptyText: (
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={tableData.length === 0 ? 'No Users' : null}
+            description={tableData.length === 0 ? emptyMessage : null}
           />
         ),
       }}

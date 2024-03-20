@@ -322,6 +322,7 @@ const projectList = () => {
                 onChange: onChange,
               }} // Set pagination configuration
               handleTableChange={handleTableChange}
+              emptyMessage="No Projects Available"
             />
           </Col>
         </Row>

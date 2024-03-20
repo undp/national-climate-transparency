@@ -317,6 +317,7 @@ const supportList = () => {
                 onChange: onChange,
               }} // Set pagination configuration
               handleTableChange={handleTableChange}
+              emptyMessage="No Support Available"
             />
           </Col>
         </Row>

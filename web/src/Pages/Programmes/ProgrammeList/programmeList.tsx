@@ -328,6 +328,7 @@ const programmeList = () => {
                 onChange: onChange,
               }} // Set pagination configuration
               handleTableChange={handleTableChange}
+              emptyMessage="No Programmes Available"
             />
           </Col>
         </Row>

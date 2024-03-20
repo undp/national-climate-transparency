@@ -11,6 +11,7 @@ import { BaseEntity } from '../Entities/baseEntity';
 import { Action } from '../Enums/action.enum';
 import { Role } from '../Enums/role.enum';
 import { User } from '../Entities/user';
+import { ActionEntity } from '../Entities/action';
 import { Organisation } from '../Entities/organisation';
 
 type Subjects = InferSubjects<typeof BaseEntity> | 'all';
@@ -42,6 +43,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Update, User);
       can(Action.Delete, User);
       cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'organisationType']);
+
+      can(Action.Read, ActionEntity);
+      can(Action.Create, ActionEntity);
+      can(Action.Update, ActionEntity);
+      can(Action.Delete, ActionEntity);
     }
 
     if (user.role == Role.Admin) {
@@ -56,6 +62,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Update, User, { role: { $ne: Role.Root } });
       can(Action.Delete, User);
       cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'organisationType']);
+
+      can(Action.Read, ActionEntity);
+      can(Action.Create, ActionEntity);
+      can(Action.Update, ActionEntity);
+      can(Action.Delete, ActionEntity);
     }
 
     if (user.role == Role.DepartmentUser) {
@@ -71,6 +82,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'organisationType'], {
         id: { $eq: user.id },
       });
+
+      can(Action.Read, ActionEntity);
+      cannot(Action.Create, ActionEntity);
+      cannot(Action.Update, ActionEntity);
+      cannot(Action.Delete, ActionEntity);
     }
 
     if (user.role == Role.ViewOnly) {
@@ -86,6 +102,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'organisationType'], {
         id: { $eq: user.id },
       });
+
+      can(Action.Read, ActionEntity);
+      cannot(Action.Create, ActionEntity);
+      cannot(Action.Update, ActionEntity);
+      cannot(Action.Delete, ActionEntity);
     }
   }
 
