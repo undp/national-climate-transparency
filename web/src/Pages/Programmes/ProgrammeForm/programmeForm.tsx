@@ -182,6 +182,14 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
 
   const removeKPI = (kpiIndex: number) => {
     setKpiList(kpiList.filter((obj) => obj.index !== kpiIndex));
+
+    const updatedValues = {
+      [`kpi_name_${kpiIndex}`]: '',
+      [`kpi_unit_${kpiIndex}`]: '',
+      [`kpi_exp_${kpiIndex}`]: '',
+    };
+
+    form.setFieldsValue(updatedValues);
   };
 
   const updateKPI = (id: number, property: keyof KpiData, value: any): void => {
@@ -539,7 +547,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             {t('kpiInfoTitle')}
           </div>
           {kpiList.map((kpi: any) => (
-            <Row key={kpi.index} gutter={gutterSize}>
+            <Row key={kpi.index} gutter={gutterSize} style={{ height: '80px' }}>
               <Col span={12}>
                 <Row gutter={gutterSize}>
                   <Col span={12}>
@@ -585,7 +593,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                       label={
                         <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>
                       }
-                      name={`kpi_ach_${kpi.index}`}
                     >
                       <Input size="large" value={kpi.achieved} disabled={true} />
                     </Form.Item>
@@ -600,7 +607,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                     >
                       <Input
                         size="large"
-                        value={kpi.achieved}
                         disabled={isView}
                         onChange={(e) => {
                           updateKPI(kpi.index, 'expected', e.target.value);
@@ -641,6 +647,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 <Button
                   icon={<PlusCircleOutlined />}
                   style={{
+                    marginTop: '15px',
                     border: 'none',
                     color: '#3A3541',
                     opacity: 0.8,
