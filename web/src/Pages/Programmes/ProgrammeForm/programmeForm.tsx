@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, Card, Modal, SelectProps } from 'antd';
+import { Row, Col, Input, Button, Form, Select, Card, Modal, SelectProps, message } from 'antd';
 import {
   AppstoreAddOutlined,
   DeleteOutlined,
@@ -8,9 +8,12 @@ import {
 } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import { InstrumentType } from '../../../Enums/action.enum';
 import { useNavigate } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
+import { useConnection } from '@undp/carbon-library';
+import { Sector } from '../../../Enums/sector.enum';
+import { SubSector, NatImplementor } from '../../../Enums/shared.enum';
+import { ProgrammeStatus } from '../../../Enums/programme.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -22,13 +25,18 @@ const multiLineHeight = '114px';
 const fieldHeight = '32px';
 
 const validation = {
-  required: { required: true, message: 'Required Field' },
+  required: { required: false, message: 'Required Field' },
   number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
 };
 
 interface Props {
   method: 'create' | 'view' | 'update';
 }
+
+type ActionData = {
+  id: string;
+  title: string;
+};
 
 type KpiData = {
   index: number;
@@ -56,9 +64,11 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   }
 
   const navigate = useNavigate();
+  const { post } = useConnection();
 
   // form state
 
+  const [actionList, setActionList] = useState<ActionData[]>([]);
   const [programIdList, setProgramIdList] = useState<SelectProps['options']>([]);
 
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
@@ -74,6 +84,17 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
 
   // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
+
+  useEffect(() => {
+    const actionData: ActionData[] = [];
+    for (let i = 0; i < 1; i++) {
+      actionData.push({
+        id: 'A001',
+        title: 'MB Solar',
+      });
+    }
+    setActionList(actionData);
+  }, []);
 
   useEffect(() => {
     const newProgramIdList: SelectProps['options'] = [];
@@ -92,6 +113,8 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
     }
 
     form.setFieldsValue({
+      type: 'Mitigation',
+      instrumentType: 'Policy',
       intImplementor: 'AFDB',
       recipientEntity: 'Ministry of Agriculture, Climate Change and Environment',
       ghgsAffected: ['CO2', 'N2O'],
@@ -103,7 +126,49 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
-    console.log(payload);
+    console.log('shdgc', payload);
+    try {
+      for (const key in payload) {
+        if (key.startsWith('kpi_')) {
+          delete payload[key];
+        }
+      }
+      payload.documents = [];
+      uploadedFiles.forEach((file) => {
+        payload.documents.push({ title: file.title, data: file.data });
+      });
+
+      payload.kpis = [];
+      kpiList.forEach((kpi) => {
+        payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
+      });
+
+      payload.linkedProjects = [];
+      projectList.forEach((project) => {
+        payload.linkedProgrammes.push(project.projectId);
+      });
+
+      payload.investment = parseFloat(payload.investment);
+
+      const response = await post('national/programme/add', payload);
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: t('actionCreationSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        navigate('/programmes');
+      }
+    } catch (error: any) {
+      console.log('Error in action creation', error);
+      message.open({
+        type: 'error',
+        content: `${error.message}`,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    }
   };
 
   // Attach Project
@@ -201,9 +266,11 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 rules={[validation.required]}
               >
                 <Select allowClear disabled={isView} showSearch>
-                  <Option key={'check'} value={'check'}>
-                    {'action'}
-                  </Option>
+                  {actionList.map((action) => (
+                    <Option key={action.id} value={action.id}>
+                      {action.title}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
             </Col>
@@ -213,13 +280,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="type"
                 rules={[validation.required]}
               >
-                <Select allowClear disabled={isView} showSearch>
-                  {Object.values(InstrumentType).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
-                    </Option>
-                  ))}
-                </Select>
+                <Input style={{ height: fieldHeight }} disabled />
               </Form.Item>
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
@@ -267,15 +328,8 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('instrTypeTitle')}</label>
                 }
                 name="instrumentType"
-                rules={[validation.required]}
               >
-                <Select allowClear disabled={isView} showSearch>
-                  {Object.values(InstrumentType).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
-                    </Option>
-                  ))}
-                </Select>
+                <Input style={{ height: fieldHeight }} disabled />
               </Form.Item>
             </Col>
             <Col span={6} style={{ height: rowHeight }}>
@@ -287,7 +341,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 rules={[validation.required]}
               >
                 <Select allowClear disabled={isView} showSearch>
-                  {Object.values(InstrumentType).map((instrument) => (
+                  {Object.values(ProgrammeStatus).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
                     </Option>
@@ -300,11 +354,11 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('sectorsAffTitle')}</label>
                 }
-                name="sectorsAffected"
+                name="affectedSectors"
                 rules={[validation.required]}
               >
-                <Select allowClear disabled={isView} showSearch>
-                  {Object.values(InstrumentType).map((instrument) => (
+                <Select mode="multiple" allowClear disabled={isView} showSearch>
+                  {Object.values(Sector).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
                     </Option>
@@ -319,11 +373,11 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                     {t('subSectorsAffTitle')}
                   </label>
                 }
-                name="subSectorsAffected"
+                name="affectedSubSector"
                 rules={[validation.required]}
               >
-                <Select allowClear disabled={isView} showSearch>
-                  {Object.values(InstrumentType).map((instrument) => (
+                <Select mode="multiple" allowClear disabled={isView} showSearch>
+                  {Object.values(SubSector).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
                     </Option>
@@ -386,20 +440,26 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="natImplementor"
                 rules={[validation.required]}
               >
-                <Input style={{ height: fieldHeight }} />
+                <Select mode="multiple" allowClear disabled={isView} showSearch>
+                  {Object.values(NatImplementor).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12} style={{ height: rowHeight }}>
-              <Form.Item
+              <Form.Item<number>
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>
                     {t('investmentNeedsTitle')}
                   </label>
                 }
-                name="investmentNeeds"
+                name="investment"
                 rules={[validation.required]}
               >
-                <Input style={{ height: fieldHeight }} />
+                <Input type="number" style={{ height: fieldHeight }} />
               </Form.Item>
             </Col>
           </Row>
