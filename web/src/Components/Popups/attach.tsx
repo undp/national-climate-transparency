@@ -94,11 +94,11 @@ const AttachEntity: React.FC<Props> = ({
           {content.listTitle}
         </div>
         <Select
+          style={{ fontSize: '13px', width: '100%' }}
           showSearch
           maxTagCount={'responsive'}
           mode="multiple"
           allowClear
-          style={{ width: '100%' }}
           value={pendingAttachments}
           onChange={handleItemSelect}
           options={optionsList}

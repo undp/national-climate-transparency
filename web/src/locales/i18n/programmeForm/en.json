@@ -37,6 +37,7 @@
     "projectList": "Project List",
     "addKPI": "Add KPI",
     "actionCreationSuccess": "Programme Added Succesfully",
-    "updatesInfoTitle": "Updates"
+    "updatesInfoTitle": "Updates",
+    "noProjectMessage": "No Projects Attached"
   }
   
