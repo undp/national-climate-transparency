@@ -15,7 +15,7 @@ import { ProjectEntity } from "./project.entity";
 @Entity("programme")
 export class ProgrammeEntity {
   @PrimaryColumn()
-  programId: string;
+  programmeId: string;
 
   @Column()
   title: string;
@@ -27,31 +27,31 @@ export class ProgrammeEntity {
   objective: string;
 
   @Column({ type: "enum", enum: Sector })
-  affectedSector: string;
+  affectedSectors: Sector[];
 
   @Column({ type: "enum", enum: SubSector })
-  affectedSubSector: string;
+  affectedSubSector: SubSector[];
 
   @Column()
   startYear: number;
 
   @Column({ type: "enum", enum: NatImplementor })
-  natImplementor: string;
+  natImplementor: NatImplementor[];
 
-  @Column()
+  @Column({nullable: false, type: 'double precision' })
   investment: number;
 
-  @Column()
-  document: string;
+  @Column({ type: 'jsonb', nullable: true })
+  documents: any;
 
   @Column()
-  comment: string;
+  comments: string;
 
   @Column({ type: "ltree" })
   path: string;
 
   @ManyToOne(() => ActionEntity, (action) => action.programmes, {
-    nullable: false,
+    nullable: true,
   })
   @JoinColumn([{ name: "actionId", referencedColumnName: "actionId" }])
   action: ActionEntity;

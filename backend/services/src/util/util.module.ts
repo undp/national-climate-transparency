@@ -14,16 +14,15 @@ import { IsValidCountryConstraint } from "./validcountry.decorator";
 import { PasswordReset } from "../entities/userPasswordResetToken.entity";
 import { PasswordResetService } from "./passwordReset.service";
 import { User } from "../entities/user.entity";
-import { UserModule } from "../user/user.module";
 import { AsyncOperationsModule } from "../async-operations/async-operations.module";
 import { ConfigurationSettingsService } from "./configurationSettings.service";
 import { ConfigurationSettings } from "../entities/configuration.settings";
-// import { FileHandlerModule } from '@undp/carbon-services-lib';
 import { Region } from "../entities/region.entity";
 import { PasswordHashService } from "./passwordHash.service";
 import { HttpUtilService } from "./http.util.service";
 import { Organisation } from "src/entities/organisation.entity";
 import { FileHandlerModule } from "src/file-handler/filehandler.module";
+import { FileUploadService } from "./fileUpload.service";
 
 @Module({
   imports: [
@@ -68,7 +67,8 @@ import { FileHandlerModule } from "src/file-handler/filehandler.module";
     Logger,
     ConfigurationSettingsService,
     PasswordHashService,
-    HttpUtilService
+    HttpUtilService,
+    FileUploadService,
   ],
   exports: [
     CounterService,
@@ -77,7 +77,8 @@ import { FileHandlerModule } from "src/file-handler/filehandler.module";
     PasswordResetService,
     ConfigurationSettingsService,
     PasswordHashService,
-    HttpUtilService
+    HttpUtilService,
+    FileUploadService,
   ],
 })
 export class UtilModule {}

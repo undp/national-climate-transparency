@@ -1,6 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { EntityType, LogEventType } from "../enums/shared.enum";
-import { User } from "./user.entity";
 
 @Entity("log")
 export class LogEntity {

@@ -25,7 +25,7 @@ export class ActionEntity {
   status: string;
 
   @Column()
-  startYear: string;
+  startYear: number;
 
   @Column({ type: "enum", enum: NatAnchor })
   natAnchor: string;

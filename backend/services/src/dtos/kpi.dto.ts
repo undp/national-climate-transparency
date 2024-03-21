@@ -2,7 +2,6 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { EntityType } from "../enums/shared.enum";
 
-
 export class KpiDto {
     @IsNotEmpty()
     @IsString()
