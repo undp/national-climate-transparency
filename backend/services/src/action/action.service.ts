@@ -15,12 +15,14 @@ import { HelperService } from "../util/helpers.service";
 import { EntityManager, Repository } from "typeorm";
 import { FileUploadService } from "../util/fileUpload.service";
 import { PayloadValidator } from "../validation/payload.validator";
+import { ProgrammeEntity } from "../entities/programme.entity";
 
 @Injectable()
 export class ActionService {
   constructor(
     @InjectEntityManager() private entityManger: EntityManager,
     @InjectRepository(ActionEntity) private actionRepo: Repository<ActionEntity>,
+    @InjectRepository(ProgrammeEntity) private programmeRepo: Repository<ProgrammeEntity>,
     private counterService: CounterService,
     private helperService: HelperService,
     private fileUploadService: FileUploadService,
@@ -33,6 +35,27 @@ export class ActionService {
     const eventLog = [];
 
     action.actionId = 'A' + await this.counterService.incrementCount(CounterType.ACTION, 3);
+
+    const linkedProgrammeList = [];
+
+    if (actionDto.linkedProgrammes) {
+      const programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
+
+      for (const programme of programmes) {
+        if (programme.action) {
+          throw new HttpException(
+            this.helperService.formatReqMessagesString(
+              "programme.programmeAlreadyLinked",
+              [programme.programmeId]
+            ),
+            HttpStatus.BAD_REQUEST
+          );
+        }
+        programme.action = action;
+        programme.path = action.actionId;
+        linkedProgrammeList.push(programme);
+      }
+    }
 
     // upload the documents and create the doc array here
     if (actionDto.documents) {
@@ -68,6 +91,11 @@ export class ActionService {
         const savedAction = await em.save<ActionEntity>(action);
         if (savedAction) {
           // link programmes here
+          if (actionDto.linkedProgrammes) {
+            linkedProgrammeList.forEach(async programme => {
+              await em.save<ProgrammeEntity>(programme);
+            })
+          }
           if (actionDto.kpis) {
             kpiList.forEach(async kpi => {
               await em.save<KpiEntity>(kpi)
@@ -105,6 +133,14 @@ export class ActionService {
       actionId
     })
   }
+
+  // adding find method to action service to avoid a circular dependency with programme service
+  async findAllProgrammeByIds(programmeIds: string[]) {
+    return await this.programmeRepo.createQueryBuilder('programme')
+        .leftJoinAndSelect('programme.action', 'action')
+        .where('programme.programmeId IN (:...programmeIds)', { programmeIds })
+        .getMany();
+}
 
   private addEventLogEntry = (
     eventLog: any[],

@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AsyncOperationsHandlerInterface } from './async-operations-handler-interface.service';
 import { AsyncOperationsHandlerService } from './async-operations-handler.service';
-import { AsyncActionEntity } from 'src/entities/async.action.entity';
-import { Counter } from 'src/entities/counter.entity';
-import { CounterType } from 'src/enums/counter.type.enum';
+import { AsyncActionEntity } from '../entities/async.action.entity';
+import { Counter } from '../entities/counter.entity';
+import { CounterType } from '../enums/counter.type.enum';
 
 @Injectable()
 export class AsyncOperationsDatabaseHandlerService

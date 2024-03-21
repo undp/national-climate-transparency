@@ -3,7 +3,7 @@ import { CounterService } from "../util/counter.service";
 import { FileUploadService } from "../util/fileUpload.service";
 import { HelperService } from "../util/helpers.service";
 import { PayloadValidator } from "../validation/payload.validator";
-import { EntityManager } from "typeorm";
+import { EntityManager, Repository } from "typeorm";
 import { ProgrammeService } from "./programme.service";
 import { Test, TestingModule } from "@nestjs/testing";
 import { DataResponseMessageDto } from "../dtos/data.response.message";
@@ -17,10 +17,14 @@ import { HttpException, HttpStatus } from "@nestjs/common";
 
 import { DocumentDto } from "../dtos/document.dto";
 import { KpiDto } from "../dtos/kpi.dto";
+import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { LinkProgrammesDto } from "../dtos/link.programmes.dto";
 
 describe('ProgrammeService', () => {
     let service: ProgrammeService;
     let entityManagerMock: Partial<EntityManager>;
+    let programmeRepositoryMock: Partial<Repository<ProgrammeEntity>>;
     let actionServiceMock: Partial<ActionService>;
     let counterServiceMock: Partial<CounterService>;
     let helperServiceMock: Partial<HelperService>;
@@ -32,6 +36,10 @@ describe('ProgrammeService', () => {
     beforeEach(async () => {
         entityManagerMock = {
             transaction: jest.fn(),
+            save: jest.fn(),
+        };
+
+        programmeRepositoryMock = {
             save: jest.fn(),
         };
 
@@ -78,6 +86,10 @@ describe('ProgrammeService', () => {
                 {
                     provide: PayloadValidator,
                     useValue: payloadValidatorMock,
+                },
+                {
+                    provide: getRepositoryToken(ProgrammeEntity),
+                    useValue: programmeRepositoryMock,
                 },
             ],
         }).compile();
@@ -138,7 +150,7 @@ describe('ProgrammeService', () => {
 
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
-                save: jest.fn().mockResolvedValueOnce(programmeEntity), 
+                save: jest.fn().mockResolvedValueOnce(programmeEntity),
             };
             const savedProgramme = await callback(emMock);
             expect(emMock.save).toHaveBeenCalledTimes(2);
@@ -210,7 +222,7 @@ describe('ProgrammeService', () => {
 
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
-                save: jest.fn().mockResolvedValueOnce(programmeEntity), 
+                save: jest.fn().mockResolvedValueOnce(programmeEntity),
             };
             const savedProgramme = await callback(emMock);
             expect(emMock.save).toHaveBeenCalledTimes(4);
@@ -283,7 +295,7 @@ describe('ProgrammeService', () => {
 
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
-                save: jest.fn().mockResolvedValueOnce(programmeEntity), 
+                save: jest.fn().mockResolvedValueOnce(programmeEntity),
             };
             const savedProgramme = await callback(emMock);
             expect(emMock.save).toHaveBeenCalledTimes(4);
@@ -394,7 +406,7 @@ describe('ProgrammeService', () => {
 
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
-                save: jest.fn().mockResolvedValueOnce(expectedResult), 
+                save: jest.fn().mockResolvedValueOnce(expectedResult),
             };
             const savedProgramme = await callback(emMock);
             expect(emMock.save).toHaveBeenCalledTimes(7);
@@ -409,5 +421,197 @@ describe('ProgrammeService', () => {
         expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 
         expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
+    });
+
+    it('should link programmes to action', async () => {
+        const linkProgrammesDto: LinkProgrammesDto = { actionId: '1', programmes: ['1', '2', '3'] };
+        const user = new User();
+        const action = new ActionEntity();
+        jest.spyOn(actionServiceMock, 'findActionById').mockResolvedValue(action);
+
+        const programme1 = new ProgrammeEntity();
+        programme1.programmeId = '1';
+        programme1.action = null;
+
+        const programme2 = new ProgrammeEntity();
+        programme2.programmeId = '2';
+        programme2.action = null;
+
+        const programme3 = new ProgrammeEntity();
+        programme3.programmeId = '3';
+        programme3.action = null;
+
+        jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+
+        entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+            const emMock = {
+                save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+            };
+            const updatedProgramme = await callback(emMock);
+
+            expect(programme1.action).toBe(action);
+            expect(programme1.path).toBe(action.actionId);
+            expect(programme2.action).toBe(action);
+            expect(programme2.path).toBe(action.actionId);
+            expect(programme3.action).toBe(action);
+            expect(programme3.path).toBe(action.actionId);
+
+            expect(emMock.save).toHaveBeenCalledTimes(6);
+
+            return updatedProgramme;
+        });
+
+        // jest.spyOn(service, 'buildLogEntity').mockReturnValue(new LogEntity());
+
+        const result = await service.linkProgrammesToAction(linkProgrammesDto, user);
+
+        // Assert the returned result
+        expect(result).toEqual(expect.any(DataResponseMessageDto));
+        expect(result.statusCode).toEqual(HttpStatus.OK);
+
+        // Assert that helperService.formatReqMessagesString has been called
+        expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("programme.programmesLinkedToAction", []);
+
+        // Assert that entityManagerMock.transaction has been called
+        expect(entityManagerMock.transaction).toHaveBeenCalled();
+    });
+
+    it('should throws an error when already linked programmeId sent', async () => {
+        const linkProgrammesDto: LinkProgrammesDto = { actionId: '1', programmes: ['1', '2', '3'] };
+        const user = new User();
+        const action = new ActionEntity();
+        jest.spyOn(actionServiceMock, 'findActionById').mockResolvedValue(action);
+
+        const programme1 = new ProgrammeEntity();
+        programme1.programmeId = '1';
+        programme1.action = action;
+        programme1.path = "path1"
+
+        const programme2 = new ProgrammeEntity();
+        programme2.programmeId = '2';
+        programme2.action = null;
+
+        const programme3 = new ProgrammeEntity();
+        programme3.programmeId = '3';
+        programme3.action = null;
+
+        jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+
+        entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+            const emMock = {
+                save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+            };
+            const updatedProgramme = await callback(emMock);
+            expect(emMock.save).toHaveBeenCalledTimes(6);
+            return updatedProgramme;
+        });
+
+        // jest.spyOn(service, 'buildLogEntity').mockReturnValue(new LogEntity());
+
+        try {
+            await service.linkProgrammesToAction(linkProgrammesDto, user);
+        } catch (error) {
+            expect(error).toBeInstanceOf(HttpException);
+            expect(error.status).toBe(HttpStatus.BAD_REQUEST);
+        }
+
+        expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
+            'programme.programmeAlreadyLinked',
+            ["1"],
+        );
+
+        // Assert that entityManagerMock.transaction has been called
+        expect(entityManagerMock.transaction).toHaveBeenCalled();
+    });
+
+    it('should unlink programmes from action', async () => {
+        const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
+        const user = new User();
+
+        const programme1 = new ProgrammeEntity();
+        programme1.programmeId = '1';
+        programme1.action = new ActionEntity();
+        programme1.path = 'path1';
+
+        const programme2 = new ProgrammeEntity();
+        programme2.programmeId = '2';
+        programme2.action = new ActionEntity();
+        programme2.path = 'path2';
+
+        const programme3 = new ProgrammeEntity();
+        programme3.programmeId = '3';
+        programme3.action = new ActionEntity();
+        programme3.path = 'path3';
+
+        jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+
+        entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+            const emMock = {
+                save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+            };
+            const updatedProgrammes = await callback(emMock);
+
+            expect(programme1.action).toBeNull();
+            expect(programme1.path).toBe('');
+            expect(programme2.action).toBeNull();
+            expect(programme2.path).toBe('');
+            expect(programme3.action).toBeNull();
+            expect(programme3.path).toBe('');
+
+            expect(emMock.save).toHaveBeenCalledTimes(6);
+
+            return updatedProgrammes;
+        });
+
+        const result = await service.unlinkProgrammesFromAction(unlinkProgrammesDto, user);
+
+        expect(result).toEqual(expect.any(DataResponseMessageDto));
+        expect(result.statusCode).toEqual(HttpStatus.OK);
+        expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("programme.programmesUnlinkedFromAction", []);
+        expect(entityManagerMock.transaction).toHaveBeenCalled();
+    });
+
+    it('should throw an exception when not linked programme sent for unlinking', async () => {
+        const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
+        const user = new User();
+
+        const programme1 = new ProgrammeEntity();
+        programme1.programmeId = '1';
+        programme1.action = null;
+        programme1.path = '';
+
+        const programme2 = new ProgrammeEntity();
+        programme2.programmeId = '2';
+        programme2.action = new ActionEntity();
+        programme2.path = 'path2';
+
+        const programme3 = new ProgrammeEntity();
+        programme3.programmeId = '3';
+        programme3.action = new ActionEntity();
+        programme3.path = 'path3';
+
+        jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+
+        entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+            const emMock = {
+                save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+            };
+            const updatedProgrammes = await callback(emMock);
+
+            expect(emMock.save).toHaveBeenCalledTimes(0);
+            return updatedProgrammes;
+        });
+
+        try {
+            await service.unlinkProgrammesFromAction(unlinkProgrammesDto, user);
+        } catch (error) {
+            expect(error).toBeInstanceOf(HttpException);
+            expect(error.status).toBe(HttpStatus.BAD_REQUEST);
+        }
+
+        expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
+            'programme.programmeIsNotLinked',
+            ["1"],
+        );
     });
 })

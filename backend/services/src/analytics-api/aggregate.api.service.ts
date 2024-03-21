@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DataCountResponseDto } from "src/dtos/data.count.response";
-import { FilterEntry } from "src/dtos/filter.entry";
-import { StatFilter } from "src/dtos/stat.filter";
-import { StatList } from "src/dtos/stat.list.dto";
-import { HelperService } from "src/util/helpers.service";
+import { DataCountResponseDto } from "../dtos/data.count.response";
+import { FilterEntry } from "../dtos/filter.entry";
+import { StatFilter } from "../dtos/stat.filter";
+import { StatList } from "../dtos/stat.list.dto";
+import { HelperService } from "../util/helpers.service";
 import { Repository } from "typeorm";
 // import { StatList } from "../shared/dto/stat.list.dto";
 // import { StatType } from "../shared/enum/stat.type.enum";

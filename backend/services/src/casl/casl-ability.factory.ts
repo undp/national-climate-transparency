@@ -6,13 +6,14 @@ import {
   InferSubjects,
   MongoAbility,
 } from "@casl/ability";
-import { Injectable, ForbiddenException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { User } from "../entities/user.entity";
 import { Action } from "./action.enum";
 import { Role } from "./role.enum";
 import { EntitySubject } from "../entities/entity.subject";
 import { Organisation } from "../entities/organisation.entity";
-import { ActionEntity } from "src/entities/action.entity";
+import { ActionEntity } from "../entities/action.entity";
+import { ProgrammeEntity } from "../entities/programme.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -45,6 +46,11 @@ export class CaslAbilityFactory {
         can(Action.Create, ActionEntity);
         can(Action.Update, ActionEntity);
         can(Action.Delete, ActionEntity);
+
+        can(Action.Read, ProgrammeEntity);
+        can(Action.Create, ProgrammeEntity);
+        can(Action.Update, ProgrammeEntity);
+        can(Action.Delete, ProgrammeEntity);
       }
 
       if (user.role == Role.Admin) {
@@ -66,6 +72,11 @@ export class CaslAbilityFactory {
         can(Action.Update, ActionEntity);
         can(Action.Delete, ActionEntity);
 
+        can(Action.Read, ProgrammeEntity);
+        can(Action.Create, ProgrammeEntity);
+        can(Action.Update, ProgrammeEntity);
+        can(Action.Delete, ProgrammeEntity);
+
       }
 
       if (user.role == Role.DepartmentUser) {        
@@ -86,6 +97,11 @@ export class CaslAbilityFactory {
         can(Action.Create, ActionEntity);
         can(Action.Update, ActionEntity);
         can(Action.Delete, ActionEntity);
+
+        can(Action.Read, ProgrammeEntity);
+        can(Action.Create, ProgrammeEntity);
+        can(Action.Update, ProgrammeEntity);
+        can(Action.Delete, ProgrammeEntity);
       }
 
       if (user.role == Role.ViewOnly) {
@@ -106,6 +122,11 @@ export class CaslAbilityFactory {
         cannot(Action.Create, ActionEntity);
         cannot(Action.Update, ActionEntity);
         cannot(Action.Delete, ActionEntity);
+
+        can(Action.Read, ProgrammeEntity);
+        cannot(Action.Create, ProgrammeEntity);
+        cannot(Action.Update, ProgrammeEntity);
+        cannot(Action.Delete, ProgrammeEntity);
       }
 
 

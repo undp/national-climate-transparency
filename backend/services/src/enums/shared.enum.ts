@@ -83,7 +83,8 @@ export enum LogEventType {
   PROGRAMME_LINKED = 3,
   ACTION_UPDATED = 4,
   PROGRAMME_CREATED = 5,
-  LINKED_TO_ACTION = 6
+  LINKED_TO_ACTION = 6,
+  UNLINKED_FROM_ACTION = 7,
 }
 
 export enum GHGS {
