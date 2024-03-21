@@ -68,7 +68,7 @@ const UploadFileGrid: React.FC<Props> = ({
         <Upload {...props}>
           <Button
             icon={<UploadOutlined />}
-            style={{ width: '120px', height: height }}
+            style={{ width: '120px', height: height, color: '#3A3541', opacity: 0.8 }}
             disabled={isView}
           >
             {buttonText}

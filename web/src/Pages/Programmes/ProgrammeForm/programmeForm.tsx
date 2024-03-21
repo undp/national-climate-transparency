@@ -16,7 +16,6 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const gutterSize = 30;
-const rowBottomMargin = '0px';
 
 const validation = {
   required: { required: true, message: 'Required Field' },
@@ -51,12 +50,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   const { t } = useTranslation(['programmeForm']);
   const isView: boolean = method === 'view' ? true : false;
 
-  const yearsList: number[] = [];
-
-  for (let year = 2013; year <= 2050; year++) {
-    yearsList.push(year);
-  }
-
   const navigate = useNavigate();
   const { post } = useConnection();
 
@@ -66,17 +59,27 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
   );
-  const [kpiList, setKpiList] = useState<KpiData[]>([]);
+
+  // projects state
 
   const [allProjectIds, setAllProjectIdList] = useState<string[]>([]);
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
   const [projectData, setProjectData] = useState<ProjectData[]>([]);
-
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
+  // KPI State
+
+  const [kpiList, setKpiList] = useState<KpiData[]>([]);
+
   // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
+
+  const yearsList: number[] = [];
+
+  for (let year = 2013; year <= 2050; year++) {
+    yearsList.push(year);
+  }
 
   useEffect(() => {
     const actionData: ActionData[] = [];
@@ -163,8 +166,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
     }
   };
 
-  // Attach Project
-
   // Add New KPI
 
   const createKPI = () => {
@@ -219,7 +220,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
           <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
             {t('generalInfoTitle')}
           </div>
-          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+          <Row gutter={gutterSize}>
             <Col span={6}>
               <Form.Item
                 label={
@@ -260,7 +261,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+          <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
                 label={
@@ -286,7 +287,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+          <Row gutter={gutterSize}>
             <Col span={6}>
               <Form.Item
                 label={
@@ -351,7 +352,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+          <Row gutter={gutterSize}>
             <Col span={6}>
               <Form.Item
                 label={
@@ -394,7 +395,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+          <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
                 label={
@@ -439,7 +440,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             setUploadedFiles={setUploadedFiles}
             isView={isView}
           ></UploadFileGrid>
-          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+          <Row gutter={gutterSize}>
             <Col span={24}>
               <Form.Item
                 label={
@@ -454,7 +455,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+          <Row gutter={gutterSize}>
             <Col span={12}>
               <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                 {t('projectListTitle')}
@@ -503,7 +504,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
           <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
             {t('mitigationInfoTitle')}
           </div>
-          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+          <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('ghgAffected')}</label>}
@@ -513,10 +514,10 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
           </Row>
-          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '25px', marginBottom: '10px' }}>
+          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}>
             {t('emmissionInfoTitle')}
           </div>
-          <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+          <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>}
@@ -534,13 +535,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
           </Row>
-          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '25px', marginBottom: '10px' }}>
+          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}>
             {t('kpiInfoTitle')}
           </div>
           {kpiList.map((kpi: any) => (
-            <Row key={kpi.index} gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+            <Row key={kpi.index} gutter={gutterSize}>
               <Col span={12}>
-                <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
+                <Row gutter={gutterSize}>
                   <Col span={12}>
                     <Form.Item
                       label={
@@ -578,7 +579,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 </Row>
               </Col>
               <Col span={12}>
-                <Row gutter={15} style={{ marginBottom: rowBottomMargin }}>
+                <Row gutter={15}>
                   <Col span={11}>
                     <Form.Item
                       label={
@@ -614,9 +615,9 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                         justifyContent: 'center',
                         alignItems: 'center',
                         padding: '0px',
-                        width: '31px',
-                        height: '31px',
-                        marginTop: '38px',
+                        width: '30px',
+                        height: '30px',
+                        marginTop: '36px',
                         borderWidth: '1px',
                         borderRadius: '4px',
                         borderColor: '#d9d9d9',
@@ -638,15 +639,11 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             <Col span={2}>
               {!isView && (
                 <Button
-                  type="default"
-                  size="large"
-                  block
                   icon={<PlusCircleOutlined />}
                   style={{
                     border: 'none',
                     color: '#3A3541',
                     opacity: 0.8,
-                    marginTop: '15px',
                     padding: 0,
                   }}
                   onClick={createKPI}
