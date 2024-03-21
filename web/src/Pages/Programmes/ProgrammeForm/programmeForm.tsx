@@ -1,11 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, Card, Modal, SelectProps, message } from 'antd';
-import {
-  AppstoreAddOutlined,
-  DeleteOutlined,
-  LinkOutlined,
-  PlusCircleOutlined,
-} from '@ant-design/icons';
+import { DeleteOutlined, LinkOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate } from 'react-router-dom';
@@ -14,18 +9,16 @@ import { useConnection } from '@undp/carbon-library';
 import { Sector } from '../../../Enums/sector.enum';
 import { SubSector, NatImplementor } from '../../../Enums/shared.enum';
 import { ProgrammeStatus } from '../../../Enums/programme.enum';
+import { Layers } from 'react-bootstrap-icons';
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 const gutterSize = 30;
-const rowHeight = '75px';
-const rowBottomMargin = '10px';
-const multiLineHeight = '114px';
-const fieldHeight = '32px';
+const rowBottomMargin = '0px';
 
 const validation = {
-  required: { required: false, message: 'Required Field' },
+  required: { required: true, message: 'Required Field' },
   number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
 };
 
@@ -100,8 +93,8 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
     const newProgramIdList: SelectProps['options'] = [];
     for (let i = 0; i < 20; i++) {
       newProgramIdList.push({
-        label: `P00${i}`,
-        value: `P00${i}`,
+        label: `J00${i}`,
+        value: `J00${i}`,
       });
     }
     setProgramIdList(newProgramIdList);
@@ -115,9 +108,9 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
     form.setFieldsValue({
       type: 'Mitigation',
       instrumentType: 'Policy',
-      intImplementor: 'AFDB',
+      intImplementor: 'AFGB',
       recipientEntity: 'Ministry of Agriculture, Climate Change and Environment',
-      ghgsAffected: ['CO2', 'N2O'],
+      ghgsAffected: 'CO2',
       achievedReduct: 6,
       expectedReduct: 100,
     });
@@ -144,7 +137,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
 
       payload.linkedProjects = [];
       projectList.forEach((project) => {
-        payload.linkedProgrammes.push(project.projectId);
+        payload.linkedProjects.push(project.projectId);
       });
 
       payload.investment = parseFloat(payload.investment);
@@ -153,7 +146,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
-          content: t('actionCreationSuccess'),
+          content: t('programmeCreationSuccess'),
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -206,7 +199,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
       index: kpiList.length,
       name: '',
       unit: '',
-      creatorType: 'action',
+      creatorType: 'programme',
       expected: 0,
       achieved: 0,
     };
@@ -254,7 +247,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             {t('generalInfoTitle')}
           </div>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={6} style={{ height: rowHeight }}>
+            <Col span={6}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>
@@ -264,7 +257,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="actionId"
                 rules={[validation.required]}
               >
-                <Select allowClear disabled={isView} showSearch>
+                <Select size="large" allowClear disabled={isView} showSearch>
                   {actionList.map((action) => (
                     <Option key={action.id} value={action.id}>
                       {action.title}
@@ -273,16 +266,16 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={6} style={{ height: rowHeight }}>
+            <Col span={6}>
               <Form.Item
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('typesHeader')}</label>}
                 name="type"
                 rules={[validation.required]}
               >
-                <Input style={{ height: fieldHeight }} disabled />
+                <Input size="large" disabled />
               </Form.Item>
             </Col>
-            <Col span={12} style={{ height: rowHeight }}>
+            <Col span={12}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('progTitleHeader')}</label>
@@ -290,12 +283,12 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="title"
                 rules={[validation.required]}
               >
-                <Input style={{ height: fieldHeight }} disabled={isView} />
+                <Input size="large" maxLength={10} disabled={isView} />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={12} style={{ height: multiLineHeight }}>
+            <Col span={12}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('progDescTitle')}</label>
@@ -303,10 +296,10 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="description"
                 rules={[validation.required]}
               >
-                <TextArea rows={3} disabled={isView} />
+                <TextArea maxLength={250} rows={3} disabled={isView} />
               </Form.Item>
             </Col>
-            <Col span={12} style={{ height: multiLineHeight }}>
+            <Col span={12}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>
@@ -316,22 +309,22 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="objective"
                 rules={[validation.required]}
               >
-                <TextArea rows={3} disabled={isView} />
+                <TextArea maxLength={250} rows={3} disabled={isView} />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={6} style={{ height: rowHeight }}>
+            <Col span={6}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('instrTypeTitle')}</label>
                 }
                 name="instrumentType"
               >
-                <Input style={{ height: fieldHeight }} disabled />
+                <Input size="large" disabled />
               </Form.Item>
             </Col>
-            <Col span={6} style={{ height: rowHeight }}>
+            <Col span={6}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('progStatusTitle')}</label>
@@ -339,7 +332,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="status"
                 rules={[validation.required]}
               >
-                <Select allowClear disabled={isView} showSearch>
+                <Select size="large" allowClear disabled={isView} showSearch>
                   {Object.values(ProgrammeStatus).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -348,7 +341,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={6} style={{ height: rowHeight }}>
+            <Col span={6}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('sectorsAffTitle')}</label>
@@ -356,13 +349,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="affectedSectors"
                 rules={[validation.required]}
               >
-                <Select
-                  mode="multiple"
-                  allowClear
-                  disabled={isView}
-                  showSearch
-                  maxTagCount={'responsive'}
-                >
+                <Select size="large" mode="multiple" allowClear disabled={isView} showSearch>
                   {Object.values(Sector).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -371,7 +358,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={6} style={{ height: rowHeight }}>
+            <Col span={6}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>
@@ -381,13 +368,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="affectedSubSector"
                 rules={[validation.required]}
               >
-                <Select
-                  mode="multiple"
-                  allowClear
-                  disabled={isView}
-                  showSearch
-                  maxTagCount={'responsive'}
-                >
+                <Select size="large" mode="multiple" allowClear disabled={isView} showSearch>
                   {Object.values(SubSector).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -398,7 +379,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={6} style={{ height: rowHeight }}>
+            <Col span={6}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('startYearTitle')}</label>
@@ -406,7 +387,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="startYear"
                 rules={[validation.required]}
               >
-                <Select allowClear disabled={isView} showSearch>
+                <Select size="large" allowClear disabled={isView} showSearch>
                   {yearsList.map((year) => (
                     <Option key={year} value={year}>
                       {year}
@@ -415,7 +396,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={6} style={{ height: rowHeight }}>
+            <Col span={6}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>
@@ -424,10 +405,10 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 }
                 name="intImplementor"
               >
-                <Input style={{ height: fieldHeight }} disabled />
+                <Input size="large" disabled />
               </Form.Item>
             </Col>
-            <Col span={12} style={{ height: rowHeight }}>
+            <Col span={12}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>
@@ -436,12 +417,12 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 }
                 name="recipientEntity"
               >
-                <Input style={{ height: fieldHeight }} disabled />
+                <Input size="large" disabled />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={12} style={{ height: rowHeight }}>
+            <Col span={12}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>
@@ -451,13 +432,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="natImplementor"
                 rules={[validation.required]}
               >
-                <Select
-                  mode="multiple"
-                  allowClear
-                  disabled={isView}
-                  showSearch
-                  maxTagCount={'responsive'}
-                >
+                <Select size="large" mode="multiple" allowClear disabled={isView} showSearch>
                   {Object.values(NatImplementor).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -466,7 +441,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={12} style={{ height: rowHeight }}>
+            <Col span={12}>
               <Form.Item<number>
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>
@@ -476,7 +451,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="investment"
                 rules={[validation.required]}
               >
-                <Input type="number" style={{ height: fieldHeight }} disabled={isView} />
+                <Input size="large" type="number" disabled={isView} />
               </Form.Item>
             </Col>
           </Row>
@@ -485,14 +460,14 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             horizontalGutter={gutterSize}
             verticalGutter={10}
             buttonText={t('upload')}
-            height={fieldHeight}
+            height={'40px'}
             acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
-            style={{ marginBottom: '25px', marginTop: '20px' }}
+            style={{ marginBottom: '25px' }}
             setUploadedFiles={setUploadedFiles}
             isView={isView}
           ></UploadFileGrid>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={24} style={{ height: multiLineHeight }}>
+            <Col span={24}>
               <Form.Item
                 label={
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>
@@ -557,7 +532,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 ]}
               >
                 <div style={{ color: '#16B1FF', marginTop: '15px' }}>
-                  <AppstoreAddOutlined style={{ fontSize: '120px' }} />
+                  <Layers style={{ fontSize: '120px' }} />
                 </div>
                 <div
                   style={{ color: '#3A3541', opacity: 0.8, marginTop: '30px', fontSize: '15px' }}
@@ -576,6 +551,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                   {t('projectList')}
                 </div>
                 <Select
+                  size="large"
                   showSearch
                   mode="multiple"
                   allowClear
@@ -593,12 +569,12 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             {t('mitigationInfoTitle')}
           </div>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={12} style={{ height: rowHeight }}>
+            <Col span={12}>
               <Form.Item
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('ghgAffected')}</label>}
                 name="ghgsAffected"
               >
-                <Input style={{ height: fieldHeight }} disabled />
+                <Input size="large" disabled />
               </Form.Item>
             </Col>
           </Row>
@@ -606,20 +582,20 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             {t('emmissionInfoTitle')}
           </div>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-            <Col span={12} style={{ height: rowHeight }}>
+            <Col span={12}>
               <Form.Item
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>}
                 name="achievedReduct"
               >
-                <Input style={{ height: fieldHeight }} disabled />
+                <Input size="large" disabled />
               </Form.Item>
             </Col>
-            <Col span={12} style={{ height: rowHeight }}>
+            <Col span={12}>
               <Form.Item
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>}
                 name="expectedReduct"
               >
-                <Input style={{ height: fieldHeight }} disabled />
+                <Input size="large" disabled />
               </Form.Item>
             </Col>
           </Row>
@@ -628,9 +604,9 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
           </div>
           {kpiList.map((kpi: any) => (
             <Row key={kpi.index} gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-              <Col span={12} style={{ height: rowHeight }}>
+              <Col span={12}>
                 <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
-                  <Col span={12} style={{ height: rowHeight }}>
+                  <Col span={12}>
                     <Form.Item
                       label={
                         <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('kpiName')}</label>
@@ -639,7 +615,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                       rules={[validation.required]}
                     >
                       <Input
-                        style={{ height: fieldHeight }}
+                        size="large"
                         disabled={isView}
                         onChange={(e) => {
                           updateKPI(kpi.index, 'name', e.target.value);
@@ -647,16 +623,16 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                       />
                     </Form.Item>
                   </Col>
-                  <Col span={12} style={{ height: rowHeight }}>
+                  <Col span={12}>
                     <Form.Item
                       label={
                         <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('kpiUnit')}</label>
                       }
                       name={`kpi_unit_${kpi.index}`}
-                      rules={[{ required: true, message: 'Required Field' }]}
+                      rules={[validation.required]}
                     >
                       <Input
-                        style={{ height: fieldHeight }}
+                        size="large"
                         disabled={isView}
                         onChange={(e) => {
                           updateKPI(kpi.index, 'unit', e.target.value);
@@ -666,19 +642,19 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                   </Col>
                 </Row>
               </Col>
-              <Col span={12} style={{ height: rowHeight }}>
+              <Col span={12}>
                 <Row gutter={15} style={{ marginBottom: rowBottomMargin }}>
-                  <Col span={11} style={{ height: rowHeight }}>
+                  <Col span={11}>
                     <Form.Item
                       label={
                         <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>
                       }
                       name={`kpi_ach_${kpi.index}`}
                     >
-                      <Input style={{ height: fieldHeight }} value={kpi.achieved} disabled={true} />
+                      <Input size="large" value={kpi.achieved} disabled={true} />
                     </Form.Item>
                   </Col>
-                  <Col span={11} style={{ height: rowHeight }}>
+                  <Col span={11}>
                     <Form.Item
                       label={
                         <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>
@@ -687,7 +663,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                       rules={[validation.required, validation.number]}
                     >
                       <Input
-                        style={{ height: fieldHeight }}
+                        size="large"
                         value={kpi.achieved}
                         disabled={isView}
                         onChange={(e) => {
@@ -696,7 +672,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                       />
                     </Form.Item>
                   </Col>
-                  <Col span={2} style={{ height: rowHeight }}>
+                  <Col span={2}>
                     <Card
                       style={{
                         display: 'flex',
@@ -724,7 +700,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Row>
           ))}
           <Row justify={'start'}>
-            <Col span={2} style={{ height: fieldHeight }}>
+            <Col span={2}>
               {!isView && (
                 <Button
                   type="default"
@@ -757,7 +733,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
         )}
         {!isView && (
           <Row gutter={20} justify={'end'}>
-            <Col span={2} style={{ height: fieldHeight }}>
+            <Col span={2}>
               <Button
                 type="default"
                 size="large"
@@ -769,7 +745,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 {t('cancel')}
               </Button>
             </Col>
-            <Col span={2} style={{ height: fieldHeight }}>
+            <Col span={2}>
               <Form.Item>
                 <Button type="primary" size="large" block htmlType="submit">
                   {t('add')}

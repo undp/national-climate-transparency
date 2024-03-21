@@ -35,6 +35,8 @@
     "attach": "Attach",
     "attachProjects": "ATTACH PROJECTS",
     "projectList": "Project List",
-    "addKPI": "Add KPI"
+    "addKPI": "Add KPI",
+    "actionCreationSuccess": "Programme Added Succesfully",
+    "updatesInfoTitle": "Updates"
   }
   

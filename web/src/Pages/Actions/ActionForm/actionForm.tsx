@@ -17,7 +17,7 @@ import {
   message,
 } from 'antd';
 import {
-  AppstoreAddOutlined,
+  AppstoreOutlined,
   CloseCircleOutlined,
   DeleteOutlined,
   EllipsisOutlined,
@@ -570,7 +570,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 ]}
               >
                 <div style={{ color: '#16B1FF', marginTop: '15px' }}>
-                  <AppstoreAddOutlined style={{ fontSize: '120px' }} />
+                  <AppstoreOutlined style={{ fontSize: '120px' }} />
                 </div>
                 <div
                   style={{ color: '#3A3541', opacity: 0.8, marginTop: '30px', fontSize: '15px' }}
