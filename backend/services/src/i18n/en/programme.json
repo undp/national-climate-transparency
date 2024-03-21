@@ -1,7 +1,12 @@
 {
     "actionNotFound": "An action with id {} is not found",
     "programmeCreationFailed": "Programme Creation failed due to {}",
-    "createProgrammeSuccess": "Programme created successfully"
+    "createProgrammeSuccess": "Programme created successfully",
+    "programmesNotFound": "Programme(s) not found",
+    "programmeAlreadyLinked": "Programme with id {} is already linked to an action",
+    "programmeIsNotLinked": "Programme with id {} is not linked to an action",
+    "programmesLinkedToAction": "Programmes linked to action successfully",
+    "programmesUnlinkedFromAction": "Programmes unlinked from action successfully"
 
 
 }

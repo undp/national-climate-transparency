@@ -243,9 +243,6 @@ export class ProgrammeService {
             .getMany();
     }
 
-
-
-
     private addEventLogEntry = (
         eventLog: any[],
         eventType: LogEventType,
