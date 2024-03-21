@@ -356,7 +356,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="affectedSectors"
                 rules={[validation.required]}
               >
-                <Select mode="multiple" allowClear disabled={isView} showSearch>
+                <Select
+                  mode="multiple"
+                  allowClear
+                  disabled={isView}
+                  showSearch
+                  maxTagCount={'responsive'}
+                >
                   {Object.values(Sector).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -375,7 +381,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="affectedSubSector"
                 rules={[validation.required]}
               >
-                <Select mode="multiple" allowClear disabled={isView} showSearch>
+                <Select
+                  mode="multiple"
+                  allowClear
+                  disabled={isView}
+                  showSearch
+                  maxTagCount={'responsive'}
+                >
                   {Object.values(SubSector).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -439,7 +451,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="natImplementor"
                 rules={[validation.required]}
               >
-                <Select mode="multiple" allowClear disabled={isView} showSearch>
+                <Select
+                  mode="multiple"
+                  allowClear
+                  disabled={isView}
+                  showSearch
+                  maxTagCount={'responsive'}
+                >
                   {Object.values(NatImplementor).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
