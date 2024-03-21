@@ -16,6 +16,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const gutterSize = 30;
+const inputFontSize = '13px';
 
 const validation = {
   required: { required: true, message: 'Required Field' },
@@ -239,7 +240,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="actionId"
                 rules={[validation.required]}
               >
-                <Select size="large" allowClear disabled={isView} showSearch>
+                <Select
+                  size={'large'}
+                  style={{ fontSize: inputFontSize }}
+                  allowClear
+                  disabled={isView}
+                  showSearch
+                >
                   {actionList.map((action) => (
                     <Option key={action.id} value={action.id}>
                       {action.title}
@@ -254,7 +261,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="type"
                 rules={[validation.required]}
               >
-                <Input size="large" disabled />
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -265,7 +272,11 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="title"
                 rules={[validation.required]}
               >
-                <Input size="large" maxLength={10} disabled={isView} />
+                <Input
+                  style={{ fontSize: inputFontSize, height: '40px' }}
+                  maxLength={10}
+                  disabled={isView}
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -303,7 +314,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 }
                 name="instrumentType"
               >
-                <Input size="large" disabled />
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
               </Form.Item>
             </Col>
             <Col span={6}>
@@ -314,7 +325,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="status"
                 rules={[validation.required]}
               >
-                <Select size="large" allowClear disabled={isView} showSearch>
+                <Select
+                  size="large"
+                  style={{ fontSize: inputFontSize }}
+                  allowClear
+                  disabled={isView}
+                  showSearch
+                >
                   {Object.values(ProgrammeStatus).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -331,7 +348,14 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="affectedSectors"
                 rules={[validation.required]}
               >
-                <Select size="large" mode="multiple" allowClear disabled={isView} showSearch>
+                <Select
+                  size="large"
+                  style={{ fontSize: inputFontSize }}
+                  mode="multiple"
+                  allowClear
+                  disabled={isView}
+                  showSearch
+                >
                   {Object.values(Sector).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -350,7 +374,14 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="affectedSubSector"
                 rules={[validation.required]}
               >
-                <Select size="large" mode="multiple" allowClear disabled={isView} showSearch>
+                <Select
+                  size="large"
+                  style={{ fontSize: inputFontSize }}
+                  mode="multiple"
+                  allowClear
+                  disabled={isView}
+                  showSearch
+                >
                   {Object.values(SubSector).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -369,7 +400,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="startYear"
                 rules={[validation.required]}
               >
-                <Select size="large" allowClear disabled={isView} showSearch>
+                <Select
+                  size="large"
+                  style={{ fontSize: inputFontSize }}
+                  allowClear
+                  disabled={isView}
+                  showSearch
+                >
                   {yearsList.map((year) => (
                     <Option key={year} value={year}>
                       {year}
@@ -387,7 +424,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 }
                 name="intImplementor"
               >
-                <Input size="large" disabled />
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -399,7 +436,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 }
                 name="recipientEntity"
               >
-                <Input size="large" disabled />
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
               </Form.Item>
             </Col>
           </Row>
@@ -414,7 +451,14 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="natImplementor"
                 rules={[validation.required]}
               >
-                <Select size="large" mode="multiple" allowClear disabled={isView} showSearch>
+                <Select
+                  size="large"
+                  style={{ fontSize: inputFontSize }}
+                  mode="multiple"
+                  allowClear
+                  disabled={isView}
+                  showSearch
+                >
                   {Object.values(NatImplementor).map((instrument) => (
                     <Option key={instrument} value={instrument}>
                       {instrument}
@@ -433,7 +477,11 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="investment"
                 rules={[validation.required]}
               >
-                <Input size="large" type="number" disabled={isView} />
+                <Input
+                  style={{ fontSize: inputFontSize, height: '40px' }}
+                  type="number"
+                  disabled={isView}
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -518,7 +566,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('ghgAffected')}</label>}
                 name="ghgsAffected"
               >
-                <Input size="large" disabled />
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
               </Form.Item>
             </Col>
           </Row>
@@ -531,7 +579,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>}
                 name="achievedReduct"
               >
-                <Input size="large" disabled />
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -539,7 +587,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>}
                 name="expectedReduct"
               >
-                <Input size="large" disabled />
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
               </Form.Item>
             </Col>
           </Row>
@@ -559,7 +607,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                       rules={[validation.required]}
                     >
                       <Input
-                        size="large"
+                        style={{ fontSize: inputFontSize, height: '40px' }}
                         disabled={isView}
                         onChange={(e) => {
                           updateKPI(kpi.index, 'name', e.target.value);
@@ -576,7 +624,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                       rules={[validation.required]}
                     >
                       <Input
-                        size="large"
+                        style={{ fontSize: inputFontSize, height: '40px' }}
                         disabled={isView}
                         onChange={(e) => {
                           updateKPI(kpi.index, 'unit', e.target.value);
@@ -594,7 +642,11 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                         <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>
                       }
                     >
-                      <Input size="large" value={kpi.achieved} disabled={true} />
+                      <Input
+                        style={{ fontSize: inputFontSize, height: '40px' }}
+                        value={kpi.achieved}
+                        disabled={true}
+                      />
                     </Form.Item>
                   </Col>
                   <Col span={11}>
@@ -606,7 +658,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                       rules={[validation.required, validation.number]}
                     >
                       <Input
-                        size="large"
+                        style={{ fontSize: inputFontSize, height: '40px' }}
                         disabled={isView}
                         onChange={(e) => {
                           updateKPI(kpi.index, 'expected', e.target.value);
