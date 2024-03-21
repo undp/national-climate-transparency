@@ -690,15 +690,12 @@ const actionForm: React.FC<Props> = ({ method }) => {
             <Col span={2}>
               {!isView && (
                 <Button
-                  type="default"
-                  size="large"
-                  block
                   icon={<PlusCircleOutlined />}
                   style={{
+                    marginTop: '15px',
                     border: 'none',
                     color: '#3A3541',
                     opacity: 0.8,
-                    marginTop: '15px',
                     padding: 0,
                   }}
                   onClick={createKPI}
