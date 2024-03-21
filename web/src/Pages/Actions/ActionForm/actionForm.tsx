@@ -183,7 +183,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
     }
   };
 
-  // Attach Programme
+  // Dettach Programme
 
   const detachProgramme = (prgId: string) => {
     const filteredData = programData.filter((prg) => prg.programmeId !== prgId);

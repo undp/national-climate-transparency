@@ -1,6 +1,23 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, Card, message } from 'antd';
-import { DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import {
+  Row,
+  Col,
+  Input,
+  Button,
+  Form,
+  Select,
+  Card,
+  message,
+  Popover,
+  List,
+  Typography,
+} from 'antd';
+import {
+  CloseCircleOutlined,
+  DeleteOutlined,
+  EllipsisOutlined,
+  PlusCircleOutlined,
+} from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate } from 'react-router-dom';
@@ -205,10 +222,63 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
     });
   };
 
+  // Dettach Project
+
+  const detachProject = (prjId: string) => {
+    const filteredData = projectData.filter((prj) => prj.projectId !== prjId);
+    const filteredIds = selectedProjectIds.filter((id) => id !== prjId);
+    setProjectData(filteredData);
+    setSelectedProjectIds(filteredIds);
+  };
+
+  // Action Menu definition
+
+  const actionMenu = (record: any) => {
+    return (
+      <List
+        className="action-menu"
+        size="small"
+        dataSource={[
+          {
+            text: t('detach'),
+            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
+            click: () => {
+              {
+                detachProject(record.projectId);
+              }
+            },
+          },
+        ]}
+        renderItem={(item) => (
+          <List.Item onClick={item.click}>
+            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
+            <span>{item.text}</span>
+          </List.Item>
+        )}
+      />
+    );
+  };
+
   // Column Definition
   const projTableColumns = [
     { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
     { title: t('projectName'), dataIndex: 'projectName', key: 'projectName' },
+    {
+      title: '',
+      key: 'projectId',
+      align: 'right' as const,
+      width: 6,
+      render: (record: any) => {
+        return (
+          <Popover placement="bottomRight" trigger="click" content={actionMenu(record)}>
+            <EllipsisOutlined
+              rotate={90}
+              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
+            />
+          </Popover>
+        );
+      },
+    },
   ];
 
   // Table Behaviour
