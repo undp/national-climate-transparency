@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, Card, Modal, SelectProps, message } from 'antd';
-import { DeleteOutlined, LinkOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, Card, message } from 'antd';
+import { DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
+import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '@undp/carbon-library';
 import { Sector } from '../../../Enums/sector.enum';
 import { SubSector, NatImplementor } from '../../../Enums/shared.enum';
@@ -62,15 +63,14 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   // form state
 
   const [actionList, setActionList] = useState<ActionData[]>([]);
-  const [programIdList, setProgramIdList] = useState<SelectProps['options']>([]);
-
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
   );
   const [kpiList, setKpiList] = useState<KpiData[]>([]);
 
-  const [pendingProjects, setPendingProjects] = useState<string[]>([]);
-  const [projectList, setProjectList] = useState<ProjectData[]>([]);
+  const [allProjectIds, setAllProjectIdList] = useState<string[]>([]);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
+  const [projectData, setProjectData] = useState<ProjectData[]>([]);
 
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -87,18 +87,21 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
       });
     }
     setActionList(actionData);
+
+    const projIds: string[] = [];
+    for (let i = 0; i < 15; i++) {
+      projIds.push(`J00${i}`);
+    }
+    setAllProjectIdList(projIds);
   }, []);
 
   useEffect(() => {
-    const newProgramIdList: SelectProps['options'] = [];
-    for (let i = 0; i < 20; i++) {
-      newProgramIdList.push({
-        label: `J00${i}`,
-        value: `J00${i}`,
-      });
-    }
-    setProgramIdList(newProgramIdList);
-  }, [projectList]);
+    const tempProjectData: ProjectData[] = [];
+    selectedProjectIds.forEach((projId) => {
+      tempProjectData.push({ projectId: projId, projectName: `${projId}_name` });
+    });
+    setProjectData(tempProjectData);
+  }, [selectedProjectIds]);
 
   useEffect(() => {
     if (method !== 'create') {
@@ -114,7 +117,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
       achievedReduct: 6,
       expectedReduct: 100,
     });
-  }, [projectList, kpiList]);
+  }, [selectedProjectIds, kpiList]);
 
   // Form Submit
 
@@ -135,10 +138,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
         payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
       });
 
-      payload.linkedProjects = [];
-      projectList.forEach((project) => {
-        payload.linkedProjects.push(project.projectId);
-      });
+      payload.linkedProjects = selectedProjectIds;
 
       payload.investment = parseFloat(payload.investment);
 
@@ -164,33 +164,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   };
 
   // Attach Project
-
-  const [open, setOpen] = useState(false);
-
-  const showModal = () => {
-    setOpen(true);
-  };
-
-  const attachProject = () => {
-    setOpen(false);
-    const updatedPrjData: ProjectData[] = [];
-
-    for (const prjId of pendingProjects) {
-      updatedPrjData.push({
-        projectId: prjId,
-        projectName: 'project name',
-      });
-    }
-    setProjectList(updatedPrjData);
-  };
-
-  const attachCancel = () => {
-    setOpen(false);
-  };
-
-  const handleProjSelect = (prjIds: string[]) => {
-    setPendingProjects(prjIds);
-  };
 
   // Add New KPI
 
@@ -487,13 +460,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 {t('projectListTitle')}
               </div>
               <LayoutTable
-                tableData={projectList}
+                tableData={projectData}
                 columns={projTableColumns}
                 loading={false}
                 pagination={{
                   current: currentPage,
                   pageSize: pageSize,
-                  total: projectList.length,
+                  total: projectData.length,
                   showQuickJumper: true,
                   pageSizeOptions: ['10', '20', '30'],
                   showSizeChanger: true,
@@ -509,58 +482,20 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               span={5}
               style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
             >
-              {!isView && (
-                <Button
-                  type="primary"
-                  size="large"
-                  block
-                  icon={<LinkOutlined />}
-                  style={{ padding: 0 }}
-                  onClick={showModal}
-                >
-                  {t('attachProjects')}
-                </Button>
-              )}
-              <Modal
-                open={open}
-                onCancel={attachCancel}
-                footer={[
-                  <Button onClick={attachCancel}>Cancel</Button>,
-                  <Button type="primary" onClick={attachProject}>
-                    {t('attach')}
-                  </Button>,
-                ]}
-              >
-                <div style={{ color: '#16B1FF', marginTop: '15px' }}>
-                  <Layers style={{ fontSize: '120px' }} />
-                </div>
-                <div
-                  style={{ color: '#3A3541', opacity: 0.8, marginTop: '30px', fontSize: '15px' }}
-                >
-                  <strong>{t('attachProjects')}</strong>
-                </div>
-                <div
-                  style={{
-                    color: '#3A3541',
-                    opacity: 0.8,
-                    marginTop: '20px',
-                    marginBottom: '8px',
-                    textAlign: 'left',
-                  }}
-                >
-                  {t('projectList')}
-                </div>
-                <Select
-                  size="large"
-                  showSearch
-                  mode="multiple"
-                  allowClear
-                  style={{ width: '100%' }}
-                  value={pendingProjects}
-                  onChange={handleProjSelect}
-                  options={programIdList}
-                />
-              </Modal>
+              <AttachEntity
+                isDisabled={isView}
+                options={allProjectIds}
+                content={{
+                  buttonName: t('attachProjects'),
+                  attach: t('attach'),
+                  contentTitle: t('attachProjects'),
+                  listTitle: t('projectList'),
+                  cancel: t('cancel'),
+                }}
+                attachedUnits={selectedProjectIds}
+                setAttachedUnits={setSelectedProjectIds}
+                icon={<Layers style={{ fontSize: '120px' }} />}
+              ></AttachEntity>
             </Col>
           </Row>
         </div>
