@@ -126,7 +126,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
-    console.log('shdgc', payload);
     try {
       for (const key in payload) {
         if (key.startsWith('kpi_')) {
@@ -291,7 +290,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="title"
                 rules={[validation.required]}
               >
-                <Input style={{ height: fieldHeight }} status="error" />
+                <Input style={{ height: fieldHeight }} disabled={isView} />
               </Form.Item>
             </Col>
           </Row>
@@ -459,7 +458,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 name="investment"
                 rules={[validation.required]}
               >
-                <Input type="number" style={{ height: fieldHeight }} />
+                <Input type="number" style={{ height: fieldHeight }} disabled={isView} />
               </Form.Item>
             </Col>
           </Row>
@@ -472,6 +471,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
             style={{ marginBottom: '25px', marginTop: '20px' }}
             setUploadedFiles={setUploadedFiles}
+            isView={isView}
           ></UploadFileGrid>
           <Row gutter={gutterSize} style={{ marginBottom: rowBottomMargin }}>
             <Col span={24} style={{ height: multiLineHeight }}>

@@ -15,6 +15,7 @@ interface Props {
   setUploadedFiles: React.Dispatch<
     React.SetStateAction<{ id: string; title: string; data: string }[]>
   >;
+  isView: boolean;
 }
 
 const UploadFileGrid: React.FC<Props> = ({
@@ -26,6 +27,7 @@ const UploadFileGrid: React.FC<Props> = ({
   height,
   acceptedFiles,
   setUploadedFiles,
+  isView,
 }) => {
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
 
@@ -64,7 +66,11 @@ const UploadFileGrid: React.FC<Props> = ({
     <Row gutter={[horizontalGutter, verticalGutter]} style={style}>
       <Col span={3} style={{ height: height }}>
         <Upload {...props}>
-          <Button icon={<UploadOutlined />} style={{ width: '120px', height: height }}>
+          <Button
+            icon={<UploadOutlined />}
+            style={{ width: '120px', height: height }}
+            disabled={isView}
+          >
             {buttonText}
           </Button>
         </Upload>

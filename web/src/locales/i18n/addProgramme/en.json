@@ -46,5 +46,6 @@
   "isRequired": "is required!",
   "environmentalImpactAssessment": "Environmental Impact Assessment",
   "environmentalAssessmentRegistrationNo": "Environmental Assessment Registration Number",
-  "actionCreationSuccess": "Programme Added Succesfully"
+  "actionCreationSuccess": "Programme Added Succesfully",
+  "updatesInfoTitle": "Updates"
 }
