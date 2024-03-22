@@ -13,3 +13,8 @@ $colHeight: 500px;
     padding-right: 30px;
     padding-bottom: 30px;
 }
+
+body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
+  border-color: #ff4d4f !important;
+}

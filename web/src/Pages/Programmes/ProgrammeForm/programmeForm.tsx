@@ -28,6 +28,7 @@ import { Sector } from '../../../Enums/sector.enum';
 import { SubSector, NatImplementor } from '../../../Enums/shared.enum';
 import { ProgrammeStatus } from '../../../Enums/programme.enum';
 import { Layers } from 'react-bootstrap-icons';
+import './programmeForm.scss';
 
 const { Option } = Select;
 const { TextArea } = Input;
