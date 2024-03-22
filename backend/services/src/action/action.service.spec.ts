@@ -14,11 +14,13 @@ import { HttpException, HttpStatus } from "@nestjs/common";
 import { DocumentDto } from "../dtos/document.dto";
 import { FileUploadService } from "../util/fileUpload.service";
 import { PayloadValidator } from "../validation/payload.validator";
+import { ProgrammeEntity } from "../entities/programme.entity";
 
 describe('ActionService', () => {
     let service: ActionService;
     let entityManagerMock: Partial<EntityManager>;
     let actionRepositoryMock: Partial<Repository<ActionEntity>>;
+    let programmeRepositoryMock: Partial<Repository<ProgrammeEntity>>;
     let counterServiceMock: Partial<CounterService>;
     let helperServiceMock: Partial<HelperService>;
     let fileUploadServiceMock: Partial<FileUploadService>;
@@ -75,6 +77,10 @@ describe('ActionService', () => {
                 {
                     provide: PayloadValidator,
                     useValue: payloadValidatorMock,
+                },
+                {
+                    provide: getRepositoryToken(ProgrammeEntity),
+                    useValue: programmeRepositoryMock,
                 },
             ],
         }).compile();
@@ -141,7 +147,7 @@ describe('ActionService', () => {
         expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
     });
 
-    it('should create an action with documents and kpis', async () => {
+    it('should create an action with documents, kpis and link programmes', async () => {
         const user = new User();
         user.id = 2;
 
@@ -159,6 +165,18 @@ describe('ActionService', () => {
         documentDto.data = documentData;
         documentDto.title = "doc title"
 
+        const programme1 = new ProgrammeEntity();
+        programme1.programmeId = '1';
+        programme1.action = null;
+
+        const programme2 = new ProgrammeEntity();
+        programme2.programmeId = '2';
+        programme2.action = null;
+
+        const programme3 = new ProgrammeEntity();
+        programme3.programmeId = '3';
+        programme3.action = null;
+
         const actionDto = new ActionDto();
         actionDto.title = "test";
         actionDto.description = "test description";
@@ -169,6 +187,7 @@ describe('ActionService', () => {
         actionDto.natAnchor = NatAnchor.NDC;
         actionDto.kpis = [kpiDto1, kpiDto2];
         actionDto.documents = [documentDto];
+        actionDto.linkedProgrammes = ['1', '2', '3'];
 
         const expectedResult = {
             "title": "test",
@@ -206,15 +225,18 @@ describe('ActionService', () => {
 
         jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
         jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce("2");
+        jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
 
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
                 save: jest.fn().mockResolvedValueOnce(expectedResult),
             };
             const savedAction = await callback(emMock);
-            expect(emMock.save).toHaveBeenCalledTimes(5);
+
+            expect(emMock.save).toHaveBeenCalledTimes(8);
             return savedAction;
         });
+
 
         const result = await service.createAction(actionDto, user);
 
@@ -222,6 +244,7 @@ describe('ActionService', () => {
         expect(result.statusCode).toEqual(expectedResponse.statusCode);
 
         expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+        expect(service.findAllProgrammeByIds).toHaveBeenCalledTimes(1);
         expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
 
     });

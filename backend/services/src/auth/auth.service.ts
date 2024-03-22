@@ -14,7 +14,7 @@ import { HelperService } from "../util/helpers.service";
 import { JWTPayload } from "../dtos/jwt.payload";
 import { EmailTemplates } from "../email-helper/email.template";
 import { API_KEY_SEPARATOR } from "../constants";
-import { UserState } from "src/enums/user.state.enum";
+import { UserState } from "../enums/user.state.enum";
 
 @Injectable()
 export class AuthService {

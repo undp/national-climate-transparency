@@ -9,17 +9,12 @@ import {
   Body,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-// import { StatList } from "../shared/dto/stat.list.dto";
-// import { ApiKeyJwtAuthGuard } from "../shared/auth/guards/api-jwt-key.guard";
-// import { Action } from "../shared/casl/action.enum";
-// import { PoliciesGuardEx } from "../shared/casl/policy.guard";
-// import { Stat } from "../shared/dto/stat.dto";
 import { AggregateAPIService } from "./aggregate.api.service";
-import { ApiKeyJwtAuthGuard } from "src/auth/guards/api-jwt-key.guard";
-import { PoliciesGuardEx } from "src/casl/policy.guard";
-import { Stat } from "src/dtos/stat.dto";
-import { StatList } from "src/dtos/stat.list.dto";
-import { Action } from "src/casl/action.enum";
+import { ApiKeyJwtAuthGuard } from "../auth/guards/api-jwt-key.guard";
+import { PoliciesGuardEx } from "../casl/policy.guard";
+import { Stat } from "../dtos/stat.dto";
+import { StatList } from "../dtos/stat.list.dto";
+import { Action } from "../casl/action.enum";
 
 @ApiTags("Programme")
 @ApiBearerAuth()

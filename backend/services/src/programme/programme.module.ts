@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import configuration from '../configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -39,9 +39,9 @@ import { ActionModule } from '../action/action.module';
             SupportEntity
         ]),
         UtilModule,
+        forwardRef(() => ActionModule),
         FileHandlerModule,
         ValidationModule,
-        ActionModule
     ],
     providers: [
         ProgrammeService

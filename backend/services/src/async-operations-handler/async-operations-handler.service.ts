@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { EmailService } from "src/email/email.service";
-import { AsyncActionType } from "src/enums/async.action.type.enum";
+import { EmailService } from "../email/email.service";
+import { AsyncActionType } from "../enums/async.action.type.enum";
 // import { RegistryClientService } from "../shared/registry-client/registry-client.service";
 // import { CadtApiService } from "../shared/cadt/cadt.api.service";
 

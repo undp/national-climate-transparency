@@ -1,14 +1,14 @@
 import { Logger, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import configuration from "src/configuration";
-import { Organisation } from "src/entities/organisation.entity";
-import { TypeOrmConfigService } from "src/typeorm.config.service";
+import configuration from "../configuration";
+import { Organisation } from "../entities/organisation.entity";
+import { TypeOrmConfigService } from "../typeorm.config.service";
 import { ProgrammeController } from "./programme.controller";
 import { AggregateAPIService } from "./aggregate.api.service";
-import { AuthModule } from "src/auth/auth.module";
-import { CaslModule } from "src/casl/casl.module";
-import { UtilModule } from "src/util/util.module";
+import { AuthModule } from "../auth/auth.module";
+import { CaslModule } from "../casl/casl.module";
+import { UtilModule } from "../util/util.module";
 // import { Programme } from "../shared/entities/programme.entity";
 // import { ProgrammeTransfer } from "../shared/entities/programme.transfer";
 // import { ProgrammeTransferViewEntityQuery } from "../shared/entities/programmeTransfer.view.entity";
@@ -24,9 +24,9 @@ import { UtilModule } from "src/util/util.module";
 // import { InvestmentView } from "../shared/entities/investment.view.entity";
 // import { NDCActionViewEntity } from "../shared/entities/ndc.view.entity";
 // import { GHGInventoryController } from "./ghg-inventory.controller";
-// import { Emission } from "src/shared/entities/emission.entity";
-// import { Projection } from "src/shared/entities/projection.entity";
-// import { EventLog } from "src/shared/entities/event.log.entity";
+// import { Emission } from "../shared/entities/emission.entity";
+// import { Projection } from "../shared/entities/projection.entity";
+// import { EventLog } from "../shared/entities/event.log.entity";
 
 @Module({
   imports: [
