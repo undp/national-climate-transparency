@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Table, Empty, Pagination, TablePaginationConfig } from 'antd';
+import { Table, Empty, TablePaginationConfig } from 'antd';
 
 interface Props {
   tableData: any;

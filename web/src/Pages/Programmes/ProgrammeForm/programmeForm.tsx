@@ -60,6 +60,7 @@ type KpiData = {
 };
 
 type ProjectData = {
+  key: string;
   projectId: string;
   projectName: string;
 };
@@ -124,7 +125,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   useEffect(() => {
     const tempProjectData: ProjectData[] = [];
     selectedProjectIds.forEach((projId) => {
-      tempProjectData.push({ projectId: projId, projectName: `${projId}_name` });
+      tempProjectData.push({ key: projId, projectId: projId, projectName: `${projId}_name` });
     });
     setProjectData(tempProjectData);
     setDetachOpen(Array(selectedProjectIds.length).fill(false));

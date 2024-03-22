@@ -53,6 +53,7 @@ type KpiData = {
 };
 
 type ProgrammeData = {
+  key: string;
   programmeId: string;
   actionId: string;
   title: string;
@@ -113,6 +114,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
     const tempProgData: ProgrammeData[] = [];
     selectedProgramIds.forEach((progId) => {
       tempProgData.push({
+        key: progId,
         programmeId: progId,
         actionId: 'action id',
         title: 'test title',
