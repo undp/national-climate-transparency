@@ -26,16 +26,16 @@ export class ProgrammeEntity {
   @Column()
   objective: string;
 
-  @Column({ type: "enum", enum: Sector })
+  @Column("varchar", { array: true, nullable: false })
   affectedSectors: Sector[];
 
-  @Column({ type: "enum", enum: SubSector })
+  @Column("varchar", { array: true, nullable: false })
   affectedSubSector: SubSector[];
 
   @Column()
   startYear: number;
 
-  @Column({ type: "enum", enum: NatImplementor })
+  @Column("varchar", { array: true, nullable: false })
   natImplementor: NatImplementor[];
 
   @Column({nullable: false, type: 'double precision' })
