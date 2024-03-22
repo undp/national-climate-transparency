@@ -76,6 +76,10 @@ const actionForm: React.FC<Props> = ({ method }) => {
     []
   );
 
+  // Popover state
+
+  const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
+
   // projects state
 
   const [allProgramIds, setAllProgramIdList] = useState<string[]>([]);
@@ -120,6 +124,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
     });
 
     setProgramData(tempProgData);
+    setDetachOpen(Array(selectedProgramIds.length).fill(false));
   }, [selectedProgramIds]);
 
   useEffect(() => {
@@ -184,6 +189,12 @@ const actionForm: React.FC<Props> = ({ method }) => {
   };
 
   // Dettach Programme
+
+  const handleDetachOpen = (record: any) => {
+    const newOpenList = Array(selectedProgramIds.length).fill(false);
+    newOpenList[selectedProgramIds.indexOf(record.programmeId)] = true;
+    setDetachOpen(newOpenList);
+  };
 
   const detachProgramme = (prgId: string) => {
     const filteredData = programData.filter((prg) => prg.programmeId !== prgId);
@@ -269,15 +280,21 @@ const actionForm: React.FC<Props> = ({ method }) => {
     },
     {
       title: '',
-      key: 'programmeId',
+      key: 'programmeAcion',
       align: 'right' as const,
       width: 6,
       render: (record: any) => {
         return (
-          <Popover placement="bottomRight" trigger="click" content={actionMenu(record)}>
+          <Popover
+            placement="bottomRight"
+            trigger="click"
+            content={actionMenu(record)}
+            open={detachOpen[selectedProgramIds.indexOf(record.programmeId)]}
+          >
             <EllipsisOutlined
               rotate={90}
               style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
+              onClick={() => handleDetachOpen(record)}
             />
           </Popover>
         );
@@ -651,6 +668,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                       rules={[validation.required, validation.number]}
                     >
                       <Input
+                        type="number"
                         style={{ fontSize: inputFontSize, height: '40px' }}
                         disabled={isView}
                         onChange={(e) => {

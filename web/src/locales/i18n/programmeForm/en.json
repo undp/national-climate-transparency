@@ -33,11 +33,12 @@
     "add": "Add",
     "cancel": "Cancel",
     "attach": "Attach",
+    "detach": "Detach",
     "attachProjects": "ATTACH PROJECTS",
     "projectList": "Project List",
     "addKPI": "Add KPI",
     "programmeCreationSuccess": "Programme Added Succesfully",
     "updatesInfoTitle": "Updates",
-    "noProjectMessage": "No Projects Attached"
+    "noProjectsMessage": "No Projects Attached"
   }
   

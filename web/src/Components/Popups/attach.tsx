@@ -32,6 +32,7 @@ const AttachEntity: React.FC<Props> = ({
 
   options.forEach((entityId) => {
     optionsList.push({
+      key: entityId,
       label: entityId,
       value: entityId,
     });
@@ -72,8 +73,10 @@ const AttachEntity: React.FC<Props> = ({
         open={open}
         onCancel={attachCancel}
         footer={[
-          <Button onClick={attachCancel}>{content.cancel}</Button>,
-          <Button type="primary" onClick={attachProject}>
+          <Button key={'cancelButton'} onClick={attachCancel}>
+            {content.cancel}
+          </Button>,
+          <Button key={'attachButton'} type="primary" onClick={attachProject}>
             {content.attach}
           </Button>,
         ]}
