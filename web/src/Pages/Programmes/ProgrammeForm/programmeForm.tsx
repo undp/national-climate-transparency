@@ -800,7 +800,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 size="large"
                 block
                 onClick={() => {
-                  navigate('/actions');
+                  navigate('/programmes');
                 }}
               >
                 {t('cancel')}
