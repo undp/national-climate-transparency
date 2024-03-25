@@ -4,17 +4,27 @@ import { ProgrammeEntity } from "./programme.entity"
 
 @ViewEntity({
     materialized: true,
-    expression: (dataSource: DataSource) =>
-        dataSource
-            .createQueryBuilder()
-            .from(ActionEntity, "a")
-            .leftJoin(ProgrammeEntity, 'p', "a.actionId = p.actionId")
-            .select(["a.actionId AS id"])
-            .addSelect("ARRAY_AGG(DISTINCT p.affectedSectors) AS sectors")
-            .addSelect("SUM(p.investment) AS total_investment")
-            .addSelect("ARRAY_AGG(DISTINCT p.natImplementor) AS nat_implementors")
-            .groupBy("a.actionId")
+    expression: `
+    SELECT 
+        a."actionId" AS id,
+        ARRAY_AGG(DISTINCT p.sector) AS sectors,
+        SUM(p.investment) AS total_investment,
+        ARRAY_AGG(DISTINCT p.nat_impl) AS nat_implementors
+    FROM 
+        action a
+    LEFT JOIN (
+        SELECT 
+            "actionId",
+            "investment",
+            UNNEST("affectedSectors") AS sector,
+            UNNEST("natImplementor") AS nat_impl
+        FROM 
+            programme
+    ) p ON a."actionId" = p."actionId"
+    GROUP BY 
+        a."actionId";`,
 })
+
 export class ActionViewEntity {
     @Index()
     @ViewColumn()
