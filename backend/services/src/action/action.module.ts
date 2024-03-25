@@ -15,6 +15,7 @@ import { SupportEntity } from '../entities/support.entity';
 import { UtilModule } from '../util/util.module';
 import { FileHandlerModule } from '../file-handler/filehandler.module';
 import { ValidationModule } from '../validation/validation.module';
+import { ActionViewEntity } from 'src/entities/action.view.entity';
 
 @Module({
     imports: [
@@ -28,6 +29,7 @@ import { ValidationModule } from '../validation/validation.module';
             imports: undefined,
           }),
           TypeOrmModule.forFeature([
+            ActionViewEntity,
             ActionEntity,
             KpiEntity,
             LogEntity,
