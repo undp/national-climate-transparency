@@ -646,23 +646,6 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
             setUploadedFiles={setUploadedFiles}
             isView={isView}
           ></UploadFileGrid>
-          <Row gutter={gutterSize}>
-            <Col span={24}>
-              <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('programmeCommentsTitle')}
-                  </label>
-                }
-                name="comments"
-                rules={[validation.required]}
-              >
-                <TextArea rows={3} disabled={isView} />
-              </Form.Item>
-            </Col>
-          </Row>
-        </div>
-        <div className="form-card">
           <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
             {t('mitigationInfoTitle')}
           </div>
@@ -819,6 +802,21 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               )}
             </Col>
           </Row>
+          <Row gutter={gutterSize}>
+            <Col span={24}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
+                    {t('programmeCommentsTitle')}
+                  </label>
+                }
+                name="comments"
+                rules={[validation.required]}
+              >
+                <TextArea rows={3} disabled={isView} />
+              </Form.Item>
+            </Col>
+          </Row>
         </div>
         <div className="form-card">
           <Row>
@@ -848,24 +846,26 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           </Row>
           <Row>
             <Col span={24}>
-              <LayoutTable
-                tableData={activityData}
-                columns={activityTableColumns}
-                loading={false}
-                pagination={{
-                  current: activityCurrentPage,
-                  pageSize: activityPageSize,
-                  total: activityData.length,
-                  showQuickJumper: true,
-                  pageSizeOptions: ['10', '20', '30'],
-                  showSizeChanger: true,
-                  style: { textAlign: 'center' },
-                  locale: { page: '' },
-                  position: ['bottomRight'],
-                }}
-                handleTableChange={handleActivityTableChange}
-                emptyMessage={t('noActivityMessage')}
-              />
+              <div style={{ overflowX: 'auto' }}>
+                <LayoutTable
+                  tableData={activityData}
+                  columns={activityTableColumns}
+                  loading={false}
+                  pagination={{
+                    current: activityCurrentPage,
+                    pageSize: activityPageSize,
+                    total: activityData.length,
+                    showQuickJumper: true,
+                    pageSizeOptions: ['10', '20', '30'],
+                    showSizeChanger: true,
+                    style: { textAlign: 'center' },
+                    locale: { page: '' },
+                    position: ['bottomRight'],
+                  }}
+                  handleTableChange={handleActivityTableChange}
+                  emptyMessage={t('noActivityMessage')}
+                />{' '}
+              </div>
             </Col>
           </Row>
         </div>
@@ -875,30 +875,32 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <div
                 style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
               >
-                {t('programInfoTitle')}
+                {t('supportInfoTitle')}
               </div>
             </Col>
           </Row>
           <Row>
             <Col span={24}>
-              <LayoutTable
-                tableData={supportData}
-                columns={supportTableColumns}
-                loading={false}
-                pagination={{
-                  current: supportCurrentPage,
-                  pageSize: supportPageSize,
-                  total: supportData.length,
-                  showQuickJumper: true,
-                  pageSizeOptions: ['10', '20', '30'],
-                  showSizeChanger: true,
-                  style: { textAlign: 'center' },
-                  locale: { page: '' },
-                  position: ['bottomRight'],
-                }}
-                handleTableChange={handleSupportTableChange}
-                emptyMessage={t('noSupportMessage')}
-              />
+              <div style={{ overflowX: 'auto' }}>
+                <LayoutTable
+                  tableData={supportData}
+                  columns={supportTableColumns}
+                  loading={false}
+                  pagination={{
+                    current: supportCurrentPage,
+                    pageSize: supportPageSize,
+                    total: supportData.length,
+                    showQuickJumper: true,
+                    pageSizeOptions: ['10', '20', '30'],
+                    showSizeChanger: true,
+                    style: { textAlign: 'center' },
+                    locale: { page: '' },
+                    position: ['bottomRight'],
+                  }}
+                  handleTableChange={handleSupportTableChange}
+                  emptyMessage={t('noSupportMessage')}
+                />
+              </div>
             </Col>
           </Row>
         </div>
