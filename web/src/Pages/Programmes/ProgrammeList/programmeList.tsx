@@ -13,16 +13,14 @@ import {
   message,
   PaginationProps,
 } from 'antd';
-import {
-  EditOutlined,
-  EllipsisOutlined,
-  FilterOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { EditOutlined, EllipsisOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 const { Search } = Input;
 import data from '../../../Testing/programmeList.json';
+import { useNavigate } from 'react-router-dom';
+import { Action } from '../../../Enums/action.enum';
+import { ProgrammeEntity } from '../../../Entities/programme';
+import { useAbilityContext } from '../../../Casl/Can';
 
 interface Item {
   key: string;
@@ -38,6 +36,7 @@ interface Item {
 
 const programmeList = () => {
   const { t } = useTranslation(['programmeList']);
+  const ability = useAbilityContext();
   const [tableData, setTableData] = useState<Item[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<any>(1);
@@ -49,6 +48,8 @@ const programmeList = () => {
   const [valueOnSearch, setValueOnSearch] = useState<string>('');
   const [totalUser, setTotalUser] = useState<number>();
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const actionMenu = (record: any) => {
     return (
@@ -268,9 +269,19 @@ const programmeList = () => {
         <Row className="table-actions-section">
           <Col md={8} xs={24}>
             <div className="action-bar">
-              <Button type="primary" size="large" block icon={<PlusOutlined />} onClick={() => {}}>
-                {t('addButtonType')}
-              </Button>
+              {ability.can(Action.Create, ProgrammeEntity) && (
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    navigate('/programmes/add');
+                  }}
+                >
+                  {t('addButtonType')}
+                </Button>
+              )}
             </div>
           </Col>
           <Col md={16} xs={24}>

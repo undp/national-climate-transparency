@@ -13,6 +13,7 @@ import { Role } from '../Enums/role.enum';
 import { User } from '../Entities/user';
 import { ActionEntity } from '../Entities/action';
 import { Organisation } from '../Entities/organisation';
+import { ProgrammeEntity } from '../Entities/programme';
 
 type Subjects = InferSubjects<typeof BaseEntity> | 'all';
 
@@ -48,6 +49,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Create, ActionEntity);
       can(Action.Update, ActionEntity);
       can(Action.Delete, ActionEntity);
+
+      can(Action.Read, ProgrammeEntity);
+      can(Action.Create, ProgrammeEntity);
+      can(Action.Update, ProgrammeEntity);
+      can(Action.Delete, ProgrammeEntity);
     }
 
     if (user.role == Role.Admin) {
@@ -67,6 +73,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Create, ActionEntity);
       can(Action.Update, ActionEntity);
       can(Action.Delete, ActionEntity);
+
+      can(Action.Read, ProgrammeEntity);
+      can(Action.Create, ProgrammeEntity);
+      can(Action.Update, ProgrammeEntity);
+      can(Action.Delete, ProgrammeEntity);
     }
 
     if (user.role == Role.DepartmentUser) {
@@ -87,6 +98,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Create, ActionEntity);
       cannot(Action.Update, ActionEntity);
       cannot(Action.Delete, ActionEntity);
+
+      can(Action.Read, ProgrammeEntity);
+      cannot(Action.Create, ProgrammeEntity);
+      cannot(Action.Update, ProgrammeEntity);
+      cannot(Action.Delete, ProgrammeEntity);
     }
 
     if (user.role == Role.ViewOnly) {
@@ -107,6 +123,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Create, ActionEntity);
       cannot(Action.Update, ActionEntity);
       cannot(Action.Delete, ActionEntity);
+
+      can(Action.Read, ProgrammeEntity);
+      cannot(Action.Create, ProgrammeEntity);
+      cannot(Action.Update, ProgrammeEntity);
+      cannot(Action.Delete, ProgrammeEntity);
     }
   }
 
