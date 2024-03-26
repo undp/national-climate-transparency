@@ -24,10 +24,10 @@ export class Views1711370952119 implements MigrationInterface {
         CREATE MATERIALIZED VIEW action_view_entity AS
         SELECT 
             a."actionId" AS id,
-            ARRAY_AGG(DISTINCT fullp.sector) AS sectors,
-            ARRAY_AGG(DISTINCT fullp.nat_impl) AS nat_implementors,
+            ARRAY_AGG(DISTINCT fullp.sector) AS "sectorsAffected",
+            ARRAY_AGG(DISTINCT fullp.nat_impl) AS "natImplementors",
             ARRAY_AGG(DISTINCT fullp.types) AS types,
-            SUM(fullp.investment) AS total_investment,
+            SUM(fullp.investment) AS "totalInvestmemt",
             SUM(fullp."achievedReduct") AS "achievedReduct",
             SUM(fullp."expectedReduct") AS "expectedReduct"
         FROM 

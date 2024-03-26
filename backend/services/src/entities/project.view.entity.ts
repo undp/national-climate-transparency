@@ -4,23 +4,36 @@ import { Index, ViewColumn, ViewEntity } from "typeorm"
     materialized: true,
     expression: `
     SELECT 
-        a."actionId" AS id,
-        ARRAY_AGG(DISTINCT p.sector) AS sectors,
-        SUM(p.investment) AS total_investment,
-        ARRAY_AGG(DISTINCT p.nat_impl) AS nat_implementors
+        prj."projectId" AS id,
+        ARRAY_AGG(DISTINCT fullact."techTypes") AS "technologyTypes",
+        ARRAY_AGG(DISTINCT fullact."implMeans") AS "implMeans",
+        SUM(fullact."requiredAmount") AS "estimatedAmount",
+        SUM(fullact."recievedAmount") AS "recievedAmount"
     FROM 
-        action a
+        project prj
     LEFT JOIN (
         SELECT 
-            "actionId",
-            "investment",
-            UNNEST("affectedSectors") AS sector,
-            UNNEST("natImplementor") AS nat_impl
+            act."activityId",
+            act."parentId" AS "projectId",
+            UNNEST(act."technologyType") AS "techTypes",
+            UNNEST(act."implMeans") AS "implMeans",
+            sup."requiredAmount",
+            sup."recievedAmount"
         FROM 
-            programme
-    ) p ON a."actionId" = p."actionId"
+            activity act
+        LEFT JOIN (
+            SELECT 
+                "activityId",
+                SUM("requiredAmount") AS "requiredAmount",
+                SUM("recievedAmount") AS "recievedAmount"
+            FROM 
+                support
+            GROUP BY 
+                "activityId"
+        ) sup ON act."activityId" = sup."activityId"
+    ) fullact ON prj."projectId" = fullact."projectId"
     GROUP BY 
-        a."actionId";`,
+        prj."projectId";`,
 })
 
 export class ProjectViewEntity {
@@ -28,32 +41,15 @@ export class ProjectViewEntity {
     @ViewColumn()
     id: number
 
-    // @ViewColumn()
-    // actionTitle: string
-
-    // @ViewColumn()
-    // programmeTitle: string
-
-    @ViewColumn()
-    natAnchors: string[]
-
-    @ViewColumn()
-    instrTypes: string[]
-
-    @ViewColumn()
-    sectorsAffected: string[]
-
-    @ViewColumn()
-    subSectorsAffected: string[]
-
-    @ViewColumn()
-    natImplementors: string[]
+    // From Activity
 
     @ViewColumn()
     implMeans: string[]
 
     @ViewColumn()
     technologyTypes: string[]
+
+    // From Support
 
     @ViewColumn()
     estimatedAmount: number
