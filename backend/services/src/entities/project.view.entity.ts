@@ -1,8 +1,6 @@
 import { Index, ViewColumn, ViewEntity } from "typeorm"
 
-@ViewEntity({
-    materialized: true,
-    expression: `
+export const projectViewSQL = `
     SELECT 
         prj."projectId" AS id,
         ARRAY_AGG(DISTINCT fullact."techTypes") AS "technologyTypes",
@@ -30,10 +28,14 @@ import { Index, ViewColumn, ViewEntity } from "typeorm"
                 support
             GROUP BY 
                 "activityId"
-        ) sup ON act."activityId" = sup."activityId"
-    ) fullact ON prj."projectId" = fullact."projectId"
+            ) sup ON act."activityId" = sup."activityId"
+        ) fullact ON prj."projectId" = fullact."projectId"
     GROUP BY 
-        prj."projectId";`,
+        prj."projectId";`
+
+@ViewEntity({
+    materialized: true,
+    expression: projectViewSQL,
 })
 
 export class ProjectViewEntity {

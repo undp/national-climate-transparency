@@ -1,8 +1,6 @@
 import { Index, ViewColumn, ViewEntity } from "typeorm"
 
-@ViewEntity({
-    materialized: true,
-    expression: `
+export const programmeViewSQL =  `
     SELECT 
         p."programmeId" AS id,
         ARRAY_AGG(DISTINCT prj.type) AS types,
@@ -15,7 +13,11 @@ import { Index, ViewColumn, ViewEntity } from "typeorm"
     LEFT JOIN 
         project prj ON p."programmeId" = prj."programmeId"
     GROUP BY 
-        p."programmeId";`,
+        p."programmeId";`
+
+@ViewEntity({
+    materialized: true,
+    expression: programmeViewSQL,
 })
 
 export class ProgrammeViewEntity {

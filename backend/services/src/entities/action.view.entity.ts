@@ -1,25 +1,23 @@
 import { Index, ViewColumn, ViewEntity } from "typeorm"
 
-@ViewEntity({
-    materialized: true,
-    expression: `
+export const actionViewSQL = `
     SELECT 
         a."actionId" AS id,
         ARRAY_AGG(DISTINCT fullp.sector) AS "sectorsAffected",
         ARRAY_AGG(DISTINCT fullp.nat_impl) AS "natImplementors",
-		ARRAY_AGG(DISTINCT fullp.types) AS types,
-		SUM(fullp.investment) AS "totalInvestmemt",
-		SUM(fullp."achievedReduct") AS "achievedReduct",
-		SUM(fullp."expectedReduct") AS "expectedReduct"
+        ARRAY_AGG(DISTINCT fullp.types) AS types,
+        SUM(fullp.investment) AS "totalInvestmemt",
+        SUM(fullp."achievedReduct") AS "achievedReduct",
+        SUM(fullp."expectedReduct") AS "expectedReduct"
     FROM 
-	    action a
+        action a
     LEFT JOIN (
         SELECT 
             p."actionId",
             p."investment",
             UNNEST(p."affectedSectors") AS sector,
             UNNEST(p."natImplementor") AS nat_impl,
-			UNNEST(pve.types) AS types,
+            UNNEST(pve.types) AS types,
             pve."achievedReduct",
             pve."expectedReduct"
         FROM 
@@ -28,7 +26,11 @@ import { Index, ViewColumn, ViewEntity } from "typeorm"
             programme_view_entity pve ON p."programmeId" = pve.id
     ) fullp ON a."actionId" = fullp."actionId"
     GROUP BY 
-        a."actionId";`,
+        a."actionId";`
+
+@ViewEntity({
+    materialized: true,
+    expression: actionViewSQL,
 })
 
 export class ActionViewEntity {
