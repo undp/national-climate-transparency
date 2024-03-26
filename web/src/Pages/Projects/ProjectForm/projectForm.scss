@@ -1,0 +1,6 @@
+@import "../../../Styles/app.scss";
+
+body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
+  border-color: #ff4d4f !important;
+}
