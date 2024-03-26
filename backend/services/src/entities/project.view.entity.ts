@@ -15,8 +15,8 @@ import { Index, ViewColumn, ViewEntity } from "typeorm"
         SELECT 
             act."activityId",
             act."parentId" AS "projectId",
-            UNNEST(act."technologyType") AS "techTypes",
-            UNNEST(act."implMeans") AS "implMeans",
+            act."technologyType" AS "techTypes",
+            act."implMeans" AS "implMeans",
             sup."requiredAmount",
             sup."recievedAmount"
         FROM 
