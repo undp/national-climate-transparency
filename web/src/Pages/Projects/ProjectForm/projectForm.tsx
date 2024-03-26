@@ -160,6 +160,9 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
       });
     });
     setActivityData(tempActivityData);
+
+    // Get the Support Data for each attached Activity
+    setSupportData([]);
     setDetachOpen(Array(selectedActivityIds.length).fill(false));
   }, [selectedActivityIds]);
 
@@ -789,7 +792,8 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 <Button
                   icon={<PlusCircleOutlined />}
                   style={{
-                    marginTop: '15px',
+                    marginTop: '5px',
+                    marginBottom: '15px',
                     border: 'none',
                     color: '#3A3541',
                     opacity: 0.8,
@@ -814,6 +818,53 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 rules={[validation.required]}
               >
                 <TextArea rows={3} disabled={isView} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
+            {t('financeInfoTitle')}
+          </div>
+          <Row gutter={gutterSize}>
+            <Col span={6}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('instrTypeTitle')}</label>
+                }
+                name="instrumentType"
+              >
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('progStatusTitle')}</label>
+                }
+                name="status"
+              >
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('sectorsAffTitle')}</label>
+                }
+                name="affectedSectors"
+              >
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item
+                label={
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
+                    {t('subSectorsAffTitle')}
+                  </label>
+                }
+                name="affectedSubSector"
+              >
+                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
               </Form.Item>
             </Col>
           </Row>
