@@ -38,5 +38,6 @@
     "actionDescTitle": "Short Description of Action",
     "actionTitle": "Title of Action",
     "typesTitle": "Type (s)",
-    "detach": "Detach"
+    "detach": "Detach",
+    "documentsHeader": "Documents"
 }

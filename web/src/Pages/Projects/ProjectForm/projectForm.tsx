@@ -716,6 +716,9 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
           </Row>
+          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}>
+            {t('documentsHeader')}
+          </div>
           <UploadFileGrid
             uploadedFiles={uploadedFiles}
             horizontalGutter={gutterSize}
@@ -730,16 +733,6 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
             {t('mitigationInfoTitle')}
           </div>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('ghgAffected')}</label>}
-                name="ghgsAffected"
-              >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
-              </Form.Item>
-            </Col>
-          </Row>
           <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}>
             {t('emmissionInfoTitle')}
           </div>

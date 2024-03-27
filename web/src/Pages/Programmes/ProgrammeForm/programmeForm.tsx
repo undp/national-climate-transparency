@@ -574,6 +574,9 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               </Form.Item>
             </Col>
           </Row>
+          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}>
+            {t('documentsHeader')}
+          </div>
           <UploadFileGrid
             uploadedFiles={uploadedFiles}
             horizontalGutter={gutterSize}
