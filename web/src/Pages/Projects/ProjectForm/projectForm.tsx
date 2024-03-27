@@ -26,6 +26,8 @@ import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '@undp/carbon-library';
 import { GraphUpArrow } from 'react-bootstrap-icons';
 import './projectForm.scss';
+import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
+import { IntImplementor, Recipient } from '../../../Enums/shared.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -376,8 +378,8 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addProgTitle')}</div>
-        <div className="body-sub-title">{t('addProgDesc')}</div>
+        <div className="body-title">{t('addProjTitle')}</div>
+        <div className="body-sub-title">{t('addProjDesc')}</div>
       </div>
       <Form form={form} onFinish={handleSubmit} layout="vertical">
         <div className="form-card">
@@ -417,15 +419,16 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 rules={[validation.required]}
               >
                 <Select
-                  size={'large'}
+                  size="large"
                   style={{ fontSize: inputFontSize }}
+                  mode="multiple"
                   allowClear
                   disabled={isView}
                   showSearch
                 >
-                  {programmeList.map((program) => (
-                    <Option key={program.id} value={program.id}>
-                      {program.title}
+                  {Object.values(ProjectType).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
                     </Option>
                   ))}
                 </Select>
@@ -531,9 +534,9 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                   disabled={isView}
                   showSearch
                 >
-                  {yearsList.map((year) => (
-                    <Option key={year} value={year}>
-                      {year}
+                  {Object.values(ProjectStatus).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
                     </Option>
                   ))}
                 </Select>
@@ -657,13 +660,14 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 <Select
                   size="large"
                   style={{ fontSize: inputFontSize }}
+                  mode="multiple"
                   allowClear
                   disabled={isView}
                   showSearch
                 >
-                  {yearsList.map((year) => (
-                    <Option key={year} value={year}>
-                      {year}
+                  {Object.values(Recipient).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
                     </Option>
                   ))}
                 </Select>
@@ -681,13 +685,14 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 <Select
                   size="large"
                   style={{ fontSize: inputFontSize }}
+                  mode="multiple"
                   allowClear
                   disabled={isView}
                   showSearch
                 >
-                  {yearsList.map((year) => (
-                    <Option key={year} value={year}>
-                      {year}
+                  {Object.values(IntImplementor).map((instrument) => (
+                    <Option key={instrument} value={instrument}>
+                      {instrument}
                     </Option>
                   ))}
                 </Select>
