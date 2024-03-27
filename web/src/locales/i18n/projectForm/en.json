@@ -1,4 +1,5 @@
 {
+    "generalInfoTitle": "General Project  Information ",
     "selectProgrammeHeader": "Select Programme",
     "typeHeader": "Type",
     "projTitleHeader": "Title of Project",
@@ -25,11 +26,11 @@
     "programmeCommentsTitle": "Comments on the Project",
     "financeInfoTitle": "Project Finance",
     "neededUSDHeader": "Estimated Amount Needed (USD)",
-    "neededSCRHeader": "Estimated Amount Needed (SCR)",
+    "neededLCLHeader": "Estimated Amount Needed (XXX)",
     "recievedUSDHeader": "Amount Received (USD)",
-    "recievedSCRHeader":"Amount Received (SCR)",
-    "activityInfoTitle": "Activity List",
-    "supportInfoTitle": "Support List",
+    "recievedLCLHeader":"Amount Received (XXX)",
+    "activityInfoTitle": "List of Activities under the Project",
+    "supportInfoTitle": "List of Supports under the Project",
     "achieved": "Achieved",
     "expected": "Expected",
     "kpiInfoTitle": "Other Programme KPI Value",
@@ -47,6 +48,16 @@
     "programmeCreationSuccess": "Project Added Succesfully",
     "updatesInfoTitle": "Updates",
     "noProjectsMessage": "No Activities Attached",
-    "documentsHeader": "Documents"
+    "documentsHeader": "Documents",
+    "supportIdTitle": "Support ID",
+    "financeNatureTitle": "International or National Finance",
+    "directionTitle": "Needed/Received",
+    "finInstrumentTitle": "Financial Instrument",
+    "activityIdTitle": "Activity ID",
+    "titleTitle": "Activity Title",
+    "redMeasuresTitle": "Reduction Measures",
+    "statusTitle": "Status",
+    "natImplementorTitle": "National Implementing Entity (s)",
+    "noActivityMessage": "No Activities Attached",
+    "noSupportMessage": "No Supports Attached"
   }
-  

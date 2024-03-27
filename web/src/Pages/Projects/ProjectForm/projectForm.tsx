@@ -180,9 +180,9 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
       capBuildObjectives: 'Yes',
       techType: 'Renewable Energy',
       neededUSD: 1000000,
-      neededSCR: 2500000,
+      neededLCL: 2500000,
       recievedUSD: 50000,
-      recievedSCR: 86520,
+      recievedLCL: 86520,
     });
   }, [selectedActivityIds, kpiList]);
 
@@ -319,8 +319,8 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
     { title: t('titleTitle'), dataIndex: 'title', key: 'title' },
     { title: t('redMeasuresTitle'), dataIndex: 'reductionMeasures', key: 'reductionMeasures' },
     { title: t('statusTitle'), dataIndex: 'status', key: 'status' },
-    { title: t('startYearTitle'), dataIndex: 'startYear', key: 'startYear' },
-    { title: t('endYearTitle'), dataIndex: 'endYear', key: 'endYear' },
+    { title: t('startYearHeader'), dataIndex: 'startYear', key: 'startYear' },
+    { title: t('endYearHeader'), dataIndex: 'endYear', key: 'endYear' },
     { title: t('natImplementorTitle'), dataIndex: 'natImplementor', key: 'natImplementor' },
     {
       title: '',
@@ -353,10 +353,10 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
     { title: t('financeNatureTitle'), dataIndex: 'financeNature', key: 'financeNature' },
     { title: t('directionTitle'), dataIndex: 'direction', key: 'direction' },
     { title: t('finInstrumentTitle'), dataIndex: 'finInstrument', key: 'finInstrument' },
-    { title: t('estimatedUSDTitle'), dataIndex: 'estimatedUSD', key: 'estimatedUSD' },
-    { title: t('estimatedLCTitle'), dataIndex: 'estimatedLC', key: 'estimatedLC' },
-    { title: t('recievedUSDTitle'), dataIndex: 'recievedUSD', key: 'recievedUSD' },
-    { title: t('recievedLCTitle'), dataIndex: 'recievedLC', key: 'recievedLC' },
+    { title: t('neededUSDHeader'), dataIndex: 'estimatedUSD', key: 'estimatedUSD' },
+    { title: t('neededLCLHeader'), dataIndex: 'estimatedLC', key: 'estimatedLC' },
+    { title: t('recievedUSDHeader'), dataIndex: 'recievedUSD', key: 'recievedUSD' },
+    { title: t('recievedLCLHeader'), dataIndex: 'recievedLC', key: 'recievedLC' },
   ];
 
   // Activity Table Behaviour
@@ -909,9 +909,9 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
             <Col span={6}>
               <Form.Item
                 label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('neededSCRHeader')}</label>
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('neededLCLHeader')}</label>
                 }
-                name="neededSCR"
+                name="neededLCL"
               >
                 <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
               </Form.Item>
@@ -929,9 +929,9 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
             <Col span={6}>
               <Form.Item
                 label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('recievedSCRHeader')}</label>
+                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('recievedLCLHeader')}</label>
                 }
-                name="recievedSCR"
+                name="recievedLCL"
               >
                 <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
               </Form.Item>
