@@ -524,7 +524,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
         </div>
         <div className="form-card">
           <Row>
-            <Col span={6}>
+            <Col span={6} style={{ paddingTop: '6px' }}>
               <div
                 style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
               >
