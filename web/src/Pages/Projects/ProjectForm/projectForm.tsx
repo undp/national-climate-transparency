@@ -1,23 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import {
-  Row,
-  Col,
-  Input,
-  Button,
-  Form,
-  Select,
-  Card,
-  message,
-  Popover,
-  List,
-  Typography,
-} from 'antd';
-import {
-  CloseCircleOutlined,
-  DeleteOutlined,
-  EllipsisOutlined,
-  PlusCircleOutlined,
-} from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message, Popover, List, Typography } from 'antd';
+import { CloseCircleOutlined, EllipsisOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +11,7 @@ import { GraphUpArrow } from 'react-bootstrap-icons';
 import './projectForm.scss';
 import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
 import { IntImplementor, Recipient } from '../../../Enums/shared.enum';
+import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -49,14 +33,12 @@ type ProgrammeData = {
   title: string;
 };
 
-type KpiData = {
+type NewKpiData = {
   index: number;
   name: string;
   unit: string;
   creatorType: string;
-  achieved: number;
   expected: number;
-  migrated: boolean;
 };
 
 type ActivityData = {
@@ -117,7 +99,8 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
 
   // KPI State
 
-  const [kpiList, setKpiList] = useState<KpiData[]>([]);
+  const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
+  const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
 
   // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
@@ -190,6 +173,21 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
       recievedUSD: 50000,
       recievedLCL: 86520,
     });
+
+    const migratedKpis = [];
+    for (let i = 0; i < 2; i++) {
+      const updatedValues = {
+        [`kpi_name_${i}`]: `Name_${i}`,
+        [`kpi_unit_${i}`]: `Unit_${i}`,
+        [`kpi_ach_${i}`]: 35,
+        [`kpi_exp_${i}`]: 55,
+      };
+
+      form.setFieldsValue(updatedValues);
+      migratedKpis.push(i);
+    }
+
+    setMigratedKpiList(migratedKpis);
   }, [activityData]);
 
   // Form Submit
@@ -207,7 +205,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
       });
 
       payload.kpis = [];
-      kpiList.forEach((kpi) => {
+      newKpiList.forEach((kpi) => {
         payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
       });
 
@@ -245,20 +243,24 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
   // Add New KPI
 
   const createKPI = () => {
-    const newItem: KpiData = {
-      index: kpiList.length,
+    const kpiIndex = Math.floor(Date.now() / 1000);
+    const newItem: NewKpiData = {
+      index: kpiIndex,
       name: '',
       unit: '',
-      creatorType: 'programme',
+      creatorType: 'project',
       expected: 0,
-      achieved: 0,
-      migrated: true,
     };
-    setKpiList((prevList) => [...prevList, newItem]);
+    const updatedValues = {
+      [`kpi_ach_${kpiIndex}`]: 0,
+    };
+
+    form.setFieldsValue(updatedValues);
+    setNewKpiList((prevList) => [...prevList, newItem]);
   };
 
   const removeKPI = (kpiIndex: number) => {
-    setKpiList(kpiList.filter((obj) => obj.index !== kpiIndex));
+    setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
 
     const updatedValues = {
       [`kpi_name_${kpiIndex}`]: '',
@@ -269,8 +271,8 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
     form.setFieldsValue(updatedValues);
   };
 
-  const updateKPI = (id: number, property: keyof KpiData, value: any): void => {
-    setKpiList((prevKpiList) => {
+  const updateKPI = (id: number, property: keyof NewKpiData, value: any): void => {
+    setNewKpiList((prevKpiList) => {
       const updatedKpiList = prevKpiList.map((kpi) => {
         if (kpi.index === id) {
           return { ...kpi, [property]: value };
@@ -774,107 +776,33 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}>
             {t('kpiInfoTitle')}
           </div>
-          {kpiList.map((kpi: any) => (
-            <Row key={kpi.index} gutter={gutterSize} style={{ height: '80px' }}>
-              <Col span={12}>
-                <Row gutter={gutterSize}>
-                  <Col span={12}>
-                    <Form.Item
-                      label={
-                        <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('kpiName')}</label>
-                      }
-                      name={`kpi_name_${kpi.index}`}
-                      rules={[validation.required]}
-                    >
-                      <Input
-                        style={{ fontSize: inputFontSize, height: '40px' }}
-                        disabled={isView || kpi.migrated}
-                        onChange={(e) => {
-                          updateKPI(kpi.index, 'name', e.target.value);
-                        }}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      label={
-                        <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('kpiUnit')}</label>
-                      }
-                      name={`kpi_unit_${kpi.index}`}
-                      rules={[validation.required]}
-                    >
-                      <Input
-                        style={{ fontSize: inputFontSize, height: '40px' }}
-                        disabled={isView || kpi.migrated}
-                        onChange={(e) => {
-                          updateKPI(kpi.index, 'unit', e.target.value);
-                        }}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Col>
-              <Col span={12}>
-                <Row gutter={15}>
-                  <Col span={isView || kpi.migrated ? 12 : 11}>
-                    <Form.Item
-                      label={
-                        <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>
-                      }
-                    >
-                      <Input
-                        style={{ fontSize: inputFontSize, height: '40px' }}
-                        value={kpi.achieved}
-                        disabled={true}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={isView || kpi.migrated ? 12 : 11}>
-                    <Form.Item
-                      label={
-                        <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>
-                      }
-                      name={`kpi_exp_${kpi.index}`}
-                      rules={[validation.required]}
-                    >
-                      <Input
-                        type="number"
-                        style={{ fontSize: inputFontSize, height: '40px' }}
-                        disabled={isView || kpi.migrated}
-                        onChange={(e) => {
-                          updateKPI(kpi.index, 'expected', e.target.value);
-                        }}
-                      />
-                    </Form.Item>
-                  </Col>
-                  {!isView && !kpi.migrated ? (
-                    <Col span={2}>
-                      <Card
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          padding: '0px',
-                          width: '30px',
-                          height: '30px',
-                          marginTop: '36px',
-                          borderWidth: '1px',
-                          borderRadius: '4px',
-                          borderColor: '#d9d9d9',
-                        }}
-                      >
-                        <DeleteOutlined
-                          style={{ cursor: 'pointer', color: '#3A3541', opacity: 0.8 }}
-                          onClick={() => {
-                            removeKPI(kpi.index);
-                          }}
-                        />
-                      </Card>
-                    </Col>
-                  ) : null}
-                </Row>
-              </Col>
-            </Row>
+          {migratedKpiList.map((index: number) => (
+            <KpiGrid
+              key={index}
+              form={form}
+              rules={[]}
+              index={index}
+              isEditable={false}
+              inputFontSize={inputFontSize}
+              gutterSize={gutterSize}
+              headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+              updateKPI={updateKPI}
+              removeKPI={removeKPI}
+            ></KpiGrid>
+          ))}
+          {newKpiList.map((kpi: any) => (
+            <KpiGrid
+              key={kpi.index}
+              form={form}
+              rules={[validation.required]}
+              index={kpi.index}
+              isEditable={!isView && !kpi.visibility}
+              inputFontSize={inputFontSize}
+              gutterSize={gutterSize}
+              headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+              updateKPI={updateKPI}
+              removeKPI={removeKPI}
+            ></KpiGrid>
           ))}
           <Row justify={'start'}>
             <Col span={2}>
