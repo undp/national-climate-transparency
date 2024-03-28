@@ -395,7 +395,6 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                   </label>
                 }
                 name="programmeId"
-                rules={[validation.required]}
               >
                 <Select
                   size={'large'}
@@ -416,7 +415,6 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Form.Item
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('typeHeader')}</label>}
                 name="type"
-                rules={[validation.required]}
               >
                 <Select
                   size="large"
@@ -526,6 +524,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                   </label>
                 }
                 name="status"
+                rules={[validation.required]}
               >
                 <Select
                   size="large"
@@ -574,6 +573,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('startYearHeader')}</label>
                 }
                 name="startYear"
+                rules={[validation.required]}
               >
                 <Select
                   size="large"
@@ -596,6 +596,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('endYearHeader')}</label>
                 }
                 name="endYear"
+                rules={[validation.required]}
               >
                 <Select
                   size="large"
@@ -746,16 +747,18 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Form.Item
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>}
                 name="achievedReduct"
+                rules={[validation.required]}
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input type="number" style={{ fontSize: inputFontSize, height: '40px' }} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>}
                 name="expectedReduct"
+                rules={[validation.required]}
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input type="number" style={{ fontSize: inputFontSize, height: '40px' }} />
               </Form.Item>
             </Col>
           </Row>
@@ -891,7 +894,6 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                   </label>
                 }
                 name="comments"
-                rules={[validation.required]}
               >
                 <TextArea rows={3} disabled={isView} />
               </Form.Item>
