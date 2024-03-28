@@ -131,7 +131,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
     const programmeData: ProgrammeData[] = [];
     for (let i = 0; i < 5; i++) {
       programmeData.push({
-        id: 'P001',
+        id: `P00${i}`,
         title: `Xep Energy 00${i}`,
       });
     }
@@ -209,21 +209,26 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
 
       payload.linkedActivities = selectedActivityIds;
 
-      payload.achieved = parseFloat(payload.achieved);
-      payload.expected = parseFloat(payload.expected);
+      payload.timeFrame = parseFloat(payload.timeFrame);
+      payload.startYear = parseInt(payload.startYear);
+      payload.endYear = parseInt(payload.endYear);
+      payload.achievedReduct = parseFloat(payload.achievedReduct);
+      payload.expectedReduct = parseFloat(payload.expectedReduct);
+
+      console.log(payload);
 
       const response = await post('national/project/add', payload);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
-          content: t('programmeCreationSuccess'),
+          content: t('projectCreationSuccess'),
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
-        navigate('/programmes');
+        navigate('/projects');
       }
     } catch (error: any) {
-      console.log('Error in action creation', error);
+      console.log('Error in project creation', error);
       message.open({
         type: 'error',
         content: `${error.message}`,
@@ -419,7 +424,6 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 <Select
                   size="large"
                   style={{ fontSize: inputFontSize }}
-                  mode="multiple"
                   allowClear
                   disabled={isView}
                   showSearch
@@ -621,7 +625,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                   <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('timeFrameHeader')}</label>
                 }
                 name="timeFrame"
-                rules={[validation.required, validation.number]}
+                rules={[validation.required]}
               >
                 <Input type="number" style={{ fontSize: inputFontSize, height: '40px' }} />
               </Form.Item>
@@ -826,7 +830,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                         <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>
                       }
                       name={`kpi_exp_${kpi.index}`}
-                      rules={[validation.required, validation.number]}
+                      rules={[validation.required]}
                     >
                       <Input
                         type="number"

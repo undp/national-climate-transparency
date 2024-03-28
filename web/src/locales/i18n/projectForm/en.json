@@ -61,5 +61,6 @@
     "statusTitle": "Status",
     "natImplementorTitle": "National Implementing Entity (s)",
     "noActivityMessage": "No Activities Attached",
-    "noSupportMessage": "No Supports Attached"
+    "noSupportMessage": "No Supports Attached",
+    "projectCreationSuccess": "Project Added Succesfully"
   }
