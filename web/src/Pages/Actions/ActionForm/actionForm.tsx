@@ -50,6 +50,7 @@ type KpiData = {
   creatorType: string;
   achieved: number;
   expected: number;
+  migrated: boolean;
 };
 
 type ProgrammeData = {
@@ -130,6 +131,8 @@ const actionForm: React.FC<Props> = ({ method }) => {
   }, [selectedProgramIds]);
 
   useEffect(() => {
+    console.log('Running Migration Update');
+
     if (method !== 'create') {
       console.log('Get the Action Information and load them');
     }
@@ -143,7 +146,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
       achievedReduct: 6,
       expectedReduct: 100,
     });
-  }, [selectedProgramIds, kpiList]);
+  }, [programData]);
 
   // Form Submit
 
@@ -215,6 +218,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
       creatorType: 'action',
       expected: 0,
       achieved: 0,
+      migrated: false,
     };
     setKpiList((prevList) => [...prevList, newItem]);
   };
@@ -623,7 +627,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                     >
                       <Input
                         style={{ fontSize: inputFontSize, height: '40px' }}
-                        disabled={isView}
+                        disabled={isView || kpi.migrated}
                         onChange={(e) => {
                           updateKPI(kpi.index, 'name', e.target.value);
                         }}
@@ -640,7 +644,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                     >
                       <Input
                         style={{ fontSize: inputFontSize, height: '40px' }}
-                        disabled={isView}
+                        disabled={isView || kpi.migrated}
                         onChange={(e) => {
                           updateKPI(kpi.index, 'unit', e.target.value);
                         }}
@@ -651,7 +655,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               </Col>
               <Col span={12}>
                 <Row gutter={15}>
-                  <Col span={11}>
+                  <Col span={isView || kpi.migrated ? 12 : 11}>
                     <Form.Item
                       label={
                         <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>
@@ -664,7 +668,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                       />
                     </Form.Item>
                   </Col>
-                  <Col span={11}>
+                  <Col span={isView || kpi.migrated ? 12 : 11}>
                     <Form.Item
                       label={
                         <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>
@@ -675,36 +679,38 @@ const actionForm: React.FC<Props> = ({ method }) => {
                       <Input
                         type="number"
                         style={{ fontSize: inputFontSize, height: '40px' }}
-                        disabled={isView}
+                        disabled={isView || kpi.migrated}
                         onChange={(e) => {
                           updateKPI(kpi.index, 'expected', e.target.value);
                         }}
                       />
                     </Form.Item>
                   </Col>
-                  <Col span={2}>
-                    <Card
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        padding: '0px',
-                        width: '30px',
-                        height: '30px',
-                        marginTop: '36px',
-                        borderWidth: '1px',
-                        borderRadius: '4px',
-                        borderColor: '#d9d9d9',
-                      }}
-                    >
-                      <DeleteOutlined
-                        style={{ cursor: 'pointer', color: '#3A3541', opacity: 0.8 }}
-                        onClick={() => {
-                          removeKPI(kpi.index);
+                  {!isView && !kpi.migrated ? (
+                    <Col span={2}>
+                      <Card
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          padding: '0px',
+                          width: '30px',
+                          height: '30px',
+                          marginTop: '36px',
+                          borderWidth: '1px',
+                          borderRadius: '4px',
+                          borderColor: '#d9d9d9',
                         }}
-                      />
-                    </Card>
-                  </Col>
+                      >
+                        <DeleteOutlined
+                          style={{ cursor: 'pointer', color: '#3A3541', opacity: 0.8 }}
+                          onClick={() => {
+                            removeKPI(kpi.index);
+                          }}
+                        />
+                      </Card>
+                    </Col>
+                  ) : null}
                 </Row>
               </Col>
             </Row>
