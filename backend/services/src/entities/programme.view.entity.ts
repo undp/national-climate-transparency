@@ -40,11 +40,6 @@ export class ProgrammeViewEntity {
     @ViewColumn()
     expectedReduct: number
 
-    // From Action
-
-    // @ViewColumn()
-    // instrTypes: string[]
-
     // No Clue of Location
 
     // @ViewColumn()

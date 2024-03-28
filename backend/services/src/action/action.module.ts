@@ -15,6 +15,7 @@ import { SupportEntity } from '../entities/support.entity';
 import { UtilModule } from '../util/util.module';
 import { FileHandlerModule } from '../file-handler/filehandler.module';
 import { ValidationModule } from '../validation/validation.module';
+
 @Module({
     imports: [
         ConfigModule.forRoot({
