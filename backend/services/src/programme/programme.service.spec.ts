@@ -3,14 +3,14 @@ import { CounterService } from "../util/counter.service";
 import { FileUploadService } from "../util/fileUpload.service";
 import { HelperService } from "../util/helpers.service";
 import { PayloadValidator } from "../validation/payload.validator";
-import { EntityManager, Repository } from "typeorm";
+import { EntityManager, Repository, SelectQueryBuilder } from "typeorm";
 import { ProgrammeService } from "./programme.service";
 import { Test, TestingModule } from "@nestjs/testing";
 import { DataResponseMessageDto } from "../dtos/data.response.message";
 import { User } from "../entities/user.entity";
 import { ProgrammeDto } from "../dtos/programme.dto";
 import { Sector } from "../enums/sector.enum";
-import { NatImplementor, SubSector } from "../enums/shared.enum";
+import { IntImplementor, NatImplementor, Recipient, SubSector } from "../enums/shared.enum";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { HttpException, HttpStatus } from "@nestjs/common";
@@ -20,11 +20,18 @@ import { KpiDto } from "../dtos/kpi.dto";
 import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { LinkProgrammesDto } from "../dtos/link.programmes.dto";
+import { OrganisationService } from "../organisation/organisation.service";
+import { ProgrammeViewDto } from "../dtos/programme.view.dto";
+import { ProjectEntity } from "../entities/project.entity";
+import { ProjectType } from "../enums/project.enum";
+import { QueryDto } from "../dtos/query.dto";
+import { FilterEntry } from "../dtos/filter.entry";
 
 describe('ProgrammeService', () => {
     let service: ProgrammeService;
     let entityManagerMock: Partial<EntityManager>;
     let programmeRepositoryMock: Partial<Repository<ProgrammeEntity>>;
+    let organisationServiceMock: Partial<OrganisationService>;
     let actionServiceMock: Partial<ActionService>;
     let counterServiceMock: Partial<CounterService>;
     let helperServiceMock: Partial<HelperService>;
@@ -51,6 +58,8 @@ describe('ProgrammeService', () => {
         };
         helperServiceMock = {
             formatReqMessagesString: jest.fn(),
+            parseMongoQueryToSQLWithTable: jest.fn(),
+            generateWhereSQL: jest.fn(),
         };
         fileUploadServiceMock = {
             uploadDocument: jest.fn().mockResolvedValue('http://test.com/documents/action_documents/test.csv'),
@@ -60,12 +69,27 @@ describe('ProgrammeService', () => {
             validateKpiPayload: jest.fn(),
         };
 
+        programmeRepositoryMock = {
+            createQueryBuilder: jest.fn(() => ({
+                where: jest.fn().mockReturnThis(),
+                leftJoinAndSelect: jest.fn().mockReturnThis(),
+                orderBy: jest.fn().mockReturnThis(),
+                offset: jest.fn().mockReturnThis(),
+                limit: jest.fn().mockReturnThis(),
+                getManyAndCount: jest.fn(),
+            })) as unknown as () => SelectQueryBuilder<ProgrammeEntity>,
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 ProgrammeService,
                 {
                     provide: EntityManager,
                     useValue: entityManagerMock,
+                },
+                {
+                    provide: OrganisationService,
+                    useValue: organisationServiceMock,
                 },
                 {
                     provide: ActionService,
@@ -614,4 +638,205 @@ describe('ProgrammeService', () => {
             ["1"],
         );
     });
+
+    it('should return ProgrammeViewDto with migrating data', async () => {
+        const programmeId = 'P001';
+        const abilityCondition = 'someCondition';
+
+        const project1 = new ProjectEntity();
+        project1.type = ProjectType.MITIGATION;
+        project1.recipient = Recipient.MIN_EDU;
+        project1.intImplementor = IntImplementor.EBRD;
+
+        const project2 = new ProjectEntity();
+        project2.type = ProjectType.MITIGATION;
+        project2.recipient = Recipient.MIN_FISH;
+        project2.intImplementor = IntImplementor.GIZ;
+
+        const programmeEntity = new ProgrammeEntity();
+        programmeEntity.title = "test";
+        programmeEntity.description = "test description";
+        programmeEntity.objective = "test objective";
+        programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+        programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+        programmeEntity.startYear = 2024;
+        programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+        programmeEntity.investment = 1000;
+        programmeEntity.comments = "Test comment"
+        programmeEntity.programmeId = "P001";
+        programmeEntity.projects = [project1, project2]
+
+
+        jest.spyOn(service, 'query').mockResolvedValueOnce({ data: [programmeEntity] });
+
+        const result = await service.getProgrammeViewData(programmeId, abilityCondition);
+
+        expect(result).toBeInstanceOf(ProgrammeViewDto);
+        expect(result.programmeId).toEqual("P001");
+
+        expect(result.types.length).toEqual(1);
+        expect(result.types).toContain("Mitigation");
+
+        expect(result.recipientEntity.length).toEqual(2);
+        expect(result.recipientEntity).toContain("Ministry of Education");
+        expect(result.recipientEntity).toContain("Ministry of Fisheries");
+
+        expect(result.interNationalImplementor.length).toEqual(2);
+        expect(result.interNationalImplementor).toContain("EBRD");
+        expect(result.interNationalImplementor).toContain("GIZ");
+    });
+
+    it('should return ProgrammeViewDto with empty arrays when projects array is empty', async () => {
+        const programmeId = 'P001';
+        const abilityCondition = 'someCondition';
+
+        const programmeEntity = new ProgrammeEntity();
+        programmeEntity.title = "test";
+        programmeEntity.description = "test description";
+        programmeEntity.objective = "test objective";
+        programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+        programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+        programmeEntity.startYear = 2024;
+        programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+        programmeEntity.investment = 1000;
+        programmeEntity.comments = "Test comment"
+        programmeEntity.programmeId = "P001";
+
+
+        jest.spyOn(service, 'query').mockResolvedValueOnce({ data: [programmeEntity] });
+
+        const result = await service.getProgrammeViewData(programmeId, abilityCondition);
+
+        expect(result).toBeInstanceOf(ProgrammeViewDto);
+        expect(result.programmeId).toEqual("P001");
+        expect(result.types).toEqual([]);
+        expect(result.recipientEntity).toEqual([]);
+        expect(result.interNationalImplementor).toEqual([]);
+    });
+
+    it('should throw HttpException when programme is null', async () => {
+        const programmeId = '1';
+        const abilityCondition = 'someCondition';
+
+        jest.spyOn(service, 'query').mockResolvedValueOnce(null);
+
+        try {
+            await service.getProgrammeViewData(programmeId, abilityCondition);
+        } catch (error) {
+            expect(error).toBeInstanceOf(HttpException);
+            expect(error.status).toBe(HttpStatus.BAD_REQUEST);
+        }
+
+        expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
+            'programme.programmesNotFound',
+            [],
+        );
+    });
+
+
+    it('should build the query correctly without size and page', async () => {
+        const queryDto = new QueryDto();
+        const filterAnd: FilterEntry[] = [];
+        filterAnd.push({
+            key: 'programmeId',
+            operation: '=',
+            value: 'P025',
+        });
+        queryDto.filterAnd = filterAnd;
+        const abilityCondition = 'someCondition';
+
+        const mockQueryBuilder = {
+            where: jest.fn().mockReturnThis(),
+            leftJoinAndSelect: jest.fn().mockReturnThis(),
+            orderBy: jest.fn().mockReturnThis(),
+            offset: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockReturnThis(),
+            getManyAndCount: jest.fn().mockResolvedValue([]),
+        } as unknown as SelectQueryBuilder<ProgrammeEntity>;
+
+        jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
+
+
+        await service.query(queryDto, abilityCondition);
+
+        expect(programmeRepositoryMock.createQueryBuilder).toHaveBeenCalledWith('programme');
+        expect(programmeRepositoryMock.createQueryBuilder().where).toHaveBeenCalled();
+        expect(programmeRepositoryMock.createQueryBuilder().leftJoinAndSelect).toHaveBeenCalledTimes(2);
+        expect(programmeRepositoryMock.createQueryBuilder().orderBy).toHaveBeenCalled();
+        expect(programmeRepositoryMock.createQueryBuilder().offset).toBeCalledTimes(0);
+        expect(programmeRepositoryMock.createQueryBuilder().limit).toBeCalledTimes(0);
+        expect(programmeRepositoryMock.createQueryBuilder().getManyAndCount).toHaveBeenCalled();
+    });
+
+    it('should build the query correctly without size and page', async () => {
+        const queryDto = new QueryDto();
+        const filterAnd: FilterEntry[] = [];
+        filterAnd.push({
+            key: 'programmeId',
+            operation: '=',
+            value: 'P025',
+        });
+        queryDto.filterAnd = filterAnd;
+        const abilityCondition = 'someCondition';
+
+        const mockQueryBuilder = {
+            where: jest.fn().mockReturnThis(),
+            leftJoinAndSelect: jest.fn().mockReturnThis(),
+            orderBy: jest.fn().mockReturnThis(),
+            offset: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockReturnThis(),
+            getManyAndCount: jest.fn().mockResolvedValue([]),
+        } as unknown as SelectQueryBuilder<ProgrammeEntity>;
+
+        jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
+
+
+        await service.query(queryDto, abilityCondition);
+
+        expect(programmeRepositoryMock.createQueryBuilder).toHaveBeenCalledWith('programme');
+        expect(programmeRepositoryMock.createQueryBuilder().where).toHaveBeenCalled();
+        expect(programmeRepositoryMock.createQueryBuilder().leftJoinAndSelect).toHaveBeenCalledTimes(2); // Assuming there are two left join queries
+        expect(programmeRepositoryMock.createQueryBuilder().orderBy).toHaveBeenCalled();
+        expect(programmeRepositoryMock.createQueryBuilder().offset).toBeCalledTimes(0);
+        expect(programmeRepositoryMock.createQueryBuilder().limit).toBeCalledTimes(0);
+        expect(programmeRepositoryMock.createQueryBuilder().getManyAndCount).toHaveBeenCalled();
+    });
+
+    it('should build the query correctly with size and page', async () => {
+        const queryDto = new QueryDto();
+        const filterAnd: FilterEntry[] = [];
+        filterAnd.push({
+            key: 'programmeId',
+            operation: '=',
+            value: 'P025',
+        });
+        queryDto.filterAnd = filterAnd;
+        queryDto.page = 10;
+        queryDto.size = 20;
+        const abilityCondition = 'someCondition';
+
+        const mockQueryBuilder = {
+            where: jest.fn().mockReturnThis(),
+            leftJoinAndSelect: jest.fn().mockReturnThis(),
+            orderBy: jest.fn().mockReturnThis(),
+            offset: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockReturnThis(),
+            getManyAndCount: jest.fn().mockResolvedValue([]),
+        } as unknown as SelectQueryBuilder<ProgrammeEntity>;
+
+        jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
+
+
+        await service.query(queryDto, abilityCondition);
+
+        expect(programmeRepositoryMock.createQueryBuilder).toHaveBeenCalledWith('programme');
+        expect(programmeRepositoryMock.createQueryBuilder().where).toHaveBeenCalled();
+        expect(programmeRepositoryMock.createQueryBuilder().leftJoinAndSelect).toHaveBeenCalledTimes(2); // Assuming there are two left join queries
+        expect(programmeRepositoryMock.createQueryBuilder().orderBy).toHaveBeenCalled();
+        expect(programmeRepositoryMock.createQueryBuilder().offset).toHaveBeenCalledWith(180);
+        expect(programmeRepositoryMock.createQueryBuilder().limit).toHaveBeenCalledWith(20);
+        expect(programmeRepositoryMock.createQueryBuilder().getManyAndCount).toHaveBeenCalled();
+    });
+
+
 })

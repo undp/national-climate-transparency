@@ -4,18 +4,20 @@ import {
     Request,
     Post,
     Body,
+    Get,
+    Param,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
 import { Action } from "../casl/action.enum";
 import { PoliciesGuardEx } from "../casl/policy.guard";
-import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeDto } from "../dtos/programme.dto";
 import { ProgrammeService } from "../programme/programme.service";
 import { ProgrammeEntity } from "src/entities/programme.entity";
 import { LinkProgrammesDto } from "src/dtos/link.programmes.dto";
 import { UnlinkProgrammesDto } from "src/dtos/unlink.programmes.dto";
+import { QueryDto } from "../dtos/query.dto";
 
 @ApiTags("Programme")
 @ApiBearerAuth()
@@ -31,6 +33,21 @@ export class ProgrammeController {
     @Post("add")
     addProgramme(@Body() programmeDto: ProgrammeDto, @Request() req) {
         return this.programmeService.createProgramme(programmeDto, req.user);
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeEntity, true))
+    @Post("query")
+    queryUser(@Body() query: QueryDto, @Request() req) {
+      console.log(req.abilityCondition);
+      return this.programmeService.query(query, req.abilityCondition);
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeEntity, true))
+    @Get('/:id')
+    getProgrammeViewData(@Param('id') id: string, @Request() req) {
+      return this.programmeService.getProgrammeViewData(id, req.abilityCondition);
     }
 
     @ApiBearerAuth('api_key')

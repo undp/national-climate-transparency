@@ -16,6 +16,7 @@ import { FileHandlerModule } from '../file-handler/filehandler.module';
 import { ProgrammeService } from './programme.service';
 import { ValidationModule } from '../validation/validation.module';
 import { ActionModule } from '../action/action.module';
+import { OrganisationModule } from 'src/organisation/organisation.module';
 
 @Module({
     imports: [
@@ -42,6 +43,7 @@ import { ActionModule } from '../action/action.module';
         forwardRef(() => ActionModule),
         FileHandlerModule,
         ValidationModule,
+        OrganisationModule
     ],
     providers: [
         ProgrammeService
