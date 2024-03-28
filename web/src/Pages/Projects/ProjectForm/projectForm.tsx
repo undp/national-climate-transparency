@@ -395,17 +395,11 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
       </div>
       <Form form={form} onFinish={handleSubmit} layout="vertical">
         <div className="form-card">
-          <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
-            {t('generalInfoTitle')}
-          </div>
+          <div className="form-section-header">{t('generalInfoTitle')}</div>
           <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('selectProgrammeHeader')}
-                  </label>
-                }
+                label={<label className="form-item-header">{t('selectProgrammeHeader')}</label>}
                 name="programmeId"
               >
                 <Select
@@ -425,7 +419,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={12}>
               <Form.Item
-                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('typeHeader')}</label>}
+                label={<label className="form-item-header">{t('typeHeader')}</label>}
                 name="type"
               >
                 <Select
@@ -447,20 +441,16 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('projTitleHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('projTitleHeader')}</label>}
                 name="title"
                 rules={[validation.required]}
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} />
+                <Input className="form-input-box" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('projDescHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('projDescHeader')}</label>}
                 name="description"
                 rules={[validation.required]}
               >
@@ -471,69 +461,51 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('projectNumberHeader')}
-                  </label>
-                }
+                label={<label className="form-item-header">{t('projectNumberHeader')}</label>}
                 name="addProjectNumber"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} />
+                <Input className="form-input-box" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('actionTitleHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('actionTitleHeader')}</label>}
                 name="actionTitle"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('programmeTitleHeader')}
-                  </label>
-                }
+                label={<label className="form-item-header">{t('programmeTitleHeader')}</label>}
                 name="programmeTitle"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('natAnchorHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('natAnchorHeader')}</label>}
                 name="natAnchor"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('instrTypesHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('instrTypesHeader')}</label>}
                 name="instrTypes"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('projectStatusHeader')}
-                  </label>
-                }
+                label={<label className="form-item-header">{t('projectStatusHeader')}</label>}
                 name="status"
                 rules={[validation.required]}
               >
@@ -556,33 +528,23 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize}>
             <Col span={6}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('sectorsAffectedHeader')}
-                  </label>
-                }
+                label={<label className="form-item-header">{t('sectorsAffectedHeader')}</label>}
                 name="sectorsAffected"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
             <Col span={6}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('subSectorsAffectedHeader')}
-                  </label>
-                }
+                label={<label className="form-item-header">{t('subSectorsAffectedHeader')}</label>}
                 name="subSectorsAffected"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
             <Col span={6}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('startYearHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('startYearHeader')}</label>}
                 name="startYear"
                 rules={[validation.required]}
               >
@@ -603,9 +565,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={6}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('endYearHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('endYearHeader')}</label>}
                 name="endYear"
                 rules={[validation.required]}
               >
@@ -628,44 +588,34 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize}>
             <Col span={6}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('timeFrameHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('timeFrameHeader')}</label>}
                 name="timeFrame"
                 rules={[validation.required]}
               >
-                <Input type="number" style={{ fontSize: inputFontSize, height: '40px' }} />
+                <Input type="number" className="form-input-box" />
               </Form.Item>
             </Col>
             <Col span={6}>
               <Form.Item<number>
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('natImplementorHeader')}
-                  </label>
-                }
+                label={<label className="form-item-header">{t('natImplementorHeader')}</label>}
                 name="natImplementor"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item<number>
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('techTypeHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('techTypeHeader')}</label>}
                 name="techType"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('recipientHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('recipientHeader')}</label>}
                 name="recipient"
                 rules={[validation.required]}
               >
@@ -687,11 +637,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
             </Col>
             <Col span={12}>
               <Form.Item<number>
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('intImplementorHeader')}
-                  </label>
-                }
+                label={<label className="form-item-header">{t('intImplementorHeader')}</label>}
                 name="intImplementor"
               >
                 <Select
@@ -714,28 +660,22 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item<number>
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('techDevHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('techDevHeader')}</label>}
                 name="techDevContribution"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item<number>
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('capBuildHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('capBuildHeader')}</label>}
                 name="capBuildObjectives"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
           </Row>
-          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}>
-            {t('documentsHeader')}
-          </div>
+          <div className="form-section-sub-header">{t('documentsHeader')}</div>
           <UploadFileGrid
             uploadedFiles={uploadedFiles}
             horizontalGutter={gutterSize}
@@ -747,35 +687,29 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
             setUploadedFiles={setUploadedFiles}
             isView={isView}
           ></UploadFileGrid>
-          <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
-            {t('mitigationInfoTitle')}
-          </div>
-          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}>
-            {t('emmissionInfoTitle')}
-          </div>
+          <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+          <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
           <Row gutter={gutterSize}>
             <Col span={12}>
               <Form.Item
-                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>}
+                label={<label className="form-item-header">{t('achieved')}</label>}
                 name="achievedReduct"
                 rules={[validation.required]}
               >
-                <Input type="number" style={{ fontSize: inputFontSize, height: '40px' }} />
+                <Input type="number" className="form-input-box" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>}
+                label={<label className="form-item-header">{t('expected')}</label>}
                 name="expectedReduct"
                 rules={[validation.required]}
               >
-                <Input type="number" style={{ fontSize: inputFontSize, height: '40px' }} />
+                <Input type="number" className="form-input-box" />
               </Form.Item>
             </Col>
           </Row>
-          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}>
-            {t('kpiInfoTitle')}
-          </div>
+          <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
           {migratedKpiList.map((index: number) => (
             <KpiGrid
               key={index}
@@ -809,14 +743,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               {!isView && (
                 <Button
                   icon={<PlusCircleOutlined />}
-                  style={{
-                    marginTop: '5px',
-                    marginBottom: '15px',
-                    border: 'none',
-                    color: '#3A3541',
-                    opacity: 0.8,
-                    padding: 0,
-                  }}
+                  className="create-kpi-button"
                   onClick={createKPI}
                 >
                   {t('addKPI')}
@@ -827,59 +754,45 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           <Row gutter={gutterSize}>
             <Col span={24}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('programmeCommentsTitle')}
-                  </label>
-                }
+                label={<label className="form-item-header">{t('programmeCommentsTitle')}</label>}
                 name="comments"
               >
                 <TextArea rows={3} disabled={isView} />
               </Form.Item>
             </Col>
           </Row>
-          <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
-            {t('financeInfoTitle')}
-          </div>
+          <div className="form-section-header">{t('financeInfoTitle')}</div>
           <Row gutter={gutterSize}>
             <Col span={6}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('neededUSDHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('neededUSDHeader')}</label>}
                 name="neededUSD"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
             <Col span={6}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('neededLCLHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('neededLCLHeader')}</label>}
                 name="neededLCL"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
             <Col span={6}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('recievedUSDHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('recievedUSDHeader')}</label>}
                 name="recievedUSD"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
             <Col span={6}>
               <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('recievedLCLHeader')}</label>
-                }
+                label={<label className="form-item-header">{t('recievedLCLHeader')}</label>}
                 name="recievedLCL"
               >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
+                <Input className="form-input-box" disabled />
               </Form.Item>
             </Col>
           </Row>
@@ -887,11 +800,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
         <div className="form-card">
           <Row>
             <Col span={6} style={{ paddingTop: '6px' }}>
-              <div
-                style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
-              >
-                {t('activityInfoTitle')}
-              </div>
+              <div className="form-section-header">{t('activityInfoTitle')}</div>
             </Col>
             <Col span={4}>
               <AttachEntity
@@ -938,11 +847,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
         <div className="form-card">
           <Row>
             <Col span={6}>
-              <div
-                style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
-              >
-                {t('supportInfoTitle')}
-              </div>
+              <div className="form-section-header">{t('supportInfoTitle')}</div>
             </Col>
           </Row>
           <Row>
@@ -972,11 +877,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
         </div>
         {isView && (
           <div className="form-card">
-            <div
-              style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
-            >
-              {t('updatesInfoTitle')}
-            </div>
+            <div className="form-section-header">{t('updatesInfoTitle')}</div>
           </div>
         )}
         {!isView && (

@@ -4,3 +4,36 @@ body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless)
 body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
   border-color: #ff4d4f !important;
 }
+
+.form-item-header {
+  color: #3a3541;
+  opacity: 0.8;
+}
+
+.form-section-header {
+  color: #3A3541;
+  opacity: 0.8;
+  margin-bottom: 25px;
+  font-weight: bold;
+}
+
+.form-section-sub-header {
+  color: #3A3541;
+  opacity: 0.8;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.form-input-box {
+  font-size: 13px;
+  height: 40px;
+}
+
+.create-kpi-button {
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: none;
+  color: #3A3541;
+  opacity: 0.8;
+  padding: 0;
+}
