@@ -285,13 +285,15 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
 
   // Dettach Project
 
-  const handleDetachOpen = (record: any) => {
+  const handleDetachOpen = (record: ActivityData) => {
+    console.log(record);
     const newOpenList = Array(selectedActivityIds.length).fill(false);
-    newOpenList[selectedActivityIds.indexOf(record.projectId)] = true;
+    newOpenList[selectedActivityIds.indexOf(record.activityId)] = true;
     setDetachOpen(newOpenList);
   };
 
   const detachActivity = (actId: string) => {
+    console.log(actId);
     const filteredData = activityData.filter((act) => act.activityId !== actId);
     const filteredIds = selectedActivityIds.filter((id) => id !== actId);
     setActivityData(filteredData);
@@ -300,7 +302,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
 
   // Action Menu definition
 
-  const actionMenu = (record: any) => {
+  const actionMenu = (record: ActivityData) => {
     return (
       <List
         className="action-menu"
@@ -311,7 +313,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
             icon: <CloseCircleOutlined style={{ color: 'red' }} />,
             click: () => {
               {
-                detachActivity(record.projectId);
+                detachActivity(record.activityId);
               }
             },
           },

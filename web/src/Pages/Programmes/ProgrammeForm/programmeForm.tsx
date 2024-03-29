@@ -238,7 +238,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
 
   // Dettach Project
 
-  const handleDetachOpen = (record: any) => {
+  const handleDetachOpen = (record: ProjectData) => {
     const newOpenList = Array(selectedProjectIds.length).fill(false);
     newOpenList[selectedProjectIds.indexOf(record.projectId)] = true;
     setDetachOpen(newOpenList);
@@ -253,7 +253,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
 
   // Action Menu definition
 
-  const actionMenu = (record: any) => {
+  const actionMenu = (record: ProjectData) => {
     return (
       <List
         className="action-menu"
