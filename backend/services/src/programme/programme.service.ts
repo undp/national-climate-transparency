@@ -18,6 +18,15 @@ import { DataResponseMessageDto } from "../dtos/data.response.message";
 import { ActionService } from "../action/action.service";
 import { LinkProgrammesDto } from "../dtos/link.programmes.dto";
 import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
+import { QueryDto } from "../dtos/query.dto";
+import { DataListResponseDto } from "../dtos/data.list.response";
+import { OrganisationService } from "../organisation/organisation.service";
+import { Role } from "../casl/role.enum";
+import { Organisation } from "../entities/organisation.entity";
+import { FilterEntry } from "../dtos/filter.entry";
+import { ProgrammeViewDto } from "../dtos/programme.view.dto";
+import { ProjectType } from "../enums/project.enum";
+import { ProjectEntity } from "../entities/project.entity";
 
 @Injectable()
 export class ProgrammeService {
@@ -25,6 +34,7 @@ export class ProgrammeService {
         @InjectEntityManager() private entityManger: EntityManager,
         @InjectRepository(ProgrammeEntity) private programmeRepo: Repository<ProgrammeEntity>,
         private actionService: ActionService,
+        private organisationService: OrganisationService,
         private counterService: CounterService,
         private helperService: HelperService,
         private fileUploadService: FileUploadService,
@@ -125,6 +135,68 @@ export class ProgrammeService {
 
     }
 
+    async getProgrammeViewData(programmeId: string, abilityCondition: string) {
+        const filterAnd: FilterEntry[] = [];
+        filterAnd.push({
+            key: 'programmeId',
+            operation: '=',
+            value: programmeId,
+        });
+
+        const queryDto = new QueryDto();
+        queryDto.filterAnd = filterAnd;
+
+        const programme = await this.query(queryDto, abilityCondition);
+
+        if (!programme) {
+            throw new HttpException(
+                this.helperService.formatReqMessagesString(
+                    "programme.programmesNotFound",
+                    []
+                ),
+                HttpStatus.BAD_REQUEST
+            );
+        }
+
+        return this.getProgrammeViewDto(programme.data[0]);
+    }
+
+    async query(query: QueryDto, abilityCondition: string): Promise<any> {
+        const queryBuilder = await this.programmeRepo
+            .createQueryBuilder("programme")
+            .where(
+                this.helperService.generateWhereSQL(
+                    query,
+                    this.helperService.parseMongoQueryToSQLWithTable(
+                        '"programme"',
+                        abilityCondition
+                    ),
+                    '"programme"'
+                )
+            )
+            .leftJoinAndSelect("programme.action", "action")
+            .leftJoinAndSelect("programme.projects", "projects")
+            .orderBy(
+                query?.sort?.key ? `"programme"."${query?.sort?.key}"` : `"programme"."programmeId"`,
+                query?.sort?.order ? query?.sort?.order : "DESC"
+            );
+        // .offset(query.size * query.page - query.size)
+        // .limit(query.size)
+        // .getManyAndCount();
+
+        if (query.size && query.page) {
+            queryBuilder.offset(query.size * query.page - query.size)
+                .limit(query.size);
+        }
+
+        const resp = await queryBuilder.getManyAndCount();
+
+        return new DataListResponseDto(
+            resp.length > 0 ? resp[0] : undefined,
+            resp.length > 1 ? resp[1] : undefined
+        );
+    }
+
     async linkProgrammesToAction(linkProgrammesDto: LinkProgrammesDto, user: User) {
         const action = await this.actionService.findActionById(linkProgrammesDto.actionId);
         if (!action) {
@@ -148,10 +220,28 @@ export class ProgrammeService {
                 HttpStatus.BAD_REQUEST
             );
         }
+        let department: Organisation;
+        if (user.role === Role.DepartmentUser) {
+            department = await this.organisationService.findByCompanyId(user.organisationId);
+        }
+        const departmentSectors = department?.sector || [];
 
         const prog = await this.entityManger
             .transaction(async (em) => {
                 for (const programme of programmes) {
+
+                    if (departmentSectors.length > 0) {
+                        const commonSectors = programme.affectedSectors.filter(sector => departmentSectors.includes(sector));
+                        if (commonSectors.length === 0) {
+                            throw new HttpException(
+                                this.helperService.formatReqMessagesString(
+                                    "programme.cannotLinkNotRelatedProgrammes",
+                                    [programme.programmeId]
+                                ),
+                                HttpStatus.BAD_REQUEST
+                            );
+                        }
+                    }
                     if (programme.action) {
                         throw new HttpException(
                             this.helperService.formatReqMessagesString(
@@ -273,5 +363,46 @@ export class ProgrammeService {
         log.userId = userId;
         log.logData = data;
         return log;
+    }
+
+    getProgrammeViewDto(programme: ProgrammeEntity) {
+
+        const typesSet: Set<string> = new Set();
+        const recipientEntitySet: Set<string> = new Set();
+        const interNationalImplementorSet: Set<string> = new Set();
+        
+        if (programme.projects && programme.projects.length > 0) {
+            for (const project of programme.projects) {
+                if (project.type) typesSet.add(project.type);
+                if (project.recipient) recipientEntitySet.add(project.recipient);
+                if (project.intImplementor) interNationalImplementorSet.add(project.intImplementor);
+            }
+        }
+        
+        const types: string[] = Array.from(typesSet);
+        const recipientEntity: string[] = Array.from(recipientEntitySet);
+        const interNationalImplementor: string[] = Array.from(interNationalImplementorSet);
+
+        const programmeViewDto = new ProgrammeViewDto();
+        programmeViewDto.programmeId = programme.programmeId;
+        programmeViewDto.actionId = programme.action?.actionId;
+        programmeViewDto.types = types;
+        programmeViewDto.title = programme.title;
+        programmeViewDto.description = programme.description;
+        programmeViewDto.objectives = programme.objective;
+        programmeViewDto.instrumentType = programme.action?.instrumentType;
+        programmeViewDto.affectedSectors = programme.affectedSectors;
+        programmeViewDto.affectedSubSector = programme.affectedSubSector;
+        programmeViewDto.programmeStatus = null;
+        programmeViewDto.recipientEntity = recipientEntity;
+        programmeViewDto.startYear = programme.startYear;
+        programmeViewDto.interNationalImplementor = interNationalImplementor;
+        programmeViewDto.nationalImplementor = programme.natImplementor;
+        programmeViewDto.investment = programme.investment;
+        programmeViewDto.documents = programme.documents;
+        programmeViewDto.comments = programme.comments;
+
+        return programmeViewDto;
+
     }
 }
