@@ -78,7 +78,7 @@ const UploadFileGrid: React.FC<Props> = ({
       <Col span={21}>
         <Row gutter={[horizontalGutter, verticalGutter]}>
           {documentList.map((file: any) => (
-            <Col span={8} style={{ height: height }}>
+            <Col key={file.uid} span={8} style={{ height: height }}>
               <DeleteCard
                 fileName={file.name.slice(0, 20)}
                 fileId={file.uid}

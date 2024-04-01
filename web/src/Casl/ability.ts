@@ -14,6 +14,7 @@ import { User } from '../Entities/user';
 import { ActionEntity } from '../Entities/action';
 import { Organisation } from '../Entities/organisation';
 import { ProgrammeEntity } from '../Entities/programme';
+import { ProjectEntity } from '../Entities/project';
 
 type Subjects = InferSubjects<typeof BaseEntity> | 'all';
 
@@ -54,6 +55,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Create, ProgrammeEntity);
       can(Action.Update, ProgrammeEntity);
       can(Action.Delete, ProgrammeEntity);
+
+      can(Action.Read, ProjectEntity);
+      can(Action.Create, ProjectEntity);
+      can(Action.Update, ProjectEntity);
+      can(Action.Delete, ProjectEntity);
     }
 
     if (user.role == Role.Admin) {
@@ -78,6 +84,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Create, ProgrammeEntity);
       can(Action.Update, ProgrammeEntity);
       can(Action.Delete, ProgrammeEntity);
+
+      can(Action.Read, ProjectEntity);
+      can(Action.Create, ProjectEntity);
+      can(Action.Update, ProjectEntity);
+      can(Action.Delete, ProjectEntity);
     }
 
     if (user.role == Role.DepartmentUser) {
@@ -103,6 +114,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Create, ProgrammeEntity);
       cannot(Action.Update, ProgrammeEntity);
       cannot(Action.Delete, ProgrammeEntity);
+
+      can(Action.Read, ProjectEntity);
+      cannot(Action.Create, ProjectEntity);
+      cannot(Action.Update, ProjectEntity);
+      cannot(Action.Delete, ProjectEntity);
     }
 
     if (user.role == Role.ViewOnly) {
@@ -128,6 +144,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Create, ProgrammeEntity);
       cannot(Action.Update, ProgrammeEntity);
       cannot(Action.Delete, ProgrammeEntity);
+
+      can(Action.Read, ProjectEntity);
+      cannot(Action.Create, ProjectEntity);
+      cannot(Action.Update, ProjectEntity);
+      cannot(Action.Delete, ProjectEntity);
     }
   }
 

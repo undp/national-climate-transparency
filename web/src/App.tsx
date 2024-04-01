@@ -105,8 +105,8 @@ const App = () => {
                   </Route>
                   <Route path="/projects" element={<CustomLayout selectedKey="projects" />}>
                     <Route path="" element={<ProjectList />} />
-                    <Route path="view/:id" element={<ProjectForm />} />
-                    <Route path="add" element={<ProjectForm />} />
+                    <Route path="view/:id" element={<ProjectForm method="view" />} />
+                    <Route path="add" element={<ProjectForm method="create" />} />
                   </Route>
 
                   <Route path="/activities" element={<CustomLayout selectedKey="activities" />}>

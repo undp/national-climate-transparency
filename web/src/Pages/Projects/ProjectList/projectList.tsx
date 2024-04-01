@@ -13,17 +13,15 @@ import {
   message,
   PaginationProps,
 } from 'antd';
-import {
-  EditOutlined,
-  EllipsisOutlined,
-  FilterOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { EditOutlined, EllipsisOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 const { Search } = Input;
 
 import data from '../../../Testing/projectList.json';
+import { useNavigate } from 'react-router-dom';
+import { useAbilityContext } from '../../../Casl/Can';
+import { Action } from '../../../Enums/action.enum';
+import { ProjectEntity } from '../../../Entities/project';
 
 interface Item {
   key: string;
@@ -38,6 +36,7 @@ interface Item {
 }
 const projectList = () => {
   const { t } = useTranslation(['projectList']);
+  const ability = useAbilityContext();
   const [tableData, setTableData] = useState<Item[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<any>(1);
@@ -49,6 +48,8 @@ const projectList = () => {
   const [valueOnSearch, setValueOnSearch] = useState<string>('');
   const [totalUser, setTotalUser] = useState<number>();
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const actionMenu = (record: any) => {
     return (
@@ -175,29 +176,29 @@ const projectList = () => {
     setValueOnSearch(searchValue);
   };
 
-  const sort = () => {
-    if (sortOrder !== '' && sortField !== '') {
-      return {
-        key: sortField,
-        order: sortOrder,
-      };
-    } else
-      return {
-        key: 'id',
-        order: 'DESC',
-      };
-  };
+  // const sort = () => {
+  //   if (sortOrder !== '' && sortField !== '') {
+  //     return {
+  //       key: sortField,
+  //       order: sortOrder,
+  //     };
+  //   } else
+  //     return {
+  //       key: 'id',
+  //       order: 'DESC',
+  //     };
+  // };
 
   // get All Data Params
-  const getAllDataParams = () => {
-    return {
-      page: currentPage,
-      size: pageSize,
-      // filterOr: filterOr(),
-      // filterAnd: filterAnd(),
-      sort: sort(),
-    };
-  };
+  // const getAllDataParams = () => {
+  //   return {
+  //     page: currentPage,
+  //     size: pageSize,
+  //     // filterOr: filterOr(),
+  //     // filterAnd: filterAnd(),
+  //     sort: sort(),
+  //   };
+  // };
   const dummyDataQuery = () => {
     console.log('dummyDataQuery', currentPage, pageSize, sortField, sortOrder, valueOnSearch);
     if (sortField) {
@@ -262,9 +263,19 @@ const projectList = () => {
         <Row className="table-actions-section">
           <Col md={8} xs={24}>
             <div className="action-bar">
-              <Button type="primary" size="large" block icon={<PlusOutlined />} onClick={() => {}}>
-                {t('addButtonType')}
-              </Button>
+              {ability.can(Action.Create, ProjectEntity) && (
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    navigate('/projects/add');
+                  }}
+                >
+                  {t('addButtonType')}
+                </Button>
+              )}
             </div>
           </Col>
           <Col md={16} xs={24}>
@@ -289,7 +300,7 @@ const projectList = () => {
                   open={filterVisible}
                   onOpenChange={handleFilterVisibleChange}
                 >
-                  <a className="ant-dropdown-link" onClick={(e) => {}}>
+                  <a className="ant-dropdown-link" onClick={() => {}}>
                     <FilterOutlined
                       style={{
                         color: 'rgba(58, 53, 65, 0.3)',
