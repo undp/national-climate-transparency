@@ -7,7 +7,6 @@ import LayoutHeader from '../Header/layout.header';
 import LayoutSider from '../Sider/layout.sider';
 import './layout.scss';
 import { PauseCircleFill } from 'react-bootstrap-icons';
-
 import { Loading } from '../Loading/loading';
 import { ConfigurationSettingsType } from '../../Enums/configuration.setting.type.enum';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';

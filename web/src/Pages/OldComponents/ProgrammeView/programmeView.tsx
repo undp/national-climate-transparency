@@ -8,7 +8,6 @@ import './programmeView.scss';
 import {
   BlockOutlined,
   BulbOutlined,
-  CheckCircleOutlined,
   ClockCircleOutlined,
   ExperimentOutlined,
   QrcodeOutlined,
@@ -46,12 +45,13 @@ import {
   getStageEnumVal,
   getStageTagTypeMRV,
   isBase64,
-  useConnection,
-  useUserContext,
 } from '@undp/carbon-library';
 
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
+
 const ProgrammeView = () => {
-  const { get, put, post } = useConnection();
+  const { post } = useConnection();
 
   const { userInfoState } = useUserContext();
   const { state } = useLocation();

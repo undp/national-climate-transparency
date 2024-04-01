@@ -30,8 +30,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
 import {
-  useConnection,
-  useUserContext,
   GovBGColor,
   CertBGColor,
   DevBGColor,
@@ -49,6 +47,9 @@ import {
   DevColor,
   ProfileIcon,
 } from '@undp/carbon-library';
+
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { useTranslation } from 'react-i18next';
 import UserActionConfirmationModel from '../../../Components/Models/userActionConfirmationModel';
 import Search from 'antd/lib/input/Search';
