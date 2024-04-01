@@ -16,7 +16,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
 import {
-  useConnection,
   GovBGColor,
   CertBGColor,
   DevBGColor,
@@ -28,6 +27,7 @@ import {
   RoleIcon,
   addCommSep,
 } from '@undp/carbon-library';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { CompanyTableDataType } from '../../../Definitions/companyManagement.definitions';

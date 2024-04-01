@@ -1,16 +1,16 @@
-import React, { FC, Suspense, useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './login.scss';
 import { Button, Col, Form, Input, Row, Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { userForgotPasswordProps, useConnection } from '@undp/carbon-library';
-import i18next from 'i18next';
+import { userForgotPasswordProps } from '@undp/carbon-library';
+import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useNavigate } from 'react-router-dom';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 const ForgotPassword = () => {
   const { post } = useConnection();
   const navigate = useNavigate();
-  const { i18n, t } = useTranslation(['common', 'forgotPassword']);
+  const { t } = useTranslation(['common', 'forgotPassword']);
   const [loading, setLoading] = useState<boolean>(false);
   const [emailSent, setEmailSent] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<boolean>(false);

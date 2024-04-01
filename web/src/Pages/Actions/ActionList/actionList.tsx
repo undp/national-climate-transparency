@@ -37,7 +37,6 @@ interface Item {
 }
 
 const actionList = () => {
-  // const { post, delete: del } = useConnection();
   const navigate = useNavigate();
   const ability = useAbilityContext();
   const { t } = useTranslation(['actionList']);
