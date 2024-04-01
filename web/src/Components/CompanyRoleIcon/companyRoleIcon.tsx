@@ -1,5 +1,6 @@
 import { BankOutlined, ExperimentOutlined } from '@ant-design/icons';
-import { DevBGColor, DevColor, GovBGColor, GovColor, RoleIcon } from '@undp/carbon-library';
+import { DevBGColor, DevColor, GovBGColor, GovColor } from '@undp/carbon-library';
+import { RoleIcon } from '../common/RoleIcon/role.icon';
 import { FC } from 'react';
 
 export interface CompanyRoleIconProps {
