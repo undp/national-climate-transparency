@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from 'react';
 import { Progress, Skeleton, Tooltip } from 'antd';
 import { InfoCircle } from 'react-bootstrap-icons';
-import { addCommSepRound } from '../../Definitions/commSep.definition';
+import { addCommSepRound } from '../../Utils/utilServices';
 
 export interface ListWidgetProps {
   data: any[];

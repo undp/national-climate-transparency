@@ -1,4 +1,4 @@
-import { addCommSepRound } from '../../Definitions/commSep.definition';
+import { addCommSepRound } from '../../Utils/utilServices';
 
 export const getChartOptions = (labels: string[], colors: string[]) => {
   return {

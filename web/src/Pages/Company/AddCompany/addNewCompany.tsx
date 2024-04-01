@@ -8,7 +8,7 @@ import PhoneInput, {
 import { AuditOutlined, BankOutlined, UploadOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getBase64 } from '@undp/carbon-library';
+import { getBase64 } from '../../../Utils/utilServices';
 import { UserProps } from '../../../Definitions/userContext.definition';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';

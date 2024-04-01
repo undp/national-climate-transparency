@@ -29,11 +29,12 @@ import {
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
+import { RoleIcon, CompanyRole, ProfileIcon } from '@undp/carbon-library';
+
 import {
   GovBGColor,
   CertBGColor,
   DevBGColor,
-  RoleIcon,
   AdminBGColor,
   RootBGColor,
   ManagerBGColor,
@@ -42,11 +43,9 @@ import {
   RootColor,
   ManagerColor,
   ViewColor,
-  CompanyRole,
   GovColor,
   DevColor,
-  ProfileIcon,
-} from '@undp/carbon-library';
+} from '../../../Styles/role.color.constants';
 
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
