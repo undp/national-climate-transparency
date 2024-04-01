@@ -38,7 +38,7 @@ export class ProgrammeController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeEntity, true))
     @Post("query")
-    queryUser(@Body() query: QueryDto, @Request() req) {
+    queryProgramme(@Body() query: QueryDto, @Request() req) {
       console.log(req.abilityCondition);
       return this.programmeService.query(query, req.abilityCondition);
     }

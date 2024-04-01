@@ -16,11 +16,14 @@ import { EntityManager, Repository } from "typeorm";
 import { FileUploadService } from "../util/fileUpload.service";
 import { PayloadValidator } from "../validation/payload.validator";
 import { ProgrammeEntity } from "../entities/programme.entity";
+import { QueryDto } from "../dtos/query.dto";
+import { DataListResponseDto } from "../dtos/data.list.response";
+import { ActionViewEntity } from "../entities/action.view.entity";
 
 @Injectable()
 export class ActionService {
   constructor(
-    @InjectEntityManager() private entityManger: EntityManager,
+    @InjectEntityManager() private entityManager: EntityManager,
     @InjectRepository(ActionEntity) private actionRepo: Repository<ActionEntity>,
     @InjectRepository(ProgrammeEntity) private programmeRepo: Repository<ProgrammeEntity>,
     private counterService: CounterService,
@@ -86,7 +89,7 @@ export class ActionService {
       this.addEventLogEntry(eventLog, LogEventType.KPI_ADDED, EntityType.ACTION, action.actionId, user.id, kpiList);
     }
 
-    const act = await this.entityManger
+    const act = await this.entityManager
       .transaction(async (em) => {
         const savedAction = await em.save<ActionEntity>(action);
         if (savedAction) {
@@ -102,10 +105,10 @@ export class ActionService {
             });
           }
 
-          //add log here
           eventLog.forEach(async event => {
             await em.save<LogEntity>(event);
           });
+          await em.query('REFRESH MATERIALIZED VIEW action_view_entity;');
         }
         return savedAction;
       })
@@ -137,10 +140,69 @@ export class ActionService {
   // adding find method to action service to avoid a circular dependency with programme service
   async findAllProgrammeByIds(programmeIds: string[]) {
     return await this.programmeRepo.createQueryBuilder('programme')
-        .leftJoinAndSelect('programme.action', 'action')
-        .where('programme.programmeId IN (:...programmeIds)', { programmeIds })
-        .getMany();
-}
+      .leftJoinAndSelect('programme.action', 'action')
+      .where('programme.programmeId IN (:...programmeIds)', { programmeIds })
+      .getMany();
+  }
+
+  async getActionViewData(actionId: string, abilityCondition: string) {
+
+    const queryBuilder = await this.actionRepo
+        .createQueryBuilder("action")
+        .where('action.actionId = :actionId', { actionId })
+        .leftJoinAndMapOne(
+          "action.migratedData",
+          ActionViewEntity,
+          "actionViewEntity",
+          "actionViewEntity.id = action.actionId"
+        );
+        const result = await queryBuilder.getOne();
+
+    if (!result) {
+      throw new HttpException(
+        this.helperService.formatReqMessagesString(
+          "programme.programmesNotFound",
+          []
+        ),
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    return result;
+
+  }
+
+  async query(query: QueryDto, abilityCondition: string): Promise<any> {
+    const queryBuilder = await this.actionRepo
+      .createQueryBuilder("action")
+      .where(
+        this.helperService.generateWhereSQL(
+          query,
+          this.helperService.parseMongoQueryToSQLWithTable(
+            '"action"',
+            abilityCondition
+          ),
+          '"action"'
+        )
+      )
+      .leftJoinAndSelect('action.programmes', 'programme')
+      .orderBy(
+        query?.sort?.key ? `"action"."${query?.sort?.key}"` : `"action"."actionId"`,
+        query?.sort?.order ? query?.sort?.order : "DESC"
+      );
+
+    if (query.size && query.page) {
+      queryBuilder.offset(query.size * query.page - query.size)
+        .limit(query.size);
+    }
+
+    const resp = await queryBuilder.getManyAndCount();
+
+    return new DataListResponseDto(
+      resp.length > 0 ? resp[0] : undefined,
+      resp.length > 1 ? resp[1] : undefined
+    );
+  }
 
   private addEventLogEntry = (
     eventLog: any[],

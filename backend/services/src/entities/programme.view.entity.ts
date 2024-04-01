@@ -16,8 +16,11 @@ export const programmeViewSQL =  `
         p."programmeId";`
 
 @ViewEntity({
+    name: 'programme_view_entity',
     materialized: true,
     expression: programmeViewSQL,
+    synchronize: false,
+
 })
 
 export class ProgrammeViewEntity {
