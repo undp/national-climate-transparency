@@ -46,8 +46,8 @@ import { SettingsContextProvider } from './Context/SettingsContext/settingsConte
 
 const App = () => {
   const ability = defineAbility();
-  const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION || 'true';
-  const { i18n, t } = useTranslation(['common']);
+  // const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION || 'true';
+  const { t } = useTranslation(['common']);
   if (
     localStorage.getItem('companyId') &&
     localStorage.getItem('userRole') &&

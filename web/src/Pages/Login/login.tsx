@@ -1,5 +1,5 @@
 import { Button, Col, Form, Input, Row, Select, Spin } from 'antd';
-import React, { FC, Suspense, useContext, useEffect, useState } from 'react';
+import { FC, Suspense, useContext, useEffect, useState } from 'react';
 import './login.scss';
 import countryLogo from '../../Assets/Images/mrvlogo.svg';
 import { useTranslation } from 'react-i18next';
