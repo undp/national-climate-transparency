@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Row, Col, Card, Progress, Tag, Steps, message, Skeleton, Button, Tooltip } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Chart from 'react-apexcharts';
