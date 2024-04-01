@@ -22,7 +22,6 @@ import UserProfile from './Pages/Users/UserProfile/UserProfile';
 import CompanyProfile from './Pages/Company/CompanyProfile/companyProfile';
 import { AbilityContext } from './Casl/Can';
 import { defineAbility, updateUserAbility } from './Casl/ability';
-import ReportSection from './Pages/OldComponents/ReportSection/reportsSection';
 import { useTranslation } from 'react-i18next';
 import ActionList from './Pages/Actions/ActionList/actionList';
 import ActionForm from './Pages/Actions/ActionForm/actionForm';
@@ -182,9 +181,9 @@ const App = () => {
                   >
                     <Route path="view" element={<CompanyProfile />} />
                   </Route>
-                  <Route path="/reports" element={<CustomLayout selectedKey="reports" />}>
+                  {/* <Route path="/reports" element={<CustomLayout selectedKey="reports" />}>
                     <Route index element={<ReportSection />} />
-                  </Route>
+                  </Route> */}
                   {/* <Route
                       path="/userManagement"
                       element={<CustomLayout selectedKey="userManagement" />}
