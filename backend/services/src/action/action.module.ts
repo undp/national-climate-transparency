@@ -15,6 +15,7 @@ import { SupportEntity } from '../entities/support.entity';
 import { UtilModule } from '../util/util.module';
 import { FileHandlerModule } from '../file-handler/filehandler.module';
 import { ValidationModule } from '../validation/validation.module';
+import { ActionViewEntity } from '../entities/action.view.entity';
 
 @Module({
     imports: [
@@ -35,11 +36,12 @@ import { ValidationModule } from '../validation/validation.module';
             ProjectEntity,
             AchievementEntity,
             ActivityEntity,
-            SupportEntity
+            SupportEntity,
+            ActionViewEntity,
         ]),
         UtilModule,
         FileHandlerModule,
-        ValidationModule
+        ValidationModule,
     ],
     providers: [
         ActionService

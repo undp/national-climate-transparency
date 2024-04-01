@@ -102,17 +102,16 @@ export class ProgrammeService {
             .transaction(async (em) => {
                 const savedProgramme = await em.save<ProgrammeEntity>(programme);
                 if (savedProgramme) {
-                    // link projects here
                     if (programmeDto.kpis) {
                         kpiList.forEach(async kpi => {
                             await em.save<KpiEntity>(kpi)
                         });
                     }
 
-                    //add log here
                     eventLog.forEach(async event => {
                         await em.save<LogEntity>(event);
                     });
+                    await em.query('REFRESH MATERIALIZED VIEW programme_view_entity;');
                 }
                 return savedProgramme;
             })
@@ -180,9 +179,6 @@ export class ProgrammeService {
                 query?.sort?.key ? `"programme"."${query?.sort?.key}"` : `"programme"."programmeId"`,
                 query?.sort?.order ? query?.sort?.order : "DESC"
             );
-        // .offset(query.size * query.page - query.size)
-        // .limit(query.size)
-        // .getManyAndCount();
 
         if (query.size && query.page) {
             queryBuilder.offset(query.size * query.page - query.size)

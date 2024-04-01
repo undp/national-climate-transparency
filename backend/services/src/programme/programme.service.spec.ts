@@ -175,9 +175,11 @@ describe('ProgrammeService', () => {
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
                 save: jest.fn().mockResolvedValueOnce(programmeEntity),
+                query: jest.fn().mockResolvedValueOnce(programmeEntity),
             };
             const savedProgramme = await callback(emMock);
             expect(emMock.save).toHaveBeenCalledTimes(2);
+            expect(emMock.query).toHaveBeenCalledTimes(1);
             return savedProgramme;
         });
 
@@ -247,9 +249,11 @@ describe('ProgrammeService', () => {
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
                 save: jest.fn().mockResolvedValueOnce(programmeEntity),
+                query: jest.fn().mockResolvedValueOnce(programmeEntity),
             };
             const savedProgramme = await callback(emMock);
             expect(emMock.save).toHaveBeenCalledTimes(4);
+            expect(emMock.query).toHaveBeenCalledTimes(1);
             return savedProgramme;
         });
 
@@ -319,10 +323,12 @@ describe('ProgrammeService', () => {
 
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
+                query: jest.fn().mockResolvedValueOnce(programmeEntity),
                 save: jest.fn().mockResolvedValueOnce(programmeEntity),
             };
             const savedProgramme = await callback(emMock);
             expect(emMock.save).toHaveBeenCalledTimes(4);
+            expect(emMock.query).toHaveBeenCalledTimes(1);
             return savedProgramme;
         });
 
@@ -431,9 +437,11 @@ describe('ProgrammeService', () => {
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
                 save: jest.fn().mockResolvedValueOnce(expectedResult),
+                query: jest.fn().mockResolvedValueOnce(expectedResult),
             };
             const savedProgramme = await callback(emMock);
             expect(emMock.save).toHaveBeenCalledTimes(7);
+            expect(emMock.query).toHaveBeenCalledTimes(1);
             return savedProgramme;
         });
 

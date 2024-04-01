@@ -34,8 +34,10 @@ export const projectViewSQL = `
         prj."projectId";`
 
 @ViewEntity({
+    name: 'project_view_entity',
     materialized: true,
     expression: projectViewSQL,
+    synchronize: false,
 })
 
 export class ProjectViewEntity {

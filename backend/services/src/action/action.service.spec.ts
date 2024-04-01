@@ -3,7 +3,7 @@ import { getRepositoryToken } from "@nestjs/typeorm";
 import { ActionEntity } from "../entities/action.entity";
 import { CounterService } from "../util/counter.service";
 import { HelperService } from "../util/helpers.service";
-import { EntityManager, Repository } from "typeorm";
+import { EntityManager, Repository, SelectQueryBuilder } from "typeorm";
 import { ActionService } from "./action.service";
 import { ActionDto } from "../dtos/action.dto";
 import { ActionStatus, InstrumentType, NatAnchor } from "../enums/action.enum";
@@ -15,6 +15,8 @@ import { DocumentDto } from "../dtos/document.dto";
 import { FileUploadService } from "../util/fileUpload.service";
 import { PayloadValidator } from "../validation/payload.validator";
 import { ProgrammeEntity } from "../entities/programme.entity";
+import { QueryDto } from "../dtos/query.dto";
+import { FilterEntry } from "../dtos/filter.entry";
 
 describe('ActionService', () => {
     let service: ActionService;
@@ -32,16 +34,27 @@ describe('ActionService', () => {
         entityManagerMock = {
             transaction: jest.fn(),
             save: jest.fn(),
-        };
+            query: jest.fn(),
 
+        };
         actionRepositoryMock = {
             save: jest.fn(),
+            createQueryBuilder: jest.fn(() => ({
+                where: jest.fn().mockReturnThis(),
+                leftJoinAndSelect: jest.fn().mockReturnThis(),
+                orderBy: jest.fn().mockReturnThis(),
+                offset: jest.fn().mockReturnThis(),
+                limit: jest.fn().mockReturnThis(),
+                getManyAndCount: jest.fn(),
+            })) as unknown as () => SelectQueryBuilder<ActionEntity>,
         };
         counterServiceMock = {
             incrementCount: jest.fn().mockResolvedValue(1),
         };
         helperServiceMock = {
             formatReqMessagesString: jest.fn(),
+            parseMongoQueryToSQLWithTable: jest.fn(),
+            generateWhereSQL: jest.fn(),
         };
         fileUploadServiceMock = {
             uploadDocument: jest.fn().mockResolvedValue('http://test.com/documents/action_documents/test.csv'),
@@ -131,9 +144,11 @@ describe('ActionService', () => {
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
                 save: jest.fn().mockResolvedValueOnce(actionEntity), 
+                query: jest.fn().mockResolvedValueOnce(actionEntity), 
             };
             const savedAction = await callback(emMock);
             expect(emMock.save).toHaveBeenCalledTimes(2);
+            expect(emMock.query).toHaveBeenCalledTimes(1);
             return savedAction;
         });
 
@@ -230,10 +245,12 @@ describe('ActionService', () => {
         entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
             const emMock = {
                 save: jest.fn().mockResolvedValueOnce(expectedResult),
+                query: jest.fn().mockResolvedValueOnce(expectedResult), 
             };
             const savedAction = await callback(emMock);
 
             expect(emMock.save).toHaveBeenCalledTimes(8);
+            expect(emMock.query).toHaveBeenCalledTimes(1);
             return savedAction;
         });
 
@@ -312,6 +329,94 @@ describe('ActionService', () => {
             expect(error.status).toBe(HttpStatus.BAD_REQUEST);
         }
     });
+
+    it('should have been called query method correctly when get action data requested', async () => {
+        const mockQueryBuilder = {
+            where: jest.fn().mockReturnThis(),
+            leftJoinAndMapOne: jest.fn().mockReturnThis(),
+            getOne: jest.fn().mockResolvedValue([]),
+        } as unknown as SelectQueryBuilder<ActionEntity>;
+
+        jest.spyOn(actionRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
+  
+        // testing whether query method called correctly
+        const result = await service.getActionViewData('1', 'abilityCondition');
+        expect(actionRepositoryMock.createQueryBuilder).toHaveBeenCalledWith('action');
+        expect(actionRepositoryMock.createQueryBuilder().where).toHaveBeenCalledWith("action.actionId = :actionId", {"actionId": "1"});
+        expect(actionRepositoryMock.createQueryBuilder().leftJoinAndMapOne).toHaveBeenCalledTimes(1); // Assuming there are two left join queries
+        expect(actionRepositoryMock.createQueryBuilder().getOne).toHaveBeenCalled();
+      });
+
+      it('should build the query correctly with size and page', async () => {
+        const queryDto = new QueryDto();
+        const filterAnd: FilterEntry[] = [];
+        filterAnd.push({
+            key: 'actionId',
+            operation: '=',
+            value: 'A025',
+        });
+        queryDto.filterAnd = filterAnd;
+        queryDto.page = 10;
+        queryDto.size = 20;
+        const abilityCondition = 'someCondition';
+
+        const mockQueryBuilder = {
+            where: jest.fn().mockReturnThis(),
+            leftJoinAndSelect: jest.fn().mockReturnThis(),
+            orderBy: jest.fn().mockReturnThis(),
+            offset: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockReturnThis(),
+            getManyAndCount: jest.fn().mockResolvedValue([]),
+        } as unknown as SelectQueryBuilder<ActionEntity>;
+
+        jest.spyOn(actionRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
+
+
+        await service.query(queryDto, abilityCondition);
+
+        expect(actionRepositoryMock.createQueryBuilder).toHaveBeenCalledWith('action');
+        expect(actionRepositoryMock.createQueryBuilder().where).toHaveBeenCalled();
+        expect(actionRepositoryMock.createQueryBuilder().leftJoinAndSelect).toHaveBeenCalledTimes(1);
+        expect(actionRepositoryMock.createQueryBuilder().orderBy).toHaveBeenCalled();
+        expect(actionRepositoryMock.createQueryBuilder().offset).toHaveBeenCalledWith(180);
+        expect(actionRepositoryMock.createQueryBuilder().limit).toHaveBeenCalledWith(20);
+        expect(actionRepositoryMock.createQueryBuilder().getManyAndCount).toHaveBeenCalled();
+    });
+
+    it('should build the query correctly without size and page', async () => {
+        const queryDto = new QueryDto();
+        const filterAnd: FilterEntry[] = [];
+        filterAnd.push({
+            key: 'actionId',
+            operation: '=',
+            value: 'A025',
+        });
+        const abilityCondition = 'someCondition';
+
+        const mockQueryBuilder = {
+            where: jest.fn().mockReturnThis(),
+            leftJoinAndSelect: jest.fn().mockReturnThis(),
+            orderBy: jest.fn().mockReturnThis(),
+            offset: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockReturnThis(),
+            getManyAndCount: jest.fn().mockResolvedValue([]),
+        } as unknown as SelectQueryBuilder<ActionEntity>;
+
+        jest.spyOn(actionRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
+
+
+        await service.query(queryDto, abilityCondition);
+
+        expect(actionRepositoryMock.createQueryBuilder).toHaveBeenCalledWith('action');
+        expect(actionRepositoryMock.createQueryBuilder().where).toHaveBeenCalled();
+        expect(actionRepositoryMock.createQueryBuilder().leftJoinAndSelect).toHaveBeenCalledTimes(1);
+        expect(actionRepositoryMock.createQueryBuilder().orderBy).toHaveBeenCalled();
+        expect(actionRepositoryMock.createQueryBuilder().offset).toHaveBeenCalledTimes(0);
+        expect(actionRepositoryMock.createQueryBuilder().limit).toHaveBeenCalledTimes(0);
+        expect(actionRepositoryMock.createQueryBuilder().getManyAndCount).toHaveBeenCalled();
+    });
+
+
 });
 
 
