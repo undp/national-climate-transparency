@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { MrvDashboardComponent } from '@undp/carbon-library';
+import { MrvDashboardComponent } from '../../Components/Dashboard/mrvDashboardViewComponent';
 import { Link } from 'react-router-dom';
 import Chart from 'react-apexcharts';
 import ButtonGroup from 'antd/lib/button/button-group';

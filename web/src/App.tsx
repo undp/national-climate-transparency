@@ -22,11 +22,6 @@ import UserProfile from './Pages/Users/UserProfile/UserProfile';
 import CompanyProfile from './Pages/Company/CompanyProfile/companyProfile';
 import { AbilityContext } from './Casl/Can';
 import { defineAbility, updateUserAbility } from './Casl/ability';
-import {
-  ConnectionContextProvider,
-  UserInformationContextProvider,
-  SettingsContextProvider,
-} from '@undp/carbon-library';
 import ReportSection from './Pages/OldComponents/ReportSection/reportsSection';
 import { useTranslation } from 'react-i18next';
 import ActionList from './Pages/Actions/ActionList/actionList';
@@ -41,6 +36,9 @@ import SupportList from './Pages/Support/SupportList/supportList';
 import SupportForm from './Pages/Support/SupportForm/supportForm';
 import ReportList from './Pages/Reporting/reportList';
 import Faq from './Pages/Faq/faq';
+import { ConnectionContextProvider } from './Context/ConnectionContext/connectionContext';
+import { UserInformationContextProvider } from './Context/UserInformationContext/userInformationContext';
+import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
 
 // message.config({
 //   duration: 60,

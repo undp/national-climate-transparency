@@ -1,27 +1,12 @@
 import { useState } from 'react';
 import { Menu, Layout, MenuProps } from 'antd';
 import sliderLogo from '../../Assets/Images/mrvlogo.svg';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './layout.sider.scss';
 import * as Icon from 'react-bootstrap-icons';
-import {
-  AppstoreOutlined,
-  DashboardOutlined,
-  HomeOutlined,
-  ShopOutlined,
-  UnorderedListOutlined,
-  UserOutlined,
-  MoneyCollectOutlined,
-  BankOutlined,
-  CloudOutlined,
-  CompassOutlined,
-  PaperClipOutlined,
-  LineChartOutlined,
-  CustomerServiceFilled,
-  DollarOutlined,
-} from '@ant-design/icons';
+import { AppstoreOutlined, DashboardOutlined, ShopOutlined, UserOutlined } from '@ant-design/icons';
 import { ClipboardMinus, Coin, GraphUpArrow, Headset, Layers } from 'react-bootstrap-icons';
-import { LayoutSiderProps } from '@undp/carbon-library';
+import { LayoutSiderProps } from '../../Definitions/props/layout.sider.definitions';
 import { useTranslation } from 'react-i18next';
 
 const { Sider } = Layout;

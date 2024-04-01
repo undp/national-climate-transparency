@@ -1,10 +1,11 @@
-import { Button, Col, Form, Input, message, Row, Select, Spin } from 'antd';
+import { Button, Col, Form, Input, Row, Select, Spin } from 'antd';
 import React, { FC, Suspense, useContext, useEffect, useState } from 'react';
 import './login.scss';
 import countryLogo from '../../Assets/Images/mrvlogo.svg';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
-import { LoginProps, useConnection, useUserContext } from '@undp/carbon-library';
+import { useConnection } from '../../Context/ConnectionContext/connectionContext';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { AbilityContext } from '../../Casl/Can';
@@ -15,6 +16,11 @@ import ResetPassword from './resetPassword';
 export interface LoginPageProps {
   forgotPassword?: boolean;
   resetPassword?: boolean;
+}
+
+interface LoginProps {
+  email: string;
+  password: string;
 }
 
 const Login: FC<LoginPageProps> = (props: LoginPageProps) => {

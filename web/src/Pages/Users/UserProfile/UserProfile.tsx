@@ -1,12 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useConnection, useUserContext } from '@undp/carbon-library';
+import { useUserContext } from '@undp/carbon-library';
 import { useEffect, useState } from 'react';
 import { Row, Col, Card, Button, Skeleton } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { CompanyDetailsComponent } from '../../../Components/CompanyDetails/companyDetailsComponent';
 import { UserRoleIcon } from '../../../Components/UserRoleIcon/userRoleIcon';
 import LanguageSelection from '../../../Components/LanguageSelection/languageSelection';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 
 const CompanyProfile = () => {
   const navigate = useNavigate();

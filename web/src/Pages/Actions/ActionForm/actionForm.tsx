@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { InstrumentType, ActionStatus, NatAnchor } from '../../../Enums/action.enum';
 import { useNavigate } from 'react-router-dom';
-import { useConnection } from '@undp/carbon-library';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
