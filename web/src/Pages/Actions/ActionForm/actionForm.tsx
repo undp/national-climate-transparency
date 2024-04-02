@@ -335,379 +335,337 @@ const actionForm: React.FC<Props> = ({ method }) => {
         <div className="body-title">{t('addActionTitle')}</div>
         <div className="body-sub-title">{t('addActionDesc')}</div>
       </div>
-      <Form form={form} onFinish={handleSubmit} layout="vertical">
-        <div className="form-card">
-          <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
-            {t('generalInfoTitle')}
-          </div>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('typesTitle')}</label>}
-                name="type"
-              >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('actionTitle')}</label>}
-                name="title"
-                rules={[validation.required]}
-              >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled={isView} />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('actionDescTitle')}</label>
-                }
-                name="description"
-                rules={[validation.required]}
-              >
-                <TextArea rows={3} disabled={isView} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('actionObjectivesTitle')}
-                  </label>
-                }
-                name="objective"
-                rules={[validation.required]}
-              >
-                <TextArea rows={3} disabled={isView} />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('ghgAffected')}</label>}
-                name="ghgsAffected"
-              >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('instrTypeTitle')}</label>
-                }
-                name="instrumentType"
-                rules={[validation.required]}
-              >
-                <Select
-                  size="large"
-                  style={{ fontSize: inputFontSize }}
-                  allowClear
-                  disabled={isView}
-                  showSearch
+      <div className="action-form">
+        <Form form={form} onFinish={handleSubmit} layout="vertical">
+          <div className="form-section-card">
+            <div className="form-section-header">{t('generalInfoTitle')}</div>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('typesTitle')}</label>}
+                  name="type"
                 >
-                  {Object.values(InstrumentType).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('actionStatusTitle')}</label>
-                }
-                name="status"
-                rules={[validation.required]}
-              >
-                <Select
-                  size="large"
-                  style={{ fontSize: inputFontSize }}
-                  allowClear
-                  disabled={isView}
-                  showSearch
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('actionTitle')}</label>}
+                  name="title"
+                  rules={[validation.required]}
                 >
-                  {Object.values(ActionStatus).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('natImplementorTitle')}
-                  </label>
-                }
-                name="natImplementor"
-              >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>
-                    {t('sectorsAffectedTitle')}
-                  </label>
-                }
-                name="sectorsdAffected"
-              >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('startYearTitle')}</label>
-                }
-                name="startYear"
-                rules={[validation.required]}
-              >
-                <Select
-                  size="large"
-                  style={{ fontSize: inputFontSize }}
-                  allowClear
-                  disabled={isView}
-                  showSearch
+                  <Input className="form-input-box" disabled={isView} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('actionDescTitle')}</label>}
+                  name="description"
+                  rules={[validation.required]}
                 >
-                  {yearsList.map((year) => (
-                    <Option key={year} value={year}>
-                      {year}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('investmentNeeds')}</label>
-                }
-                name="estimatedInvestment"
-              >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={
-                  <label style={{ color: '#3A3541', opacity: 0.8 }}>{t('natAnchorTitle')}</label>
-                }
-                name="natAnchor"
-                rules={[validation.required]}
-              >
-                <Select
-                  size="large"
-                  style={{ fontSize: inputFontSize }}
-                  allowClear
-                  disabled={isView}
-                  showSearch
+                  <TextArea rows={3} disabled={isView} />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('actionObjectivesTitle')}</label>}
+                  name="objective"
+                  rules={[validation.required]}
                 >
-                  {Object.values(NatAnchor).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}>
-            {t('documentsHeader')}
-          </div>
-          <UploadFileGrid
-            uploadedFiles={uploadedFiles}
-            horizontalGutter={gutterSize}
-            verticalGutter={10}
-            buttonText={t('upload')}
-            height={'40px'}
-            acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
-            style={{ marginBottom: '25px' }}
-            setUploadedFiles={setUploadedFiles}
-            isView={isView}
-          ></UploadFileGrid>
-        </div>
-        <div className="form-card">
-          <Row>
-            <Col span={6} style={{ paddingTop: '6px' }}>
-              <div
-                style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
-              >
-                {t('programInfoTitle')}
-              </div>
-            </Col>
-            <Col span={4}>
-              <AttachEntity
-                isDisabled={isView}
-                options={allProgramIds}
-                content={{
-                  buttonName: t('attachProgramme'),
-                  attach: t('attach'),
-                  contentTitle: t('attachProgramme'),
-                  listTitle: t('programmeList'),
-                  cancel: t('cancel'),
-                }}
-                attachedUnits={selectedProgramIds}
-                setAttachedUnits={setSelectedProgramIds}
-                icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
-              ></AttachEntity>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={24}>
-              <LayoutTable
-                tableData={programData}
-                columns={progTableColumns}
-                loading={false}
-                pagination={{
-                  current: currentPage,
-                  pageSize: pageSize,
-                  total: programData.length,
-                  showQuickJumper: true,
-                  pageSizeOptions: ['10', '20', '30'],
-                  showSizeChanger: true,
-                  style: { textAlign: 'center' },
-                  locale: { page: '' },
-                  position: ['bottomRight'],
-                }}
-                handleTableChange={handleTableChange}
-                emptyMessage={t('noProgramsMessage')}
-              />
-            </Col>
-          </Row>
-        </div>
-        <div className="form-card">
-          <div style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}>
-            {t('mitigationInfoTitle')}
-          </div>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('ghgAffected')}</label>}
-                name="ghgsAffected"
-              >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
-              </Form.Item>
-            </Col>
-          </Row>
-          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '25px', marginBottom: '10px' }}>
-            {t('emmissionInfoTitle')}
-          </div>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('achieved')}</label>}
-                name="achievedReduct"
-              >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{t('expected')}</label>}
-                name="expectedReduct"
-              >
-                <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled />
-              </Form.Item>
-            </Col>
-          </Row>
-          <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '25px', marginBottom: '10px' }}>
-            {t('kpiInfoTitle')}
-          </div>
-          {migratedKpiList.map((index: number) => (
-            <KpiGrid
-              key={index}
-              form={form}
-              rules={[]}
-              index={index}
-              isEditable={false}
-              inputFontSize={inputFontSize}
-              gutterSize={gutterSize}
-              headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-              updateKPI={updateKPI}
-              removeKPI={removeKPI}
-            ></KpiGrid>
-          ))}
-          {newKpiList.map((kpi: any) => (
-            <KpiGrid
-              key={kpi.index}
-              form={form}
-              rules={[validation.required]}
-              index={kpi.index}
-              isEditable={!isView && !kpi.visibility}
-              inputFontSize={inputFontSize}
-              gutterSize={gutterSize}
-              headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-              updateKPI={updateKPI}
-              removeKPI={removeKPI}
-            ></KpiGrid>
-          ))}
-          <Row justify={'start'}>
-            <Col span={2}>
-              {!isView && (
-                <Button
-                  icon={<PlusCircleOutlined />}
-                  style={{
-                    marginTop: '15px',
-                    border: 'none',
-                    color: '#3A3541',
-                    opacity: 0.8,
-                    padding: 0,
-                  }}
-                  onClick={createKPI}
+                  <TextArea rows={3} disabled={isView} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                  name="ghgsAffected"
                 >
-                  {t('addKPI')}
-                </Button>
-              )}
-            </Col>
-          </Row>
-        </div>
-        {isView && (
-          <div className="form-card">
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
+                  name="instrumentType"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(InstrumentType).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('actionStatusTitle')}</label>}
+                  name="status"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(ActionStatus).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
+                  name="natImplementor"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('sectorsAffectedTitle')}</label>}
+                  name="sectorsdAffected"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('startYearTitle')}</label>}
+                  name="startYear"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {yearsList.map((year) => (
+                      <Option key={year} value={year}>
+                        {year}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('investmentNeeds')}</label>}
+                  name="estimatedInvestment"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('natAnchorTitle')}</label>}
+                  name="natAnchor"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(NatAnchor).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
             <div
-              style={{ color: '#3A3541', opacity: 0.8, marginBottom: '25px', fontWeight: 'bold' }}
+              style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}
             >
-              {t('updatesInfoTitle')}
+              {t('documentsHeader')}
             </div>
+            <UploadFileGrid
+              uploadedFiles={uploadedFiles}
+              horizontalGutter={gutterSize}
+              verticalGutter={10}
+              buttonText={t('upload')}
+              height={'40px'}
+              acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
+              style={{ marginBottom: '25px' }}
+              setUploadedFiles={setUploadedFiles}
+              isView={isView}
+            ></UploadFileGrid>
           </div>
-        )}
-        {!isView && (
-          <Row gutter={20} justify={'end'}>
-            <Col span={2}>
-              <Button
-                type="default"
-                size="large"
-                block
-                onClick={() => {
-                  navigate('/actions');
-                }}
-              >
-                {t('cancel')}
-              </Button>
-            </Col>
-            <Col span={2}>
-              <Form.Item>
-                <Button type="primary" size="large" block htmlType="submit">
-                  {t('add')}
+          <div className="form-section-card">
+            <Row>
+              <Col span={6} style={{ paddingTop: '6px' }}>
+                <div className="form-section-header">{t('programInfoTitle')}</div>
+              </Col>
+              <Col span={4}>
+                <AttachEntity
+                  isDisabled={isView}
+                  options={allProgramIds}
+                  content={{
+                    buttonName: t('attachProgramme'),
+                    attach: t('attach'),
+                    contentTitle: t('attachProgramme'),
+                    listTitle: t('programmeList'),
+                    cancel: t('cancel'),
+                  }}
+                  attachedUnits={selectedProgramIds}
+                  setAttachedUnits={setSelectedProgramIds}
+                  icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
+                ></AttachEntity>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24}>
+                <LayoutTable
+                  tableData={programData}
+                  columns={progTableColumns}
+                  loading={false}
+                  pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    total: programData.length,
+                    showQuickJumper: true,
+                    pageSizeOptions: ['10', '20', '30'],
+                    showSizeChanger: true,
+                    style: { textAlign: 'center' },
+                    locale: { page: '' },
+                    position: ['bottomRight'],
+                  }}
+                  handleTableChange={handleTableChange}
+                  emptyMessage={t('noProgramsMessage')}
+                />
+              </Col>
+            </Row>
+          </div>
+          <div className="form-section-card">
+            <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                  name="ghgsAffected"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+            </Row>
+            <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('achieved')}</label>}
+                  name="achievedReduct"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('expected')}</label>}
+                  name="expectedReduct"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+            </Row>
+            <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+            {migratedKpiList.map((index: number) => (
+              <KpiGrid
+                key={index}
+                form={form}
+                rules={[]}
+                index={index}
+                isEditable={false}
+                inputFontSize={inputFontSize}
+                gutterSize={gutterSize}
+                headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                updateKPI={updateKPI}
+                removeKPI={removeKPI}
+              ></KpiGrid>
+            ))}
+            {newKpiList.map((kpi: any) => (
+              <KpiGrid
+                key={kpi.index}
+                form={form}
+                rules={[validation.required]}
+                index={kpi.index}
+                isEditable={!isView && !kpi.visibility}
+                inputFontSize={inputFontSize}
+                gutterSize={gutterSize}
+                headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                updateKPI={updateKPI}
+                removeKPI={removeKPI}
+              ></KpiGrid>
+            ))}
+            <Row justify={'start'}>
+              <Col span={2}>
+                {!isView && (
+                  <Button
+                    icon={<PlusCircleOutlined />}
+                    className="create-kpi-button"
+                    onClick={createKPI}
+                  >
+                    {t('addKPI')}
+                  </Button>
+                )}
+              </Col>
+            </Row>
+          </div>
+          {isView && (
+            <div className="form-section-card">
+              <div className="form-section-header">{t('updatesInfoTitle')}</div>
+            </div>
+          )}
+          {!isView && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/actions');
+                  }}
+                >
+                  {t('cancel')}
                 </Button>
-              </Form.Item>
-            </Col>
-          </Row>
-        )}
-      </Form>
+              </Col>
+              <Col span={2}>
+                <Form.Item>
+                  <Button type="primary" size="large" block htmlType="submit">
+                    {t('add')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+        </Form>
+      </div>
     </div>
   );
 };
