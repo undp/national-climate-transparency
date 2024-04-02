@@ -857,26 +857,24 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
             </Row>
             <Row>
               <Col span={24}>
-                <div style={{ overflowX: 'auto' }}>
-                  <LayoutTable
-                    tableData={supportData}
-                    columns={supportTableColumns}
-                    loading={false}
-                    pagination={{
-                      current: supportCurrentPage,
-                      pageSize: supportPageSize,
-                      total: supportData.length,
-                      showQuickJumper: true,
-                      pageSizeOptions: ['10', '20', '30'],
-                      showSizeChanger: true,
-                      style: { textAlign: 'center' },
-                      locale: { page: '' },
-                      position: ['bottomRight'],
-                    }}
-                    handleTableChange={handleSupportTableChange}
-                    emptyMessage={t('noSupportMessage')}
-                  />
-                </div>
+                <LayoutTable
+                  tableData={supportData}
+                  columns={supportTableColumns}
+                  loading={false}
+                  pagination={{
+                    current: supportCurrentPage,
+                    pageSize: supportPageSize,
+                    total: supportData.length,
+                    showQuickJumper: true,
+                    pageSizeOptions: ['10', '20', '30'],
+                    showSizeChanger: true,
+                    style: { textAlign: 'center' },
+                    locale: { page: '' },
+                    position: ['bottomRight'],
+                  }}
+                  handleTableChange={handleSupportTableChange}
+                  emptyMessage={t('noSupportMessage')}
+                />
               </Col>
             </Row>
           </div>
