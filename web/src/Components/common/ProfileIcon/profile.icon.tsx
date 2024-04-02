@@ -1,24 +1,12 @@
 import { FC } from 'react';
-import { Buffer } from 'buffer';
 import './profile.icon.scss';
+import { isBase64 } from '../../../Utils/utilServices';
 
 export interface ProfileIconProps {
   icon: any;
   bg: string;
   name: string;
 }
-
-const isBase64 = (str: string) => {
-  if (!str || str === '' || str.trim() === '') {
-    return false;
-  }
-  try {
-    const bs = Buffer.from(str, 'base64').toString('base64');
-    return bs === str;
-  } catch (err) {
-    return false;
-  }
-};
 
 export const ProfileIcon: FC<ProfileIconProps> = (props: ProfileIconProps) => {
   const { icon, bg, name } = props;

@@ -127,3 +127,9 @@ export enum SubSector {
   MULTI_SUB_SEC = 'Multi-Subsector',
   NA = 'Not Applicable',
 }
+
+export enum TypeOfMitigation {
+  AGRICULTURE = 'Agriculture',
+  SOLAR = 'Solar',
+  EE_HOUSEHOLDS = 'EEHouseholds',
+}

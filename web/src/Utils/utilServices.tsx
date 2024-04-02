@@ -1,4 +1,5 @@
 import { RcFile } from 'antd/lib/upload';
+import { Buffer } from 'buffer';
 
 export const addCommSep = (value: any) => {
   return (
@@ -24,3 +25,25 @@ export const getBase64 = (file: RcFile): Promise<string> =>
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = (error) => reject(error);
   });
+
+export const isBase64 = (str: string) => {
+  if (!str || str === '' || str.trim() === '') {
+    return false;
+  }
+  try {
+    const bs = Buffer.from(str, 'base64').toString('base64');
+    return bs === str;
+  } catch (err) {
+    return false;
+  }
+};
+
+export const addSpaces = (text: string) => {
+  if (!text) {
+    return text;
+  }
+  if (text === text.toUpperCase()) {
+    return text;
+  }
+  return text.replace(/([A-Z])/g, ' $1').trim();
+};
