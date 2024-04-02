@@ -193,16 +193,6 @@ const App = () => {
                       <Route path="updateUser" element={<UpdateUser />} />
                     </Route> */}
                 </Route>
-                {/* {enableRegistration === 'true' && (
-                  <Route
-                    path="registerCompany"
-                    element={
-                      <Suspense fallback={<Loading />}>
-                        <RegisterNewCompany />
-                      </Suspense>
-                    }
-                  />
-                )} */}
                 <Route path="/*" element={<Navigate to="/" replace />} />
               </Routes>
             </BrowserRouter>

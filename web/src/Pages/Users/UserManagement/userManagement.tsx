@@ -29,7 +29,9 @@ import {
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
-import { RoleIcon, CompanyRole, ProfileIcon } from '@undp/carbon-library';
+import { RoleIcon } from '../../../Components/common/RoleIcon/role.icon';
+import { ProfileIcon } from '../../../Components/common/ProfileIcon/profile.icon';
+import { CompanyRole } from '../../../Enums/company.role.enum';
 
 import {
   GovBGColor,
@@ -89,7 +91,7 @@ const UserManagement = () => {
     navigate('/userManagement/addUSer');
   };
 
-  const [formModal] = Form.useForm();
+  // const [formModal] = Form.useForm();
   const { post, put } = useConnection();
   const [totalUser, setTotalUser] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
