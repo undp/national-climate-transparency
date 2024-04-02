@@ -13,13 +13,7 @@ import {
   message,
   PaginationProps,
 } from 'antd';
-import {
-  EditOutlined,
-  EllipsisOutlined,
-  FilterOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { EditOutlined, EllipsisOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 const { Search } = Input;
 import data from '../../../Testing/supportList.json';

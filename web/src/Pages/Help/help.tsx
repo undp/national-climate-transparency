@@ -1,12 +1,11 @@
-import { Button, Col, Divider, Form, Input, message, Row, Select, Statistic } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { Col, Row } from 'antd';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import sliderLogo from '../../Assets/Images/mrvlogo.svg';
 import LayoutFooter from '../../Components/Footer/layout.footer';
 import './help.scss';
-import { CcCircle } from 'react-bootstrap-icons';
+
 const CarbonHelp = () => {
   const navigate = useNavigate();
 

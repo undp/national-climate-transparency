@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 import './login.scss';
 import { Button, Col, Form, Input, Row, message } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +16,7 @@ const ResetPassword: FC<ResetPasswordPageProps> = (props: ResetPasswordPageProps
   const { put } = useConnection();
   const navigate = useNavigate();
   const { requestid } = useParams();
-  const queryParameters = new URLSearchParams(window.location.search);
+  // const queryParameters = new URLSearchParams(window.location.search);
   const [loading, setLoading] = useState<boolean>(false);
   const [disable, setDisable] = useState<boolean>(false);
   const [resetError, setResetError] = useState<boolean>(false);

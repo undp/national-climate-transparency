@@ -10,7 +10,6 @@ import {
   BulbOutlined,
   ClockCircleOutlined,
   ExperimentOutlined,
-  // QrcodeOutlined,
 } from '@ant-design/icons';
 import Geocoding from '@mapbox/mapbox-sdk/services/geocoding';
 
