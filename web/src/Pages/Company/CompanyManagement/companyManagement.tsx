@@ -21,7 +21,6 @@ import { useEffect, useState } from 'react';
 import { CompanyTableDataType } from '../../../Definitions/companyManagement.definitions';
 import { Organisation } from '../../../Entities/organisation';
 import { OrganisationManagementColumns } from '../../../Enums/organisation.management.columns.enum';
-
 import {
   GovBGColor,
   CertBGColor,
@@ -29,8 +28,11 @@ import {
   DevColor,
   GovColor,
 } from '../../../Styles/role.color.constants';
-
-import { CompanyRole, Action, ProfileIcon, RoleIcon, addCommSep } from '@undp/carbon-library';
+import { Action } from '../../../Enums/action.enum';
+import { CompanyRole } from '../../../Enums/company.role.enum';
+import { addCommSep } from '../../../Utils/utilServices';
+import { RoleIcon } from '../../../Components/common/RoleIcon/role.icon';
+import { ProfileIcon } from '../../../Components/common/ProfileIcon/profile.icon';
 
 const { Search } = Input;
 

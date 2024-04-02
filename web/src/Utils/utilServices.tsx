@@ -1,5 +1,15 @@
 import { RcFile } from 'antd/lib/upload';
 
+export const addCommSep = (value: any) => {
+  return (
+    Number(value)
+      // .toString()
+      .toFixed(2)
+      .replace('.00', '')
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  );
+};
+
 export const addCommSepRound = (value: any) => {
   return Number(value)
     .toFixed(2)
