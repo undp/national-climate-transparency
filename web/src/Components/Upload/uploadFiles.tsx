@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { RcFile, UploadFile } from 'antd/lib/upload/interface';
-import { Button, Card, Col, Row, Upload } from 'antd';
+import { Button, Card, Col, Row, Tooltip, Upload } from 'antd';
 import { DeleteOutlined, UploadOutlined } from '@ant-design/icons';
 import ConfirmPopup from '../Popups/Confirmation/confirmPopup';
 import './uploadFiles.scss';
@@ -99,15 +99,17 @@ const UploadFileGrid: React.FC<Props> = ({
           <Row gutter={[horizontalGutter, verticalGutter]}>
             {documentList.map((file: any) => (
               <Col key={file.uid} span={8} style={{ height: height }}>
-                <Card className="file-card">
-                  <div className="file-content">
-                    <span>{file.name.slice(0, 20)}</span>
-                    <DeleteOutlined
-                      className="delete-icon"
-                      onClick={() => handleDeleteClick(file.uid)}
-                    />
-                  </div>
-                </Card>
+                <Tooltip placement="topLeft" title={file.name} showArrow={false}>
+                  <Card className="file-card">
+                    <div className="file-content">
+                      <span>{file.name.slice(0, 20)}</span>
+                      <DeleteOutlined
+                        className="delete-icon"
+                        onClick={() => handleDeleteClick(file.uid)}
+                      />
+                    </div>
+                  </Card>
+                </Tooltip>
               </Col>
             ))}
           </Row>
