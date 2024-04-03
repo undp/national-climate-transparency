@@ -63,6 +63,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
   );
+  const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
 
   // Popover state
 
@@ -92,10 +93,19 @@ const actionForm: React.FC<Props> = ({ method }) => {
 
   useEffect(() => {
     const progIds: string[] = [];
+
     for (let i = 0; i < 15; i++) {
       progIds.push(`P00${i}`);
     }
     setAllProgramIdList(progIds);
+
+    if (method !== 'create') {
+      const tempFiles: { id: number; title: string; url: string }[] = [];
+      for (let i = 0; i < 6; i++) {
+        tempFiles.push({ id: i, title: `title_${i}.pdf`, url: `url_${i}` });
+      }
+      setStoredFiles(tempFiles);
+    }
   }, []);
 
   useEffect(() => {
@@ -506,15 +516,12 @@ const actionForm: React.FC<Props> = ({ method }) => {
               {t('documentsHeader')}
             </div>
             <UploadFileGrid
+              storedFiles={storedFiles}
               uploadedFiles={uploadedFiles}
-              horizontalGutter={gutterSize}
-              verticalGutter={10}
               buttonText={t('upload')}
-              height={'40px'}
               acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
-              style={{ marginBottom: '25px' }}
               setUploadedFiles={setUploadedFiles}
-              isView={isView}
+              usedIn={method}
             ></UploadFileGrid>
           </div>
           <div className="form-section-card">

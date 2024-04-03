@@ -18,6 +18,10 @@
         position: relative;
     }
 
+    .file-column {
+        height: 40px;
+    }
+
     .file-content {
         color: #3A3541;
         opacity: 0.8;
@@ -28,6 +32,13 @@
         position: absolute;
         top: 12px;
         right: 20px;
+    }
+
+    .download-icon {
+        cursor: pointer;
+        position: absolute;
+        top: 12px;
+        right: 50px;
     }
     
   }

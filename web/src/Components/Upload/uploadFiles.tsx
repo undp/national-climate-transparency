@@ -1,35 +1,29 @@
 import { useState } from 'react';
 import { RcFile, UploadFile } from 'antd/lib/upload/interface';
-import { Button, Card, Col, Row, Tooltip, Upload } from 'antd';
-import { DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Row, Upload } from 'antd';
+import { DeleteOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import ConfirmPopup from '../Popups/Confirmation/confirmPopup';
 import './uploadFiles.scss';
 import { XOctagon } from 'react-bootstrap-icons';
 
 interface Props {
-  uploadedFiles: { id: string; title: string; data: string }[];
-  horizontalGutter: number;
-  verticalGutter: number;
-  style: any;
   buttonText: string;
-  height: string;
   acceptedFiles: string;
+  storedFiles: { id: number; title: string; url: string }[];
+  uploadedFiles: { id: string; title: string; data: string }[];
   setUploadedFiles: React.Dispatch<
     React.SetStateAction<{ id: string; title: string; data: string }[]>
   >;
-  isView: boolean;
+  usedIn: 'create' | 'view' | 'update';
 }
 
 const UploadFileGrid: React.FC<Props> = ({
+  storedFiles,
   uploadedFiles,
-  horizontalGutter,
-  verticalGutter,
-  style,
   buttonText,
-  height,
   acceptedFiles,
   setUploadedFiles,
-  isView,
+  usedIn,
 }) => {
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
@@ -50,6 +44,18 @@ const UploadFileGrid: React.FC<Props> = ({
   const handleDeleteClick = (fileId: any) => {
     setConfirmOpen(true);
     setWhichFile(fileId);
+  };
+
+  const handleDownloadClick = (file: { id: number; title: string; url: string }) => {
+    console.log('Clicked to download', file);
+
+    const link = document.createElement('a');
+    link.href = file.url;
+    link.download = file.title;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleDelete = (fileId: any) => {
@@ -87,29 +93,54 @@ const UploadFileGrid: React.FC<Props> = ({
         open={confirmOpen}
         setOpen={setConfirmOpen}
       />
-      <Row gutter={[horizontalGutter, verticalGutter]} style={style}>
-        <Col span={3} style={{ height: height }}>
-          <Upload {...props}>
-            <Button className="upload-button" icon={<UploadOutlined />} disabled={isView}>
-              {buttonText}
-            </Button>
-          </Upload>
-        </Col>
-        <Col span={21}>
-          <Row gutter={[horizontalGutter, verticalGutter]}>
-            {documentList.map((file: any) => (
-              <Col key={file.uid} span={8} style={{ height: height }}>
-                <Tooltip placement="topLeft" title={file.name} showArrow={false}>
-                  <Card className="file-card">
-                    <div className="file-content">
-                      <span>{file.name.slice(0, 20)}</span>
+      <Row gutter={[30, 10]} style={{ marginBottom: '25px' }}>
+        {usedIn !== 'view' && (
+          <Col span={3}>
+            <Upload {...props}>
+              <Button className="upload-button" icon={<UploadOutlined />}>
+                {buttonText}
+              </Button>
+            </Upload>
+          </Col>
+        )}
+        <Col span={usedIn === 'view' ? 24 : 21}>
+          <Row gutter={[30, 10]}>
+            {storedFiles.map((file: any) => (
+              <Col key={file.id} span={8} className="file-column">
+                {/* <Tooltip placement="topLeft" title={file.title} showArrow={false}> */}
+                <Card className="file-card">
+                  <div className="file-content">
+                    <span>{file.title.slice(0, 20)}</span>
+                    {usedIn !== 'create' && (
+                      <DownloadOutlined
+                        className="download-icon"
+                        onClick={() => handleDownloadClick(file)}
+                      />
+                    )}
+                    {usedIn !== 'view' && (
                       <DeleteOutlined
                         className="delete-icon"
-                        onClick={() => handleDeleteClick(file.uid)}
+                        onClick={() => handleDeleteClick(file.id)}
                       />
-                    </div>
-                  </Card>
-                </Tooltip>
+                    )}
+                  </div>
+                </Card>
+                {/* </Tooltip> */}
+              </Col>
+            ))}
+            {documentList.map((file: any) => (
+              <Col key={file.uid} span={8} className="file-column">
+                {/* <Tooltip placement="topLeft" title={file.name} showArrow={false}> */}
+                <Card className="file-card">
+                  <div className="file-content">
+                    <span>{file.name.slice(0, 20)}</span>
+                    <DeleteOutlined
+                      className="delete-icon"
+                      onClick={() => handleDeleteClick(file.uid)}
+                    />
+                  </div>
+                </Card>
+                {/* </Tooltip> */}
               </Col>
             ))}
           </Row>

@@ -62,6 +62,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
   );
+  const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
 
   // Popover state
 
@@ -104,6 +105,14 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
       projIds.push(`J00${i}`);
     }
     setAllProjectIdList(projIds);
+
+    if (method !== 'create') {
+      const tempFiles: { id: number; title: string; url: string }[] = [];
+      for (let i = 0; i < 6; i++) {
+        tempFiles.push({ id: i, title: `title_${i}.pdf`, url: `url_${i}` });
+      }
+      setStoredFiles(tempFiles);
+    }
   }, []);
 
   useEffect(() => {
@@ -534,15 +543,12 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Row>
             <div className="form-section-sub-header">{t('documentsHeader')}</div>
             <UploadFileGrid
+              storedFiles={storedFiles}
               uploadedFiles={uploadedFiles}
-              horizontalGutter={gutterSize}
-              verticalGutter={10}
               buttonText={t('upload')}
-              height={'40px'}
               acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
-              style={{ marginBottom: '25px' }}
               setUploadedFiles={setUploadedFiles}
-              isView={isView}
+              usedIn={method}
             ></UploadFileGrid>
             <Row gutter={gutterSize}>
               <Col span={24}>
