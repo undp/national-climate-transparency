@@ -6,9 +6,9 @@ SELECT
     ARRAY_AGG(DISTINCT fullp.sector) FILTER (WHERE fullp.sector IS NOT NULL) AS "sectorsAffected",
     ARRAY_AGG(DISTINCT fullp.nat_impl) FILTER (WHERE fullp.nat_impl IS NOT NULL) AS "natImplementors",
     ARRAY_AGG(DISTINCT fullp.types) FILTER (WHERE fullp.types IS NOT NULL) AS types,
-    SUM(fullp."achievedReduct") AS "achievedReduct",
-    SUM(fullp."expectedReduct") AS "expectedReduct",
-    inv."totalInvestment" AS "totalInvestment"
+    MAX(fullp."achievedGHGReduction") AS "achievedGHGReduction",
+    MAX(fullp."expectedGHGReduction") AS "expectedGHGReduction",
+    MAX(inv."totalInvestment") AS "totalInvestment"
 FROM 
     action a
 LEFT JOIN (
@@ -18,12 +18,20 @@ LEFT JOIN (
         UNNEST(p."affectedSectors") AS sector,
         UNNEST(p."natImplementor") AS nat_impl,
         UNNEST(pve.types) AS types,
-        pve."achievedReduct",
-        pve."expectedReduct"
+        pve."achievedGHGReduction",
+        pve."expectedGHGReduction"
     FROM 
         programme p
-    LEFT JOIN 
-        programme_view_entity pve ON p."programmeId" = pve.id
+    LEFT JOIN (
+		SELECT 
+			id,
+			types,
+			SUM("achievedGHGReduction") AS "achievedGHGReduction",
+			SUM("expectedGHGReduction") AS "expectedGHGReduction"
+    FROM programme_view_entity
+		group by id, types
+		
+	) pve ON p."programmeId" = pve.id
 ) fullp ON a."actionId" = fullp."actionId"
 LEFT JOIN (
     SELECT 
@@ -35,7 +43,7 @@ LEFT JOIN (
         "actionId"
 ) inv ON a."actionId" = inv."actionId"
 GROUP BY 
-    a."actionId", inv."totalInvestment";`
+    a."actionId";`
 
 @ViewEntity({
     name: 'action_view_entity',
@@ -63,10 +71,10 @@ export class ActionViewEntity {
     types: string[]
 
     @ViewColumn()
-    achievedReduct: number
+    achievedGHGReduction: number
 
     @ViewColumn()
-    expectedReduct: number
+    expectedGHGReduction: number
 
     // No Clue to location
 

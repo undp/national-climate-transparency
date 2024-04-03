@@ -18,6 +18,8 @@ import { ActionController } from './action.controller';
 import { ActionModule } from '../action/action.module';
 import { ProgrammeModule } from '../programme/programme.module';
 import { ProgrammeController } from './programme.controller';
+import { ProjectController } from './project.controller';
+import { ProjectModule } from '../project/project.module';
 
 
 @Module({
@@ -37,7 +39,8 @@ import { ProgrammeController } from './programme.controller';
     OrganisationModule,
     UtilModule,
     ActionModule,
-    ProgrammeModule
+    ProgrammeModule, 
+		ProjectModule
   ],
   controllers: [ 
     NationalAPIController, 
@@ -46,7 +49,8 @@ import { ProgrammeController } from './programme.controller';
     CompanyController, 
     SettingsController, 
     ActionController, 
-    ProgrammeController 
+    ProgrammeController,
+		ProjectController 
   ],
   providers: [
     NationalAPIService, 
