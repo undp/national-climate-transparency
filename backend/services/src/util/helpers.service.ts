@@ -6,6 +6,7 @@ import { chartStatsRequestDto } from "../dtos/chartStats.request.dto";
 import { ConfigService } from "@nestjs/config";
 import { I18nService } from "nestjs-i18n";
 import { programmeStatusRequestDto } from "../dtos/programmeStatus.request.dto";
+import { EntityManager } from "typeorm";
 
 @Injectable()
 export class HelperService {
@@ -454,6 +455,13 @@ export class HelperService {
     }
     return final;
   }
+
+	public async refreshMaterializedViews(entityManager: EntityManager) {
+		await entityManager.query('REFRESH MATERIALIZED VIEW project_view_entity;');
+		await entityManager.query('REFRESH MATERIALIZED VIEW programme_view_entity;');
+		await entityManager.query('REFRESH MATERIALIZED VIEW action_view_entity;');
+		
+	}
 
   
   public getEmailTemplateMessage(template: string, data, isSubject: boolean) :string{

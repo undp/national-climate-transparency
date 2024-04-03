@@ -52,7 +52,7 @@ export class SupportEntity {
   requiredAmount: number;
 
   @Column()
-  recievedAmount: number;
+  receivedAmount: number;
 
   @Column()
   exchRate: number;

@@ -18,8 +18,8 @@ export class ProjectEntity {
   @Column({ type: "enum", enum: ProjectType })
   type: string;
 
-  @Column()
-  additionalProject: string;
+  @Column({ nullable: true })
+  additionalProjectNumber: string;
 
   @Column({ type: "enum", enum: ProjectStatus })
   projectStatus: string;
@@ -30,23 +30,23 @@ export class ProjectEntity {
   @Column()
   endYear: number;
 
-  @Column()
-  timeFrame: number;
+  @Column({ nullable: true })
+  expectedTimeFrame: number;
 
-  @Column({ type: "enum", enum: Recipient })
-  recipient: string;
+  @Column("varchar", { array: true, nullable: false })
+  recipientEntities: Recipient[];
 
-  @Column({ type: "enum", enum: IntImplementor })
-  intImplementor: string;
+  @Column("varchar", { array: true, nullable: false })
+  internationalImplementingEntities: IntImplementor[];
 
-  @Column()
-  document: string;
-
-  @Column()
-  achievedReduct: number;
+  @Column({ type: 'jsonb', nullable: true })
+  documents: any;
 
   @Column()
-  expectedReduct: number;
+  achievedGHGReduction: number;
+
+  @Column()
+  expectedGHGReduction: number;
 
   @Column()
   comment: string;
@@ -55,7 +55,7 @@ export class ProjectEntity {
   path: string;
 
   @ManyToOne(() => ProgrammeEntity, (programme) => programme.projects, {
-    nullable: false,
+    nullable: true,
   })
   @JoinColumn([{ name: "programmeId", referencedColumnName: "programmeId" }])
   programme: ProgrammeEntity;

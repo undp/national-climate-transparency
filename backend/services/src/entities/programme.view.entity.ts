@@ -1,50 +1,71 @@
 import { Index, ViewColumn, ViewEntity } from "typeorm"
 
-export const programmeViewSQL =  `
+export const programmeViewSQL = `
+SELECT 
+			p."programmeId" AS id,
+			ARRAY_AGG(DISTINCT prj.type) FILTER (WHERE prj.type IS NOT NULL) AS types,
+			ARRAY_AGG(DISTINCT prj."internationalImplementingEntities") FILTER (WHERE prj."internationalImplementingEntities" IS NOT NULL) AS "internationalImplementingEntities",
+			ARRAY_AGG(DISTINCT prj."recipientEntities") FILTER (WHERE prj."recipientEntities" IS NOT NULL) AS "recipientEntities",
+			reductionSum."achievedGHGReduction" AS "achievedGHGReduction",
+			reductionSum."expectedGHGReduction" AS "expectedGHGReduction"
+	FROM 
+			programme p
+	LEFT JOIN (
+		SELECT 
+			prje."projectId" AS id,
+			prje.type AS type,
+			UNNEST(prje."internationalImplementingEntities") AS "internationalImplementingEntities",
+			UNNEST(prje."recipientEntities") AS "recipientEntities",
+			prje."programmeId"
+	FROM 
+			project prje
+		GROUP BY 
+			prje."projectId"
+	) prj ON p."programmeId" = prj."programmeId"
+	
+	LEFT JOIN (
     SELECT 
-        p."programmeId" AS id,
-        ARRAY_AGG(DISTINCT prj.type) AS types,
-        ARRAY_AGG(DISTINCT prj."intImplementor") AS "intImplementors",
-        ARRAY_AGG(DISTINCT prj.recipient) AS recipients,
-        SUM(prj."achievedReduct") AS "achievedReduct",
-        SUM(prj."expectedReduct") AS "expectedReduct"
+        "programmeId",
+        SUM("achievedGHGReduction") AS "achievedGHGReduction",
+				SUM("expectedGHGReduction") AS "expectedGHGReduction"
     FROM 
-        programme p
-    LEFT JOIN 
-        project prj ON p."programmeId" = prj."programmeId"
+        project
     GROUP BY 
-        p."programmeId";`
+        "programmeId"
+	) reductionSum ON  p."programmeId" = reductionSum."programmeId"
+	GROUP BY 
+			p."programmeId", reductionsum."achievedGHGReduction", reductionsum."expectedGHGReduction";`
 
 @ViewEntity({
-    name: 'programme_view_entity',
-    materialized: true,
-    expression: programmeViewSQL,
-    synchronize: false,
+	name: 'programme_view_entity',
+	materialized: true,
+	expression: programmeViewSQL,
+	synchronize: false,
 
 })
 
 export class ProgrammeViewEntity {
-    @Index()
-    @ViewColumn()
-    id: number
+	@Index()
+	@ViewColumn()
+	id: number
 
-    @ViewColumn()
-    types: string[]
+	@ViewColumn()
+	types: string[]
 
-    @ViewColumn()
-    intImplementors: string[]
+	@ViewColumn()
+	internationalImplementingEntities: string[]
 
-    @ViewColumn()
-    recipients: string[]
+	@ViewColumn()
+	recipientEntities: string[]
 
-    @ViewColumn()
-    achievedReduct: number
+	@ViewColumn()
+	achievedGHGReduction: number
 
-    @ViewColumn()
-    expectedReduct: number
+	@ViewColumn()
+	expectedGHGReduction: number
 
-    // No Clue of Location
+	// No Clue of Location
 
-    // @ViewColumn()
-    // ghgsAffected: string[]
+	// @ViewColumn()
+	// ghgsAffected: string[]
 }
