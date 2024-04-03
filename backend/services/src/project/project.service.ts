@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
 import { plainToClass } from "class-transformer";
-import { ActionService } from "../action/action.service";
 import { DataResponseMessageDto } from "../dtos/data.response.message";
 import { DocumentEntityDto } from "../dtos/document.entity.dto";
 import { ProjectDto } from "../dtos/project.dto";
@@ -11,7 +10,6 @@ import { ProjectEntity } from "../entities/project.entity";
 import { User } from "../entities/user.entity";
 import { CounterType } from "../enums/counter.type.enum";
 import { EntityType, LogEventType } from "../enums/shared.enum";
-import { OrganisationService } from "../organisation/organisation.service";
 import { ProgrammeService } from "../programme/programme.service";
 import { CounterService } from "../util/counter.service";
 import { FileUploadService } from "../util/fileUpload.service";
