@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConnection, useUserContext } from '@undp/carbon-library';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { useAbilityContext } from '../../../Casl/Can';
 import { useEffect, useState } from 'react';
 import { Row, Col, Button, Form, Input, message, Tooltip, Skeleton, Radio, Select } from 'antd';
@@ -33,13 +34,13 @@ const AddUser = () => {
     navigate('/login', { replace: true });
   };
 
-  const { post, put, delete: del, get } = useConnection();
+  const { post, put, get } = useConnection();
   const [formOne] = Form.useForm();
   const { state } = useLocation();
   const { updateToken } = useConnection();
   const { removeUserInfo } = useUserContext();
   const [loading, setLoading] = useState<boolean>(false);
-  const [actionInfo, setActionInfo] = useState<any>({});
+  // const [actionInfo, setActionInfo] = useState<any>({});
   const [isUpdate, setIsUpdate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingList, setLoadingList] = useState<boolean>(false);

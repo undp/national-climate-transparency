@@ -25,17 +25,17 @@ import {
   Space,
   Table,
   Typography,
-  Form,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
+import { RoleIcon } from '../../../Components/common/RoleIcon/role.icon';
+import { ProfileIcon } from '../../../Components/common/ProfileIcon/profile.icon';
+import { CompanyRole } from '../../../Enums/company.role.enum';
+
 import {
-  useConnection,
-  useUserContext,
   GovBGColor,
   CertBGColor,
   DevBGColor,
-  RoleIcon,
   AdminBGColor,
   RootBGColor,
   ManagerBGColor,
@@ -44,11 +44,12 @@ import {
   RootColor,
   ManagerColor,
   ViewColor,
-  CompanyRole,
   GovColor,
   DevColor,
-  ProfileIcon,
-} from '@undp/carbon-library';
+} from '../../../Styles/role.color.constants';
+
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { useTranslation } from 'react-i18next';
 import UserActionConfirmationModel from '../../../Components/Models/userActionConfirmationModel';
 import Search from 'antd/lib/input/Search';
@@ -89,7 +90,7 @@ const UserManagement = () => {
     navigate('/userManagement/addUSer');
   };
 
-  const [formModal] = Form.useForm();
+  // const [formModal] = Form.useForm();
   const { post, put } = useConnection();
   const [totalUser, setTotalUser] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);

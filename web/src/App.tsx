@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import 'antd/dist/antd.css';
+import 'antd/dist/antd.min.css';
 import './Styles/theme.less';
 import './Styles/app.scss';
 import Login from './Pages/Login/login';
@@ -22,12 +22,6 @@ import UserProfile from './Pages/Users/UserProfile/UserProfile';
 import CompanyProfile from './Pages/Company/CompanyProfile/companyProfile';
 import { AbilityContext } from './Casl/Can';
 import { defineAbility, updateUserAbility } from './Casl/ability';
-import {
-  ConnectionContextProvider,
-  UserInformationContextProvider,
-  SettingsContextProvider,
-} from '@undp/carbon-library';
-import ReportSection from './Pages/OldComponents/ReportSection/reportsSection';
 import { useTranslation } from 'react-i18next';
 import ActionList from './Pages/Actions/ActionList/actionList';
 import ActionForm from './Pages/Actions/ActionForm/actionForm';
@@ -41,6 +35,9 @@ import SupportList from './Pages/Support/SupportList/supportList';
 import SupportForm from './Pages/Support/SupportForm/supportForm';
 import ReportList from './Pages/Reporting/reportList';
 import Faq from './Pages/Faq/faq';
+import { ConnectionContextProvider } from './Context/ConnectionContext/connectionContext';
+import { UserInformationContextProvider } from './Context/UserInformationContext/userInformationContext';
+import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
 
 // message.config({
 //   duration: 60,
@@ -48,8 +45,8 @@ import Faq from './Pages/Faq/faq';
 
 const App = () => {
   const ability = defineAbility();
-  const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION || 'true';
-  const { i18n, t } = useTranslation(['common']);
+  // const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION || 'true';
+  const { t } = useTranslation(['common']);
   if (
     localStorage.getItem('companyId') &&
     localStorage.getItem('userRole') &&
@@ -184,9 +181,9 @@ const App = () => {
                   >
                     <Route path="view" element={<CompanyProfile />} />
                   </Route>
-                  <Route path="/reports" element={<CustomLayout selectedKey="reports" />}>
+                  {/* <Route path="/reports" element={<CustomLayout selectedKey="reports" />}>
                     <Route index element={<ReportSection />} />
-                  </Route>
+                  </Route> */}
                   {/* <Route
                       path="/userManagement"
                       element={<CustomLayout selectedKey="userManagement" />}
@@ -196,16 +193,6 @@ const App = () => {
                       <Route path="updateUser" element={<UpdateUser />} />
                     </Route> */}
                 </Route>
-                {/* {enableRegistration === 'true' && (
-                  <Route
-                    path="registerCompany"
-                    element={
-                      <Suspense fallback={<Loading />}>
-                        <RegisterNewCompany />
-                      </Suspense>
-                    }
-                  />
-                )} */}
                 <Route path="/*" element={<Navigate to="/" replace />} />
               </Routes>
             </BrowserRouter>

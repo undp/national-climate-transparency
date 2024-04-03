@@ -1,18 +1,16 @@
 import { Layout } from 'antd';
 import { Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout;
 import { Outlet } from 'react-router-dom';
-import {
-  ConfigurationSettingsType,
-  Loading,
-  useConnection,
-  useSettingsContext,
-} from '@undp/carbon-library';
 import LayoutHeader from '../Header/layout.header';
 import LayoutSider from '../Sider/layout.sider';
 import './layout.scss';
 import { PauseCircleFill } from 'react-bootstrap-icons';
+import { Loading } from '../Loading/loading';
+import { ConfigurationSettingsType } from '../../Enums/configuration.setting.type.enum';
+import { useConnection } from '../../Context/ConnectionContext/connectionContext';
+import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
 
 const CustomLayout = (props: any) => {
   const { selectedKey } = props;
@@ -21,7 +19,7 @@ const CustomLayout = (props: any) => {
   const { isTransferFrozen, setTransferFrozen } = useSettingsContext();
   const { t } = useTranslation(['creditTransfer']);
 
-  const getTranferFrozenStatus = async () => {
+  const getTransferFrozenStatus = async () => {
     const response = await get(
       `national/Settings/query?id=${ConfigurationSettingsType.isTransferFrozen}`
     );
@@ -33,7 +31,7 @@ const CustomLayout = (props: any) => {
   };
 
   useEffect(() => {
-    getTranferFrozenStatus();
+    getTransferFrozenStatus();
   }, []);
 
   return (

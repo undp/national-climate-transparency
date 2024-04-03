@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Row, Col, Card, Progress, Tag, Steps, message, Skeleton, Button, Tooltip } from 'antd';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Chart from 'react-apexcharts';
@@ -8,50 +8,41 @@ import './programmeView.scss';
 import {
   BlockOutlined,
   BulbOutlined,
-  CheckCircleOutlined,
   ClockCircleOutlined,
   ExperimentOutlined,
-  QrcodeOutlined,
 } from '@ant-design/icons';
 import Geocoding from '@mapbox/mapbox-sdk/services/geocoding';
+
+import { DevBGColor, DevColor, TooltipColor } from '../../../Styles/role.color.constants';
+import { addCommSep, addCommSepRound, isBase64, addSpaces } from '../../../Utils/utilServices';
+import { RoleIcon } from '../../../Components/common/RoleIcon/role.icon';
+import { MarkerData, MapTypes } from '../../../Definitions/mapComponent.definitions';
+import { MapComponent } from '../../../Components/Maps/mapComponent';
+import { CompanyRole } from '../../../Enums/company.role.enum';
+import { CarbonSystemType } from '../../../Enums/carbonSystemType.enum';
+import { Role } from '../../../Enums/role.enum';
+import { CompanyState } from '../../../Enums/companyState.enum';
+import { DocType, DocumentStatus } from '../../../Enums/document.enum';
+import { Loading } from '../../../Components/Loading/loading';
+import { TypeOfMitigation } from '../../../Enums/shared.enum';
+import { ProgrammeStageMRV } from '../../../Enums/programme.enum';
 import {
-  CarbonSystemType,
-  CompanyRole,
-  CompanyState,
-  DevBGColor,
-  DevColor,
-  DocType,
-  DocumentStatus,
-  InfoView,
-  InvestmentBody,
-  Loading,
-  MapComponent,
-  MapTypes,
-  MarkerData,
-  NdcActionBody,
-  OrganisationStatus,
-  ProgrammeDocuments,
-  ProgrammeStageMRV,
-  ProgrammeT,
-  Role,
-  RoleIcon,
-  TooltipColor,
-  TypeOfMitigation,
-  UnitField,
-  addCommSep,
-  addCommSepRound,
-  addSpaces,
-  getFinancialFields,
-  getGeneralFields,
-  getStageEnumVal,
   getStageTagTypeMRV,
-  isBase64,
-  useConnection,
-  useUserContext,
-} from '@undp/carbon-library';
+  getStageEnumVal,
+  getGeneralFields,
+  ProgrammeT,
+  getFinancialFields,
+  UnitField,
+} from '../../../Definitions/programme.definitions';
+import { InfoView } from '../../../Components/common/InfoView/info.view';
+import { InvestmentBody } from '../../../Components/common/Investment/investmentBody';
+import { OrganisationStatus } from '../../../Components/common/OrganisationStatus/organisationStatus';
+import { NdcActionBody } from '../../../Components/common/NdcActionBody/ndcActionBody';
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 
 const ProgrammeView = () => {
-  const { get, put, post } = useConnection();
+  const { post } = useConnection();
 
   const { userInfoState } = useUserContext();
   const { state } = useLocation();
@@ -808,7 +799,7 @@ const ProgrammeView = () => {
             )}
             <Card className="card-container">
               <div>
-                <ProgrammeDocuments
+                {/* <ProgrammeDocuments
                   data={documentsData}
                   title={t('view:programmeDocs')}
                   icon={<QrcodeOutlined />}
@@ -829,7 +820,7 @@ const ProgrammeView = () => {
                   translator={i18n}
                   methodologyDocumentUpdated={methodologyDocumentApproved}
                   programmeStatus={data?.currentStage}
-                />
+                /> */}
               </div>
             </Card>
             {mapType !== MapTypes.None ? (

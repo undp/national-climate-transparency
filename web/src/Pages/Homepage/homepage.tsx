@@ -1,5 +1,5 @@
 import { Button, Col, Row } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
@@ -21,9 +21,10 @@ import resourcesfall from '../../Assets/Images/resources.png';
 import LayoutFooter from '../../Components/Footer/layout.footer';
 import './homepage.scss';
 import { BarChart, Gem, Calculator } from 'react-bootstrap-icons';
-import { ImgWithFallback } from '@undp/carbon-library';
+import { ImgWithFallback } from '../../Components/common/ImgWithFallback/ImgWithFallback';
+
 const Homepage = () => {
-  const { i18n, t } = useTranslation(['common', 'homepage']);
+  const { t } = useTranslation(['common', 'homepage']);
   const navigate = useNavigate();
   const [Visible, setVisible] = useState(true);
 
@@ -35,9 +36,9 @@ const Homepage = () => {
     }
   };
 
-  const handleLanguageChange = (lang: string) => {
-    i18n.changeLanguage(lang);
-  };
+  // const handleLanguageChange = (lang: string) => {
+  //   i18n.changeLanguage(lang);
+  // };
 
   const handleClickScroll = () => {
     const element = document.getElementById('scrollhome');

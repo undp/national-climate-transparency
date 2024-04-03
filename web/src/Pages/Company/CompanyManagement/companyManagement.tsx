@@ -15,24 +15,24 @@ import {
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
-import {
-  useConnection,
-  GovBGColor,
-  CertBGColor,
-  DevBGColor,
-  CompanyRole,
-  Action,
-  DevColor,
-  GovColor,
-  ProfileIcon,
-  RoleIcon,
-  addCommSep,
-} from '@undp/carbon-library';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { CompanyTableDataType } from '../../../Definitions/companyManagement.definitions';
 import { Organisation } from '../../../Entities/organisation';
 import { OrganisationManagementColumns } from '../../../Enums/organisation.management.columns.enum';
+import {
+  GovBGColor,
+  CertBGColor,
+  DevBGColor,
+  DevColor,
+  GovColor,
+} from '../../../Styles/role.color.constants';
+import { Action } from '../../../Enums/action.enum';
+import { CompanyRole } from '../../../Enums/company.role.enum';
+import { addCommSep } from '../../../Utils/utilServices';
+import { RoleIcon } from '../../../Components/common/RoleIcon/role.icon';
+import { ProfileIcon } from '../../../Components/common/ProfileIcon/profile.icon';
 
 const { Search } = Input;
 

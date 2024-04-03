@@ -6,7 +6,7 @@ import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
-import { useConnection } from '@undp/carbon-library';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { GraphUpArrow } from 'react-bootstrap-icons';
 import './projectForm.scss';
 import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
@@ -395,466 +395,468 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
         <div className="body-title">{t('addProjTitle')}</div>
         <div className="body-sub-title">{t('addProjDesc')}</div>
       </div>
-      <Form form={form} onFinish={handleSubmit} layout="vertical">
-        <div className="form-card">
-          <div className="form-section-header">{t('generalInfoTitle')}</div>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('selectProgrammeHeader')}</label>}
-                name="programmeId"
-              >
-                <Select
-                  size={'large'}
-                  style={{ fontSize: inputFontSize }}
-                  allowClear
-                  disabled={isView}
-                  showSearch
+      <div className="project-form">
+        <Form form={form} onFinish={handleSubmit} layout="vertical">
+          <div className="form-section-card">
+            <div className="form-section-header">{t('generalInfoTitle')}</div>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('selectProgrammeHeader')}</label>}
+                  name="programmeId"
                 >
-                  {programmeList.map((program) => (
-                    <Option key={program.id} value={program.id}>
-                      {program.title}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('typeHeader')}</label>}
-                name="type"
-              >
-                <Select
-                  size="large"
-                  style={{ fontSize: inputFontSize }}
-                  allowClear
-                  disabled={isView}
-                  showSearch
+                  <Select
+                    size={'large'}
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {programmeList.map((program) => (
+                      <Option key={program.id} value={program.id}>
+                        {program.title}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('typeHeader')}</label>}
+                  name="type"
                 >
-                  {Object.values(ProjectType).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('projTitleHeader')}</label>}
-                name="title"
-                rules={[validation.required]}
-              >
-                <Input className="form-input-box" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('projDescHeader')}</label>}
-                name="description"
-                rules={[validation.required]}
-              >
-                <TextArea maxLength={250} rows={3} disabled={isView} />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('projectNumberHeader')}</label>}
-                name="addProjectNumber"
-              >
-                <Input className="form-input-box" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('actionTitleHeader')}</label>}
-                name="actionTitle"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('programmeTitleHeader')}</label>}
-                name="programmeTitle"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('natAnchorHeader')}</label>}
-                name="natAnchor"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('instrTypesHeader')}</label>}
-                name="instrTypes"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('projectStatusHeader')}</label>}
-                name="status"
-                rules={[validation.required]}
-              >
-                <Select
-                  size="large"
-                  style={{ fontSize: inputFontSize }}
-                  allowClear
-                  disabled={isView}
-                  showSearch
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(ProjectType).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('projTitleHeader')}</label>}
+                  name="title"
+                  rules={[validation.required]}
                 >
-                  {Object.values(ProjectStatus).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={6}>
-              <Form.Item
-                label={<label className="form-item-header">{t('sectorsAffectedHeader')}</label>}
-                name="sectorsAffected"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                label={<label className="form-item-header">{t('subSectorsAffectedHeader')}</label>}
-                name="subSectorsAffected"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                label={<label className="form-item-header">{t('startYearHeader')}</label>}
-                name="startYear"
-                rules={[validation.required]}
-              >
-                <Select
-                  size="large"
-                  style={{ fontSize: inputFontSize }}
-                  allowClear
-                  disabled={isView}
-                  showSearch
+                  <Input className="form-input-box" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('projDescHeader')}</label>}
+                  name="description"
+                  rules={[validation.required]}
                 >
-                  {yearsList.map((year) => (
-                    <Option key={year} value={year}>
-                      {year}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                label={<label className="form-item-header">{t('endYearHeader')}</label>}
-                name="endYear"
-                rules={[validation.required]}
-              >
-                <Select
-                  size="large"
-                  style={{ fontSize: inputFontSize }}
-                  allowClear
-                  disabled={isView}
-                  showSearch
+                  <TextArea maxLength={250} rows={3} disabled={isView} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('projectNumberHeader')}</label>}
+                  name="addProjectNumber"
                 >
-                  {yearsList.map((year) => (
-                    <Option key={year} value={year}>
-                      {year}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={6}>
-              <Form.Item
-                label={<label className="form-item-header">{t('timeFrameHeader')}</label>}
-                name="timeFrame"
-                rules={[validation.required]}
-              >
-                <Input type="number" className="form-input-box" />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item<number>
-                label={<label className="form-item-header">{t('natImplementorHeader')}</label>}
-                name="natImplementor"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item<number>
-                label={<label className="form-item-header">{t('techTypeHeader')}</label>}
-                name="techType"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('recipientHeader')}</label>}
-                name="recipient"
-                rules={[validation.required]}
-              >
-                <Select
-                  size="large"
-                  style={{ fontSize: inputFontSize }}
-                  mode="multiple"
-                  allowClear
-                  disabled={isView}
-                  showSearch
+                  <Input className="form-input-box" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('actionTitleHeader')}</label>}
+                  name="actionTitle"
                 >
-                  {Object.values(Recipient).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item<number>
-                label={<label className="form-item-header">{t('intImplementorHeader')}</label>}
-                name="intImplementor"
-              >
-                <Select
-                  size="large"
-                  style={{ fontSize: inputFontSize }}
-                  mode="multiple"
-                  allowClear
-                  disabled={isView}
-                  showSearch
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('programmeTitleHeader')}</label>}
+                  name="programmeTitle"
                 >
-                  {Object.values(IntImplementor).map((instrument) => (
-                    <Option key={instrument} value={instrument}>
-                      {instrument}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item<number>
-                label={<label className="form-item-header">{t('techDevHeader')}</label>}
-                name="techDevContribution"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item<number>
-                label={<label className="form-item-header">{t('capBuildHeader')}</label>}
-                name="capBuildObjectives"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-          </Row>
-          <div className="form-section-sub-header">{t('documentsHeader')}</div>
-          <UploadFileGrid
-            uploadedFiles={uploadedFiles}
-            horizontalGutter={gutterSize}
-            verticalGutter={10}
-            buttonText={t('upload')}
-            height={'40px'}
-            acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
-            style={{ marginBottom: '25px' }}
-            setUploadedFiles={setUploadedFiles}
-            isView={isView}
-          ></UploadFileGrid>
-          <div className="form-section-header">{t('mitigationInfoTitle')}</div>
-          <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
-          <Row gutter={gutterSize}>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('achieved')}</label>}
-                name="achievedReduct"
-                rules={[validation.required]}
-              >
-                <Input type="number" className="form-input-box" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label={<label className="form-item-header">{t('expected')}</label>}
-                name="expectedReduct"
-                rules={[validation.required]}
-              >
-                <Input type="number" className="form-input-box" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-          {migratedKpiList.map((index: number) => (
-            <KpiGrid
-              key={index}
-              form={form}
-              rules={[]}
-              index={index}
-              isEditable={false}
-              inputFontSize={inputFontSize}
-              gutterSize={gutterSize}
-              headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-              updateKPI={updateKPI}
-              removeKPI={removeKPI}
-            ></KpiGrid>
-          ))}
-          {newKpiList.map((kpi: any) => (
-            <KpiGrid
-              key={kpi.index}
-              form={form}
-              rules={[validation.required]}
-              index={kpi.index}
-              isEditable={!isView && !kpi.visibility}
-              inputFontSize={inputFontSize}
-              gutterSize={gutterSize}
-              headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-              updateKPI={updateKPI}
-              removeKPI={removeKPI}
-            ></KpiGrid>
-          ))}
-          <Row justify={'start'}>
-            <Col span={2}>
-              {!isView && (
-                <Button
-                  icon={<PlusCircleOutlined />}
-                  className="create-kpi-button"
-                  onClick={createKPI}
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('natAnchorHeader')}</label>}
+                  name="natAnchor"
                 >
-                  {t('addKPI')}
-                </Button>
-              )}
-            </Col>
-          </Row>
-          <Row gutter={gutterSize}>
-            <Col span={24}>
-              <Form.Item
-                label={<label className="form-item-header">{t('programmeCommentsTitle')}</label>}
-                name="comments"
-              >
-                <TextArea rows={3} disabled={isView} />
-              </Form.Item>
-            </Col>
-          </Row>
-          <div className="form-section-header">{t('financeInfoTitle')}</div>
-          <Row gutter={gutterSize}>
-            <Col span={6}>
-              <Form.Item
-                label={<label className="form-item-header">{t('neededUSDHeader')}</label>}
-                name="neededUSD"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                label={<label className="form-item-header">{t('neededLCLHeader')}</label>}
-                name="neededLCL"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                label={<label className="form-item-header">{t('recievedUSDHeader')}</label>}
-                name="recievedUSD"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                label={<label className="form-item-header">{t('recievedLCLHeader')}</label>}
-                name="recievedLCL"
-              >
-                <Input className="form-input-box" disabled />
-              </Form.Item>
-            </Col>
-          </Row>
-        </div>
-        <div className="form-card">
-          <Row>
-            <Col span={6} style={{ paddingTop: '6px' }}>
-              <div className="form-section-header">{t('activityInfoTitle')}</div>
-            </Col>
-            <Col span={4}>
-              <AttachEntity
-                isDisabled={isView}
-                options={allActivityIds}
-                content={{
-                  buttonName: t('attachActivity'),
-                  attach: t('attach'),
-                  contentTitle: t('attachActivity'),
-                  listTitle: t('activityList'),
-                  cancel: t('cancel'),
-                }}
-                attachedUnits={selectedActivityIds}
-                setAttachedUnits={setSelectedActivityIds}
-                icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
-              ></AttachEntity>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={24}>
-              <div style={{ overflowX: 'auto' }}>
-                <LayoutTable
-                  tableData={activityData}
-                  columns={activityTableColumns}
-                  loading={false}
-                  pagination={{
-                    current: activityCurrentPage,
-                    pageSize: activityPageSize,
-                    total: activityData.length,
-                    showQuickJumper: true,
-                    pageSizeOptions: ['10', '20', '30'],
-                    showSizeChanger: true,
-                    style: { textAlign: 'center' },
-                    locale: { page: '' },
-                    position: ['bottomRight'],
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('instrTypesHeader')}</label>}
+                  name="instrTypes"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('projectStatusHeader')}</label>}
+                  name="status"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(ProjectStatus).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('sectorsAffectedHeader')}</label>}
+                  name="sectorsAffected"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={
+                    <label className="form-item-header">{t('subSectorsAffectedHeader')}</label>
+                  }
+                  name="subSectorsAffected"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('startYearHeader')}</label>}
+                  name="startYear"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {yearsList.map((year) => (
+                      <Option key={year} value={year}>
+                        {year}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('endYearHeader')}</label>}
+                  name="endYear"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {yearsList.map((year) => (
+                      <Option key={year} value={year}>
+                        {year}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('timeFrameHeader')}</label>}
+                  name="timeFrame"
+                  rules={[validation.required]}
+                >
+                  <Input type="number" className="form-input-box" />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item<number>
+                  label={<label className="form-item-header">{t('natImplementorHeader')}</label>}
+                  name="natImplementor"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item<number>
+                  label={<label className="form-item-header">{t('techTypeHeader')}</label>}
+                  name="techType"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('recipientHeader')}</label>}
+                  name="recipient"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    mode="multiple"
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(Recipient).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item<number>
+                  label={<label className="form-item-header">{t('intImplementorHeader')}</label>}
+                  name="intImplementor"
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    mode="multiple"
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(IntImplementor).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item<number>
+                  label={<label className="form-item-header">{t('techDevHeader')}</label>}
+                  name="techDevContribution"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item<number>
+                  label={<label className="form-item-header">{t('capBuildHeader')}</label>}
+                  name="capBuildObjectives"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+            </Row>
+            <div className="form-section-sub-header">{t('documentsHeader')}</div>
+            <UploadFileGrid
+              uploadedFiles={uploadedFiles}
+              horizontalGutter={gutterSize}
+              verticalGutter={10}
+              buttonText={t('upload')}
+              height={'40px'}
+              acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
+              style={{ marginBottom: '25px' }}
+              setUploadedFiles={setUploadedFiles}
+              isView={isView}
+            ></UploadFileGrid>
+            <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+            <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('achieved')}</label>}
+                  name="achievedReduct"
+                  rules={[validation.required]}
+                >
+                  <Input type="number" className="form-input-box" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('expected')}</label>}
+                  name="expectedReduct"
+                  rules={[validation.required]}
+                >
+                  <Input type="number" className="form-input-box" />
+                </Form.Item>
+              </Col>
+            </Row>
+            <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+            {migratedKpiList.map((index: number) => (
+              <KpiGrid
+                key={index}
+                form={form}
+                rules={[]}
+                index={index}
+                isEditable={false}
+                inputFontSize={inputFontSize}
+                gutterSize={gutterSize}
+                headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                updateKPI={updateKPI}
+                removeKPI={removeKPI}
+              ></KpiGrid>
+            ))}
+            {newKpiList.map((kpi: any) => (
+              <KpiGrid
+                key={kpi.index}
+                form={form}
+                rules={[validation.required]}
+                index={kpi.index}
+                isEditable={!isView && !kpi.visibility}
+                inputFontSize={inputFontSize}
+                gutterSize={gutterSize}
+                headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                updateKPI={updateKPI}
+                removeKPI={removeKPI}
+              ></KpiGrid>
+            ))}
+            <Row justify={'start'}>
+              <Col span={2}>
+                {!isView && (
+                  <Button
+                    icon={<PlusCircleOutlined />}
+                    className="create-kpi-button"
+                    onClick={createKPI}
+                  >
+                    {t('addKPI')}
+                  </Button>
+                )}
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={24}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('programmeCommentsTitle')}</label>}
+                  name="comments"
+                >
+                  <TextArea rows={3} disabled={isView} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <div className="form-section-header">{t('financeInfoTitle')}</div>
+            <Row gutter={gutterSize}>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('neededUSDHeader')}</label>}
+                  name="neededUSD"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('neededLCLHeader')}</label>}
+                  name="neededLCL"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('recievedUSDHeader')}</label>}
+                  name="recievedUSD"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('recievedLCLHeader')}</label>}
+                  name="recievedLCL"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
+          <div className="form-section-card">
+            <Row>
+              <Col span={6} style={{ paddingTop: '6px' }}>
+                <div className="form-section-header">{t('activityInfoTitle')}</div>
+              </Col>
+              <Col span={4}>
+                <AttachEntity
+                  isDisabled={isView}
+                  options={allActivityIds}
+                  content={{
+                    buttonName: t('attachActivity'),
+                    attach: t('attach'),
+                    contentTitle: t('attachActivity'),
+                    listTitle: t('activityList'),
+                    cancel: t('cancel'),
                   }}
-                  handleTableChange={handleActivityTableChange}
-                  emptyMessage={t('noActivityMessage')}
-                />{' '}
-              </div>
-            </Col>
-          </Row>
-        </div>
-        <div className="form-card">
-          <Row>
-            <Col span={6}>
-              <div className="form-section-header">{t('supportInfoTitle')}</div>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={24}>
-              <div style={{ overflowX: 'auto' }}>
+                  attachedUnits={selectedActivityIds}
+                  setAttachedUnits={setSelectedActivityIds}
+                  icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
+                ></AttachEntity>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24}>
+                <div style={{ overflowX: 'auto' }}>
+                  <LayoutTable
+                    tableData={activityData}
+                    columns={activityTableColumns}
+                    loading={false}
+                    pagination={{
+                      current: activityCurrentPage,
+                      pageSize: activityPageSize,
+                      total: activityData.length,
+                      showQuickJumper: true,
+                      pageSizeOptions: ['10', '20', '30'],
+                      showSizeChanger: true,
+                      style: { textAlign: 'center' },
+                      locale: { page: '' },
+                      position: ['bottomRight'],
+                    }}
+                    handleTableChange={handleActivityTableChange}
+                    emptyMessage={t('noActivityMessage')}
+                  />{' '}
+                </div>
+              </Col>
+            </Row>
+          </div>
+          <div className="form-section-card">
+            <Row>
+              <Col span={6}>
+                <div className="form-section-header">{t('supportInfoTitle')}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24}>
                 <LayoutTable
                   tableData={supportData}
                   columns={supportTableColumns}
@@ -873,39 +875,39 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                   handleTableChange={handleSupportTableChange}
                   emptyMessage={t('noSupportMessage')}
                 />
-              </div>
-            </Col>
-          </Row>
-        </div>
-        {isView && (
-          <div className="form-card">
-            <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              </Col>
+            </Row>
           </div>
-        )}
-        {!isView && (
-          <Row gutter={20} justify={'end'}>
-            <Col span={2}>
-              <Button
-                type="default"
-                size="large"
-                block
-                onClick={() => {
-                  navigate('/projects');
-                }}
-              >
-                {t('cancel')}
-              </Button>
-            </Col>
-            <Col span={2}>
-              <Form.Item>
-                <Button type="primary" size="large" block htmlType="submit">
-                  {t('add')}
+          {isView && (
+            <div className="form-section-card">
+              <div className="form-section-header">{t('updatesInfoTitle')}</div>
+            </div>
+          )}
+          {!isView && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/projects');
+                  }}
+                >
+                  {t('cancel')}
                 </Button>
-              </Form.Item>
-            </Col>
-          </Row>
-        )}
-      </Form>
+              </Col>
+              <Col span={2}>
+                <Form.Item>
+                  <Button type="primary" size="large" block htmlType="submit">
+                    {t('add')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+        </Form>
+      </div>
     </div>
   );
 };

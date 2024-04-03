@@ -10,7 +10,7 @@ import {
   ViewBGColor,
   ViewColor,
 } from '../../Styles/role.color.constants';
-import { RoleIcon } from '@undp/carbon-library';
+import { RoleIcon } from '../common/RoleIcon/role.icon';
 
 export interface UserRoleIconProps {
   role: string;

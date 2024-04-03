@@ -41,6 +41,17 @@ body {
   }
 }
 
+.form-section-card {
+  background-color: $outside-background-color;
+  border-radius: 10px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding-top: 45px; 
+  padding-left: 60px; 
+  padding-right: 30px;
+  padding-bottom: 30px;
+}
+
 .layout-content-container .ant-btn-primary {
   background-color: $primary-color !important;
   color: #ffffff;
@@ -339,7 +350,7 @@ body {
     width: 100%;
     flex-direction: row;
     align-items: center;
-    justify-content: end;
+    justify-content: flex-end;
 
     .search-bar {
       display: flex;
