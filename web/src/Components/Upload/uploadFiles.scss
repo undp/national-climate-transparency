@@ -7,6 +7,15 @@
         opacity: 0.8;
     }
 
+    .upload-box {
+        opacity: 0.8;
+        padding: 15px;
+        border: 2px dashed #c4bbbb;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        margin-top: 20px;
+    }
+
     .file-card {
         height: 100%;
         display: flex;
@@ -31,6 +40,13 @@
         cursor: pointer;
         position: absolute;
         top: 12px;
+        right: 20px;
+    }
+
+    .close-icon {
+        cursor: pointer;
+        position: absolute;
+        top: 13px;
         right: 20px;
     }
 

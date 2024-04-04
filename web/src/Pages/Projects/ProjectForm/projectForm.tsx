@@ -79,6 +79,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
     []
   );
   const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
+  const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
 
   // Popover state
 
@@ -691,12 +692,14 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
             </Row>
             <div className="form-section-sub-header">{t('documentsHeader')}</div>
             <UploadFileGrid
-              storedFiles={storedFiles}
-              uploadedFiles={uploadedFiles}
+              usedIn={method}
               buttonText={t('upload')}
               acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
+              storedFiles={storedFiles}
+              uploadedFiles={uploadedFiles}
               setUploadedFiles={setUploadedFiles}
-              usedIn={method}
+              removedFiles={filesToRemove}
+              setRemovedFiles={setFilesToRemove}
             ></UploadFileGrid>
             <div className="form-section-header">{t('mitigationInfoTitle')}</div>
             <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>

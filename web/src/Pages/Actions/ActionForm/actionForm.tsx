@@ -64,6 +64,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
     []
   );
   const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
+  const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
 
   // Popover state
 
@@ -516,12 +517,14 @@ const actionForm: React.FC<Props> = ({ method }) => {
               {t('documentsHeader')}
             </div>
             <UploadFileGrid
-              storedFiles={storedFiles}
-              uploadedFiles={uploadedFiles}
+              usedIn={method}
               buttonText={t('upload')}
               acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
+              storedFiles={storedFiles}
+              uploadedFiles={uploadedFiles}
               setUploadedFiles={setUploadedFiles}
-              usedIn={method}
+              removedFiles={filesToRemove}
+              setRemovedFiles={setFilesToRemove}
             ></UploadFileGrid>
           </div>
           <div className="form-section-card">
