@@ -10,6 +10,7 @@ import {
 import ConfirmPopup from '../Popups/Confirmation/confirmPopup';
 import './uploadFiles.scss';
 import { XOctagon } from 'react-bootstrap-icons';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   buttonText: string;
@@ -34,6 +35,10 @@ const UploadFileGrid: React.FC<Props> = ({
   removedFiles,
   setRemovedFiles,
 }) => {
+  const { t } = useTranslation(['uploadGrid']);
+
+  // Upload Grid State
+
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
   const [storedVisibleList, setStoredVisibleList] = useState<
     { id: number; title: string; url: string }[]
@@ -42,10 +47,14 @@ const UploadFileGrid: React.FC<Props> = ({
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [whichFile, setWhichFile] = useState<number>();
 
+  // Hook to update the visible files shown after deleting
+
   useEffect(() => {
     const toShow = storedFiles.filter((item) => !removedFiles.includes(item.id));
     setStoredVisibleList(toShow);
   }, [removedFiles, storedFiles]);
+
+  // File Upload functionality
 
   const handleFileRead = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -55,14 +64,36 @@ const UploadFileGrid: React.FC<Props> = ({
       reader.onerror = (error) => reject(error);
     });
 
+  const beforeUpload = async (file: RcFile): Promise<boolean> => {
+    const base64 = await handleFileRead(file);
+    setUploadedFiles([...uploadedFiles, { id: file.uid, title: file.name, data: base64 }]);
+    return false;
+  };
+
   const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
     setDocumentList(newFileList);
   };
+
+  const props = {
+    onChange,
+    fileList: documentList,
+    showUploadList: false,
+    beforeUpload,
+    accept: acceptedFiles,
+  };
+
+  // Delete function for stored files
 
   const handleDeleteClick = (fileId: any) => {
     setConfirmOpen(true);
     setWhichFile(fileId);
   };
+
+  const handleStoredDelete = (fileId: any) => {
+    setRemovedFiles((prevState) => [...prevState, fileId]);
+  };
+
+  // Download functionality for stored files
 
   const handleDownloadClick = (file: { id: number; title: string; url: string }) => {
     const link = document.createElement('a');
@@ -74,27 +105,11 @@ const UploadFileGrid: React.FC<Props> = ({
     document.body.removeChild(link);
   };
 
+  // Remove Functionality for uploaded not stored files
+
   const handleUploadDelete = (fileId: any) => {
     setDocumentList((prevList) => prevList.filter((file) => file.uid !== fileId));
     setUploadedFiles((prevList) => prevList.filter((file) => file.id !== fileId));
-  };
-
-  const handleStoredDelete = (fileId: any) => {
-    setRemovedFiles((prevState) => [...prevState, fileId]);
-  };
-
-  const beforeUpload = async (file: RcFile): Promise<boolean> => {
-    const base64 = await handleFileRead(file);
-    setUploadedFiles([...uploadedFiles, { id: file.uid, title: file.name, data: base64 }]);
-    return false;
-  };
-
-  const props = {
-    onChange,
-    fileList: documentList,
-    showUploadList: false,
-    beforeUpload,
-    accept: acceptedFiles,
   };
 
   return (
@@ -103,10 +118,10 @@ const UploadFileGrid: React.FC<Props> = ({
         icon={<XOctagon style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
-          primaryMsg: 'Are you sure you want to remove this document?',
-          secondaryMsg: 'You can’t undo this action',
-          cancelTitle: 'cancel',
-          actionTitle: 'remove',
+          primaryMsg: t('primaryMsg'),
+          secondaryMsg: t('secondaryMsg'),
+          cancelTitle: t('cancelTitle'),
+          actionTitle: t('actionTitle'),
         }}
         actionRef={whichFile}
         doAction={handleStoredDelete}
