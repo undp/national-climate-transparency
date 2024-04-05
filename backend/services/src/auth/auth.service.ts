@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { OrganisationService } from "../organisation/organisation.service";
+// import { OrganisationService } from "../organisation/organisation.service";
 import { instanceToPlain } from "class-transformer";
 import { CaslAbilityFactory } from "../casl/casl-ability.factory";
 import { UserService } from "../user/user.service";
@@ -20,7 +20,7 @@ import { UserState } from "../enums/user.state.enum";
 export class AuthService {
   constructor(
     private readonly userService: UserService,
-    private readonly companyService: OrganisationService,
+    // private readonly companyService: OrganisationService,
     private readonly jwtService: JwtService,
     private configService: ConfigService,
     private helperService: HelperService,
@@ -56,30 +56,28 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const organisationDetails = await this.companyService.findByCompanyId(
-      user.organisationId
-    );
+    // const organisationDetails = await this.companyService.findByCompanyId(
+    //   user.organisationId
+    // );
     const payload = new JWTPayload(
-      organisationDetails.name,
+      user.organisation,
       user.name,
       user.id,
       user.role,
-      user.organisationId,
-      user.organisationType,
-      parseInt(organisationDetails.state)
+			user.subRole
+      // user.organisationId,
+      // user.organisationType,
+      // parseInt(organisationDetails.state)
     );
     const ability = this.caslAbilityFactory.createForUser(user);
     return {
       access_token: this.jwtService.sign(instanceToPlain(payload)),
       role: user.role,
+			subRole: user.subRole,
       id: user.id,
       name: user.name,
-      companyId: user.organisationId,
-      companyRole: user.organisationType,
-      companyName: organisationDetails.name,
-      companyLogo: organisationDetails.logo,
+      company: user.organisation,
       ability: JSON.stringify(ability),
-      companyState: parseInt(organisationDetails.state),
     };
   }
 

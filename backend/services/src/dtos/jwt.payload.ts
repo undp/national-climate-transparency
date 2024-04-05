@@ -1,5 +1,4 @@
-import { Role } from "../casl/role.enum"
-import { OrganisationType } from "../enums/organisation.type.enum"
+import { Role, SubRole } from "../casl/role.enum"
 
 export class JWTPayload {
     constructor(
@@ -7,9 +6,7 @@ export class JWTPayload {
         public n: string,
         public sub: number,
         public r: Role,
-        public cid: number,
-        public cr: OrganisationType,
-        public s: number
+        public sr: SubRole
     ) {
 
     }

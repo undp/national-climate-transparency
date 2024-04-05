@@ -158,9 +158,9 @@ export const PoliciesGuardEx = (
         let abilityCan: boolean = true;
         // console.log(obj);
         if (action == Action.Update) {
-          if (obj instanceof User && obj.organisationId == undefined) {
-            obj.organisationId = user.companyId;
-          }
+          // if (obj instanceof User && obj.organisationId == undefined) {
+          //   obj.organisationId = user.companyId;
+          // }
           for (const key in obj) {
             if (!ability.can(action, obj, key)) {
               console.log(

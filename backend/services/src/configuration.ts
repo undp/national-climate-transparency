@@ -2,6 +2,7 @@ export default () => ({
   stage: process.env.STAGE || "local",
   systemCountry: process.env.systemCountryCode || "NG",
   systemCountryName: process.env.systemCountryName || "CountryX",
+  systemCountryGovernmentName: process.env.systemCountryGovernmentName || "Government of CountryX",
   systemContinentName: process.env.systemContinentName || "CountryX",
   defaultCreditUnit: process.env.defaultCreditUnit || "ITMO",
   year: parseInt(process.env.REPORT_YEAR),

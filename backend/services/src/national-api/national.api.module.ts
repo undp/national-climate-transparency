@@ -3,14 +3,14 @@ import { ConfigModule } from '@nestjs/config';
 import { NationalAPIController } from './national.api.controller';
 import { NationalAPIService } from './national.api.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CompanyController } from './company.controller';
+// import { CompanyController } from './company.controller';
 import { UserController } from './user.controller';
 import { AuthController } from './auth.controller';
 import { SettingsController } from './settings.controller';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
 import { CaslModule } from '../casl/casl.module';
-import { OrganisationModule } from '../organisation/organisation.module';
+// import { OrganisationModule } from '../organisation/organisation.module';
 import { TypeOrmConfigService } from '../typeorm.config.service';
 import { UtilModule } from '../util/util.module';
 import configuration from '../configuration';
@@ -36,7 +36,7 @@ import { ProjectModule } from '../project/project.module';
     AuthModule,
     UserModule,
     CaslModule,
-    OrganisationModule,
+    // OrganisationModule,
     UtilModule,
     ActionModule,
     ProgrammeModule, 
@@ -46,7 +46,7 @@ import { ProjectModule } from '../project/project.module';
     NationalAPIController, 
     UserController, 
     AuthController, 
-    CompanyController, 
+    // CompanyController, 
     SettingsController, 
     ActionController, 
     ProgrammeController,

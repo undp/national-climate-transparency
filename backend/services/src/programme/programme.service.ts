@@ -20,9 +20,6 @@ import { LinkProgrammesDto } from "../dtos/link.programmes.dto";
 import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
 import { QueryDto } from "../dtos/query.dto";
 import { DataListResponseDto } from "../dtos/data.list.response";
-import { OrganisationService } from "../organisation/organisation.service";
-import { Role } from "../casl/role.enum";
-import { Organisation } from "../entities/organisation.entity";
 import { FilterEntry } from "../dtos/filter.entry";
 import { ProgrammeViewDto } from "../dtos/programme.view.dto";
 
@@ -32,7 +29,6 @@ export class ProgrammeService {
 		@InjectEntityManager() private entityManager: EntityManager,
 		@InjectRepository(ProgrammeEntity) private programmeRepo: Repository<ProgrammeEntity>,
 		private actionService: ActionService,
-		private organisationService: OrganisationService,
 		private counterService: CounterService,
 		private helperService: HelperService,
 		private fileUploadService: FileUploadService,
@@ -145,13 +141,13 @@ export class ProgrammeService {
 
 		const programme = await this.query(queryDto, abilityCondition);
 
-		if (!programme) {
+		if (!programme || programme.data.length <= 0) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
-					"programme.programmesNotFound",
-					[]
+					"programme.programmeNotFound",
+					[programmeId]
 				),
-				HttpStatus.BAD_REQUEST
+				HttpStatus.NOT_FOUND
 			);
 		}
 
@@ -205,7 +201,7 @@ export class ProgrammeService {
 
 		const programmes = await this.findAllProgrammeByIds(linkProgrammesDto.programmes);
 
-		if (!programmes) {
+		if (!programmes || programmes.length <= 0) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"programme.programmesNotFound",
@@ -214,37 +210,33 @@ export class ProgrammeService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
-		let department: Organisation;
-		if (user.role === Role.DepartmentUser) {
-			department = await this.organisationService.findByCompanyId(user.organisationId);
+		for (const programme of programmes) {
+			if (user.sector.length > 0) {
+				const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
+				if (commonSectors.length === 0) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"programme.cannotLinkNotRelatedProgrammes",
+							[programme.programmeId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
+			}
+			if (programme.action) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.programmeAlreadyLinked",
+						[programme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
 		}
-		const departmentSectors = department?.sector || [];
 
 		const prog = await this.entityManager
 			.transaction(async (em) => {
 				for (const programme of programmes) {
-
-					if (departmentSectors.length > 0) {
-						const commonSectors = programme.affectedSectors.filter(sector => departmentSectors.includes(sector));
-						if (commonSectors.length === 0) {
-							throw new HttpException(
-								this.helperService.formatReqMessagesString(
-									"programme.cannotLinkNotRelatedProgrammes",
-									[programme.programmeId]
-								),
-								HttpStatus.BAD_REQUEST
-							);
-						}
-					}
-					if (programme.action) {
-						throw new HttpException(
-							this.helperService.formatReqMessagesString(
-								"programme.programmeAlreadyLinked",
-								[programme.programmeId]
-							),
-							HttpStatus.BAD_REQUEST
-						);
-					}
 					programme.action = action;
 					programme.path = action.actionId;
 					const linkedProgramme = await em.save<ProgrammeEntity>(programme);
@@ -275,7 +267,7 @@ export class ProgrammeService {
 	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User) {
 		const programmes = await this.findAllProgrammeByIds(unlinkProgrammesDto.programmes);
 
-		if (!programmes) {
+		if (!programmes || programmes.length <= 0) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"programme.programmesNotFound",
@@ -285,18 +277,33 @@ export class ProgrammeService {
 			);
 		}
 
+		for (const programme of programmes) {
+			if (user.sector.length > 0) {
+				const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
+				if (commonSectors.length === 0) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"programme.cannotUnlinkNotRelatedProgrammes",
+							[programme.programmeId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
+			}
+			if (!programme.action) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.programmeIsNotLinked",
+						[programme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+		}
+
 		const prog = await this.entityManager
 			.transaction(async (em) => {
 				for (const programme of programmes) {
-					if (!programme.action) {
-						throw new HttpException(
-							this.helperService.formatReqMessagesString(
-								"programme.programmeIsNotLinked",
-								[programme.programmeId]
-							),
-							HttpStatus.BAD_REQUEST
-						);
-					}
 					programme.action = null;
 					programme.path = "";
 					const linkedProgramme = await em.save<ProgrammeEntity>(programme);

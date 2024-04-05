@@ -1,15 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
+	ArrayMinSize,
+	IsArray,
   IsEmail,
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+	MaxLength,
+	ValidateIf,
 } from "class-validator";
-import { Role } from "../casl/role.enum";
-import { OrganisationType } from "../enums/organisation.type.enum";
+import { Role, SubRole } from "../casl/role.enum";
+import { Organisation, OrganisationType } from "../enums/organisation.enum";
 import { IsValidCountry } from "../util/validcountry.decorator";
+import { Sector } from "src/enums/sector.enum";
 
 export class UserDto {
   @IsNotEmpty()
@@ -29,6 +34,33 @@ export class UserDto {
   })
   role: Role;
 
+	@ValidateIf(
+    (c) => ![Role.Root, Role.Admin].includes(c.role)
+  )
+	@IsNotEmpty()
+  @ApiProperty({ enum: SubRole })
+  @IsEnum(SubRole, {
+    message: "Invalid sub role. Supported following roles:" + Object.values(SubRole),
+  })
+  subRole: SubRole;
+
+	@ValidateIf(
+    (c) => ![Role.Root, Role.Admin].includes(c.role)
+  )
+  @IsArray()
+  @ArrayMinSize(1)
+  @MaxLength(100, { each: true })
+  @IsNotEmpty({ each: true })
+  @IsEnum(Sector, {
+      each: true,
+      message: 'Invalid Sector. Supported following sectors:' + Object.values(Sector)
+  })
+  @ApiProperty({
+    type: [String],
+    enum: Object.values(Sector),
+  })
+  sector: Sector[];
+
   @IsString()
   @ApiPropertyOptional()
   @IsNotEmpty()
@@ -40,17 +72,12 @@ export class UserDto {
   @ApiPropertyOptional()
   country: string;
 
-  @IsNumber()
-  @ApiPropertyOptional()
   @IsNotEmpty()
-  organisationId: number;
-
-  @IsNotEmpty()
-  @ApiProperty({ enum: OrganisationType })
-  @IsEnum(OrganisationType, {
-    message: "Invalid organisation type. Supported following types:" + Object.values(OrganisationType),
+  @ApiProperty({ enum: Organisation })
+  @IsEnum(Organisation, {
+    message: "Invalid organisation. Supported following Organisations:" + Object.values(Organisation),
   })
-  organisationType: OrganisationType;
+  organisation: Organisation;
 
   password: string;
 

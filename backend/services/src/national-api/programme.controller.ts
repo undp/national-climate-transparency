@@ -19,9 +19,9 @@ import { LinkProgrammesDto } from "src/dtos/link.programmes.dto";
 import { UnlinkProgrammesDto } from "src/dtos/unlink.programmes.dto";
 import { QueryDto } from "../dtos/query.dto";
 
-@ApiTags("Programme")
+@ApiTags("Programmes")
 @ApiBearerAuth()
-@Controller("programme")
+@Controller("programmes")
 export class ProgrammeController {
     constructor(
         private readonly programmeService: ProgrammeService,

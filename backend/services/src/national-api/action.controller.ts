@@ -17,9 +17,9 @@ import { ActionDto } from "../dtos/action.dto";
 import { ActionEntity } from "../entities/action.entity";
 import { QueryDto } from "../dtos/query.dto";
 
-@ApiTags("Action")
+@ApiTags("Actions")
 @ApiBearerAuth()
-@Controller("action")
+@Controller("actions")
 export class ActionController {
   constructor(
     private readonly actionService: ActionService,

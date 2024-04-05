@@ -11,7 +11,7 @@ import {
   MaxLength,
   ValidateIf,
 } from "class-validator";
-import { OrganisationType } from "../enums/organisation.type.enum";
+import { OrganisationType } from "../enums/organisation.enum";
 import { Sector } from "../enums/sector.enum";
 import { IsValidCountry } from "src/util/validcountry.decorator";
 

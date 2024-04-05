@@ -1,5 +1,5 @@
 import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
-import { OrganisationType } from '../enums/organisation.type.enum'
+import { OrganisationType } from '../enums/organisation.enum'
 import { EntitySubject } from "./entity.subject";
 import { OrganisationState } from "../enums/organisation.state.enum";
 import { Sector } from "../enums/sector.enum";

@@ -5,7 +5,7 @@ import { UserService } from './user.service';
 import { CaslModule } from '../casl/casl.module';
 import configuration from '../configuration';
 import { ConfigModule } from '@nestjs/config';
-import { OrganisationModule } from '../organisation/organisation.module';
+// import { OrganisationModule } from '../organisation/organisation.module';
 import { TypeOrmConfigService } from '../typeorm.config.service';
 import { UtilModule } from '../util/util.module';
 import { AsyncOperationsModule } from '../async-operations/async-operations.module';
@@ -27,7 +27,7 @@ import { LocationModule } from 'src/location/location.module';
     }),
     TypeOrmModule.forFeature([User]),
     CaslModule,
-    forwardRef(() => OrganisationModule),
+    // forwardRef(() => OrganisationModule),
     // forwardRef(() => EmailHelperModule),
     UtilModule,
     FileHandlerModule,
