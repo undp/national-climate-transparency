@@ -372,7 +372,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
     },
   ];
 
-  // Activity Column Definition
+  // Support Column Definition
 
   const supportTableColumns = [
     { title: t('supportIdTitle'), dataIndex: 'supportId', key: 'activityId' },

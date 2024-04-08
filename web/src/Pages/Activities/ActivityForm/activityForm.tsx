@@ -1,18 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Popover, List, Typography } from 'antd';
-import { CloseCircleOutlined, EllipsisOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message } from 'antd';
+import { PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
-import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
-import { Sector } from '../../../Enums/sector.enum';
-import { SubSector, NatImplementor } from '../../../Enums/shared.enum';
 import { ProgrammeStatus } from '../../../Enums/programme.enum';
-import { Layers } from 'react-bootstrap-icons';
 import './activityForm.scss';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
+import { ParentType } from '../../../Enums/parentType.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -29,7 +26,7 @@ interface Props {
   method: 'create' | 'view' | 'update';
 }
 
-type ActionData = {
+type ParentData = {
   id: string;
   title: string;
 };
@@ -42,10 +39,16 @@ type NewKpiData = {
   expected: number;
 };
 
-type ProjectData = {
+type SupportData = {
   key: string;
-  projectId: string;
-  projectName: string;
+  supportId: string;
+  financeNature: string;
+  direction: string;
+  finInstrument: string;
+  estimatedUSD: number;
+  estimatedLC: number;
+  recievedUSD: number;
+  recievedLC: number;
 };
 
 const ActivityForm: React.FC<Props> = ({ method }) => {
@@ -58,24 +61,19 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
   // form state
 
-  const [actionList, setActionList] = useState<ActionData[]>([]);
+  const [parentType, setParentType] = useState<string>();
+  const [parentList, setParentList] = useState<ParentData[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
   );
   const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
 
-  // Popover state
-
-  const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
-
   // projects state
 
-  const [allProjectIds, setAllProjectIdList] = useState<string[]>([]);
-  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
-  const [projectData, setProjectData] = useState<ProjectData[]>([]);
-  const [currentPage, setCurrentPage] = useState<any>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [supportData, setSupportData] = useState<SupportData[]>([]);
+  const [supportCurrentPage, setCurrentPage] = useState<any>(1);
+  const [supportPageSize, setPageSize] = useState<number>(10);
 
   // KPI State
 
@@ -92,38 +90,18 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
   }
 
   useEffect(() => {
-    const actionData: ActionData[] = [];
-    for (let i = 0; i < 1; i++) {
-      actionData.push({
-        id: 'A001',
-        title: 'MB Solar',
-      });
-    }
-    setActionList(actionData);
-
-    const projIds: string[] = [];
-    for (let i = 0; i < 15; i++) {
-      projIds.push(`J00${i}`);
-    }
-    setAllProjectIdList(projIds);
-
     if (method !== 'create') {
       const tempFiles: { id: number; title: string; url: string }[] = [];
       for (let i = 0; i < 6; i++) {
         tempFiles.push({ id: i, title: `title_${i}.pdf`, url: `url_${i}` });
       }
       setStoredFiles(tempFiles);
+
+      // Get the attached supports
+
+      setSupportData([]);
     }
   }, []);
-
-  useEffect(() => {
-    const tempProjectData: ProjectData[] = [];
-    selectedProjectIds.forEach((projId) => {
-      tempProjectData.push({ key: projId, projectId: projId, projectName: `${projId}_name` });
-    });
-    setProjectData(tempProjectData);
-    setDetachOpen(Array(selectedProjectIds.length).fill(false));
-  }, [selectedProjectIds]);
 
   useEffect(() => {
     console.log('Running Migration Update');
@@ -132,7 +110,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
       console.log('Get the Action Information and load them');
     }
 
-    // Get Migrated Data for the Projects
+    // Get Migrated Data for the Activity
     form.setFieldsValue({
       type: 'Mitigation',
       instrumentType: 'Policy',
@@ -157,7 +135,23 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
     }
 
     setMigratedKpiList(migratedKpis);
-  }, [projectData]);
+  }, [supportData]);
+
+  // Tracking Parent selection
+
+  const handleSelectChange = (value: string) => {
+    setParentType(value);
+  };
+
+  useEffect(() => {
+    console.log('Running Parent Id Population');
+    const prefix = parentType?.slice(0, 3);
+    const parentIds: ParentData[] = [];
+    for (let i = 0; i < 15; i++) {
+      parentIds.push({ id: `${prefix}00${i}`, title: `${prefix}00${i}` });
+    }
+    setParentList(parentIds);
+  }, [parentType]);
 
   // Form Submit
 
@@ -178,22 +172,18 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
         payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
       });
 
-      payload.linkedProjects = selectedProjectIds;
-
-      payload.investment = parseFloat(payload.investment);
-
-      const response = await post('national/programme/add', payload);
+      const response = await post('national/activity/add', payload);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
-          content: t('programmeCreationSuccess'),
+          content: t('activityCreationSuccess'),
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
         navigate('/programmes');
       }
     } catch (error: any) {
-      console.log('Error in action creation', error);
+      console.log('Error in activity creation', error);
       message.open({
         type: 'error',
         content: `${error.message}`,
@@ -211,7 +201,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
       index: kpiIndex,
       name: '',
       unit: '',
-      creatorType: 'programme',
+      creatorType: 'activity',
       expected: 0,
     };
     const updatedValues = {
@@ -246,80 +236,21 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
     });
   };
 
-  // Dettach Project
-
-  const handleDetachOpen = (record: ProjectData) => {
-    const newOpenList = Array(selectedProjectIds.length).fill(false);
-    newOpenList[selectedProjectIds.indexOf(record.projectId)] = true;
-    setDetachOpen(newOpenList);
-  };
-
-  const detachProject = (prjId: string) => {
-    const filteredData = projectData.filter((prj) => prj.projectId !== prjId);
-    const filteredIds = selectedProjectIds.filter((id) => id !== prjId);
-    setProjectData(filteredData);
-    setSelectedProjectIds(filteredIds);
-  };
-
-  // Action Menu definition
-
-  const actionMenu = (record: ProjectData) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: t('detach'),
-            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            click: () => {
-              {
-                detachProject(record.projectId);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) => (
-          <List.Item onClick={item.click}>
-            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{item.text}</span>
-          </List.Item>
-        )}
-      />
-    );
-  };
-
   // Column Definition
-  const projTableColumns = [
-    { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
-    { title: t('projectName'), dataIndex: 'projectName', key: 'projectName' },
-    {
-      title: '',
-      key: 'projectAction',
-      align: 'right' as const,
-      width: 6,
-      render: (record: any) => {
-        return (
-          <Popover
-            placement="bottomRight"
-            content={actionMenu(record)}
-            trigger="click"
-            open={detachOpen[selectedProjectIds.indexOf(record.projectId)]}
-          >
-            <EllipsisOutlined
-              rotate={90}
-              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => handleDetachOpen(record)}
-            />
-          </Popover>
-        );
-      },
-    },
+  const supportTableColumns = [
+    { title: t('supportIdTitle'), dataIndex: 'supportId', key: 'activityId' },
+    { title: t('financeNatureTitle'), dataIndex: 'financeNature', key: 'financeNature' },
+    { title: t('directionTitle'), dataIndex: 'direction', key: 'direction' },
+    { title: t('finInstrumentTitle'), dataIndex: 'finInstrument', key: 'finInstrument' },
+    { title: t('neededUSDHeader'), dataIndex: 'estimatedUSD', key: 'estimatedUSD' },
+    { title: t('neededLCLHeader'), dataIndex: 'estimatedLC', key: 'estimatedLC' },
+    { title: t('recievedUSDHeader'), dataIndex: 'recievedUSD', key: 'recievedUSD' },
+    { title: t('recievedLCLHeader'), dataIndex: 'recievedLC', key: 'recievedLC' },
   ];
 
   // Table Behaviour
 
-  const handleTableChange = (pagination: any) => {
+  const handleSupportTableChange = (pagination: any) => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
   };
@@ -327,19 +258,60 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addProgTitle')}</div>
-        <div className="body-sub-title">{t('addProgDesc')}</div>
+        <div className="body-title">{t('addActivityTitle')}</div>
+        <div className="body-sub-title">{t('addActivityDesc')}</div>
       </div>
       <div className="activity-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
             <Row gutter={gutterSize}>
-              <Col span={6}>
+              <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('selectActionHeader')}</label>}
-                  name="actionId"
+                  label={<label className="form-item-header">{t('activityTitle')}</label>}
+                  name="title"
                   rules={[validation.required]}
+                >
+                  <Input className="form-input-box" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('activityDescTitle')}</label>}
+                  name="description"
+                  rules={[validation.required]}
+                >
+                  <TextArea maxLength={250} rows={3} disabled={isView} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('parentTypeTitle')}</label>}
+                  name="parentType"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                    onChange={handleSelectChange}
+                  >
+                    {Object.values(ParentType).map((parent) => (
+                      <Option key={parent} value={parent}>
+                        {parent}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('selectParentTitle')}</label>}
+                  name="parentId"
                 >
                   <Select
                     size={'large'}
@@ -348,66 +320,126 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {actionList.map((action) => (
-                      <Option key={action.id} value={action.id}>
-                        {action.title}
+                    {parentList.map((parent) => (
+                      <Option key={parent.id} value={parent.id}>
+                        {parent.title}
                       </Option>
                     ))}
                   </Select>
                 </Form.Item>
               </Col>
-              <Col span={6}>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('typesHeader')}</label>}
-                  name="type"
-                  rules={[validation.required]}
+                  label={<label className="form-item-header">{t('parentDescTitle')}</label>}
+                  name="parentDescription"
                 >
-                  <Input className="form-input-box" disabled />
+                  <TextArea maxLength={250} rows={3} disabled />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('progTitleHeader')}</label>}
-                  name="title"
+                  label={<label className="form-item-header">{t('supportTypeTitle')}</label>}
+                  name="supportType"
                   rules={[validation.required]}
                 >
-                  <Input className="form-input-box" maxLength={10} disabled={isView} />
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(ProgrammeStatus).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Col>
             </Row>
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('progDescTitle')}</label>}
-                  name="description"
+                  label={<label className="form-item-header">{t('measuresTitle')}</label>}
+                  name="measures"
                   rules={[validation.required]}
                 >
-                  <TextArea maxLength={250} rows={3} disabled={isView} />
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(ProgrammeStatus).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('progObjectivesTitle')}</label>}
-                  name="objective"
+                  label={<label className="form-item-header">{t('activityStatusTitle')}</label>}
+                  name="activityStatus"
                   rules={[validation.required]}
                 >
-                  <TextArea maxLength={250} rows={3} disabled={isView} />
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(ProgrammeStatus).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Col>
             </Row>
             <Row gutter={gutterSize}>
-              <Col span={6}>
+              <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
-                  name="instrumentType"
+                  label={<label className="form-item-header">{t('recipientEntityTitle')}</label>}
+                  name="recipient"
                 >
                   <Input className="form-input-box" disabled />
                 </Form.Item>
               </Col>
-              <Col span={6}>
+              <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('progStatusTitle')}</label>}
-                  name="status"
+                  label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
+                  name="natImplementor"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(ProgrammeStatus).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
+                  name="intImplementor"
                   rules={[validation.required]}
                 >
                   <Select
@@ -427,46 +459,18 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               </Col>
               <Col span={6}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('sectorsAffTitle')}</label>}
-                  name="affectedSectors"
-                  rules={[validation.required]}
+                  label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
+                  name="affSectorsTitle"
                 >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    mode="multiple"
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(Sector).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
+                  <Input className="form-input-box" disabled />
                 </Form.Item>
               </Col>
               <Col span={6}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('subSectorsAffTitle')}</label>}
-                  name="affectedSubSector"
-                  rules={[validation.required]}
+                  label={<label className="form-item-header">{t('affSubSectorsTitle')}</label>}
+                  name="affSubSectorsTitle"
                 >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    mode="multiple"
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(SubSector).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
+                  <Input className="form-input-box" disabled />
                 </Form.Item>
               </Col>
             </Row>
@@ -475,35 +479,22 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('startYearTitle')}</label>}
                   name="startYear"
-                  rules={[validation.required]}
                 >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {yearsList.map((year) => (
-                      <Option key={year} value={year}>
-                        {year}
-                      </Option>
-                    ))}
-                  </Select>
+                  <Input className="form-input-box" disabled />
                 </Form.Item>
               </Col>
               <Col span={6}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
-                  name="intImplementor"
+                  label={<label className="form-item-header">{t('endYearTitle')}</label>}
+                  name="endYear"
                 >
                   <Input className="form-input-box" disabled />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('recipientEntityTitle')}</label>}
-                  name="recipientEntity"
+                  label={<label className="form-item-header">{t('timeFrameTitle')}</label>}
+                  name="expectedTimeFrame"
                 >
                   <Input className="form-input-box" disabled />
                 </Form.Item>
@@ -512,33 +503,74 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
-                  name="natImplementor"
+                  label={<label className="form-item-header">{t('anchoredTitle')}</label>}
+                  name="isAnchored"
                   rules={[validation.required]}
                 >
                   <Select
                     size="large"
                     style={{ fontSize: inputFontSize }}
-                    mode="multiple"
                     allowClear
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(NatImplementor).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
+                    {Object.values(ParentType).map((parent) => (
+                      <Option key={parent} value={parent}>
+                        {parent}
                       </Option>
                     ))}
                   </Select>
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item<number>
-                  label={<label className="form-item-header">{t('investmentNeedsTitle')}</label>}
-                  name="investment"
+                <Form.Item
+                  label={<label className="form-item-header">{t('implMeansTitle')}</label>}
+                  name="implMeans"
+                >
+                  <Select
+                    size={'large'}
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {parentList.map((parent) => (
+                      <Option key={parent.id} value={parent.id}>
+                        {parent.title}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('techTypeTitle')}</label>}
+                  name="techType"
                   rules={[validation.required]}
                 >
-                  <Input className="form-input-box" type="number" disabled={isView} />
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(ParentType).map((parent) => (
+                      <Option key={parent} value={parent}>
+                        {parent}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('additionalInfoTitle')}</label>}
+                  name="addInfo"
+                >
+                  <TextArea maxLength={250} rows={3} disabled={isView} />
                 </Form.Item>
               </Col>
             </Row>
@@ -556,7 +588,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
             <Row gutter={gutterSize}>
               <Col span={24}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('programmeCommentsTitle')}</label>}
+                  label={<label className="form-item-header">{t('activityCommentsTitle')}</label>}
                   name="comments"
                   rules={[validation.required]}
                 >
@@ -564,79 +596,25 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 </Form.Item>
               </Col>
             </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                  {t('projectListTitle')}
-                </div>
-                <LayoutTable
-                  tableData={projectData}
-                  columns={projTableColumns}
-                  loading={false}
-                  pagination={{
-                    current: currentPage,
-                    pageSize: pageSize,
-                    total: projectData.length,
-                    showQuickJumper: true,
-                    pageSizeOptions: ['10', '20', '30'],
-                    showSizeChanger: true,
-                    style: { textAlign: 'center' },
-                    locale: { page: '' },
-                    position: ['bottomRight'],
-                  }}
-                  handleTableChange={handleTableChange}
-                  emptyMessage={t('noProjectsMessage')}
-                />
-              </Col>
-              <Col
-                span={5}
-                style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
-              >
-                <AttachEntity
-                  isDisabled={isView}
-                  options={allProjectIds}
-                  content={{
-                    buttonName: t('attachProjects'),
-                    attach: t('attach'),
-                    contentTitle: t('attachProjects'),
-                    listTitle: t('projectList'),
-                    cancel: t('cancel'),
-                  }}
-                  attachedUnits={selectedProjectIds}
-                  setAttachedUnits={setSelectedProjectIds}
-                  icon={<Layers style={{ fontSize: '120px' }} />}
-                ></AttachEntity>
-              </Col>
-            </Row>
-          </div>
-          <div className="form-section-card">
             <div className="form-section-header">{t('mitigationInfoTitle')}</div>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('ghgAffected')}</label>}
-                  name="ghgsAffected"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-            </Row>
             <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('achieved')}</label>}
                   name="achievedReduct"
+                  rules={[validation.required]}
                 >
-                  <Input className="form-input-box" disabled />
+                  <Input type="number" className="form-input-box" />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('expected')}</label>}
                   name="expectedReduct"
+                  rules={[validation.required]}
                 >
-                  <Input className="form-input-box" disabled />
+                  <Input type="number" className="form-input-box" />
                 </Form.Item>
               </Col>
             </Row>
@@ -682,6 +660,71 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 )}
               </Col>
             </Row>
+          </div>
+          <div className="form-section-card">
+            <Row>
+              <Col span={6}>
+                <div className="form-section-header">{t('supportInfoTitle')}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24}>
+                <LayoutTable
+                  tableData={supportData}
+                  columns={supportTableColumns}
+                  loading={false}
+                  pagination={{
+                    current: supportCurrentPage,
+                    pageSize: supportPageSize,
+                    total: supportData.length,
+                    showQuickJumper: true,
+                    pageSizeOptions: ['10', '20', '30'],
+                    showSizeChanger: true,
+                    style: { textAlign: 'center' },
+                    locale: { page: '' },
+                    position: ['bottomRight'],
+                  }}
+                  handleTableChange={handleSupportTableChange}
+                  emptyMessage={t('noSupportMessage')}
+                />
+              </Col>
+            </Row>
+          </div>
+          <div className="form-section-card">
+            <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                  name="ghgsAffected"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+            </Row>
+            <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('achieved')}</label>}
+                  name="achievedReduct"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('expected')}</label>}
+                  name="expectedReduct"
+                >
+                  <Input className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
+          <div className="form-section-card">
+            <div className="form-section-header">{t('mitigationTimelineTitle')}</div>
+            <Row gutter={gutterSize}></Row>
           </div>
           {isView && (
             <div className="form-section-card">
