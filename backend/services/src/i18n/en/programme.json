@@ -1,12 +1,15 @@
 {
+    "programmeNotFound": "A programme with id {} is not found",
     "actionNotFound": "An action with id {} is not found",
     "programmeCreationFailed": "Programme Creation failed due to {}",
     "createProgrammeSuccess": "Programme created successfully",
     "programmesNotFound": "Programme(s) not found",
-    "programmeAlreadyLinked": "Programme with id {} is already linked to an action",
-    "programmeIsNotLinked": "Programme with id {} is not linked to an action",
-    "programmesLinkedToAction": "Programmes linked to action successfully",
-    "programmesUnlinkedFromAction": "Programmes unlinked from action successfully"
+    "programmeAlreadyLinked": "Programme with id {} is already attach to an action",
+    "programmeIsNotLinked": "Programme with id {} is not attached to an action",
+    "programmesLinkedToAction": "Programmes attached to action successfully",
+    "programmesUnlinkedFromAction": "Programmes detached from action successfully",
+    "cannotLinkNotRelatedProgrammes": "User is not allowed to attach the programme with id {}",
+    "cannotUnlinkNotRelatedProgrammes": "User is not allowed to detach the programme with id {}"
 
 
 }

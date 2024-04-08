@@ -1,6 +1,6 @@
-NAME,EMAIL,PHONE,ORGANISATION ID,ORGANISATION TYPE(Government|Department|API),ROLE(admin|DepartmentUser|ViewOnly),Password,APIKey
-Test User,palinda+add@xeptagon.com,,Government of Antarctica,Government,admin,123,
-Test Dev,palinda+dev@xeptagon.com,,77777,Department,DepartmentUser,123,
-Test Dev 2,palinda+dev2@xeptagon.com,,33333,Department,DepartmentUser,123,
-Test Dev 3,palinda+dev3@xeptagon.com,,55555,Department,DepartmentUser,123,
-Test Cert,palinda+cet@xeptagon.com,,44444,Department,DepartmentUser,123,
+NAME,EMAIL,PHONE,ORGANISATION,ROLE(admin|GovernmentUser|Observer),SUBROLE,SECTOR,Password,APIKey
+Test User,palinda+add@xeptagon.com,,Government of Antarctica,admin,,,123,
+Test Dev,palinda+dev@xeptagon.com,,Department of Energy,GovernmentUser,GovernmentDepartment,Energy,123,
+Test Dev 2,palinda+dev2@xeptagon.com,,Tourism Board,GovernmentUser,GovernmentDepartment,Energy,123,
+Test Dev 3,palinda+dev3@xeptagon.com,,Land Transport Agency,GovernmentUser,GovernmentDepartment,Energy-Transport-Land Use,123,
+Test Cert,palinda+cet@xeptagon.com,,Maritime Safety Authority,GovernmentUser,GovernmentDepartment,Energy,123,

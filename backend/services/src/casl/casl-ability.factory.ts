@@ -79,7 +79,7 @@ export class CaslAbilityFactory {
 
       }
 
-      if (user.role == Role.DepartmentUser) {        
+      if (user.role == Role.GovernmentUser) {        
         can(Action.Read, Organisation);
         cannot(Action.Create, Organisation);
         cannot(Action.Update, Organisation);
@@ -104,7 +104,7 @@ export class CaslAbilityFactory {
         can(Action.Delete, ProgrammeEntity);
       }
 
-      if (user.role == Role.ViewOnly) {
+      if (user.role == Role.Observer) {
         can(Action.Read, Organisation);
         cannot(Action.Create, Organisation);
         cannot(Action.Update, Organisation);

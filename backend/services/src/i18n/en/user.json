@@ -40,5 +40,7 @@
   "govCannotHaveDepUsers": "Government can only create users with Admin and Observer roles",
   "departmentCanHaveOnlyDepUsers": "Department cannot create users with Admin and Observer roles",
   "departmentDoesNotExist": "Department does not exist",
-  "orgDoesNotExist": "Organisation does not exist"
+  "orgDoesNotExist": "Organisation does not exist",
+  "incorrectSubRole": "Role {} cannot have the sub role {}",
+  "adminCantHaveSubRole": "Role {} cannot have any sub roles"
 }

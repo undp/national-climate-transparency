@@ -20,7 +20,7 @@ import { KpiDto } from "../dtos/kpi.dto";
 import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { LinkProgrammesDto } from "../dtos/link.programmes.dto";
-import { OrganisationService } from "../organisation/organisation.service";
+// import { OrganisationService } from "../organisation/organisation.service";
 import { ProgrammeViewDto } from "../dtos/programme.view.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { ProjectType } from "../enums/project.enum";
@@ -31,7 +31,7 @@ describe('ProgrammeService', () => {
 	let service: ProgrammeService;
 	let entityManagerMock: Partial<EntityManager>;
 	let programmeRepositoryMock: Partial<Repository<ProgrammeEntity>>;
-	let organisationServiceMock: Partial<OrganisationService>;
+	// let organisationServiceMock: Partial<OrganisationService>;
 	let actionServiceMock: Partial<ActionService>;
 	let counterServiceMock: Partial<CounterService>;
 	let helperServiceMock: Partial<HelperService>;
@@ -88,10 +88,10 @@ describe('ProgrammeService', () => {
 					provide: EntityManager,
 					useValue: entityManagerMock,
 				},
-				{
-					provide: OrganisationService,
-					useValue: organisationServiceMock,
-				},
+				// {
+				// 	provide: OrganisationService,
+				// 	useValue: organisationServiceMock,
+				// },
 				{
 					provide: ActionService,
 					useValue: actionServiceMock,
@@ -452,20 +452,25 @@ describe('ProgrammeService', () => {
 	it('should link programmes to action', async () => {
 		const linkProgrammesDto: LinkProgrammesDto = { actionId: '1', programmes: ['1', '2', '3'] };
 		const user = new User();
+		user.sector = [Sector.Agriculture]
+
 		const action = new ActionEntity();
 		jest.spyOn(actionServiceMock, 'findActionById').mockResolvedValue(action);
 
 		const programme1 = new ProgrammeEntity();
 		programme1.programmeId = '1';
 		programme1.action = null;
+		programme1.affectedSectors = [Sector.Agriculture];
 
 		const programme2 = new ProgrammeEntity();
 		programme2.programmeId = '2';
 		programme2.action = null;
+		programme2.affectedSectors = [Sector.Agriculture];
 
 		const programme3 = new ProgrammeEntity();
 		programme3.programmeId = '3';
 		programme3.action = null;
+		programme3.affectedSectors = [Sector.Agriculture];
 
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
 
@@ -500,6 +505,8 @@ describe('ProgrammeService', () => {
 	it('should throws an error when already linked programmeId sent', async () => {
 		const linkProgrammesDto: LinkProgrammesDto = { actionId: '1', programmes: ['1', '2', '3'] };
 		const user = new User();
+		user.sector = [Sector.Agriculture]
+
 		const action = new ActionEntity();
 		jest.spyOn(actionServiceMock, 'findActionById').mockResolvedValue(action);
 
@@ -507,14 +514,17 @@ describe('ProgrammeService', () => {
 		programme1.programmeId = '1';
 		programme1.action = action;
 		programme1.path = "path1"
+		programme1.affectedSectors = [Sector.Agriculture];
 
 		const programme2 = new ProgrammeEntity();
 		programme2.programmeId = '2';
 		programme2.action = null;
+		programme2.affectedSectors = [Sector.Agriculture];
 
 		const programme3 = new ProgrammeEntity();
 		programme3.programmeId = '3';
 		programme3.action = null;
+		programme3.affectedSectors = [Sector.Agriculture];
 
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
 
@@ -538,28 +548,32 @@ describe('ProgrammeService', () => {
 			'programme.programmeAlreadyLinked',
 			["1"],
 		);
-		expect(entityManagerMock.transaction).toHaveBeenCalled();
+		expect(entityManagerMock.transaction).toBeCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
 	});
 
 	it('should unlink programmes from action', async () => {
 		const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
 		const user = new User();
+		user.sector = [Sector.Agriculture]
 
 		const programme1 = new ProgrammeEntity();
 		programme1.programmeId = '1';
 		programme1.action = new ActionEntity();
 		programme1.path = 'path1';
+		programme1.affectedSectors = [Sector.Agriculture];
 
 		const programme2 = new ProgrammeEntity();
 		programme2.programmeId = '2';
 		programme2.action = new ActionEntity();
 		programme2.path = 'path2';
+		programme2.affectedSectors = [Sector.Agriculture];
 
 		const programme3 = new ProgrammeEntity();
 		programme3.programmeId = '3';
 		programme3.action = new ActionEntity();
 		programme3.path = 'path3';
+		programme3.affectedSectors = [Sector.Agriculture];
 
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
 
@@ -593,21 +607,25 @@ describe('ProgrammeService', () => {
 	it('should throw an exception when not linked programme sent for unlinking', async () => {
 		const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
 		const user = new User();
-
+		user.sector = [Sector.Agriculture]
+		
 		const programme1 = new ProgrammeEntity();
 		programme1.programmeId = '1';
 		programme1.action = null;
 		programme1.path = '';
+		programme1.affectedSectors = [Sector.Agriculture];
 
 		const programme2 = new ProgrammeEntity();
 		programme2.programmeId = '2';
 		programme2.action = new ActionEntity();
 		programme2.path = 'path2';
+		programme2.affectedSectors = [Sector.Agriculture];
 
 		const programme3 = new ProgrammeEntity();
 		programme3.programmeId = '3';
 		programme3.action = new ActionEntity();
 		programme3.path = 'path3';
+		programme3.affectedSectors = [Sector.Agriculture];
 
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
 
@@ -632,6 +650,104 @@ describe('ProgrammeService', () => {
 			'programme.programmeIsNotLinked',
 			["1"],
 		);
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
+	});
+
+	it('should throw an exception when mismatch sector user trying to link programme', async () => {
+		const linkProgrammesDto: LinkProgrammesDto = { actionId: '1', programmes: ['1', '2', '3'] };
+		const user = new User();
+		user.sector = [Sector.Agriculture]
+
+		const action = new ActionEntity();
+		jest.spyOn(actionServiceMock, 'findActionById').mockResolvedValue(action);
+
+		const programme1 = new ProgrammeEntity();
+		programme1.programmeId = '1';
+		programme1.action = null;
+		programme1.affectedSectors = [Sector.Agriculture];
+
+		const programme2 = new ProgrammeEntity();
+		programme2.programmeId = '2';
+		programme2.action = null;
+		programme2.affectedSectors = [Sector.Industry];
+
+		const programme3 = new ProgrammeEntity();
+		programme3.programmeId = '3';
+		programme3.action = null;
+		programme3.affectedSectors = [Sector.Agriculture];
+
+		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+			};
+			const updatedProgramme = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(6);
+			return updatedProgramme;
+		});
+
+		try {
+			await service.linkProgrammesToAction(linkProgrammesDto, user);
+		} catch (error) {
+			expect(error).toBeInstanceOf(HttpException);
+			expect(error.status).toBe(HttpStatus.BAD_REQUEST);
+		}
+
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
+			'programme.cannotLinkNotRelatedProgrammes',
+			["2"],
+		);
+		expect(entityManagerMock.transaction).toBeCalledTimes(0);
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
+	});
+
+	it('should throw an exception when mismatch sector user trying to unlink programme', async () => {
+		const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
+		const user = new User();
+		user.sector = [Sector.Agriculture];
+
+		const programme1 = new ProgrammeEntity();
+		programme1.programmeId = '1';
+		programme1.action = new ActionEntity();;
+		programme1.path = 'path1';
+		programme1.affectedSectors = [Sector.Agriculture];
+
+		const programme2 = new ProgrammeEntity();
+		programme2.programmeId = '2';
+		programme2.action = new ActionEntity();
+		programme2.path = 'path2';
+		programme2.affectedSectors = [Sector.Energy];
+
+		const programme3 = new ProgrammeEntity();
+		programme3.programmeId = '3';
+		programme3.action = new ActionEntity();
+		programme3.path = 'path3';
+		programme3.affectedSectors = [Sector.Agriculture];
+
+		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+			};
+			const updatedProgrammes = await callback(emMock);
+
+			expect(emMock.save).toHaveBeenCalledTimes(0);
+			return updatedProgrammes;
+		});
+
+		try {
+			await service.unlinkProgrammesFromAction(unlinkProgrammesDto, user);
+		} catch (error) {
+			expect(error).toBeInstanceOf(HttpException);
+			expect(error.status).toBe(HttpStatus.BAD_REQUEST);
+		}
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
+			'programme.cannotUnlinkNotRelatedProgrammes',
+			["2"],
+		);
+		expect(entityManagerMock.transaction).toBeCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
 	});
 
@@ -720,12 +836,12 @@ describe('ProgrammeService', () => {
 			await service.getProgrammeViewData(programmeId, abilityCondition);
 		} catch (error) {
 			expect(error).toBeInstanceOf(HttpException);
-			expect(error.status).toBe(HttpStatus.BAD_REQUEST);
+			expect(error.status).toBe(HttpStatus.NOT_FOUND);
 		}
 
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
-			'programme.programmesNotFound',
-			[],
+			'programme.programmeNotFound',
+			["1"],
 		);
 	});
 

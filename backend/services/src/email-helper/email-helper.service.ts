@@ -6,7 +6,7 @@ import {
 } from "../async-operations/async-operations.interface";
 import { AsyncActionType } from "../enums/async.action.type.enum";
 import { HelperService } from "../util/helpers.service";
-import { OrganisationService } from "src/organisation/organisation.service";
+// import { OrganisationService } from "src/organisation/organisation.service";
 
 @Injectable()
 export class EmailHelperService {
@@ -14,8 +14,8 @@ export class EmailHelperService {
 
   constructor(
     private configService: ConfigService,
-    @Inject(forwardRef(() => OrganisationService))
-    private companyService: OrganisationService,
+    // @Inject(forwardRef(() => OrganisationService))
+    // private companyService: OrganisationService,
     private asyncOperationsInterface: AsyncOperationsInterface,
     private helperService: HelperService
   ) {
@@ -31,12 +31,14 @@ export class EmailHelperService {
     companyId: number
   ) {
     if (this.isEmailDisabled) return;
-    const companyDetails = await this.companyService.findByCompanyId(companyId);
+    // const companyDetails = await this.companyService.findByCompanyId(companyId);
     const systemCountryName = this.configService.get("systemCountryName");
+    const systemCountryGovernmentName = this.configService.get("systemCountryGovernmentName");
+
     templateData = {
       ...templateData,
       countryName: systemCountryName,
-      government: companyDetails.name,
+      government: systemCountryGovernmentName,
     };
     const action: AsyncAction = {
       actionType: AsyncActionType.Email,

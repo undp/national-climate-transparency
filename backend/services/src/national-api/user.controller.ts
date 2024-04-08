@@ -29,9 +29,9 @@ import { User } from "src/entities/user.entity";
 import { UserService } from "src/user/user.service";
 import { HelperService } from "src/util/helpers.service";
 
-@ApiTags("User")
+@ApiTags("Users")
 @ApiBearerAuth()
-@Controller("user")
+@Controller("users")
 export class UserController {
   constructor(
     private readonly userService: UserService,
@@ -62,9 +62,7 @@ export class UserController {
     }
     global.baseUrl = `${req.protocol}://${req.get("Host")}`;
     return this.userService.validateAndCreateUser(
-      user,
-      req.user.companyId,
-      req.user.companyRole
+      user
     );
   }
 

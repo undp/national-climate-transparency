@@ -1,8 +1,9 @@
-import { Role } from '../casl/role.enum';
+import { Role, SubRole } from '../casl/role.enum';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { EntitySubject } from './entity.subject';
-import { OrganisationType } from '../enums/organisation.type.enum'
+import { Organisation, OrganisationType } from '../enums/organisation.enum'
 import { UserState } from '../enums/user.state.enum';
+import { Sector } from '../enums/sector.enum';
 
 @Entity()
 export class User  implements EntitySubject{
@@ -19,9 +20,17 @@ export class User  implements EntitySubject{
         type: "enum",
         enum: Role,
         array: false,
-        default: Role.ViewOnly
+        default: Role.Observer
     })
     role: Role;
+
+		@Column({
+			type: "enum",
+			enum: SubRole,
+			array: false,
+			nullable: true
+	})
+	subRole: SubRole;
 
     @Column()
     name: string;
@@ -32,16 +41,13 @@ export class User  implements EntitySubject{
     @Column({nullable: true})
     phoneNo: string;
 
-    @Column({nullable: true})
-    organisationId: number;
-
     @Column({
-        type: "enum",
-        enum: OrganisationType,
-        array: false,
-        default: OrganisationType.DEPARTMENT
-    })
-    organisationType: OrganisationType;
+			type: "enum",
+			enum: Organisation,
+			array: false,
+			nullable: true
+	})
+    organisation: Organisation;
 
     @Column({nullable: true, select: false})
     apiKey: string;
@@ -49,7 +55,8 @@ export class User  implements EntitySubject{
     @Column({type: "bigint", nullable: true})
     createdTime: number;
 
-    companyState: number;
+		@Column("varchar", { array: true, nullable: true })
+		sector: Sector[];
 
     @Column({
         type: "enum",
