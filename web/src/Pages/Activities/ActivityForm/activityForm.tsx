@@ -597,7 +597,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
             <div className="form-section-header">{t('mitigationInfoTitle')}</div>
-            <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
+            <div className="form-section-sub-header">{t('emissionInfoTitle')}</div>
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
@@ -695,29 +695,64 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('ghgAffected')}</label>}
-                  name="ghgsAffected"
+                  label={<label className="form-item-header">{t('mtgMethodName')}</label>}
+                  name="mtgMethodName"
                 >
-                  <Input className="form-input-box" disabled />
+                  <Input className="form-input-box" />
                 </Form.Item>
               </Col>
+              <Col span={12}>
+                <UploadFileGrid
+                  usedIn={method}
+                  buttonText={t('upload')}
+                  acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
+                  storedFiles={storedFiles}
+                  uploadedFiles={uploadedFiles}
+                  setUploadedFiles={setUploadedFiles}
+                  removedFiles={filesToRemove}
+                  setRemovedFiles={setFilesToRemove}
+                ></UploadFileGrid>
+              </Col>
             </Row>
-            <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('achieved')}</label>}
-                  name="achievedReduct"
+                  label={<label className="form-item-header">{t('mtgDescTitle')}</label>}
+                  name="mtgMethodDesc"
                 >
-                  <Input className="form-input-box" disabled />
+                  <TextArea rows={3} disabled={isView} />
                 </Form.Item>
               </Col>
               <Col span={12}>
+                <UploadFileGrid
+                  usedIn={method}
+                  buttonText={t('upload')}
+                  acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
+                  storedFiles={storedFiles}
+                  uploadedFiles={uploadedFiles}
+                  setUploadedFiles={setUploadedFiles}
+                  removedFiles={filesToRemove}
+                  setRemovedFiles={setFilesToRemove}
+                ></UploadFileGrid>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('expected')}</label>}
-                  name="expectedReduct"
+                  label={<label className="form-item-header">{t('mtgCalculateEntityTitle')}</label>}
+                  name="mtgCalculateEntity"
                 >
-                  <Input className="form-input-box" disabled />
+                  <Input className="form-input-box" />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={24}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('mtgCalculateEntityTitle')}</label>}
+                  name="mtgCalculateEntity"
+                >
+                  <TextArea rows={3} disabled={isView} />
                 </Form.Item>
               </Col>
             </Row>
