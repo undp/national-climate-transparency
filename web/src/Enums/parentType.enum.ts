@@ -1,5 +1,5 @@
 export enum ParentType {
-  ACTION = 'Action',
-  PROGRAMME = 'Programme',
-  PROJECT = 'Project',
+  ACTION = 'action',
+  PROGRAMME = 'programme',
+  PROJECT = 'project',
 }

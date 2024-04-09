@@ -61,15 +61,18 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
   // form state
 
-  const [parentType, setParentType] = useState<string>();
-  const [parentList, setParentList] = useState<ParentData[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
   );
   const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
 
-  // projects state
+  // Parent Selection State
+
+  const [parentType, setParentType] = useState<string>(ParentType.ACTION);
+  const [parentList, setParentList] = useState<ParentData[]>([]);
+
+  // Support state
 
   const [supportData, setSupportData] = useState<SupportData[]>([]);
   const [supportCurrentPage, setCurrentPage] = useState<any>(1);
@@ -299,10 +302,11 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                     onChange={handleSelectChange}
+                    defaultValue={ParentType.ACTION}
                   >
                     {Object.values(ParentType).map((parent) => (
                       <Option key={parent} value={parent}>
-                        {parent}
+                        {t(parent)}
                       </Option>
                     ))}
                   </Select>
@@ -310,7 +314,11 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               </Col>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('selectParentTitle')}</label>}
+                  label={
+                    <label className="form-item-header">
+                      {`${t('selectParentTitle')} ${t(parentType)}`}
+                    </label>
+                  }
                   name="parentId"
                 >
                   <Select
@@ -332,7 +340,11 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('parentDescTitle')}</label>}
+                  label={
+                    <label className="form-item-header">
+                      {`${t('parentDescTitle')} ${t(parentType)}`}
+                    </label>
+                  }
                   name="parentDescription"
                 >
                   <TextArea maxLength={250} rows={3} disabled />
@@ -664,7 +676,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
           <div className="form-section-card">
             <Row>
               <Col span={6}>
-                <div className="form-section-header">{t('supportInfoTitle')}</div>
+                <div className="form-section-header">{t('supportTableHeader')}</div>
               </Col>
             </Row>
             <Row>
