@@ -1,35 +1,60 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RcFile, UploadFile } from 'antd/lib/upload/interface';
-import { Button, Col, Row, Upload } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import DeleteCard from '../Card/deleteCard';
+import { Button, Card, Col, Row, Upload } from 'antd';
+import {
+  CloseCircleOutlined,
+  DeleteOutlined,
+  DownloadOutlined,
+  UploadOutlined,
+} from '@ant-design/icons';
+import ConfirmPopup from '../Popups/Confirmation/confirmPopup';
+import './uploadFiles.scss';
+import { XOctagon } from 'react-bootstrap-icons';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
-  uploadedFiles: { id: string; title: string; data: string }[];
-  horizontalGutter: number;
-  verticalGutter: number;
-  style: any;
   buttonText: string;
-  height: string;
   acceptedFiles: string;
+  usedIn: 'create' | 'view' | 'update';
+  storedFiles: { id: number; title: string; url: string }[];
+  uploadedFiles: { id: string; title: string; data: string }[];
   setUploadedFiles: React.Dispatch<
     React.SetStateAction<{ id: string; title: string; data: string }[]>
   >;
-  isView: boolean;
+  removedFiles: number[];
+  setRemovedFiles: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
 const UploadFileGrid: React.FC<Props> = ({
-  uploadedFiles,
-  horizontalGutter,
-  verticalGutter,
-  style,
   buttonText,
-  height,
   acceptedFiles,
+  usedIn,
+  storedFiles,
+  uploadedFiles,
   setUploadedFiles,
-  isView,
+  removedFiles,
+  setRemovedFiles,
 }) => {
+  const { t } = useTranslation(['uploadGrid']);
+
+  // Upload Grid State
+
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
+  const [storedVisibleList, setStoredVisibleList] = useState<
+    { id: number; title: string; url: string }[]
+  >([]);
+
+  const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
+  const [whichFile, setWhichFile] = useState<number>();
+
+  // Hook to update the visible files shown after deleting
+
+  useEffect(() => {
+    const toShow = storedFiles.filter((item) => !removedFiles.includes(item.id));
+    setStoredVisibleList(toShow);
+  }, [removedFiles, storedFiles]);
+
+  // File Upload functionality
 
   const handleFileRead = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -39,19 +64,14 @@ const UploadFileGrid: React.FC<Props> = ({
       reader.onerror = (error) => reject(error);
     });
 
-  const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
-    setDocumentList(newFileList);
-  };
-
-  const handleDelete = (fileId: any) => {
-    setDocumentList((prevList) => prevList.filter((file) => file.uid !== fileId));
-    setUploadedFiles((prevList) => prevList.filter((file) => file.id !== fileId));
-  };
-
   const beforeUpload = async (file: RcFile): Promise<boolean> => {
     const base64 = await handleFileRead(file);
     setUploadedFiles([...uploadedFiles, { id: file.uid, title: file.name, data: base64 }]);
     return false;
+  };
+
+  const onChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
+    setDocumentList(newFileList);
   };
 
   const props = {
@@ -62,33 +82,114 @@ const UploadFileGrid: React.FC<Props> = ({
     accept: acceptedFiles,
   };
 
+  // Delete function for stored files
+
+  const handleDeleteClick = (fileId: any) => {
+    setConfirmOpen(true);
+    setWhichFile(fileId);
+  };
+
+  const handleStoredDelete = (fileId: any) => {
+    setRemovedFiles((prevState) => [...prevState, fileId]);
+  };
+
+  // Download functionality for stored files
+
+  const handleDownloadClick = (file: { id: number; title: string; url: string }) => {
+    const link = document.createElement('a');
+    link.href = file.url;
+    link.download = file.title;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Remove Functionality for uploaded not stored files
+
+  const handleUploadDelete = (fileId: any) => {
+    setDocumentList((prevList) => prevList.filter((file) => file.uid !== fileId));
+    setUploadedFiles((prevList) => prevList.filter((file) => file.id !== fileId));
+  };
+
   return (
-    <Row gutter={[horizontalGutter, verticalGutter]} style={style}>
-      <Col span={3} style={{ height: height }}>
-        <Upload {...props}>
-          <Button
-            icon={<UploadOutlined />}
-            style={{ width: '120px', height: height, color: '#3A3541', opacity: 0.8 }}
-            disabled={isView}
-          >
-            {buttonText}
-          </Button>
-        </Upload>
-      </Col>
-      <Col span={21}>
-        <Row gutter={[horizontalGutter, verticalGutter]}>
-          {documentList.map((file: any) => (
-            <Col key={file.uid} span={8} style={{ height: height }}>
-              <DeleteCard
-                fileName={file.name.slice(0, 20)}
-                fileId={file.uid}
-                handleDelete={handleDelete}
-              ></DeleteCard>
+    <div className="upload-files">
+      <ConfirmPopup
+        icon={<XOctagon style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: t('primaryMsg'),
+          secondaryMsg: t('secondaryMsg'),
+          cancelTitle: t('cancelTitle'),
+          actionTitle: t('actionTitle'),
+        }}
+        actionRef={whichFile}
+        doAction={handleStoredDelete}
+        open={confirmOpen}
+        setOpen={setConfirmOpen}
+      />
+      {/* Section to show the already uploaded files */}
+      {storedVisibleList.length > 0 && (
+        <Row gutter={[30, 10]} style={{ marginBottom: '25px' }}>
+          {storedVisibleList.map((file: any) => (
+            <Col key={file.id} span={8} className="file-column">
+              {/* <Tooltip placement="topLeft" title={file.title} showArrow={false}> */}
+              <Card className="file-card">
+                <div className="file-content">
+                  <span>{file.title.slice(0, 20)}</span>
+                  {usedIn !== 'create' && (
+                    <DownloadOutlined
+                      className="download-icon"
+                      onClick={() => handleDownloadClick(file)}
+                    />
+                  )}
+                  {usedIn !== 'view' && (
+                    <DeleteOutlined
+                      className="delete-icon"
+                      onClick={() => handleDeleteClick(file.id)}
+                    />
+                  )}
+                </div>
+              </Card>
+              {/* </Tooltip> */}
             </Col>
           ))}
         </Row>
-      </Col>
-    </Row>
+      )}
+      {/* Section to upload files */}
+      {usedIn !== 'view' && (
+        <div className="upload-box">
+          <Row gutter={[30, 10]}>
+            <Col span={3}>
+              <Upload {...props}>
+                <Button className="upload-button" icon={<UploadOutlined />}>
+                  {buttonText}
+                </Button>
+              </Upload>
+            </Col>
+            <Col span={21}>
+              <Row gutter={[30, 10]}>
+                {documentList.map((file: any) => (
+                  <Col key={file.uid} span={8} className="file-column">
+                    {/* <Tooltip placement="topLeft" title={file.name} showArrow={false}> */}
+                    <Card className="file-card">
+                      <div className="file-content">
+                        <span>{file.name.slice(0, 20)}</span>
+                        <CloseCircleOutlined
+                          className="close-icon"
+                          onClick={() => handleUploadDelete(file.uid)}
+                        />
+                      </div>
+                    </Card>
+                    {/* </Tooltip> */}
+                  </Col>
+                ))}
+              </Row>
+            </Col>
+          </Row>
+        </div>
+      )}
+    </div>
   );
 };
 
