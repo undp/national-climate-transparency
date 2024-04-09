@@ -10,6 +10,7 @@ import { ProgrammeStatus } from '../../../Enums/programme.enum';
 import './activityForm.scss';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 import { ParentType } from '../../../Enums/parentType.enum';
+import TimelineTable from '../../../Components/Timeline/timeline';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -803,8 +804,20 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
             </Row>
           </div>
           <div className="form-section-card">
-            <div className="form-section-header">{t('mitigationTimelineTitle')}</div>
-            <Row gutter={gutterSize}></Row>
+            <Row>
+              <Col span={6}>
+                <div className="form-section-header">{t('mitigationTimelineTitle')}</div>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24}>
+                <TimelineTable
+                  tableData={supportData}
+                  loading={false}
+                  handleTableChange={handleSupportTableChange}
+                />
+              </Col>
+            </Row>
           </div>
           {isView && (
             <div className="form-section-card">
