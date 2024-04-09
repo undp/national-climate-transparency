@@ -544,6 +544,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Row>
             <div className="form-section-sub-header">{t('documentsHeader')}</div>
             <UploadFileGrid
+              isSingleColumn={false}
               usedIn={method}
               buttonText={t('upload')}
               acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"

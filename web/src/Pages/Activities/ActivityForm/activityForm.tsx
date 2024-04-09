@@ -67,6 +67,26 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
   const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
 
+  // Methodology Doc state
+
+  const [uploadedMthFiles, setUploadedMthFiles] = useState<
+    { id: string; title: string; data: string }[]
+  >([]);
+  const [storedMthFiles, setStoredMthFiles] = useState<
+    { id: number; title: string; url: string }[]
+  >([]);
+  const [mthFilesToRemove, setMthFilesToRemove] = useState<number[]>([]);
+
+  // Results Doc state
+
+  const [uploadedRstFiles, setUploadedRstFiles] = useState<
+    { id: string; title: string; data: string }[]
+  >([]);
+  const [storedRstFiles, setStoredRstFiles] = useState<
+    { id: number; title: string; url: string }[]
+  >([]);
+  const [rstFilesToRemove, setRstFilesToRemove] = useState<number[]>([]);
+
   // Parent Selection State
 
   const [parentType, setParentType] = useState<string>(ParentType.ACTION);
@@ -103,6 +123,8 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
       // Get the attached supports
 
       setSupportData([]);
+      setStoredMthFiles([]);
+      setStoredRstFiles([]);
     }
   }, []);
 
@@ -588,6 +610,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
             </Row>
             <div className="form-section-sub-header">{t('documentsHeader')}</div>
             <UploadFileGrid
+              isSingleColumn={false}
               usedIn={method}
               buttonText={t('upload')}
               acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
@@ -714,16 +737,21 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <UploadFileGrid
-                  usedIn={method}
-                  buttonText={t('upload')}
-                  acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
-                  storedFiles={storedFiles}
-                  uploadedFiles={uploadedFiles}
-                  setUploadedFiles={setUploadedFiles}
-                  removedFiles={filesToRemove}
-                  setRemovedFiles={setFilesToRemove}
-                ></UploadFileGrid>
+                <Form.Item
+                  label={<label className="form-item-header">{t('mtgDocUploadOne')}</label>}
+                >
+                  <UploadFileGrid
+                    isSingleColumn={true}
+                    usedIn={method}
+                    buttonText={t('upload')}
+                    acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
+                    storedFiles={storedMthFiles}
+                    uploadedFiles={uploadedMthFiles}
+                    setUploadedFiles={setUploadedMthFiles}
+                    removedFiles={mthFilesToRemove}
+                    setRemovedFiles={setMthFilesToRemove}
+                  ></UploadFileGrid>
+                </Form.Item>
               </Col>
             </Row>
             <Row gutter={gutterSize}>
@@ -736,16 +764,21 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <UploadFileGrid
-                  usedIn={method}
-                  buttonText={t('upload')}
-                  acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
-                  storedFiles={storedFiles}
-                  uploadedFiles={uploadedFiles}
-                  setUploadedFiles={setUploadedFiles}
-                  removedFiles={filesToRemove}
-                  setRemovedFiles={setFilesToRemove}
-                ></UploadFileGrid>
+                <Form.Item
+                  label={<label className="form-item-header">{t('mtgDocUploadTwo')}</label>}
+                >
+                  <UploadFileGrid
+                    isSingleColumn={true}
+                    usedIn={method}
+                    buttonText={t('upload')}
+                    acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
+                    storedFiles={storedRstFiles}
+                    uploadedFiles={uploadedRstFiles}
+                    setUploadedFiles={setUploadedRstFiles}
+                    removedFiles={rstFilesToRemove}
+                    setRemovedFiles={setRstFilesToRemove}
+                  ></UploadFileGrid>
+                </Form.Item>
               </Col>
             </Row>
             <Row gutter={gutterSize}>
@@ -761,8 +794,8 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
             <Row gutter={gutterSize}>
               <Col span={24}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('mtgCalculateEntityTitle')}</label>}
-                  name="mtgCalculateEntity"
+                  label={<label className="form-item-header">{t('mtgComments')}</label>}
+                  name="mtgComments"
                 >
                   <TextArea rows={3} disabled={isView} />
                 </Form.Item>

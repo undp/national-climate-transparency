@@ -517,6 +517,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               {t('documentsHeader')}
             </div>
             <UploadFileGrid
+              isSingleColumn={false}
               usedIn={method}
               buttonText={t('upload')}
               acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"

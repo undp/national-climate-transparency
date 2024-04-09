@@ -13,6 +13,7 @@ import { XOctagon } from 'react-bootstrap-icons';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
+  isSingleColumn: boolean;
   buttonText: string;
   acceptedFiles: string;
   usedIn: 'create' | 'view' | 'update';
@@ -26,6 +27,7 @@ interface Props {
 }
 
 const UploadFileGrid: React.FC<Props> = ({
+  isSingleColumn,
   buttonText,
   acceptedFiles,
   usedIn,
@@ -160,17 +162,17 @@ const UploadFileGrid: React.FC<Props> = ({
       {usedIn !== 'view' && (
         <div className="upload-box">
           <Row gutter={[30, 10]}>
-            <Col span={3}>
+            <Col span={isSingleColumn ? 6 : 3}>
               <Upload {...props}>
                 <Button className="upload-button" icon={<UploadOutlined />}>
                   {buttonText}
                 </Button>
               </Upload>
             </Col>
-            <Col span={21}>
+            <Col span={isSingleColumn ? 18 : 21}>
               <Row gutter={[30, 10]}>
                 {documentList.map((file: any) => (
-                  <Col key={file.uid} span={8} className="file-column">
+                  <Col key={file.uid} span={isSingleColumn ? 24 : 8} className="file-column">
                     {/* <Tooltip placement="topLeft" title={file.name} showArrow={false}> */}
                     <Card className="file-card">
                       <div className="file-content">
