@@ -1,89 +1,105 @@
-import { Table, TablePaginationConfig, TableProps } from 'antd';
+import { Table, TableProps, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { ActualTimeline, ExpectedTimeline } from '../../Definitions/mtgTimeline.definition';
 
 interface Props {
-  tableData: any;
+  expectedTimeline: any;
+  actualTimeline: any;
   loading: boolean;
-  handleTableChange: (pagination: TablePaginationConfig, filters: any, sorter: any) => void;
+  onValueEnter: (rowId: number, year: string, value: number) => void;
 }
 
-interface DataType {
-  key: string;
-  name: string;
-  money: string;
-  address: string;
-}
-
-const TimelineTable: React.FC<Props> = ({ tableData, loading, handleTableChange }) => {
+const TimelineTable: React.FC<Props> = ({
+  expectedTimeline,
+  actualTimeline,
+  loading,
+  onValueEnter,
+}) => {
   const { t } = useTranslation(['timelineTable']);
 
-  const expectedTableColumns: TableProps<DataType>['columns'] = [
+  const expectedTableColumns: TableProps<ExpectedTimeline>['columns'] = [
     {
       title: t('ghg'),
-      dataIndex: 'supportId',
-      key: 'activityId',
+      dataIndex: 'ghg',
       align: 'center',
       ellipsis: true,
       width: 100,
     },
     {
       title: t('catExpectedEmissionReduct'),
-      dataIndex: 'financeNature',
-      key: 'financeNature',
+      dataIndex: 'topic',
       align: 'left',
       width: 350,
     },
-    { title: t('total'), dataIndex: 'direction', key: 'direction', width: 100 },
+    { title: t('total'), align: 'center', dataIndex: 'total', width: 100 },
   ];
 
-  const actualTableColumns: TableProps<DataType>['columns'] = [
+  const actualTableColumns: TableProps<ActualTimeline>['columns'] = [
     {
       title: t('ghg'),
-      dataIndex: 'supportId',
-      key: 'activityId',
+      dataIndex: 'ghg',
       align: 'center',
       ellipsis: true,
       width: 100,
     },
     {
       title: t('catActualEmissionReduct'),
-      dataIndex: 'financeNature',
-      key: 'financeNature',
+      dataIndex: 'topic',
       align: 'left',
       width: 350,
     },
-    { title: t('total'), dataIndex: 'direction', key: 'direction', width: 100 },
+    { title: t('total'), align: 'center', dataIndex: 'total', width: 100 },
   ];
 
   for (let year = 2023; year <= 2050; year++) {
     expectedTableColumns.push({
-      title: t(year.toString()),
-      dataIndex: 'direction',
-      key: 'direction',
-      width: 100,
+      title: year.toString(),
+      dataIndex: year.toString(),
+      width: 70,
+      align: 'center',
+      render: (record: any) => {
+        return (
+          <Input
+            value={record}
+            onChange={(event: any) => {
+              onValueEnter(5, year.toString(), event.target.value);
+            }}
+          />
+        );
+      },
     });
 
     actualTableColumns.push({
-      title: t(year.toString()),
-      dataIndex: 'direction',
-      key: 'direction',
-      width: 100,
+      title: year.toString(),
+      dataIndex: year.toString(),
+      width: 70,
+      align: 'center',
+      render: (record: any) => {
+        return (
+          <Input
+            value={record}
+            onChange={(event: any) => {
+              onValueEnter(5, year.toString(), event.target.value);
+            }}
+          />
+        );
+      },
     });
   }
 
   return (
     <div style={{ overflowX: 'auto' }}>
       <Table
-        dataSource={tableData}
+        dataSource={expectedTimeline}
         columns={expectedTableColumns}
         loading={loading}
-        onChange={handleTableChange}
+        pagination={false}
       />
       <Table
-        dataSource={tableData}
+        dataSource={actualTimeline}
         columns={actualTableColumns}
         loading={loading}
-        onChange={handleTableChange}
+        pagination={false}
       />
     </div>
   );

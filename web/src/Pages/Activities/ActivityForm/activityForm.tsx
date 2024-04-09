@@ -11,6 +11,12 @@ import './activityForm.scss';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 import { ParentType } from '../../../Enums/parentType.enum';
 import TimelineTable from '../../../Components/Timeline/timeline';
+import {
+  ActualRows,
+  ActualTimeline,
+  ExpectedRows,
+  ExpectedTimeline,
+} from '../../../Definitions/mtgTimeline.definition';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -104,6 +110,11 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
   const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
 
+  // MTG Timeline State
+
+  const [expectedTimeline, setExpectedTimeline] = useState<ExpectedTimeline[]>([]);
+  const [actualTimeline, setActualTimeline] = useState<ActualTimeline[]>([]);
+
   // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
 
@@ -126,6 +137,29 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
       setSupportData([]);
       setStoredMthFiles([]);
       setStoredRstFiles([]);
+    }
+
+    if (method === 'create') {
+      const tempExpectedEntries: ExpectedTimeline[] = [];
+      Object.entries(ExpectedRows).forEach(([key, value]) => {
+        const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
+        for (let year = 2023; year <= 2050; year++) {
+          rowData[year.toString()] = 0;
+        }
+        tempExpectedEntries.push(rowData);
+      });
+
+      const tempActualEntries: ActualTimeline[] = [];
+      Object.entries(ActualRows).forEach(([key, value]) => {
+        const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
+        for (let year = 2023; year <= 2050; year++) {
+          rowData[year.toString()] = 0;
+        }
+        tempActualEntries.push(rowData);
+      });
+
+      setExpectedTimeline(tempExpectedEntries);
+      setActualTimeline(tempActualEntries);
     }
   }, []);
 
@@ -279,6 +313,12 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
   const handleSupportTableChange = (pagination: any) => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
+  };
+
+  // Mtg Data Change
+
+  const onMtgValueEnter = (rowId: number, year: string, value: number) => {
+    console.log(rowId, year, value);
   };
 
   return (
@@ -812,9 +852,10 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
             <Row>
               <Col span={24}>
                 <TimelineTable
-                  tableData={supportData}
+                  expectedTimeline={expectedTimeline}
+                  actualTimeline={actualTimeline}
                   loading={false}
-                  handleTableChange={handleSupportTableChange}
+                  onValueEnter={onMtgValueEnter}
                 />
               </Col>
             </Row>
