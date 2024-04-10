@@ -317,8 +317,33 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
   // Mtg Data Change
 
-  const onMtgValueEnter = (rowId: number, year: string, value: number) => {
-    console.log(rowId, year, value);
+  const onMtgValueEnter = (
+    tableType: 'expected' | 'actual',
+    rowId: string,
+    year: string,
+    value: number
+  ) => {
+    if (tableType === 'expected') {
+      setExpectedTimeline((prevState) =>
+        prevState.map((entry) => {
+          if (entry.topic === rowId) {
+            entry[year] = value;
+            return entry;
+          }
+          return entry;
+        })
+      );
+    } else {
+      setActualTimeline((prevState) =>
+        prevState.map((entry) => {
+          if (entry.topic === rowId) {
+            entry[year] = value;
+            return entry;
+          }
+          return entry;
+        })
+      );
+    }
   };
 
   return (
@@ -761,7 +786,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     position: ['bottomRight'],
                   }}
                   handleTableChange={handleSupportTableChange}
-                  emptyMessage={t('noSupportMessage')}
+                  emptyMessage={t('noSupportsMessage')}
                 />
               </Col>
             </Row>

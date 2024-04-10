@@ -1,12 +1,18 @@
 import { Table, TableProps, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { ActualTimeline, ExpectedTimeline } from '../../Definitions/mtgTimeline.definition';
+import './timeline.scss';
 
 interface Props {
   expectedTimeline: any;
   actualTimeline: any;
   loading: boolean;
-  onValueEnter: (rowId: number, year: string, value: number) => void;
+  onValueEnter: (
+    tableTYpe: 'expected' | 'actual',
+    rowId: string,
+    year: string,
+    value: number
+  ) => void;
 }
 
 const TimelineTable: React.FC<Props> = ({
@@ -31,7 +37,7 @@ const TimelineTable: React.FC<Props> = ({
       align: 'left',
       width: 350,
     },
-    { title: t('total'), align: 'center', dataIndex: 'total', width: 100 },
+    { title: t('total'), dataIndex: 'total', align: 'center', width: 100 },
   ];
 
   const actualTableColumns: TableProps<ActualTimeline>['columns'] = [
@@ -48,22 +54,23 @@ const TimelineTable: React.FC<Props> = ({
       align: 'left',
       width: 350,
     },
-    { title: t('total'), align: 'center', dataIndex: 'total', width: 100 },
+    { title: t('total'), dataIndex: 'total', align: 'center', width: 100 },
   ];
 
   for (let year = 2023; year <= 2050; year++) {
     expectedTableColumns.push({
       title: year.toString(),
       dataIndex: year.toString(),
-      width: 70,
+      width: 80,
       align: 'center',
-      render: (record: any) => {
+      render: (colValue: any, record: any) => {
         return (
           <Input
-            value={record}
+            value={colValue}
             onChange={(event: any) => {
-              onValueEnter(5, year.toString(), event.target.value);
+              onValueEnter('expected', record.topic, year.toString(), event.target.value);
             }}
+            className="input-box"
           />
         );
       },
@@ -72,15 +79,16 @@ const TimelineTable: React.FC<Props> = ({
     actualTableColumns.push({
       title: year.toString(),
       dataIndex: year.toString(),
-      width: 70,
+      width: 80,
       align: 'center',
-      render: (record: any) => {
+      render: (colValue: any, record: any) => {
         return (
           <Input
-            value={record}
+            value={colValue}
             onChange={(event: any) => {
-              onValueEnter(5, year.toString(), event.target.value);
+              onValueEnter('actual', record.topic, year.toString(), event.target.value);
             }}
+            className="input-box"
           />
         );
       },
@@ -88,7 +96,7 @@ const TimelineTable: React.FC<Props> = ({
   }
 
   return (
-    <div style={{ overflowX: 'auto' }}>
+    <div className="mtg-timeline">
       <Table
         dataSource={expectedTimeline}
         columns={expectedTableColumns}
