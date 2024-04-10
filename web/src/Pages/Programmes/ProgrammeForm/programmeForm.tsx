@@ -649,7 +649,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 rules={[]}
                 index={index}
                 calledTo={'view'}
-                inputFontSize={inputFontSize}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
               ></KpiGrid>
@@ -661,7 +660,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 rules={[validation.required]}
                 index={kpi.index}
                 calledTo={'create'}
-                inputFontSize={inputFontSize}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                 updateKPI={updateKPI}

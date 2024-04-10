@@ -1,0 +1,28 @@
+.kpi-grid {
+
+    height: 90px;
+
+  .form-item-header {
+    color: #3a3541;
+    opacity: 0.8;
+  }
+  
+  .form-input-box {
+    font-size: 13px;
+    height: 40px;
+  }
+
+  .delete-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+    width: 30px;
+    height: 30px;
+    margin-top: 36px;
+    border-width: 1px;
+    border-radius: 4px;
+    border-color: '#d9d9d9';
+  }
+
+}

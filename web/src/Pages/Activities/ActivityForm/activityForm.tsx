@@ -684,7 +684,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 rules={[validation.required]}
                 index={index}
                 calledTo={'add_ach'}
-                inputFontSize={inputFontSize}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
               ></KpiGrid>
