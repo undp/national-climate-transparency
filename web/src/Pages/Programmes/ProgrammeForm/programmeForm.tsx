@@ -652,8 +652,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 inputFontSize={inputFontSize}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                updateKPI={updateKPI}
-                removeKPI={removeKPI}
               ></KpiGrid>
             ))}
             {newKpiList.map((kpi: any) => (

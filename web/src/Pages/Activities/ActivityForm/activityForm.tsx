@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate } from 'react-router-dom';
@@ -43,14 +42,6 @@ interface Props {
 type ParentData = {
   id: string;
   title: string;
-};
-
-type NewKpiData = {
-  index: number;
-  name: string;
-  unit: string;
-  creatorType: string;
-  expected: number;
 };
 
 type SupportData = {
@@ -103,7 +94,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
   // Parent Selection State
 
-  const [parentType, setParentType] = useState<string>(ParentType.ACTION);
+  const [parentType, setParentType] = useState<string>();
   const [parentList, setParentList] = useState<ParentData[]>([]);
 
   // Support state
@@ -114,7 +105,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
   // KPI State
 
-  const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
   const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
 
   // MTG Timeline State
@@ -225,7 +215,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
   const handleSubmit = async (payload: any) => {
     try {
       for (const key in payload) {
-        if (key.startsWith('kpi_')) {
+        if (key.startsWith('kpi_exp') || key.startsWith('kpi_unit')) {
           delete payload[key];
         }
       }
@@ -242,11 +232,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
       payload.rst_documents = [];
       uploadedRstFiles.forEach((file) => {
         payload.rst_documents.push({ title: file.title, data: file.data });
-      });
-
-      payload.kpis = [];
-      newKpiList.forEach((kpi) => {
-        payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
       });
 
       const response = await post('national/activity/add', payload);
@@ -268,49 +253,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     }
-  };
-
-  // Add New KPI
-
-  const createKPI = () => {
-    const kpiIndex = Math.floor(Date.now() / 1000);
-    const newItem: NewKpiData = {
-      index: kpiIndex,
-      name: '',
-      unit: '',
-      creatorType: 'activity',
-      expected: 0,
-    };
-    const updatedValues = {
-      [`kpi_ach_${kpiIndex}`]: 0,
-    };
-
-    form.setFieldsValue(updatedValues);
-    setNewKpiList((prevList) => [...prevList, newItem]);
-  };
-
-  const removeKPI = (kpiIndex: number) => {
-    setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
-
-    const updatedValues = {
-      [`kpi_name_${kpiIndex}`]: '',
-      [`kpi_unit_${kpiIndex}`]: '',
-      [`kpi_exp_${kpiIndex}`]: '',
-    };
-
-    form.setFieldsValue(updatedValues);
-  };
-
-  const updateKPI = (id: number, property: keyof NewKpiData, value: any): void => {
-    setNewKpiList((prevKpiList) => {
-      const updatedKpiList = prevKpiList.map((kpi) => {
-        if (kpi.index === id) {
-          return { ...kpi, [property]: value };
-        }
-        return kpi;
-      });
-      return updatedKpiList;
-    });
   };
 
   // Column Definition
@@ -400,8 +342,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('parentTypeTitle')}</label>}
                   name="parentType"
-                  rules={[validation.required]}
-                  initialValue={ParentType.ACTION}
                 >
                   <Select
                     size="large"
@@ -421,46 +361,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               </Col>
               <Col span={12}>
                 <Form.Item
-                  label={
-                    <label className="form-item-header">
-                      {`${t('selectParentTitle')} ${t(parentType)}`}
-                    </label>
-                  }
-                  name="parentId"
-                >
-                  <Select
-                    size={'large'}
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {parentList.map((parent) => (
-                      <Option key={parent.id} value={parent.id}>
-                        {parent.title}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={
-                    <label className="form-item-header">
-                      {`${t('parentDescTitle')} ${t(parentType)}`}
-                    </label>
-                  }
-                  name="parentDescription"
-                >
-                  <TextArea maxLength={250} rows={3} disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('supportTypeTitle')}</label>}
-                  name="supportType"
+                  label={<label className="form-item-header">{t('activityStatusTitle')}</label>}
+                  name="activityStatus"
+                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
@@ -469,15 +372,56 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(SupportType).map((support) => (
-                      <Option key={support} value={support}>
-                        {support}
+                    {Object.values(ActivityStatus).map((status) => (
+                      <Option key={status} value={status}>
+                        {status}
                       </Option>
                     ))}
                   </Select>
                 </Form.Item>
               </Col>
             </Row>
+            {parentType ? (
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">
+                        {`${t('selectParentTitle')} ${t(parentType)}`}
+                      </label>
+                    }
+                    name="parentId"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size={'large'}
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {parentList.map((parent) => (
+                        <Option key={parent.id} value={parent.id}>
+                          {parent.title}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">
+                        {`${t('parentDescTitle')} ${t(parentType)}`}
+                      </label>
+                    }
+                    name="parentDescription"
+                  >
+                    <TextArea maxLength={250} rows={3} disabled />
+                  </Form.Item>
+                </Col>
+              </Row>
+            ) : null}
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
@@ -501,9 +445,8 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               </Col>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('activityStatusTitle')}</label>}
-                  name="activityStatus"
-                  rules={[validation.required]}
+                  label={<label className="form-item-header">{t('supportTypeTitle')}</label>}
+                  name="supportType"
                 >
                   <Select
                     size="large"
@@ -512,9 +455,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(ActivityStatus).map((status) => (
-                      <Option key={status} value={status}>
-                        {status}
+                    {Object.values(SupportType).map((support) => (
+                      <Option key={support} value={support}>
+                        {support}
                       </Option>
                     ))}
                   </Select>
@@ -738,43 +681,14 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               <KpiGrid
                 key={index}
                 form={form}
-                rules={[]}
+                rules={[validation.required]}
                 index={index}
                 calledTo={'add_ach'}
                 inputFontSize={inputFontSize}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                updateKPI={updateKPI}
-                removeKPI={removeKPI}
               ></KpiGrid>
             ))}
-            {newKpiList.map((kpi: any) => (
-              <KpiGrid
-                key={kpi.index}
-                form={form}
-                rules={[validation.required]}
-                index={kpi.index}
-                calledTo={'full'}
-                inputFontSize={inputFontSize}
-                gutterSize={gutterSize}
-                headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                updateKPI={updateKPI}
-                removeKPI={removeKPI}
-              ></KpiGrid>
-            ))}
-            <Row justify={'start'}>
-              <Col span={2}>
-                {!isView && (
-                  <Button
-                    icon={<PlusCircleOutlined />}
-                    className="create-kpi-button"
-                    onClick={createKPI}
-                  >
-                    {t('addKPI')}
-                  </Button>
-                )}
-              </Col>
-            </Row>
           </div>
           {method !== 'create' && (
             <div className="form-section-card">
@@ -914,7 +828,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                   size="large"
                   block
                   onClick={() => {
-                    navigate('/programmes');
+                    navigate('/activities');
                   }}
                 >
                   {t('cancel')}
