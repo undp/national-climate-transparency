@@ -5,7 +5,7 @@ interface Props {
   form: any;
   rules: any;
   index: number;
-  isEditable: boolean;
+  calledTo: 'view' | 'create' | 'add_ach' | 'full';
   gutterSize: number;
   inputFontSize: string;
   headerNames: string[];
@@ -13,16 +13,24 @@ interface Props {
   removeKPI: (kpiId: number) => void;
 }
 
+const disabilityMapping = {
+  view: [true, true, true, true, true],
+  create: [false, false, true, false, false],
+  add_ach: [true, true, false, true, true],
+  full: [false, false, false, false, false],
+};
+
 export const KpiGrid: React.FC<Props> = ({
   rules,
   index,
-  isEditable,
+  calledTo,
   gutterSize,
   inputFontSize,
   headerNames,
   updateKPI,
   removeKPI,
 }) => {
+  const currDisabilityMapping = disabilityMapping[calledTo];
   return (
     <Row key={index} gutter={gutterSize} style={{ height: '90px' }}>
       <Col span={12}>
@@ -35,7 +43,7 @@ export const KpiGrid: React.FC<Props> = ({
             >
               <Input
                 style={{ fontSize: inputFontSize, height: '40px' }}
-                disabled={!isEditable}
+                disabled={currDisabilityMapping[0]}
                 onChange={(e) => {
                   updateKPI(index, 'name', e.target.value);
                 }}
@@ -50,7 +58,7 @@ export const KpiGrid: React.FC<Props> = ({
             >
               <Input
                 style={{ fontSize: inputFontSize, height: '40px' }}
-                disabled={!isEditable}
+                disabled={currDisabilityMapping[1]}
                 onChange={(e) => {
                   updateKPI(index, 'unit', e.target.value);
                 }}
@@ -65,8 +73,16 @@ export const KpiGrid: React.FC<Props> = ({
             <Form.Item
               label={<label style={{ color: '#3A3541', opacity: 0.8 }}>{headerNames[2]}</label>}
               name={`kpi_ach_${index}`}
+              rules={rules}
             >
-              <Input style={{ fontSize: inputFontSize, height: '40px' }} disabled={true} />
+              <Input
+                type="number"
+                style={{ fontSize: inputFontSize, height: '40px' }}
+                disabled={currDisabilityMapping[2]}
+                onChange={(e) => {
+                  updateKPI(index, 'achieved', e.target.value);
+                }}
+              />
             </Form.Item>
           </Col>
           <Col span={11}>
@@ -78,14 +94,14 @@ export const KpiGrid: React.FC<Props> = ({
               <Input
                 type="number"
                 style={{ fontSize: inputFontSize, height: '40px' }}
-                disabled={!isEditable}
+                disabled={currDisabilityMapping[3]}
                 onChange={(e) => {
                   updateKPI(index, 'expected', e.target.value);
                 }}
               />
             </Form.Item>
           </Col>
-          {isEditable ? (
+          {!currDisabilityMapping[4] ? (
             <Col span={2}>
               <Card
                 style={{

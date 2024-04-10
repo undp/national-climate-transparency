@@ -731,7 +731,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 form={form}
                 rules={[]}
                 index={index}
-                isEditable={false}
+                calledTo={'view'}
                 inputFontSize={inputFontSize}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
@@ -745,7 +745,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 form={form}
                 rules={[validation.required]}
                 index={kpi.index}
-                isEditable={!isView && !kpi.visibility}
+                calledTo={'create'}
                 inputFontSize={inputFontSize}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}

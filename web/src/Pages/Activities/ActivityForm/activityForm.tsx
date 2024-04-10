@@ -234,6 +234,16 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
         payload.documents.push({ title: file.title, data: file.data });
       });
 
+      payload.mth_documents = [];
+      uploadedMthFiles.forEach((file) => {
+        payload.mth_documents.push({ title: file.title, data: file.data });
+      });
+
+      payload.rst_documents = [];
+      uploadedRstFiles.forEach((file) => {
+        payload.rst_documents.push({ title: file.title, data: file.data });
+      });
+
       payload.kpis = [];
       newKpiList.forEach((kpi) => {
         payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
@@ -730,7 +740,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 form={form}
                 rules={[]}
                 index={index}
-                isEditable={false}
+                calledTo={'add_ach'}
                 inputFontSize={inputFontSize}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
@@ -744,7 +754,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 form={form}
                 rules={[validation.required]}
                 index={kpi.index}
-                isEditable={!isView && !kpi.visibility}
+                calledTo={'full'}
                 inputFontSize={inputFontSize}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
