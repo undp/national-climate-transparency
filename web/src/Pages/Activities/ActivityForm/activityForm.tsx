@@ -6,7 +6,6 @@ import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
-import { ProgrammeStatus } from '../../../Enums/programme.enum';
 import './activityForm.scss';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 import { ParentType } from '../../../Enums/parentType.enum';
@@ -17,6 +16,14 @@ import {
   ExpectedRows,
   ExpectedTimeline,
 } from '../../../Definitions/mtgTimeline.definition';
+import {
+  ActivityStatus,
+  ImplMeans,
+  Measure,
+  SupportType,
+  TechnologyType,
+} from '../../../Enums/activity.enum';
+import { IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -172,13 +179,13 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
     // Get Migrated Data for the Activity
     form.setFieldsValue({
-      type: 'Mitigation',
-      instrumentType: 'Policy',
-      intImplementor: 'AFGB',
-      recipientEntity: 'Ministry of Agriculture, Climate Change and Environment',
-      ghgsAffected: 'CO2',
-      achievedReduct: 6,
-      expectedReduct: 100,
+      parentDescription: 'This is the description migrated from the Parent',
+      recipient: 'Ministry of Agriculture, Climate Change and Environment',
+      affSectors: 'Energy',
+      affSubSectors: 'Grid-Connected Generation',
+      startYear: 2019,
+      endYear: 2020,
+      expectedTimeFrame: 2,
     });
 
     const migratedKpis = [];
@@ -321,13 +328,15 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
     tableType: 'expected' | 'actual',
     rowId: string,
     year: string,
-    value: number
+    value: string
   ) => {
+    const newValue = value ? parseInt(value) : 0;
+
     if (tableType === 'expected') {
       setExpectedTimeline((prevState) =>
         prevState.map((entry) => {
           if (entry.topic === rowId) {
-            entry[year] = value;
+            entry[year] = newValue;
             return entry;
           }
           return entry;
@@ -337,7 +346,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
       setActualTimeline((prevState) =>
         prevState.map((entry) => {
           if (entry.topic === rowId) {
-            entry[year] = value;
+            entry[year] = newValue;
             return entry;
           }
           return entry;
@@ -382,6 +391,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                   label={<label className="form-item-header">{t('parentTypeTitle')}</label>}
                   name="parentType"
                   rules={[validation.required]}
+                  initialValue={ParentType.ACTION}
                 >
                   <Select
                     size="large"
@@ -390,7 +400,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                     onChange={handleSelectChange}
-                    defaultValue={ParentType.ACTION}
                   >
                     {Object.values(ParentType).map((parent) => (
                       <Option key={parent} value={parent}>
@@ -442,7 +451,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('supportTypeTitle')}</label>}
                   name="supportType"
-                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
@@ -451,9 +459,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(ProgrammeStatus).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
+                    {Object.values(SupportType).map((support) => (
+                      <Option key={support} value={support}>
+                        {support}
                       </Option>
                     ))}
                   </Select>
@@ -465,7 +473,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('measuresTitle')}</label>}
                   name="measures"
-                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
@@ -474,9 +481,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(ProgrammeStatus).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
+                    {Object.values(Measure).map((measure) => (
+                      <Option key={measure} value={measure}>
+                        {measure}
                       </Option>
                     ))}
                   </Select>
@@ -495,9 +502,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(ProgrammeStatus).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
+                    {Object.values(ActivityStatus).map((status) => (
+                      <Option key={status} value={status}>
+                        {status}
                       </Option>
                     ))}
                   </Select>
@@ -517,7 +524,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
                   name="natImplementor"
-                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
@@ -526,9 +532,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(ProgrammeStatus).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
+                    {Object.values(NatImplementor).map((implementer) => (
+                      <Option key={implementer} value={implementer}>
+                        {implementer}
                       </Option>
                     ))}
                   </Select>
@@ -540,7 +546,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
                   name="intImplementor"
-                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
@@ -549,9 +554,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(ProgrammeStatus).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
+                    {Object.values(IntImplementor).map((implementer) => (
+                      <Option key={implementer} value={implementer}>
+                        {implementer}
                       </Option>
                     ))}
                   </Select>
@@ -560,7 +565,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
-                  name="affSectorsTitle"
+                  name="affSectors"
                 >
                   <Input className="form-input-box" disabled />
                 </Form.Item>
@@ -568,7 +573,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('affSubSectorsTitle')}</label>}
-                  name="affSubSectorsTitle"
+                  name="affSubSectors"
                 >
                   <Input className="form-input-box" disabled />
                 </Form.Item>
@@ -605,7 +610,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('anchoredTitle')}</label>}
                   name="isAnchored"
-                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
@@ -614,11 +618,12 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(ParentType).map((parent) => (
-                      <Option key={parent} value={parent}>
-                        {parent}
-                      </Option>
-                    ))}
+                    <Option key={'yes'} value={true}>
+                      {'Yes'}
+                    </Option>
+                    <Option key={'no'} value={false}>
+                      {'No'}
+                    </Option>
                   </Select>
                 </Form.Item>
               </Col>
@@ -634,9 +639,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {parentList.map((parent) => (
-                      <Option key={parent.id} value={parent.id}>
-                        {parent.title}
+                    {Object.values(ImplMeans).map((mean) => (
+                      <Option key={mean} value={mean}>
+                        {mean}
                       </Option>
                     ))}
                   </Select>
@@ -648,7 +653,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('techTypeTitle')}</label>}
                   name="techType"
-                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
@@ -657,9 +661,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(ParentType).map((parent) => (
-                      <Option key={parent} value={parent}>
-                        {parent}
+                    {Object.values(TechnologyType).map((tech) => (
+                      <Option key={tech} value={tech}>
+                        {tech}
                       </Option>
                     ))}
                   </Select>
@@ -762,35 +766,37 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
           </div>
-          <div className="form-section-card">
-            <Row>
-              <Col span={6}>
-                <div className="form-section-header">{t('supportTableHeader')}</div>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={24}>
-                <LayoutTable
-                  tableData={supportData}
-                  columns={supportTableColumns}
-                  loading={false}
-                  pagination={{
-                    current: supportCurrentPage,
-                    pageSize: supportPageSize,
-                    total: supportData.length,
-                    showQuickJumper: true,
-                    pageSizeOptions: ['10', '20', '30'],
-                    showSizeChanger: true,
-                    style: { textAlign: 'center' },
-                    locale: { page: '' },
-                    position: ['bottomRight'],
-                  }}
-                  handleTableChange={handleSupportTableChange}
-                  emptyMessage={t('noSupportsMessage')}
-                />
-              </Col>
-            </Row>
-          </div>
+          {method !== 'create' && (
+            <div className="form-section-card">
+              <Row>
+                <Col span={6}>
+                  <div className="form-section-header">{t('supportTableHeader')}</div>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <LayoutTable
+                    tableData={supportData}
+                    columns={supportTableColumns}
+                    loading={false}
+                    pagination={{
+                      current: supportCurrentPage,
+                      pageSize: supportPageSize,
+                      total: supportData.length,
+                      showQuickJumper: true,
+                      pageSizeOptions: ['10', '20', '30'],
+                      showSizeChanger: true,
+                      style: { textAlign: 'center' },
+                      locale: { page: '' },
+                      position: ['bottomRight'],
+                    }}
+                    handleTableChange={handleSupportTableChange}
+                    emptyMessage={t('noSupportsMessage')}
+                  />
+                </Col>
+              </Row>
+            </div>
+          )}
           <div className="form-section-card">
             <div className="form-section-header">{t('mitigationInfoTitle')}</div>
             <Row gutter={gutterSize}>

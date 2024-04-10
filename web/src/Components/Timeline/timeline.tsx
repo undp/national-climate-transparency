@@ -11,7 +11,7 @@ interface Props {
     tableTYpe: 'expected' | 'actual',
     rowId: string,
     year: string,
-    value: number
+    value: string
   ) => void;
 }
 
@@ -68,7 +68,11 @@ const TimelineTable: React.FC<Props> = ({
           <Input
             value={colValue}
             onChange={(event: any) => {
-              onValueEnter('expected', record.topic, year.toString(), event.target.value);
+              const inputValue = event.target.value;
+              const regex = /^\d*$/;
+              if (regex.test(inputValue) || inputValue === '') {
+                onValueEnter('expected', record.topic, year.toString(), inputValue);
+              }
             }}
             className="input-box"
           />
@@ -86,7 +90,11 @@ const TimelineTable: React.FC<Props> = ({
           <Input
             value={colValue}
             onChange={(event: any) => {
-              onValueEnter('actual', record.topic, year.toString(), event.target.value);
+              const inputValue = event.target.value;
+              const regex = /^\d*$/;
+              if (regex.test(inputValue) || inputValue === '') {
+                onValueEnter('actual', record.topic, year.toString(), event.target.value);
+              }
             }}
             className="input-box"
           />
