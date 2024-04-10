@@ -42,6 +42,7 @@ interface Props {
 type ParentData = {
   id: string;
   title: string;
+  desc: string;
 };
 
 type SupportData = {
@@ -169,7 +170,6 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
     // Get Migrated Data for the Activity
     form.setFieldsValue({
-      parentDescription: 'This is the description migrated from the Parent',
       recipient: 'Ministry of Agriculture, Climate Change and Environment',
       affSectors: 'Energy',
       affSubSectors: 'Grid-Connected Generation',
@@ -198,6 +198,16 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
   const handleSelectChange = (value: string) => {
     setParentType(value);
+    form.setFieldsValue({
+      parentId: '',
+      parentDescription: '',
+    });
+  };
+
+  const handleParentIdSelect = (id: string) => {
+    form.setFieldsValue({
+      parentDescription: parentList.find((obj) => obj.id === id)?.desc,
+    });
   };
 
   useEffect(() => {
@@ -205,7 +215,11 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
     const prefix = parentType?.slice(0, 3);
     const parentIds: ParentData[] = [];
     for (let i = 0; i < 15; i++) {
-      parentIds.push({ id: `${prefix}00${i}`, title: `${prefix}00${i}` });
+      parentIds.push({
+        id: `${prefix}00${i}`,
+        title: `${prefix}00${i}`,
+        desc: `This is the description migrated from the parent 00${i}`,
+      });
     }
     setParentList(parentIds);
   }, [parentType]);
@@ -399,6 +413,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                       allowClear
                       disabled={isView}
                       showSearch
+                      onChange={handleParentIdSelect}
                     >
                       {parentList.map((parent) => (
                         <Option key={parent.id} value={parent.id}>
