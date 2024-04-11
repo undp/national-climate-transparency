@@ -18,10 +18,10 @@ import {
 import { EditOutlined, EllipsisOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 const { Search } = Input;
-import data from '../../../Testing/actionList.json';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
 import { ActionEntity } from '../../../Entities/action';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 
 interface Item {
   key: number;
@@ -38,14 +38,25 @@ interface Item {
 
 const actionList = () => {
   const navigate = useNavigate();
+  const { post } = useConnection();
   const ability = useAbilityContext();
+
   const { t } = useTranslation(['actionList']);
-  const [tableData, setTableData] = useState<Item[]>([]);
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState<any>(1);
+
+  // General Page State
+
   const [loading, setLoading] = useState<boolean>(false);
-  const [sortField, setSortField] = useState<string>('');
+
+  // Table Data State
+
+  const [tableData, setTableData] = useState<Item[]>([]);
   const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<any>(1);
+
+  // Filters State
+
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [sortField, setSortField] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('');
   const [searchByTermUser, setSearchByTermUser] = useState<any>('name');
   const [valueOnSearch, setValueOnSearch] = useState<string>('');
@@ -173,54 +184,15 @@ const actionList = () => {
     setValueOnSearch(searchValue);
   };
 
-  // const sort = () => {
-  //   if (sortOrder !== '' && sortField !== '') {
-  //     return {
-  //       key: sortField,
-  //       order: sortOrder,
-  //     };
-  //   } else
-  //     return {
-  //       key: 'id',
-  //       order: 'DESC',
-  //     };
-  // };
-
   // get All Data Params
-
-  const dummyDataQuery = () => {
-    console.log('dummyDataQuery', currentPage, pageSize, sortField, sortOrder, valueOnSearch);
-    if (sortField) {
-      data.sort((a: any, b: any) => {
-        const valueA = a[sortField];
-        const valueB = b[sortField];
-        if (sortOrder === 'ASC') {
-          if (valueA < valueB) return -1;
-          if (valueA > valueB) return 1;
-        } else if (sortOrder === 'DESC') {
-          if (valueA > valueB) return -1;
-          if (valueA < valueB) return 1;
-        }
-        return 0;
-      });
-    } else if (valueOnSearch) {
-      const searchData = data.filter((item) =>
-        item.titleOfAction.toLowerCase().includes(searchValue.toLowerCase())
-      );
-      return searchData;
-    }
-    return data;
-  };
 
   const getAllData = async () => {
     setLoading(true);
     try {
-      // set value for backend response
-      // const response: any = await post('national/user/query', getAllUserParams());
-      const response: any = dummyDataQuery();
+      const payload: any = { page: 1, size: 10 };
+      const response: any = await post('national/actions/query', payload);
       if (response) {
-        console.log('dummyDataQuer-response', response);
-        setTableData(response);
+        setTableData(response.data);
         setLoading(false);
       }
     } catch (error: any) {
@@ -307,12 +279,12 @@ const actionList = () => {
             <LayoutTable
               tableData={tableData}
               columns={columns}
-              loading={false} // Set loading state as needed
+              loading={loading}
               pagination={{
                 current: currentPage,
                 pageSize: pageSize,
                 total: totalUser,
-                showQuickJumper: true, // Enable jump page functionality,
+                showQuickJumper: true,
                 pageSizeOptions: ['10', '20', '30'],
                 showSizeChanger: true,
                 style: { textAlign: 'center' },
@@ -320,7 +292,7 @@ const actionList = () => {
                 itemRender: customItemRender,
                 position: ['bottomRight'],
                 onChange: onChange,
-              }} // Set pagination configuration
+              }}
               handleTableChange={handleTableChange}
               emptyMessage="No Actions Available"
             />
