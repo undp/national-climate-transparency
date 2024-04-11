@@ -10,9 +10,11 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
 import { Action } from "../casl/action.enum";
 import { PoliciesGuardEx } from "../casl/policy.guard";
-import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectService } from "../project/project.service";
 import { ProjectDto } from "../dtos/project.dto";
+import { LinkProjectsDto } from "../dtos/link.projects.dto";
+import { ProjectEntity } from "../entities/project.entity";
+import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
 
 @ApiTags("Projects")
 @ApiBearerAuth()
@@ -24,9 +26,25 @@ export class ProjectController {
 
     @ApiBearerAuth('api_key')
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Create, ProgrammeEntity))
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Create, ProjectEntity))
     @Post("add")
     addProject(@Body() projectDto: ProjectDto, @Request() req) {
         return this.projectService.createProject(projectDto, req.user);
+    }
+
+    @ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProjectEntity))
+    @Post("link")
+    linkProjects(@Body() linkProjectsDto: LinkProjectsDto, @Request() req) {
+        return this.projectService.linkProjectsToProgramme(linkProjectsDto, req.user);
+    }
+
+		@ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProjectEntity))
+    @Post("unlink")
+    unlinkProjects(@Body() unlinkProjectsDto: UnlinkProjectsDto, @Request() req) {
+        return this.projectService.unlinkProjectsFromProgramme(unlinkProjectsDto, req.user);
     }
 }

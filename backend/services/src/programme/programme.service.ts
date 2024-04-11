@@ -22,17 +22,22 @@ import { QueryDto } from "../dtos/query.dto";
 import { DataListResponseDto } from "../dtos/data.list.response";
 import { FilterEntry } from "../dtos/filter.entry";
 import { ProgrammeViewDto } from "../dtos/programme.view.dto";
+import { ActivityEntity } from "../entities/activity.entity";
+import { ProjectEntity } from "../entities/project.entity";
+import { LinkUnlinkService } from "../util/linkUnlink.service";
 
 @Injectable()
 export class ProgrammeService {
 	constructor(
 		@InjectEntityManager() private entityManager: EntityManager,
 		@InjectRepository(ProgrammeEntity) private programmeRepo: Repository<ProgrammeEntity>,
+		@InjectRepository(ProjectEntity) private projectRepo: Repository<ProjectEntity>,
 		private actionService: ActionService,
 		private counterService: CounterService,
 		private helperService: HelperService,
 		private fileUploadService: FileUploadService,
-		private payloadValidator: PayloadValidator
+		private payloadValidator: PayloadValidator,
+		private linkUnlinkService: LinkUnlinkService,
 
 	) { }
 
@@ -92,6 +97,12 @@ export class ProgrammeService {
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, action.actionId);
 		}
 
+		let projects;
+		if (programmeDto.linkedProjects) {
+			projects = await this.findAllProjectsByIds(programmeDto.linkedProjects);
+
+		}
+
 		const prog = await this.entityManager
 			.transaction(async (em) => {
 				const savedProgramme = await em.save<ProgrammeEntity>(programme);
@@ -101,10 +112,22 @@ export class ProgrammeService {
 							await em.save<KpiEntity>(kpi)
 						});
 					}
-
 					eventLog.forEach(async event => {
 						await em.save<LogEntity>(event);
 					});
+					// linking projects and updating paths of projects and activities
+					if (projects && projects.length > 0) {
+						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programmeDto, user, em);
+					}
+
+					// if (programmeDto.linkedProjects) {
+					// 	await this.projectService.linkProjectsToProgramme({
+					// 		programmeId: savedProgramme.programmeId,
+					// 		projectIds: programmeDto.linkedProjects
+
+					// 	}, user)
+					// }
+
 				}
 				return savedProgramme;
 			})
@@ -211,7 +234,7 @@ export class ProgrammeService {
 			);
 		}
 		for (const programme of programmes) {
-			if (user.sector.length > 0) {
+			if (user.sector && user.sector.length > 0) {
 				const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
 				if (commonSectors.length === 0) {
 					throw new HttpException(
@@ -234,26 +257,7 @@ export class ProgrammeService {
 			}
 		}
 
-		const prog = await this.entityManager
-			.transaction(async (em) => {
-				for (const programme of programmes) {
-					programme.action = action;
-					programme.path = action.actionId;
-					const linkedProgramme = await em.save<ProgrammeEntity>(programme);
-
-					if (linkedProgramme) {
-						await em.save<LogEntity>(
-							this.buildLogEntity(
-								LogEventType.LINKED_TO_ACTION,
-								EntityType.PROGRAMME,
-								programme.programmeId,
-								user.id,
-								linkProgrammesDto
-							)
-						);
-					}
-				}
-			});
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto, user, this.entityManager);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 
@@ -278,7 +282,7 @@ export class ProgrammeService {
 		}
 
 		for (const programme of programmes) {
-			if (user.sector.length > 0) {
+			if (user.sector && user.sector.length > 0) {
 				const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
 				if (commonSectors.length === 0) {
 					throw new HttpException(
@@ -300,27 +304,8 @@ export class ProgrammeService {
 				);
 			}
 		}
+		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programmes, unlinkProgrammesDto, user, this.entityManager);
 
-		const prog = await this.entityManager
-			.transaction(async (em) => {
-				for (const programme of programmes) {
-					programme.action = null;
-					programme.path = "";
-					const linkedProgramme = await em.save<ProgrammeEntity>(programme);
-
-					if (linkedProgramme) {
-						await em.save<LogEntity>(
-							this.buildLogEntity(
-								LogEventType.UNLINKED_FROM_ACTION,
-								EntityType.PROGRAMME,
-								programme.programmeId,
-								user.id,
-								unlinkProgrammesDto
-							)
-						);
-					}
-				}
-			});
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -332,6 +317,21 @@ export class ProgrammeService {
 	async findAllProgrammeByIds(programmeIds: string[]) {
 		return await this.programmeRepo.createQueryBuilder('programme')
 			.leftJoinAndSelect('programme.action', 'action')
+			.leftJoinAndSelect('programme.projects', 'project')
+			.leftJoinAndMapMany(
+				"programme.activities",
+				ActivityEntity,
+				"programmeActivity", // Unique alias for programme activities
+				"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
+				{ programme: EntityType.PROGRAMME }
+			)
+			.leftJoinAndMapMany(
+				"project.activities",
+				ActivityEntity,
+				"projectActivity", // Unique alias for project activities
+				"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
+				{ project: EntityType.PROJECT }
+			)
 			.where('programme.programmeId IN (:...programmeIds)', { programmeIds })
 			.getMany();
 	}
@@ -340,6 +340,20 @@ export class ProgrammeService {
 		return await this.programmeRepo.findOneBy({
 			programmeId
 		})
+	}
+
+	async findAllProjectsByIds(projectIds: string[]) {
+		return await this.projectRepo.createQueryBuilder('project')
+			.leftJoinAndSelect('project.programme', 'programme')
+			.leftJoinAndMapMany(
+				"project.activities",
+				ActivityEntity,
+				"activity",
+				"activity.parentType = :project AND activity.parentId = project.projectId",
+				{ project: EntityType.PROJECT }
+			)
+			.where('project.projectId IN (:...projectIds)', { projectIds })
+			.getMany();
 	}
 
 	private addEventLogEntry = (

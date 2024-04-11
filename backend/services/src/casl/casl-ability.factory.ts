@@ -14,6 +14,7 @@ import { EntitySubject } from "../entities/entity.subject";
 import { Organisation } from "../entities/organisation.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
+import { ProjectEntity } from "src/entities/project.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -51,6 +52,11 @@ export class CaslAbilityFactory {
         can(Action.Create, ProgrammeEntity);
         can(Action.Update, ProgrammeEntity);
         can(Action.Delete, ProgrammeEntity);
+
+				can(Action.Read, ProjectEntity);
+        can(Action.Create, ProjectEntity);
+        can(Action.Update, ProjectEntity);
+        can(Action.Delete, ProjectEntity);
       }
 
       if (user.role == Role.Admin) {
@@ -77,6 +83,11 @@ export class CaslAbilityFactory {
         can(Action.Update, ProgrammeEntity);
         can(Action.Delete, ProgrammeEntity);
 
+				can(Action.Read, ProjectEntity);
+        can(Action.Create, ProjectEntity);
+        can(Action.Update, ProjectEntity);
+        can(Action.Delete, ProjectEntity);
+
       }
 
       if (user.role == Role.GovernmentUser) {        
@@ -102,6 +113,12 @@ export class CaslAbilityFactory {
         can(Action.Create, ProgrammeEntity);
         can(Action.Update, ProgrammeEntity);
         can(Action.Delete, ProgrammeEntity);
+
+				can(Action.Read, ProjectEntity);
+        can(Action.Create, ProjectEntity);
+        can(Action.Update, ProjectEntity);
+        can(Action.Delete, ProjectEntity);
+
       }
 
       if (user.role == Role.Observer) {
@@ -127,6 +144,11 @@ export class CaslAbilityFactory {
         cannot(Action.Create, ProgrammeEntity);
         cannot(Action.Update, ProgrammeEntity);
         cannot(Action.Delete, ProgrammeEntity);
+
+				can(Action.Read, ProjectEntity);
+        cannot(Action.Create, ProjectEntity);
+        cannot(Action.Update, ProjectEntity);
+        cannot(Action.Delete, ProjectEntity);
       }
 
 

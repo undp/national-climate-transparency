@@ -19,6 +19,8 @@ import { ProgrammeEntity } from "../entities/programme.entity";
 import { QueryDto } from "../dtos/query.dto";
 import { DataListResponseDto } from "../dtos/data.list.response";
 import { ActionViewEntity } from "../entities/action.view.entity";
+import { ActivityEntity } from "../entities/activity.entity";
+import { LinkUnlinkService } from "../util/linkUnlink.service";
 
 @Injectable()
 export class ActionService {
@@ -29,7 +31,8 @@ export class ActionService {
 		private counterService: CounterService,
 		private helperService: HelperService,
 		private fileUploadService: FileUploadService,
-		private payloadValidator: PayloadValidator
+		private payloadValidator: PayloadValidator,
+		private linkUnlinkService: LinkUnlinkService
 	) { }
 
 	async createAction(actionDto: ActionDto, user: User) {
@@ -40,24 +43,9 @@ export class ActionService {
 		action.actionId = 'A' + await this.counterService.incrementCount(CounterType.ACTION, 3);
 
 		const linkedProgrammeList = [];
-
+		let programmes;
 		if (actionDto.linkedProgrammes) {
-			const programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
-
-			for (const programme of programmes) {
-				if (programme.action) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"programme.programmeAlreadyLinked",
-							[programme.programmeId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				}
-				programme.action = action;
-				programme.path = action.actionId;
-				linkedProgrammeList.push(programme);
-			}
+			programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
 		}
 
 		// upload the documents and create the doc array here
@@ -94,10 +82,8 @@ export class ActionService {
 				const savedAction = await em.save<ActionEntity>(action);
 				if (savedAction) {
 					// link programmes here
-					if (actionDto.linkedProgrammes) {
-						linkedProgrammeList.forEach(async programme => {
-							await em.save<ProgrammeEntity>(programme);
-						})
+					if (programmes && programmes.length > 0) {
+						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, actionDto, user, em);
 					}
 					if (actionDto.kpis) {
 						kpiList.forEach(async kpi => {
@@ -142,6 +128,21 @@ export class ActionService {
 	async findAllProgrammeByIds(programmeIds: string[]) {
 		return await this.programmeRepo.createQueryBuilder('programme')
 			.leftJoinAndSelect('programme.action', 'action')
+			.leftJoinAndSelect('programme.projects', 'project')
+			.leftJoinAndMapMany(
+				"programme.activities",
+				ActivityEntity,
+				"programmeActivity", // Unique alias for programme activities
+				"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
+				{ programme: EntityType.PROGRAMME }
+			)
+			.leftJoinAndMapMany(
+				"project.activities",
+				ActivityEntity,
+				"projectActivity", // Unique alias for project activities
+				"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
+				{ project: EntityType.PROJECT }
+			)
 			.where('programme.programmeId IN (:...programmeIds)', { programmeIds })
 			.getMany();
 	}

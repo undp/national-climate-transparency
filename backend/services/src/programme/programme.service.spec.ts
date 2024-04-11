@@ -26,17 +26,19 @@ import { ProjectEntity } from "../entities/project.entity";
 import { ProjectType } from "../enums/project.enum";
 import { QueryDto } from "../dtos/query.dto";
 import { FilterEntry } from "../dtos/filter.entry";
+import { LinkUnlinkService } from "../util/linkUnlink.service";
 
 describe('ProgrammeService', () => {
 	let service: ProgrammeService;
 	let entityManagerMock: Partial<EntityManager>;
 	let programmeRepositoryMock: Partial<Repository<ProgrammeEntity>>;
-	// let organisationServiceMock: Partial<OrganisationService>;
+	let projectRepositoryMock: Partial<Repository<ProjectEntity>>;
 	let actionServiceMock: Partial<ActionService>;
 	let counterServiceMock: Partial<CounterService>;
 	let helperServiceMock: Partial<HelperService>;
 	let fileUploadServiceMock: Partial<FileUploadService>;
 	let payloadValidatorMock: Partial<PayloadValidator>;
+	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -70,6 +72,12 @@ describe('ProgrammeService', () => {
 			validateKpiPayload: jest.fn(),
 		};
 
+		linkUnlinkServiceMock = {
+			linkProgrammesToAction: jest.fn(),
+			linkProjectsToProgramme: jest.fn(),
+			unlinkProgrammesFromAction: jest.fn(),
+		}
+
 		programmeRepositoryMock = {
 			createQueryBuilder: jest.fn(() => ({
 				where: jest.fn().mockReturnThis(),
@@ -79,6 +87,17 @@ describe('ProgrammeService', () => {
 				limit: jest.fn().mockReturnThis(),
 				getManyAndCount: jest.fn(),
 			})) as unknown as () => SelectQueryBuilder<ProgrammeEntity>,
+		};
+
+		projectRepositoryMock = {
+			createQueryBuilder: jest.fn(() => ({
+				where: jest.fn().mockReturnThis(),
+				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				orderBy: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				getManyAndCount: jest.fn(),
+			})) as unknown as () => SelectQueryBuilder<ProjectEntity>,
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -115,6 +134,14 @@ describe('ProgrammeService', () => {
 				{
 					provide: getRepositoryToken(ProgrammeEntity),
 					useValue: programmeRepositoryMock,
+				},
+				{
+					provide: getRepositoryToken(ProjectEntity),
+					useValue: projectRepositoryMock,
+				},
+				{
+					provide: LinkUnlinkService,
+					useValue: linkUnlinkServiceMock,
 				},
 			],
 		}).compile();
@@ -498,7 +525,7 @@ describe('ProgrammeService', () => {
 		expect(result).toEqual(expect.any(DataResponseMessageDto));
 		expect(result.statusCode).toEqual(HttpStatus.OK);
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("programme.programmesLinkedToAction", []);
-		expect(entityManagerMock.transaction).toHaveBeenCalled();
+		expect(linkUnlinkServiceMock.linkProgrammesToAction).toHaveBeenCalled();
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 	});
 
@@ -600,7 +627,7 @@ describe('ProgrammeService', () => {
 		expect(result).toEqual(expect.any(DataResponseMessageDto));
 		expect(result.statusCode).toEqual(HttpStatus.OK);
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("programme.programmesUnlinkedFromAction", []);
-		expect(entityManagerMock.transaction).toHaveBeenCalled();
+		expect(linkUnlinkServiceMock.unlinkProgrammesFromAction).toHaveBeenCalled();
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 	});
 
