@@ -16,6 +16,7 @@ import { FileHandlerModule } from '../file-handler/filehandler.module';
 import { ValidationModule } from '../validation/validation.module';
 import { ProgrammeModule } from 'src/programme/programme.module';
 import { ProjectService } from './project.service';
+import { ProjectViewEntity } from 'src/entities/project.view.entity';
 
 @Module({
 	imports: [
@@ -36,7 +37,8 @@ import { ProjectService } from './project.service';
 			ProjectEntity,
 			AchievementEntity,
 			ActivityEntity,
-			SupportEntity
+			SupportEntity,
+			ProjectViewEntity
 		]),
 		UtilModule,
 		forwardRef(() => ProgrammeModule),

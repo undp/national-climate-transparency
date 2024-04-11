@@ -57,6 +57,12 @@ export class SupportEntity {
   @Column()
   exchRate: number;
 
+	@Column()
+  requiredAmountDomestic: number;
+
+  @Column()
+  receivedAmountDomestic: number;
+
   @ManyToOne(() => ActivityEntity, (activity) => activity.support, {
     nullable: false,
   })
