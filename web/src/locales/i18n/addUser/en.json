@@ -5,8 +5,12 @@
     "addUserSub": "Add new users to the Carbon Registry for your organisation",
     "name": "Name",
     "email": "Email",
-    "role": "Role",
-    "admin": "Admin",
+    "subrole": "Sub Role",
+    "department": "Department",
+    "consultant": "Consultant",
+    "seo": "SEO",
+    "tecRev": "Technical Reviewer",
+    "devPartner": "Development Partner",
     "manager": "Manager",
     "viewer": "Viewer",
     "phoneNo": "Phone Number",
@@ -22,7 +26,11 @@
     "managerToolTip": "Access to all permitted functions except user management",
     "viewerToolTip": "Read-only access to all permitted functionalities",
     "organisationType": "Organisation Type" ,
+    "userRole": "User Role",
     "government": "Government",
-    "department": "Department",
-    "observer": "Observer"
+    "administrator": "Administrator",
+    "observer": "Observer",
+    "sectors" : "Sectors",
+    "sector" : "Sector",
+    "organisation" : "Organisation"
 }

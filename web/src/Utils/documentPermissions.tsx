@@ -25,12 +25,12 @@ export const uploadDocUserPermission = (
     if (
       (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
         (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
-      userInfoState?.userRole !== Role.ViewOnly
+      userInfoState?.userRole !== Role.Observer
     ) {
       permission = true;
     } else if (
       userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
-      userInfoState?.userRole !== Role.ViewOnly
+      userInfoState?.userRole !== Role.Observer
     ) {
       if (programmeOwnerId.includes(String(userInfoState?.companyId))) {
         permission = true;
@@ -45,12 +45,12 @@ export const uploadDocUserPermission = (
       (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
         userInfoState?.companyRole === CompanyRole.CERTIFIER ||
         (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
-      userInfoState?.userRole !== Role.ViewOnly
+      userInfoState?.userRole !== Role.Observer
     ) {
       permission = true;
     } else if (
       userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
-      userInfoState?.userRole !== Role.ViewOnly
+      userInfoState?.userRole !== Role.Observer
     ) {
       if (programmeOwnerId.includes(String(userInfoState?.companyId))) {
         permission = true;
@@ -61,7 +61,7 @@ export const uploadDocUserPermission = (
       (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
         userInfoState?.companyRole === CompanyRole.CERTIFIER ||
         (userInfoState?.companyRole === CompanyRole.MINISTRY && ministryLevelPermission)) &&
-      userInfoState?.userRole !== Role.ViewOnly
+      userInfoState?.userRole !== Role.Observer
     ) {
       permission = true;
     }

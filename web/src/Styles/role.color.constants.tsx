@@ -13,6 +13,9 @@ export const ViewColor = '#707070';
 export const GovBGColor = 'rgba(185, 226, 244, 0.56)';
 export const GovColor = '#16B1FF';
 
+export const ObsBGColor = 'rgba(254, 241, 173, 0.55)';
+export const ObsColor = '#FFA070';
+
 export const DevBGColor = 'rgba(254, 241, 173, 0.55)';
 export const DevColor = '#FFA070';
 

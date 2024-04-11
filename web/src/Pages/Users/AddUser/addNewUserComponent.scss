@@ -72,16 +72,16 @@
       }
       .details-part-two {
         .role-group {
-          .ant-radio-group {
-            justify-content: space-around;
-          }
-          .department-radio-container {
-            width: 45%;
+          // .ant-radio-group {
+          //   justify-content: space-between;
+          // }
+          .administrator-radio-container {
+            width: 30%;
             .ant-radio-button-wrapper-checked:not(
                 .ant-radio-button-wrapper-disabled
               ) {
-              color: $dev-color !important;
-              border-color: $dev-color !important;
+              color: $admin-color !important;
+              border-color: $admin-color !important;
               box-shadow: none;
             }
 
@@ -89,11 +89,11 @@
               background: #eeeeee;
               border-radius: 50px;
               padding: 0.2rem;
-              color: $dev-color;
+              color: $admin-color;
             }
           }
           .government-radio-container {
-            width: 45%;
+            width: 30%;
             .ant-radio-button-wrapper-checked:not(
                 .ant-radio-button-wrapper-disabled
               ) {
@@ -109,46 +109,67 @@
               color: $gov-color;
             }
           }
-          .admin-radio-container {
-            width: 45%;
+          .observer-radio-container {
+            width: 30%;
             .ant-radio-button-wrapper-checked:not(
                 .ant-radio-button-wrapper-disabled
               ) {
-              color: $admin-color !important;
-              border-color: $admin-color !important;
+              color: $obs-color !important;
+              border-color: $obs-color !important;
+              box-shadow: none;
+            }
+
+            .anticon {
+              background: #eeeeee;
+              border-radius: 50px;
+              padding: 0.2rem;
+              color: $obs-color;
+            }
+          }
+          .department-radio-container {
+            width: 30%;
+            text-align: center;
+            .ant-radio-button-wrapper-checked:not(
+                .ant-radio-button-wrapper-disabled
+              ) {
+              color: $subrole-color !important;
+              border-color: $subrole-color !important;
               box-shadow: none;
               .anticon {
                 background: $anticon-roles-bg;
                 border-radius: 50px;
                 padding: 0.2rem;
-                color: $admin-color;
+                color: $subrole-color;
+                text-align: center;
               }
             }
           }
-          .manager-radio-container {
+          .consultant-radio-container {
             width: 30%;
+            text-align: center;
             .ant-radio-button-wrapper-checked:not(
                 .ant-radio-button-wrapper-disabled
               ) {
-              color: $manager-color !important;
-              border-color: $manager-color !important;
+              color: $subrole-color !important;
+              border-color: $subrole-color !important;
               box-shadow: none;
 
               .anticon {
                 background: $anticon-roles-bg;
                 border-radius: 50px;
                 padding: 0.2rem;
-                color: $manager-color;
+                color: $subrole-color;
               }
             }
           }
-          .view-only-radio-container {
-            width: 45%;
+          .seo-radio-container {
+            width: 30%;
+            text-align: center;
             .ant-radio-button-wrapper-checked:not(
                 .ant-radio-button-wrapper-disabled
               ) {
-              color: $view-color !important;
-              border-color: $view-color !important;
+              color: $subrole-color !important;
+              border-color: $subrole-color !important;
               box-shadow: none;
             }
 
@@ -156,7 +177,43 @@
               background: $anticon-roles-bg;
               border-radius: 50px;
               padding: 0.2rem;
-              color: $view-color;
+              color: $subrole-color;
+            }
+          }
+          .tec-rev-radio-container {
+            width: 47.5%;
+            text-align: center;
+            .ant-radio-button-wrapper-checked:not(
+                .ant-radio-button-wrapper-disabled
+              ) {
+              color: $subrole-color !important;
+              border-color: $subrole-color !important;
+              box-shadow: none;
+            }
+
+            .anticon {
+              background: $anticon-roles-bg;
+              border-radius: 50px;
+              padding: 0.2rem;
+              color: $subrole-color;
+            }
+          }
+          .dev-partner-radio-container {
+            width: 47.5%;
+            text-align: center;
+            .ant-radio-button-wrapper-checked:not(
+                .ant-radio-button-wrapper-disabled
+              ) {
+              color: $subrole-color !important;
+              border-color: $subrole-color !important;
+              box-shadow: none;
+            }
+
+            .anticon {
+              background: $anticon-roles-bg;
+              border-radius: 50px;
+              padding: 0.2rem;
+              color: $subrole-color;
             }
           }
           .ant-radio-button-wrapper::before {
@@ -173,22 +230,41 @@
             margin-right: 0.5rem;
           }
 
-          .admin {
+          .department {
+            width: 100%;
+            .ant-radio-button-checked {
+              background: $subrole-bg-color;
+            }
+          }
+          .consultant {
+            width: 100%;
+            .ant-radio-button-checked {
+              background: $subrole-bg-color;
+            }
+          }
+          .seo {
+            width: 100%;
+            .ant-radio-button-checked {
+              background: $subrole-bg-color;
+            }
+          }
+          .tec-rev {
+            width: 100%;
+            .ant-radio-button-checked {
+              background: $subrole-bg-color;
+            }
+          }
+          .dev-partner {
+            width: 100%;
+            .ant-radio-button-checked {
+              background: $subrole-bg-color;
+            }
+          }
+          .administrator {
             width: 100%;
             .ant-radio-button-checked {
               background: $admin-bg-color;
-            }
-          }
-          .manager {
-            width: 100%;
-            .ant-radio-button-checked {
-              background: $manager-bg-color;
-            }
-          }
-          .view-only {
-            width: 100%;
-            .ant-radio-button-checked {
-              background: $view-bg-color;
+              color: $admin-color;
             }
           }
           .government {
@@ -198,11 +274,11 @@
               color: $gov-color;
             }
           }
-          .department {
+          .observer {
             width: 100%;
             .ant-radio-button-checked {
-              background: $dev-bg-color;
-              color: $dev-color;
+              background: $obs-bg-color;
+              color: $obs-color;
             }
           }
         }

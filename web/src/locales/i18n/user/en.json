@@ -4,7 +4,7 @@
     "phone": "PHONE",
     "company": "ORGANISATION",
     "companyRole": "ORGANISATION TYPE",
-    "role": "ROLE",
+    "role": "USER ROLE",
     "addUser": "Add User",
     "viewUsers": "View Users",
     "viewDesc": "View the users registered with the Carbon Registry based on your permissions",
@@ -13,6 +13,6 @@
     "deactivateConfirmHeaderText": "Are you sure you want to deactivate this User?",
     "deactivateConfirmText": "Note: Please provide any remarks for deactivation in the field below. ",
     "searchBy": "Search by",
-    "filterByRole": "Filter by Role",
+    "filterByRole": "Filter by User Role",
     "filterByCompanyRole": "Filter by Organisation Type"
 }

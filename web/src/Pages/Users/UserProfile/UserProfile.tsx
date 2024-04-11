@@ -4,20 +4,21 @@ import { useUserContext } from '../../../Context/UserInformationContext/userInfo
 import { useEffect, useState } from 'react';
 import { Row, Col, Card, Button, Skeleton } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
+import { PersonCircle } from 'react-bootstrap-icons';
 import { CompanyDetailsComponent } from '../../../Components/CompanyDetails/companyDetailsComponent';
 import { UserRoleIcon } from '../../../Components/UserRoleIcon/userRoleIcon';
 import LanguageSelection from '../../../Components/LanguageSelection/languageSelection';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
+import './userProfileComponent.scss';
 
 const CompanyProfile = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation(['userProfile', 'companyDetails']);
 
-  const onNavigateUpdateUser = (organisationDetails: any, userDetails: any) => {
+  const onNavigateUpdateUser = (userDetails: any) => {
     navigate('/userManagement/updateUser', {
       state: {
         record: {
-          organisation: organisationDetails,
           ...userDetails,
         },
       },
@@ -28,8 +29,25 @@ const CompanyProfile = () => {
     navigate('/login', { replace: true });
   };
 
+  const getsubRoleComponent = (subRole: any) => {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
+        {subRole === 'GovernmentDepartment'
+          ? 'Government Department'
+          : subRole === 'Consultant'
+          ? 'Consultant'
+          : subRole === 'SEO'
+          ? 'Seo'
+          : subRole === 'TechnicalReviewer'
+          ? 'Technical Reviewer'
+          : subRole === 'DevelopmentPartner'
+          ? 'Development Partner'
+          : subRole}
+      </div>
+    );
+  };
+
   const { get } = useConnection();
-  const [organisationDetails, setOrganisationDetails] = useState<any>(undefined);
   const [userDetails, setUserDetails] = useState<any>(undefined);
   const { updateToken } = useConnection();
   const { removeUserInfo } = useUserContext();
@@ -44,9 +62,9 @@ const CompanyProfile = () => {
   const getUserProfileDetails = async () => {
     try {
       setIsLoading(true);
-      const response = await get('national/User/profile');
+      const response = await get('national/Users/profile');
+      console.log(response.data);
       if (response.data) {
-        setOrganisationDetails(response.data.Organisation);
         setUserDetails(response.data.user);
         setIsLoading(false);
       }
@@ -73,12 +91,12 @@ const CompanyProfile = () => {
             <Button className="mg-left-1 btn-danger mg-bottom-1" onClick={() => signOut()}>
               {t('userProfile:logOut')}
             </Button>
-            {userDetails && organisationDetails && (
+            {userDetails && (
               <Button
                 className="mg-left-1 mg-bottom-1"
                 type="primary"
                 onClick={() => {
-                  onNavigateUpdateUser(organisationDetails, userDetails);
+                  onNavigateUpdateUser(userDetails);
                 }}
               >
                 {t('userProfile:edit')}
@@ -89,23 +107,24 @@ const CompanyProfile = () => {
         </Col>
       </Row>
 
-      {(!userDetails || !organisationDetails) && (
+      {!userDetails && (
         <div className="content-body">
           <Skeleton active loading={true}></Skeleton>
         </div>
       )}
-      {userDetails && organisationDetails && (
+      {userDetails && (
         <div className="content-body">
           <Row gutter={16}>
             <Col md={24} lg={8}>
               <Card className="card-container">
                 <Row justify="center">
                   <Skeleton loading={isLoading} active>
-                    <img className="profile-img" alt="profile-img" src={organisationDetails.logo} />
+                    {/* <img className="profile-img" alt="profile-img" src={userDetails.logo} /> */}
+                    <PersonCircle color="#3A354199" size={100} />
                   </Skeleton>
                 </Row>
                 <Row justify="center">
-                  <div className=" company-name mg-top-1">{organisationDetails.name}</div>
+                  <div className=" company-name mg-top-1">{userDetails.name}</div>
                 </Row>
               </Card>
             </Col>
@@ -137,30 +156,58 @@ const CompanyProfile = () => {
                     </Row>
                     <Row className="field">
                       <Col span={12} className="field-key">
-                        {t('userProfile:role')}
-                      </Col>
-                      <Col span={12} className="field-value">
-                        <UserRoleIcon role={userDetails.role} />
-                      </Col>
-                    </Row>
-                    <Row className="field">
-                      <Col span={12} className="field-key">
                         {t('userProfile:phoneNo')}
                       </Col>
                       <Col span={12} className="field-value">
                         {userDetails.phoneNo ? userDetails.phoneNo : '-'}
                       </Col>
                     </Row>
+                    <Row className="field">
+                      <Col span={12} className="field-key">
+                        {t('userProfile:role')}
+                      </Col>
+                      <Col span={12} className="field-value">
+                        <UserRoleIcon role={userDetails.role} />
+                      </Col>
+                    </Row>
+                    {userDetails.role !== 'Admin' && (
+                      <Row className="field">
+                        <Col span={12} className="field-key">
+                          {t('userProfile:subRole')}
+                        </Col>
+                        <Col span={12} className="field-value">
+                          {userDetails.subRole ? getsubRoleComponent(userDetails.subRole) : '-'}
+                        </Col>
+                      </Row>
+                    )}
+                    <Row className="field">
+                      <Col span={12} className="field-key">
+                        {t('userProfile:organisation')}
+                      </Col>
+                      <Col span={12} className="field-value">
+                        {userDetails.organisation ? userDetails.organisation : '-'}
+                      </Col>
+                    </Row>
+                    {userDetails.role !== 'Admin' && (
+                      <Row className="field">
+                        <Col span={12} className="field-key">
+                          {t('userProfile:sector')}
+                        </Col>
+                        <Col span={12} className="field-value">
+                          {userDetails.sector ? userDetails.sector.join(', ') : '-'}
+                        </Col>
+                      </Row>
+                    )}
                   </Skeleton>
                 </div>
               </Card>
-              <CompanyDetailsComponent
+              {/* <CompanyDetailsComponent
                 t={t}
                 companyDetails={organisationDetails}
                 userDetails={userDetails}
                 isLoading={isLoading}
                 regionField
-              />
+              /> */}
             </Col>
           </Row>
         </div>

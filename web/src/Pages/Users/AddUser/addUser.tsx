@@ -18,8 +18,10 @@ import { plainToClass } from 'class-transformer';
 import { User } from '../../../Entities/user';
 import ChangePasswordModel from '../../../Components/Models/changePasswordModel';
 import { Role } from '../../../Enums/role.enum';
+import { Sector } from '../../../Enums/sector.enum';
+import { Organisation } from '../../../Enums/organisation.enum';
 import { BankOutlined, ExperimentOutlined, EyeOutlined, StarOutlined } from '@ant-design/icons';
-import { OrganisationType } from '../../../Definitions/organisation.type.enum';
+// import { OrganisationType } from '../../../Definitions/organisation.type.enum';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -50,14 +52,15 @@ const AddUser = () => {
   const ability = useAbilityContext();
   const [countries, setCountries] = useState<[]>([]);
   const [isCountryListLoading, setIsCountryListLoading] = useState(false);
-  const [organisationType, setOrganisationType] = useState(state?.record?.organisationType);
+  // const [organisationType, setOrganisationType] = useState(state?.record?.organisationType);
   const [orgList, setOrgList] = useState<Record<number, string>>([]);
   const [governmentInfo, setGovernmentInfo] = useState<any>();
+  const [role, setrole] = useState(state?.record?.role);
 
   const getCountryList = async () => {
     setIsCountryListLoading(true);
     try {
-      const response = await get('national/organisation/countries');
+      const response = await get('national/users/countries');
       if (response.data) {
         const alpha2Names = response.data.map((item: any) => {
           return item.alpha2;
@@ -85,13 +88,13 @@ const AddUser = () => {
       } else {
         values.phoneNo = undefined;
       }
-      if (organisationType === OrganisationType.GOVERNMENT) {
-        values.organisationId = governmentInfo?.organisationId;
-      } else {
-        values.organisationId = parseInt(values.department);
-        values.role = Role.DepartmentUser;
-      }
-      const response = await post('national/user/add', values);
+      // if (organisationType === OrganisationType.GOVERNMENT) {
+      //   values.organisationId = governmentInfo?.organisationId;
+      // } else {
+      //   values.organisationId = parseInt(values.department);
+      //   values.role = Role.DepartmentUser;
+      // }
+      const response = await post('national/users/add', values);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
@@ -124,6 +127,9 @@ const AddUser = () => {
         id: state?.record?.id,
         name: formOneValues?.name,
         phoneNo: formOneValues?.phoneNo,
+        organisation: formOneValues?.organisation,
+        sector: formOneValues?.sector,
+        subRole: formOneValues?.subRole,
       };
 
       if (ability.can(Action.Update, plainToClass(User, state?.record), 'role'))
@@ -133,7 +139,7 @@ const AddUser = () => {
         values.email = formOneValues?.email;
 
       console.log('form one values   -- > ', values, state.record);
-      const response = await put('national/user/update', values);
+      const response = await put('national/users/update', values);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
@@ -171,7 +177,7 @@ const AddUser = () => {
   const onPasswordChangeCompleted = async (props: any) => {
     setIsLoading(true);
     try {
-      const response = await put('national/user/resetPassword', {
+      const response = await put('national/users/resetPassword', {
         newPassword: props.newPassword,
         oldPassword: props.oldPassword,
       });
@@ -205,67 +211,72 @@ const AddUser = () => {
     setErrorMsg('');
   };
 
-  const onChangeOrganisationType = (event: any) => {
+  // const onChangeOrganisationType = (event: any) => {
+  //   const value = event.target.value;
+  //   setOrganisationType(value);
+  // };
+
+  const onChangeUserRole = (event: any) => {
     const value = event.target.value;
-    setOrganisationType(value);
+    setrole(value);
   };
 
-  const getDepartments = async () => {
-    setLoadingList(true);
-    try {
-      const response = await post('national/organisation/query', {
-        filterAnd: [
-          {
-            key: 'organisationType',
-            operation: '=',
-            value: 'Department',
-          },
-        ],
-      });
-      if (response.data) {
-        const orgNamesMap: Record<number, string> = response.data.reduce(
-          (acc: Record<number, string>, item: any) => {
-            acc[item.organisationId] = item.name;
-            return acc;
-          },
-          {}
-        );
-        // const uniqueRegionNames: any = Array.from(new Set(regionNames));
-        setOrgList(orgNamesMap);
-      }
-    } catch (error: any) {
-      console.log('Error in getting organisation list', error);
-    } finally {
-      setLoadingList(false);
-    }
-  };
+  // const getDepartments = async () => {
+  //   setLoadingList(true);
+  //   try {
+  //     const response = await post('national/organisation/query', {
+  //       filterAnd: [
+  //         {
+  //           key: 'organisationType',
+  //           operation: '=',
+  //           value: 'Department',
+  //         },
+  //       ],
+  //     });
+  //     if (response.data) {
+  //       const orgNamesMap: Record<number, string> = response.data.reduce(
+  //         (acc: Record<number, string>, item: any) => {
+  //           acc[item.organisationId] = item.name;
+  //           return acc;
+  //         },
+  //         {}
+  //       );
+  //       // const uniqueRegionNames: any = Array.from(new Set(regionNames));
+  //       setOrgList(orgNamesMap);
+  //     }
+  //   } catch (error: any) {
+  //     console.log('Error in getting organisation list', error);
+  //   } finally {
+  //     setLoadingList(false);
+  //   }
+  // };
 
-  const getGovernment = async () => {
-    setLoadingList(true);
-    try {
-      const response = await post('national/organisation/query', {
-        filterAnd: [
-          {
-            key: 'organisationType',
-            operation: '=',
-            value: 'Government',
-          },
-        ],
-      });
-      if (response.data) {
-        setGovernmentInfo(response.data[0]);
-      }
-    } catch (error: any) {
-      console.log('Error in getting government information', error);
-    } finally {
-      setLoadingList(false);
-    }
-  };
+  // const getGovernment = async () => {
+  //   setLoadingList(true);
+  //   try {
+  //     const response = await post('national/organisation/query', {
+  //       filterAnd: [
+  //         {
+  //           key: 'organisationType',
+  //           operation: '=',
+  //           value: 'Government',
+  //         },
+  //       ],
+  //     });
+  //     if (response.data) {
+  //       setGovernmentInfo(response.data[0]);
+  //     }
+  //   } catch (error: any) {
+  //     console.log('Error in getting government information', error);
+  //   } finally {
+  //     setLoadingList(false);
+  //   }
+  // };
 
   useEffect(() => {
     getCountryList();
-    getDepartments();
-    getGovernment();
+    // getDepartments();
+    // getGovernment();
     setIsUpdate(state?.record ? true : false);
   }, []);
 
@@ -408,119 +419,211 @@ const AddUser = () => {
                     </Form.Item>
                   )}
                 </Skeleton>
+                <Form.Item
+                  label={t('addUser:organisation')}
+                  initialValue={state?.record?.organisation}
+                  name="organisation"
+                  rules={[
+                    {
+                      required: true,
+                      message: `${t('addUser:organisation')} ${t('isRequired')}`,
+                    },
+                  ]}
+                >
+                  <Select
+                    size="large"
+                    // style={{ fontSize: inputFontSize }}
+                    allowClear
+                    showSearch
+                  >
+                    {Object.values(Organisation).map((instrument) => (
+                      <Select.Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                  {/* rules={[
+                    {
+                      required: true,
+                      message: '',
+                    },
+                    {
+                      validator: async (rule, value) => {
+                        if (
+                          String(value).trim() === '' ||
+                          String(value).trim() === undefined ||
+                          value === null ||
+                          value === undefined
+                        ) {
+                          throw new Error(
+                            `${t('addUser:organisation')} ${t('addUser:isRequired')}`
+                          );
+                        }
+                      },
+                    },
+                  ]}
+                >
+                  <Input size="large" /> */}
+                </Form.Item>
               </div>
             </Col>
             <Col xl={12} md={24}>
               <div className="details-part-two">
                 <Form.Item
                   className="role-group"
-                  label={t('addUser:organisationType')}
-                  initialValue={state?.record?.organisationType}
-                  name="organisationType"
+                  label={t('addUser:userRole')}
+                  initialValue={state?.record?.role}
+                  name="role"
                   rules={[
                     {
                       required: true,
-                      message: `${t('addUser:organisationType')} ${t('addUser:isRequired')}`,
+                      message: `${t('addUser:userRole')} ${t('addUser:isRequired')}`,
                     },
                   ]}
                 >
                   <Radio.Group
-                    value={state?.record?.organisationType}
+                    value={state?.record?.role}
                     size="large"
                     disabled={
                       isUpdate &&
-                      !ability.can(
-                        Action.Update,
-                        plainToClass(User, state?.record),
-                        'organisationType'
-                      )
+                      !ability.can(Action.Update, plainToClass(User, state?.record), 'role')
                     }
-                    onChange={onChangeOrganisationType}
+                    onChange={onChangeUserRole}
                   >
+                    <div className="administrator-radio-container">
+                      {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
+                      <Radio.Button className="administrator" value="Admin">
+                        <StarOutlined className="role-icons" />
+                        {t('addUser:administrator')}
+                      </Radio.Button>
+                      {/* </Tooltip> */}
+                    </div>
                     <div className="government-radio-container">
                       {/* <Tooltip placement="top" title={t('addUser:adminToolTip')}> */}
-                      <Radio.Button className="government" value="Government">
+                      <Radio.Button className="government" value="GovernmentUser">
                         <BankOutlined className="role-icons" />
                         {t('addUser:government')}
                       </Radio.Button>
                       {/* </Tooltip> */}
                     </div>
-                    <div className="department-radio-container">
+                    <div className="observer-radio-container">
                       {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
-                      <Radio.Button className="department" value="Department">
+                      <Radio.Button className="observer" value="Observer">
                         <ExperimentOutlined className="role-icons" />
-                        {t('addUser:department')}
+                        {t('addUser:observer')}
                       </Radio.Button>
                       {/* </Tooltip> */}
                     </div>
                   </Radio.Group>
                 </Form.Item>
 
-                {organisationType === OrganisationType.GOVERNMENT && (
+                {role === Role.GovernmentUser && (
                   <Form.Item
                     className="role-group"
-                    label={t('addUser:role')}
-                    initialValue={state?.record?.role}
-                    name="role"
+                    label={t('addUser:subrole')}
+                    initialValue={state?.record?.subRole}
+                    name="subRole"
                     rules={[
                       {
                         required: true,
-                        message: `${t('addUser:role')} ${t('addUser:isRequired')}`,
+                        message: `${t('addUser:subrole')} ${t('addUser:isRequired')}`,
                       },
                     ]}
                   >
                     <Radio.Group
-                      value={state?.record?.role}
+                      value={state?.record?.subRole}
                       size="large"
                       disabled={
                         isUpdate &&
-                        !ability.can(Action.Update, plainToClass(User, state?.record), 'role')
+                        !ability.can(Action.Update, plainToClass(User, state?.record), 'subRole')
                       }
                     >
-                      <div className="admin-radio-container">
-                        <Tooltip placement="top" title={t('addUser:adminToolTip')}>
-                          <Radio.Button className="admin" value="Admin">
-                            <StarOutlined className="role-icons" />
-                            {t('addUser:admin')}
-                          </Radio.Button>
-                        </Tooltip>
+                      <div className="department-radio-container">
+                        {/* <Tooltip placement="top" title={t('addUser:adminToolTip')}> */}
+                        <Radio.Button className="department" value="GovernmentDepartment">
+                          {t('addUser:department')}
+                        </Radio.Button>
+                        {/* </Tooltip> */}
                       </div>
-                      <div className="view-only-radio-container">
-                        <Tooltip placement="top" title={t('addUser:viewerToolTip')}>
-                          <Radio.Button className="view-only" value="ViewOnly">
-                            <EyeOutlined className="role-icons" />
-                            {t('addUser:observer')}
-                          </Radio.Button>
-                        </Tooltip>
+                      <div className="consultant-radio-container">
+                        {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
+                        <Radio.Button className="consultant" value="Consultant">
+                          {t('addUser:consultant')}
+                        </Radio.Button>
+                        {/* </Tooltip> */}
+                      </div>
+                      <div className="seo-radio-container">
+                        {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
+                        <Radio.Button className="seo" value="SEO">
+                          {t('addUser:seo')}
+                        </Radio.Button>
+                        {/* </Tooltip> */}
                       </div>
                     </Radio.Group>
                   </Form.Item>
                 )}
-                {organisationType === OrganisationType.DEPARTMENT && (
+                {role === Role.Observer && (
                   <Form.Item
-                    label={t('addUser:department')}
-                    name="department"
-                    initialValue={state?.record?.organisation?.name}
+                    className="role-group"
+                    label={t('addUser:subrole')}
+                    initialValue={state?.record?.subRole}
+                    name="subRole"
                     rules={[
                       {
                         required: true,
-                        message: `${t('addCompany:department')} ${t('isRequired')}`,
+                        message: `${t('addUser:subrole')} ${t('addUser:isRequired')}`,
                       },
                     ]}
                   >
-                    <Select size="large" loading={loadingList}>
-                      {Object.keys(orgList).map((orgId: any) => {
-                        const orgName = orgList[orgId];
-                        return (
-                          <Select.Option
-                            key={orgId}
-                            value={orgId}
-                            selected={orgId === state?.record?.organisationId}
-                          >
-                            {orgName}
-                          </Select.Option>
-                        );
-                      })}
+                    <Radio.Group
+                      value={state?.record?.subRole}
+                      size="large"
+                      disabled={
+                        isUpdate &&
+                        !ability.can(Action.Update, plainToClass(User, state?.record), 'subRole')
+                      }
+                    >
+                      <div className="tec-rev-radio-container">
+                        {/* <Tooltip placement="top" title={t('addUser:adminToolTip')}> */}
+                        <Radio.Button className="tec-rev" value="TechnicalReviewer">
+                          {t('addUser:tecRev')}
+                        </Radio.Button>
+                        {/* </Tooltip> */}
+                      </div>
+                      <div className="dev-partner-radio-container">
+                        {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
+                        <Radio.Button className="dev-partner" value="DevelopmentPartner">
+                          {t('addUser:devPartner')}
+                        </Radio.Button>
+                        {/* </Tooltip> */}
+                      </div>
+                    </Radio.Group>
+                  </Form.Item>
+                )}
+                {(role === Role.GovernmentUser || role === Role.Observer) && (
+                  <Form.Item
+                    label={t('addUser:sectors')}
+                    initialValue={state?.record?.sector}
+                    name="sector"
+                    rules={[
+                      {
+                        required: true,
+                        message: `${t('addUser:sector')} ${t('isRequired')}`,
+                      },
+                    ]}
+                  >
+                    <Select
+                      size="large"
+                      // style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      showSearch
+                    >
+                      {Object.values(Sector).map((instrument) => (
+                        <Select.Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Select.Option>
+                      ))}
                     </Select>
                   </Form.Item>
                 )}

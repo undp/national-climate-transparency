@@ -351,7 +351,7 @@ const ProgrammeView = () => {
               data &&
               userInfoState?.companyRole === CompanyRole.MINISTRY &&
               ministrySectoralScope.includes(data.sectoralScope) &&
-              userInfoState?.userRole !== Role.ViewOnly
+              userInfoState?.userRole !== Role.Observer
             }
             translator={i18n}
           />
@@ -544,7 +544,7 @@ const ProgrammeView = () => {
           data.companyId.map((e) => Number(e)).includes(userInfoState?.companyId)) ||
         (userInfoState?.companyRole === CompanyRole.MINISTRY &&
           ministrySectoralScope.includes(data.sectoralScope))) &&
-      userInfoState?.userRole !== Role.ViewOnly
+      userInfoState?.userRole !== Role.Observer
     ) {
       actionBtns.push(
         <Button

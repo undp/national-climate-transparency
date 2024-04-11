@@ -44,7 +44,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
     // getItem(t('nav:ghgInventory'), 'ghg-inventory', <BankOutlined />),
     getItem(t('nav:reporting'), 'reportings', <ClipboardMinus />),
     getItem(t('nav:faq'), 'faqs', <Headset />),
-    getItem(t('nav:companies'), 'companyManagement/viewAll', <ShopOutlined />),
+    // getItem(t('nav:companies'), 'companyManagement/viewAll', <ShopOutlined />),
     getItem(t('nav:users'), 'userManagement/viewAll', <UserOutlined />),
     // getItem('Team', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
   ];
