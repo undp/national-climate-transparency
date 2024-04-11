@@ -88,6 +88,7 @@ export enum LogEventType {
 	PROJECT_CREATED = 8,
 	PROJECT_LINKED = 9,
 	LINKED_TO_PROGRAMME = 10,
+	UNLINKED_FROM_PROGRAMME = 11,
 }
 
 export enum GHGS {

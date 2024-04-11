@@ -16,17 +16,22 @@ import { FileUploadService } from "../util/fileUpload.service";
 import { HelperService } from "../util/helpers.service";
 import { PayloadValidator } from "../validation/payload.validator";
 import { EntityManager, Repository } from "typeorm";
+import { LinkProjectsDto } from "../dtos/link.projects.dto";
+import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
+import { ActivityEntity } from "../entities/activity.entity";
+import { LinkUnlinkService } from "../util/linkUnlink.service";
 
 @Injectable()
 export class ProjectService {
 	constructor(
-		@InjectEntityManager() private entityManger: EntityManager,
+		@InjectEntityManager() private entityManager: EntityManager,
 		@InjectRepository(ProjectEntity) private projectRepo: Repository<ProjectEntity>,
-		private programmeService: ProgrammeService,
+		private readonly programmeService: ProgrammeService,
 		private counterService: CounterService,
 		private helperService: HelperService,
 		private fileUploadService: FileUploadService,
-		private payloadValidator: PayloadValidator
+		private payloadValidator: PayloadValidator,
+		private linkUnlinkService: LinkUnlinkService
 	) { }
 
 	async createProject(projectDto: ProjectDto, user: User) {
@@ -83,10 +88,10 @@ export class ProjectService {
 			project.programme = programme;
 			project.path = `${programme.path}.${programme.programmeId}`;
 			this.addEventLogEntry(eventLog, LogEventType.PROJECT_LINKED, EntityType.PROGRAMME, programme.programmeId, user.id, project.projectId);
-			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT,project.projectId, user.id, programme.programmeId);
+			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, programme.programmeId);
 		}
 
-		const proj = await this.entityManger
+		const proj = await this.entityManager
 			.transaction(async (em) => {
 				const savedProject = await em.save<ProjectEntity>(project);
 				if (savedProject) {
@@ -113,13 +118,121 @@ export class ProjectService {
 				);
 			});
 
-		await this.helperService.refreshMaterializedViews(this.entityManger);
+		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.CREATED,
 			this.helperService.formatReqMessagesString("project.createProjectSuccess", []),
 			proj
 		);
 
+	}
+
+	async linkProjectsToProgramme(linkProjectsDto: LinkProjectsDto, user: User) {
+		const programme = await this.programmeService.findProgrammeById(linkProjectsDto.programmeId);
+		if (!programme) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.programmeNotFound",
+					[linkProjectsDto.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		const projects = await this.findAllProjectsByIds(linkProjectsDto.projectIds);
+
+		if (!projects || projects.length <= 0) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.projectsNotFound",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		for (const project of projects) {
+			if (project.programme) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.projectAlreadyLinked",
+						[project.projectId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+		}
+		const proj = await this.linkUnlinkService.linkProjectsToProgramme(programme, projects, linkProjectsDto, user, this.entityManager);
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("project.projectsLinkedToProgramme", []),
+			proj
+		);
+
+	}
+
+	async unlinkProjectsFromProgramme(unlinkProjectsDto: UnlinkProjectsDto, user: User) {
+		const projects = await this.findAllProjectsByIds(unlinkProjectsDto.projects);
+
+		if (!projects || projects.length <= 0) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.projectsNotFound",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		for (const project of projects) {
+			if (!project.programme) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.projectIsNotLinked",
+						[project.projectId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+			if (user.sector && user.sector.length > 0) {
+				const commonSectors = project.programme.affectedSectors.filter(sector => user.sector.includes(sector));
+				if (commonSectors.length === 0) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"project.cannotUnlinkNotRelatedProject",
+							[project.projectId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
+			}
+		}
+
+		const proj = await this.linkUnlinkService.unlinkProjectsFromProgramme(projects, unlinkProjectsDto, user, this.entityManager);
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("project.projectsUnlinkedFromProgramme", []),
+			proj
+		);
+
+	}
+
+	async findAllProjectsByIds(projectIds: string[]) {
+		return await this.projectRepo.createQueryBuilder('project')
+			.leftJoinAndSelect('project.programme', 'programme')
+			.leftJoinAndMapMany(
+				"project.activities",
+				ActivityEntity,
+				"activity",
+				"activity.parentType = :project AND activity.parentId = project.projectId", 
+				{ project: EntityType.PROJECT } 
+		)
+			.where('project.projectId IN (:...projectIds)', { projectIds })
+			.getMany();
 	}
 
 	private addEventLogEntry = (

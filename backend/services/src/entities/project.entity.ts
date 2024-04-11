@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { ProjectType, ProjectStatus } from "../enums/project.enum";
 import { Recipient, IntImplementor } from "../enums/shared.enum";
 import { ProgrammeEntity } from "./programme.entity";
+import { ActivityEntity } from "./activity.entity";
 
 
 @Entity("project")
@@ -59,4 +60,6 @@ export class ProjectEntity {
   })
   @JoinColumn([{ name: "programmeId", referencedColumnName: "programmeId" }])
   programme: ProgrammeEntity;
+
+	activities?: ActivityEntity[];
 }

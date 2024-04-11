@@ -17,6 +17,7 @@ import { PayloadValidator } from "../validation/payload.validator";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { QueryDto } from "../dtos/query.dto";
 import { FilterEntry } from "../dtos/filter.entry";
+import { LinkUnlinkService } from "../util/linkUnlink.service";
 
 describe('ActionService', () => {
 	let service: ActionService;
@@ -27,6 +28,7 @@ describe('ActionService', () => {
 	let helperServiceMock: Partial<HelperService>;
 	let fileUploadServiceMock: Partial<FileUploadService>;
 	let payloadValidatorMock: Partial<PayloadValidator>;
+	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -65,6 +67,10 @@ describe('ActionService', () => {
 			validateKpiPayload: jest.fn(),
 		};
 
+		linkUnlinkServiceMock = {
+			linkProgrammesToAction: jest.fn(),
+		}
+
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				ActionService,
@@ -95,6 +101,10 @@ describe('ActionService', () => {
 				{
 					provide: getRepositoryToken(ProgrammeEntity),
 					useValue: programmeRepositoryMock,
+				},
+				{
+					provide: LinkUnlinkService,
+					useValue: linkUnlinkServiceMock,
 				},
 			],
 		}).compile();
@@ -240,6 +250,7 @@ describe('ActionService', () => {
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce("2");
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+		jest.spyOn(linkUnlinkServiceMock, 'linkProgrammesToAction').mockResolvedValue();
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -248,7 +259,7 @@ describe('ActionService', () => {
 			};
 			const savedAction = await callback(emMock);
 
-			expect(emMock.save).toHaveBeenCalledTimes(8);
+			expect(emMock.save).toHaveBeenCalledTimes(5);
 			return savedAction;
 		});
 

@@ -11,6 +11,7 @@ import { Sector } from "../enums/sector.enum";
 import { NatImplementor } from "../enums/shared.enum";
 import { ActionEntity } from "./action.entity";
 import { ProjectEntity } from "./project.entity";
+import { ActivityEntity } from "./activity.entity";
 
 @Entity("programme")
 export class ProgrammeEntity {
@@ -58,4 +59,6 @@ export class ProgrammeEntity {
 
   @OneToMany(() => ProjectEntity, (projectEntity) => projectEntity.programme)
   projects?: ProjectEntity[];
+
+	activities?: ActivityEntity[];
 }

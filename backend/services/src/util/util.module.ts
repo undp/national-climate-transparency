@@ -23,6 +23,7 @@ import { HttpUtilService } from "./http.util.service";
 import { Organisation } from "src/entities/organisation.entity";
 import { FileHandlerModule } from "src/file-handler/filehandler.module";
 import { FileUploadService } from "./fileUpload.service";
+import { LinkUnlinkService } from "./linkUnlink.service";
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { FileUploadService } from "./fileUpload.service";
     PasswordHashService,
     HttpUtilService,
     FileUploadService,
+		LinkUnlinkService,
   ],
   exports: [
     CounterService,
@@ -79,6 +81,7 @@ import { FileUploadService } from "./fileUpload.service";
     PasswordHashService,
     HttpUtilService,
     FileUploadService,
+		LinkUnlinkService,
   ],
 })
 export class UtilModule {}

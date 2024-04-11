@@ -17,6 +17,10 @@ import { ProjectStatus, ProjectType } from "../enums/project.enum";
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { DocumentDto } from "../dtos/document.dto";
 import { KpiDto } from "../dtos/kpi.dto";
+import { LinkProjectsDto } from "../dtos/link.projects.dto";
+import { Sector } from "../enums/sector.enum";
+import { LinkUnlinkService } from "../util/linkUnlink.service";
+import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
 
 describe('ProjectService', () => {
 	let service: ProjectService;
@@ -27,6 +31,7 @@ describe('ProjectService', () => {
 	let helperServiceMock: Partial<HelperService>;
 	let fileUploadServiceMock: Partial<FileUploadService>;
 	let payloadValidatorMock: Partial<PayloadValidator>;
+	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -59,6 +64,11 @@ describe('ProjectService', () => {
 		payloadValidatorMock = {
 			validateKpiPayload: jest.fn(),
 		};
+
+		linkUnlinkServiceMock = {
+			linkProjectsToProgramme: jest.fn(),
+			unlinkProjectsFromProgramme: jest.fn(),
+		}
 
 		projectRepositoryMock = {
 			createQueryBuilder: jest.fn(() => ({
@@ -101,6 +111,10 @@ describe('ProjectService', () => {
 				{
 					provide: getRepositoryToken(ProjectEntity),
 					useValue: projectRepositoryMock,
+				},
+				{
+					provide: LinkUnlinkService,
+					useValue: linkUnlinkServiceMock,
 				},
 			],
 		}).compile();
@@ -312,6 +326,166 @@ describe('ProjectService', () => {
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
+	});
+
+	it('should link projects to programme', async () => {
+		const linkProjectsDto: LinkProjectsDto = { programmeId: '1', projectIds: ['1', '2', '3'] };
+		const user = new User();
+		user.sector = [Sector.Agriculture]
+
+		const programme = new ProgrammeEntity();
+		programme.programmeId = "P1";
+		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+
+		const project1 = new ProjectEntity();
+		project1.projectId = '1';
+		project1.programme = null;
+
+		const project2 = new ProjectEntity();
+		project2.projectId = '2';
+		project2.programme = null;
+
+		const project3 = new ProjectEntity();
+		project3.projectId = '3';
+		project3.programme = null;
+
+		jest.spyOn(service, 'findAllProjectsByIds').mockResolvedValue([project1, project2, project3]);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValue([new ProjectEntity()]),
+			};
+			const updatedProjects = await callback(emMock);
+
+			expect(project1.programme).toBe(programme);
+			expect(project1.path).toBe(programme.programmeId);
+			expect(project2.programme).toBe(programme);
+			expect(project2.path).toBe(programme.programmeId);
+			expect(project3.programme).toBe(programme);
+			expect(project3.path).toBe(programme.programmeId);
+
+			expect(emMock.save).toHaveBeenCalledTimes(6);
+
+			return updatedProjects;
+		});
+
+		const result = await service.linkProjectsToProgramme(linkProjectsDto, user);
+
+		// Assert the returned result
+		expect(result).toEqual(expect.any(DataResponseMessageDto));
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("project.projectsLinkedToProgramme", []);
+		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalled();
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+	});
+
+	it('should unlink projects from programme', async () => {
+		const unlinkProjectsDto: UnlinkProjectsDto = { projects: ['1', '2', '3'] };
+		const user = new User();
+		user.sector = [Sector.Agriculture]
+
+		const programme = new ProgrammeEntity();
+		programme.programmeId = "P1";
+		programme.affectedSectors = [Sector.Agriculture];
+		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+
+		const project1 = new ProjectEntity();
+		project1.projectId = '1';
+		project1.programme = programme;
+
+		const project2 = new ProjectEntity();
+		project2.projectId = '2';
+		project2.programme = programme;
+
+		const project3 = new ProjectEntity();
+		project3.projectId = '3';
+		project3.programme = programme;
+
+		jest.spyOn(service, 'findAllProjectsByIds').mockResolvedValue([project1, project2, project3]);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValue([new ProjectEntity()]),
+			};
+			const updatedProjects = await callback(emMock);
+
+			expect(project1.programme).toBe(programme);
+			expect(project1.path).toBe(programme.programmeId);
+			expect(project2.programme).toBe(programme);
+			expect(project2.path).toBe(programme.programmeId);
+			expect(project3.programme).toBe(programme);
+			expect(project3.path).toBe(programme.programmeId);
+
+			expect(emMock.save).toHaveBeenCalledTimes(6);
+
+			return updatedProjects;
+		});
+
+		const result = await service.unlinkProjectsFromProgramme(unlinkProjectsDto, user);
+
+		// Assert the returned result
+		expect(result).toEqual(expect.any(DataResponseMessageDto));
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("project.projectsUnlinkedFromProgramme", []);
+		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalled();
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+	});
+
+	it('should throw an error if unrelated sector user try to unlink projects from programme', async () => {
+		const unlinkProjectsDto: UnlinkProjectsDto = { projects: ['1', '2', '3'] };
+		const user = new User();
+		user.sector = [Sector.Industry]
+
+		const programme = new ProgrammeEntity();
+		programme.programmeId = "P1";
+		programme.affectedSectors = [Sector.Agriculture];
+		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+
+		const project1 = new ProjectEntity();
+		project1.projectId = '1';
+		project1.programme = programme;
+
+		const project2 = new ProjectEntity();
+		project2.projectId = '2';
+		project2.programme = programme;
+
+		const project3 = new ProjectEntity();
+		project3.projectId = '3';
+		project3.programme = programme;
+
+		jest.spyOn(service, 'findAllProjectsByIds').mockResolvedValue([project1, project2, project3]);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValue([new ProjectEntity()]),
+			};
+			const updatedProjects = await callback(emMock);
+
+			expect(project1.programme).toBe(programme);
+			expect(project1.path).toBe(programme.programmeId);
+			expect(project2.programme).toBe(programme);
+			expect(project2.path).toBe(programme.programmeId);
+			expect(project3.programme).toBe(programme);
+			expect(project3.path).toBe(programme.programmeId);
+
+			expect(emMock.save).toHaveBeenCalledTimes(6);
+
+			return updatedProjects;
+		});
+
+
+		try {
+			await service.unlinkProjectsFromProgramme(unlinkProjectsDto, user);
+		} catch (error) {
+			expect(error).toBeInstanceOf(HttpException);
+			expect(error.status).toBe(HttpStatus.BAD_REQUEST);
+		}
+		// Assert the returned result
+		// expect(result).toEqual(expect.any(DataResponseMessageDto));
+		// expect(result.statusCode).toEqual(HttpStatus.OK);
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("project.cannotUnlinkNotRelatedProject", ["1"]);
+		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toBeCalledTimes(0);
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
 	});
 
 })
