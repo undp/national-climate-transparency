@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { InstrumentType, ActionStatus, NatAnchor } from '../../../Enums/action.enum';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
@@ -56,10 +56,12 @@ const actionForm: React.FC<Props> = ({ method }) => {
   const isView: boolean = method === 'view' ? true : false;
 
   const navigate = useNavigate();
-  const { post } = useConnection();
+  const { get, post } = useConnection();
+  const { entId } = useParams();
 
   // form state
 
+  const [actionData, setActionData] = useState<any>();
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
   );
@@ -100,14 +102,44 @@ const actionForm: React.FC<Props> = ({ method }) => {
     }
     setAllProgramIdList(progIds);
 
-    if (method !== 'create') {
-      const tempFiles: { id: number; title: string; url: string }[] = [];
-      for (let i = 0; i < 6; i++) {
-        tempFiles.push({ id: i, title: `title_${i}.pdf`, url: `url_${i}` });
+    const fetchData = async () => {
+      if (method !== 'create' && entId) {
+        const actionDataResponse: any = await get(`national/actions/${entId}`);
+        setActionData(actionDataResponse.data);
       }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (actionData) {
+      console.log(actionData);
+      form.setFieldsValue({
+        // Entity Data
+        title: actionData.title,
+        description: actionData.description,
+        objective: actionData.objective,
+        instrumentType: actionData.instrumentType,
+        status: actionData.status,
+        startYear: actionData.startYear,
+        natAnchor: actionData.natAnchor,
+        // Migrated Data
+        type: actionData.migratedData.types,
+        ghgsAffected: actionData.migratedData.types,
+        natImplementor: actionData.migratedData.types,
+        sectorsdAffected: actionData.migratedData.types,
+        estimatedInvestment: actionData.migratedData.types,
+        achievedReduct: actionData.migratedData.types,
+        expectedReduct: actionData.migratedData.types,
+      });
+
+      const tempFiles: { id: number; title: string; url: string }[] = [];
+      actionData.documents.forEach((document: any) => {
+        tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
+      });
       setStoredFiles(tempFiles);
     }
-  }, []);
+  }, [actionData]);
 
   useEffect(() => {
     const tempProgData: ProgrammeData[] = [];
@@ -130,20 +162,6 @@ const actionForm: React.FC<Props> = ({ method }) => {
 
   useEffect(() => {
     console.log('Running Migration Update');
-
-    if (method !== 'create') {
-      console.log('Get the Action Information and load them');
-    }
-
-    form.setFieldsValue({
-      type: ['Mitigation'],
-      ghgsAffected: ['CO2', 'N2O'],
-      natImplementor: 'Department of Energy',
-      sectorsdAffected: ['Energy'],
-      estimatedInvestment: 1000,
-      achievedReduct: 6,
-      expectedReduct: 100,
-    });
 
     const migratedKpis = [];
     for (let i = 0; i < 2; i++) {
@@ -185,7 +203,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
         payload.linkedProgrammes.push(program.programmeId);
       });
 
-      const response = await post('national/action/add', payload);
+      const response = await post('national/actions/add', payload);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
