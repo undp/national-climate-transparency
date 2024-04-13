@@ -224,12 +224,12 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
       payload.timeFrame = parseFloat(payload.timeFrame);
       payload.startYear = parseInt(payload.startYear);
       payload.endYear = parseInt(payload.endYear);
-      payload.achievedReduct = parseFloat(payload.achievedReduct);
-      payload.expectedReduct = parseFloat(payload.expectedReduct);
+      payload.achievedGHGReduction = parseFloat(payload.achievedGHGReduction);
+      payload.expectedGHGReduction = parseFloat(payload.expectedGHGReduction);
 
       console.log(payload);
 
-      const response = await post('national/project/add', payload);
+      const response = await post('national/projects/add', payload);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
@@ -519,7 +519,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('projectStatusHeader')}</label>}
-                  name="status"
+                  name="projectStatus"
                   rules={[validation.required]}
                 >
                   <Select
@@ -631,7 +631,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('recipientHeader')}</label>}
-                  name="recipient"
+                  name="recipientEntities"
                   rules={[validation.required]}
                 >
                   <Select
@@ -653,7 +653,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item<number>
                   label={<label className="form-item-header">{t('intImplementorHeader')}</label>}
-                  name="intImplementor"
+                  name="internationalImplementingEntities"
                 >
                   <Select
                     size="large"
@@ -707,7 +707,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('achieved')}</label>}
-                  name="achievedReduct"
+                  name="achievedGHGReduction"
                   rules={[validation.required]}
                 >
                   <Input type="number" className="form-input-box" />
@@ -716,7 +716,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('expected')}</label>}
-                  name="expectedReduct"
+                  name="expectedGHGReduction"
                   rules={[validation.required]}
                 >
                   <Input type="number" className="form-input-box" />
@@ -769,7 +769,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={24}>
                 <Form.Item
                   label={<label className="form-item-header">{t('programmeCommentsTitle')}</label>}
-                  name="comments"
+                  name="comment"
                 >
                   <TextArea rows={3} disabled={isView} />
                 </Form.Item>
