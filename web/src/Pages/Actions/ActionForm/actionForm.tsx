@@ -95,25 +95,75 @@ const actionForm: React.FC<Props> = ({ method }) => {
   }
 
   useEffect(() => {
-    const progIds: string[] = [];
+    // Initially Loading Free Programmes that can be attached
 
-    for (let i = 0; i < 15; i++) {
-      progIds.push(`P00${i}`);
-    }
-    setAllProgramIdList(progIds);
+    const fetchFreeProgrammes = async () => {
+      if (method !== 'view') {
+        const payload = {
+          page: 1,
+          size: 100,
+          // Add the Filtering here
+          sort: {
+            key: 'programmeId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/programmes/query', payload);
+
+        const freeProgrammeIds: string[] = [];
+        response.data.forEach((prg: any) => {
+          freeProgrammeIds.push(prg.programmeId);
+        });
+        setAllProgramIdList(freeProgrammeIds);
+      }
+    };
+    fetchFreeProgrammes();
+
+    // Initially Loading the underlying action data when not in create mode
 
     const fetchData = async () => {
       if (method !== 'create' && entId) {
-        const actionDataResponse: any = await get(`national/actions/${entId}`);
-        setActionData(actionDataResponse.data);
+        const response: any = await get(`national/actions/${entId}`);
+        setActionData(response.data);
       }
     };
     fetchData();
+
+    // Initially Loading the attached programme data when not in create mode
+
+    const fetchConnectedProgrammeIds = async () => {
+      if (method !== 'create') {
+        const payload = {
+          page: 1,
+          size: 100,
+          filterAnd: [
+            {
+              key: 'actionId',
+              operation: '=',
+              value: entId,
+            },
+          ],
+          sort: {
+            key: 'programmeId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/programmes/query', payload);
+
+        const connectedProgrammeIds: string[] = [];
+        response.data.forEach((prg: any) => {
+          connectedProgrammeIds.push(prg.programmeId);
+        });
+        setSelectedProgramIds(connectedProgrammeIds);
+      }
+    };
+    fetchConnectedProgrammeIds();
   }, []);
+
+  // Populating data fields based on the loaded action data when not in create
 
   useEffect(() => {
     if (actionData) {
-      console.log(actionData);
       form.setFieldsValue({
         // Entity Data
         title: actionData.title,
@@ -125,12 +175,12 @@ const actionForm: React.FC<Props> = ({ method }) => {
         natAnchor: actionData.natAnchor,
         // Migrated Data
         type: actionData.migratedData.types,
-        ghgsAffected: actionData.migratedData.types,
-        natImplementor: actionData.migratedData.types,
-        sectorsdAffected: actionData.migratedData.types,
-        estimatedInvestment: actionData.migratedData.types,
-        achievedReduct: actionData.migratedData.types,
-        expectedReduct: actionData.migratedData.types,
+        ghgsAffected: actionData.migratedData.ghgsAffected,
+        natImplementor: actionData.migratedData.natImplementors,
+        sectorsdAffected: actionData.migratedData.sectorsAffected,
+        estimatedInvestment: actionData.migratedData.totalInvestment,
+        achievedReduct: actionData.migratedData.achievedReduct,
+        expectedReduct: actionData.migratedData.expectedReduct,
       });
 
       const tempFiles: { id: number; title: string; url: string }[] = [];
@@ -141,22 +191,36 @@ const actionForm: React.FC<Props> = ({ method }) => {
     }
   }, [actionData]);
 
-  useEffect(() => {
-    const tempProgData: ProgrammeData[] = [];
-    selectedProgramIds.forEach((progId) => {
-      tempProgData.push({
-        key: progId,
-        programmeId: progId,
-        actionId: 'action id',
-        title: 'test title',
-        type: 'test type',
-        status: 'test status',
-        subSectorsAffected: 'sub sec',
-        estimatedInvestment: 500,
-      });
-    });
+  // Loading programme data when attachment changes
 
-    setProgramData(tempProgData);
+  useEffect(() => {
+    const payload = {
+      page: 1,
+      size: selectedProgramIds.length,
+      filterOr: [] as any[],
+      sort: {
+        key: 'programmeId',
+        order: 'ASC',
+      },
+    };
+
+    const fetchData = async () => {
+      if (selectedProgramIds.length > 0) {
+        selectedProgramIds.forEach((progId) => {
+          payload.filterOr.push({
+            key: 'programmeId',
+            operation: '=',
+            value: progId,
+          });
+        });
+        const response: any = await post('national/programmes/query', payload);
+        setProgramData(response.data);
+      } else {
+        setProgramData([]);
+      }
+    };
+    fetchData();
+
     setDetachOpen(Array(selectedProgramIds.length).fill(false));
   }, [selectedProgramIds]);
 
@@ -224,7 +288,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
     }
   };
 
-  // Dettach Programme
+  // Detach Programme
 
   const handleDetachOpen = (record: ProgrammeData) => {
     const newOpenList = Array(selectedProgramIds.length).fill(false);
@@ -233,9 +297,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
   };
 
   const detachProgramme = (prgId: string) => {
-    const filteredData = programData.filter((prg) => prg.programmeId !== prgId);
     const filteredIds = selectedProgramIds.filter((id) => id !== prgId);
-    setProgramData(filteredData);
     setSelectedProgramIds(filteredIds);
   };
 
@@ -319,13 +381,13 @@ const actionForm: React.FC<Props> = ({ method }) => {
     { title: t('programmeStatus'), dataIndex: 'status', key: 'status' },
     {
       title: t('subSectorAffected'),
-      dataIndex: 'subSectorsAffected',
-      key: 'titleOfAction',
+      dataIndex: 'affectedSubSector',
+      key: 'affectedSubSector',
     },
     {
       title: t('investmentNeeds'),
-      dataIndex: 'estimatedInvestment',
-      key: 'estimatedInvestment',
+      dataIndex: 'investment',
+      key: 'investment',
     },
     {
       title: '',

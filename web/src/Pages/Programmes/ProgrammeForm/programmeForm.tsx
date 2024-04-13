@@ -182,7 +182,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
 
       payload.investment = parseFloat(payload.investment);
 
-      const response = await post('national/programme/add', payload);
+      const response = await post('national/programmes/add', payload);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
@@ -339,7 +339,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('selectActionHeader')}</label>}
                   name="actionId"
-                  rules={[validation.required]}
                 >
                   <Select
                     size={'large'}
