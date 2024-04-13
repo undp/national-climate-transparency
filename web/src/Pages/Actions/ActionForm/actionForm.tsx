@@ -225,7 +225,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
   }, [selectedProgramIds]);
 
   useEffect(() => {
-    console.log('Running Migration Update');
+    console.log('Running KPI Migration Update');
 
     const migratedKpis = [];
     for (let i = 0; i < 2; i++) {

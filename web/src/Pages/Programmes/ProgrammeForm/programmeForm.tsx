@@ -3,7 +3,7 @@ import { Row, Col, Input, Button, Form, Select, message, Popover, List, Typograp
 import { CloseCircleOutlined, EllipsisOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
@@ -54,10 +54,12 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   const isView: boolean = method === 'view' ? true : false;
 
   const navigate = useNavigate();
-  const { post } = useConnection();
+  const { get, post } = useConnection();
+  const { entId } = useParams();
 
   // form state
 
+  const [programmeData, setProgrammeData] = useState<any>();
   const [actionList, setActionList] = useState<ActionData[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
@@ -92,14 +94,56 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   }
 
   useEffect(() => {
-    const actionData: ActionData[] = [];
-    for (let i = 0; i < 1; i++) {
-      actionData.push({
-        id: 'A001',
-        title: 'MB Solar',
-      });
-    }
-    setActionList(actionData);
+    // Initially Loading Free Actions that can be parent
+
+    const fetchFreeActions = async () => {
+      if (method !== 'view') {
+        const payload = {
+          page: 1,
+          size: 100,
+          sort: {
+            key: 'actionId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/actions/query', payload);
+
+        const tempActionData: ActionData[] = [];
+        response.data.forEach((action: any) => {
+          tempActionData.push({
+            id: action.actionId,
+            title: action.title,
+          });
+        });
+        setActionList(tempActionData);
+      }
+    };
+
+    fetchFreeActions();
+
+    // Initially Loading Free Projects that can be attached
+
+    // const fetchFreeProjects = async () => {
+    //   if (method !== 'view') {
+    //     const payload = {
+    //       page: 1,
+    //       size: 100,
+    //       // Add the Filtering here
+    //       sort: {
+    //         key: 'projectId',
+    //         order: 'ASC',
+    //       },
+    //     };
+    //     const response: any = await post('national/projects/query', payload);
+
+    //     const freeProjectIds: string[] = [];
+    //     response.data.forEach((prg: any) => {
+    //       freeProjectIds.push(prg.programmeId);
+    //     });
+    //     setAllProjectIdList(freeProjectIds);
+    //   }
+    // };
+    // fetchFreeProjects();
 
     const projIds: string[] = [];
     for (let i = 0; i < 15; i++) {
@@ -107,41 +151,117 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
     }
     setAllProjectIdList(projIds);
 
-    if (method !== 'create') {
-      const tempFiles: { id: number; title: string; url: string }[] = [];
-      for (let i = 0; i < 6; i++) {
-        tempFiles.push({ id: i, title: `title_${i}.pdf`, url: `url_${i}` });
+    // Initially Loading the underlying programme data when not in create mode
+
+    const fetchData = async () => {
+      if (method !== 'create' && entId) {
+        const response: any = await get(`national/programmes/${entId}`);
+        setProgrammeData(response.data);
       }
-      setStoredFiles(tempFiles);
-    }
+    };
+    fetchData();
+
+    // Initially Loading the attached programme data when not in create mode
+
+    // const fetchConnectedProjectIds = async () => {
+    //   if (method !== 'create') {
+    //     const payload = {
+    //       page: 1,
+    //       size: 100,
+    //       filterAnd: [
+    //         {
+    //           key: 'programmeId',
+    //           operation: '=',
+    //           value: entId,
+    //         },
+    //       ],
+    //       sort: {
+    //         key: 'projectId',
+    //         order: 'ASC',
+    //       },
+    //     };
+    //     const response: any = await post('national/project/query', payload);
+
+    //     const connectedProjectIds: string[] = [];
+    //     response.data.forEach((prj: any) => {
+    //       connectedProjectIds.push(prj.projectId);
+    //     });
+    //     setSelectedProjectIds(connectedProjectIds);
+    //   }
+    // };
+    // fetchConnectedProjectIds();
   }, []);
 
+  // Populating data fields based on the loaded action data when not in create
+
   useEffect(() => {
-    const tempProjectData: ProjectData[] = [];
-    selectedProjectIds.forEach((projId) => {
-      tempProjectData.push({ key: projId, projectId: projId, projectName: `${projId}_name` });
-    });
-    setProjectData(tempProjectData);
+    if (programmeData) {
+      form.setFieldsValue({
+        // Entity Data
+        title: programmeData.title,
+        description: programmeData.description,
+        objective: programmeData.objectives,
+        programmeStatus: programmeData.programmeStatus,
+        startYear: programmeData.startYear,
+        natAnchor: programmeData.natAnchor,
+        affectedSectors: programmeData.affectedSectors,
+        affectedSubSector: programmeData.affectedSubSector,
+        natImplementor: programmeData.nationalImplementor,
+        investment: programmeData.investment,
+        comments: programmeData.comments,
+        // Migrated Data
+        type: programmeData.types,
+        instrumentType: programmeData.instrumentType,
+        intImplementor: programmeData.interNationalImplementor,
+        recipientEntity: programmeData.recipientEntity,
+        // ghgsAffected: programmeData.migratedData.totalInvestment,
+        // achievedReduct: programmeData.migratedData.achievedReduct,
+        // expectedReduct: programmeData.migratedData.expectedReduct,
+      });
+
+      const tempFiles: { id: number; title: string; url: string }[] = [];
+      programmeData.documents.forEach((document: any) => {
+        tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
+      });
+      setStoredFiles(tempFiles);
+    }
+  }, [programmeData]);
+
+  // Loading project data when attachment changes
+
+  useEffect(() => {
+    const payload = {
+      page: 1,
+      size: selectedProjectIds.length,
+      filterOr: [] as any[],
+      sort: {
+        key: 'projectId',
+        order: 'ASC',
+      },
+    };
+
+    const fetchData = async () => {
+      if (selectedProjectIds.length > 0) {
+        selectedProjectIds.forEach((projId) => {
+          payload.filterOr.push({
+            key: 'projectId',
+            operation: '=',
+            value: projId,
+          });
+        });
+        const response: any = await post('national/projects/query', payload);
+        setProjectData(response.data);
+      } else {
+        setProjectData([]);
+      }
+    };
+    fetchData();
+
     setDetachOpen(Array(selectedProjectIds.length).fill(false));
   }, [selectedProjectIds]);
 
   useEffect(() => {
-    console.log('Running Migration Update');
-
-    if (method !== 'create') {
-      console.log('Get the Action Information and load them');
-    }
-
-    // Get Migrated Data for the Projects
-    form.setFieldsValue({
-      type: 'Mitigation',
-      instrumentType: 'Policy',
-      intImplementor: 'AFGB',
-      recipientEntity: 'Ministry of Agriculture, Climate Change and Environment',
-      ghgsAffected: 'CO2',
-      achievedReduct: 6,
-      expectedReduct: 100,
-    });
+    console.log('Running KPI Migration Update');
 
     const migratedKpis = [];
     for (let i = 0; i < 2; i++) {

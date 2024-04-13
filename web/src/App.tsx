@@ -99,20 +99,21 @@ const App = () => {
                   <Route path="/programmes" element={<CustomLayout selectedKey="programmes" />}>
                     <Route path="" element={<ProgrammeList />} />
                     <Route path="add" element={<ProgrammeForm method="create" />} />
-                    <Route path="edit/:id" element={<ProgrammeForm method="update" />} />
-                    <Route path="view/:id" element={<ProgrammeForm method="view" />} />
+                    <Route path="edit/:entId" element={<ProgrammeForm method="update" />} />
+                    <Route path="view/:entId" element={<ProgrammeForm method="view" />} />
                   </Route>
                   <Route path="/projects" element={<CustomLayout selectedKey="projects" />}>
                     <Route path="" element={<ProjectList />} />
                     <Route path="add" element={<ProjectForm method="create" />} />
-                    <Route path="edit/:id" element={<ProjectForm method="update" />} />
-                    <Route path="view/:id" element={<ProjectForm method="view" />} />
+                    <Route path="edit/:entId" element={<ProjectForm method="update" />} />
+                    <Route path="view/:entId" element={<ProjectForm method="view" />} />
                   </Route>
 
                   <Route path="/activities" element={<CustomLayout selectedKey="activities" />}>
                     <Route path="" element={<ActivityList />} />
-                    <Route path="view/:id" element={<ActivityForm />} />
                     <Route path="add" element={<ActivityForm />} />
+                    <Route path="edit/:entId" element={<ActivityForm />} />
+                    <Route path="view/:entId" element={<ActivityForm />} />
                   </Route>
 
                   <Route path="/support" element={<CustomLayout selectedKey="support" />}>
