@@ -5,13 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './supportForm.scss';
 import {
-  ActivityStatus,
-  ImplMeans,
-  Measure,
-  SupportType,
-  TechnologyType,
-} from '../../../Enums/activity.enum';
-import { IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
+  FinanceNature,
+  FinancingStatus,
+  IntFinInstrument,
+  IntSource,
+  IntSupChannel,
+  NatFinInstrument,
+  SupportDirection,
+} from '../../../Enums/support.enum';
 
 const { Option } = Select;
 
@@ -119,8 +120,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('activityDescTitle')}</label>}
-                  name="description"
+                  label={<label className="form-item-header">{t('supportDirectionTitle')}</label>}
+                  name="supportDirection"
                   rules={[validation.required]}
                 >
                   <Select
@@ -130,7 +131,158 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     disabled={isView}
                     showSearch
                   >
-                    {Object.values(ActivityStatus).map((status) => (
+                    {Object.values(SupportDirection).map((support) => (
+                      <Option key={support} value={support}>
+                        {support}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('financeNatureTitle')}</label>}
+                  name="financeNature"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size={'large'}
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(FinanceNature).map((nature) => (
+                      <Option key={nature} value={nature}>
+                        {nature}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('intSupportChannelTitle')}</label>}
+                  name="intSupportChannel"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size={'large'}
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(IntSupChannel).map((channel) => (
+                      <Option key={channel} value={channel}>
+                        {channel}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('otherIntSupportChannel')}</label>}
+                  name="otherIntSupportChannel"
+                  rules={[validation.required]}
+                >
+                  <Input className="form-input-box" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={
+                    <label className="form-item-header">{t('intFinancialInstrumentTitle')}</label>
+                  }
+                  name="intFinancialInstrument"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(IntFinInstrument).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={
+                    <label className="form-item-header">
+                      {t('otherIntFinanceInstrumentTitle')}
+                    </label>
+                  }
+                  name="otherIntFinanceInstrument"
+                  rules={[validation.required]}
+                >
+                  <Input className="form-input-box" disabled={isView} />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={
+                    <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
+                  }
+                  name="nationalFinanceInstrument"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(NatFinInstrument).map((instrument) => (
+                      <Option key={instrument} value={instrument}>
+                        {instrument}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={12}>
+                <Form.Item
+                  label={
+                    <label className="form-item-header">
+                      {t('otherNatFinanceInstrumentTitle')}
+                    </label>
+                  }
+                  name="otherNatFinanceInstrument"
+                >
+                  <Input className="form-input-box" disabled={isView} />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('financeStatus')}</label>}
+                  name="financeStatus"
+                  rules={[validation.required]}
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(FinancingStatus).map((status) => (
                       <Option key={status} value={status}>
                         {status}
                       </Option>
@@ -142,208 +294,76 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('selectActivityTitle')}</label>}
-                  name="activityId"
+                  label={
+                    <label className="form-item-header">{t('internationalSourceTitle')}</label>
+                  }
+                  name="internationalSource"
+                >
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    allowClear
+                    disabled={isView}
+                    showSearch
+                  >
+                    {Object.values(IntSource).map((source) => (
+                      <Option key={source} value={source}>
+                        {source}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('nationalSourceTitle')}</label>}
+                  name="nationalSource"
+                >
+                  <Input className="form-input-box" disabled={isView} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={gutterSize}>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('neededUSDTitle')}</label>}
+                  name="neededUSD"
                   rules={[validation.required]}
                 >
-                  <Select
-                    size={'large'}
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(ActivityStatus).map((status) => (
-                      <Option key={status} value={status}>
-                        {status}
-                      </Option>
-                    ))}
-                  </Select>
+                  <Input type="number" className="form-input-box" />
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col span={6}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('activityDescTitle')}</label>}
-                  name="description"
+                  label={<label className="form-item-header">{t('neededLocalTitle')}</label>}
+                  name="neededLocal"
+                >
+                  <Input type="number" className="form-input-box" disabled />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={<label className="form-item-header">{t('receivedUSDTitle')}</label>}
+                  name="receivedUSD"
                   rules={[validation.required]}
                 >
-                  <Select
-                    size={'large'}
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(ActivityStatus).map((status) => (
-                      <Option key={status} value={status}>
-                        {status}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
-                  name="affSectors"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
-                  name="intImplementor"
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(IntImplementor).map((implementer) => (
-                      <Option key={implementer} value={implementer}>
-                        {implementer}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
-                  name="affSectors"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
-                  name="intImplementor"
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(IntImplementor).map((implementer) => (
-                      <Option key={implementer} value={implementer}>
-                        {implementer}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
-                  name="affSectors"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
-                  name="intImplementor"
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(IntImplementor).map((implementer) => (
-                      <Option key={implementer} value={implementer}>
-                        {implementer}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
-                  name="intImplementor"
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(IntImplementor).map((implementer) => (
-                      <Option key={implementer} value={implementer}>
-                        {implementer}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
-                  name="affSectors"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Row gutter={gutterSize}>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('anchoredTitle')}</label>}
-                  name="isAnchored"
-                >
                   <Input type="number" className="form-input-box" />
                 </Form.Item>
               </Col>
               <Col span={6}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('anchoredTitle')}</label>}
-                  name="isAnchored"
+                  label={<label className="form-item-header">{t('receivedLocalTitle')}</label>}
+                  name="receivedLocal"
                 >
-                  <Input type="number" className="form-input-box" />
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('anchoredTitle')}</label>}
-                  name="isAnchored"
-                >
-                  <Input type="number" className="form-input-box" />
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('anchoredTitle')}</label>}
-                  name="isAnchored"
-                >
-                  <Input type="number" className="form-input-box" />
+                  <Input type="number" className="form-input-box" disabled />
                 </Form.Item>
               </Col>
             </Row>
-
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('techTypeTitle')}</label>}
-                  name="techType"
+                  label={<label className="form-item-header">{t('exchangeRateTitle')}</label>}
+                  name="exchangeRate"
                 >
                   <Input type="number" className="form-input-box" />
                 </Form.Item>
