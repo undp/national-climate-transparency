@@ -236,7 +236,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   name="otherIntSupportChannel"
                   rules={[validation.required]}
                 >
-                  <Input className="form-input-box" />
+                  <Input className="form-input-box" disabled={isView} />
                 </Form.Item>
               </Col>
               <Col span={12}>
@@ -387,6 +387,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                         e.preventDefault();
                       }
                     }}
+                    disabled={isView}
                   />
                 </Form.Item>
               </Col>
@@ -416,6 +417,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                         e.preventDefault();
                       }
                     }}
+                    disabled={isView}
                   />
                 </Form.Item>
               </Col>
@@ -449,26 +451,12 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                         e.preventDefault();
                       }
                     }}
+                    disabled={isView}
                   />
                 </Form.Item>
               </Col>
             </Row>
           </div>
-          {method !== 'create' && (
-            <div className="form-section-card">
-              <Row>
-                <Col span={6}>
-                  <div className="form-section-header">{t('supportTableHeader')}</div>
-                </Col>
-              </Row>
-              <Row></Row>
-            </div>
-          )}
-          {isView && (
-            <div className="form-section-card">
-              <div className="form-section-header">{t('updatesInfoTitle')}</div>
-            </div>
-          )}
           {!isView && (
             <Row gutter={20} justify={'end'}>
               <Col span={2}>
