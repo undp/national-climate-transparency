@@ -22,6 +22,20 @@ const inputFontSize = '13px';
 const validation = {
   required: { required: true, message: 'Required Field' },
   number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
+  greaterThanZero: ({}) => ({
+    // eslint-disable-next-line no-unused-vars
+    validator(_rule: any, value: any) {
+      if (value) {
+        if (value > 0) {
+          return Promise.resolve();
+        } else {
+          return Promise.reject('Exchange Rate Cannot be Zero');
+        }
+      } else {
+        return Promise.resolve();
+      }
+    },
+  }),
 };
 
 interface Props {
@@ -40,6 +54,12 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const navigate = useNavigate();
   const { post } = useConnection();
+
+  // Currency Conversion
+
+  const [exchangeRate, setExchangeRate] = useState<number>();
+  const [amountNeeded, setAmountNeeded] = useState<number>();
+  const [amountReceived, setAmountReceived] = useState<number>();
 
   // Parent Selection State
 
@@ -60,6 +80,15 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     }
     setParentList(parentIds);
   }, []);
+
+  useEffect(() => {
+    const updatedNeeded = (amountNeeded ?? 0) * (exchangeRate ?? 0);
+    const updatedReceived = (amountReceived ?? 0) * (exchangeRate ?? 0);
+    form.setFieldsValue({
+      neededLocal: updatedNeeded > 0 ? parseFloat(updatedNeeded.toFixed(3)) : null,
+      receivedLocal: updatedReceived > 0 ? parseFloat(updatedReceived.toFixed(3)) : null,
+    });
+  }, [exchangeRate, amountNeeded, amountReceived]);
 
   // Form Submit
 
@@ -83,6 +112,22 @@ const SupportForm: React.FC<Props> = ({ method }) => {
         duration: 3,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
+    }
+  };
+
+  // State update for currency inputs
+
+  const handleCurrencyChange = (value: number, whichField: 'needed' | 'received' | 'rate') => {
+    switch (whichField) {
+      case 'needed':
+        setAmountNeeded(value);
+        break;
+      case 'received':
+        setAmountReceived(value);
+        break;
+      case 'rate':
+        setExchangeRate(value);
+        break;
     }
   };
 
@@ -330,7 +375,20 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   name="neededUSD"
                   rules={[validation.required]}
                 >
-                  <Input type="number" className="form-input-box" />
+                  <Input
+                    type="number"
+                    className="form-input-box"
+                    onChange={(event) => {
+                      const value = parseFloat(event.target.value);
+                      handleCurrencyChange(value, 'needed');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === '-' || e.key === 'e' || e.key === '+') {
+                        e.preventDefault();
+                      }
+                    }}
+                    min={0}
+                  />
                 </Form.Item>
               </Col>
               <Col span={6}>
@@ -347,7 +405,20 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   name="receivedUSD"
                   rules={[validation.required]}
                 >
-                  <Input type="number" className="form-input-box" />
+                  <Input
+                    type="number"
+                    className="form-input-box"
+                    onChange={(event) => {
+                      const value = parseFloat(event.target.value);
+                      handleCurrencyChange(value, 'received');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === '-' || e.key === 'e' || e.key === '+') {
+                        e.preventDefault();
+                      }
+                    }}
+                    min={0}
+                  />
                 </Form.Item>
               </Col>
               <Col span={6}>
@@ -364,8 +435,22 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('exchangeRateTitle')}</label>}
                   name="exchangeRate"
+                  rules={[validation.greaterThanZero]}
                 >
-                  <Input type="number" className="form-input-box" />
+                  <Input
+                    type="number"
+                    className="form-input-box"
+                    onChange={(event) => {
+                      const value = parseFloat(event.target.value);
+                      handleCurrencyChange(value, 'rate');
+                    }}
+                    min={0}
+                    onKeyDown={(e) => {
+                      if (e.key === '-' || e.key === 'e' || e.key === '+') {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
                 </Form.Item>
               </Col>
             </Row>
