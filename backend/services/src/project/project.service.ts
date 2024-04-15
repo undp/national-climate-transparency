@@ -20,6 +20,9 @@ import { LinkProjectsDto } from "../dtos/link.projects.dto";
 import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
 import { ActivityEntity } from "../entities/activity.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
+import { QueryDto } from "src/dtos/query.dto";
+import { DataListResponseDto } from "src/dtos/data.list.response";
+import { ProjectViewEntity } from "src/entities/project.view.entity";
 
 @Injectable()
 export class ProjectService {
@@ -127,6 +130,71 @@ export class ProjectService {
 
 	}
 
+	async query(query: QueryDto, abilityCondition: string): Promise<any> {
+		const queryBuilder = await this.projectRepo
+			.createQueryBuilder("project")
+			.where(
+				this.helperService.generateWhereSQL(
+					query,
+					this.helperService.parseMongoQueryToSQLWithTable(
+						'"project"',
+						abilityCondition
+					),
+					'"project"'
+				)
+			)
+			.leftJoinAndSelect("project.programme", "programme")
+			.leftJoinAndMapMany(
+				"project.migratedData",
+				ProjectViewEntity,
+				"projectViewEntity",
+				"projectViewEntity.id = project.projectId"
+			)
+			.orderBy(
+				query?.sort?.key ? `"project"."${query?.sort?.key}"` : `"project"."projectId"`,
+				query?.sort?.order ? query?.sort?.order : "DESC"
+			);
+
+		if (query.size && query.page) {
+			queryBuilder.offset(query.size * query.page - query.size)
+				.limit(query.size);
+		}
+
+		const resp = await queryBuilder.getManyAndCount();
+
+		return new DataListResponseDto(
+			resp.length > 0 ? resp[0] : undefined,
+			resp.length > 1 ? resp[1] : undefined
+		);
+	}
+
+	async getProjectViewData(projectId: string, abilityCondition: string) {
+
+		const queryBuilder = await this.projectRepo
+			.createQueryBuilder("project")
+			.where('project.projectId = :projectId', { projectId })
+			.leftJoinAndMapOne(
+				"project.migratedData",
+				ProjectViewEntity,
+				"projectViewEntity",
+				"projectViewEntity.id = project.projectId"
+			);
+		const result = await queryBuilder.getOne();
+
+		if (!result) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmesNotFound",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		return result;
+
+	}
+
 	async linkProjectsToProgramme(linkProjectsDto: LinkProjectsDto, user: User) {
 		const programme = await this.programmeService.findProgrammeById(linkProjectsDto.programmeId);
 		if (!programme) {
@@ -228,9 +296,9 @@ export class ProjectService {
 				"project.activities",
 				ActivityEntity,
 				"activity",
-				"activity.parentType = :project AND activity.parentId = project.projectId", 
-				{ project: EntityType.PROJECT } 
-		)
+				"activity.parentType = :project AND activity.parentId = project.projectId",
+				{ project: EntityType.PROJECT }
+			)
 			.where('project.projectId IN (:...projectIds)', { projectIds })
 			.getMany();
 	}

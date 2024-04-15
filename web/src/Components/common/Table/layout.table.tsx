@@ -18,22 +18,24 @@ const LayoutTable: React.FC<Props> = ({
   emptyMessage,
 }) => {
   return (
-    <Table
-      dataSource={tableData}
-      columns={columns}
-      className="common-table-class"
-      loading={loading}
-      pagination={pagination}
-      onChange={handleTableChange}
-      locale={{
-        emptyText: (
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={tableData.length === 0 ? emptyMessage : null}
-          />
-        ),
-      }}
-    />
+    <div style={{ overflowX: 'auto' }}>
+      <Table
+        dataSource={tableData}
+        columns={columns}
+        className="common-table-class"
+        loading={loading}
+        pagination={pagination}
+        onChange={handleTableChange}
+        locale={{
+          emptyText: (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={tableData.length === 0 ? emptyMessage : null}
+            />
+          ),
+        }}
+      />
+    </div>
   );
 };
 

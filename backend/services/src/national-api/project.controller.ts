@@ -4,6 +4,8 @@ import {
     Request,
     Post,
     Body,
+		Get,
+		Param,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -15,6 +17,7 @@ import { ProjectDto } from "../dtos/project.dto";
 import { LinkProjectsDto } from "../dtos/link.projects.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
+import { QueryDto } from "src/dtos/query.dto";
 
 @ApiTags("Projects")
 @ApiBearerAuth()
@@ -31,6 +34,21 @@ export class ProjectController {
     addProject(@Body() projectDto: ProjectDto, @Request() req) {
         return this.projectService.createProject(projectDto, req.user);
     }
+
+		@ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectEntity, true))
+    @Post("query")
+    queryProgramme(@Body() query: QueryDto, @Request() req) {
+      console.log(req.abilityCondition);
+      return this.projectService.query(query, req.abilityCondition);
+    }
+
+		@ApiBearerAuth()
+		@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectEntity, true))
+		@Get('/:id')
+		getActionViewData(@Param('id') id: string, @Request() req) {
+			return this.projectService.getProjectViewData(id, req.abilityCondition);
+		}
 
     @ApiBearerAuth('api_key')
     @ApiBearerAuth()

@@ -17,6 +17,10 @@ import { EllipsisOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icon
 import { useEffect, useState } from 'react';
 const { Search } = Input;
 import data from '../../../Testing/activityList.json';
+import { Action } from '../../../Enums/action.enum';
+import { ActivityEntity } from '../../../Entities/activity';
+import { useNavigate } from 'react-router-dom';
+import { useAbilityContext } from '../../../Casl/Can';
 
 interface Item {
   activityId: string;
@@ -31,6 +35,7 @@ interface Item {
 
 const activityList = () => {
   const { t } = useTranslation(['activityList']);
+  const ability = useAbilityContext();
   const [tableData, setTableData] = useState<Item[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<any>(1);
@@ -42,6 +47,8 @@ const activityList = () => {
   const [valueOnSearch, setValueOnSearch] = useState<string>('');
   const [totalUser, setTotalUser] = useState<number>();
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const actionMenu = (record: any) => {
     return (
@@ -240,9 +247,19 @@ const activityList = () => {
         <Row className="table-actions-section">
           <Col md={8} xs={24}>
             <div className="action-bar">
-              <Button type="primary" size="large" block icon={<PlusOutlined />} onClick={() => {}}>
-                {t('addButtonType')}
-              </Button>
+              {ability.can(Action.Create, ActivityEntity) && (
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    navigate('/activities/add');
+                  }}
+                >
+                  {t('addButtonType')}
+                </Button>
+              )}
             </div>
           </Col>
           <Col md={16} xs={24}>

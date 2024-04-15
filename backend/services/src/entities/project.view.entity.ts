@@ -6,7 +6,9 @@ export const projectViewSQL = `
         ARRAY_AGG(DISTINCT fullact."techTypes") AS "technologyTypes",
         ARRAY_AGG(DISTINCT fullact."implMeans") AS "implMeans",
         SUM(fullact."requiredAmount") AS "estimatedAmount",
-        SUM(fullact."receivedAmount") AS "receivedAmount"
+        SUM(fullact."receivedAmount") AS "receivedAmount",
+				SUM(fullact."requiredAmountDomestic") AS "estimatedAmountDomestic",
+				SUM(fullact."receivedAmountDomestic") AS "receivedAmountDomestic"
     FROM 
         project prj
     LEFT JOIN (
@@ -16,14 +18,18 @@ export const projectViewSQL = `
             act."technologyType" AS "techTypes",
             act."implMeans" AS "implMeans",
             sup."requiredAmount",
-            sup."receivedAmount"
+            sup."receivedAmount",
+						sup."requiredAmountDomestic",
+            sup."receivedAmountDomestic"
         FROM 
             activity act
         LEFT JOIN (
             SELECT 
                 "activityId",
                 SUM("requiredAmount") AS "requiredAmount",
-                SUM("receivedAmount") AS "receivedAmount"
+                SUM("receivedAmount") AS "receivedAmount",
+								SUM("requiredAmountDomestic") AS "requiredAmountDomestic",
+                SUM("receivedAmountDomestic") AS "receivedAmountDomestic"
             FROM 
                 support
             GROUP BY 
@@ -39,7 +45,6 @@ export const projectViewSQL = `
     expression: projectViewSQL,
     synchronize: false,
 })
-
 export class ProjectViewEntity {
     @Index()
     @ViewColumn()
@@ -60,4 +65,10 @@ export class ProjectViewEntity {
 
     @ViewColumn()
     receivedAmount: number
+
+		@ViewColumn()
+    estimatedAmountDomestic: number
+
+    @ViewColumn()
+    receivedAmountDomestic: number
 }
