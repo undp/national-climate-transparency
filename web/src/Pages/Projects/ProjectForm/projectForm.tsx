@@ -445,6 +445,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('typeHeader')}</label>}
                   name="type"
+                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
@@ -665,6 +666,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 <Form.Item<number>
                   label={<label className="form-item-header">{t('intImplementorHeader')}</label>}
                   name="internationalImplementingEntities"
+                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
