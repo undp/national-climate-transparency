@@ -517,6 +517,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
               {t('documentsHeader')}
             </div>
             <UploadFileGrid
+              isSingleColumn={false}
               usedIn={method}
               buttonText={t('upload')}
               acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
@@ -610,12 +611,9 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 form={form}
                 rules={[]}
                 index={index}
-                isEditable={false}
-                inputFontSize={inputFontSize}
+                calledTo={'view'}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                updateKPI={updateKPI}
-                removeKPI={removeKPI}
               ></KpiGrid>
             ))}
             {newKpiList.map((kpi: any) => (
@@ -624,8 +622,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
                 form={form}
                 rules={[validation.required]}
                 index={kpi.index}
-                isEditable={!isView && !kpi.visibility}
-                inputFontSize={inputFontSize}
+                calledTo={'create'}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                 updateKPI={updateKPI}
