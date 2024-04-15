@@ -16,6 +16,7 @@ import { Organisation } from '../Entities/organisation';
 import { ProgrammeEntity } from '../Entities/programme';
 import { ProjectEntity } from '../Entities/project';
 import { ActivityEntity } from '../Entities/activity';
+import { SupportEntity } from '../Entities/support';
 
 type Subjects = InferSubjects<typeof BaseEntity> | 'all';
 
@@ -66,6 +67,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Create, ActivityEntity);
       can(Action.Update, ActivityEntity);
       can(Action.Delete, ActivityEntity);
+
+      can(Action.Read, SupportEntity);
+      can(Action.Create, SupportEntity);
+      can(Action.Update, SupportEntity);
+      can(Action.Delete, SupportEntity);
     }
 
     if (user.role == Role.Admin) {
@@ -100,6 +106,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Create, ActivityEntity);
       can(Action.Update, ActivityEntity);
       can(Action.Delete, ActivityEntity);
+
+      can(Action.Read, SupportEntity);
+      can(Action.Create, SupportEntity);
+      can(Action.Update, SupportEntity);
+      can(Action.Delete, SupportEntity);
     }
 
     if (user.role == Role.DepartmentUser) {
@@ -135,6 +146,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Create, ActivityEntity);
       cannot(Action.Update, ActivityEntity);
       cannot(Action.Delete, ActivityEntity);
+
+      can(Action.Read, SupportEntity);
+      cannot(Action.Create, SupportEntity);
+      cannot(Action.Update, SupportEntity);
+      cannot(Action.Delete, SupportEntity);
     }
 
     if (user.role == Role.ViewOnly) {
@@ -170,6 +186,11 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Create, ActivityEntity);
       cannot(Action.Update, ActivityEntity);
       cannot(Action.Delete, ActivityEntity);
+
+      can(Action.Read, SupportEntity);
+      cannot(Action.Create, SupportEntity);
+      cannot(Action.Update, SupportEntity);
+      cannot(Action.Delete, SupportEntity);
     }
   }
 

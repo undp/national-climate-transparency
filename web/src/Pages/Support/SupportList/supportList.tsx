@@ -17,6 +17,12 @@ import { EditOutlined, EllipsisOutlined, FilterOutlined, PlusOutlined } from '@a
 import { useEffect, useState } from 'react';
 const { Search } = Input;
 import data from '../../../Testing/supportList.json';
+import { useNavigate } from 'react-router-dom';
+import { useAbilityContext } from '../../../Casl/Can';
+import { Action } from '../../../Enums/action.enum';
+import { ActivityEntity } from '../../../Entities/activity';
+import { SupportEntity } from '../../../Entities/support';
+
 interface Item {
   key: string;
   supportId: string;
@@ -31,6 +37,7 @@ interface Item {
 
 const supportList = () => {
   const { t } = useTranslation(['supportList']);
+  const ability = useAbilityContext();
   const [tableData, setTableData] = useState<Item[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<any>(1);
@@ -42,6 +49,8 @@ const supportList = () => {
   const [valueOnSearch, setValueOnSearch] = useState<string>('');
   const [totalUser, setTotalUser] = useState<number>();
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const actionMenu = (record: any) => {
     return (
@@ -251,9 +260,19 @@ const supportList = () => {
         <Row className="table-actions-section">
           <Col md={8} xs={24}>
             <div className="action-bar">
-              <Button type="primary" size="large" block icon={<PlusOutlined />} onClick={() => {}}>
-                {t('addButtonType')}
-              </Button>
+              {ability.can(Action.Create, SupportEntity) && (
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    navigate('/support/add');
+                  }}
+                >
+                  {t('addButtonType')}
+                </Button>
+              )}
             </div>
           </Col>
           <Col md={16} xs={24}>
