@@ -288,17 +288,28 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
           delete payload[key];
         }
       }
-      payload.documents = [];
-      uploadedFiles.forEach((file) => {
-        payload.documents.push({ title: file.title, data: file.data });
-      });
 
-      payload.kpis = [];
-      newKpiList.forEach((kpi) => {
-        payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
-      });
+      if (uploadedFiles.length > 0) {
+        payload.documents = [];
+        uploadedFiles.forEach((file) => {
+          payload.documents.push({ title: file.title, data: file.data });
+        });
+      }
 
-      payload.linkedProjects = selectedProjectIds;
+      if (newKpiList.length > 0) {
+        payload.kpis = [];
+        newKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            name: kpi.name,
+            creatorType: kpi.creatorType,
+            expected: kpi.expected,
+          });
+        });
+      }
+
+      if (selectedProjectIds.length > 0) {
+        payload.linkedProjects = selectedProjectIds;
+      }
 
       payload.investment = parseFloat(payload.investment);
 
@@ -479,7 +490,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('typesHeader')}</label>}
                   name="type"
-                  rules={[validation.required]}
                 >
                   <Input className="form-input-box" disabled />
                 </Form.Item>
@@ -490,7 +500,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                   name="title"
                   rules={[validation.required]}
                 >
-                  <Input className="form-input-box" maxLength={10} disabled={isView} />
+                  <Input className="form-input-box" disabled={isView} />
                 </Form.Item>
               </Col>
             </Row>

@@ -252,20 +252,31 @@ const actionForm: React.FC<Props> = ({ method }) => {
           delete payload[key];
         }
       }
-      payload.documents = [];
-      uploadedFiles.forEach((file) => {
-        payload.documents.push({ title: file.title, data: file.data });
-      });
 
-      payload.kpis = [];
-      newKpiList.forEach((kpi) => {
-        payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
-      });
+      if (uploadedFiles.length > 0) {
+        payload.documents = [];
+        uploadedFiles.forEach((file) => {
+          payload.documents.push({ title: file.title, data: file.data });
+        });
+      }
 
-      payload.linkedProgrammes = [];
-      programData.forEach((program) => {
-        payload.linkedProgrammes.push(program.programmeId);
-      });
+      if (newKpiList.length > 0) {
+        payload.kpis = [];
+        newKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            name: kpi.name,
+            creatorType: kpi.creatorType,
+            expected: kpi.expected,
+          });
+        });
+      }
+
+      if (programData.length > 0) {
+        payload.linkedProgrammes = [];
+        programData.forEach((program) => {
+          payload.linkedProgrammes.push(program.programmeId);
+        });
+      }
 
       const response = await post('national/actions/add', payload);
       if (response.status === 200 || response.status === 201) {

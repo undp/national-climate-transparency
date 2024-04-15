@@ -209,17 +209,28 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           delete payload[key];
         }
       }
-      payload.documents = [];
-      uploadedFiles.forEach((file) => {
-        payload.documents.push({ title: file.title, data: file.data });
-      });
 
-      payload.kpis = [];
-      newKpiList.forEach((kpi) => {
-        payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
-      });
+      if (uploadedFiles.length > 0) {
+        payload.documents = [];
+        uploadedFiles.forEach((file) => {
+          payload.documents.push({ title: file.title, data: file.data });
+        });
+      }
 
-      payload.linkedActivities = selectedActivityIds;
+      if (newKpiList.length > 0) {
+        payload.kpis = [];
+        newKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            name: kpi.name,
+            creatorType: kpi.creatorType,
+            expected: kpi.expected,
+          });
+        });
+      }
+
+      if (selectedActivityIds.length > 0) {
+        payload.linkedActivities = selectedActivityIds;
+      }
 
       payload.timeFrame = parseFloat(payload.timeFrame);
       payload.startYear = parseInt(payload.startYear);
@@ -770,6 +781,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('programmeCommentsTitle')}</label>}
                   name="comment"
+                  rules={[validation.required]}
                 >
                   <TextArea rows={3} disabled={isView} />
                 </Form.Item>
