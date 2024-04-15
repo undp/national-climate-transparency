@@ -130,27 +130,18 @@ const UserManagement = () => {
     }
   });
 
-  // const getCompanyBgColor = (item: string) => {
-  //   if (item === 'Government') {
-  //     return GovBGColor;
-  //   } else if (item === 'Certifier') {
-  //     return CertBGColor;
-  //   }
-  //   return ObsBGColor;
-  // };
-
   const getRoleComponent = (item: UserTableDataType) => {
     const role = item?.role;
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
-        {role === 'Admin' ? (
+        {role === 'Root' ? (
+          <RoleIcon icon={<KeyOutlined />} bg={RootBGColor} color={RootColor} />
+        ) : role === 'Admin' ? (
           <RoleIcon icon={<StarOutlined />} bg={AdminBGColor} color={AdminColor} />
         ) : role === 'GovernmentUser' ? (
           <RoleIcon icon={<BankOutlined />} bg={GovBGColor} color={GovColor} />
-        ) : role === 'Observer' ? (
-          <RoleIcon icon={<ExperimentOutlined />} bg={ObsBGColor} color={ObsColor} />
         ) : (
-          <RoleIcon icon={<KeyOutlined />} bg={RootBGColor} color={RootColor} />
+          <RoleIcon icon={<ExperimentOutlined />} bg={ObsBGColor} color={ObsColor} />
         )}
         <div>
           {role === 'Admin'
@@ -166,24 +157,6 @@ const UserManagement = () => {
       </div>
     );
   };
-
-  // const getCompanyRoleComponent = (item: UserTableDataType) => {
-  //   const role = item?.organisation?.organisationType
-  //     ? item?.organisation?.organisationType
-  //     : item?.organisationType
-  //     ? item?.organisationType
-  //     : null;
-  //   return (
-  //     <div style={{ display: 'flex', alignItems: 'center' }}>
-  //       {role === OrganisationType.GOVERNMENT ? (
-  //         <RoleIcon icon={<BankOutlined />} bg={GovBGColor} color={GovColor} />
-  //       ) : (
-  //         <RoleIcon icon={<ExperimentOutlined />} bg={DevBGColor} color={DevColor} />
-  //       )}
-  //       <div>{role}</div>
-  //     </div>
-  //   );
-  // };
 
   const changeUserStatus = async (record: UserTableDataType, remarks: string) => {
     setLoading(true);
@@ -360,21 +333,14 @@ const UserManagement = () => {
       dataIndex: 'organisation',
       key: UserManagementColumns.organisation,
       render: (item: any, itemObj: UserTableDataType) => {
-        // return itemObj?.organisation?.name ? itemObj?.organisation?.name : '-';
-        return item ? item : '-';
+        if (itemObj.role === 'Admin' || itemObj.role === 'Root') {
+          return `Government of ${process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}`;
+        } else {
+          return item ? item : '-';
+        }
       },
       align: 'left' as const,
     },
-    // {
-    //   title: t('user:companyRole'),
-    //   dataIndex: 'companyRole',
-    //   key: UserManagementColumns.organisationType,
-    //   sorter: true,
-    //   align: 'left' as const,
-    //   render: (item: any, itemObj: UserTableDataType) => {
-    //     return getCompanyRoleComponent(itemObj);
-    //   },
-    // },
     {
       title: t('user:status'),
       dataIndex: 'state',

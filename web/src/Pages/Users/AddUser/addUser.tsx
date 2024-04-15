@@ -21,7 +21,6 @@ import { Role } from '../../../Enums/role.enum';
 import { Sector } from '../../../Enums/sector.enum';
 import { Organisation } from '../../../Enums/organisation.enum';
 import { BankOutlined, ExperimentOutlined, EyeOutlined, StarOutlined } from '@ant-design/icons';
-// import { OrganisationType } from '../../../Definitions/organisation.type.enum';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -52,9 +51,6 @@ const AddUser = () => {
   const ability = useAbilityContext();
   const [countries, setCountries] = useState<[]>([]);
   const [isCountryListLoading, setIsCountryListLoading] = useState(false);
-  // const [organisationType, setOrganisationType] = useState(state?.record?.organisationType);
-  const [orgList, setOrgList] = useState<Record<number, string>>([]);
-  const [governmentInfo, setGovernmentInfo] = useState<any>();
   const [role, setrole] = useState(state?.record?.role);
 
   const getCountryList = async () => {
@@ -88,12 +84,6 @@ const AddUser = () => {
       } else {
         values.phoneNo = undefined;
       }
-      // if (organisationType === OrganisationType.GOVERNMENT) {
-      //   values.organisationId = governmentInfo?.organisationId;
-      // } else {
-      //   values.organisationId = parseInt(values.department);
-      //   values.role = Role.DepartmentUser;
-      // }
       const response = await post('national/users/add', values);
       if (response.status === 200 || response.status === 201) {
         message.open({
@@ -211,72 +201,13 @@ const AddUser = () => {
     setErrorMsg('');
   };
 
-  // const onChangeOrganisationType = (event: any) => {
-  //   const value = event.target.value;
-  //   setOrganisationType(value);
-  // };
-
-  const onChangeUserRole = (event: any) => {
+  const onChangeuserRole = (event: any) => {
     const value = event.target.value;
     setrole(value);
   };
 
-  // const getDepartments = async () => {
-  //   setLoadingList(true);
-  //   try {
-  //     const response = await post('national/organisation/query', {
-  //       filterAnd: [
-  //         {
-  //           key: 'organisationType',
-  //           operation: '=',
-  //           value: 'Department',
-  //         },
-  //       ],
-  //     });
-  //     if (response.data) {
-  //       const orgNamesMap: Record<number, string> = response.data.reduce(
-  //         (acc: Record<number, string>, item: any) => {
-  //           acc[item.organisationId] = item.name;
-  //           return acc;
-  //         },
-  //         {}
-  //       );
-  //       // const uniqueRegionNames: any = Array.from(new Set(regionNames));
-  //       setOrgList(orgNamesMap);
-  //     }
-  //   } catch (error: any) {
-  //     console.log('Error in getting organisation list', error);
-  //   } finally {
-  //     setLoadingList(false);
-  //   }
-  // };
-
-  // const getGovernment = async () => {
-  //   setLoadingList(true);
-  //   try {
-  //     const response = await post('national/organisation/query', {
-  //       filterAnd: [
-  //         {
-  //           key: 'organisationType',
-  //           operation: '=',
-  //           value: 'Government',
-  //         },
-  //       ],
-  //     });
-  //     if (response.data) {
-  //       setGovernmentInfo(response.data[0]);
-  //     }
-  //   } catch (error: any) {
-  //     console.log('Error in getting government information', error);
-  //   } finally {
-  //     setLoadingList(false);
-  //   }
-  // };
-
   useEffect(() => {
     getCountryList();
-    // getDepartments();
-    // getGovernment();
     setIsUpdate(state?.record ? true : false);
   }, []);
 
@@ -419,30 +350,31 @@ const AddUser = () => {
                     </Form.Item>
                   )}
                 </Skeleton>
-                <Form.Item
-                  label={t('addUser:organisation')}
-                  initialValue={state?.record?.organisation}
-                  name="organisation"
-                  rules={[
-                    {
-                      required: true,
-                      message: `${t('addUser:organisation')} ${t('isRequired')}`,
-                    },
-                  ]}
-                >
-                  <Select
-                    size="large"
-                    // style={{ fontSize: inputFontSize }}
-                    allowClear
-                    showSearch
+                {(role === Role.GovernmentUser || role === Role.Observer) && (
+                  <Form.Item
+                    label={t('addUser:organisation')}
+                    initialValue={state?.record?.organisation}
+                    name="organisation"
+                    rules={[
+                      {
+                        required: true,
+                        message: `${t('addUser:organisation')} ${t('isRequired')}`,
+                      },
+                    ]}
                   >
-                    {Object.values(Organisation).map((instrument) => (
-                      <Select.Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                  {/* rules={[
+                    <Select
+                      size="large"
+                      // style={{ fontSize: inputFontSize }}
+                      allowClear
+                      showSearch
+                    >
+                      {Object.values(Organisation).map((instrument) => (
+                        <Select.Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                    {/* rules={[
                     {
                       required: true,
                       message: '',
@@ -464,7 +396,8 @@ const AddUser = () => {
                   ]}
                 >
                   <Input size="large" /> */}
-                </Form.Item>
+                  </Form.Item>
+                )}
               </div>
             </Col>
             <Col xl={12} md={24}>
@@ -488,7 +421,7 @@ const AddUser = () => {
                       isUpdate &&
                       !ability.can(Action.Update, plainToClass(User, state?.record), 'role')
                     }
-                    onChange={onChangeUserRole}
+                    onChange={onChangeuserRole}
                   >
                     <div className="administrator-radio-container">
                       {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
@@ -520,13 +453,13 @@ const AddUser = () => {
                 {role === Role.GovernmentUser && (
                   <Form.Item
                     className="role-group"
-                    label={t('addUser:subrole')}
+                    label={t('addUser:subRole')}
                     initialValue={state?.record?.subRole}
                     name="subRole"
                     rules={[
                       {
                         required: true,
-                        message: `${t('addUser:subrole')} ${t('addUser:isRequired')}`,
+                        message: `${t('addUser:subRole')} ${t('addUser:isRequired')}`,
                       },
                     ]}
                   >
@@ -565,13 +498,13 @@ const AddUser = () => {
                 {role === Role.Observer && (
                   <Form.Item
                     className="role-group"
-                    label={t('addUser:subrole')}
+                    label={t('addUser:subRole')}
                     initialValue={state?.record?.subRole}
                     name="subRole"
                     rules={[
                       {
                         required: true,
-                        message: `${t('addUser:subrole')} ${t('addUser:isRequired')}`,
+                        message: `${t('addUser:subRole')} ${t('addUser:isRequired')}`,
                       },
                     ]}
                   >

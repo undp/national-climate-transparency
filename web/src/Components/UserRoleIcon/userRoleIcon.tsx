@@ -28,14 +28,14 @@ export const UserRoleIcon: FC<UserRoleIconProps> = (props: UserRoleIconProps) =>
   const { role } = props;
   return (
     <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
-      {role === 'Admin' ? (
+      {role === 'Root' ? (
+        <RoleIcon icon={<KeyOutlined />} bg={RootBGColor} color={RootColor} />
+      ) : role === 'Admin' ? (
         <RoleIcon icon={<StarOutlined />} bg={AdminBGColor} color={AdminColor} />
       ) : role === 'GovernmentUser' ? (
         <RoleIcon icon={<BankOutlined />} bg={GovBGColor} color={GovColor} />
-      ) : role === 'Observer' ? (
-        <RoleIcon icon={<ExperimentOutlined />} bg={ObsBGColor} color={ObsColor} />
       ) : (
-        <RoleIcon icon={<KeyOutlined />} bg={RootBGColor} color={RootColor} />
+        <RoleIcon icon={<ExperimentOutlined />} bg={ObsBGColor} color={ObsColor} />
       )}
       <div>
         {role === 'Admin'

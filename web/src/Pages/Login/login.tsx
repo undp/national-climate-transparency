@@ -259,7 +259,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                           </div>
                         )}
                       </Form>
-                      {enableRegistration === 'true' && (
+                      {/* {enableRegistration === 'true' && (
                         <div className="login-register-new-container">
                           <span className="login-register-new-txt">
                             {t('login:register-acc')}&nbsp;&nbsp;
@@ -271,7 +271,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                             </span>
                           </span>
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </Col>
                 </Row>

@@ -5,7 +5,7 @@
     "addUserSub": "Add new users to the Carbon Registry for your organisation",
     "name": "Name",
     "email": "Email",
-    "subrole": "Sub Role",
+    "subRole": "Sub Role",
     "department": "Department",
     "consultant": "Consultant",
     "seo": "SEO",

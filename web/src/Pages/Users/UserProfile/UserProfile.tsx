@@ -201,13 +201,6 @@ const CompanyProfile = () => {
                   </Skeleton>
                 </div>
               </Card>
-              {/* <CompanyDetailsComponent
-                t={t}
-                companyDetails={organisationDetails}
-                userDetails={userDetails}
-                isLoading={isLoading}
-                regionField
-              /> */}
             </Col>
           </Row>
         </div>
