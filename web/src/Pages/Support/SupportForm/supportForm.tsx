@@ -387,13 +387,12 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                         e.preventDefault();
                       }
                     }}
-                    min={0}
                   />
                 </Form.Item>
               </Col>
               <Col span={6}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('neededLocalTitle')}</label>}
+                  label={<label className="form-item-header-small">{t('neededLocalTitle')}</label>}
                   name="neededLocal"
                 >
                   <Input type="number" className="form-input-box" disabled />
@@ -417,13 +416,14 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                         e.preventDefault();
                       }
                     }}
-                    min={0}
                   />
                 </Form.Item>
               </Col>
               <Col span={6}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('receivedLocalTitle')}</label>}
+                  label={
+                    <label className="form-item-header-small">{t('receivedLocalTitle')}</label>
+                  }
                   name="receivedLocal"
                 >
                   <Input type="number" className="form-input-box" disabled />
@@ -444,7 +444,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                       const value = parseFloat(event.target.value);
                       handleCurrencyChange(value, 'rate');
                     }}
-                    min={0}
                     onKeyDown={(e) => {
                       if (e.key === '-' || e.key === 'e' || e.key === '+') {
                         e.preventDefault();
@@ -478,7 +477,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   size="large"
                   block
                   onClick={() => {
-                    navigate('/activities');
+                    navigate('/support');
                   }}
                 >
                   {t('cancel')}

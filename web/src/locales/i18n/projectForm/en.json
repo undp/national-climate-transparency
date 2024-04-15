@@ -47,7 +47,7 @@
     "attachACTIVITY": "ATTACH ACTIVITIES",
     "activityList": "Activity List",
     "addKPI": "Add KPI",
-    "programmeCreationSuccess": "Project Added Succesfully",
+    "programmeCreationSuccess": "Project Added Successfully",
     "updatesInfoTitle": "Updates",
     "noProjectsMessage": "No Activities Attached",
     "documentsHeader": "Documents",
@@ -62,5 +62,5 @@
     "natImplementorTitle": "National Implementing Entity (s)",
     "noActivityMessage": "No Activities Attached",
     "noSupportMessage": "No Supports Attached",
-    "projectCreationSuccess": "Project Added Succesfully"
+    "projectCreationSuccess": "Project Added Successfully"
   }
