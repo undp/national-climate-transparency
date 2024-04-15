@@ -112,8 +112,8 @@ const App = () => {
                   <Route path="/activities" element={<CustomLayout selectedKey="activities" />}>
                     <Route path="" element={<ActivityList />} />
                     <Route path="add" element={<ActivityForm method="create" />} />
-                    <Route path="edit/:id" element={<ActivityForm method="update" />} />
-                    <Route path="view/:id" element={<ActivityForm method="view" />} />
+                    <Route path="edit/:entId" element={<ActivityForm method="update" />} />
+                    <Route path="view/:entId" element={<ActivityForm method="view" />} />
                   </Route>
 
                   <Route path="/support" element={<CustomLayout selectedKey="support" />}>
