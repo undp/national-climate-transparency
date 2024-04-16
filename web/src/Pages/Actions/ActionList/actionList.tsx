@@ -13,11 +13,18 @@ import {
   List,
   Typography,
   message,
-  PaginationProps,
+  Radio,
+  Space,
+  MenuProps,
 } from 'antd';
-import { EditOutlined, EllipsisOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  EditOutlined,
+  EllipsisOutlined,
+  FilterOutlined,
+  PlusOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-const { Search } = Input;
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
 import { ActionEntity } from '../../../Entities/action';
@@ -54,22 +61,35 @@ const actionList = () => {
   const [tableData, setTableData] = useState<Item[]>([]);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<any>(1);
+  const [totalRowCount, setTotalRowRowCount] = useState<number>();
+
+  const [sortField, setSortField] = useState<string>('actionId');
+  const [sortOrder, setSortOrder] = useState<string>('DESC');
 
   // Filters State
-
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [sortField, setSortField] = useState<string>('');
-  const [sortOrder, setSortOrder] = useState<string>('');
-
-  const [valueOnSearch, setValueOnSearch] = useState<string>('');
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
+  const [searchBy, setSearchBy] = useState<string>('actionId');
+  const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [validationFilter, setValidationFilter] = useState<string>('All');
+
+  // Search Value State
+
+  const [tempSearchValue, setTempSearchValue] = useState<string>('');
+  const [searchValue, setSearchValue] = useState<string>('');
 
   // Data Read from DB
 
   const getAllData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: 1, size: 10 };
+      const payload: any = { page: currentPage, size: pageSize };
+
+      // Adding Sort By Conditions
+      payload.sort = {
+        key: sortField,
+        order: sortOrder,
+      };
+
       const response: any = await post('national/actions/query', payload);
       if (response) {
         const unstructuredData: any[] = response.data;
@@ -91,6 +111,7 @@ const actionList = () => {
           });
         }
         setTableData(structuredData);
+        setTotalRowRowCount(response.response.data.total);
         setLoading(false);
       }
     } catch (error: any) {
@@ -104,45 +125,43 @@ const actionList = () => {
     }
   };
 
-  const onChange: PaginationProps['onChange'] = (page: number, size: number) => {
-    setCurrentPage(page);
-    setPageSize(size);
-  };
+  // Handling Table Pagination and Sorting Changes
 
   const handleTableChange = (pagination: any, filters: any, sorter: any) => {
-    // Handle table change event (e.g., sorting, pagination)
-    console.log('Pagination:', pagination);
-    console.log('Filters:', filters);
-    console.log('Sorter:', sorter);
+    console.log(filters);
+    // Setting Pagination
+    setCurrentPage(pagination.current);
+    setPageSize(pagination.pageSize);
+
+    // Setting the Sort Direction
     if (sorter.order === 'ascend') {
       setSortOrder('ASC');
     } else if (sorter.order === 'descend') {
       setSortOrder('DESC');
     } else if (sorter.order === undefined) {
-      setSortOrder('ASC');
+      setSortOrder('DESC');
     }
+
+    // Setting the Sort By Column
     if (sorter.columnKey !== undefined) {
       setSortField(sorter.field);
     } else {
-      setSortField('id');
-      setSortOrder('DESC');
+      setSortField('actionId');
     }
   };
 
+  // Search Value Handling
+
   const onSearch = () => {
     setCurrentPage(1);
-    setValueOnSearch(searchValue);
-  };
-
-  const handleFilterVisibleChange = () => {
-    setFilterVisible(false);
+    setSearchValue(tempSearchValue);
   };
 
   // State Management
 
   useEffect(() => {
     getAllData();
-  }, [currentPage, pageSize, valueOnSearch, sortField, sortOrder]);
+  }, [currentPage, pageSize, sortField, sortOrder, searchValue]);
 
   // Popup Menu for Action List
 
@@ -188,8 +207,8 @@ const actionList = () => {
 
   const columns = [
     { title: t('actionId'), dataIndex: 'actionId', key: 'actionId', sorter: false },
-    { title: t('activityId'), dataIndex: 'activityId', key: 'activityId', sorter: true },
-    { title: t('titleOfAction'), dataIndex: 'title', key: 'title', sorter: false },
+    { title: t('activityId'), dataIndex: 'activityId', key: 'activityId', sorter: false },
+    { title: t('titleOfAction'), dataIndex: 'title', key: 'title', sorter: true },
     { title: t('actionType'), dataIndex: 'actionType', key: 'actionType', sorter: false },
     {
       title: t('sectorAffected'),
@@ -243,6 +262,75 @@ const actionList = () => {
     },
   ];
 
+  // Items for the filter dropdown
+
+  const items: MenuProps['items'] = [
+    {
+      key: '1',
+      title: 'Search by',
+      label: (
+        <div className="filter-menu-item">
+          <div className="filter-title">{t('user:searchBy')}</div>
+          <Radio.Group
+            onChange={(e) => {
+              setSearchBy(e?.target?.value);
+              setFilterVisible(false);
+            }}
+            value={searchBy}
+          >
+            <Space direction="vertical">
+              <Radio value="actionId">ID</Radio>
+              <Radio value="title">Title</Radio>
+            </Space>
+          </Radio.Group>
+        </div>
+      ),
+    },
+    {
+      key: '2',
+      title: 'Filter by Action Status',
+      label: (
+        <div className="filter-menu-item">
+          <div className="filter-title">{t('filterByActionStatus')}</div>
+          <Radio.Group
+            onChange={(e) => {
+              setStatusFilter(e?.target?.value);
+            }}
+            value={statusFilter}
+          >
+            <Space direction="vertical">
+              <Radio value="All">All</Radio>
+              <Radio value="Planned">Planned</Radio>
+              <Radio value="Adopted">Adopted</Radio>
+              <Radio value="Implemented">Implemented</Radio>
+            </Space>
+          </Radio.Group>
+        </div>
+      ),
+    },
+    {
+      key: '3',
+      title: 'Filter by Validation Status',
+      label: (
+        <div className="filter-menu-item">
+          <div className="filter-title">{t('filterByValidationStatus')}</div>
+          <Radio.Group
+            onChange={(e) => {
+              setValidationFilter(e?.target?.value);
+            }}
+            value={validationFilter}
+          >
+            <Space direction="vertical">
+              <Radio value="All">All</Radio>
+              <Radio value="Pending">Pending</Radio>
+              <Radio value="Validated">Validated</Radio>
+            </Space>
+          </Radio.Group>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="content-container">
       <div className="title-bar">
@@ -271,33 +359,34 @@ const actionList = () => {
           <Col md={16} xs={24}>
             <div className="filter-section">
               <div className="search-bar">
-                <Search
-                  onPressEnter={onSearch}
-                  placeholder="Search by Action Title"
+                <Input
+                  addonAfter={<SearchOutlined style={{ color: '#615d67' }} onClick={onSearch} />}
+                  placeholder={
+                    searchBy === 'actionId' ? 'Search by Action ID' : 'Search by Action Title'
+                  }
                   allowClear
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  onSearch={onSearch}
+                  onPressEnter={onSearch}
+                  onChange={(e) => setTempSearchValue(e.target.value)}
                   style={{ width: 265 }}
                 />
               </div>
               <div className="filter-bar" style={{ marginTop: '0.3rem' }}>
                 <Dropdown
                   arrow={false}
-                  menu={{}} // Assuming 'items' is defined elsewhere
                   placement="bottomRight"
-                  overlayClassName="filter-dropdown"
                   trigger={['click']}
                   open={filterVisible}
-                  onOpenChange={handleFilterVisibleChange}
+                  menu={{ items }}
                 >
-                  <a className="ant-dropdown-link" onClick={() => {}}>
-                    <FilterOutlined
-                      style={{
-                        color: 'rgba(58, 53, 65, 0.3)',
-                        fontSize: '20px',
-                      }}
-                    />
-                  </a>
+                  <FilterOutlined
+                    style={{
+                      color: '#615d67',
+                      fontSize: '20px',
+                    }}
+                    onClick={() => {
+                      setFilterVisible(true);
+                    }}
+                  />
                 </Dropdown>
               </div>
             </div>
@@ -310,15 +399,15 @@ const actionList = () => {
               columns={columns}
               loading={loading}
               pagination={{
+                total: totalRowCount,
                 current: currentPage,
                 pageSize: pageSize,
                 showQuickJumper: true,
-                pageSizeOptions: ['10', '20', '30'],
+                pageSizeOptions: ['1', '10', '20', '30'],
                 showSizeChanger: true,
                 style: { textAlign: 'center' },
                 locale: { page: '' },
                 position: ['bottomRight'],
-                onChange: onChange,
               }}
               handleTableChange={handleTableChange}
               emptyMessage="No Actions Available"
