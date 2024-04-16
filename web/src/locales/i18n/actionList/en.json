@@ -12,5 +12,7 @@
   "financeReceived": "Finance Received (USD)",
   "actionStatus": "Action Status",
   "nationalImplementingEntity": "National Implementing Entity(s)",
-  "validationStatus": "Validation Status"
+  "validationStatus": "Validation Status",
+  "filterByActionStatus": "Filter By Action Status",
+  "filterByValidationStatus": "Filter By Validation Status"
 }

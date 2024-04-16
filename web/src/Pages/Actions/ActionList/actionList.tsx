@@ -45,6 +45,12 @@ interface Item {
   nationalImplementingEntity: string;
 }
 
+interface Filter {
+  searchBy: string;
+  statusFilter: string;
+  validationFilter: string;
+}
+
 const actionList = () => {
   const navigate = useNavigate();
   const { post } = useConnection();
@@ -68,9 +74,17 @@ const actionList = () => {
 
   // Filters State
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
-  const [searchBy, setSearchBy] = useState<string>('actionId');
-  const [statusFilter, setStatusFilter] = useState<string>('All');
-  const [validationFilter, setValidationFilter] = useState<string>('All');
+
+  const [appliedFilterValue, setAppliedFilterValue] = useState<Filter>({
+    searchBy: 'actionId',
+    statusFilter: 'All',
+    validationFilter: 'All',
+  });
+  const [tempFilterValue, setTempFilterValue] = useState<Filter>({
+    searchBy: 'actionId',
+    statusFilter: 'All',
+    validationFilter: 'All',
+  });
 
   // Search Value State
 
@@ -155,6 +169,23 @@ const actionList = () => {
   const onSearch = () => {
     setCurrentPage(1);
     setSearchValue(tempSearchValue);
+  };
+
+  // Search Value Handling
+
+  const updatedTempFilters = (filterSection: string, newValue: string) => {
+    const updatedFilters = { ...tempFilterValue };
+    if (filterSection === 'validation') {
+      updatedFilters.validationFilter = newValue;
+      setTempFilterValue(updatedFilters);
+    } else if (filterSection === 'status') {
+      updatedFilters.statusFilter = newValue;
+      setTempFilterValue(updatedFilters);
+    } else if (filterSection === 'search') {
+      updatedFilters.searchBy = newValue;
+      console.log(updatedFilters);
+      setTempFilterValue(updatedFilters);
+    }
   };
 
   // State Management
@@ -273,10 +304,9 @@ const actionList = () => {
           <div className="filter-title">{t('user:searchBy')}</div>
           <Radio.Group
             onChange={(e) => {
-              setSearchBy(e?.target?.value);
-              setFilterVisible(false);
+              updatedTempFilters('search', e?.target?.value);
             }}
-            value={searchBy}
+            value={tempFilterValue.searchBy}
           >
             <Space direction="vertical">
               <Radio value="actionId">ID</Radio>
@@ -294,9 +324,9 @@ const actionList = () => {
           <div className="filter-title">{t('filterByActionStatus')}</div>
           <Radio.Group
             onChange={(e) => {
-              setStatusFilter(e?.target?.value);
+              updatedTempFilters('status', e?.target?.value);
             }}
-            value={statusFilter}
+            value={tempFilterValue.statusFilter}
           >
             <Space direction="vertical">
               <Radio value="All">All</Radio>
@@ -316,9 +346,9 @@ const actionList = () => {
           <div className="filter-title">{t('filterByValidationStatus')}</div>
           <Radio.Group
             onChange={(e) => {
-              setValidationFilter(e?.target?.value);
+              updatedTempFilters('validation', e?.target?.value);
             }}
-            value={validationFilter}
+            value={tempFilterValue.validationFilter}
           >
             <Space direction="vertical">
               <Radio value="All">All</Radio>
@@ -326,6 +356,42 @@ const actionList = () => {
               <Radio value="Validated">Validated</Radio>
             </Space>
           </Radio.Group>
+        </div>
+      ),
+    },
+    {
+      key: '4',
+      title: 'Action',
+      label: (
+        <div className="filter-menu-actions">
+          <Row gutter={10}>
+            <Col span={12}>
+              <Button
+                style={{ width: '100%' }}
+                size="small"
+                type="default"
+                onClick={() => {
+                  setFilterVisible(false);
+                  setTempFilterValue({ ...appliedFilterValue });
+                }}
+              >
+                Cancel
+              </Button>
+            </Col>
+            <Col span={12}>
+              <Button
+                style={{ width: '100%' }}
+                size="small"
+                type="primary"
+                onClick={() => {
+                  setFilterVisible(false);
+                  setAppliedFilterValue({ ...tempFilterValue });
+                }}
+              >
+                Apply
+              </Button>
+            </Col>
+          </Row>
         </div>
       ),
     },
@@ -362,7 +428,9 @@ const actionList = () => {
                 <Input
                   addonAfter={<SearchOutlined style={{ color: '#615d67' }} onClick={onSearch} />}
                   placeholder={
-                    searchBy === 'actionId' ? 'Search by Action ID' : 'Search by Action Title'
+                    appliedFilterValue.searchBy === 'actionId'
+                      ? 'Search by Action ID'
+                      : 'Search by Action Title'
                   }
                   allowClear
                   onPressEnter={onSearch}
@@ -377,6 +445,7 @@ const actionList = () => {
                   trigger={['click']}
                   open={filterVisible}
                   menu={{ items }}
+                  overlayStyle={{ width: '240px' }}
                 >
                   <FilterOutlined
                     style={{
