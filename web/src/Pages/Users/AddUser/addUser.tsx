@@ -51,7 +51,7 @@ const AddUser = () => {
   const ability = useAbilityContext();
   const [countries, setCountries] = useState<[]>([]);
   const [isCountryListLoading, setIsCountryListLoading] = useState(false);
-  const [role, setrole] = useState(state?.record?.role);
+  const [role, setRole] = useState(state?.record?.role);
 
   const getCountryList = async () => {
     setIsCountryListLoading(true);
@@ -203,7 +203,7 @@ const AddUser = () => {
 
   const onChangeuserRole = (event: any) => {
     const value = event.target.value;
-    setrole(value);
+    setRole(value);
   };
 
   useEffect(() => {
