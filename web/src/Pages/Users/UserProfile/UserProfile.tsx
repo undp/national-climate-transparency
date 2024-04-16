@@ -170,7 +170,7 @@ const CompanyProfile = () => {
                         <UserRoleIcon role={userDetails.role} />
                       </Col>
                     </Row>
-                    {userDetails.role !== 'Admin' && (
+                    {userDetails.role !== 'Admin' && userDetails.role !== 'Root' && (
                       <Row className="field">
                         <Col span={12} className="field-key">
                           {t('userProfile:subRole')}
@@ -180,15 +180,17 @@ const CompanyProfile = () => {
                         </Col>
                       </Row>
                     )}
-                    <Row className="field">
-                      <Col span={12} className="field-key">
-                        {t('userProfile:organisation')}
-                      </Col>
-                      <Col span={12} className="field-value">
-                        {userDetails.organisation ? userDetails.organisation : '-'}
-                      </Col>
-                    </Row>
-                    {userDetails.role !== 'Admin' && (
+                    {userDetails.role !== 'Admin' && userDetails.role !== 'Root' && (
+                      <Row className="field">
+                        <Col span={12} className="field-key">
+                          {t('userProfile:organisation')}
+                        </Col>
+                        <Col span={12} className="field-value">
+                          {userDetails.organisation ? userDetails.organisation : '-'}
+                        </Col>
+                      </Row>
+                    )}
+                    {userDetails.role !== 'Admin' && userDetails.role !== 'Root' && (
                       <Row className="field">
                         <Col span={12} className="field-key">
                           {t('userProfile:sector')}
