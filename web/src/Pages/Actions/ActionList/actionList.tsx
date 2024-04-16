@@ -22,6 +22,7 @@ import data from '../../../Testing/actionList.json';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
 import { ActionEntity } from '../../../Entities/action';
+import StatusChip from '../../../Components/StatusChip/statusChip';
 
 interface Item {
   key: number;
@@ -114,6 +115,13 @@ const actionList = () => {
       sorter: false,
     },
     { title: t('actionStatus'), dataIndex: 'actionStatus', key: 'actionStatus', sorter: false },
+    {
+      title: t('validationStatus'),
+      key: 'validationStatus',
+      render: (_: any, record: any) => {
+        return <StatusChip message={record.validationStatus} defaultMessage="pending" />;
+      },
+    },
     {
       title: t('nationalImplementingEntity'),
       dataIndex: 'nationalImplementingEntity',
@@ -307,12 +315,12 @@ const actionList = () => {
             <LayoutTable
               tableData={tableData}
               columns={columns}
-              loading={false} // Set loading state as needed
+              loading={loading}
               pagination={{
                 current: currentPage,
                 pageSize: pageSize,
                 total: totalUser,
-                showQuickJumper: true, // Enable jump page functionality,
+                showQuickJumper: true,
                 pageSizeOptions: ['10', '20', '30'],
                 showSizeChanger: true,
                 style: { textAlign: 'center' },
@@ -320,7 +328,7 @@ const actionList = () => {
                 itemRender: customItemRender,
                 position: ['bottomRight'],
                 onChange: onChange,
-              }} // Set pagination configuration
+              }}
               handleTableChange={handleTableChange}
               emptyMessage="No Actions Available"
             />

@@ -1,0 +1,21 @@
+.status-chip {
+
+    .pending-chip {
+        align-content: center;
+        height: 28px;
+        width: 90px;
+        border-width: 0;
+        background-color: #e3f3fb;
+        color: #16B1FF;
+    }
+
+    .validated-chip {
+        align-content: center;
+        height: 28;
+        width: 90;
+        border-width: 0;
+        background: #e8e8e8;
+        color: #918e94;
+    }
+    
+  }
