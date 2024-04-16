@@ -104,6 +104,39 @@ const actionList = () => {
         order: sortOrder,
       };
 
+      // Adding Filter Conditions
+
+      if (appliedFilterValue.statusFilter !== 'All') {
+        payload.filterAnd = [];
+        payload.filterAnd.push({
+          key: 'status',
+          operation: '=',
+          value: appliedFilterValue.statusFilter,
+        });
+      }
+
+      // if (appliedFilterValue.validationFilter !== 'All') {
+      //   if (!payload.hasOwnProperty('filterAnd')) {
+      //     payload.filterAnd = [];
+      //   }
+      //   payload.filterAnd.push({
+      //     key: 'validationStatus',
+      //     operation: '=',
+      //     value: appliedFilterValue.validationFilter,
+      //   });
+      // }
+
+      if (searchValue !== '') {
+        if (!payload.hasOwnProperty('filterAnd')) {
+          payload.filterAnd = [];
+        }
+        payload.filterAnd.push({
+          key: appliedFilterValue.searchBy,
+          operation: 'LIKE',
+          value: [searchValue + '%'],
+        });
+      }
+
       const response: any = await post('national/actions/query', payload);
       if (response) {
         const unstructuredData: any[] = response.data;
@@ -141,8 +174,8 @@ const actionList = () => {
 
   // Handling Table Pagination and Sorting Changes
 
+  // eslint-disable-next-line no-unused-vars
   const handleTableChange = (pagination: any, filters: any, sorter: any) => {
-    console.log(filters);
     // Setting Pagination
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
@@ -192,7 +225,7 @@ const actionList = () => {
 
   useEffect(() => {
     getAllData();
-  }, [currentPage, pageSize, sortField, sortOrder, searchValue]);
+  }, [currentPage, pageSize, sortField, sortOrder, searchValue, appliedFilterValue]);
 
   // Popup Menu for Action List
 
@@ -385,6 +418,8 @@ const actionList = () => {
                 type="primary"
                 onClick={() => {
                   setFilterVisible(false);
+                  setSearchValue('');
+                  setTempSearchValue('');
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >
@@ -436,6 +471,7 @@ const actionList = () => {
                   onPressEnter={onSearch}
                   onChange={(e) => setTempSearchValue(e.target.value)}
                   style={{ width: 265 }}
+                  value={tempSearchValue}
                 />
               </div>
               <div className="filter-bar" style={{ marginTop: '0.3rem' }}>
