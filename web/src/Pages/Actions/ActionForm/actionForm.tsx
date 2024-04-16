@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { InstrumentType, ActionStatus, NatAnchor } from '../../../Enums/action.enum';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
@@ -56,10 +56,12 @@ const actionForm: React.FC<Props> = ({ method }) => {
   const isView: boolean = method === 'view' ? true : false;
 
   const navigate = useNavigate();
-  const { post } = useConnection();
+  const { get, post } = useConnection();
+  const { entId } = useParams();
 
   // form state
 
+  const [actionData, setActionData] = useState<any>();
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
     []
   );
@@ -93,57 +95,137 @@ const actionForm: React.FC<Props> = ({ method }) => {
   }
 
   useEffect(() => {
-    const progIds: string[] = [];
+    // Initially Loading Free Programmes that can be attached
 
-    for (let i = 0; i < 15; i++) {
-      progIds.push(`P00${i}`);
-    }
-    setAllProgramIdList(progIds);
+    const fetchFreeProgrammes = async () => {
+      if (method !== 'view') {
+        const payload = {
+          page: 1,
+          size: 100,
+          // Add the Filtering here
+          sort: {
+            key: 'programmeId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/programmes/query', payload);
 
-    if (method !== 'create') {
-      const tempFiles: { id: number; title: string; url: string }[] = [];
-      for (let i = 0; i < 6; i++) {
-        tempFiles.push({ id: i, title: `title_${i}.pdf`, url: `url_${i}` });
+        const freeProgrammeIds: string[] = [];
+        response.data.forEach((prg: any) => {
+          freeProgrammeIds.push(prg.programmeId);
+        });
+        setAllProgramIdList(freeProgrammeIds);
       }
-      setStoredFiles(tempFiles);
-    }
+    };
+    fetchFreeProgrammes();
+
+    // Initially Loading the underlying action data when not in create mode
+
+    const fetchData = async () => {
+      if (method !== 'create' && entId) {
+        const response: any = await get(`national/actions/${entId}`);
+        setActionData(response.data);
+      }
+    };
+    fetchData();
+
+    // Initially Loading the attached programme data when not in create mode
+
+    const fetchConnectedProgrammeIds = async () => {
+      if (method !== 'create') {
+        const payload = {
+          page: 1,
+          size: 100,
+          filterAnd: [
+            {
+              key: 'actionId',
+              operation: '=',
+              value: entId,
+            },
+          ],
+          sort: {
+            key: 'programmeId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/programmes/query', payload);
+
+        const connectedProgrammeIds: string[] = [];
+        response.data.forEach((prg: any) => {
+          connectedProgrammeIds.push(prg.programmeId);
+        });
+        setSelectedProgramIds(connectedProgrammeIds);
+      }
+    };
+    fetchConnectedProgrammeIds();
   }, []);
 
-  useEffect(() => {
-    const tempProgData: ProgrammeData[] = [];
-    selectedProgramIds.forEach((progId) => {
-      tempProgData.push({
-        key: progId,
-        programmeId: progId,
-        actionId: 'action id',
-        title: 'test title',
-        type: 'test type',
-        status: 'test status',
-        subSectorsAffected: 'sub sec',
-        estimatedInvestment: 500,
-      });
-    });
+  // Populating data fields based on the loaded action data when not in create
 
-    setProgramData(tempProgData);
+  useEffect(() => {
+    if (actionData) {
+      form.setFieldsValue({
+        // Entity Data
+        title: actionData.title,
+        description: actionData.description,
+        objective: actionData.objective,
+        instrumentType: actionData.instrumentType,
+        status: actionData.status,
+        startYear: actionData.startYear,
+        natAnchor: actionData.natAnchor,
+        // Migrated Data
+        type: actionData.migratedData.types,
+        ghgsAffected: actionData.migratedData.ghgsAffected,
+        natImplementor: actionData.migratedData.natImplementors,
+        sectorsdAffected: actionData.migratedData.sectorsAffected,
+        estimatedInvestment: actionData.migratedData.totalInvestment,
+        achievedReduct: actionData.migratedData.achievedReduct,
+        expectedReduct: actionData.migratedData.expectedReduct,
+      });
+
+      const tempFiles: { id: number; title: string; url: string }[] = [];
+      actionData.documents.forEach((document: any) => {
+        tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
+      });
+      setStoredFiles(tempFiles);
+    }
+  }, [actionData]);
+
+  // Loading programme data when attachment changes
+
+  useEffect(() => {
+    const payload = {
+      page: 1,
+      size: selectedProgramIds.length,
+      filterOr: [] as any[],
+      sort: {
+        key: 'programmeId',
+        order: 'ASC',
+      },
+    };
+
+    const fetchData = async () => {
+      if (selectedProgramIds.length > 0) {
+        selectedProgramIds.forEach((progId) => {
+          payload.filterOr.push({
+            key: 'programmeId',
+            operation: '=',
+            value: progId,
+          });
+        });
+        const response: any = await post('national/programmes/query', payload);
+        setProgramData(response.data);
+      } else {
+        setProgramData([]);
+      }
+    };
+    fetchData();
+
     setDetachOpen(Array(selectedProgramIds.length).fill(false));
   }, [selectedProgramIds]);
 
   useEffect(() => {
-    console.log('Running Migration Update');
-
-    if (method !== 'create') {
-      console.log('Get the Action Information and load them');
-    }
-
-    form.setFieldsValue({
-      type: ['Mitigation'],
-      ghgsAffected: ['CO2', 'N2O'],
-      natImplementor: 'Department of Energy',
-      sectorsdAffected: ['Energy'],
-      estimatedInvestment: 1000,
-      achievedReduct: 6,
-      expectedReduct: 100,
-    });
+    console.log('Running KPI Migration Update');
 
     const migratedKpis = [];
     for (let i = 0; i < 2; i++) {
@@ -170,22 +252,33 @@ const actionForm: React.FC<Props> = ({ method }) => {
           delete payload[key];
         }
       }
-      payload.documents = [];
-      uploadedFiles.forEach((file) => {
-        payload.documents.push({ title: file.title, data: file.data });
-      });
 
-      payload.kpis = [];
-      newKpiList.forEach((kpi) => {
-        payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
-      });
+      if (uploadedFiles.length > 0) {
+        payload.documents = [];
+        uploadedFiles.forEach((file) => {
+          payload.documents.push({ title: file.title, data: file.data });
+        });
+      }
 
-      payload.linkedProgrammes = [];
-      programData.forEach((program) => {
-        payload.linkedProgrammes.push(program.programmeId);
-      });
+      if (newKpiList.length > 0) {
+        payload.kpis = [];
+        newKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            name: kpi.name,
+            creatorType: kpi.creatorType,
+            expected: kpi.expected,
+          });
+        });
+      }
 
-      const response = await post('national/action/add', payload);
+      if (programData.length > 0) {
+        payload.linkedProgrammes = [];
+        programData.forEach((program) => {
+          payload.linkedProgrammes.push(program.programmeId);
+        });
+      }
+
+      const response = await post('national/actions/add', payload);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
@@ -206,7 +299,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
     }
   };
 
-  // Dettach Programme
+  // Detach Programme
 
   const handleDetachOpen = (record: ProgrammeData) => {
     const newOpenList = Array(selectedProgramIds.length).fill(false);
@@ -215,9 +308,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
   };
 
   const detachProgramme = (prgId: string) => {
-    const filteredData = programData.filter((prg) => prg.programmeId !== prgId);
     const filteredIds = selectedProgramIds.filter((id) => id !== prgId);
-    setProgramData(filteredData);
     setSelectedProgramIds(filteredIds);
   };
 
@@ -301,13 +392,13 @@ const actionForm: React.FC<Props> = ({ method }) => {
     { title: t('programmeStatus'), dataIndex: 'status', key: 'status' },
     {
       title: t('subSectorAffected'),
-      dataIndex: 'subSectorsAffected',
-      key: 'titleOfAction',
+      dataIndex: 'affectedSubSector',
+      key: 'affectedSubSector',
     },
     {
       title: t('investmentNeeds'),
-      dataIndex: 'estimatedInvestment',
-      key: 'estimatedInvestment',
+      dataIndex: 'investment',
+      key: 'investment',
     },
     {
       title: '',

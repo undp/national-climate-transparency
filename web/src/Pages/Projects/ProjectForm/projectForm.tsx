@@ -209,27 +209,38 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
           delete payload[key];
         }
       }
-      payload.documents = [];
-      uploadedFiles.forEach((file) => {
-        payload.documents.push({ title: file.title, data: file.data });
-      });
 
-      payload.kpis = [];
-      newKpiList.forEach((kpi) => {
-        payload.kpis.push({ name: kpi.name, creatorType: kpi.creatorType, expected: kpi.expected });
-      });
+      if (uploadedFiles.length > 0) {
+        payload.documents = [];
+        uploadedFiles.forEach((file) => {
+          payload.documents.push({ title: file.title, data: file.data });
+        });
+      }
 
-      payload.linkedActivities = selectedActivityIds;
+      if (newKpiList.length > 0) {
+        payload.kpis = [];
+        newKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            name: kpi.name,
+            creatorType: kpi.creatorType,
+            expected: kpi.expected,
+          });
+        });
+      }
+
+      if (selectedActivityIds.length > 0) {
+        payload.linkedActivities = selectedActivityIds;
+      }
 
       payload.timeFrame = parseFloat(payload.timeFrame);
       payload.startYear = parseInt(payload.startYear);
       payload.endYear = parseInt(payload.endYear);
-      payload.achievedReduct = parseFloat(payload.achievedReduct);
-      payload.expectedReduct = parseFloat(payload.expectedReduct);
+      payload.achievedGHGReduction = parseFloat(payload.achievedGHGReduction);
+      payload.expectedGHGReduction = parseFloat(payload.expectedGHGReduction);
 
       console.log(payload);
 
-      const response = await post('national/project/add', payload);
+      const response = await post('national/projects/add', payload);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
@@ -434,6 +445,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('typeHeader')}</label>}
                   name="type"
+                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
@@ -519,7 +531,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('projectStatusHeader')}</label>}
-                  name="status"
+                  name="projectStatus"
                   rules={[validation.required]}
                 >
                   <Select
@@ -631,7 +643,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('recipientHeader')}</label>}
-                  name="recipient"
+                  name="recipientEntities"
                   rules={[validation.required]}
                 >
                   <Select
@@ -653,7 +665,8 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item<number>
                   label={<label className="form-item-header">{t('intImplementorHeader')}</label>}
-                  name="intImplementor"
+                  name="internationalImplementingEntities"
+                  rules={[validation.required]}
                 >
                   <Select
                     size="large"
@@ -708,7 +721,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('achieved')}</label>}
-                  name="achievedReduct"
+                  name="achievedGHGReduction"
                   rules={[validation.required]}
                 >
                   <Input type="number" className="form-input-box" />
@@ -717,7 +730,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('expected')}</label>}
-                  name="expectedReduct"
+                  name="expectedGHGReduction"
                   rules={[validation.required]}
                 >
                   <Input type="number" className="form-input-box" />
@@ -766,7 +779,8 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={24}>
                 <Form.Item
                   label={<label className="form-item-header">{t('programmeCommentsTitle')}</label>}
-                  name="comments"
+                  name="comment"
+                  rules={[validation.required]}
                 >
                   <TextArea rows={3} disabled={isView} />
                 </Form.Item>
