@@ -32,7 +32,6 @@ export const defineAbility = () => {
 
 export const updateUserAbility = (ability: AppAbility, user: User) => {
   const { can, cannot, rules } = new AbilityBuilder(createAppAbility);
-
   if (user) {
     if (user.role == Role.Root) {
       can(Action.Read, Organisation);
@@ -102,7 +101,7 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Delete, ActivityEntity);
     }
 
-    if (user.role == Role.DepartmentUser) {
+    if (user.role == Role.GovernmentUser) {
       can(Action.Read, Organisation);
       cannot(Action.Create, Organisation);
       cannot(Action.Update, Organisation);
@@ -137,7 +136,7 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Delete, ActivityEntity);
     }
 
-    if (user.role == Role.ViewOnly) {
+    if (user.role == Role.Observer) {
       can(Action.Read, Organisation);
       cannot(Action.Create, Organisation);
       cannot(Action.Update, Organisation);

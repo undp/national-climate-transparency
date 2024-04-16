@@ -272,11 +272,11 @@ export const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps)
 
   const companyRolePermission =
     userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
-    userInfoState?.userRole !== Role.ViewOnly;
+    userInfoState?.userRole !== Role.Observer;
 
   const verficationCompanyRolePermission =
     userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
-    userInfoState?.userRole !== Role.ViewOnly;
+    userInfoState?.userRole !== Role.Observer;
 
   const monitoringReportPending = monitoringReportData?.status === DocumentStatus.PENDING;
   const monitoringReportAccepted = monitoringReportData?.status === DocumentStatus.ACCEPTED;
@@ -369,7 +369,7 @@ export const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps)
                     placement="top"
                     trigger="hover"
                     title={
-                      userInfoState?.userRole === Role.ViewOnly
+                      userInfoState?.userRole === Role.Observer
                         ? t('programme:notAuthToUploadDoc')
                         : uploadDocUserPermission(
                             userInfoState,
@@ -458,7 +458,7 @@ export const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps)
                     placement="top"
                     trigger="hover"
                     title={
-                      userInfoState?.userRole === Role.ViewOnly
+                      userInfoState?.userRole === Role.Observer
                         ? t('programme:notAuthToUploadDoc')
                         : uploadDocUserPermission(
                             userInfoState,
@@ -604,7 +604,7 @@ export const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps)
                     placement="top"
                     trigger="hover"
                     title={
-                      userInfoState?.userRole === Role.ViewOnly
+                      userInfoState?.userRole === Role.Observer
                         ? t('programme:notAuthToUploadDoc')
                         : uploadDocUserPermission(
                             userInfoState,
@@ -695,7 +695,7 @@ export const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps)
                     placement="top"
                     trigger="hover"
                     title={
-                      userInfoState?.userRole === Role.ViewOnly
+                      userInfoState?.userRole === Role.Observer
                         ? t('programme:notAuthToUploadDoc')
                         : uploadDocUserPermission(
                             userInfoState,

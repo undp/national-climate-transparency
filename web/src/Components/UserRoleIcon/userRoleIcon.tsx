@@ -1,14 +1,22 @@
-import { EyeOutlined, SearchOutlined, StarOutlined, ToolOutlined } from '@ant-design/icons';
+import {
+  BankOutlined,
+  ExperimentOutlined,
+  EyeOutlined,
+  KeyOutlined,
+  SearchOutlined,
+  StarOutlined,
+  ToolOutlined,
+} from '@ant-design/icons';
 import React, { FC } from 'react';
 import {
   AdminBGColor,
   AdminColor,
-  ManagerBGColor,
-  ManagerColor,
+  GovBGColor,
+  GovColor,
+  ObsBGColor,
+  ObsColor,
   RootBGColor,
   RootColor,
-  ViewBGColor,
-  ViewColor,
 } from '../../Styles/role.color.constants';
 import { RoleIcon } from '../common/RoleIcon/role.icon';
 
@@ -20,22 +28,24 @@ export const UserRoleIcon: FC<UserRoleIconProps> = (props: UserRoleIconProps) =>
   const { role } = props;
   return (
     <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
-      {role === 'Admin' ? (
+      {role === 'Root' ? (
+        <RoleIcon icon={<KeyOutlined />} bg={RootBGColor} color={RootColor} />
+      ) : role === 'Admin' ? (
         <RoleIcon icon={<StarOutlined />} bg={AdminBGColor} color={AdminColor} />
-      ) : role === 'Root' ? (
-        <RoleIcon icon={<SearchOutlined />} bg={RootBGColor} color={RootColor} />
-      ) : role === 'DepartmentUser' ? (
-        <RoleIcon icon={<ToolOutlined />} bg={ManagerBGColor} color={ManagerColor} />
+      ) : role === 'GovernmentUser' ? (
+        <RoleIcon icon={<BankOutlined />} bg={GovBGColor} color={GovColor} />
       ) : (
-        <RoleIcon icon={<EyeOutlined />} bg={ViewBGColor} color={ViewColor} />
+        <RoleIcon icon={<ExperimentOutlined />} bg={ObsBGColor} color={ObsColor} />
       )}
       <div>
-        {role === 'ViewOnly'
-          ? 'Observer'
+        {role === 'Admin'
+          ? 'Administrator'
           : role === 'Root'
           ? 'Super Admin'
-          : role === 'DepartmentUser'
-          ? 'User'
+          : role === 'GovernmentUser'
+          ? 'Government User'
+          : role === 'Observer'
+          ? 'Observer'
           : role}
       </div>
     </div>

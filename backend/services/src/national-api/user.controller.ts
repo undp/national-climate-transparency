@@ -27,6 +27,7 @@ import { UserDto } from "src/dtos/user.dto";
 import { UserUpdateDto } from "src/dtos/user.update.dto";
 import { User } from "src/entities/user.entity";
 import { UserService } from "src/user/user.service";
+import { CountryService } from "src/util/country.service";
 import { HelperService } from "src/util/helpers.service";
 
 @ApiTags("Users")
@@ -36,6 +37,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private caslAbilityFactory: CaslAbilityFactory,
+    private readonly countryService: CountryService,
     private helperService: HelperService
   ) {}
 
@@ -101,5 +103,10 @@ export class UserController {
   queryUser(@Body() query: QueryDto, @Request() req) {
     console.log(req.abilityCondition);
     return this.userService.query(query, req.abilityCondition);
+  }
+
+  @Get("countries")
+  async getAvailableCountries(@Request() req) {
+    return await this.countryService.getAvailableCountries();
   }
 }

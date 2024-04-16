@@ -7,6 +7,7 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { useNavigate } from 'react-router-dom';
 import thumbnail from '../../Assets/Images/thumbnail.png';
+import { PersonCircle } from 'react-bootstrap-icons';
 
 const LayoutHeader = (props: HeaderProps) => {
   const navigate = useNavigate();
@@ -36,9 +37,16 @@ const LayoutHeader = (props: HeaderProps) => {
     <div className="header-container">
       <div className="header-prof">
         <div className="header-country-logo">
-          <img
+          {/* <img
             src={companyLogo as string}
             alt="logo"
+            onClick={() => {
+              navigate('/userProfile/view');
+            }}
+          /> */}
+          <PersonCircle
+            color="#3A354199"
+            size={44}
             onClick={() => {
               navigate('/userProfile/view');
             }}

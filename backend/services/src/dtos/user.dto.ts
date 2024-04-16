@@ -72,6 +72,9 @@ export class UserDto {
   @ApiPropertyOptional()
   country: string;
 
+  @ValidateIf(
+    (c) => ![Role.Root, Role.Admin].includes(c.role)
+  )
   @IsNotEmpty()
   @ApiProperty({ enum: Organisation })
   @IsEnum(Organisation, {

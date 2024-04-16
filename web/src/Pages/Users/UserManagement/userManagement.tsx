@@ -6,7 +6,7 @@ import {
   EyeOutlined,
   FilterOutlined,
   PlusOutlined,
-  SearchOutlined,
+  KeyOutlined,
   StarOutlined,
   ToolOutlined,
 } from '@ant-design/icons';
@@ -35,7 +35,8 @@ import { CompanyRole } from '../../../Enums/company.role.enum';
 import {
   GovBGColor,
   CertBGColor,
-  DevBGColor,
+  // eslint-disable-next-line import/named
+  ObsBGColor,
   AdminBGColor,
   RootBGColor,
   ManagerBGColor,
@@ -45,7 +46,8 @@ import {
   ManagerColor,
   ViewColor,
   GovColor,
-  DevColor,
+  // eslint-disable-next-line import/named
+  ObsColor,
 } from '../../../Styles/role.color.constants';
 
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
@@ -60,7 +62,7 @@ import { Action } from '../../../Enums/action.enum';
 import { User } from '../../../Entities/user';
 import { PersonDash, PersonCheck } from 'react-bootstrap-icons';
 import { UserManagementColumns } from '../../../Enums/user.management.columns.enum';
-import { OrganisationType } from '../../../Definitions/organisation.type.enum';
+// import { OrganisationType } from '../../../Definitions/organisation.type.enum';
 import './userManagementComponent.scss';
 import '../../../Styles/common.table.scss';
 import { UserState } from '../../../Enums/user.state.enum';
@@ -76,7 +78,7 @@ const UserManagement = () => {
     UserManagementColumns.email,
     UserManagementColumns.phoneNo,
     UserManagementColumns.organisation,
-    UserManagementColumns.organisationType,
+    // UserManagementColumns.organisationType,
     UserManagementColumns.status,
     UserManagementColumns.role,
     UserManagementColumns.actions,
@@ -101,7 +103,7 @@ const UserManagement = () => {
   const [searchValueUsers, setSearchValueUsers] = useState<string>('');
   const [networksearchUsers, setNetworkSearchUsers] = useState<string>('');
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
-  const [filterByOrganisationType, setFilterByOrganisationType] = useState<string>('All');
+  // const [filterByOrganisationType, setFilterByOrganisationType] = useState<string>('All');
   const [filterByRole, setFilterByRole] = useState<string>('All');
   const [sortOrder, setSortOrder] = useState<string>('');
   const [sortField, setSortField] = useState<string>('');
@@ -128,55 +130,30 @@ const UserManagement = () => {
     }
   });
 
-  const getCompanyBgColor = (item: string) => {
-    if (item === 'Government') {
-      return GovBGColor;
-    } else if (item === 'Certifier') {
-      return CertBGColor;
-    }
-    return DevBGColor;
-  };
-
   const getRoleComponent = (item: UserTableDataType) => {
     const role = item?.role;
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
-        {role === 'Admin' ? (
+        {role === 'Root' ? (
+          <RoleIcon icon={<KeyOutlined />} bg={RootBGColor} color={RootColor} />
+        ) : role === 'Admin' ? (
           <RoleIcon icon={<StarOutlined />} bg={AdminBGColor} color={AdminColor} />
-        ) : role === 'Root' ? (
-          <RoleIcon icon={<SearchOutlined />} bg={RootBGColor} color={RootColor} />
-        ) : role === 'DepartmentUser' ? (
-          <RoleIcon icon={<ToolOutlined />} bg={ManagerBGColor} color={ManagerColor} />
-        ) : (
-          <RoleIcon icon={<EyeOutlined />} bg={ViewBGColor} color={ViewColor} />
-        )}
-        <div>
-          {role === 'ViewOnly'
-            ? 'Observer'
-            : role === 'Root'
-            ? 'Super Admin'
-            : role === 'DepartmentUser'
-            ? 'User'
-            : role}
-        </div>
-      </div>
-    );
-  };
-
-  const getCompanyRoleComponent = (item: UserTableDataType) => {
-    const role = item?.organisation?.organisationType
-      ? item?.organisation?.organisationType
-      : item?.organisationType
-      ? item?.organisationType
-      : null;
-    return (
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {role === OrganisationType.GOVERNMENT ? (
+        ) : role === 'GovernmentUser' ? (
           <RoleIcon icon={<BankOutlined />} bg={GovBGColor} color={GovColor} />
         ) : (
-          <RoleIcon icon={<ExperimentOutlined />} bg={DevBGColor} color={DevColor} />
+          <RoleIcon icon={<ExperimentOutlined />} bg={ObsBGColor} color={ObsColor} />
         )}
-        <div>{role}</div>
+        <div>
+          {role === 'Admin'
+            ? 'Administrator'
+            : role === 'Root'
+            ? 'Super Admin'
+            : role === 'GovernmentUser'
+            ? 'Government User'
+            : role === 'Observer'
+            ? 'Observer'
+            : role}
+        </div>
       </div>
     );
   };
@@ -184,7 +161,7 @@ const UserManagement = () => {
   const changeUserStatus = async (record: UserTableDataType, remarks: string) => {
     setLoading(true);
     try {
-      const response = await put('national/user/update', {
+      const response = await put('national/users/update', {
         id: record.id,
         state: record.state,
         remarks,
@@ -238,7 +215,7 @@ const UserManagement = () => {
     if (
       // eslint-disable-next-line eqeqeq
       record.state == 1 &&
-      (record.role === Role.DepartmentUser || record.role === Role.ViewOnly)
+      (record.role === Role.GovernmentUser || record.role === Role.Observer)
     ) {
       data.push({
         text: 'Deactivate',
@@ -261,7 +238,7 @@ const UserManagement = () => {
     } else if (
       // eslint-disable-next-line eqeqeq
       record.state == 0 &&
-      (record.role === Role.DepartmentUser || record.role === Role.ViewOnly)
+      (record.role === Role.GovernmentUser || record.role === Role.Observer)
     ) {
       data.push({
         text: 'Activate',
@@ -302,7 +279,8 @@ const UserManagement = () => {
   const columns = [
     {
       title: '',
-      dataIndex: 'logo',
+      // dataIndex: 'logo',
+      dataIndex: 'name',
       key: UserManagementColumns.logo,
       width: '20px',
       align: 'left' as const,
@@ -310,11 +288,12 @@ const UserManagement = () => {
         console.log({ item, ...itemObj });
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <ProfileIcon
+            {/* <ProfileIcon
               icon={itemObj?.company?.logo}
               bg={getCompanyBgColor(itemObj.companyRole)}
-              name={itemObj?.company?.name}
-            />
+              // name={itemObj?.company?.name}
+              name={item}
+            /> */}
           </div>
         );
       },
@@ -351,22 +330,16 @@ const UserManagement = () => {
     },
     {
       title: t('user:company'),
-      dataIndex: 'company',
+      dataIndex: 'organisation',
       key: UserManagementColumns.organisation,
       render: (item: any, itemObj: UserTableDataType) => {
-        return itemObj?.organisation?.name ? itemObj?.organisation?.name : '-';
+        if (itemObj.role === 'Admin' || itemObj.role === 'Root') {
+          return `Government of ${process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}`;
+        } else {
+          return item ? item : '-';
+        }
       },
       align: 'left' as const,
-    },
-    {
-      title: t('user:companyRole'),
-      dataIndex: 'companyRole',
-      key: UserManagementColumns.organisationType,
-      sorter: true,
-      align: 'left' as const,
-      render: (item: any, itemObj: UserTableDataType) => {
-        return getCompanyRoleComponent(itemObj);
-      },
     },
     {
       title: t('user:status'),
@@ -414,7 +387,6 @@ const UserManagement = () => {
       searchByTermUser !== '' &&
       networksearchUsers !== null &&
       networksearchUsers !== '' &&
-      filterByOrganisationType === 'All' &&
       filterByRole === 'All'
     ) {
       return [
@@ -433,8 +405,7 @@ const UserManagement = () => {
       searchByTermUser !== '' &&
       networksearchUsers !== null &&
       networksearchUsers !== '' &&
-      filterByRole !== 'All' &&
-      filterByOrganisationType !== 'All'
+      filterByRole !== 'All'
     ) {
       return [
         {
@@ -446,11 +417,6 @@ const UserManagement = () => {
           key: 'role',
           operation: '=',
           value: filterByRole,
-        },
-        {
-          key: 'organisationType',
-          operation: '=',
-          value: filterByOrganisationType,
         },
       ];
     } else if (
@@ -476,40 +442,13 @@ const UserManagement = () => {
       searchByTermUser !== null &&
       searchByTermUser !== '' &&
       networksearchUsers !== null &&
-      networksearchUsers !== '' &&
-      filterByOrganisationType !== 'All'
+      networksearchUsers !== ''
     ) {
       return [
         {
           key: searchByTermUser,
           operation: 'like',
           value: '%' + networksearchUsers + '%',
-        },
-        {
-          key: 'organisationType',
-          operation: '=',
-          value: filterByOrganisationType,
-        },
-      ];
-    } else if (filterByOrganisationType !== 'All' && filterByRole !== 'All') {
-      return [
-        {
-          key: 'organisationType',
-          operation: '=',
-          value: filterByOrganisationType,
-        },
-        {
-          key: 'role',
-          operation: '=',
-          value: filterByRole,
-        },
-      ];
-    } else if (filterByOrganisationType !== 'All') {
-      return [
-        {
-          key: 'organisationType',
-          operation: '=',
-          value: filterByOrganisationType,
         },
       ];
     } else if (filterByRole !== 'All') {
@@ -549,7 +488,7 @@ const UserManagement = () => {
   const getAllUser = async () => {
     setLoading(true);
     try {
-      const response: any = await post('national/user/query', getAllUserParams());
+      const response: any = await post('national/users/query', getAllUserParams());
       if (response && response.data) {
         const availableUsers = response.data.filter(
           (user: any) => user.companyRole !== CompanyRole.API
@@ -583,7 +522,6 @@ const UserManagement = () => {
     searchByTermUser,
     networksearchUsers,
     filterByRole,
-    filterByOrganisationType,
     sortField,
     sortOrder,
   ]);
@@ -599,11 +537,6 @@ const UserManagement = () => {
 
   const searchByTermHandler = (event: any) => {
     setSearchByTermUser(event?.target?.value);
-  };
-
-  const onFilterOrganisationType = (checkedValue: any) => {
-    setCurrentPage(1);
-    setFilterByOrganisationType(checkedValue?.target?.value);
   };
 
   const onFilterRole = (checkedValue: any) => {
@@ -636,25 +569,9 @@ const UserManagement = () => {
           <Radio.Group onChange={onFilterRole} value={filterByRole}>
             <Space direction="vertical">
               <Radio value="All">All</Radio>
-              <Radio value="Admin">Admin</Radio>
-              <Radio value="DepartmentUser">User</Radio>
-              <Radio value="ViewOnly">Observer</Radio>
-            </Space>
-          </Radio.Group>
-        </div>
-      ),
-    },
-    {
-      key: '3',
-      title: 'Filter by',
-      label: (
-        <div className="filter-menu-item">
-          <div className="filter-title">{t('user:filterByCompanyRole')}</div>
-          <Radio.Group onChange={onFilterOrganisationType} value={filterByOrganisationType}>
-            <Space direction="vertical">
-              <Radio value="All">All</Radio>
-              <Radio value="Government">Government</Radio>
-              <Radio value="Department">Department</Radio>
+              <Radio value="Admin">Administrator</Radio>
+              <Radio value="GovernmentUser">Government User</Radio>
+              <Radio value="Observer">Observer</Radio>
             </Space>
           </Radio.Group>
         </div>
@@ -716,7 +633,7 @@ const UserManagement = () => {
               <div className="search-bar">
                 <Search
                   onPressEnter={onSearch}
-                  placeholder={searchByTermUser === 'email' ? 'Search by email' : 'Search by name'}
+                  placeholder={searchByTermUser === 'email' ? 'Search by Email' : 'Search by Name'}
                   allowClear
                   onChange={(e) =>
                     e.target.value === ''

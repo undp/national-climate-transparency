@@ -47,7 +47,7 @@ const CompanyProfile = () => {
   const getUserDetails = async (organisationId: string) => {
     setIsLoading(true);
     try {
-      const response: any = await post('national/user/query', {
+      const response: any = await post('national/users/query', {
         page: 1,
         size: 10,
         filterAnd: [
