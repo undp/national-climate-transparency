@@ -27,13 +27,14 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 interface Item {
   key: number;
   actionId: number;
-  activityId: number;
-  titleOfAction: string;
-  AType: string;
-  sectorAffected: string;
+  activityId: string;
+  title: string;
+  actionType: string;
+  affectedSectors: string;
   financeNeeded: number;
   financeReceived: number;
-  actionStatus: string;
+  status: string;
+  validationStatus: string;
   nationalImplementingEntity: string;
 }
 
@@ -59,12 +60,94 @@ const actionList = () => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [sortField, setSortField] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('');
-  const [searchByTermUser, setSearchByTermUser] = useState<any>('name');
+
   const [valueOnSearch, setValueOnSearch] = useState<string>('');
-  const [totalUser, setTotalUser] = useState<number>();
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
 
+  // Data Read from DB
+
+  const getAllData = async () => {
+    setLoading(true);
+    try {
+      const payload: any = { page: 1, size: 10 };
+      const response: any = await post('national/actions/query', payload);
+      if (response) {
+        const unstructuredData: any[] = response.data;
+        const structuredData: Item[] = [];
+        for (let i = 0; i < unstructuredData.length; i++) {
+          structuredData.push({
+            key: i,
+            actionId: unstructuredData[i].actionId,
+            activityId: 'T001',
+            title: unstructuredData[i].title,
+            actionType: 'Mitigation',
+            affectedSectors: unstructuredData[i].programmes?.[0]?.affectedSectors ?? '',
+            financeNeeded: unstructuredData[i].financeNeeded ?? 0,
+            financeReceived: unstructuredData[i].financeReceived ?? 0,
+            status: unstructuredData[i].status,
+            validationStatus: unstructuredData[i].validationStatus ?? '',
+            nationalImplementingEntity:
+              unstructuredData[i].nationalImplementingEntity ?? 'Department of Energy',
+          });
+        }
+        setTableData(structuredData);
+        setLoading(false);
+      }
+    } catch (error: any) {
+      message.open({
+        type: 'error',
+        content: error.message,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      setLoading(false);
+    }
+  };
+
+  const onChange: PaginationProps['onChange'] = (page: number, size: number) => {
+    setCurrentPage(page);
+    setPageSize(size);
+  };
+
+  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+    // Handle table change event (e.g., sorting, pagination)
+    console.log('Pagination:', pagination);
+    console.log('Filters:', filters);
+    console.log('Sorter:', sorter);
+    if (sorter.order === 'ascend') {
+      setSortOrder('ASC');
+    } else if (sorter.order === 'descend') {
+      setSortOrder('DESC');
+    } else if (sorter.order === undefined) {
+      setSortOrder('ASC');
+    }
+    if (sorter.columnKey !== undefined) {
+      setSortField(sorter.field);
+    } else {
+      setSortField('id');
+      setSortOrder('DESC');
+    }
+  };
+
+  const onSearch = () => {
+    setCurrentPage(1);
+    setValueOnSearch(searchValue);
+  };
+
+  const handleFilterVisibleChange = () => {
+    setFilterVisible(false);
+  };
+
+  // State Management
+
+  useEffect(() => {
+    getAllData();
+  }, [currentPage, pageSize, valueOnSearch, sortField, sortOrder]);
+
+  // Popup Menu for Action List
+
   const actionMenu = (record: any) => {
+    console.log(record);
     return (
       <List
         className="action-menu"
@@ -101,16 +184,17 @@ const actionList = () => {
     );
   };
 
-  // Define columns for your table (example)
+  // Action List Table Columns
+
   const columns = [
     { title: t('actionId'), dataIndex: 'actionId', key: 'actionId', sorter: false },
     { title: t('activityId'), dataIndex: 'activityId', key: 'activityId', sorter: true },
-    { title: t('titleOfAction'), dataIndex: 'titleOfAction', key: 'titleOfAction', sorter: false },
+    { title: t('titleOfAction'), dataIndex: 'title', key: 'title', sorter: false },
     { title: t('actionType'), dataIndex: 'actionType', key: 'actionType', sorter: false },
     {
       title: t('sectorAffected'),
-      dataIndex: 'sectorAffected',
-      key: 'sectorAffected',
+      dataIndex: 'affectedSectors',
+      key: 'affectedSectors',
       sorter: false,
     },
     {
@@ -125,10 +209,11 @@ const actionList = () => {
       key: 'financeReceived',
       sorter: false,
     },
-    { title: t('actionStatus'), dataIndex: 'actionStatus', key: 'actionStatus', sorter: false },
+    { title: t('actionStatus'), dataIndex: 'status', key: 'status', sorter: false },
     {
       title: t('validationStatus'),
       key: 'validationStatus',
+      // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
         return <StatusChip message={record.validationStatus} defaultMessage="pending" />;
       },
@@ -144,6 +229,7 @@ const actionList = () => {
       key: 'activityId',
       align: 'right' as const,
       width: 6,
+      // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
         return (
           <Popover placement="bottomRight" trigger="click" content={actionMenu(record)}>
@@ -155,72 +241,7 @@ const actionList = () => {
         );
       },
     },
-    // Add more columns as needed
   ];
-
-  const onChange: PaginationProps['onChange'] = (page: number, size: number) => {
-    setCurrentPage(page);
-    setPageSize(size);
-  };
-
-  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
-    // Handle table change event (e.g., sorting, pagination)
-    console.log('Pagination:', pagination);
-    console.log('Filters:', filters);
-    console.log('Sorter:', sorter);
-    if (sorter.order === 'ascend') {
-      setSortOrder('ASC');
-    } else if (sorter.order === 'descend') {
-      setSortOrder('DESC');
-    } else if (sorter.order === undefined) {
-      setSortOrder('ASC');
-    }
-    if (sorter.columnKey !== undefined) {
-      setSortField(sorter.field);
-    } else {
-      setSortField('id');
-      setSortOrder('DESC');
-    }
-  };
-  const customItemRender = (page: any, type: any, element: any) => {
-    return element;
-  };
-
-  const onSearch = () => {
-    console.log('onSearch', searchValue);
-    setCurrentPage(1);
-    setValueOnSearch(searchValue);
-  };
-
-  // get All Data Params
-
-  const getAllData = async () => {
-    setLoading(true);
-    try {
-      const payload: any = { page: 1, size: 10 };
-      const response: any = await post('national/actions/query', payload);
-      if (response) {
-        setTableData(response.data);
-        setLoading(false);
-      }
-    } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-      setLoading(false);
-    }
-  };
-
-  const handleFilterVisibleChange = () => {
-    setFilterVisible(false);
-  };
-
-  useEffect(() => {
-    getAllData();
-  }, [currentPage, pageSize, searchByTermUser, valueOnSearch, sortField, sortOrder]);
 
   return (
     <div className="content-container">
@@ -291,13 +312,11 @@ const actionList = () => {
               pagination={{
                 current: currentPage,
                 pageSize: pageSize,
-                total: totalUser,
                 showQuickJumper: true,
                 pageSizeOptions: ['10', '20', '30'],
                 showSizeChanger: true,
                 style: { textAlign: 'center' },
                 locale: { page: '' },
-                itemRender: customItemRender,
                 position: ['bottomRight'],
                 onChange: onChange,
               }}

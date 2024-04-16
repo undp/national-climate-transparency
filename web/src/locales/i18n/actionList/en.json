@@ -11,5 +11,6 @@
   "financeNeeded": "Finance Needed (USD)",
   "financeReceived": "Finance Received (USD)",
   "actionStatus": "Action Status",
-  "nationalImplementingEntity": "National Implementing Entity(s)"
+  "nationalImplementingEntity": "National Implementing Entity(s)",
+  "validationStatus": "Validation Status"
 }
