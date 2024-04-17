@@ -53,7 +53,7 @@ export class ProgrammeService {
 		if (programmeDto.documents) {
 			const documents = [];
 			for (const documentItem of programmeDto.documents) {
-				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title);
+				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.PROGRAMME);
 				const docEntity = new DocumentEntityDto();
 				docEntity.title = documentItem.title;
 				docEntity.url = response;
@@ -355,6 +355,14 @@ export class ProgrammeService {
 			.where('project.projectId IN (:...projectIds)', { projectIds })
 			.getMany();
 	}
+
+	async findProgrammesEligibleForLinking() {
+    return await this.programmeRepo.createQueryBuilder('programme')
+        .select(['"programmeId"', 'title'])
+        .where('programme.actionId IS NULL')
+        .orderBy('programme.programmeId', 'ASC') 
+        .getRawMany();
+}
 
 	private addEventLogEntry = (
 		eventLog: any[],

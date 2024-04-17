@@ -15,6 +15,7 @@ import { Organisation } from "../entities/organisation.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "src/entities/project.entity";
+import { ActivityEntity } from "src/entities/activity.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -57,6 +58,11 @@ export class CaslAbilityFactory {
         can(Action.Create, ProjectEntity);
         can(Action.Update, ProjectEntity);
         can(Action.Delete, ProjectEntity);
+
+				can(Action.Read, ActivityEntity);
+        can(Action.Create, ActivityEntity);
+        can(Action.Update, ActivityEntity);
+        can(Action.Delete, ActivityEntity);
       }
 
       if (user.role == Role.Admin) {
@@ -87,6 +93,11 @@ export class CaslAbilityFactory {
         can(Action.Create, ProjectEntity);
         can(Action.Update, ProjectEntity);
         can(Action.Delete, ProjectEntity);
+
+				can(Action.Read, ActivityEntity);
+        can(Action.Create, ActivityEntity);
+        can(Action.Update, ActivityEntity);
+        can(Action.Delete, ActivityEntity);
 
       }
 
@@ -119,6 +130,11 @@ export class CaslAbilityFactory {
         can(Action.Update, ProjectEntity);
         can(Action.Delete, ProjectEntity);
 
+				can(Action.Read, ActivityEntity);
+        can(Action.Create, ActivityEntity);
+        can(Action.Update, ActivityEntity);
+        can(Action.Delete, ActivityEntity);
+
       }
 
       if (user.role == Role.Observer) {
@@ -149,6 +165,11 @@ export class CaslAbilityFactory {
         cannot(Action.Create, ProjectEntity);
         cannot(Action.Update, ProjectEntity);
         cannot(Action.Delete, ProjectEntity);
+
+				can(Action.Read, ActivityEntity);
+        cannot(Action.Create, ActivityEntity);
+        cannot(Action.Update, ActivityEntity);
+        cannot(Action.Delete, ActivityEntity);
       }
 
 

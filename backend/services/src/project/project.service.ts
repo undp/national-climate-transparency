@@ -20,9 +20,9 @@ import { LinkProjectsDto } from "../dtos/link.projects.dto";
 import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
 import { ActivityEntity } from "../entities/activity.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
-import { QueryDto } from "src/dtos/query.dto";
-import { DataListResponseDto } from "src/dtos/data.list.response";
-import { ProjectViewEntity } from "src/entities/project.view.entity";
+import { QueryDto } from "../dtos/query.dto";
+import { DataListResponseDto } from "../dtos/data.list.response";
+import { ProjectViewEntity } from "../entities/project.view.entity";
 
 @Injectable()
 export class ProjectService {
@@ -49,7 +49,7 @@ export class ProjectService {
 		if (projectDto.documents) {
 			const documents = [];
 			for (const documentItem of projectDto.documents) {
-				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title);
+				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.PROJECT);
 				const docEntity = new DocumentEntityDto();
 				docEntity.title = documentItem.title;
 				docEntity.url = response;
@@ -195,6 +195,14 @@ export class ProjectService {
 
 	}
 
+	async findProjectsEligibleForLinking() {
+    return await this.projectRepo.createQueryBuilder('project')
+        .select(['"projectId"', 'title'])
+        .where('project.programmeId IS NULL')
+        .orderBy('project.projectId', 'ASC') 
+        .getRawMany();
+}
+
 	async linkProjectsToProgramme(linkProjectsDto: LinkProjectsDto, user: User) {
 		const programme = await this.programmeService.findProgrammeById(linkProjectsDto.programmeId);
 		if (!programme) {
@@ -301,6 +309,12 @@ export class ProjectService {
 			)
 			.where('project.projectId IN (:...projectIds)', { projectIds })
 			.getMany();
+	}
+
+	async findProjectById(projectId: string) {
+		return await this.projectRepo.findOneBy({
+			projectId
+		})
 	}
 
 	private addEventLogEntry = (

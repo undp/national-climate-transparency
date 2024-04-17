@@ -50,6 +50,13 @@ export class ProjectController {
 			return this.projectService.getProjectViewData(id, req.abilityCondition);
 		}
 
+		@ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectEntity, true))
+    @Get('link/eligible')
+    findEligibleProjectsForLinking(@Request() req) {
+      return this.projectService.findProjectsEligibleForLinking();
+    }
+
     @ApiBearerAuth('api_key')
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProjectEntity))

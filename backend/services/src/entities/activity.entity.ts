@@ -22,56 +22,56 @@ export class ActivityEntity {
   @Column()
   description: string;
 
-  @Column({ type: "enum", enum: EntityType })
+  @Column({ type: "enum", enum: EntityType, nullable: true })
   parentType: string;
 
-  @Column()
+  @Column({ nullable: true })
   parentId: string;
 
-  @Column({ type: "enum", enum: SupportType })
+  @Column({ type: "enum", enum: SupportType, nullable: true })
   supportType: string;
 
-  @Column({ type: "enum", enum: Measure })
+  @Column({ type: "enum", enum: Measure, nullable: true })
   measure: string;
 
   @Column({ type: "enum", enum: ActivityStatus })
   status: string;
 
-  @Column({ type: "enum", enum: IntImplementor })
-  intImplementor: string;
+  @Column("varchar", { array: true, nullable: true })
+  internationalImplementingEntity: IntImplementor[];
 
-  @Column({ type: "enum", enum: NatImplementor })
-  natImplementor: string;
+  @Column("varchar", { array: true, nullable: true })
+  nationalImplementingEntity: NatImplementor[];
 
-  @Column()
-  isAnchored: boolean;
+  @Column({nullable: true})
+  anchoredInNationalStrategy: boolean;
 
-  @Column({ type: "enum", enum: ImpleMeans })
-  implMeans: string;
+  @Column({ type: "enum", enum: ImpleMeans, nullable: true })
+  meansOfImplementation: string;
 
-  @Column({ type: "enum", enum: TechnologyType })
+  @Column({ type: "enum", enum: TechnologyType, nullable: true  })
   technologyType: string;
 
-  @Column()
-  document: string;
+	@Column({ type: 'jsonb', nullable: true })
+  documents: any;
+
+  @Column({nullable: true})
+  etfDescription: string;
+
+	@Column()
+  achievedGHGReduction: number;
 
   @Column()
-  etfDescription: string;
+  expectedGHGReduction: number;
 
   @Column()
   comment: string;
 
-  @Column()
-  achievedReduct: number;
-
-  @Column()
-  expectedReduct: number;
+  @Column("jsonb", { nullable: true })
+  mitigationInfo: any;
 
   @Column("jsonb", { nullable: true })
-  mgData: JSON;
-
-  @Column("jsonb", { nullable: true })
-  mgTimeline: JSON;
+  mitigationTimeline: any;
 
   @Column({ type: "ltree" })
   path: string;

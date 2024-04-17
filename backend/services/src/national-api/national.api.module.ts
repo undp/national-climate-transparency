@@ -20,6 +20,8 @@ import { ProgrammeModule } from '../programme/programme.module';
 import { ProgrammeController } from './programme.controller';
 import { ProjectController } from './project.controller';
 import { ProjectModule } from '../project/project.module';
+import { ActivityModule } from 'src/activity/activity.module';
+import { ActivityController } from './activity.controller';
 
 
 @Module({
@@ -40,7 +42,8 @@ import { ProjectModule } from '../project/project.module';
     UtilModule,
     ActionModule,
     ProgrammeModule, 
-		ProjectModule
+		ProjectModule,
+		ActivityModule,
   ],
   controllers: [ 
     NationalAPIController, 
@@ -50,7 +53,8 @@ import { ProjectModule } from '../project/project.module';
     SettingsController, 
     ActionController, 
     ProgrammeController,
-		ProjectController 
+		ProjectController, 
+		ActivityController 
   ],
   providers: [
     NationalAPIService, 
