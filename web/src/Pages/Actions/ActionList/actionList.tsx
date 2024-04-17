@@ -18,6 +18,7 @@ import {
   MenuProps,
 } from 'antd';
 import {
+  AppstoreOutlined,
   EditOutlined,
   EllipsisOutlined,
   FilterOutlined,
@@ -31,6 +32,7 @@ import { useAbilityContext } from '../../../Casl/Can';
 import { ActionEntity } from '../../../Entities/action';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import StatusChip from '../../../Components/StatusChip/statusChip';
+import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 
 interface Item {
   key: number;
@@ -61,6 +63,8 @@ const actionList = () => {
   // General Page State
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [openAttaching, setOpenAttaching] = useState<boolean>(false);
+  const [openPopoverKey, setOpenPopoverKey] = useState<number>();
 
   // Table Data State
 
@@ -220,6 +224,12 @@ const actionList = () => {
     }
   };
 
+  // Children Attachment Functionality
+
+  const attachChildrenEntities = (parentId: string, childId: string) => {
+    console.log(parentId, childId);
+  };
+
   // State Management
 
   useEffect(() => {
@@ -251,6 +261,8 @@ const actionList = () => {
             isDisabled: false,
             click: () => {
               {
+                setOpenAttaching(true);
+                setOpenPopoverKey(undefined);
               }
             },
           },
@@ -275,6 +287,16 @@ const actionList = () => {
         }
       />
     );
+  };
+
+  // Controlling Popover visibility
+
+  const shouldPopoverOpen = (key: number) => {
+    if (key === openPopoverKey) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   // Action List Table Columns
@@ -339,10 +361,17 @@ const actionList = () => {
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
         return (
-          <Popover placement="bottomRight" trigger="click" content={actionMenu(record)}>
+          <Popover
+            open={shouldPopoverOpen(record.key)}
+            placement="bottomRight"
+            content={actionMenu(record)}
+          >
             <EllipsisOutlined
               rotate={90}
               style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
+              onClick={() => {
+                setOpenPopoverKey(record.key);
+              }}
             />
           </Popover>
         );
@@ -463,6 +492,21 @@ const actionList = () => {
         <div className="body-sub-title">{t('viewDesc')}</div>
       </div>
       <div className="content-card">
+        <SimpleAttachEntity
+          open={openAttaching}
+          setOpen={setOpenAttaching}
+          options={['P003', 'P004']}
+          content={{
+            buttonName: t('attachProgramme'),
+            attach: t('attach'),
+            contentTitle: t('attachProgramme'),
+            listTitle: t('programmeList'),
+            cancel: t('cancel'),
+          }}
+          attachedUnits={['P003']}
+          attachUnits={attachChildrenEntities}
+          icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
+        ></SimpleAttachEntity>
         <Row className="table-actions-section">
           <Col md={8} xs={24}>
             <div className="action-bar">
