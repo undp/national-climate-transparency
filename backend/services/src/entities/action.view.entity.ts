@@ -8,7 +8,9 @@ SELECT
     ARRAY_AGG(DISTINCT fullp.types) FILTER (WHERE fullp.types IS NOT NULL) AS types,
     MAX(fullp."achievedGHGReduction") AS "achievedGHGReduction",
     MAX(fullp."expectedGHGReduction") AS "expectedGHGReduction",
-    MAX(inv."totalInvestment") AS "totalInvestment"
+    MAX(inv."totalInvestment") AS "totalInvestment",
+    MAX(finance."totalRequired") AS "financeNeeded",
+    MAX(finance."totalReceived") AS "financeReceived"
 FROM 
     action a
 LEFT JOIN (
@@ -42,6 +44,16 @@ LEFT JOIN (
     GROUP BY 
         "actionId"
 ) inv ON a."actionId" = inv."actionId"
+LEFT JOIN (
+    SELECT 
+        action,
+        SUM("totalRequired") AS "totalRequired",
+        SUM("totalReceived") AS "totalReceived"
+    FROM 
+        activity_view_entity
+    GROUP BY 
+        action
+) finance ON a."actionId" = finance.action
 GROUP BY 
     a."actionId";`
 
@@ -75,6 +87,14 @@ export class ActionViewEntity {
 
     @ViewColumn()
     expectedGHGReduction: number
+
+    // From Activity + Support View
+
+    @ViewColumn()
+    financeNeeded: number
+
+    @ViewColumn()
+    financeReceived: number
 
     // No Clue to location
 

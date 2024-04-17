@@ -7,8 +7,8 @@ export const projectViewSQL = `
         ARRAY_AGG(DISTINCT fullact."meansOfImplementation") AS "meansOfImplementation",
         SUM(fullact."requiredAmount") AS "estimatedAmount",
         SUM(fullact."receivedAmount") AS "receivedAmount",
-				SUM(fullact."requiredAmountDomestic") AS "estimatedAmountDomestic",
-				SUM(fullact."receivedAmountDomestic") AS "receivedAmountDomestic"
+		SUM(fullact."requiredAmountDomestic") AS "estimatedAmountDomestic",
+		SUM(fullact."receivedAmountDomestic") AS "receivedAmountDomestic"
     FROM 
         project prj
     LEFT JOIN (
@@ -19,7 +19,7 @@ export const projectViewSQL = `
             act."meansOfImplementation" AS "meansOfImplementation",
             sup."requiredAmount",
             sup."receivedAmount",
-						sup."requiredAmountDomestic",
+			sup."requiredAmountDomestic",
             sup."receivedAmountDomestic"
         FROM 
             activity act
@@ -28,7 +28,7 @@ export const projectViewSQL = `
                 "activityId",
                 SUM("requiredAmount") AS "requiredAmount",
                 SUM("receivedAmount") AS "receivedAmount",
-								SUM("requiredAmountDomestic") AS "requiredAmountDomestic",
+				SUM("requiredAmountDomestic") AS "requiredAmountDomestic",
                 SUM("receivedAmountDomestic") AS "receivedAmountDomestic"
             FROM 
                 support
