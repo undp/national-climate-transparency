@@ -52,7 +52,7 @@ export class ActionService {
 		if (actionDto.documents) {
 			const documents = [];
 			for (const documentItem of actionDto.documents) {
-				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title);
+				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.ACTION);
 				const docEntity = new DocumentEntityDto();
 				docEntity.title = documentItem.title;
 				docEntity.url = response;

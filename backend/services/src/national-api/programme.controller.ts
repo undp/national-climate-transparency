@@ -50,6 +50,13 @@ export class ProgrammeController {
       return this.programmeService.getProgrammeViewData(id, req.abilityCondition);
     }
 
+		@ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeEntity, true))
+    @Get('link/eligible')
+    findEligibleProgrammesForLinking(@Request() req) {
+      return this.programmeService.findProgrammesEligibleForLinking();
+    }
+
     @ApiBearerAuth('api_key')
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeEntity))

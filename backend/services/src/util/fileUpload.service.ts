@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { FileHandlerInterface } from "../file-handler/filehandler.interface";
 import { HelperService } from "./helpers.service";
+import { EntityType } from "src/enums/shared.enum";
 
 @Injectable()
 export class FileUploadService {
@@ -10,7 +11,7 @@ export class FileUploadService {
         private fileHandler: FileHandlerInterface,
     ) { }
 
-    async uploadDocument(data: string, fileName: string) {
+    async uploadDocument(data: string, fileName: string, entityType: string) {
         let filetype;
         try {
             filetype = this.getFileExtension(data);
@@ -36,7 +37,7 @@ export class FileUploadService {
         }
 
         const response: any = await this.fileHandler.uploadFile(
-            `documents/action_documents/${fileName}.${filetype}`,
+            `documents/${entityType}_documents/${fileName}_${new Date().getTime()}.${filetype}`,
             data,
         );
         if (response) {

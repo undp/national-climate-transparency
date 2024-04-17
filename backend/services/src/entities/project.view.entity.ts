@@ -4,7 +4,7 @@ export const projectViewSQL = `
     SELECT 
         prj."projectId" AS id,
         ARRAY_AGG(DISTINCT fullact."techTypes") AS "technologyTypes",
-        ARRAY_AGG(DISTINCT fullact."implMeans") AS "implMeans",
+        ARRAY_AGG(DISTINCT fullact."meansOfImplementation") AS "meansOfImplementation",
         SUM(fullact."requiredAmount") AS "estimatedAmount",
         SUM(fullact."receivedAmount") AS "receivedAmount",
 				SUM(fullact."requiredAmountDomestic") AS "estimatedAmountDomestic",
@@ -16,7 +16,7 @@ export const projectViewSQL = `
             act."activityId",
             act."parentId" AS "projectId",
             act."technologyType" AS "techTypes",
-            act."implMeans" AS "implMeans",
+            act."meansOfImplementation" AS "meansOfImplementation",
             sup."requiredAmount",
             sup."receivedAmount",
 						sup."requiredAmountDomestic",
@@ -53,7 +53,7 @@ export class ProjectViewEntity {
     // From Activity
 
     @ViewColumn()
-    implMeans: string[]
+    meansOfImplementation: string[]
 
     @ViewColumn()
     technologyTypes: string[]
