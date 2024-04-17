@@ -4,7 +4,8 @@
         "cmpt",
         "Popconfirm",
         "Popover",
-        "Sider"
+        "Sider",
+        "vars"
     ],
     "compile-hero.disable-compile-files-on-did-save-code": true,
     "cSpell.language": "en-GB"

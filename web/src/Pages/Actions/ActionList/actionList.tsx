@@ -21,6 +21,7 @@ import {
   EditOutlined,
   EllipsisOutlined,
   FilterOutlined,
+  InfoCircleOutlined,
   PlusOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
@@ -99,6 +100,7 @@ const actionList = () => {
       const payload: any = { page: currentPage, size: pageSize };
 
       // Adding Sort By Conditions
+
       payload.sort = {
         key: sortField,
         order: sortOrder,
@@ -237,8 +239,18 @@ const actionList = () => {
         size="small"
         dataSource={[
           {
+            text: 'View/Validate',
+            icon: <InfoCircleOutlined style={{ color: '#9155FD' }} />,
+            isDisabled: false,
+            click: () => {
+              {
+                navigate(`/actions/view/${record.actionId}`);
+              }
+            },
+          },
+          {
             text: 'Attach Programme',
-            icon: <PlusOutlined />,
+            icon: <PlusOutlined style={{ color: '#9155FD' }} />,
             isDisabled: false,
             click: () => {
               {
@@ -247,10 +259,11 @@ const actionList = () => {
           },
           {
             text: 'Edit Action',
-            icon: <EditOutlined />,
+            icon: <EditOutlined style={{ color: '#9155FD' }} />,
             isDisabled: false,
             click: () => {
               {
+                navigate(`/actions/edit/${record.actionId}`);
               }
             },
           },
