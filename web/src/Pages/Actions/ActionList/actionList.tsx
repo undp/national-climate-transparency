@@ -35,15 +35,14 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 interface Item {
   key: number;
   actionId: number;
-  activityId: string;
   title: string;
   actionType: string;
-  affectedSectors: string;
+  affectedSectors: string[];
   financeNeeded: number;
   financeReceived: number;
   status: string;
   validationStatus: string;
-  nationalImplementingEntity: string;
+  nationalImplementingEntity: string[];
 }
 
 interface Filter {
@@ -147,16 +146,14 @@ const actionList = () => {
           structuredData.push({
             key: i,
             actionId: unstructuredData[i].actionId,
-            activityId: 'T001',
             title: unstructuredData[i].title,
-            actionType: 'Mitigation',
-            affectedSectors: unstructuredData[i].programmes?.[0]?.affectedSectors ?? '',
-            financeNeeded: unstructuredData[i].financeNeeded ?? 0,
-            financeReceived: unstructuredData[i].financeReceived ?? 0,
             status: unstructuredData[i].status,
             validationStatus: unstructuredData[i].validationStatus ?? '',
-            nationalImplementingEntity:
-              unstructuredData[i].nationalImplementingEntity ?? 'Department of Energy',
+            actionType: unstructuredData[i].migratedData[0]?.types ?? '',
+            affectedSectors: unstructuredData[i].migratedData[0]?.sectorsAffected ?? '',
+            nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? '',
+            financeNeeded: unstructuredData[i].migratedData[0]?.financeNeeded ?? 0,
+            financeReceived: unstructuredData[i].migratedData[0]?.financeReceived ?? 0,
           });
         }
         setTableData(structuredData);
@@ -284,14 +281,21 @@ const actionList = () => {
 
   const columns = [
     { title: t('actionId'), dataIndex: 'actionId', key: 'actionId', sorter: false },
-    { title: t('activityId'), dataIndex: 'activityId', key: 'activityId', sorter: false },
     { title: t('titleOfAction'), dataIndex: 'title', key: 'title', sorter: true },
     { title: t('actionType'), dataIndex: 'actionType', key: 'actionType', sorter: false },
     {
       title: t('sectorAffected'),
-      dataIndex: 'affectedSectors',
-      key: 'affectedSectors',
       sorter: false,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        return (
+          <div style={{ width: '100px' }}>
+            {record.affectedSectors.map((item: string, index: number) => (
+              <div key={index}>{item}</div>
+            ))}
+          </div>
+        );
+      },
     },
     {
       title: t('financeNeeded'),
@@ -316,9 +320,16 @@ const actionList = () => {
     },
     {
       title: t('nationalImplementingEntity'),
-      dataIndex: 'nationalImplementingEntity',
-      key: 'nationalImplementingEntity',
-      sorter: false,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        return (
+          <div style={{ width: '200px' }}>
+            {record.nationalImplementingEntity.map((item: string, index: number) => (
+              <div key={index}>{item}</div>
+            ))}
+          </div>
+        );
+      },
     },
     {
       title: '',
@@ -521,7 +532,7 @@ const actionList = () => {
                 current: currentPage,
                 pageSize: pageSize,
                 showQuickJumper: true,
-                pageSizeOptions: ['1', '10', '20', '30'],
+                pageSizeOptions: ['10', '20', '30'],
                 showSizeChanger: true,
                 style: { textAlign: 'center' },
                 locale: { page: '' },
