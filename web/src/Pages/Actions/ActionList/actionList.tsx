@@ -234,9 +234,9 @@ const actionList = () => {
             title: unstructuredData[i].title,
             status: unstructuredData[i].status,
             validationStatus: unstructuredData[i].validationStatus ?? '',
-            actionType: unstructuredData[i].migratedData[0]?.types ?? '',
-            affectedSectors: unstructuredData[i].migratedData[0]?.sectorsAffected ?? '',
-            nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? '',
+            actionType: unstructuredData[i].migratedData[0]?.types ?? [],
+            affectedSectors: unstructuredData[i].migratedData[0]?.sectorsAffected ?? [],
+            nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? [],
             financeNeeded: unstructuredData[i].migratedData[0]?.financeNeeded ?? 0,
             financeReceived: unstructuredData[i].migratedData[0]?.financeReceived ?? 0,
           });
