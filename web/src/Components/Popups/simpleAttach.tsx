@@ -13,7 +13,7 @@ interface Props {
   };
   options: string[];
   attachedUnits: string[];
-  attachUnits: (parentId: string, childId: string) => void;
+  setToBeAttached: React.Dispatch<React.SetStateAction<string[]>>;
   icon: React.ReactNode;
 }
 
@@ -23,7 +23,7 @@ const SimpleAttachEntity: React.FC<Props> = ({
   content,
   options,
   attachedUnits,
-  attachUnits,
+  setToBeAttached,
   icon,
 }) => {
   const [pendingAttachments, setPendingAttachments] = useState<string[]>([]);
@@ -35,6 +35,16 @@ const SimpleAttachEntity: React.FC<Props> = ({
       key: entityId,
       label: entityId,
       value: entityId,
+      disabled: false,
+    });
+  });
+
+  attachedUnits.forEach((entityId) => {
+    optionsList.push({
+      key: entityId,
+      label: entityId,
+      value: entityId,
+      disabled: true,
     });
   });
 
@@ -43,9 +53,8 @@ const SimpleAttachEntity: React.FC<Props> = ({
   }, [attachedUnits]);
 
   const attachProject = () => {
+    setToBeAttached(pendingAttachments.filter((entity) => !attachedUnits.includes(entity)));
     setOpen(false);
-    // Call the attach function
-    attachUnits('A001', 'P002');
   };
 
   const attachCancel = () => {

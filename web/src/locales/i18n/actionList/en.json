@@ -14,5 +14,10 @@
   "nationalImplementingEntity": "National Implementing Entity(s)",
   "validationStatus": "Validation Status",
   "filterByActionStatus": "Filter By Action Status",
-  "filterByValidationStatus": "Filter By Validation Status"
+  "filterByValidationStatus": "Filter By Validation Status",
+  "attachProgramme": "Attach Programme",
+  "attach" : "Attach",
+  "programmeList" : "Programme List",
+  "cancel": "Cancel",
+  "programmeLinkSuccess": "Programme/s Linked Successfully"
 }

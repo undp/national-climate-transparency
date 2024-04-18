@@ -63,7 +63,6 @@ const actionList = () => {
   // General Page State
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [openAttaching, setOpenAttaching] = useState<boolean>(false);
   const [openPopoverKey, setOpenPopoverKey] = useState<number>();
 
   // Table Data State
@@ -94,6 +93,88 @@ const actionList = () => {
 
   const [tempSearchValue, setTempSearchValue] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
+
+  // Programme Attachment State
+
+  const [openAttaching, setOpenAttaching] = useState<boolean>(false);
+  const [allFreeProgrammeIds, setAllFreeProgrammeIds] = useState<string[]>([]);
+
+  const [selectedActionId, setSelectedActionId] = useState<string>();
+  const [attachedProgrammeIds, setAttachedProgrammeIds] = useState<string[]>([]);
+  const [toBeAttached, setToBeAttached] = useState<string[]>([]);
+
+  // Attach Multiple Programmes for an Action
+
+  const attachProgrammes = async () => {
+    const payload = {
+      actionId: selectedActionId,
+      programmes: toBeAttached,
+    };
+    const response: any = await post('national/programmes/link', payload);
+    if (response.status === 200 || response.status === 201) {
+      message.open({
+        type: 'success',
+        content: t('programmeLinkSuccess'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      navigate('/actions');
+    }
+  };
+
+  // Free Prg Read from DB
+
+  const getFreeProgrammeIds = async () => {
+    const payload = {
+      page: 1,
+      size: 100,
+      filterAnd: [
+        {
+          key: 'actionId',
+          operation: 'IS',
+          value: 'NULL',
+        },
+      ],
+      sort: {
+        key: 'programmeId',
+        order: 'ASC',
+      },
+    };
+    const response: any = await post('national/programmes/query', payload);
+
+    const freeProgrammeIds: string[] = [];
+    response.data.forEach((prg: any) => {
+      freeProgrammeIds.push(prg.programmeId);
+    });
+    setAllFreeProgrammeIds(freeProgrammeIds);
+  };
+
+  // Get Attached Programmes
+
+  const getAttachedProgrammeIds = async (actionId: string) => {
+    const payload = {
+      page: 1,
+      size: 100,
+      filterAnd: [
+        {
+          key: 'actionId',
+          operation: '=',
+          value: actionId,
+        },
+      ],
+      sort: {
+        key: 'programmeId',
+        order: 'ASC',
+      },
+    };
+    const response: any = await post('national/programmes/query', payload);
+
+    const freeProgrammeIds: string[] = [];
+    response.data.forEach((prg: any) => {
+      freeProgrammeIds.push(prg.programmeId);
+    });
+    setAttachedProgrammeIds(freeProgrammeIds);
+  };
 
   // Data Read from DB
 
@@ -224,22 +305,32 @@ const actionList = () => {
     }
   };
 
-  // Children Attachment Functionality
-
-  const attachChildrenEntities = (parentId: string, childId: string) => {
-    console.log(parentId, childId);
-  };
-
   // State Management
+
+  useEffect(() => {
+    getFreeProgrammeIds();
+    if (!openAttaching) {
+      setAttachedProgrammeIds([]);
+    }
+  }, [openAttaching]);
 
   useEffect(() => {
     getAllData();
   }, [currentPage, pageSize, sortField, sortOrder, searchValue, appliedFilterValue]);
 
+  // Children Attachment Functionality
+
+  useEffect(() => {
+    if (toBeAttached.length > 0) {
+      attachProgrammes();
+      setToBeAttached([]);
+      setSelectedActionId(undefined);
+    }
+  }, [toBeAttached]);
+
   // Popup Menu for Action List
 
   const actionMenu = (record: any) => {
-    console.log(record);
     return (
       <List
         className="action-menu"
@@ -262,6 +353,8 @@ const actionList = () => {
             click: () => {
               {
                 setOpenAttaching(true);
+                setSelectedActionId(record.actionId);
+                getAttachedProgrammeIds(record.actionId);
                 setOpenPopoverKey(undefined);
               }
             },
@@ -495,7 +588,7 @@ const actionList = () => {
         <SimpleAttachEntity
           open={openAttaching}
           setOpen={setOpenAttaching}
-          options={['P003', 'P004']}
+          options={allFreeProgrammeIds}
           content={{
             buttonName: t('attachProgramme'),
             attach: t('attach'),
@@ -503,8 +596,8 @@ const actionList = () => {
             listTitle: t('programmeList'),
             cancel: t('cancel'),
           }}
-          attachedUnits={['P003']}
-          attachUnits={attachChildrenEntities}
+          attachedUnits={attachedProgrammeIds}
+          setToBeAttached={setToBeAttached}
           icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
         ></SimpleAttachEntity>
         <Row className="table-actions-section">

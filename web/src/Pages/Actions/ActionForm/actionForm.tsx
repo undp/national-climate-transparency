@@ -102,7 +102,13 @@ const actionForm: React.FC<Props> = ({ method }) => {
         const payload = {
           page: 1,
           size: 100,
-          // Add the Filtering here
+          filterAnd: [
+            {
+              key: 'actionId',
+              operation: 'IS',
+              value: 'NULL',
+            },
+          ],
           sort: {
             key: 'programmeId',
             order: 'ASC',

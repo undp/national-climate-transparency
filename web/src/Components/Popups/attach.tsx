@@ -35,6 +35,16 @@ const AttachEntity: React.FC<Props> = ({
       key: entityId,
       label: entityId,
       value: entityId,
+      disabled: false,
+    });
+  });
+
+  attachedUnits.forEach((entityId) => {
+    optionsList.push({
+      key: entityId,
+      label: entityId,
+      value: entityId,
+      disabled: true,
     });
   });
 
