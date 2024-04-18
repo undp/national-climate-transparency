@@ -8,7 +8,9 @@ SELECT
     SUM(fullact."requiredAmount") AS "estimatedAmount",
     SUM(fullact."receivedAmount") AS "receivedAmount",
     SUM(fullact."requiredAmountDomestic") AS "estimatedAmountDomestic",
-    SUM(fullact."receivedAmountDomestic") AS "receivedAmountDomestic"
+    SUM(fullact."receivedAmountDomestic") AS "receivedAmountDomestic",
+    SUM(fullact."achievedGHGReduction") AS "achievedGHGReduction",
+    SUM(fullact."expectedGHGReduction") AS "expectedGHGReduction"
 FROM 
     project prj
 LEFT JOIN (
@@ -17,6 +19,8 @@ LEFT JOIN (
         act."parentId" AS "projectId",
         act."technologyType" AS "techTypes",
         act."meansOfImplementation" AS "meansOfImplementation",
+        act."achievedGHGReduction" AS "achievedGHGReduction",
+        act."expectedGHGReduction" AS "expectedGHGReduction",
         sup."requiredAmount",
         sup."receivedAmount",
         sup."requiredAmountDomestic",
@@ -57,6 +61,12 @@ export class ProjectViewEntity {
 
     @ViewColumn()
     technologyTypes: string[]
+
+    @ViewColumn()
+    achievedGHGReduction: number;
+  
+    @ViewColumn()
+    expectedGHGReduction: number;
 
     // From Support
 

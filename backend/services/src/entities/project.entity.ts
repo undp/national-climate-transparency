@@ -4,7 +4,6 @@ import { Recipient, IntImplementor } from "../enums/shared.enum";
 import { ProgrammeEntity } from "./programme.entity";
 import { ActivityEntity } from "./activity.entity";
 
-
 @Entity("project")
 export class ProjectEntity {
   @PrimaryColumn()
@@ -42,12 +41,6 @@ export class ProjectEntity {
 
   @Column({ type: 'jsonb', nullable: true })
   documents: any;
-
-  @Column()
-  achievedGHGReduction: number;
-
-  @Column()
-  expectedGHGReduction: number;
 
   @Column()
   comment: string;
