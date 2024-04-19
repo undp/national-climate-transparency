@@ -219,11 +219,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
         // expectedReduct: programmeData.migratedData.expectedReduct,
       });
 
-      const tempFiles: { id: number; title: string; url: string }[] = [];
-      programmeData.documents.forEach((document: any) => {
-        tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
-      });
-      setStoredFiles(tempFiles);
+      if (programmeData.documents?.length > 0) {
+        const tempFiles: { id: number; title: string; url: string }[] = [];
+        programmeData.documents.forEach((document: any) => {
+          tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
+        });
+        setStoredFiles(tempFiles);
+      }
     }
   }, [programmeData]);
 

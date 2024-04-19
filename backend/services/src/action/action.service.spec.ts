@@ -352,7 +352,7 @@ describe('ActionService', () => {
 		jest.spyOn(actionRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
 
 		// testing whether query method called correctly
-		const result = await service.getActionViewData('1', 'abilityCondition');
+		const result = await service.getActionViewData('1');
 		expect(actionRepositoryMock.createQueryBuilder).toHaveBeenCalledWith('action');
 		expect(actionRepositoryMock.createQueryBuilder().where).toHaveBeenCalledWith("action.actionId = :actionId", { "actionId": "1" });
 		expect(actionRepositoryMock.createQueryBuilder().leftJoinAndMapOne).toHaveBeenCalledTimes(1); // Assuming there are two left join queries

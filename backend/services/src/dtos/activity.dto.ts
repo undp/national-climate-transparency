@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { ArrayMinSize, IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
 import { ActivityStatus, ImpleMeans, Measure, SupportType, TechnologyType } from "../enums/activity.enum";
 import { EntityType, IntImplementor, NatImplementor } from "../enums/shared.enum";
@@ -20,7 +20,7 @@ export class ActivityDto {
 
 	@ValidateIf((c) => c.parentType)
 	@IsNotEmpty()
-	@ApiProperty({ enum: EntityType })
+	@ApiPropertyOptional({ enum: EntityType })
 	@IsEnum(EntityType, {
 		message: "Invalid parent type. Supported following paren types:" + Object.values(EntityType),
 	})
@@ -28,20 +28,20 @@ export class ActivityDto {
 
 	@IsOptional()
 	@IsString()
-	@ApiProperty()
+	@ApiPropertyOptional()
 	parentId: string;
 
-	@ValidateIf((c) => c.supportType)
-	@IsNotEmpty()
-	@ApiProperty({ enum: SupportType })
-	@IsEnum(SupportType, {
-		message: "Invalid type of support. Supported following types:" + Object.values(SupportType),
-	})
-	supportType: SupportType;
+	// @ValidateIf((c) => c.supportType)
+	// @IsNotEmpty()
+	// @ApiPropertyOptional({ enum: SupportType })
+	// @IsEnum(SupportType, {
+	// 	message: "Invalid type of support. Supported following types:" + Object.values(SupportType),
+	// })
+	// supportType: SupportType;
 
 	@ValidateIf((c) => c.measure)
 	@IsNotEmpty()
-	@ApiProperty({ enum: Measure })
+	@ApiPropertyOptional({ enum: Measure })
 	@IsEnum(Measure, {
 		message: "Invalid Measure type. Supported following types:" + Object.values(Measure),
 	})
@@ -64,7 +64,7 @@ export class ActivityDto {
 		each: true,
 		message: 'Invalid National Implementing Entity. Supported following entities:' + Object.values(NatImplementor)
 	})
-	@ApiProperty({
+	@ApiPropertyOptional({
 		type: [String],
 		enum: Object.values(NatImplementor),
 	})
@@ -80,7 +80,7 @@ export class ActivityDto {
 		each: true,
 		message: 'Invalid International Implementing Entity. Supported following entities:' + Object.values(IntImplementor)
 	})
-	@ApiProperty({
+	@ApiPropertyOptional({
 		type: [String],
 		enum: Object.values(IntImplementor),
 	})
@@ -88,12 +88,12 @@ export class ActivityDto {
 
 	@IsOptional()
 	@IsBoolean()
-	@ApiProperty()
+	@ApiPropertyOptional()
 	anchoredInNationalStrategy: boolean;
 
 	@ValidateIf((c) => c.meansOfImplementation)
 	@IsNotEmpty()
-	@ApiProperty({ enum: ImpleMeans })
+	@ApiPropertyOptional({ enum: ImpleMeans })
 	@IsEnum(ImpleMeans, {
 		message: "Invalid Means of Implementation. Supported following types:" + Object.values(ImpleMeans),
 	})
@@ -101,7 +101,7 @@ export class ActivityDto {
 
 	@ValidateIf((c) => c.technologyType)
 	@IsNotEmpty()
-	@ApiProperty({ enum: TechnologyType })
+	@ApiPropertyOptional({ enum: TechnologyType })
 	@IsEnum(TechnologyType, {
 		message: "Invalid Technology Type. Supported following types:" + Object.values(TechnologyType),
 	})
@@ -109,11 +109,22 @@ export class ActivityDto {
 
 	@IsOptional()
 	@IsString()
-	@ApiProperty()
+	@ApiPropertyOptional()
 	etfDescription: string;
 
 	@IsOptional()
-	@ApiProperty()
+	@ApiPropertyOptional(
+		{
+			type: "array",
+			example: [{
+				title: "document 1",
+				data: "base64 document string"
+			}],
+			items: {
+				$ref: getSchemaPath(DocumentDto),
+			},
+		}
+	)
 	documents: DocumentDto[];
 
 	@IsNumber()
@@ -125,12 +136,28 @@ export class ActivityDto {
 	expectedGHGReduction: number;
 
 	@IsOptional()
-	@ApiProperty()
+	@ApiPropertyOptional()
 	@IsString()
 	comments: string;
 
 	@IsOptional()
-	@ApiProperty()
+	@ApiPropertyOptional({
+		type: "object",
+		example: {
+			mitigationMethodology: "CO2",
+			mitigationMethodologyDescription: "test",
+			mitigationCalcEntity: "ABB",
+			comments: "test mitigation comments",
+			methodologyDocuments: [{
+				title: "mitigation document 1",
+				data: "base64 document string"
+			}],
+			resultDocuments: [{
+				title: "result document 1",
+				data: "base64 document string"
+			}]
+		},
+	})
 	mitigationInfo: any;
 
 }

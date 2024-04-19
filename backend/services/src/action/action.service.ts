@@ -147,7 +147,7 @@ export class ActionService {
 			.getMany();
 	}
 
-	async getActionViewData(actionId: string, abilityCondition: string) {
+	async getActionViewData(actionId: string) {
 
 		const queryBuilder = await this.actionRepo
 			.createQueryBuilder("action")

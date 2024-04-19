@@ -10,6 +10,7 @@ import {
   ActivityStatus,
 } from "../enums/activity.enum";
 import { NatImplementor, IntImplementor } from "../enums/shared.enum";
+import { Sector } from "../enums/sector.enum";
 
 @Entity("activity")
 export class ActivityEntity {
@@ -28,8 +29,8 @@ export class ActivityEntity {
   @Column({ nullable: true })
   parentId: string;
 
-  @Column({ type: "enum", enum: SupportType, nullable: true })
-  supportType: string;
+  // @Column({ type: "enum", enum: SupportType, nullable: true })
+  // supportType: string;
 
   @Column({ type: "enum", enum: Measure, nullable: true })
   measure: string;
@@ -72,6 +73,9 @@ export class ActivityEntity {
 
   @Column("jsonb", { nullable: true })
   mitigationTimeline: any;
+
+	@Column("varchar", { array: true, nullable: true })
+  sectors: Sector[];
 
   @Column({ type: "ltree" })
   path: string;

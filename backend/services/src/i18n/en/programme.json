@@ -4,7 +4,7 @@
     "programmeCreationFailed": "Programme Creation failed due to {}",
     "createProgrammeSuccess": "Programme created successfully",
     "programmesNotFound": "Programme(s) not found",
-    "programmeAlreadyLinked": "Programme with id {} is already attach to an action",
+    "programmeAlreadyLinked": "Programme with id {} is already attached to an action",
     "programmeIsNotLinked": "Programme with id {} is not attached to an action",
     "programmesLinkedToAction": "Programmes attached to action successfully",
     "programmesUnlinkedFromAction": "Programmes detached from action successfully",

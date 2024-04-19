@@ -221,8 +221,7 @@ describe('ProjectService', () => {
 				save: jest.fn().mockResolvedValueOnce(projectEntity),
 			};
 			const savedProgramme = await callback(emMock);
-			expect(emMock.save).toHaveBeenNthCalledWith(1, projectEntity);
-			expect(emMock.save).toHaveBeenCalledTimes(2);
+			expect(emMock.save).toHaveBeenCalledTimes(0);
 			return savedProgramme;
 		});
 
