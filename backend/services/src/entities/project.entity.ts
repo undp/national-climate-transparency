@@ -3,6 +3,7 @@ import { ProjectType, ProjectStatus } from "../enums/project.enum";
 import { Recipient, IntImplementor } from "../enums/shared.enum";
 import { ProgrammeEntity } from "./programme.entity";
 import { ActivityEntity } from "./activity.entity";
+import { Sector } from "../enums/sector.enum";
 
 
 @Entity("project")
@@ -51,6 +52,9 @@ export class ProjectEntity {
 
   @Column()
   comment: string;
+
+	@Column("varchar", { array: true, nullable: true })
+  sectors: Sector[];
 
   @Column({ type: "ltree" })
   path: string;

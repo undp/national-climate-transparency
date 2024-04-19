@@ -45,6 +45,6 @@ export class ActionController {
   @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ActionEntity, true))
   @Get('/:id')
   getActionViewData(@Param('id') id: string, @Request() req) {
-    return this.actionService.getActionViewData(id, req.abilityCondition);
+    return this.actionService.getActionViewData(id);
   }
 }
