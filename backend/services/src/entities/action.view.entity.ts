@@ -61,10 +61,10 @@ export class ActionViewEntity {
     id: string
 
     @ViewColumn()
-    sectorsAffected: any;
+    sectorsAffected: string[];
 
     @ViewColumn()
-    natImplementors: any;
+    natImplementors: string[];
 
     @ViewColumn()
     totalInvestment: number
@@ -72,7 +72,7 @@ export class ActionViewEntity {
     // From Project Entities
 
     @ViewColumn()
-    types: any;
+    types: string[];
 
     @ViewColumn()
     achievedGHGReduction: number
