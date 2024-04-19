@@ -2,23 +2,23 @@ import { Index, ViewColumn, ViewEntity } from "typeorm"
 
 export const programmeViewSQL = `
 SELECT 
-		p."programmeId" AS id,
-		ARRAY_AGG(DISTINCT fullprj.type) FILTER (WHERE fullprj.type IS NOT NULL) AS types,
-		ARRAY_AGG(DISTINCT fullprj."internationalImplementingEntities") FILTER (WHERE fullprj."internationalImplementingEntities" IS NOT NULL) AS "internationalImplementingEntities",
-		ARRAY_AGG(DISTINCT fullprj."recipientEntities") FILTER (WHERE fullprj."recipientEntities" IS NOT NULL) AS "recipientEntities",
-		SUM(fullprj."achievedGHGReduction") AS "achievedGHGReduction",
-		SUM(fullprj."expectedGHGReduction") AS "expectedGHGReduction"
+	p."programmeId" AS id,
+	CAST(ARRAY_AGG(DISTINCT fullprj.type) FILTER (WHERE fullprj.type IS NOT NULL) AS character varying[]) AS types,
+	CUSTOM_ARRAY_AGG(fullprj."internationalImplementingEntities") FILTER (WHERE fullprj."internationalImplementingEntities" IS NOT NULL) AS "internationalImplementingEntities",
+	CUSTOM_ARRAY_AGG(fullprj."recipientEntities") FILTER (WHERE fullprj."recipientEntities" IS NOT NULL) AS "recipientEntities",
+	SUM(fullprj."achievedGHGReduction") AS "achievedGHGReduction",
+	SUM(fullprj."expectedGHGReduction") AS "expectedGHGReduction"
 FROM 
-		programme p
+	programme p
 LEFT JOIN (
 	SELECT 
 		prj."projectId" AS id,
 		prj.type AS type,
 		prj."programmeId",
-		UNNEST(prj."internationalImplementingEntities") AS "internationalImplementingEntities",
-		UNNEST(prj."recipientEntities") AS "recipientEntities",
-		MAX(p_v_e."achievedGHGReduction") AS "achievedGHGReduction",
-		MAX(p_v_e."expectedGHGReduction") AS "expectedGHGReduction"
+		prj."internationalImplementingEntities",
+		prj."recipientEntities",
+		p_v_e."achievedGHGReduction" AS "achievedGHGReduction",
+		p_v_e."expectedGHGReduction" AS "expectedGHGReduction"
 	FROM 
 		project prj
 	LEFT JOIN (
@@ -30,7 +30,7 @@ LEFT JOIN (
 			project_view_entity
 		) p_v_e ON prj."projectId" = p_v_e.id
 	GROUP BY 
-		prj."projectId"
+		prj."projectId", p_v_e."achievedGHGReduction", p_v_e."expectedGHGReduction"
 	) fullprj ON p."programmeId" = fullprj."programmeId"
 GROUP BY 
 	p."programmeId";`
