@@ -1,0 +1,13 @@
+{
+    "activityCreationFailed": "Activity creation failed due to {}",
+    "createActivitySuccess": "Activity created successfully",
+    "actionNotFound": "An action with id {} is not found",
+    "programmeNotFound": "A programme with id {} is not found",
+    "projectNotFound": "A project with id {} is not found",
+    "activityAlreadyLinked": "Activity with id {} is already attached",
+    "activitiesNotFound": "Activities not found",
+    "activitiesLinked": "Activities attached successfully",
+    "activityIsNotLinked": "Activity with id {} is not attached",
+    "activitiesUnlinked": "Activities detached successfully",
+    "cannotUnlinkNotRelatedActivity": "User is not allowed to detach the activity with id {}"
+}

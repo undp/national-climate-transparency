@@ -5,3 +5,9 @@ export enum ProgrammeStage {
   REJECTED = "Rejected",
   APPROVED = "Approved",
 }
+
+export enum ProgrammeStatus {
+  PLANNED = "Planned",
+  ONGOING = "Ongoing",
+  COMPLETED = "Completed",
+}

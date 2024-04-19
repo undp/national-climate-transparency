@@ -22,16 +22,19 @@ import { HelperService } from "../util/helpers.service";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { PayloadValidator } from "../validation/payload.validator";
 import { EntityManager, Repository } from "typeorm";
+import { LinkActivitiesDto } from "src/dtos/link.activities.dto";
+import { ProjectEntity } from "src/entities/project.entity";
+import { UnlinkActivitiesDto } from "src/dtos/unlink.activities.dto";
 
 @Injectable()
 export class ActivityService {
 	constructor(
 		@InjectEntityManager() private entityManager: EntityManager,
+		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
 		private counterService: CounterService,
 		private helperService: HelperService,
 		private fileUploadService: FileUploadService,
-		// private payloadValidator: PayloadValidator,
-		// private linkUnlinkService: LinkUnlinkService,
+		private linkUnlinkService: LinkUnlinkService,
 		private projectService: ProjectService,
 		private programmeService: ProgrammeService,
 		private actionService: ActionService
@@ -55,15 +58,15 @@ export class ActivityService {
 					break;
 				}
 				case EntityType.PROGRAMME: {
-					await this.isProgrammeValid(activityDto.parentId);
-					activity.path = `_.${activityDto.parentId}._`;
+					const programme = await this.isProgrammeValid(activityDto.parentId);
+					activity.path = programme.path ? `${programme.path}.${activityDto.parentId}._`: `_.${activityDto.parentId}._`;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROGRAMME, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
 					break;
 				}
 				case EntityType.PROJECT: {
-					await this.isProjectValid(activityDto.parentId);
-					activity.path = `_._.${activityDto.parentId}`;
+					const project = await this.isProjectValid(activityDto.parentId);
+					activity.path = project.path ? `${project.path}.${activityDto.parentId}` : `_._.${activityDto.parentId}`;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROJECT, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
 					break;
@@ -140,6 +143,7 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
+		return project;
 	}
 
 	async isProgrammeValid(programmeId: string) {
@@ -153,10 +157,11 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
+		return programme;
 	}
 
 	async isActionValid(actionId: string) {
-		const action = await this.actionService.findActionById(actionId);
+		const action = await this.actionService.getActionViewData(actionId);
 		if (!action) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -166,6 +171,130 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
+		return action;
+	}
+
+	async findActivitiesEligibleForLinking() {
+    return await this.activityRepo.createQueryBuilder('activity')
+        .select(['"activityId"', 'title'])
+        .where('activity.parentType IS NULL AND activity.parentId IS NULL')
+        .orderBy('activity.activityId', 'ASC') 
+        .getRawMany();
+}
+
+	async linkActivitiesToParent(linkActivitiesDto: LinkActivitiesDto, user: User) {
+		let parentEntity: any;
+
+		switch (linkActivitiesDto.parentType) {
+			case EntityType.ACTION: {
+				parentEntity = await this.isActionValid(linkActivitiesDto.parentId);
+				break;
+			}
+			case EntityType.PROGRAMME: {
+				parentEntity = await this.isProgrammeValid(linkActivitiesDto.parentId);
+				break;
+			}
+			case EntityType.PROJECT: {
+				parentEntity = await this.isProjectValid(linkActivitiesDto.parentId);
+				break;
+			}
+		}
+
+		const activities = await this.findAllActivitiesByIds(linkActivitiesDto.activityIds);
+
+		if (!activities || activities.length <= 0) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.activitiesNotFound",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		for (const activity of activities) {
+			if (activity.parentId || activity.parentType) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"activity.activityAlreadyLinked",
+						[activity.activityId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+		}
+
+		const act = await this.linkUnlinkService.linkActivitiesToParent(
+			parentEntity,
+			activities,
+			linkActivitiesDto,
+			user,
+			this.entityManager
+		);
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("activity.activitiesLinked", []),
+			act
+		);
+
+	}
+
+	async unlinkActivitiesFromParents(unlinkActivitiesDto: UnlinkActivitiesDto, user: User) {
+		const activities = await this.findAllActivitiesByIds(unlinkActivitiesDto.activityIds);
+
+		if (!activities || activities.length <= 0) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.activitiesNotFound",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		for (const activity of activities) {
+			if (!activity.parentId && !activity.parentType) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"activity.activityIsNotLinked",
+						[activity.activityId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+			
+			if (user.sector && user.sector.length > 0) {
+				const commonSectors = activity.sectors.filter(sector => user.sector.includes(sector));
+				if (commonSectors.length === 0) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"activity.cannotUnlinkNotRelatedActivity",
+							[activity.activityId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
+			}
+		}
+
+		const proj = await this.linkUnlinkService.unlinkActivitiesFromParent(activities, unlinkActivitiesDto, user, this.entityManager);
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("activity.activitiesUnlinked", []),
+			proj
+		);
+
+	}
+
+
+	async findAllActivitiesByIds(activityIds: string[]) {
+		return await this.activityRepo.createQueryBuilder('activity')
+			.where('activity.activityId IN (:...activityIds)', { activityIds })
+			.getMany();
 	}
 
 	private addEventLogEntry = (

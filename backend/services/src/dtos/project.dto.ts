@@ -1,7 +1,7 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max} from 'class-validator';
 import { ProjectStatus, ProjectType } from "../enums/project.enum";
-import { IntImplementor, NatImplementor, Recipient } from "../enums/shared.enum";
+import { IntImplementor, Recipient } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { KpiDto } from "./kpi.dto";
 
@@ -32,7 +32,7 @@ export class ProjectDto {
 
     @IsString()
     @IsOptional()
-    @ApiProperty()
+    @ApiPropertyOptional()
     additionalProjectNumber: string;
 
     @IsNotEmpty()
@@ -62,7 +62,7 @@ export class ProjectDto {
 
     @IsOptional()
     @IsNumber()
-    @ApiProperty()
+    @ApiPropertyOptional()
     expectedTimeFrame: number;
 
     @IsArray()
@@ -94,7 +94,18 @@ export class ProjectDto {
     internationalImplementingEntities: IntImplementor[];
 
     @IsOptional()
-    @ApiProperty()
+		@ApiPropertyOptional(
+			{
+				type: "array",
+				example: [{
+					title: "document 1",
+					data: "base64 document string"
+				}],
+				items: {
+					$ref: getSchemaPath(DocumentDto),
+				},
+			}
+		)
     documents: DocumentDto[];
 
 		@IsNumber()
@@ -106,16 +117,28 @@ export class ProjectDto {
 		expectedGHGReduction: number;
   
     @IsOptional()
-    @ApiProperty()
+    @ApiPropertyOptional()
     @IsString()
     comments: string;
 
     @IsOptional()
-    @ApiProperty()
+    @ApiPropertyOptional()
     linkedActivities: string[];
 
 		@IsOptional()
-    @ApiProperty()
+		@ApiPropertyOptional(
+			{
+				type: "array",
+				example: [{
+					name: "KPI 1",
+					creatorType: "project",
+					expected: 100
+			}],
+				items: {
+					$ref: getSchemaPath(KpiDto),
+				},
+			}
+		)
     kpis: KpiDto[];
 		
 }

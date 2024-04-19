@@ -2,8 +2,9 @@
     "programmeNotFound": "A programme with id {} is not found",
     "projectCreationFailed": "Project Creation failed due to {}",
     "createProjectSuccess": "Project created successfully",
-    "projectAlreadyLinked": "Project with id {} is already attach to a programme",
+    "projectAlreadyLinked": "Project with id {} is already attached to a programme",
     "projectsNotFound": "Project(s) not found",
+    "projectIsNotLinked": "Project with id {} is not attached to any programme",
     "projectsLinkedToProgramme": "Projects attached to programme successfully",
     "projectsUnlinkedFromProgramme": "Projects detached from programme successfully"
 
