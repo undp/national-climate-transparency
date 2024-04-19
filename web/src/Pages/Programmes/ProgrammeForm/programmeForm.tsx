@@ -538,7 +538,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('progStatusTitle')}</label>}
-                  name="status"
+                  name="programmeStatus"
                   rules={[validation.required]}
                 >
                   <Select

@@ -1,7 +1,7 @@
 export enum ProgrammeStatus {
   PLANNED = 'Planned',
-  ADOPTED = 'Adopted',
-  IMPLEMENTED = 'Implemented',
+  ONGOING = 'Ongoing',
+  COMPLETED = 'Completed',
 }
 
 export enum ProgrammeStageMRV {
