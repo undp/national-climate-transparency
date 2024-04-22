@@ -183,7 +183,7 @@ const projectList = () => {
       if (appliedFilterValue.statusFilter !== 'All') {
         payload.filterAnd = [];
         payload.filterAnd.push({
-          key: 'status',
+          key: 'projectStatus',
           operation: '=',
           value: appliedFilterValue.statusFilter,
         });
@@ -288,7 +288,6 @@ const projectList = () => {
       setTempFilterValue(updatedFilters);
     } else if (filterSection === 'search') {
       updatedFilters.searchBy = newValue;
-      console.log(updatedFilters);
       setTempFilterValue(updatedFilters);
     }
   };
@@ -481,7 +480,7 @@ const projectList = () => {
             value={tempFilterValue.searchBy}
           >
             <Space direction="vertical">
-              <Radio value="actionId">ID</Radio>
+              <Radio value="projectId">ID</Radio>
               <Radio value="title">Title</Radio>
             </Space>
           </Radio.Group>
@@ -503,8 +502,8 @@ const projectList = () => {
             <Space direction="vertical">
               <Radio value="All">All</Radio>
               <Radio value="Planned">Planned</Radio>
-              <Radio value="Adopted">Adopted</Radio>
-              <Radio value="Implemented">Implemented</Radio>
+              <Radio value="Ongoing">Ongoing</Radio>
+              <Radio value="Completed">Completed</Radio>
             </Space>
           </Radio.Group>
         </div>
