@@ -401,13 +401,13 @@ const programmeList = () => {
       width: 120,
     },
     { title: t('actionId'), dataIndex: 'action', key: 'action', sorter: false, width: 90 },
-    { title: t('titleOfProgramme'), dataIndex: 'title', key: 'title', sorter: false, width: 180 },
+    { title: t('titleOfProgramme'), dataIndex: 'title', key: 'title', sorter: false, width: 130 },
     { title: t('type'), dataIndex: 'type', key: 'type', sorter: false, width: 80 },
-    { title: t('programmeStatus'), dataIndex: 'status', key: 'status', sorter: false, width: 150 },
+    { title: t('programmeStatus'), dataIndex: 'status', key: 'status', sorter: false, width: 130 },
     {
       title: t('validationStatus'),
       key: 'validationStatus',
-      width: 120,
+      width: 100,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
         return <StatusChip message={record.validationStatus} defaultMessage="pending" />;
@@ -435,7 +435,7 @@ const programmeList = () => {
       key: 'investment',
       sorter: false,
       align: 'center' as const,
-      width: 50,
+      width: 150,
     },
     {
       title: '',
