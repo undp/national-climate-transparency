@@ -1,9 +1,6 @@
 export type UserProps = {
   id: string;
   userRole: string;
-  companyId: number;
-  companyRole: string;
-  companyLogo: string;
   companyName: string;
   companyState: number;
 };

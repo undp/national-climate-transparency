@@ -29,8 +29,6 @@ const CompanyProfile = () => {
   const [userDetails, setUserDetails] = useState<any>(undefined);
   const { state } = useLocation();
   const [isLoading, setIsLoading] = useState(true);
-  const [userRole, setUserRole] = useState<any>('');
-  const [companyRole, setCompanyRole] = useState<any>('');
   const ability = useAbilityContext();
 
   const getCompanyDetails = async (organisationId: string) => {
@@ -78,9 +76,6 @@ const CompanyProfile = () => {
       onNavigateToCompanyManagement();
     } else {
       getCompanyDetails(state.record.organisationId);
-      const userRoleValue = localStorage.getItem('userRole') as string;
-      setUserRole(userRoleValue);
-      setCompanyRole(localStorage.getItem('companyRole') as string);
       // eslint-disable-next-line eqeqeq
       if (state.record?.state == '2' || state.record?.state == '3') {
         getUserDetails(state.record.organisationId);

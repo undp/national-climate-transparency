@@ -1,5 +1,5 @@
 import { Layout } from 'antd';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 const { Header, Content } = Layout;
 import { Outlet } from 'react-router-dom';
@@ -14,7 +14,6 @@ import { useSettingsContext } from '../../Context/SettingsContext/settingsContex
 
 const CustomLayout = (props: any) => {
   const { selectedKey } = props;
-  const [collapsed, setCollapsed] = useState(false);
   const { get } = useConnection();
   const { isTransferFrozen, setTransferFrozen } = useSettingsContext();
   const { t } = useTranslation(['creditTransfer']);
@@ -45,10 +44,10 @@ const CustomLayout = (props: any) => {
         </div>
       )}
       <Layout hasSider>
-        <LayoutSider selectedKey={selectedKey} collapsed={collapsed} />
+        <LayoutSider selectedKey={selectedKey} />
         <Layout className="layout-container">
           <Header className="layout-header-container">
-            <LayoutHeader onToggle={(val) => setCollapsed(val)} />
+            <LayoutHeader />
           </Header>
           <Content>
             <div className="layout-content-container">

@@ -270,13 +270,9 @@ export const NdcActionBody: FC<NdcActionBodyProps> = (props: NdcActionBodyProps)
     });
   }, [data]);
 
-  const companyRolePermission =
-    userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
-    userInfoState?.userRole !== Role.Observer;
+  const companyRolePermission = userInfoState?.userRole !== Role.Observer;
 
-  const verficationCompanyRolePermission =
-    userInfoState?.companyRole === CompanyRole.GOVERNMENT &&
-    userInfoState?.userRole !== Role.Observer;
+  const verficationCompanyRolePermission = userInfoState?.userRole !== Role.Observer;
 
   const monitoringReportPending = monitoringReportData?.status === DocumentStatus.PENDING;
   const monitoringReportAccepted = monitoringReportData?.status === DocumentStatus.ACCEPTED;
