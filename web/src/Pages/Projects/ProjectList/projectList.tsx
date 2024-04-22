@@ -18,7 +18,6 @@ import {
   MenuProps,
 } from 'antd';
 import {
-  AppstoreOutlined,
   EditOutlined,
   EllipsisOutlined,
   FilterOutlined,
@@ -34,6 +33,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
+import { GraphUpArrow } from 'react-bootstrap-icons';
 
 interface Item {
   key: number;
@@ -590,7 +590,7 @@ const projectList = () => {
           }}
           attachedUnits={attachedActivityIds}
           setToBeAttached={setToBeAttached}
-          icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
+          icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
         ></SimpleAttachEntity>
         <Row className="table-actions-section">
           <Col md={8} xs={24}>
