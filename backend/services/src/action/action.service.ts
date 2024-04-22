@@ -21,6 +21,8 @@ import { DataListResponseDto } from "../dtos/data.list.response";
 import { ActionViewEntity } from "../entities/action.view.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
+import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
+import { KpiService } from "../kpi/kpi.service";
 
 @Injectable()
 export class ActionService {
@@ -32,7 +34,8 @@ export class ActionService {
 		private helperService: HelperService,
 		private fileUploadService: FileUploadService,
 		private payloadValidator: PayloadValidator,
-		private linkUnlinkService: LinkUnlinkService
+		private linkUnlinkService: LinkUnlinkService,
+		private kpiService: KpiService
 	) { }
 
 	async createAction(actionDto: ActionDto, user: User) {
@@ -109,7 +112,7 @@ export class ActionService {
 			});
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
-		
+
 		return new DataResponseMessageDto(
 			HttpStatus.CREATED,
 			this.helperService.formatReqMessagesString("action.createActionSuccess", []),
@@ -204,6 +207,148 @@ export class ActionService {
 			resp.length > 0 ? resp[0] : undefined,
 			resp.length > 1 ? resp[1] : undefined
 		);
+	}
+
+	async updateAction(actionUpdateDto: ActionUpdateDto, user: User) {
+		const actionUpdate: ActionEntity = plainToClass(ActionEntity, actionUpdateDto);
+		const eventLog = [];
+
+		const currentAction = await this.findActionById(actionUpdateDto.actionId);
+		if (!currentAction) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.actionNotFound",
+					[actionUpdateDto.actionId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		// upload the documents and create the doc array here
+
+		if (actionUpdateDto.removedDocuments && actionUpdateDto.removedDocuments.length > 0) {
+			if (currentAction.documents && currentAction.documents.length > 0) {
+				const updatedDocs = currentAction.documents.filter(item => !actionUpdateDto.removedDocuments.some(url => url === item.url));
+				actionUpdate.documents = (updatedDocs && updatedDocs.length > 0) ? updatedDocs : null;
+			} else {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"action.noDocumentsFound",
+						[actionUpdateDto.actionId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+		}
+
+		if (actionUpdateDto.newDocuments) {
+			const documents = [];
+			for (const documentItem of actionUpdateDto.newDocuments) {
+				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.ACTION);
+				const docEntity = new DocumentEntityDto();
+				docEntity.title = documentItem.title;
+				docEntity.url = response;
+				docEntity.createdTime = new Date().getTime();
+				documents.push(docEntity)
+			};
+			actionUpdate.documents = (actionUpdate.documents) ? [...actionUpdate.documents, documents] : documents;
+
+		}
+
+		const kpiList = [];
+		const kpisToRemove = [];
+		let kpisUpdated = false;
+
+		if (actionUpdateDto.kpis && actionUpdateDto.kpis.length > 0) {
+			const currentKpis = await this.kpiService.findKpisByCreatorTypeAndCreatorId(EntityType.ACTION, actionUpdate.actionId);
+
+			const addedKpis = actionUpdateDto.kpis.filter(kpi => !kpi.kpiId);
+
+			if (addedKpis && addedKpis.length > 0) {
+				for (const kpiItem of addedKpis) {
+					this.payloadValidator.validateKpiPayload(kpiItem, EntityType.ACTION);
+					const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
+					kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
+					kpi.creatorId = actionUpdateDto.actionId;
+					kpiList.push(kpi);
+				}
+				kpisUpdated = true;
+			}
+
+			for (const currentKpi of currentKpis) {
+				const kpiToUpdate = actionUpdateDto.kpis.find(kpi => currentKpi.kpiId == kpi.kpiId);
+				if (kpiToUpdate) {
+					const kpi = new KpiEntity();
+					kpi.kpiId = kpiToUpdate.kpiId;
+					kpi.creatorId = kpiToUpdate.creatorId;
+					kpi.creatorType = kpiToUpdate.creatorType;
+					kpi.name = kpiToUpdate.name;
+					kpi.expected = kpiToUpdate.expected;
+					kpiList.push(kpi);
+					kpisUpdated = true;
+				} else {
+					kpisToRemove.push(currentKpi);
+					kpisUpdated = true;
+				}
+			}
+
+		}
+
+
+		this.addEventLogEntry(eventLog, LogEventType.ACTION_UPDATED, EntityType.ACTION, actionUpdate.actionId, user.id, actionUpdateDto);
+
+		if (kpisUpdated) {
+			// Add event log entry after the loop completes
+			this.addEventLogEntry(eventLog, LogEventType.KPI_UPDATED, EntityType.ACTION, actionUpdateDto.actionId, user.id, kpiList);
+		}
+
+		const act = await this.entityManager
+			.transaction(async (em) => {
+				const savedAction = await em.save<ActionEntity>(actionUpdate);
+				if (savedAction) {
+					// Save new KPIs
+					if (kpiList.length > 0) {
+						await Promise.all(kpiList.map(async kpi => {
+							await em.save<KpiEntity>(kpi);
+						}));
+					}
+					// Remove KPIs
+					if (kpisToRemove.length > 0) {
+						await Promise.all(kpisToRemove.map(async kpi => {
+							await em.remove<KpiEntity>(kpi);
+						}));
+					}
+					// Save event logs
+					if (eventLog.length > 0) {
+						await Promise.all(eventLog.map(async event => {
+							await em.save<LogEntity>(event);
+						}));
+					}
+				}
+				return savedAction;
+			})
+			.catch((err: any) => {
+				console.log(err);
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"action.actionCreationFailed",
+						[err]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("action.updateActionSuccess", []),
+			act
+		);
+
+
+
 	}
 
 	private addEventLogEntry = (

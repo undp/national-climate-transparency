@@ -119,15 +119,6 @@ export class ProgrammeService {
 					if (projects && projects.length > 0) {
 						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programmeDto, user, em);
 					}
-
-					// if (programmeDto.linkedProjects) {
-					// 	await this.projectService.linkProjectsToProgramme({
-					// 		programmeId: savedProgramme.programmeId,
-					// 		projectIds: programmeDto.linkedProjects
-
-					// 	}, user)
-					// }
-
 				}
 				return savedProgramme;
 			})

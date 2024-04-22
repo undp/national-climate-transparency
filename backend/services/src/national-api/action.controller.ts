@@ -6,6 +6,7 @@ import {
   Body,
   Get,
   Param,
+	Put,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ActionService } from "../action/action.service";
@@ -16,6 +17,7 @@ import { PoliciesGuardEx } from "../casl/policy.guard";
 import { ActionDto } from "../dtos/action.dto";
 import { ActionEntity } from "../entities/action.entity";
 import { QueryDto } from "../dtos/query.dto";
+import { ActionUpdateDto } from "src/dtos/actionUpdate.dto";
 
 @ApiTags("Actions")
 @ApiBearerAuth()
@@ -46,5 +48,13 @@ export class ActionController {
   @Get('/:id')
   getActionViewData(@Param('id') id: string, @Request() req) {
     return this.actionService.getActionViewData(id);
+  }
+
+	@ApiBearerAuth('api_key')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ActionEntity))
+  @Put("update")
+  updateAction(@Body() actionUpdateDto: ActionUpdateDto, @Request() req) {
+    return this.actionService.updateAction(actionUpdateDto, req.user);
   }
 }
