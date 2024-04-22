@@ -188,6 +188,12 @@ export class ActionService {
 				)
 			)
 			.leftJoinAndSelect('action.programmes', 'programme')
+			.leftJoinAndMapMany(
+				"action.migratedData",
+				ActionViewEntity,
+				"actionViewEntity",
+				"actionViewEntity.id = action.actionId"
+			)
 			.orderBy(
 				query?.sort?.key ? `"action"."${query?.sort?.key}"` : `"action"."actionId"`,
 				query?.sort?.order ? query?.sort?.order : "DESC"
