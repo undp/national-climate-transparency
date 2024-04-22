@@ -589,7 +589,7 @@ const programmeList = () => {
                     navigate('/programmes/add');
                   }}
                 >
-                  {t('Add Programme')}
+                  {t('addProgramme')}
                 </Button>
               )}
             </div>

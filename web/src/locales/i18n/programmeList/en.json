@@ -17,5 +17,6 @@
   "attach" : "Attach",
   "projectList" : "Project List",
   "cancel": "Cancel",
-  "projectLinkSuccess": "Project/s Linked Successfully"
+  "projectLinkSuccess": "Project/s Linked Successfully",
+  "addProgramme": "Add Programme"
 }
