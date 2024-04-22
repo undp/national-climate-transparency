@@ -107,19 +107,21 @@ const projectList = () => {
   // Attach Multiple Activities for a Project
 
   const attachActivities = async () => {
-    const payload = {
-      projectId: selectedProjectId,
-      activityIds: toBeAttached,
-    };
-    const response: any = await post('national/activities/link', payload);
-    if (response.status === 200 || response.status === 201) {
-      message.open({
-        type: 'success',
-        content: t('activityLinkSuccess'),
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-      navigate('/projects');
+    if (toBeAttached.length > 0) {
+      const payload = {
+        projectId: selectedProjectId,
+        activityIds: toBeAttached,
+      };
+      const response: any = await post('national/activities/link', payload);
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: t('activityLinkSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        navigate('/projects');
+      }
     }
   };
 
@@ -446,6 +448,9 @@ const projectList = () => {
             open={shouldPopoverOpen(record.key)}
             placement="bottomRight"
             content={actionMenu(record)}
+            onOpenChange={() => {
+              setOpenPopoverKey(undefined);
+            }}
           >
             <EllipsisOutlined
               rotate={90}
@@ -488,7 +493,7 @@ const projectList = () => {
       title: 'Filter by Action Status',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('filterByActionStatus')}</div>
+          <div className="filter-title">{t('filterByProjectStatus')}</div>
           <Radio.Group
             onChange={(e) => {
               updatedTempFilters('status', e?.target?.value);

@@ -21,7 +21,7 @@ const ScrollableList: React.FC<Props> = ({ listToShow }) => {
       showSearch={false}
       mode="multiple"
       maxTagCount={5}
-      style={{ width: '150px' }}
+      style={{ width: '130px' }}
       options={options}
       value={options}
       bordered={false}
