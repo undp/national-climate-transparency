@@ -476,7 +476,7 @@ const programmeList = () => {
       title: 'Filter by Action Status',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('filterByActionStatus')}</div>
+          <div className="filter-title">{t('filterByProgrammeStatus')}</div>
           <Radio.Group
             onChange={(e) => {
               updatedTempFilters('status', e?.target?.value);
@@ -618,7 +618,7 @@ const programmeList = () => {
                   trigger={['click']}
                   open={filterVisible}
                   menu={{ items }}
-                  overlayStyle={{ width: '240px' }}
+                  overlayStyle={{ width: '250px' }}
                 >
                   <FilterOutlined
                     style={{
