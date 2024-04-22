@@ -194,7 +194,7 @@ const programmeList = () => {
       if (appliedFilterValue.statusFilter !== 'All') {
         payload.filterAnd = [];
         payload.filterAnd.push({
-          key: 'status',
+          key: 'programmeStatus',
           operation: '=',
           value: appliedFilterValue.statusFilter,
         });
@@ -501,8 +501,8 @@ const programmeList = () => {
             <Space direction="vertical">
               <Radio value="All">All</Radio>
               <Radio value="Planned">Planned</Radio>
-              <Radio value="Adopted">Adopted</Radio>
-              <Radio value="Implemented">Implemented</Radio>
+              <Radio value="Ongoing">Ongoing</Radio>
+              <Radio value="Completed">Completed</Radio>
             </Space>
           </Radio.Group>
         </div>
