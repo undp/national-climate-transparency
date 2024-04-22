@@ -54,7 +54,7 @@ interface Filter {
 
 const programmeList = () => {
   const navigate = useNavigate();
-  const { post } = useConnection();
+  const { get, post } = useConnection();
   const ability = useAbilityContext();
 
   const { t } = useTranslation(['programmeList']);
@@ -124,22 +124,7 @@ const programmeList = () => {
   // Free Prg Read from DB
 
   const getFreeProjectIds = async () => {
-    const payload = {
-      page: 1,
-      size: 100,
-      filterAnd: [
-        {
-          key: 'programmeId',
-          operation: 'IS',
-          value: 'NULL',
-        },
-      ],
-      sort: {
-        key: 'projectId',
-        order: 'ASC',
-      },
-    };
-    const response: any = await post('national/projects/query', payload);
+    const response: any = await get('national/projects/link/eligible');
 
     const freeProjectIds: string[] = [];
     response.data.forEach((prj: any) => {
