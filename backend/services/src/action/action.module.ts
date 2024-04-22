@@ -16,6 +16,7 @@ import { UtilModule } from '../util/util.module';
 import { FileHandlerModule } from '../file-handler/filehandler.module';
 import { ValidationModule } from '../validation/validation.module';
 import { ActionViewEntity } from '../entities/action.view.entity';
+import { KpiModule } from '../kpi/kpi.module';
 
 @Module({
     imports: [
@@ -42,6 +43,7 @@ import { ActionViewEntity } from '../entities/action.view.entity';
         UtilModule,
         FileHandlerModule,
         ValidationModule,
+				KpiModule
     ],
     providers: [
         ActionService
