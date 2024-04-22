@@ -9,8 +9,6 @@ import { AuditOutlined, BankOutlined, UploadOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getBase64 } from '../../../Utils/utilServices';
-import { UserProps } from '../../../Definitions/userContext.definition';
-import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { RcFile } from 'antd/lib/upload';
 import { OrganisationType } from '../../../Definitions/organisation.type.enum';
@@ -36,7 +34,6 @@ const AddNewCompany = () => {
   const [contactNoInput] = useState<any>();
   const [isUpdate, setIsUpdate] = useState(false);
   const { put, get, post } = useConnection();
-  const { setUserInfo, userInfoState } = useUserContext();
   const { state } = useLocation();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [countries, setCountries] = useState<[]>([]);
@@ -130,11 +127,6 @@ const AddNewCompany = () => {
       requestData.logo = logoUrls[1];
       const response = await post('national/organisation/add', requestData);
       if (response.status === 200 || response.status === 201) {
-        if (isUpdate && values.organisationId === userInfoState?.companyId) {
-          setUserInfo({
-            companyLogo: response.data.logo,
-          } as UserProps);
-        }
         message.open({
           type: 'success',
           content: t('companyAddedSuccess'),
@@ -193,12 +185,6 @@ const AddNewCompany = () => {
 
       const response = await put('national/organisation/update', values);
       if (response.status === 200 || response.status === 201) {
-        if (values.organisationId === userInfoState?.companyId) {
-          setUserInfo({
-            companyLogo: response.data.logo,
-          } as UserProps);
-        }
-
         message.open({
           type: 'success',
           content: t('companyUpdatedSuccess'),

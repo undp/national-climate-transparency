@@ -47,19 +47,10 @@ const App = () => {
   const ability = defineAbility();
   // const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION || 'true';
   const { t } = useTranslation(['common']);
-  if (
-    localStorage.getItem('companyId') &&
-    localStorage.getItem('userRole') &&
-    localStorage.getItem('userId') &&
-    localStorage.getItem('companyState') &&
-    localStorage.getItem('companyRole')
-  )
+  if (localStorage.getItem('userRole') && localStorage.getItem('userId'))
     updateUserAbility(ability, {
       id: parseInt(localStorage.getItem('userId') as string),
       role: localStorage.getItem('userRole') as string,
-      organisationId: parseInt(localStorage.getItem('companyId') as string),
-      // companyState: parseInt(localStorage.getItem('companyState') as string),
-      organisationType: localStorage.getItem('companyRole') as string,
     });
   return (
     <AbilityContext.Provider value={ability}>
