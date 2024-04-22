@@ -1,0 +1,9 @@
+.scrollable-list {
+    width: auto;
+}
+
+.has-options {
+    .ant-select-selector .ant-select-selection-search-input {
+      display: none;
+    }
+}
