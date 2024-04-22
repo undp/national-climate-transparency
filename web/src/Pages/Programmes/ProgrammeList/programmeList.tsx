@@ -107,7 +107,7 @@ const programmeList = () => {
   const attachProjects = async () => {
     const payload = {
       programmeId: selectedProgrammeId,
-      programmes: toBeAttached,
+      projectIds: toBeAttached,
     };
     const response: any = await post('national/projects/link', payload);
     if (response.status === 200 || response.status === 201) {
