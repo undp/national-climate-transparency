@@ -150,13 +150,13 @@ const actionForm: React.FC<Props> = ({ method }) => {
           }
 
           setActionMigratedData({
-            type: entityData.migratedData.types,
-            ghgsAffected: entityData.migratedData.ghgsAffected,
-            natImplementer: entityData.migratedData.natImplementors,
-            sectorsAffected: entityData.migratedData.sectorsAffected,
-            estimatedInvestment: entityData.migratedData.totalInvestment,
-            achievedReduction: entityData.migratedData.achievedReduct,
-            expectedReduction: entityData.migratedData.expectedReduct,
+            type: entityData.migratedData?.types,
+            ghgsAffected: entityData.migratedData?.ghgsAffected,
+            natImplementer: entityData.migratedData?.natImplementors,
+            sectorsAffected: entityData.migratedData?.sectorsAffected,
+            estimatedInvestment: entityData.migratedData?.totalInvestment,
+            achievedReduction: entityData.migratedData?.achievedGHGReduction,
+            expectedReduction: entityData.migratedData?.expectedGHGReduction,
           });
         }
       }
@@ -571,15 +571,25 @@ const actionForm: React.FC<Props> = ({ method }) => {
                   label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
                   name="natImplementor"
                 >
-                  <Input className="form-input-box" disabled />
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    mode="multiple"
+                    disabled={true}
+                  ></Select>
                 </Form.Item>
               </Col>
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('sectorsAffectedTitle')}</label>}
-                  name="sectorsdAffected"
+                  name="sectorsAffected"
                 >
-                  <Input className="form-input-box" disabled />
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    mode="multiple"
+                    disabled={true}
+                  ></Select>
                 </Form.Item>
               </Col>
               <Col span={6}>
