@@ -75,11 +75,11 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
   // form state
 
   const [programmeList, setProgrammeList] = useState<ProgrammeData[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
-    []
-  );
-  const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
-  const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { key: string; title: string; data: string }[]
+  >([]);
+  const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   // Popover state
 
@@ -130,9 +130,9 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
     setAllActivityList(activityIds);
 
     if (method !== 'create') {
-      const tempFiles: { id: number; title: string; url: string }[] = [];
+      const tempFiles: { key: string; title: string; url: string }[] = [];
       for (let i = 0; i < 6; i++) {
-        tempFiles.push({ id: i, title: `title_${i}.pdf`, url: `url_${i}` });
+        tempFiles.push({ key: `${i}`, title: `title_${i}.pdf`, url: `url_${i}` });
       }
       setStoredFiles(tempFiles);
     }

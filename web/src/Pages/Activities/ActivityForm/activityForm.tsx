@@ -67,31 +67,31 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
   // form state
 
-  const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
-    []
-  );
-  const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
-  const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { key: string; title: string; data: string }[]
+  >([]);
+  const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   // Methodology Doc state
 
   const [uploadedMthFiles, setUploadedMthFiles] = useState<
-    { id: string; title: string; data: string }[]
+    { key: string; title: string; data: string }[]
   >([]);
   const [storedMthFiles, setStoredMthFiles] = useState<
-    { id: number; title: string; url: string }[]
+    { key: string; title: string; url: string }[]
   >([]);
-  const [mthFilesToRemove, setMthFilesToRemove] = useState<number[]>([]);
+  const [mthFilesToRemove, setMthFilesToRemove] = useState<string[]>([]);
 
   // Results Doc state
 
   const [uploadedRstFiles, setUploadedRstFiles] = useState<
-    { id: string; title: string; data: string }[]
+    { key: string; title: string; data: string }[]
   >([]);
   const [storedRstFiles, setStoredRstFiles] = useState<
-    { id: number; title: string; url: string }[]
+    { key: string; title: string; url: string }[]
   >([]);
-  const [rstFilesToRemove, setRstFilesToRemove] = useState<number[]>([]);
+  const [rstFilesToRemove, setRstFilesToRemove] = useState<string[]>([]);
 
   // Parent Selection State
 
@@ -124,9 +124,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
   useEffect(() => {
     if (method !== 'create') {
-      const tempFiles: { id: number; title: string; url: string }[] = [];
+      const tempFiles: { key: string; title: string; url: string }[] = [];
       for (let i = 0; i < 6; i++) {
-        tempFiles.push({ id: i, title: `title_${i}.pdf`, url: `url_${i}` });
+        tempFiles.push({ key: `${i}`, title: `title_${i}.pdf`, url: `url_${i}` });
       }
       setStoredFiles(tempFiles);
 

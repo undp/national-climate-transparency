@@ -61,11 +61,11 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
 
   const [programmeData, setProgrammeData] = useState<any>();
   const [actionList, setActionList] = useState<ActionData[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
-    []
-  );
-  const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
-  const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { key: string; title: string; data: string }[]
+  >([]);
+  const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   // Popover state
 
@@ -205,9 +205,9 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
       });
 
       if (programmeData.documents?.length > 0) {
-        const tempFiles: { id: number; title: string; url: string }[] = [];
+        const tempFiles: { key: string; title: string; url: string }[] = [];
         programmeData.documents.forEach((document: any) => {
-          tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
+          tempFiles.push({ key: document.createdTime, title: document.title, url: document.url });
         });
         setStoredFiles(tempFiles);
       }
