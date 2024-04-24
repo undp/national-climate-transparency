@@ -233,7 +233,21 @@ const actionForm: React.FC<Props> = ({ method }) => {
           });
         });
         const response: any = await post('national/programmes/query', payload);
-        setProgramData(response.data);
+
+        const tempPRGData: ProgrammeData[] = [];
+        response.data.forEach((prg: any, index: number) => {
+          tempPRGData.push({
+            key: index.toString(),
+            programmeId: prg.programmeId,
+            actionId: prg.action?.actionId,
+            title: prg.title,
+            type: prg.migratedData?.types,
+            status: prg.programmeStatus,
+            subSectorsAffected: prg.affectedSubSector,
+            estimatedInvestment: prg.investment,
+          });
+        });
+        setProgramData(tempPRGData);
       } else {
         setProgramData([]);
       }
@@ -411,13 +425,13 @@ const actionForm: React.FC<Props> = ({ method }) => {
     { title: t('programmeStatus'), dataIndex: 'status', key: 'status' },
     {
       title: t('subSectorAffected'),
-      dataIndex: 'affectedSubSector',
-      key: 'affectedSubSector',
+      dataIndex: 'subSectorsAffected',
+      key: 'subSectorsAffected',
     },
     {
       title: t('investmentNeeds'),
-      dataIndex: 'investment',
-      key: 'investment',
+      dataIndex: 'estimatedInvestment',
+      key: 'estimatedInvestment',
     },
     {
       title: '',
