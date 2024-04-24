@@ -62,7 +62,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
   const isView: boolean = method === 'view' ? true : false;
 
   const navigate = useNavigate();
-  const { get, post } = useConnection();
+  const { get, post, put } = useConnection();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -88,7 +88,10 @@ const actionForm: React.FC<Props> = ({ method }) => {
   // projects state
 
   const [allProgramIds, setAllProgramIdList] = useState<string[]>([]);
-  const [selectedProgramIds, setSelectedProgramIds] = useState<string[]>([]);
+
+  const [attachedProgramIds, setAttachedProgramIds] = useState<string[]>([]);
+  const [tempProgramIds, setTempProgramIds] = useState<string[]>([]);
+
   const [programData, setProgramData] = useState<ProgrammeData[]>([]);
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -191,7 +194,8 @@ const actionForm: React.FC<Props> = ({ method }) => {
         response.data.forEach((prg: any) => {
           connectedProgrammeIds.push(prg.programmeId);
         });
-        setSelectedProgramIds(connectedProgrammeIds);
+        setAttachedProgramIds(connectedProgrammeIds);
+        setTempProgramIds(connectedProgrammeIds);
       }
     };
     fetchConnectedProgrammeIds();
@@ -218,7 +222,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
   useEffect(() => {
     const payload = {
       page: 1,
-      size: selectedProgramIds.length,
+      size: tempProgramIds.length,
       filterOr: [] as any[],
       sort: {
         key: 'programmeId',
@@ -227,8 +231,8 @@ const actionForm: React.FC<Props> = ({ method }) => {
     };
 
     const fetchData = async () => {
-      if (selectedProgramIds.length > 0) {
-        selectedProgramIds.forEach((progId) => {
+      if (tempProgramIds.length > 0) {
+        tempProgramIds.forEach((progId) => {
           payload.filterOr.push({
             key: 'programmeId',
             operation: '=',
@@ -257,8 +261,8 @@ const actionForm: React.FC<Props> = ({ method }) => {
     };
     fetchData();
 
-    setDetachOpen(Array(selectedProgramIds.length).fill(false));
-  }, [selectedProgramIds]);
+    setDetachOpen(Array(tempProgramIds.length).fill(false));
+  }, [tempProgramIds]);
 
   useEffect(() => {
     console.log('Running KPI Migration Update');
@@ -281,6 +285,19 @@ const actionForm: React.FC<Props> = ({ method }) => {
 
   // Form Submit
 
+  const resolveAttachments = async () => {
+    const toAttach = tempProgramIds.filter((prg) => !attachedProgramIds.includes(prg));
+    const toDetach = attachedProgramIds.filter((prg) => !tempProgramIds.includes(prg));
+
+    if (toDetach.length > 0) {
+      await post('national/programmes/unlink', { programmes: toDetach });
+    }
+
+    if (toAttach.length > 0) {
+      await post('national/programmes/link', { actionId: entId, programmes: toAttach });
+    }
+  };
+
   const handleSubmit = async (payload: any) => {
     try {
       for (const key in payload) {
@@ -290,9 +307,25 @@ const actionForm: React.FC<Props> = ({ method }) => {
       }
 
       if (uploadedFiles.length > 0) {
-        payload.documents = [];
-        uploadedFiles.forEach((file) => {
-          payload.documents.push({ title: file.title, data: file.data });
+        if (method === 'create') {
+          payload.documents = [];
+          uploadedFiles.forEach((file) => {
+            payload.documents.push({ title: file.title, data: file.data });
+          });
+        } else if (method === 'update') {
+          payload.newDocuments = [];
+          uploadedFiles.forEach((file) => {
+            payload.newDocuments.push({ title: file.title, data: file.data });
+          });
+        }
+      }
+
+      if (filesToRemove.length > 0) {
+        payload.removedDocuments = [];
+        filesToRemove.forEach((removedFileKey) => {
+          payload.removedDocuments.push(
+            storedFiles.find((file) => file.key === removedFileKey)?.url
+          );
         });
       }
 
@@ -307,25 +340,42 @@ const actionForm: React.FC<Props> = ({ method }) => {
         });
       }
 
-      if (programData.length > 0) {
+      if (programData.length > 0 && method === 'create') {
         payload.linkedProgrammes = [];
         programData.forEach((program) => {
           payload.linkedProgrammes.push(program.programmeId);
         });
       }
 
-      const response = await post('national/actions/add', payload);
+      const successMsg =
+        method === 'create' ? t('actionCreationSuccess') : t('actionUpdateSuccess');
+
+      let response: any;
+
+      if (method === 'create') {
+        response = await post('national/actions/add', payload);
+      } else if (method === 'update') {
+        payload.actionId = entId;
+        response = await put('national/actions/update', payload);
+
+        resolveAttachments();
+      }
+
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
-          content: t('actionCreationSuccess'),
+          content: successMsg,
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        });
+
         navigate('/actions');
       }
     } catch (error: any) {
-      console.log('Error in action creation', error);
       message.open({
         type: 'error',
         content: `${error.message}`,
@@ -350,14 +400,14 @@ const actionForm: React.FC<Props> = ({ method }) => {
   // Detach Programme
 
   const handleDetachOpen = (record: ProgrammeData) => {
-    const newOpenList = Array(selectedProgramIds.length).fill(false);
-    newOpenList[selectedProgramIds.indexOf(record.programmeId)] = true;
+    const newOpenList = Array(tempProgramIds.length).fill(false);
+    newOpenList[tempProgramIds.indexOf(record.programmeId)] = true;
     setDetachOpen(newOpenList);
   };
 
-  const detachProgramme = (prgId: string) => {
-    const filteredIds = selectedProgramIds.filter((id) => id !== prgId);
-    setSelectedProgramIds(filteredIds);
+  const detachProgramme = async (prgId: string) => {
+    const filteredIds = tempProgramIds.filter((id) => id !== prgId);
+    setTempProgramIds(filteredIds);
   };
 
   // Add New KPI
@@ -459,7 +509,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
             placement="bottomRight"
             trigger="click"
             content={actionMenu(record)}
-            open={detachOpen[selectedProgramIds.indexOf(record.programmeId)]}
+            open={detachOpen[tempProgramIds.indexOf(record.programmeId)]}
           >
             <EllipsisOutlined
               rotate={90}
@@ -696,8 +746,8 @@ const actionForm: React.FC<Props> = ({ method }) => {
                     listTitle: t('programmeList'),
                     cancel: t('cancel'),
                   }}
-                  attachedUnits={selectedProgramIds}
-                  setAttachedUnits={setSelectedProgramIds}
+                  attachedUnits={tempProgramIds}
+                  setAttachedUnits={setTempProgramIds}
                   icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
                 ></AttachEntity>
               </Col>
