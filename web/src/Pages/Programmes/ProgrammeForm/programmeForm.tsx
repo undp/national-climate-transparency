@@ -21,11 +21,6 @@ const { TextArea } = Input;
 const gutterSize = 30;
 const inputFontSize = '13px';
 
-const validation = {
-  required: { required: true, message: 'Required Field' },
-  number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
-};
-
 interface Props {
   method: 'create' | 'view' | 'update';
 }
@@ -57,6 +52,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post } = useConnection();
   const { entId } = useParams();
+
+  // Form Validation Rules
+
+  const validation = {
+    required: { required: method !== 'view', message: 'Required Field' },
+    number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
+  };
 
   // form state
 
