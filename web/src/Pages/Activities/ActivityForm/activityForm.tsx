@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message } from 'antd';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './activityForm.scss';
@@ -23,6 +23,7 @@ import {
   TechnologyType,
 } from '../../../Enums/activity.enum';
 import { IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
+import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -64,6 +65,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
   const navigate = useNavigate();
   const { post } = useConnection();
+  const { entId } = useParams();
 
   // form state
 
@@ -331,6 +333,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
+            {method !== 'create' && entId && (
+              <EntityIdCard calledIn="Activity" entId={entId}></EntityIdCard>
+            )}
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item

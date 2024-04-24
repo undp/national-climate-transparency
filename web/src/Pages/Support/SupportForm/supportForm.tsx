@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message } from 'antd';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './supportForm.scss';
 import {
@@ -13,6 +13,7 @@ import {
   NatFinInstrument,
   SupportDirection,
 } from '../../../Enums/support.enum';
+import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 
 const { Option } = Select;
 
@@ -54,6 +55,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const navigate = useNavigate();
   const { post } = useConnection();
+  const { entId } = useParams();
 
   // Currency Conversion
 
@@ -141,6 +143,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
+            {method !== 'create' && entId && (
+              <EntityIdCard calledIn="Support" entId={entId}></EntityIdCard>
+            )}
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item

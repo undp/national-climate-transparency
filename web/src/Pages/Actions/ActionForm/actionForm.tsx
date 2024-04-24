@@ -15,6 +15,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
+import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -474,6 +475,9 @@ const actionForm: React.FC<Props> = ({ method }) => {
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
+            {method !== 'create' && entId && (
+              <EntityIdCard calledIn="Action" entId={entId}></EntityIdCard>
+            )}
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item

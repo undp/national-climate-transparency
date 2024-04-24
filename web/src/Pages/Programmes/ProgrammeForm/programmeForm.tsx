@@ -13,6 +13,7 @@ import { ProgrammeStatus } from '../../../Enums/programme.enum';
 import { Layers } from 'react-bootstrap-icons';
 import './programmeForm.scss';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
+import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -452,6 +453,9 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
+            {method !== 'create' && entId && (
+              <EntityIdCard calledIn="Programme" entId={entId}></EntityIdCard>
+            )}
             <Row gutter={gutterSize}>
               <Col span={6}>
                 <Form.Item
