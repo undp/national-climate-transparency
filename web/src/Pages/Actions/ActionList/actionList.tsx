@@ -33,6 +33,7 @@ import { ActionEntity } from '../../../Entities/action';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
+import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 
 interface Item {
   key: number;
@@ -380,39 +381,42 @@ const actionList = () => {
   // Action List Table Columns
 
   const columns = [
-    { title: t('actionId'), dataIndex: 'actionId', key: 'actionId', sorter: false },
-    { title: t('titleOfAction'), dataIndex: 'title', key: 'title', sorter: true },
-    { title: t('actionType'), dataIndex: 'actionType', key: 'actionType', sorter: false },
+    { title: t('actionId'), width: 100, dataIndex: 'actionId', key: 'actionId', sorter: false },
+    { title: t('titleOfAction'), width: 120, dataIndex: 'title', key: 'title', sorter: false },
+    {
+      title: t('actionType'),
+      width: 100,
+      dataIndex: 'actionType',
+      key: 'actionType',
+      sorter: false,
+    },
     {
       title: t('sectorAffected'),
-      sorter: false,
+      width: 100,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
-        return (
-          <div style={{ width: '100px' }}>
-            {record.affectedSectors.map((item: string, index: number) => (
-              <div key={index}>{item}</div>
-            ))}
-          </div>
-        );
+        return <ScrollableList listToShow={record.affectedSectors}></ScrollableList>;
       },
     },
     {
       title: t('financeNeeded'),
+      width: 120,
       dataIndex: 'financeNeeded',
       key: 'financeNeeded',
       sorter: false,
     },
     {
       title: t('financeReceived'),
+      width: 130,
       dataIndex: 'financeReceived',
       key: 'financeReceived',
       sorter: false,
     },
-    { title: t('actionStatus'), dataIndex: 'status', key: 'status', sorter: false },
+    { title: t('actionStatus'), width: 120, dataIndex: 'status', key: 'status', sorter: false },
     {
       title: t('validationStatus'),
       key: 'validationStatus',
+      width: 140,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
         return <StatusChip message={record.validationStatus} defaultMessage="pending" />;
@@ -420,15 +424,10 @@ const actionList = () => {
     },
     {
       title: t('nationalImplementingEntity'),
+      width: 180,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
-        return (
-          <div style={{ width: '200px' }}>
-            {record.nationalImplementingEntity.map((item: string, index: number) => (
-              <div key={index}>{item}</div>
-            ))}
-          </div>
-        );
+        return <ScrollableList listToShow={record.nationalImplementingEntity}></ScrollableList>;
       },
     },
     {
