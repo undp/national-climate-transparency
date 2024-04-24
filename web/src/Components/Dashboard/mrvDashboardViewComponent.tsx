@@ -43,7 +43,7 @@ export const MrvDashboardComponent = (props: any) => {
 
   const colorsStatus = ['#6ACDFF', '#CDCDCD', '#FF8183', '#B7A4FE', '#B7A4FE'];
 
-  const TTSuffix = userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER ? 'My' : '';
+  const TTSuffix = '';
   const genPayload = () => {
     const stats = [];
     for (const item in MrvStatsCardsTypes) {
@@ -52,7 +52,7 @@ export const MrvDashboardComponent = (props: any) => {
         statFilter: {
           startTime: startTime !== 0 ? startTime : undefined,
           endTime: endTime !== 0 ? endTime : undefined,
-          onlyMine: userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER,
+          onlyMine: false,
         },
       });
     }

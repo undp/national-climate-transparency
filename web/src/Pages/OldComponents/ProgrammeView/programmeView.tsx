@@ -349,7 +349,6 @@ const ProgrammeView = () => {
             getProgrammeDocs={() => getDocuments(String(data?.programmeId))}
             ministryLevelPermission={
               data &&
-              userInfoState?.companyRole === CompanyRole.MINISTRY &&
               ministrySectoralScope.includes(data.sectoralScope) &&
               userInfoState?.userRole !== Role.Observer
             }
@@ -436,9 +435,7 @@ const ProgrammeView = () => {
   };
 
   useEffect(() => {
-    if (userInfoState?.companyRole === CompanyRole.MINISTRY) {
-      getUserDetails();
-    }
+    getUserDetails();
 
     if (state && state.record) {
       setLoadingAll(false);
@@ -468,10 +465,7 @@ const ProgrammeView = () => {
       );
       drawMap();
       for (const company of data.company) {
-        if (
-          parseInt(company.state) === CompanyState.ACTIVE.valueOf() &&
-          company.companyId !== userInfoState?.companyId
-        ) {
+        if (parseInt(company.state) === CompanyState.ACTIVE.valueOf()) {
           setIsAllOwnersDeactivated(false);
           break;
         }
@@ -539,11 +533,7 @@ const ProgrammeView = () => {
 
   if (userInfoState && data.currentStage !== ProgrammeStageMRV.Rejected) {
     if (
-      (userInfoState?.companyRole === CompanyRole.GOVERNMENT ||
-        (userInfoState?.companyRole === CompanyRole.PROGRAMME_DEVELOPER &&
-          data.companyId.map((e) => Number(e)).includes(userInfoState?.companyId)) ||
-        (userInfoState?.companyRole === CompanyRole.MINISTRY &&
-          ministrySectoralScope.includes(data.sectoralScope))) &&
+      ministrySectoralScope.includes(data.sectoralScope) &&
       userInfoState?.userRole !== Role.Observer
     ) {
       actionBtns.push(
