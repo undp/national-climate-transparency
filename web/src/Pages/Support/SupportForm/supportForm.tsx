@@ -117,6 +117,18 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     }
   };
 
+  // Entity Validate
+
+  const validateEntity = () => {
+    console.log('Validate Clicked');
+  };
+
+  // Entity Delete
+
+  const deleteEntity = () => {
+    console.log('Delete Clicked');
+  };
+
   // State update for currency inputs
 
   const handleCurrencyChange = (value: number, whichField: 'needed' | 'received' | 'rate') => {
@@ -462,7 +474,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
           </div>
-          {!isView && (
+          {method === 'create' && (
             <Row gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
@@ -480,6 +492,72 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
                     {t('add')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+          {method === 'view' && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/support');
+                  }}
+                >
+                  {t('back')}
+                </Button>
+              </Col>
+              <Col span={2.5}>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    size="large"
+                    block
+                    onClick={() => {
+                      validateEntity();
+                    }}
+                  >
+                    {t('validate')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+          {method === 'update' && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/support');
+                  }}
+                >
+                  {t('cancel')}
+                </Button>
+              </Col>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    deleteEntity();
+                  }}
+                  style={{ color: 'red', borderColor: 'red' }}
+                >
+                  {t('delete')}
+                </Button>
+              </Col>
+              <Col span={2.5}>
+                <Form.Item>
+                  <Button type="primary" size="large" block htmlType="submit">
+                    {t('update')}
                   </Button>
                 </Form.Item>
               </Col>
