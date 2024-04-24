@@ -219,14 +219,14 @@ const projectList = () => {
           structuredData.push({
             key: i,
             projectId: unstructuredData[i].projectId,
-            programmeId: unstructuredData[i].programme.programmeId,
+            programmeId: unstructuredData[i].programme?.programmeId ?? '',
             title: unstructuredData[i].title,
             projectStatus: unstructuredData[i].projectStatus,
             recipientEntity: unstructuredData[i].recipientEntities,
             intImplementingEntity: unstructuredData[i].internationalImplementingEntities,
             validationStatus: unstructuredData[i].validationStatus ?? '',
-            natImplementingEntity: unstructuredData[i].programme.natImplementor ?? [],
-            estimatedInvestment: unstructuredData[i].programme.investment ?? 0,
+            natImplementingEntity: unstructuredData[i].programme?.natImplementor ?? [],
+            estimatedInvestment: unstructuredData[i].programme?.investment,
           });
         }
         setTableData(structuredData);

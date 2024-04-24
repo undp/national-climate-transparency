@@ -29,10 +29,10 @@ const ScrollableList: React.FC<Props> = ({ listToShow }) => {
   const fullList = () => {
     return (
       <List
-        style={{ padding: '0px', overflowY: 'auto', maxHeight: '100px' }}
+        className="scrollable-list"
         dataSource={options}
         renderItem={(item) => (
-          <List.Item style={{ height: '25px', fontSize: '12px' }} key={item.key}>
+          <List.Item className="list-item" key={item.key}>
             {item.value}
           </List.Item>
         )}
@@ -52,13 +52,9 @@ const ScrollableList: React.FC<Props> = ({ listToShow }) => {
           <Col key={index} span={24}>
             <Tag
               color={listValue.color}
-              style={{
-                maxWidth: '130px',
-                width: listValue.label.length === 18 ? '130px' : 'auto',
-                color: '#605c66',
-                margin: '0px',
-                borderRadius: '2px',
-              }}
+              className={
+                listValue.label.length === 18 ? 'table-full-width-tag' : 'table-partial-width-tag'
+              }
             >
               {listValue.label}
             </Tag>
