@@ -50,6 +50,16 @@ type ProgrammeData = {
   estimatedInvestment: number;
 };
 
+type ActionMigratedData = {
+  type: string[];
+  ghgsAffected: string;
+  natImplementer: string[];
+  sectorsAffected: string[];
+  estimatedInvestment: number;
+  achievedReduction: number;
+  expectedReduction: number;
+};
+
 const actionForm: React.FC<Props> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['actionForm']);
@@ -61,12 +71,12 @@ const actionForm: React.FC<Props> = ({ method }) => {
 
   // form state
 
-  const [actionData, setActionData] = useState<any>();
-  const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
-    []
-  );
-  const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
-  const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
+  const [actionMigratedData, setActionMigratedData] = useState<ActionMigratedData>();
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { key: string; title: string; data: string }[]
+  >([]);
+  const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   // Popover state
 
@@ -115,7 +125,40 @@ const actionForm: React.FC<Props> = ({ method }) => {
     const fetchData = async () => {
       if (method !== 'create' && entId) {
         const response: any = await get(`national/actions/${entId}`);
-        setActionData(response.data);
+        if (response.status === 200 || response.status === 201) {
+          const entityData: any = response.data;
+          form.setFieldsValue({
+            title: entityData.title,
+            description: entityData.description,
+            objective: entityData.objective,
+            instrumentType: entityData.instrumentType,
+            status: entityData.status,
+            startYear: entityData.startYear,
+            natAnchor: entityData.natAnchor,
+          });
+
+          if (entityData.documents?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.documents.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredFiles(tempFiles);
+          }
+
+          setActionMigratedData({
+            type: entityData.migratedData.types,
+            ghgsAffected: entityData.migratedData.ghgsAffected,
+            natImplementer: entityData.migratedData.natImplementors,
+            sectorsAffected: entityData.migratedData.sectorsAffected,
+            estimatedInvestment: entityData.migratedData.totalInvestment,
+            achievedReduction: entityData.migratedData.achievedReduct,
+            expectedReduction: entityData.migratedData.expectedReduct,
+          });
+        }
       }
     };
     fetchData();
@@ -151,38 +194,21 @@ const actionForm: React.FC<Props> = ({ method }) => {
     fetchConnectedProgrammeIds();
   }, []);
 
-  // Populating data fields based on the loaded action data when not in create
+  // Populating Migrated Data Fields
 
   useEffect(() => {
-    if (actionData) {
+    if (actionMigratedData) {
       form.setFieldsValue({
-        // Entity Data
-        title: actionData.title,
-        description: actionData.description,
-        objective: actionData.objective,
-        instrumentType: actionData.instrumentType,
-        status: actionData.status,
-        startYear: actionData.startYear,
-        natAnchor: actionData.natAnchor,
-        // Migrated Data
-        type: actionData.migratedData.types,
-        ghgsAffected: actionData.migratedData.ghgsAffected,
-        natImplementor: actionData.migratedData.natImplementors,
-        sectorsdAffected: actionData.migratedData.sectorsAffected,
-        estimatedInvestment: actionData.migratedData.totalInvestment,
-        achievedReduct: actionData.migratedData.achievedReduct,
-        expectedReduct: actionData.migratedData.expectedReduct,
+        type: actionMigratedData.type,
+        ghgsAffected: actionMigratedData.ghgsAffected,
+        natImplementor: actionMigratedData.natImplementer,
+        sectorsAffected: actionMigratedData.sectorsAffected,
+        estimatedInvestment: actionMigratedData.estimatedInvestment,
+        achievedReduct: actionMigratedData.achievedReduction,
+        expectedReduct: actionMigratedData.expectedReduction,
       });
-
-      if (actionData.documents?.length > 0) {
-        const tempFiles: { id: number; title: string; url: string }[] = [];
-        actionData.documents.forEach((document: any) => {
-          tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
-        });
-        setStoredFiles(tempFiles);
-      }
     }
-  }, [actionData]);
+  }, [actionMigratedData]);
 
   // Loading programme data when attachment changes
 
