@@ -4,13 +4,12 @@ import sliderLogo from '../../Assets/Images/mrvlogo.svg';
 import { useNavigate } from 'react-router-dom';
 import './layout.sider.scss';
 import * as Icon from 'react-bootstrap-icons';
-import { AppstoreOutlined, DashboardOutlined, ShopOutlined, UserOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, DashboardOutlined, UserOutlined } from '@ant-design/icons';
 import { ClipboardMinus, Coin, GraphUpArrow, Headset, Layers } from 'react-bootstrap-icons';
 import { LayoutSiderProps } from '../../Definitions/props/layout.sider.definitions';
 import { useTranslation } from 'react-i18next';
 
 const { Sider } = Layout;
-const { SubMenu } = Menu;
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -32,7 +31,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
   const { selectedKey } = props;
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-  const { i18n, t } = useTranslation(['nav']);
+  const { t } = useTranslation(['nav']);
 
   const items: MenuItem[] = [
     getItem(t('nav:dashboard'), 'dashboard', <DashboardOutlined />),
@@ -41,12 +40,9 @@ const LayoutSider = (props: LayoutSiderProps) => {
     getItem(t('nav:projects'), 'projects', <Layers />),
     getItem(t('nav:activities'), 'activities', <GraphUpArrow />),
     getItem(t('nav:support'), 'support', <Coin />),
-    // getItem(t('nav:ghgInventory'), 'ghg-inventory', <BankOutlined />),
     getItem(t('nav:reporting'), 'reportings', <ClipboardMinus />),
     getItem(t('nav:faq'), 'faqs', <Headset />),
-    // getItem(t('nav:companies'), 'companyManagement/viewAll', <ShopOutlined />),
     getItem(t('nav:users'), 'userManagement/viewAll', <UserOutlined />),
-    // getItem('Team', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
   ];
 
   const onClick: MenuProps['onClick'] = (e) => {

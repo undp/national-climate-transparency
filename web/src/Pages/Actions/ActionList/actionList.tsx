@@ -598,7 +598,7 @@ const actionList = () => {
                     navigate('/actions/add');
                   }}
                 >
-                  {t('Add Action')}
+                  {t('addAction')}
                 </Button>
               )}
             </div>
