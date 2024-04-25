@@ -1,24 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
-import {
-  Row,
-  Col,
-  Input,
-  Button,
-  Popover,
-  List,
-  Typography,
-  Form,
-  Select,
-  message,
-  Spin,
-} from 'antd';
-import {
-  AppstoreOutlined,
-  CloseCircleOutlined,
-  EllipsisOutlined,
-  PlusCircleOutlined,
-} from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
+import { AppstoreOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { InstrumentType, ActionStatus, NatAnchor } from '../../../Enums/action.enum';
@@ -34,6 +17,12 @@ import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getFormTitle, joinTwoArrays } from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
+import { GraphUpArrow } from 'react-bootstrap-icons';
+import { ActivityData } from '../../../Definitions/activityDefinitions';
+import { SupportData } from '../../../Definitions/supportDefinitions';
+import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
+import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
+import { getProgrammeTableColumns } from '../../../Definitions/columns/programmeColumns';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -57,7 +46,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const validation = getValidationRules(method);
 
-  // form state
+  // Form General State
 
   const [actionMigratedData, setActionMigratedData] = useState<ActionMigratedData>();
   const [uploadedFiles, setUploadedFiles] = useState<
@@ -74,7 +63,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
 
-  // Attachments state
+  // Programme Attachments state
 
   const [allProgramIds, setAllProgramIdList] = useState<string[]>([]);
   const [attachedProgramIds, setAttachedProgramIds] = useState<string[]>([]);
@@ -83,6 +72,20 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [programData, setProgramData] = useState<ProgrammeData[]>([]);
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+
+  // Activity Attachment State
+
+  const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
+  const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
+  const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
+
+  const [activityData, setActivityData] = useState<ActivityData[]>([]);
+  const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
+  const [activityPageSize, setActivityPageSize] = useState<number>(10);
+
+  const [supportData, setSupportData] = useState<SupportData[]>([]);
+  const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
+  const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
   // KPI State
 
@@ -102,13 +105,21 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchFreeProgrammes = async () => {
       if (method !== 'view') {
-        const response: any = await get('national/programmes/link/eligible');
+        const prgResponse: any = await get('national/programmes/link/eligible');
 
         const freeProgrammeIds: string[] = [];
-        response.data.forEach((prg: any) => {
+        prgResponse.data.forEach((prg: any) => {
           freeProgrammeIds.push(prg.programmeId);
         });
         setAllProgramIdList(freeProgrammeIds);
+
+        const actResponse: any = await get('national/activities/link/eligible');
+
+        const freeActivityIds: string[] = [];
+        actResponse.data.forEach((act: any) => {
+          freeActivityIds.push(act.activityId);
+        });
+        setAllActivityIdList(freeActivityIds);
       }
     };
     fetchFreeProgrammes();
@@ -189,6 +200,36 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchConnectedProgrammeIds();
+
+    // Initially Loading the attached activity data when not in create mode
+
+    const fetchConnectedActivityIds = async () => {
+      if (method !== 'create') {
+        const connectedActivityIds: string[] = [];
+        // const payload = {
+        //   page: 1,
+        //   size: 100,
+        //   filterAnd: [
+        //     {
+        //       key: 'actionId',
+        //       operation: '=',
+        //       value: entId,
+        //     },
+        //   ],
+        //   sort: {
+        //     key: 'activityId',
+        //     order: 'ASC',
+        //   },
+        // };
+        // const response: any = await post('national/activities/query', payload);
+        // response.data.forEach((act: any) => {
+        //   connectedActivityIds.push(act.activityId);
+        // });
+        setAttachedActivityIds(connectedActivityIds);
+        setTempActivityIds(connectedActivityIds);
+      }
+    };
+    fetchConnectedActivityIds();
   }, []);
 
   // Populating Form Migrated Fields, when migration data changes
@@ -292,6 +333,26 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     setDetachOpen(Array(tempProgramIds.length).fill(false));
   }, [tempProgramIds]);
+
+  useEffect(() => {
+    const tempActivityData: ActivityData[] = [];
+    tempActivityIds.forEach((actId) => {
+      tempActivityData.push({
+        key: actId,
+        activityId: actId,
+        title: 'Title',
+        reductionMeasures: 'With Measures',
+        status: 'Planned',
+        startYear: 2014,
+        endYear: 2016,
+        natImplementor: 'Department of Energy',
+      });
+    });
+    setActivityData(tempActivityData);
+
+    // Get the Support Data for each attached Activity
+    setSupportData([]);
+  }, [tempActivityIds]);
 
   // To Do :
   // Populating the KPI UI Update when the attachments change
@@ -492,80 +553,43 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     });
   };
 
-  // Action Menu definition
+  // Programme Column Definition
 
-  const actionMenu = (record: ProgrammeData) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: t('detach'),
-            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            click: () => {
-              {
-                detachProgramme(record.programmeId);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) => (
-          <List.Item onClick={item.click}>
-            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{item.text}</span>
-          </List.Item>
-        )}
-      />
-    );
-  };
+  const progTableColumns = getProgrammeTableColumns(
+    isView,
+    detachProgramme,
+    handleDetachOpen,
+    detachOpen,
+    tempProgramIds
+  );
 
-  // Column Definition
-  const progTableColumns = [
-    { title: t('programmeId'), dataIndex: 'programmeId', key: 'programmeId' },
-    { title: t('actionId'), dataIndex: 'actionId', key: 'actionId' },
-    { title: t('programmeTitle'), dataIndex: 'title', key: 'title' },
-    { title: t('programmeType'), dataIndex: 'type', key: 'type' },
-    { title: t('programmeStatus'), dataIndex: 'status', key: 'status' },
-    {
-      title: t('subSectorAffected'),
-      dataIndex: 'subSectorsAffected',
-      key: 'subSectorsAffected',
-    },
-    {
-      title: t('investmentNeeds'),
-      dataIndex: 'estimatedInvestment',
-      key: 'estimatedInvestment',
-    },
-    {
-      title: '',
-      key: 'programmeAcion',
-      align: 'right' as const,
-      width: 6,
-      render: (record: any) => {
-        return (
-          <Popover
-            placement="bottomRight"
-            trigger="click"
-            content={actionMenu(record)}
-            open={detachOpen[tempProgramIds.indexOf(record.programmeId)]}
-          >
-            <EllipsisOutlined
-              rotate={90}
-              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => handleDetachOpen(record)}
-            />
-          </Popover>
-        );
-      },
-    },
-  ];
+  // Activity Column Definition
 
-  // Table Behaviour
+  const activityTableColumns = getActivityTableColumns();
+
+  // Support Column Definition
+
+  const supportTableColumns = getSupportTableColumns();
+
+  // Programme Table Behaviour
 
   const handleTableChange = (pagination: any) => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
+  };
+
+  // Activity Table Behaviour
+
+  const handleActivityTableChange = (pagination: any) => {
+    setActivityCurrentPage(pagination.current);
+    setActivityPageSize(pagination.pageSize);
+  };
+
+  // Support Table Behaviour
+
+  const handleSupportTableChange = (pagination: any) => {
+    setSupportCurrentPage(pagination.current);
+    setSupportPageSize(pagination.pageSize);
   };
 
   return (
@@ -574,7 +598,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         <div className="body-title">{t(formTitle)}</div>
         <div className="body-sub-title">{t(formDesc)}</div>
       </div>
-
       {!waitingForBE ? (
         <div className="action-form">
           <Form form={form} onFinish={handleSubmit} layout="vertical">
@@ -818,6 +841,83 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     }}
                     handleTableChange={handleTableChange}
                     emptyMessage={t('noProgramsMessage')}
+                  />
+                </Col>
+              </Row>
+            </div>
+            <div className="form-section-card">
+              <Row>
+                <Col span={6} style={{ paddingTop: '6px' }}>
+                  <div className="form-section-header">{t('activityInfoTitle')}</div>
+                </Col>
+                <Col span={4}>
+                  <AttachEntity
+                    isDisabled={isView}
+                    content={{
+                      buttonName: t('attachActivity'),
+                      attach: t('attach'),
+                      contentTitle: t('attachActivity'),
+                      listTitle: t('activityList'),
+                      cancel: t('cancel'),
+                    }}
+                    options={allActivityIds}
+                    alreadyAttached={attachedActivityIds}
+                    currentAttachments={tempActivityIds}
+                    setCurrentAttachments={setTempActivityIds}
+                    icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
+                  ></AttachEntity>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <div style={{ overflowX: 'auto' }}>
+                    <LayoutTable
+                      tableData={activityData}
+                      columns={activityTableColumns}
+                      loading={false}
+                      pagination={{
+                        current: activityCurrentPage,
+                        pageSize: activityPageSize,
+                        total: activityData.length,
+                        showQuickJumper: true,
+                        pageSizeOptions: ['10', '20', '30'],
+                        showSizeChanger: true,
+                        style: { textAlign: 'center' },
+                        locale: { page: '' },
+                        position: ['bottomRight'],
+                      }}
+                      handleTableChange={handleActivityTableChange}
+                      emptyMessage={t('noActivityMessage')}
+                    />{' '}
+                  </div>
+                </Col>
+              </Row>
+            </div>
+            <div className="form-section-card">
+              <Row>
+                <Col span={6}>
+                  <div className="form-section-header">{t('supportInfoTitle')}</div>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <LayoutTable
+                    tableData={supportData}
+                    columns={supportTableColumns}
+                    loading={false}
+                    pagination={{
+                      current: supportCurrentPage,
+                      pageSize: supportPageSize,
+                      total: supportData.length,
+                      showQuickJumper: true,
+                      pageSizeOptions: ['10', '20', '30'],
+                      showSizeChanger: true,
+                      style: { textAlign: 'center' },
+                      locale: { page: '' },
+                      position: ['bottomRight'],
+                    }}
+                    handleTableChange={handleSupportTableChange}
+                    emptyMessage={t('noSupportMessage')}
                   />
                 </Col>
               </Row>

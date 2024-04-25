@@ -16,6 +16,7 @@
     "subSectorAffected": "Sub-Sector Affected",
     "investmentNeeds": " Estimated investment needs (USD)",
     "attachProgramme": "Attach Programme",
+    "attachActivity": "Attach Activity",
     "addKPI": "Add KPI",
     "cancel": "Cancel",
     "add": "Add",
@@ -26,6 +27,7 @@
     "ghgAffected": "GHG(s) Affected",
     "noProgramsMessage": "No Programmes Attached",
     "programmeList" : "Programme List",
+    "activityList" : "Activity List",
     "attach" : "Attach",
     "upload" : "Upload",
     "natAnchorTitle": "Anchored in a National Strategy",
@@ -39,5 +41,7 @@
     "actionTitle": "Title of Action",
     "typesTitle": "Type (s)",
     "detach": "Detach",
-    "documentsHeader": "Documents"
+    "documentsHeader": "Documents",
+    "activityInfoTitle": "List of Activities under the Project",
+    "supportInfoTitle": "List of Supports under the Project"
 }

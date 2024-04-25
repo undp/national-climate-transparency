@@ -386,7 +386,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     setActivityPageSize(pagination.pageSize);
   };
 
-  // Activity Table Behaviour
+  // Support Table Behaviour
 
   const handleSupportTableChange = (pagination: any) => {
     setSupportCurrentPage(pagination.current);
