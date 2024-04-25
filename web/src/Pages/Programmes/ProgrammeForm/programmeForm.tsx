@@ -710,7 +710,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               >
                 <AttachEntity
                   isDisabled={isView}
-                  options={allProjectIds}
                   content={{
                     buttonName: t('attachProjects'),
                     attach: t('attach'),
@@ -718,8 +717,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     listTitle: t('projectList'),
                     cancel: t('cancel'),
                   }}
-                  attachedUnits={selectedProjectIds}
-                  setAttachedUnits={setSelectedProjectIds}
+                  options={allProjectIds}
+                  alreadyAttached={[]} // Need to be defined
+                  currentAttachments={selectedProjectIds}
+                  setCurrentAttachments={setSelectedProjectIds}
                   icon={<Layers style={{ fontSize: '120px' }} />}
                 ></AttachEntity>
               </Col>

@@ -20,6 +20,7 @@ import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
 import { NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
+import { joinTwoArrays } from '../../../Utils/utilServices';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -59,7 +60,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // projects state
 
   const [allProgramIds, setAllProgramIdList] = useState<string[]>([]);
-
   const [attachedProgramIds, setAttachedProgramIds] = useState<string[]>([]);
   const [tempProgramIds, setTempProgramIds] = useState<string[]>([]);
 
@@ -201,6 +201,16 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       },
     };
 
+    const tempMigratedData: ActionMigratedData = {
+      natImplementer: [],
+      sectorsAffected: [],
+      estimatedInvestment: 0,
+      type: [],
+      achievedReduction: 0,
+      expectedReduction: 0,
+      ghgsAffected: '',
+    };
+
     const fetchData = async () => {
       if (tempProgramIds.length > 0) {
         tempProgramIds.forEach((progId) => {
@@ -224,10 +234,36 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             subSectorsAffected: prg.affectedSubSector,
             estimatedInvestment: prg.investment,
           });
+
+          tempMigratedData.type = joinTwoArrays(
+            tempMigratedData.type,
+            prg.migratedData?.types ?? []
+          );
+          tempMigratedData.natImplementer = joinTwoArrays(
+            tempMigratedData.natImplementer,
+            prg.natImplementor ?? []
+          );
+          tempMigratedData.sectorsAffected = joinTwoArrays(
+            tempMigratedData.sectorsAffected,
+            prg.affectedSectors ?? []
+          );
+
+          tempMigratedData.estimatedInvestment =
+            tempMigratedData.estimatedInvestment + prg.investment ?? 0;
+
+          const prgGHGAchievement = prg.migratedData?.achievedGHGReduction;
+          const prgGHGExpected = prg.migratedData?.expectedGHGReduction;
+
+          tempMigratedData.achievedReduction =
+            tempMigratedData.achievedReduction + prgGHGAchievement !== null ? prgGHGAchievement : 0;
+          tempMigratedData.expectedReduction =
+            tempMigratedData.expectedReduction + prgGHGExpected !== null ? prgGHGExpected : 0;
         });
         setProgramData(tempPRGData);
+        setActionMigratedData(tempMigratedData);
       } else {
         setProgramData([]);
+        setActionMigratedData(tempMigratedData);
       }
     };
     fetchData();
@@ -709,7 +745,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={4}>
                 <AttachEntity
                   isDisabled={isView}
-                  options={allProgramIds}
                   content={{
                     buttonName: t('attachProgramme'),
                     attach: t('attach'),
@@ -717,8 +752,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     listTitle: t('programmeList'),
                     cancel: t('cancel'),
                   }}
-                  attachedUnits={tempProgramIds}
-                  setAttachedUnits={setTempProgramIds}
+                  options={allProgramIds}
+                  alreadyAttached={attachedProgramIds}
+                  currentAttachments={tempProgramIds}
+                  setCurrentAttachments={setTempProgramIds}
                   icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
                 ></AttachEntity>
               </Col>

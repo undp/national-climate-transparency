@@ -47,3 +47,13 @@ export const addSpaces = (text: string) => {
   }
   return text.replace(/([A-Z])/g, ' $1').trim();
 };
+
+export const joinTwoArrays = (arrayOne: any[], arrayTwo: any[]) => {
+  const joinedArray = [...arrayOne];
+  arrayTwo.forEach((value) => {
+    if (!joinedArray.includes(value)) {
+      joinedArray.push(value);
+    }
+  });
+  return joinedArray;
+};

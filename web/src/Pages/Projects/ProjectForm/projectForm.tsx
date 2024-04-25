@@ -814,7 +814,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={4}>
                 <AttachEntity
                   isDisabled={isView}
-                  options={allActivityIds}
                   content={{
                     buttonName: t('attachActivity'),
                     attach: t('attach'),
@@ -822,8 +821,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     listTitle: t('activityList'),
                     cancel: t('cancel'),
                   }}
-                  attachedUnits={selectedActivityIds}
-                  setAttachedUnits={setSelectedActivityIds}
+                  options={allActivityIds}
+                  alreadyAttached={[]} // Need to be defined
+                  currentAttachments={selectedActivityIds}
+                  setCurrentAttachments={setSelectedActivityIds}
                   icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
                 ></AttachEntity>
               </Col>
