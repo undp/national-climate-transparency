@@ -21,6 +21,7 @@ import { NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { joinTwoArrays } from '../../../Utils/utilServices';
+import { getValidationRules } from '../../../Utils/validationRules';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -39,10 +40,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Form Validation Rules
 
-  const validation = {
-    required: { required: method !== 'view', message: 'Required Field' },
-    number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
-  };
+  const validation = getValidationRules(method);
 
   // form state
 

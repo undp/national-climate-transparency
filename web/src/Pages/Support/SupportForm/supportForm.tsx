@@ -14,30 +14,12 @@ import {
   SupportDirection,
 } from '../../../Enums/support.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
+import { getValidationRules } from '../../../Utils/validationRules';
 
 const { Option } = Select;
 
 const gutterSize = 30;
 const inputFontSize = '13px';
-
-const validation = {
-  required: { required: true, message: 'Required Field' },
-  number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
-  greaterThanZero: ({}) => ({
-    // eslint-disable-next-line no-unused-vars
-    validator(_rule: any, value: any) {
-      if (value) {
-        if (value > 0) {
-          return Promise.resolve();
-        } else {
-          return Promise.reject('Exchange Rate Cannot be Zero');
-        }
-      } else {
-        return Promise.resolve();
-      }
-    },
-  }),
-};
 
 interface Props {
   method: 'create' | 'view' | 'update';
@@ -56,6 +38,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   const navigate = useNavigate();
   const { post } = useConnection();
   const { entId } = useParams();
+
+  // Form Validation Rules
+
+  const validation = getValidationRules(method);
 
   // Currency Conversion
 

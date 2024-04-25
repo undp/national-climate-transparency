@@ -18,6 +18,7 @@ import { ProgrammeSelectData } from '../../../Definitions/programmeDefinitions';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
+import { getValidationRules } from '../../../Utils/validationRules';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -36,10 +37,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Form Validation Rules
 
-  const validation = {
-    required: { required: method !== 'view', message: 'Required Field' },
-    number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
-  };
+  const validation = getValidationRules(method);
 
   // form state
 
