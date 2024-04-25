@@ -16,6 +16,10 @@ import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
+import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
+import { NewKpiData } from '../../../Definitions/kpiDefinitions';
+import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
+import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -23,40 +27,7 @@ const { TextArea } = Input;
 const gutterSize = 30;
 const inputFontSize = '13px';
 
-interface Props {
-  method: 'create' | 'view' | 'update';
-}
-
-type NewKpiData = {
-  index: number;
-  name: string;
-  unit: string;
-  creatorType: string;
-  expected: number;
-};
-
-type ProgrammeData = {
-  key: string;
-  programmeId: string;
-  actionId: string;
-  title: string;
-  type: string;
-  status: string;
-  subSectorsAffected: string;
-  estimatedInvestment: number;
-};
-
-type ActionMigratedData = {
-  type: string[];
-  ghgsAffected: string;
-  natImplementer: string[];
-  sectorsAffected: string[];
-  estimatedInvestment: number;
-  achievedReduction: number;
-  expectedReduction: number;
-};
-
-const actionForm: React.FC<Props> = ({ method }) => {
+const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['actionForm']);
   const isView: boolean = method === 'view' ? true : false;

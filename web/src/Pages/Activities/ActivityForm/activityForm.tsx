@@ -24,6 +24,9 @@ import {
 } from '../../../Enums/activity.enum';
 import { IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
+import { SupportData } from '../../../Definitions/supportDefinitions';
+import { ParentData } from '../../../Definitions/activityDefinitions';
+import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -31,29 +34,7 @@ const { TextArea } = Input;
 const gutterSize = 30;
 const inputFontSize = '13px';
 
-interface Props {
-  method: 'create' | 'view' | 'update';
-}
-
-type ParentData = {
-  id: string;
-  title: string;
-  desc: string;
-};
-
-type SupportData = {
-  key: string;
-  supportId: string;
-  financeNature: string;
-  direction: string;
-  finInstrument: string;
-  estimatedUSD: number;
-  estimatedLC: number;
-  recievedUSD: number;
-  recievedLC: number;
-};
-
-const ActivityForm: React.FC<Props> = ({ method }) => {
+const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['activityForm']);
   const isView: boolean = method === 'view' ? true : false;

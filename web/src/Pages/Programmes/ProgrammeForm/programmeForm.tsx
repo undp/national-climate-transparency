@@ -14,6 +14,10 @@ import { Layers } from 'react-bootstrap-icons';
 import './programmeForm.scss';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
+import { NewKpiData } from '../../../Definitions/kpiDefinitions';
+import { ActionSelectData } from '../../../Definitions/actionDefinitions';
+import { ProjectData } from '../../../Definitions/projectDefinitions';
+import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -21,30 +25,7 @@ const { TextArea } = Input;
 const gutterSize = 30;
 const inputFontSize = '13px';
 
-interface Props {
-  method: 'create' | 'view' | 'update';
-}
-
-type ActionData = {
-  id: string;
-  title: string;
-};
-
-type NewKpiData = {
-  index: number;
-  name: string;
-  unit: string;
-  creatorType: string;
-  expected: number;
-};
-
-type ProjectData = {
-  key: string;
-  projectId: string;
-  projectName: string;
-};
-
-const ProgrammeForm: React.FC<Props> = ({ method }) => {
+const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['programmeForm']);
   const isView: boolean = method === 'view' ? true : false;
@@ -63,7 +44,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   // form state
 
   const [programmeData, setProgrammeData] = useState<any>();
-  const [actionList, setActionList] = useState<ActionData[]>([]);
+  const [actionList, setActionList] = useState<ActionSelectData[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<
     { key: string; title: string; data: string }[]
   >([]);
@@ -111,7 +92,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
         };
         const response: any = await post('national/actions/query', payload);
 
-        const tempActionData: ActionData[] = [];
+        const tempActionData: ActionSelectData[] = [];
         response.data.forEach((action: any) => {
           tempActionData.push({
             id: action.actionId,

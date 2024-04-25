@@ -13,6 +13,11 @@ import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
 import { IntImplementor, Recipient } from '../../../Enums/shared.enum';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
+import { NewKpiData } from '../../../Definitions/kpiDefinitions';
+import { ProgrammeSelectData } from '../../../Definitions/programmeDefinitions';
+import { ActivityData } from '../../../Definitions/activityDefinitions';
+import { SupportData } from '../../../Definitions/supportDefinitions';
+import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -20,47 +25,7 @@ const { TextArea } = Input;
 const gutterSize = 30;
 const inputFontSize = '13px';
 
-interface Props {
-  method: 'create' | 'view' | 'update';
-}
-
-type ProgrammeData = {
-  id: string;
-  title: string;
-};
-
-type NewKpiData = {
-  index: number;
-  name: string;
-  unit: string;
-  creatorType: string;
-  expected: number;
-};
-
-type ActivityData = {
-  key: string;
-  activityId: string;
-  title: string;
-  reductionMeasures: string;
-  status: string;
-  startYear: number;
-  endYear: number;
-  natImplementor: string;
-};
-
-type SupportData = {
-  key: string;
-  supportId: string;
-  financeNature: string;
-  direction: string;
-  finInstrument: string;
-  estimatedUSD: number;
-  estimatedLC: number;
-  recievedUSD: number;
-  recievedLC: number;
-};
-
-const ProjectForm: React.FC<Props> = ({ method }) => {
+const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['projectForm']);
   const isView: boolean = method === 'view' ? true : false;
@@ -78,7 +43,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
 
   // form state
 
-  const [programmeList, setProgrammeList] = useState<ProgrammeData[]>([]);
+  const [programmeList, setProgrammeList] = useState<ProgrammeSelectData[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<
     { key: string; title: string; data: string }[]
   >([]);
@@ -118,7 +83,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
   }
 
   useEffect(() => {
-    const programmeData: ProgrammeData[] = [];
+    const programmeData: ProgrammeSelectData[] = [];
     for (let i = 0; i < 5; i++) {
       programmeData.push({
         id: `P00${i}`,
