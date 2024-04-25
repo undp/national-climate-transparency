@@ -15,6 +15,7 @@ import {
 } from '../../../Enums/support.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { getValidationRules } from '../../../Utils/validationRules';
+import { getFormTitle } from '../../../Utils/utilServices';
 
 const { Option } = Select;
 
@@ -33,7 +34,10 @@ type ParentData = {
 const SupportForm: React.FC<Props> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['supportForm']);
+
   const isView: boolean = method === 'view' ? true : false;
+  const formTitle = getFormTitle('Support', method)[0];
+  const formDesc = getFormTitle('Support', method)[1];
 
   const navigate = useNavigate();
   const { post } = useConnection();
@@ -134,8 +138,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addSupportTitle')}</div>
-        <div className="body-sub-title">{t('addSupportDesc')}</div>
+        <div className="body-title">{t(formTitle)}</div>
+        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       <div className="support-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">

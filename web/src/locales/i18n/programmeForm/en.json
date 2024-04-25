@@ -1,6 +1,6 @@
 {
-    "addProgTitle": "Add New Programme",
-    "addProgDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
+    "addProgrammeTitle": "Add New Programme",
+    "addProgrammeDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
     "generalInfoTitle": "General Programme Information",
     "selectActionHeader": "Select Action",
     "typesHeader": "Type (s)",

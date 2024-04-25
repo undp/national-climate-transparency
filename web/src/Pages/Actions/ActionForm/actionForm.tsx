@@ -20,7 +20,7 @@ import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
 import { NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
-import { joinTwoArrays } from '../../../Utils/utilServices';
+import { getFormTitle, joinTwoArrays } from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
 
 const { Option } = Select;
@@ -32,7 +32,10 @@ const inputFontSize = '13px';
 const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['actionForm']);
+
   const isView: boolean = method === 'view' ? true : false;
+  const formTitle = getFormTitle('Action', method)[0];
+  const formDesc = getFormTitle('Action', method)[1];
 
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
@@ -55,7 +58,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
 
-  // projects state
+  // Attachments state
 
   const [allProgramIds, setAllProgramIdList] = useState<string[]>([]);
   const [attachedProgramIds, setAttachedProgramIds] = useState<string[]>([]);
@@ -70,7 +73,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
   const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
 
-  // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
 
   const yearsList: number[] = [];
@@ -102,6 +104,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         const response: any = await get(`national/actions/${entId}`);
         if (response.status === 200 || response.status === 201) {
           const entityData: any = response.data;
+
+          // Populating Action owned data fields
           form.setFieldsValue({
             title: entityData.title,
             description: entityData.description,
@@ -124,6 +128,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             setStoredFiles(tempFiles);
           }
 
+          // Populating Migrated Fields (Will be overwritten when attachments change)
           setActionMigratedData({
             type: entityData.migratedData?.types,
             ghgsAffected: entityData.migratedData?.ghgsAffected,
@@ -170,7 +175,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     fetchConnectedProgrammeIds();
   }, []);
 
-  // Populating Migrated Data Fields
+  // Populating Form Migrated Fields, when migration data changes
 
   useEffect(() => {
     if (actionMigratedData) {
@@ -186,7 +191,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, [actionMigratedData]);
 
-  // Loading programme data when attachment changes
+  // Fetching Programme data and calculating migrated fields when attachment changes
 
   useEffect(() => {
     const payload = {
@@ -221,6 +226,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         const response: any = await post('national/programmes/query', payload);
 
         const tempPRGData: ProgrammeData[] = [];
+
         response.data.forEach((prg: any, index: number) => {
           tempPRGData.push({
             key: index.toString(),
@@ -254,6 +260,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
           tempMigratedData.achievedReduction =
             tempMigratedData.achievedReduction + prgGHGAchievement !== null ? prgGHGAchievement : 0;
+
           tempMigratedData.expectedReduction =
             tempMigratedData.expectedReduction + prgGHGExpected !== null ? prgGHGExpected : 0;
         });
@@ -269,9 +276,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     setDetachOpen(Array(tempProgramIds.length).fill(false));
   }, [tempProgramIds]);
 
-  useEffect(() => {
-    console.log('Running KPI Migration Update');
+  // To Do :
+  // Populating the KPI UI Update when the attachments change
 
+  useEffect(() => {
     const migratedKpis = [];
     for (let i = 0; i < 2; i++) {
       const updatedValues = {
@@ -286,9 +294,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     }
 
     setMigratedKpiList(migratedKpis);
-  }, [programData]);
+  }, [tempProgramIds]);
 
-  // Form Submit
+  // Attachment resolve before updating an already created action
 
   const resolveAttachments = async () => {
     const toAttach = tempProgramIds.filter((prg) => !attachedProgramIds.includes(prg));
@@ -302,6 +310,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       await post('national/programmes/link', { actionId: entId, programmes: toAttach });
     }
   };
+
+  // Form Submit
 
   const handleSubmit = async (payload: any) => {
     try {
@@ -352,9 +362,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         });
       }
 
-      const successMsg =
-        method === 'create' ? t('actionCreationSuccess') : t('actionUpdateSuccess');
-
       let response: any;
 
       if (method === 'create') {
@@ -365,6 +372,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
         resolveAttachments();
       }
+
+      const successMsg =
+        method === 'create' ? t('actionCreationSuccess') : t('actionUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
         message.open({
@@ -537,8 +547,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addActionTitle')}</div>
-        <div className="body-sub-title">{t('addActionDesc')}</div>
+        <div className="body-title">{t(formTitle)}</div>
+        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       <div className="action-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">

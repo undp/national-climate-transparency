@@ -57,3 +57,16 @@ export const joinTwoArrays = (arrayOne: any[], arrayTwo: any[]) => {
   });
   return joinedArray;
 };
+
+export const getFormTitle = (
+  formType: 'Action' | 'Programme' | 'Project' | 'Activity' | 'Support',
+  formMethod: 'create' | 'update' | 'view'
+) => {
+  if (formMethod === 'create') {
+    return [`add${formType}Title`, `add${formType}Desc`];
+  } else if (formMethod === 'update') {
+    return [`edit${formType}Title`, `edit${formType}Desc`];
+  } else {
+    return [`view${formType}Title`, `view${formType}Desc`];
+  }
+};

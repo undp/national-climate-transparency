@@ -19,6 +19,7 @@ import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
+import { getFormTitle } from '../../../Utils/utilServices';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -29,7 +30,10 @@ const inputFontSize = '13px';
 const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['projectForm']);
+
   const isView: boolean = method === 'view' ? true : false;
+  const formTitle = getFormTitle('Project', method)[0];
+  const formDesc = getFormTitle('Project', method)[1];
 
   const navigate = useNavigate();
   const { post } = useConnection();
@@ -392,8 +396,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addProjTitle')}</div>
-        <div className="body-sub-title">{t('addProjDesc')}</div>
+        <div className="body-title">{t(formTitle)}</div>
+        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       <div className="project-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">
