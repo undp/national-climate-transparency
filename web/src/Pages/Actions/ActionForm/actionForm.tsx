@@ -130,7 +130,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
           // Populating Migrated Fields (Will be overwritten when attachments change)
           setActionMigratedData({
-            type: entityData.migratedData?.types,
+            type: entityData.migratedData?.types ?? [],
             ghgsAffected: entityData.migratedData?.ghgsAffected,
             estimatedInvestment: entityData.migratedData?.totalInvestment,
             achievedReduction: entityData.migratedData?.achievedGHGReduction,
@@ -179,6 +179,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   useEffect(() => {
     if (actionMigratedData) {
+      console.log(actionMigratedData);
       form.setFieldsValue({
         type: actionMigratedData.type,
         ghgsAffected: actionMigratedData.ghgsAffected,
@@ -233,7 +234,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             programmeId: prg.programmeId,
             actionId: prg.action?.actionId,
             title: prg.title,
-            type: prg.migratedData?.types,
+            type: prg.migratedData[0]?.types,
             status: prg.programmeStatus,
             subSectorsAffected: prg.affectedSubSector,
             estimatedInvestment: prg.investment,
@@ -241,8 +242,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
           tempMigratedData.type = joinTwoArrays(
             tempMigratedData.type,
-            prg.migratedData?.types ?? []
+            prg.migratedData[0]?.types ?? []
           );
+
           tempMigratedData.natImplementer = joinTwoArrays(
             tempMigratedData.natImplementer,
             prg.natImplementor ?? []
@@ -255,8 +257,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           tempMigratedData.estimatedInvestment =
             tempMigratedData.estimatedInvestment + prg.investment ?? 0;
 
-          const prgGHGAchievement = prg.migratedData?.achievedGHGReduction;
-          const prgGHGExpected = prg.migratedData?.expectedGHGReduction;
+          const prgGHGAchievement = prg.migratedData[0]?.achievedGHGReduction;
+          const prgGHGExpected = prg.migratedData[0]?.expectedGHGReduction;
 
           tempMigratedData.achievedReduction =
             tempMigratedData.achievedReduction + prgGHGAchievement !== null ? prgGHGAchievement : 0;
@@ -563,7 +565,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   label={<label className="form-item-header">{t('typesTitle')}</label>}
                   name="type"
                 >
-                  <Input className="form-input-box" disabled />
+                  <Select
+                    size="large"
+                    style={{ fontSize: inputFontSize }}
+                    mode="multiple"
+                    disabled={true}
+                  ></Select>
                 </Form.Item>
               </Col>
               <Col span={12}>
