@@ -235,7 +235,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         payload.rst_documents.push({ title: file.title, data: file.data });
       });
 
-      const response = await post('national/activity/add', payload);
+      payload.achievedGHGReduction = parseFloat(payload.achievedGHGReduction);
+      payload.expectedGHGReduction = parseFloat(payload.expectedGHGReduction);
+
+      const response = await post('national/activities/add', payload);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
@@ -243,7 +246,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
-        navigate('/programmes');
+        navigate('/activities');
       }
     } catch (error: any) {
       console.log('Error in activity creation', error);
@@ -378,7 +381,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('activityStatusTitle')}</label>}
-                  name="activityStatus"
+                  name="status"
                   rules={[validation.required]}
                 >
                   <Select
@@ -664,7 +667,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={24}>
                 <Form.Item
                   label={<label className="form-item-header">{t('activityCommentsTitle')}</label>}
-                  name="comments"
+                  name="comment"
                   rules={[validation.required]}
                 >
                   <TextArea rows={3} disabled={isView} />
@@ -677,7 +680,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('achieved')}</label>}
-                  name="achievedReduct"
+                  name="achievedGHGReduction"
                   rules={[validation.required]}
                 >
                   <Input type="number" className="form-input-box" />
@@ -686,7 +689,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('expected')}</label>}
-                  name="expectedReduct"
+                  name="expectedGHGReduction"
                   rules={[validation.required]}
                 >
                   <Input type="number" className="form-input-box" />
