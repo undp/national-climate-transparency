@@ -56,16 +56,16 @@
 
       .title {
         font-family: 'MuseoSans';
-        font-size: 1.2rem;
+        font-size: 15px;
         color: $logo-text-color;
         font-weight: 700;
-        margin-right: 0.5rem;
+        margin-right: 5px;
       }
 
       .title-sub {
         font-weight: 100 !important;
         font-family: 'MuseoSans';
-        font-size: 1.2rem;
+        font-size: 15px;
         color: $logo-text-color;
       }
 
@@ -78,7 +78,7 @@
           height: auto;
           height: 78%;
           margin-top: 6px;
-          margin-right: 5px;
+          margin-right: 7px;
         }
       }
     }

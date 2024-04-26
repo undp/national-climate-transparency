@@ -104,25 +104,6 @@ const actionList = () => {
   const [attachedProgrammeIds, setAttachedProgrammeIds] = useState<string[]>([]);
   const [toBeAttached, setToBeAttached] = useState<string[]>([]);
 
-  // Attach Multiple Programmes for an Action
-
-  const attachProgrammes = async () => {
-    const payload = {
-      actionId: selectedActionId,
-      programmes: toBeAttached,
-    };
-    const response: any = await post('national/programmes/link', payload);
-    if (response.status === 200 || response.status === 201) {
-      message.open({
-        type: 'success',
-        content: t('programmeLinkSuccess'),
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-      navigate('/actions');
-    }
-  };
-
   // Free Prg Read from DB
 
   const getFreeProgrammeIds = async () => {
@@ -239,6 +220,34 @@ const actionList = () => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
       setLoading(false);
+    }
+  };
+
+  // Attach Multiple Programmes for an Action
+
+  const attachProgrammes = async () => {
+    const payload = {
+      actionId: selectedActionId,
+      programmes: toBeAttached,
+    };
+    const response: any = await post('national/programmes/link', payload);
+    if (response.status === 200 || response.status === 201) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      message.open({
+        type: 'success',
+        content: t('programmeLinkSuccess'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      getAllData();
     }
   };
 
@@ -386,9 +395,10 @@ const actionList = () => {
     {
       title: t('actionType'),
       width: 100,
-      dataIndex: 'actionType',
-      key: 'actionType',
-      sorter: false,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        return <ScrollableList listToShow={record.actionType}></ScrollableList>;
+      },
     },
     {
       title: t('sectorAffected'),
@@ -597,7 +607,7 @@ const actionList = () => {
                     navigate('/actions/add');
                   }}
                 >
-                  {t('Add Action')}
+                  {t('addAction')}
                 </Button>
               )}
             </div>

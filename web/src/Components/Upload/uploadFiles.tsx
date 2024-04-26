@@ -17,13 +17,13 @@ interface Props {
   buttonText: string;
   acceptedFiles: string;
   usedIn: 'create' | 'view' | 'update';
-  storedFiles: { id: number; title: string; url: string }[];
-  uploadedFiles: { id: string; title: string; data: string }[];
+  storedFiles: { key: string; title: string; url: string }[];
+  uploadedFiles: { key: string; title: string; data: string }[];
   setUploadedFiles: React.Dispatch<
-    React.SetStateAction<{ id: string; title: string; data: string }[]>
+    React.SetStateAction<{ key: string; title: string; data: string }[]>
   >;
-  removedFiles: number[];
-  setRemovedFiles: React.Dispatch<React.SetStateAction<number[]>>;
+  removedFiles: string[];
+  setRemovedFiles: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const UploadFileGrid: React.FC<Props> = ({
@@ -43,16 +43,16 @@ const UploadFileGrid: React.FC<Props> = ({
 
   const [documentList, setDocumentList] = useState<UploadFile[]>([]);
   const [storedVisibleList, setStoredVisibleList] = useState<
-    { id: number; title: string; url: string }[]
+    { key: string; title: string; url: string }[]
   >([]);
 
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
-  const [whichFile, setWhichFile] = useState<number>();
+  const [whichFile, setWhichFile] = useState<string>();
 
   // Hook to update the visible files shown after deleting
 
   useEffect(() => {
-    const toShow = storedFiles.filter((item) => !removedFiles.includes(item.id));
+    const toShow = storedFiles.filter((item) => !removedFiles.includes(item.key));
     setStoredVisibleList(toShow);
   }, [removedFiles, storedFiles]);
 
@@ -68,7 +68,7 @@ const UploadFileGrid: React.FC<Props> = ({
 
   const beforeUpload = async (file: RcFile): Promise<boolean> => {
     const base64 = await handleFileRead(file);
-    setUploadedFiles([...uploadedFiles, { id: file.uid, title: file.name, data: base64 }]);
+    setUploadedFiles([...uploadedFiles, { key: file.uid, title: file.name, data: base64 }]);
     return false;
   };
 
@@ -86,18 +86,18 @@ const UploadFileGrid: React.FC<Props> = ({
 
   // Delete function for stored files
 
-  const handleDeleteClick = (fileId: any) => {
+  const handleDeleteClick = (fileId: string) => {
     setConfirmOpen(true);
     setWhichFile(fileId);
   };
 
-  const handleStoredDelete = (fileId: any) => {
+  const handleStoredDelete = (fileId: string) => {
     setRemovedFiles((prevState) => [...prevState, fileId]);
   };
 
   // Download functionality for stored files
 
-  const handleDownloadClick = (file: { id: number; title: string; url: string }) => {
+  const handleDownloadClick = (file: { key: string; title: string; url: string }) => {
     const link = document.createElement('a');
     link.href = file.url;
     link.download = file.title;
@@ -111,7 +111,7 @@ const UploadFileGrid: React.FC<Props> = ({
 
   const handleUploadDelete = (fileId: any) => {
     setDocumentList((prevList) => prevList.filter((file) => file.uid !== fileId));
-    setUploadedFiles((prevList) => prevList.filter((file) => file.id !== fileId));
+    setUploadedFiles((prevList) => prevList.filter((file) => file.key !== fileId));
   };
 
   return (
@@ -133,8 +133,8 @@ const UploadFileGrid: React.FC<Props> = ({
       {/* Section to show the already uploaded files */}
       {storedVisibleList.length > 0 && (
         <Row gutter={[30, 10]} style={{ marginBottom: '25px' }}>
-          {storedVisibleList.map((file: any) => (
-            <Col key={file.id} span={8} className="file-column">
+          {storedVisibleList.map((file) => (
+            <Col key={file.key} span={8} className="file-column">
               {/* <Tooltip placement="topLeft" title={file.title} showArrow={false}> */}
               <Card className="file-card">
                 <div className="file-content">
@@ -148,7 +148,7 @@ const UploadFileGrid: React.FC<Props> = ({
                   {usedIn !== 'view' && (
                     <DeleteOutlined
                       className="delete-icon"
-                      onClick={() => handleDeleteClick(file.id)}
+                      onClick={() => handleDeleteClick(file.key)}
                     />
                   )}
                 </div>

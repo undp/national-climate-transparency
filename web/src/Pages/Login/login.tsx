@@ -34,7 +34,6 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
   const ability = useContext(AbilityContext);
   const { state } = useLocation();
   const [errorMsg, setErrorMsg] = useState<string>();
-  const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION || 'true';
 
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -90,160 +89,131 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (IsAuthenticated()) {
+      navigate('/dashboard');
+    }
+  }, []);
+
   const onClickForgotPassword = () => {
     navigate('/forgotPassword', { replace: true });
   };
 
   return (
     <Suspense fallback={<Spin />}>
-      <div className="login-container">
-        <Row>
-          <Col md={24} lg={15} flex="auto">
-            <div className="login-img-container container-image">
-              <div className="text-ctn">
-                <span>
-                  {t('login:nationalNdc')} <br /> {t('login:creditMrv')} <br />
-                  {t('login:management')}
-                </span>
+      {!IsAuthenticated() ? (
+        <div className="login-container">
+          <Row>
+            <Col md={24} lg={15} flex="auto">
+              <div className="login-img-container container-image">
+                <div className="text-ctn">
+                  <span>
+                    {t('login:nationalNdc')} <br /> {t('login:creditMrv')} <br />
+                    {t('login:management')}
+                  </span>
+                </div>
               </div>
-            </div>
-          </Col>
-          <Col md={24} lg={9} flex="auto">
-            <Row>
-              <Col lg={{ span: 18, offset: 4 }} md={{ span: 24 }} flex="auto">
-                <Row>
-                  <Col lg={{ span: 9, offset: 15 }} md={{ span: 24 }} flex="auto">
-                    <div className="login-country-logo">
-                      <img
-                        src={countryLogo}
-                        alt="country-logo"
-                        onClick={() => {
-                          navigate('/');
-                        }}
-                      />
-                    </div>
-                    <div className="login-country-name">
-                      <div className="title">
-                        {'TRANSPARENCY'}
-                        <span className="title-sub">{'SYSTEM'}</span>
+            </Col>
+            <Col md={24} lg={9} flex="auto">
+              <Row>
+                <Col lg={{ span: 18, offset: 4 }} md={{ span: 24 }} flex="auto">
+                  <Row>
+                    <Col lg={{ span: 9, offset: 15 }} md={{ span: 24 }} flex="auto">
+                      <div className="login-country-logo">
+                        <img
+                          src={countryLogo}
+                          alt="country-logo"
+                          onClick={() => {
+                            navigate('/');
+                          }}
+                        />
                       </div>
-
-                      <span className="country-name">
-                        {process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}
-                      </span>
-                    </div>
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
-            {forgotPassword ? (
-              <ForgotPassword />
-            ) : resetPassword ? (
-              <ResetPassword />
-            ) : (
-              <>
-                <Row>
-                  <Col lg={{ span: 18, offset: 3 }} md={24} flex="auto">
-                    <div className="login-text-contents">
-                      <span className="login-text-signin">
-                        {t('common:login')} <br />
-                        <span className="login-text-welcome">{t('login:welcome-back')}</span>
-                      </span>
-                    </div>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col lg={{ span: 18, offset: 3 }} md={{ span: 18 }} flex="fill">
-                    <div className="login-input-fields-container login-input-fields">
-                      <Form
-                        layout="vertical"
-                        onFinish={onSubmit}
-                        name="login-details"
-                        requiredMark={false}
-                      >
-                        <Form.Item
-                          name="email"
-                          label={`${t('common:email')}`}
-                          validateTrigger={'onSubmit'}
-                          rules={[
-                            ({ getFieldValue }) => ({
-                              validator() {
-                                if (
-                                  getFieldValue('email') &&
-                                  !getFieldValue('email')
-                                    ?.trim()
-                                    .match(
-                                      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                                    )
-                                ) {
-                                  return Promise.reject('Please enter a valid email');
-                                }
-                                return Promise.resolve();
-                              },
-                            }),
-                            {
-                              required: true,
-                              message: 'Email cannot be empty',
-                            },
-                          ]}
-                        >
-                          <div className="login-input-email">
-                            <Input type="username" />
-                          </div>
-                        </Form.Item>
-                        <Form.Item
-                          name="password"
-                          validateTrigger={'onSubmit'}
-                          label={`${t('common:pwd')}`}
-                          rules={[
-                            {
-                              required: true,
-                              message: 'Password cannot be empty',
-                            },
-                          ]}
-                        >
-                          <div className="login-input-password">
-                            <Input.Password type="password" />
-                          </div>
-                        </Form.Item>
-                        {showError && (
-                          <div className="login-error-message-container">
-                            <ExclamationCircleOutlined
-                              style={{
-                                color: 'rgba(255, 77, 79, 0.8)',
-                                marginRight: '0.5rem',
-                                fontSize: '1.1rem',
-                              }}
-                            />
-                            <span className="ant-form-item-explain-error">
-                              {errorMsg ? errorMsg : t('common:loginFailed')}
-                            </span>
-                          </div>
-                        )}
-                        <div className="login-forget-pwd-container">
-                          <span
-                            onClick={() => onClickForgotPassword()}
-                            className="login-forget-pwd-txt"
-                          >
-                            {t('login:forgot-pwd')}?
-                          </span>
+                      <div className="login-country-name">
+                        <div className="title">
+                          {'TRANSPARENCY'}
+                          <span className="title-sub">{'SYSTEM'}</span>
                         </div>
-                        <Form.Item>
-                          <div className="login-submit-btn-container">
-                            <Button
-                              type="primary"
-                              size="large"
-                              htmlType="submit"
-                              block
-                              loading={loading}
-                            >
-                              {t('common:login')}
-                            </Button>
-                          </div>
-                        </Form.Item>
-                        {isTokenExpired && !forgotPassword && !resetPassword && !showError && (
-                          <div className="logged-out-section">
-                            <div className="info-icon">
+
+                        <span className="country-name">
+                          {process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}
+                        </span>
+                      </div>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+              {forgotPassword ? (
+                <ForgotPassword />
+              ) : resetPassword ? (
+                <ResetPassword />
+              ) : (
+                <>
+                  <Row>
+                    <Col lg={{ span: 18, offset: 3 }} md={24} flex="auto">
+                      <div className="login-text-contents">
+                        <span className="login-text-signin">
+                          {t('common:login')} <br />
+                          <span className="login-text-welcome">{t('login:welcome-back')}</span>
+                        </span>
+                      </div>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col lg={{ span: 18, offset: 3 }} md={{ span: 18 }} flex="fill">
+                      <div className="login-input-fields-container login-input-fields">
+                        <Form
+                          layout="vertical"
+                          onFinish={onSubmit}
+                          name="login-details"
+                          requiredMark={false}
+                        >
+                          <Form.Item
+                            name="email"
+                            label={`${t('common:email')}`}
+                            validateTrigger={'onSubmit'}
+                            rules={[
+                              ({ getFieldValue }) => ({
+                                validator() {
+                                  if (
+                                    getFieldValue('email') &&
+                                    !getFieldValue('email')
+                                      ?.trim()
+                                      .match(
+                                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                                      )
+                                  ) {
+                                    return Promise.reject('Please enter a valid email');
+                                  }
+                                  return Promise.resolve();
+                                },
+                              }),
+                              {
+                                required: true,
+                                message: 'Email cannot be empty',
+                              },
+                            ]}
+                          >
+                            <div className="login-input-email">
+                              <Input type="username" />
+                            </div>
+                          </Form.Item>
+                          <Form.Item
+                            name="password"
+                            validateTrigger={'onSubmit'}
+                            label={`${t('common:pwd')}`}
+                            rules={[
+                              {
+                                required: true,
+                                message: 'Password cannot be empty',
+                              },
+                            ]}
+                          >
+                            <div className="login-input-password">
+                              <Input.Password type="password" />
+                            </div>
+                          </Form.Item>
+                          {showError && (
+                            <div className="login-error-message-container">
                               <ExclamationCircleOutlined
                                 style={{
                                   color: 'rgba(255, 77, 79, 0.8)',
@@ -251,12 +221,48 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                                   fontSize: '1.1rem',
                                 }}
                               />
+                              <span className="ant-form-item-explain-error">
+                                {errorMsg ? errorMsg : t('common:loginFailed')}
+                              </span>
                             </div>
-                            <div className="msg">{t('common:sessionExpiredErrorMsg')}</div>
+                          )}
+                          <div className="login-forget-pwd-container">
+                            <span
+                              onClick={() => onClickForgotPassword()}
+                              className="login-forget-pwd-txt"
+                            >
+                              {t('login:forgot-pwd')}?
+                            </span>
                           </div>
-                        )}
-                      </Form>
-                      {/* {enableRegistration === 'true' && (
+                          <Form.Item>
+                            <div className="login-submit-btn-container">
+                              <Button
+                                type="primary"
+                                size="large"
+                                htmlType="submit"
+                                block
+                                loading={loading}
+                              >
+                                {t('common:login')}
+                              </Button>
+                            </div>
+                          </Form.Item>
+                          {isTokenExpired && !forgotPassword && !resetPassword && !showError && (
+                            <div className="logged-out-section">
+                              <div className="info-icon">
+                                <ExclamationCircleOutlined
+                                  style={{
+                                    color: 'rgba(255, 77, 79, 0.8)',
+                                    marginRight: '0.5rem',
+                                    fontSize: '1.1rem',
+                                  }}
+                                />
+                              </div>
+                              <div className="msg">{t('common:sessionExpiredErrorMsg')}</div>
+                            </div>
+                          )}
+                        </Form>
+                        {/* {enableRegistration === 'true' && (
                         <div className="login-register-new-container">
                           <span className="login-register-new-txt">
                             {t('login:register-acc')}&nbsp;&nbsp;
@@ -269,53 +275,54 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                           </span>
                         </div>
                       )} */}
+                      </div>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <div className="login-language-selection-container">
+                      <span className="login-language-selection-txt">
+                        {t('common:language')}
+                        <span className="sep">{':'}</span>
+                        <Select
+                          placeholder="Search to Select"
+                          defaultValue={
+                            localStorage.getItem('i18nextLng') !== null
+                              ? localStorage.getItem('i18nextLng')
+                              : 'en'
+                          }
+                          placement="topRight"
+                          onChange={(lan: string) => handleLanguageChange(lan)}
+                          optionFilterProp="children"
+                          filterOption={(input, option) => (option?.label ?? '').includes(input)}
+                          filterSort={(optionA, optionB) =>
+                            (optionA?.label ?? '')
+                              .toLowerCase()
+                              .localeCompare((optionB?.label ?? '').toLowerCase())
+                          }
+                          options={[
+                            {
+                              value: 'en',
+                              label: 'English',
+                            },
+                            {
+                              value: 'es',
+                              label: 'Español',
+                            },
+                            {
+                              value: 'fr',
+                              label: 'Français',
+                            },
+                          ]}
+                        />
+                      </span>
                     </div>
-                  </Col>
-                </Row>
-                <Row>
-                  <div className="login-language-selection-container">
-                    <span className="login-language-selection-txt">
-                      {t('common:language')}
-                      <span className="sep">{':'}</span>
-                      <Select
-                        placeholder="Search to Select"
-                        defaultValue={
-                          localStorage.getItem('i18nextLng') !== null
-                            ? localStorage.getItem('i18nextLng')
-                            : 'en'
-                        }
-                        placement="topRight"
-                        onChange={(lan: string) => handleLanguageChange(lan)}
-                        optionFilterProp="children"
-                        filterOption={(input, option) => (option?.label ?? '').includes(input)}
-                        filterSort={(optionA, optionB) =>
-                          (optionA?.label ?? '')
-                            .toLowerCase()
-                            .localeCompare((optionB?.label ?? '').toLowerCase())
-                        }
-                        options={[
-                          {
-                            value: 'en',
-                            label: 'English',
-                          },
-                          {
-                            value: 'es',
-                            label: 'Español',
-                          },
-                          {
-                            value: 'fr',
-                            label: 'Français',
-                          },
-                        ]}
-                      />
-                    </span>
-                  </div>
-                </Row>
-              </>
-            )}
-          </Col>
-        </Row>
-      </div>
+                  </Row>
+                </>
+              )}
+            </Col>
+          </Row>
+        </div>
+      ) : null}
     </Suspense>
   );
 };
