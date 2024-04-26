@@ -1,6 +1,10 @@
 {
     "addActionTitle":"Add New Action",
     "addActionDesc":"Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    "viewActionTitle":"View Action",
+    "viewActionDesc":"Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    "editActionTitle":"Edit Action",
+    "editActionDesc":"Lorem ipsum dolor sit amet, consectetur adipiscing elit",
     "generalInfoTitle": "General Action Information",
     "programInfoTitle": "List of Programme under the Action",
     "kpiInfoTitle": "Other Programme KPI Value",
