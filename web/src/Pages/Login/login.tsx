@@ -34,7 +34,6 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
   const ability = useContext(AbilityContext);
   const { state } = useLocation();
   const [errorMsg, setErrorMsg] = useState<string>();
-  const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION || 'true';
 
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -87,6 +86,12 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
   useEffect(() => {
     if (localStorage.getItem('i18nextLng')!.length > 2) {
       i18next.changeLanguage('en');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (IsAuthenticated()) {
+      navigate('/dashboard');
     }
   }, []);
 
