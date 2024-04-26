@@ -18,6 +18,11 @@ import { ProgrammeEntity } from "../entities/programme.entity";
 import { QueryDto } from "../dtos/query.dto";
 import { FilterEntry } from "../dtos/filter.entry";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
+import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
+import { KpiService } from "../kpi/kpi.service";
+import { DocumentEntityDto } from "../dtos/document.entity.dto";
+import { KpiEntity } from "../entities/kpi.entity";
+import { KpiUpdateDto } from "../dtos/kpi.update.dto";
 
 describe('ActionService', () => {
 	let service: ActionService;
@@ -29,6 +34,7 @@ describe('ActionService', () => {
 	let fileUploadServiceMock: Partial<FileUploadService>;
 	let payloadValidatorMock: Partial<PayloadValidator>;
 	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
+	let kpiServiceMock: Partial<KpiService>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -37,6 +43,7 @@ describe('ActionService', () => {
 			transaction: jest.fn(),
 			save: jest.fn(),
 			query: jest.fn(),
+			remove: jest.fn(),
 
 		};
 		actionRepositoryMock = {
@@ -69,7 +76,10 @@ describe('ActionService', () => {
 
 		linkUnlinkServiceMock = {
 			linkProgrammesToAction: jest.fn(),
-		}
+		};
+		kpiServiceMock = {
+			findKpisByCreatorTypeAndCreatorId: jest.fn(),
+		};
 
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
@@ -105,6 +115,10 @@ describe('ActionService', () => {
 				{
 					provide: LinkUnlinkService,
 					useValue: linkUnlinkServiceMock,
+				},
+				{
+					provide: KpiService,
+					useValue: kpiServiceMock,
 				},
 			],
 		}).compile();
@@ -352,7 +366,7 @@ describe('ActionService', () => {
 		jest.spyOn(actionRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
 
 		// testing whether query method called correctly
-		const result = await service.getActionViewData('1', 'abilityCondition');
+		const result = await service.getActionViewData('1');
 		expect(actionRepositoryMock.createQueryBuilder).toHaveBeenCalledWith('action');
 		expect(actionRepositoryMock.createQueryBuilder().where).toHaveBeenCalledWith("action.actionId = :actionId", { "actionId": "1" });
 		expect(actionRepositoryMock.createQueryBuilder().leftJoinAndMapOne).toHaveBeenCalledTimes(1); // Assuming there are two left join queries
@@ -427,6 +441,256 @@ describe('ActionService', () => {
 		expect(actionRepositoryMock.createQueryBuilder().limit).toHaveBeenCalledTimes(0);
 		expect(actionRepositoryMock.createQueryBuilder().getManyAndCount).toHaveBeenCalled();
 	});
+
+	it('should update the action without documents', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const actionUpdateDto = new ActionUpdateDto();
+		actionUpdateDto.title = "test Updated";
+		actionUpdateDto.description = "test description Updated";
+		actionUpdateDto.objective = "test objective Updated";
+		actionUpdateDto.instrumentType = InstrumentType.ECONOMIC;
+		actionUpdateDto.status = ActionStatus.IMPLEMENTED;
+		actionUpdateDto.startYear = 2025;
+		actionUpdateDto.natAnchor = NatAnchor.OTHER;
+
+		const actionDto = new ActionDto();
+		actionDto.title = "test";
+		actionDto.description = "test description";
+		actionDto.objective = "test objective";
+		actionDto.instrumentType = InstrumentType.POLICY;
+		actionDto.status = ActionStatus.PLANNED;
+		actionDto.startYear = 2024;
+		actionDto.natAnchor = NatAnchor.NDC;
+
+		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(new ActionEntity());
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(actionUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			expect(emMock.save).toHaveBeenNthCalledWith(1, actionUpdateDto);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedAction;
+		});
+
+		const result = await service.updateAction(actionUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	})
+
+	it('should remove the action documents when user remove the documents', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const actionUpdateDto = new ActionUpdateDto();
+		actionUpdateDto.title = "test Updated";
+		actionUpdateDto.description = "test description Updated";
+		actionUpdateDto.objective = "test objective Updated";
+		actionUpdateDto.instrumentType = InstrumentType.ECONOMIC;
+		actionUpdateDto.status = ActionStatus.IMPLEMENTED;
+		actionUpdateDto.startYear = 2025;
+		actionUpdateDto.natAnchor = NatAnchor.OTHER;
+		actionUpdateDto.removedDocuments = ["www.test.com/doc1"];
+
+		const actionUpdateEntity = new ActionEntity();
+		actionUpdateEntity.title = "test Updated";
+		actionUpdateEntity.description = "test description Updated";
+		actionUpdateEntity.objective = "test objective Updated";
+		actionUpdateEntity.instrumentType = InstrumentType.ECONOMIC;
+		actionUpdateEntity.status = ActionStatus.IMPLEMENTED;
+		actionUpdateEntity.startYear = 2025;
+		actionUpdateEntity.natAnchor = NatAnchor.OTHER;
+		actionUpdateEntity.documents = null;
+
+		const documentDto = new DocumentEntityDto();
+		documentDto.url = "www.test.com/doc1";
+		documentDto.title = "doc title"
+
+		const actionEntity = new ActionEntity();
+		actionEntity.title = "test";
+		actionEntity.description = "test description";
+		actionEntity.objective = "test objective";
+		actionEntity.instrumentType = InstrumentType.POLICY;
+		actionEntity.status = ActionStatus.PLANNED;
+		actionEntity.startYear = 2024;
+		actionEntity.natAnchor = NatAnchor.NDC;
+		actionEntity.documents = [documentDto];
+
+
+		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(actionUpdateEntity),
+				remove: jest.fn().mockResolvedValueOnce(actionUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			// expect(emMock.save).toHaveBeenNthCalledWith(1, actionUpdateEntity);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			// expect(emMock.remove).toHaveBeenCalledTimes(1);
+			return savedAction;
+		});
+
+		const result = await service.updateAction(actionUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	})
+
+	it('should update the documents in action when user add new documents', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const documentDto = new DocumentEntityDto();
+		documentDto.url = "www.test.com/doc1";
+		documentDto.title = "doc title"
+
+		const addedDocumentDto = new DocumentDto();
+		addedDocumentDto.data = documentData;
+		addedDocumentDto.title = "doc title"
+
+		const actionUpdateDto = new ActionUpdateDto();
+		actionUpdateDto.title = "test Updated";
+		actionUpdateDto.description = "test description Updated";
+		actionUpdateDto.objective = "test objective Updated";
+		actionUpdateDto.instrumentType = InstrumentType.ECONOMIC;
+		actionUpdateDto.status = ActionStatus.IMPLEMENTED;
+		actionUpdateDto.startYear = 2025;
+		actionUpdateDto.natAnchor = NatAnchor.OTHER;
+		actionUpdateDto.newDocuments = [addedDocumentDto]
+
+		const actionUpdateEntity = new ActionEntity();
+		actionUpdateEntity.title = "test Updated";
+		actionUpdateEntity.description = "test description Updated";
+		actionUpdateEntity.objective = "test objective Updated";
+		actionUpdateEntity.instrumentType = InstrumentType.ECONOMIC;
+		actionUpdateEntity.status = ActionStatus.IMPLEMENTED;
+		actionUpdateEntity.startYear = 2025;
+		actionUpdateEntity.natAnchor = NatAnchor.OTHER;
+		actionUpdateEntity.documents = [documentDto, addedDocumentDto];
+
+		const actionEntity = new ActionEntity();
+		actionEntity.title = "test";
+		actionEntity.description = "test description";
+		actionEntity.objective = "test objective";
+		actionEntity.instrumentType = InstrumentType.POLICY;
+		actionEntity.status = ActionStatus.PLANNED;
+		actionEntity.startYear = 2024;
+		actionEntity.natAnchor = NatAnchor.NDC;
+		actionEntity.documents = [documentDto];
+
+
+		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(actionUpdateEntity),
+				remove: jest.fn().mockResolvedValueOnce(actionUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			// expect(emMock.save).toHaveBeenNthCalledWith(1, actionUpdateEntity);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			// expect(emMock.remove).toHaveBeenCalledTimes(1);
+			return savedAction;
+		});
+
+		const result = await service.updateAction(actionUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	})
+
+	it('should update kpis in action when user updated the Kpis', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const kpiDto1 = new KpiEntity();
+		kpiDto1.kpiId = 1;
+		kpiDto1.name = "KPI 1";
+		kpiDto1.creatorType = "action";
+		kpiDto1.expected = 100;
+
+		const kpiDto2 = new KpiEntity();
+		kpiDto2.kpiId = 2;
+		kpiDto2.name = "KPI 2";
+		kpiDto2.creatorType = "action";
+		kpiDto2.expected = 100;
+
+		const kpiAdded = new KpiUpdateDto();
+		kpiDto2.name = "KPI Added";
+		kpiDto2.creatorType = "action";
+		kpiDto2.expected = 300;
+
+		const actionUpdateDto = new ActionUpdateDto();
+		actionUpdateDto.title = "test Updated";
+		actionUpdateDto.description = "test description Updated";
+		actionUpdateDto.objective = "test objective Updated";
+		actionUpdateDto.instrumentType = InstrumentType.ECONOMIC;
+		actionUpdateDto.status = ActionStatus.IMPLEMENTED;
+		actionUpdateDto.startYear = 2025;
+		actionUpdateDto.natAnchor = NatAnchor.OTHER;
+		actionUpdateDto.kpis = [kpiDto1, kpiAdded]
+
+		const actionUpdateEntity = new ActionEntity();
+		actionUpdateEntity.title = "test Updated";
+		actionUpdateEntity.description = "test description Updated";
+		actionUpdateEntity.objective = "test objective Updated";
+		actionUpdateEntity.instrumentType = InstrumentType.ECONOMIC;
+		actionUpdateEntity.status = ActionStatus.IMPLEMENTED;
+		actionUpdateEntity.startYear = 2025;
+		actionUpdateEntity.natAnchor = NatAnchor.OTHER;
+
+		const actionEntity = new ActionEntity();
+		actionEntity.title = "test";
+		actionEntity.description = "test description";
+		actionEntity.objective = "test objective";
+		actionEntity.instrumentType = InstrumentType.POLICY;
+		actionEntity.status = ActionStatus.PLANNED;
+		actionEntity.startYear = 2024;
+		actionEntity.natAnchor = NatAnchor.NDC;
+
+
+		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
+		jest.spyOn(kpiServiceMock, 'findKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2])
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(actionUpdateEntity),
+				remove: jest.fn().mockResolvedValueOnce(actionUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			// expect(emMock.save).toHaveBeenNthCalledWith(1, actionUpdateEntity);
+			expect(emMock.save).toHaveBeenCalledTimes(5);
+			expect(emMock.remove).toHaveBeenCalledTimes(1);
+			return savedAction;
+		});
+
+		const result = await service.updateAction(actionUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	})
+
 
 
 });

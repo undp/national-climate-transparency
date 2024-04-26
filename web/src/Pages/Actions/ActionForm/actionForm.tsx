@@ -100,16 +100,7 @@ const actionForm: React.FC<Props> = ({ method }) => {
 
     const fetchFreeProgrammes = async () => {
       if (method !== 'view') {
-        const payload = {
-          page: 1,
-          size: 100,
-          // Add the Filtering here
-          sort: {
-            key: 'programmeId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/programmes/query', payload);
+        const response: any = await get('national/programmes/link/eligible');
 
         const freeProgrammeIds: string[] = [];
         response.data.forEach((prg: any) => {
@@ -184,11 +175,13 @@ const actionForm: React.FC<Props> = ({ method }) => {
         expectedReduct: actionData.migratedData.expectedReduct,
       });
 
-      const tempFiles: { id: number; title: string; url: string }[] = [];
-      actionData.documents.forEach((document: any) => {
-        tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
-      });
-      setStoredFiles(tempFiles);
+      if (actionData.documents?.length > 0) {
+        const tempFiles: { id: number; title: string; url: string }[] = [];
+        actionData.documents.forEach((document: any) => {
+          tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
+        });
+        setStoredFiles(tempFiles);
+      }
     }
   }, [actionData]);
 

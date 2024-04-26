@@ -1,18 +1,10 @@
-import { useTranslation } from 'react-i18next';
-import { MrvDashboardComponent } from '../../Components/Dashboard/mrvDashboardViewComponent';
-import { Link } from 'react-router-dom';
-import Chart from 'react-apexcharts';
-import ButtonGroup from 'antd/lib/button/button-group';
-
 const Dashboard = () => {
-  const { t } = useTranslation(['dashboard']);
   return (
-    <MrvDashboardComponent
-      Link={Link}
-      Chart={Chart}
-      t={t}
-      ButtonGroup={ButtonGroup}
-    ></MrvDashboardComponent>
+    <div className="content-container">
+      <div className="title-bar">
+        <div className="body-title">{'MRV Dashboard WIP'}</div>
+      </div>{' '}
+    </div>
   );
 };
 

@@ -3,6 +3,7 @@ import { ArrayMinSize, IsArray, IsEmail, IsEnum, isNotEmpty, IsNotEmpty, IsNumbe
 import { Role, SubRole } from "../casl/role.enum";
 import { UserState } from "src/enums/user.state.enum";
 import { Sector } from "src/enums/sector.enum";
+import { Organisation } from "src/enums/organisation.enum";
 
 export class UserUpdateDto {
 
@@ -54,6 +55,13 @@ export class UserUpdateDto {
 			enum: Object.values(Sector),
 		})
 		sector: Sector[];
+
+		@IsOptional()
+		@ApiProperty({ enum: Organisation })
+		@IsEnum(Organisation, {
+			message: "Invalid organisation. Supported following Organisations:" + Object.values(Organisation),
+		})
+		organisation: Organisation;
 
     @IsString()
     @IsOptional()

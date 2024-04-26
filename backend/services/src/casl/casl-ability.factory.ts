@@ -14,8 +14,8 @@ import { EntitySubject } from "../entities/entity.subject";
 import { Organisation } from "../entities/organisation.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
-import { ProjectEntity } from "src/entities/project.entity";
-import { ActivityEntity } from "src/entities/activity.entity";
+import { ProjectEntity } from "../entities/project.entity";
+import { ActivityEntity } from "../entities/activity.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 

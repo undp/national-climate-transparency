@@ -25,6 +25,7 @@ import { ProgrammeViewDto } from "../dtos/programme.view.dto";
 import { ActivityEntity } from "../entities/activity.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
+import { ProgrammeViewEntity } from "src/entities/programme.view.entity";
 
 @Injectable()
 export class ProgrammeService {
@@ -119,15 +120,6 @@ export class ProgrammeService {
 					if (projects && projects.length > 0) {
 						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programmeDto, user, em);
 					}
-
-					// if (programmeDto.linkedProjects) {
-					// 	await this.projectService.linkProjectsToProgramme({
-					// 		programmeId: savedProgramme.programmeId,
-					// 		projectIds: programmeDto.linkedProjects
-
-					// 	}, user)
-					// }
-
 				}
 				return savedProgramme;
 			})
@@ -192,6 +184,12 @@ export class ProgrammeService {
 			)
 			.leftJoinAndSelect("programme.action", "action")
 			.leftJoinAndSelect("programme.projects", "projects")
+			.leftJoinAndMapMany(
+				"programme.migratedData",
+				ProgrammeViewEntity,
+				"programmeViewEntity",
+				"programmeViewEntity.id = programme.programmeId"
+			)
 			.orderBy(
 				query?.sort?.key ? `"programme"."${query?.sort?.key}"` : `"programme"."programmeId"`,
 				query?.sort?.order ? query?.sort?.order : "DESC"

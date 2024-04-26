@@ -7,6 +7,8 @@ import { ProjectEntity } from "../entities/project.entity";
 import { User } from "../entities/user.entity";
 import { LogEventType, EntityType } from "../enums/shared.enum";
 import { EntityManager } from "typeorm";
+import { LinkActivitiesDto } from "src/dtos/link.activities.dto";
+import { UnlinkActivitiesDto } from "src/dtos/unlink.activities.dto";
 
 @Injectable()
 export class LinkUnlinkService {
@@ -29,9 +31,6 @@ export class LinkUnlinkService {
 						if (programme.activities && programme.activities.length > 0) {
 							// update each activity's path that are directly linked to the programme
 							for (const activity of programme.activities) {
-								// const parts = activity.path.split(".");
-								// const partOne = parts[0].replace("_", action.actionId);
-								// activity.path = [partOne, parts[1], parts[2]].join(".");
 								activity.path = this.addActionToActivityPath(activity.path, action.actionId)
 								await em.save<ActivityEntity>(activity);
 							}
@@ -39,18 +38,12 @@ export class LinkUnlinkService {
 						if (programme.projects && programme.projects.length > 0) {
 							for (const project of programme.projects) {
 								// update project's path
-								// const parts = project.path.split(".");
-								// const partOne = parts[0].replace("_", action.actionId);
-								// project.path = [partOne, parts[1]].join(".");
 								project.path = this.addActionToProjectPath(project.path, action.actionId);
 								await em.save<ProjectEntity>(project);
 
 								// update each activity's path that are linked to the project
 								if (project.activities && project.activities.length > 0) {
 									for (const activity of project.activities) {
-										// const parts = activity.path.split(".");
-										// const partOne = parts[0].replace("_", action.actionId);
-										// activity.path = [partOne, parts[1], parts[2]].join(".");
 										activity.path = this.addActionToActivityPath(activity.path, action.actionId)
 										await em.save<ActivityEntity>(activity);
 									}
@@ -134,12 +127,14 @@ export class LinkUnlinkService {
 				for (const project of projects) {
 					project.programme = programme;
 					project.path = this.addProgrammeToProjectPath(project.path, programme.programmeId);
+					project.sectors = programme.affectedSectors;
 					const linkedProject = await em.save<ProjectEntity>(project);
 
 					if (linkedProject) {
 						if (project.activities && project.activities.length > 0) {
 							for (const activity of project.activities) {
 								activity.path = this.addProgrammeToActivityPath(activity.path, programme.programmeId);
+								activity.sectors = programme.affectedSectors;
 								await em.save<ActivityEntity>(activity);
 							}
 						}
@@ -163,12 +158,14 @@ export class LinkUnlinkService {
 				for (const project of projects) {
 					project.programme = null;
 					project.path = `_._`;
+					project.sectors = null;
 					const unLinkedProgramme = await em.save<ProjectEntity>(project);
 
 					if (unLinkedProgramme) {
 						if (project.activities && project.activities.length > 0) {
 							for (const activity of project.activities) {
 								activity.path = `_._.${project.projectId}`
+								activity.sectors = null;
 								await em.save<ActivityEntity>(activity);
 							}
 						}
@@ -184,6 +181,105 @@ export class LinkUnlinkService {
 					}
 				}
 			});
+	}
+
+	async linkActivitiesToParent(
+		parentEntity: any,
+		activities: ActivityEntity[],
+		linkActivitiesDto: LinkActivitiesDto,
+		user: User,
+		entityManager: EntityManager
+	) {
+		const act = await entityManager
+			.transaction(async (em) => {
+				for (const activity of activities) {
+					let logEventType;
+					switch (linkActivitiesDto.parentType) {
+						case EntityType.ACTION: {
+							activity.path = `${linkActivitiesDto.parentId}._._`;
+							logEventType = LogEventType.LINKED_TO_ACTION;
+							activity.sectors = parentEntity?.migratedData?.sectorsAffected;
+							break;
+						}
+						case EntityType.PROGRAMME: {
+							activity.path = parentEntity.path ? `${parentEntity.path}.${linkActivitiesDto.parentId}._` : `_.${linkActivitiesDto.parentId}._`;
+							logEventType = LogEventType.LINKED_TO_PROGRAMME;
+							activity.sectors = parentEntity?.affectedSectors;
+							break;
+						}
+						case EntityType.PROJECT: {
+							activity.path = parentEntity.path ? `${parentEntity.path}.${linkActivitiesDto.parentId}` : `_._.${linkActivitiesDto.parentId}`;
+							logEventType = LogEventType.LINKED_TO_PROJECT;
+							activity.sectors = parentEntity?.sectors;
+							break;
+						}
+					}
+					activity.parentId = linkActivitiesDto.parentId;
+					activity.parentType = linkActivitiesDto.parentType;
+
+					const linkedActivity = await em.save<ActivityEntity>(activity);
+
+					if (linkedActivity) {
+						await em.save<LogEntity>(
+							this.buildLogEntity(
+								logEventType,
+								EntityType.ACTIVITY,
+								activity.activityId,
+								user.id,
+								linkActivitiesDto
+							)
+						);
+					}
+				}
+			});
+
+	}
+
+	async unlinkActivitiesFromParent(
+		activities: ActivityEntity[],
+		unlinkActivitiesDto: UnlinkActivitiesDto,
+		user: User,
+		entityManager: EntityManager
+	) {
+		const act = await entityManager
+			.transaction(async (em) => {
+				for (const activity of activities) {
+					let logEventType;
+					switch (activity.parentType) {
+						case EntityType.ACTION: {
+							logEventType = LogEventType.UNLINKED_FROM_ACTION;
+							break;
+						}
+						case EntityType.PROGRAMME: {
+							logEventType = LogEventType.UNLINKED_FROM_PROGRAMME;
+							break;
+						}
+						case EntityType.PROJECT: {
+							logEventType = LogEventType.UNLINKED_FROM_PROJECT;
+							break;
+						}
+					}
+					activity.parentId = null;
+					activity.parentType = null;
+					activity.path = '_._._';
+					activity.sectors = null;
+
+					const unlinkedActivity = await em.save<ActivityEntity>(activity);
+
+					if (unlinkedActivity) {
+						await em.save<LogEntity>(
+							this.buildLogEntity(
+								logEventType,
+								EntityType.ACTIVITY,
+								activity.activityId,
+								user.id,
+								unlinkActivitiesDto
+							)
+						);
+					}
+				}
+			});
+
 	}
 
 	addActionToActivityPath(currentActivityPath: string, actionId: string) {

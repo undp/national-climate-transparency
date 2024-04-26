@@ -12,6 +12,7 @@ import { NatImplementor } from "../enums/shared.enum";
 import { ActionEntity } from "./action.entity";
 import { ProjectEntity } from "./project.entity";
 import { ActivityEntity } from "./activity.entity";
+import { ProgrammeStatus } from "../enums/programme-status.enum";
 
 @Entity("programme")
 export class ProgrammeEntity {
@@ -41,6 +42,9 @@ export class ProgrammeEntity {
 
   @Column({nullable: false, type: 'double precision' })
   investment: number;
+
+	@Column({ type: "enum", enum: ProgrammeStatus })
+  programmeStatus: string;
 
   @Column({ type: 'jsonb', nullable: true })
   documents: any;

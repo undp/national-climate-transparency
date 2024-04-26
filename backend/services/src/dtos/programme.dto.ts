@@ -1,9 +1,10 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max} from 'class-validator';
 import { Sector } from "../enums/sector.enum";
 import { SubSector, NatImplementor } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { KpiDto } from "./kpi.dto";
+import { ProgrammeStatus } from "../enums/programme-status.enum";
 
 export class ProgrammeDto {
 
@@ -77,27 +78,61 @@ export class ProgrammeDto {
     @IsNumber()
     @ApiProperty()
     investment: number;
+
+		@IsNotEmpty()
+    @IsEnum(ProgrammeStatus, {
+			each: true,
+			message: 'Invalid Programme Status. Supported following status:' + Object.values(ProgrammeStatus)
+	})
+	@ApiProperty({
+		type: [String],
+		enum: Object.values(ProgrammeStatus),
+	})
+	programmeStatus: number;
   
     @IsOptional()
-    @ApiProperty()
+		@ApiPropertyOptional(
+			{
+				type: "array",
+				example: [{
+					title: "document 1",
+					data: "base64 document string"
+				}],
+				items: {
+					$ref: getSchemaPath(DocumentDto),
+				},
+			}
+		)
     documents: DocumentDto[];
   
     @IsOptional()
-    @ApiProperty()
+    @ApiPropertyOptional()
     @IsString()
     comments: string;
   
     // path: string;
 
     @IsOptional()
-    @ApiProperty()
+    @ApiPropertyOptional()
     actionId?: string;
 
     @IsOptional()
-    @ApiProperty()
+    @ApiPropertyOptional()
     linkedProjects: string[];
 
     @IsOptional()
-    @ApiProperty()
+		@ApiPropertyOptional(
+			{
+				type: "array",
+				example: [{
+					name: "KPI 1",
+					creatorType: "programme",
+					expected: 100
+			}],
+				items: {
+					$ref: getSchemaPath(KpiDto),
+				},
+			}
+		)
     kpis: KpiDto[];
 }

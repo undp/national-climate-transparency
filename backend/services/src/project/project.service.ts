@@ -45,6 +45,23 @@ export class ProjectService {
 
 		project.projectId = 'J' + await this.counterService.incrementCount(CounterType.PROJECT, 3);
 
+		if (projectDto.programmeId) {
+			const programme = await this.programmeService.findProgrammeById(projectDto.programmeId);
+			if (!programme) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.programmeNotFound",
+						[projectDto.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+			project.programme = programme;
+			project.path = `${programme.path}.${programme.programmeId}`;
+			this.addEventLogEntry(eventLog, LogEventType.PROJECT_LINKED, EntityType.PROGRAMME, programme.programmeId, user.id, project.projectId);
+			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, programme.programmeId);
+		}
+
 		// upload the documents and create the doc array here
 		if (projectDto.documents) {
 			const documents = [];
@@ -76,23 +93,6 @@ export class ProjectService {
 		}
 
 		project.path = "";
-
-		if (projectDto.programmeId) {
-			const programme = await this.programmeService.findProgrammeById(projectDto.programmeId);
-			if (!programme) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"project.programmeNotFound",
-						[projectDto.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
-			project.programme = programme;
-			project.path = `${programme.path}.${programme.programmeId}`;
-			this.addEventLogEntry(eventLog, LogEventType.PROJECT_LINKED, EntityType.PROGRAMME, programme.programmeId, user.id, project.projectId);
-			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, programme.programmeId);
-		}
 
 		const proj = await this.entityManager
 			.transaction(async (em) => {

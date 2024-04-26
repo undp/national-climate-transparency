@@ -351,7 +351,7 @@ body {
   width: 100%;
 
   .action-bar {
-    padding: 1.6rem 1.3rem 1.6rem 1.3rem;
+    padding: 25px;
 
     button {
       width: fit-content;
@@ -359,7 +359,7 @@ body {
   }
 
   .filter-section {
-    padding: 1.4rem 1.3rem 1.6rem 1.3rem;
+    padding: 25px;
     display: flex;
     width: 100%;
     flex-direction: row;
@@ -374,12 +374,8 @@ body {
     .filter-bar {
       display: flex;
       flex-direction: row-reverse;
-      margin-top: 0.3rem;
+      margin: 0px;
       width: 5%;
-    }
-
-    .ant-input-affix-wrapper {
-      // border-radius: 0.313rem 0 0 0.313rem;
     }
 
     .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button {
@@ -418,7 +414,7 @@ body {
 }
 
 .ant-dropdown-menu {
-  padding: 1rem 2rem 1rem 1rem !important;
+  padding: 1rem 1rem 1rem 1rem !important;
   border-radius: 5px;
 }
 

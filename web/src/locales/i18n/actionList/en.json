@@ -11,5 +11,13 @@
   "financeNeeded": "Finance Needed (USD)",
   "financeReceived": "Finance Received (USD)",
   "actionStatus": "Action Status",
-  "nationalImplementingEntity": "National Implementing Entity(s)"
+  "nationalImplementingEntity": "National Implementing Entity(s)",
+  "validationStatus": "Validation Status",
+  "filterByActionStatus": "Filter By Action Status",
+  "filterByValidationStatus": "Filter By Validation Status",
+  "attachProgramme": "Attach Programme",
+  "attach" : "Attach",
+  "programmeList" : "Programme List",
+  "cancel": "Cancel",
+  "programmeLinkSuccess": "Programme/s Linked Successfully"
 }

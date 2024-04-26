@@ -27,6 +27,7 @@ services:
       dockerfile: ./backend/services/Dockerfile
     depends_on:
       - dbmrv
+      - national
     command: ['yarn', 'migration:run']
     environment:
       DB_HOST: dbmrv

@@ -124,33 +124,18 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
 
     // Initially Loading Free Projects that can be attached
 
-    // const fetchFreeProjects = async () => {
-    //   if (method !== 'view') {
-    //     const payload = {
-    //       page: 1,
-    //       size: 100,
-    //       // Add the Filtering here
-    //       sort: {
-    //         key: 'projectId',
-    //         order: 'ASC',
-    //       },
-    //     };
-    //     const response: any = await post('national/projects/query', payload);
+    const fetchFreeProjects = async () => {
+      if (method !== 'view') {
+        const response: any = await get('national/projects/link/eligible');
 
-    //     const freeProjectIds: string[] = [];
-    //     response.data.forEach((prg: any) => {
-    //       freeProjectIds.push(prg.programmeId);
-    //     });
-    //     setAllProjectIdList(freeProjectIds);
-    //   }
-    // };
-    // fetchFreeProjects();
-
-    const projIds: string[] = [];
-    for (let i = 0; i < 15; i++) {
-      projIds.push(`J00${i}`);
-    }
-    setAllProjectIdList(projIds);
+        const freeProjectIds: string[] = [];
+        response.data.forEach((prj: any) => {
+          freeProjectIds.push(prj.projectId);
+        });
+        setAllProjectIdList(freeProjectIds);
+      }
+    };
+    fetchFreeProjects();
 
     // Initially Loading the underlying programme data when not in create mode
 
@@ -220,11 +205,13 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
         // expectedReduct: programmeData.migratedData.expectedReduct,
       });
 
-      const tempFiles: { id: number; title: string; url: string }[] = [];
-      programmeData.documents.forEach((document: any) => {
-        tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
-      });
-      setStoredFiles(tempFiles);
+      if (programmeData.documents?.length > 0) {
+        const tempFiles: { id: number; title: string; url: string }[] = [];
+        programmeData.documents.forEach((document: any) => {
+          tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
+        });
+        setStoredFiles(tempFiles);
+      }
     }
   }, [programmeData]);
 
@@ -537,7 +524,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('progStatusTitle')}</label>}
-                  name="status"
+                  name="programmeStatus"
                   rules={[validation.required]}
                 >
                   <Select
