@@ -26,6 +26,7 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ProgrammeViewEntity } from "src/entities/programme.view.entity";
+import { ProgrammeUpdateDto } from "src/dtos/programmeUpdate.dto";
 
 @Injectable()
 export class ProgrammeService {
@@ -205,6 +206,19 @@ export class ProgrammeService {
 		return new DataListResponseDto(
 			resp.length > 0 ? resp[0] : undefined,
 			resp.length > 1 ? resp[1] : undefined
+		);
+	}
+
+	async updateProgramme(programmeUpdateDto: ProgrammeUpdateDto, user: User) {
+		const programmeUpdate: ProgrammeEntity = plainToClass(ProgrammeEntity, programmeUpdateDto);
+		const eventLog = [];
+
+		// await this.helperService.refreshMaterializedViews(this.entityManager);
+
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("action.updateActionSuccess", []),
+			"Success"
 		);
 	}
 

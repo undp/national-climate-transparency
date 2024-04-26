@@ -6,6 +6,7 @@ import {
     Body,
     Get,
     Param,
+    Put,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -18,6 +19,7 @@ import { ProgrammeEntity } from "src/entities/programme.entity";
 import { LinkProgrammesDto } from "src/dtos/link.programmes.dto";
 import { UnlinkProgrammesDto } from "src/dtos/unlink.programmes.dto";
 import { QueryDto } from "../dtos/query.dto";
+import { ProgrammeUpdateDto } from "src/dtos/programmeUpdate.dto";
 
 @ApiTags("Programmes")
 @ApiBearerAuth()
@@ -48,6 +50,14 @@ export class ProgrammeController {
     @Get('/:id')
     getProgrammeViewData(@Param('id') id: string, @Request() req) {
       return this.programmeService.getProgrammeViewData(id, req.abilityCondition);
+    }
+
+    @ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeEntity))
+    @Put("update")
+    updateProgramme(@Body() programmeUpdateDto: ProgrammeUpdateDto, @Request() req) {
+      return this.programmeService.updateProgramme(programmeUpdateDto, req.user);
     }
 
 		@ApiBearerAuth()
