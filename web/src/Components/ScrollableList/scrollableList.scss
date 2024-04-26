@@ -1,0 +1,34 @@
+.scrollable-list {
+  max-height: 100px;
+  overflow-y: auto;
+
+  // WebKit-based browsers
+  &::-webkit-scrollbar {
+      display: none;
+  }
+
+  // Firefox
+  scrollbar-width: none;
+
+  // IE and Edge
+  -ms-overflow-style: none;
+  .list-item {
+    height: 25px;
+    font-size: 12px;
+  }
+}
+
+.table-partial-width-tag {
+  max-width: 130px;
+  color: #605c66;
+  margin: 0px;
+  border-radius: 5px !important;
+}
+
+.table-full-width-tag {
+  width: 130px;
+  color: #605c66;
+  margin: 0px;
+  border-radius: 5px !important;
+}
+
