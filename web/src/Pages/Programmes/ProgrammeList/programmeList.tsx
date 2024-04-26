@@ -33,6 +33,7 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import { ProgrammeEntity } from '../../../Entities/programme';
 import { Layers } from 'react-bootstrap-icons';
+import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 
 interface Item {
   key: number;
@@ -402,16 +403,10 @@ const programmeList = () => {
       title: t('subSectorAffected'),
       sorter: false,
       align: 'center' as const,
-      width: 250,
+      width: 150,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
-        return (
-          <div>
-            {record.subSectorsAffected.map((item: string, index: number) => (
-              <div key={index}>{item}</div>
-            ))}
-          </div>
-        );
+        return <ScrollableList listToShow={record.subSectorsAffected}></ScrollableList>;
       },
     },
     {
