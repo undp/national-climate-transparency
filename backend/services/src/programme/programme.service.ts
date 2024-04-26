@@ -27,6 +27,7 @@ import { ProjectEntity } from "../entities/project.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ProgrammeViewEntity } from "src/entities/programme.view.entity";
 import { ProgrammeUpdateDto } from "src/dtos/programmeUpdate.dto";
+import { KpiService } from "src/kpi/kpi.service";
 
 @Injectable()
 export class ProgrammeService {
@@ -40,7 +41,7 @@ export class ProgrammeService {
 		private fileUploadService: FileUploadService,
 		private payloadValidator: PayloadValidator,
 		private linkUnlinkService: LinkUnlinkService,
-
+		private kpiService: KpiService
 	) { }
 
 	async createProgramme(programmeDto: ProgrammeDto, user: User) {
@@ -213,12 +214,135 @@ export class ProgrammeService {
 		const programmeUpdate: ProgrammeEntity = plainToClass(ProgrammeEntity, programmeUpdateDto);
 		const eventLog = [];
 
-		// await this.helperService.refreshMaterializedViews(this.entityManager);
+		const currentProgramme = await this.findProgrammeById(programmeUpdateDto.programmeId);
+		if (!currentProgramme) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeNotFound",
+					[programmeUpdateDto.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		// Document update resolve
+
+		if (programmeUpdateDto.removedDocuments && programmeUpdateDto.removedDocuments.length > 0) {
+			if (currentProgramme.documents && currentProgramme.documents.length > 0) {
+				const updatedDocs = currentProgramme.documents.filter(item => !programmeUpdateDto.removedDocuments.some(url => url === item.url));
+				programmeUpdate.documents = (updatedDocs && updatedDocs.length > 0) ? updatedDocs : null;
+			} else {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.noDocumentsFound",
+						[programmeUpdateDto.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+		}
+
+		if (programmeUpdateDto.newDocuments) {
+			const documents = [];
+			for (const documentItem of programmeUpdateDto.newDocuments) {
+				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.PROGRAMME);
+				const docEntity = new DocumentEntityDto();
+				docEntity.title = documentItem.title;
+				docEntity.url = response;
+				docEntity.createdTime = new Date().getTime();
+				documents.push(docEntity)
+			};
+			programmeUpdate.documents = (programmeUpdate.documents) ? [...programmeUpdate.documents, documents] : documents;
+		}
+
+		const kpiList = [];
+		const kpisToRemove = [];
+		let kpisUpdated = false;
+
+		if (programmeUpdateDto.kpis && programmeUpdateDto.kpis.length > 0) {
+			const currentKpis = await this.kpiService.findKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programmeUpdate.programmeId);
+
+			const addedKpis = programmeUpdateDto.kpis.filter(kpi => !kpi.kpiId);
+
+			if (addedKpis && addedKpis.length > 0) {
+				for (const kpiItem of addedKpis) {
+					this.payloadValidator.validateKpiPayload(kpiItem, EntityType.PROGRAMME);
+					const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
+					kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
+					kpi.creatorId = programmeUpdateDto.programmeId;
+					kpiList.push(kpi);
+				}
+				kpisUpdated = true;
+			}
+
+			for (const currentKpi of currentKpis) {
+				const kpiToUpdate = programmeUpdateDto.kpis.find(kpi => currentKpi.kpiId == kpi.kpiId);
+				if (kpiToUpdate) {
+					const kpi = new KpiEntity();
+					kpi.kpiId = kpiToUpdate.kpiId;
+					kpi.creatorId = kpiToUpdate.creatorId;
+					kpi.creatorType = kpiToUpdate.creatorType;
+					kpi.name = kpiToUpdate.name;
+					kpi.expected = kpiToUpdate.expected;
+					kpiList.push(kpi);
+					kpisUpdated = true;
+				} else {
+					kpisToRemove.push(currentKpi);
+					kpisUpdated = true;
+				}
+			}
+		}
+
+		this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_UPDATED, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, programmeUpdateDto);
+
+		if (kpisUpdated) {
+			// Add event log entry after the loop completes
+			this.addEventLogEntry(eventLog, LogEventType.KPI_UPDATED, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, kpiList);
+		}
+
+		const prg = await this.entityManager
+			.transaction(async (em) => {
+				const savedProgramme = await em.save<ProgrammeEntity>(programmeUpdate);
+				if (savedProgramme) {
+					// Save new KPIs
+					if (kpiList.length > 0) {
+						await Promise.all(kpiList.map(async kpi => {
+							await em.save<KpiEntity>(kpi);
+						}));
+					}
+					// Remove KPIs
+					if (kpisToRemove.length > 0) {
+						await Promise.all(kpisToRemove.map(async kpi => {
+							await em.remove<KpiEntity>(kpi);
+						}));
+					}
+					// Save event logs
+					if (eventLog.length > 0) {
+						await Promise.all(eventLog.map(async event => {
+							await em.save<LogEntity>(event);
+						}));
+					}
+				}
+				return savedProgramme;
+			})
+			.catch((err: any) => {
+				console.log(err);
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.programmeUpdateFailed",
+						[err]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString("action.updateActionSuccess", []),
-			"Success"
+			this.helperService.formatReqMessagesString("programme.updateProgrammeSuccess", []),
+			prg
 		);
 	}
 
