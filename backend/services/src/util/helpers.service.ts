@@ -477,7 +477,7 @@ export class HelperService {
     }
 
     if(isSubject) 
-      return `${this.configService.get("email.getemailprefix")} Carbon Registry: ${template}`;
+      return `${this.configService.get("email.getemailprefix")} NDC Transparency System: ${template}`;
     else 
       return template;
 }

@@ -46,18 +46,13 @@ export const EmailTemplates = {
         Welcome {{name}}, <br><br>
 
         Your account has been created for the {{countryName}} NDC Transparency System. You can access your account using the temporary
-        Homepage: <a href="{{home}}">{{home}}</a> <br>
+        Homepage: <a href="{{home}}">{{home}}</a> <br><br>
 
         User: {{email}} <br>
         Password (temporary): {{tempPassword}} <br><br>
 
         Sincerely, <br>
-        The {{countryName}} Carbon Registry Team <br><br>
-
-        <div style="font-size:12px">
-            {{countryName}} <br>
-            {{address}}
-        </div>
+        The {{countryName}} NDC Transparency System Team <br><br>
         `,
     text: "",
   },

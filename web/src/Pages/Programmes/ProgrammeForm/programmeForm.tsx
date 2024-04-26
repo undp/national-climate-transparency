@@ -13,6 +13,7 @@ import { ProgrammeStatus } from '../../../Enums/programme.enum';
 import { Layers } from 'react-bootstrap-icons';
 import './programmeForm.scss';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -810,8 +811,9 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
             </Row>
           </div>
           {isView && (
-            <div className="form-section-card">
+            <div className="form-section-timelinecard">
               <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              <UpdatesTimeline recordType={'programme'} recordId={entId} />
             </div>
           )}
           {!isView && (

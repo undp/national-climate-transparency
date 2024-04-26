@@ -52,6 +52,20 @@ body {
   padding-bottom: 30px;
 }
 
+.form-section-timelinecard {
+  background-color: $outside-background-color;
+  border-radius: 10px;
+  width: 100%;
+  max-height: 600px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  padding-top: 45px; 
+  padding-left: 60px; 
+  padding-right: 30px;
+  padding-bottom: 30px;
+}
+
+
 .layout-content-container .ant-btn-primary {
   background-color: $primary-color !important;
   color: #ffffff;
@@ -279,10 +293,9 @@ body {
   color: $common-filter-color;
 }
 
-.ant-steps-item-process>.ant-steps-item-container>.ant-steps-item-tail::after {
-  background-color: #9155fd;
-  width: 1.7px !important;
-}
+// .ant-steps-item-process>.ant-steps-item-container>.ant-steps-item-tail::after {
+//   padding: 14px 0 0px;
+// }
 
 .layout-content-container {
   padding-bottom: 100px;
@@ -538,7 +551,6 @@ body {
     font-size: 4rem;
     margin-bottom: 15px;
     font-weight: 400;
-    color: $error-color;
   }
 
   img {
@@ -592,6 +604,41 @@ body {
     .ant-btn-primary {
       background: $primary-color;
       border-radius: $primary-color;
+      border: none;
+    }
+  }
+
+  .ant-btn-default {
+    color: $body-text-color;
+    border-color: $body-text-color;
+  }
+
+  .ant-btn-primary[disabled] {
+    border-color: #d9d9d9;
+    background: #f5f5f5;
+  }
+}
+
+.popup-danger {
+  .icon {
+    color: $error-color !important;
+  }
+
+  .ant-btn-primary {
+    background: $error-color !important;
+    border-radius: $error-color !important;
+    border: none;
+  }
+  
+  .ant-btn-primary[disabled] {
+    border-color: #d9d9d9 !important;
+    background: #f5f5f5 !important;
+  }
+
+  .transfer-form {
+    .ant-btn-primary {
+      background: $error-color;
+      border-radius: $error-color;
       border: none;
     }
   }

@@ -23,6 +23,7 @@ import {
   TechnologyType,
 } from '../../../Enums/activity.enum';
 import { IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -830,8 +831,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
             </Row>
           </div>
           {isView && (
-            <div className="form-section-card">
+            <div className="form-section-timelinecard">
               <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              {/* <UpdatesTimeline recordType={'activity'} recordId={entId} /> */}
             </div>
           )}
           {!isView && (

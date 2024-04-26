@@ -15,6 +15,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -735,8 +736,9 @@ const actionForm: React.FC<Props> = ({ method }) => {
             </Row>
           </div>
           {isView && (
-            <div className="form-section-card">
+            <div className="form-section-timelinecard">
               <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              <UpdatesTimeline recordType={'action'} recordId={entId} />
             </div>
           )}
           {!isView && (

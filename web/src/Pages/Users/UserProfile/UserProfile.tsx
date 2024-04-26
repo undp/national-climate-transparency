@@ -33,11 +33,11 @@ const CompanyProfile = () => {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
         {subRole === 'GovernmentDepartment'
-          ? 'Government Department'
+          ? 'Department'
           : subRole === 'Consultant'
           ? 'Consultant'
           : subRole === 'SEO'
-          ? 'Seo'
+          ? 'SEO'
           : subRole === 'TechnicalReviewer'
           ? 'Technical Reviewer'
           : subRole === 'DevelopmentPartner'

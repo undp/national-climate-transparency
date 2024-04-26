@@ -204,6 +204,7 @@ const AddUser = () => {
   const onChangeuserRole = (event: any) => {
     const value = event.target.value;
     setRole(value);
+    formOne.setFieldsValue({ subRole: undefined });
   };
 
   useEffect(() => {
@@ -374,28 +375,6 @@ const AddUser = () => {
                         </Select.Option>
                       ))}
                     </Select>
-                    {/* rules={[
-                    {
-                      required: true,
-                      message: '',
-                    },
-                    {
-                      validator: async (rule, value) => {
-                        if (
-                          String(value).trim() === '' ||
-                          String(value).trim() === undefined ||
-                          value === null ||
-                          value === undefined
-                        ) {
-                          throw new Error(
-                            `${t('addUser:organisation')} ${t('addUser:isRequired')}`
-                          );
-                        }
-                      },
-                    },
-                  ]}
-                >
-                  <Input size="large" /> */}
                   </Form.Item>
                 )}
               </div>

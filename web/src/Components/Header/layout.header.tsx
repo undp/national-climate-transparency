@@ -45,8 +45,9 @@ const LayoutHeader = (props: HeaderProps) => {
             }}
           /> */}
           <PersonCircle
+            className="icon"
             color="#3A354199"
-            size={44}
+            // size={44}
             onClick={() => {
               navigate('/userProfile/view');
             }}
