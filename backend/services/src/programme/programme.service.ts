@@ -225,12 +225,34 @@ export class ProgrammeService {
 			);
 		}
 
+		programmeUpdate.path = "";
+
+		// Parent Update Resolve
+
+		if (programmeUpdateDto.actionId) {
+			const action = await this.actionService.findActionById(programmeUpdateDto.actionId);
+			if (!action) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.actionNotFound",
+						[programmeUpdateDto.actionId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+			programmeUpdate.action = action;
+			programmeUpdate.path = programmeUpdateDto.actionId;
+			this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_LINKED, EntityType.ACTION, action.actionId, user.id, programmeUpdate.programmeId);
+			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, action.actionId);
+		}
+
 		// Document update resolve
 
+		let documents = (currentProgramme.documents && currentProgramme.documents.length > 0) ? [...currentProgramme.documents] : [];
+
 		if (programmeUpdateDto.removedDocuments && programmeUpdateDto.removedDocuments.length > 0) {
-			if (currentProgramme.documents && currentProgramme.documents.length > 0) {
-				const updatedDocs = currentProgramme.documents.filter(item => !programmeUpdateDto.removedDocuments.some(url => url === item.url));
-				programmeUpdate.documents = (updatedDocs && updatedDocs.length > 0) ? updatedDocs : null;
+			if (documents.length > 0) {
+				documents = documents.filter(item => !programmeUpdateDto.removedDocuments.some(url => url === item.url));
 			} else {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -244,7 +266,6 @@ export class ProgrammeService {
 		}
 
 		if (programmeUpdateDto.newDocuments) {
-			const documents = [];
 			for (const documentItem of programmeUpdateDto.newDocuments) {
 				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.PROGRAMME);
 				const docEntity = new DocumentEntityDto();
@@ -253,8 +274,13 @@ export class ProgrammeService {
 				docEntity.createdTime = new Date().getTime();
 				documents.push(docEntity)
 			};
-			programmeUpdate.documents = (programmeUpdate.documents) ? [...programmeUpdate.documents, documents] : documents;
 		}
+
+		if (documents.length > 0) {
+			programmeUpdate.documents = documents;
+		}
+
+		// KPI Update resolve
 
 		const kpiList = [];
 		const kpisToRemove = [];
