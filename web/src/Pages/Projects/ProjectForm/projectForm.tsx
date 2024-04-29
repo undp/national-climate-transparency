@@ -3,7 +3,7 @@ import { Row, Col, Input, Button, Form, Select, message, Popover, List, Typograp
 import { CloseCircleOutlined, EllipsisOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
@@ -12,6 +12,14 @@ import './projectForm.scss';
 import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
 import { IntImplementor, Recipient } from '../../../Enums/shared.enum';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
+import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
+import { NewKpiData } from '../../../Definitions/kpiDefinitions';
+import { ProgrammeSelectData } from '../../../Definitions/programmeDefinitions';
+import { ActivityData } from '../../../Definitions/activityDefinitions';
+import { SupportData } from '../../../Definitions/supportDefinitions';
+import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
+import { getValidationRules } from '../../../Utils/validationRules';
+import { getFormTitle } from '../../../Utils/utilServices';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -19,67 +27,30 @@ const { TextArea } = Input;
 const gutterSize = 30;
 const inputFontSize = '13px';
 
-const validation = {
-  required: { required: true, message: 'Required Field' },
-  number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
-};
-
-interface Props {
-  method: 'create' | 'view' | 'update';
-}
-
-type ProgrammeData = {
-  id: string;
-  title: string;
-};
-
-type NewKpiData = {
-  index: number;
-  name: string;
-  unit: string;
-  creatorType: string;
-  expected: number;
-};
-
-type ActivityData = {
-  key: string;
-  activityId: string;
-  title: string;
-  reductionMeasures: string;
-  status: string;
-  startYear: number;
-  endYear: number;
-  natImplementor: string;
-};
-
-type SupportData = {
-  key: string;
-  supportId: string;
-  financeNature: string;
-  direction: string;
-  finInstrument: string;
-  estimatedUSD: number;
-  estimatedLC: number;
-  recievedUSD: number;
-  recievedLC: number;
-};
-
-const ProjectForm: React.FC<Props> = ({ method }) => {
+const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['projectForm']);
+
   const isView: boolean = method === 'view' ? true : false;
+  const formTitle = getFormTitle('Project', method)[0];
+  const formDesc = getFormTitle('Project', method)[1];
 
   const navigate = useNavigate();
   const { post } = useConnection();
+  const { entId } = useParams();
+
+  // Form Validation Rules
+
+  const validation = getValidationRules(method);
 
   // form state
 
-  const [programmeList, setProgrammeList] = useState<ProgrammeData[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
-    []
-  );
-  const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
-  const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
+  const [programmeList, setProgrammeList] = useState<ProgrammeSelectData[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { key: string; title: string; data: string }[]
+  >([]);
+  const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   // Popover state
 
@@ -114,7 +85,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
   }
 
   useEffect(() => {
-    const programmeData: ProgrammeData[] = [];
+    const programmeData: ProgrammeSelectData[] = [];
     for (let i = 0; i < 5; i++) {
       programmeData.push({
         id: `P00${i}`,
@@ -130,9 +101,9 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
     setAllActivityList(activityIds);
 
     if (method !== 'create') {
-      const tempFiles: { id: number; title: string; url: string }[] = [];
+      const tempFiles: { key: string; title: string; url: string }[] = [];
       for (let i = 0; i < 6; i++) {
-        tempFiles.push({ id: i, title: `title_${i}.pdf`, url: `url_${i}` });
+        tempFiles.push({ key: `${i}`, title: `title_${i}.pdf`, url: `url_${i}` });
       }
       setStoredFiles(tempFiles);
     }
@@ -259,6 +230,18 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     }
+  };
+
+  // Entity Validate
+
+  const validateEntity = () => {
+    console.log('Validate Clicked');
+  };
+
+  // Entity Delete
+
+  const deleteEntity = () => {
+    console.log('Delete Clicked');
   };
 
   // Add New KPI
@@ -403,7 +386,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
     setActivityPageSize(pagination.pageSize);
   };
 
-  // Activity Table Behaviour
+  // Support Table Behaviour
 
   const handleSupportTableChange = (pagination: any) => {
     setSupportCurrentPage(pagination.current);
@@ -413,13 +396,16 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addProjTitle')}</div>
-        <div className="body-sub-title">{t('addProjDesc')}</div>
+        <div className="body-title">{t(formTitle)}</div>
+        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       <div className="project-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
+            {method !== 'create' && entId && (
+              <EntityIdCard calledIn="Project" entId={entId}></EntityIdCard>
+            )}
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
@@ -830,7 +816,6 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <Col span={4}>
                 <AttachEntity
                   isDisabled={isView}
-                  options={allActivityIds}
                   content={{
                     buttonName: t('attachActivity'),
                     attach: t('attach'),
@@ -838,8 +823,10 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                     listTitle: t('activityList'),
                     cancel: t('cancel'),
                   }}
-                  attachedUnits={selectedActivityIds}
-                  setAttachedUnits={setSelectedActivityIds}
+                  options={allActivityIds}
+                  alreadyAttached={[]} // Need to be defined
+                  currentAttachments={selectedActivityIds}
+                  setCurrentAttachments={setSelectedActivityIds}
                   icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
                 ></AttachEntity>
               </Col>
@@ -903,7 +890,7 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
               <div className="form-section-header">{t('updatesInfoTitle')}</div>
             </div>
           )}
-          {!isView && (
+          {method === 'create' && (
             <Row gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
@@ -921,6 +908,72 @@ const ProjectForm: React.FC<Props> = ({ method }) => {
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
                     {t('add')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+          {method === 'view' && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/projects');
+                  }}
+                >
+                  {t('back')}
+                </Button>
+              </Col>
+              <Col span={2.5}>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    size="large"
+                    block
+                    onClick={() => {
+                      validateEntity();
+                    }}
+                  >
+                    {t('validate')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+          {method === 'update' && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/projects');
+                  }}
+                >
+                  {t('cancel')}
+                </Button>
+              </Col>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    deleteEntity();
+                  }}
+                  style={{ color: 'red', borderColor: 'red' }}
+                >
+                  {t('delete')}
+                </Button>
+              </Col>
+              <Col span={2.5}>
+                <Form.Item>
+                  <Button type="primary" size="large" block htmlType="submit">
+                    {t('update')}
                   </Button>
                 </Form.Item>
               </Col>

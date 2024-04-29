@@ -216,7 +216,7 @@ const programmeList = () => {
           structuredData.push({
             key: i,
             programmeId: unstructuredData[i].programmeId,
-            actionId: unstructuredData[i].action,
+            actionId: unstructuredData[i].action?.actionId,
             title: unstructuredData[i].title,
             status: unstructuredData[i].programmeStatus,
             validationStatus: unstructuredData[i].validationStatus ?? '',
@@ -386,9 +386,15 @@ const programmeList = () => {
       sorter: false,
       width: 120,
     },
-    { title: t('actionId'), dataIndex: 'action', key: 'action', sorter: false, width: 90 },
+    { title: t('actionId'), dataIndex: 'actionId', key: 'actionId', sorter: false, width: 90 },
     { title: t('titleOfProgramme'), dataIndex: 'title', key: 'title', sorter: false, width: 130 },
-    { title: t('type'), dataIndex: 'type', key: 'type', sorter: false, width: 80 },
+    {
+      title: t('type'),
+      width: 80, // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        return <ScrollableList listToShow={record.type}></ScrollableList>;
+      },
+    },
     { title: t('programmeStatus'), dataIndex: 'status', key: 'status', sorter: false, width: 130 },
     {
       title: t('validationStatus'),
