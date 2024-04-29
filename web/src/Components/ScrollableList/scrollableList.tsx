@@ -50,12 +50,7 @@ const ScrollableList: React.FC<Props> = ({ listToShow }) => {
       >
         {options.map((listValue: any, index: number) => (
           <Col key={index} span={24}>
-            <Tag
-              color={listValue.color}
-              className={
-                listValue.label.length === 18 ? 'table-full-width-tag' : 'table-partial-width-tag'
-              }
-            >
+            <Tag color={listValue.color} className="table-full-width-tag">
               {listValue.label}
             </Tag>
           </Col>

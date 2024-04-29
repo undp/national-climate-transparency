@@ -13,6 +13,13 @@ import { ProgrammeStatus } from '../../../Enums/programme.enum';
 import { Layers } from 'react-bootstrap-icons';
 import './programmeForm.scss';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
+import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
+import { NewKpiData } from '../../../Definitions/kpiDefinitions';
+import { ActionSelectData } from '../../../Definitions/actionDefinitions';
+import { ProjectData } from '../../../Definitions/projectDefinitions';
+import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
+import { getValidationRules } from '../../../Utils/validationRules';
+import { getFormTitle } from '../../../Utils/utilServices';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
@@ -21,52 +28,31 @@ const { TextArea } = Input;
 const gutterSize = 30;
 const inputFontSize = '13px';
 
-const validation = {
-  required: { required: true, message: 'Required Field' },
-  number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
-};
-
-interface Props {
-  method: 'create' | 'view' | 'update';
-}
-
-type ActionData = {
-  id: string;
-  title: string;
-};
-
-type NewKpiData = {
-  index: number;
-  name: string;
-  unit: string;
-  creatorType: string;
-  expected: number;
-};
-
-type ProjectData = {
-  key: string;
-  projectId: string;
-  projectName: string;
-};
-
-const ProgrammeForm: React.FC<Props> = ({ method }) => {
+const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['programmeForm']);
+
   const isView: boolean = method === 'view' ? true : false;
+  const formTitle = getFormTitle('Programme', method)[0];
+  const formDesc = getFormTitle('Programme', method)[1];
 
   const navigate = useNavigate();
   const { get, post } = useConnection();
   const { entId } = useParams();
 
+  // Form Validation Rules
+
+  const validation = getValidationRules(method);
+
   // form state
 
   const [programmeData, setProgrammeData] = useState<any>();
-  const [actionList, setActionList] = useState<ActionData[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
-    []
-  );
-  const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
-  const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
+  const [actionList, setActionList] = useState<ActionSelectData[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { key: string; title: string; data: string }[]
+  >([]);
+  const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   // Popover state
 
@@ -109,7 +95,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
         };
         const response: any = await post('national/actions/query', payload);
 
-        const tempActionData: ActionData[] = [];
+        const tempActionData: ActionSelectData[] = [];
         response.data.forEach((action: any) => {
           tempActionData.push({
             id: action.actionId,
@@ -206,9 +192,9 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
       });
 
       if (programmeData.documents?.length > 0) {
-        const tempFiles: { id: number; title: string; url: string }[] = [];
+        const tempFiles: { key: string; title: string; url: string }[] = [];
         programmeData.documents.forEach((document: any) => {
-          tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
+          tempFiles.push({ key: document.createdTime, title: document.title, url: document.url });
         });
         setStoredFiles(tempFiles);
       }
@@ -320,6 +306,18 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     }
+  };
+
+  // Entity Validate
+
+  const validateEntity = () => {
+    console.log('Validate Clicked');
+  };
+
+  // Entity Delete
+
+  const deleteEntity = () => {
+    console.log('Delete Clicked');
   };
 
   // Add New KPI
@@ -446,13 +444,16 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addProgTitle')}</div>
-        <div className="body-sub-title">{t('addProgDesc')}</div>
+        <div className="body-title">{t(formTitle)}</div>
+        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       <div className="programme-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
+            {method !== 'create' && entId && (
+              <EntityIdCard calledIn="Programme" entId={entId}></EntityIdCard>
+            )}
             <Row gutter={gutterSize}>
               <Col span={6}>
                 <Form.Item
@@ -712,7 +713,6 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               >
                 <AttachEntity
                   isDisabled={isView}
-                  options={allProjectIds}
                   content={{
                     buttonName: t('attachProjects'),
                     attach: t('attach'),
@@ -720,8 +720,10 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                     listTitle: t('projectList'),
                     cancel: t('cancel'),
                   }}
-                  attachedUnits={selectedProjectIds}
-                  setAttachedUnits={setSelectedProjectIds}
+                  options={allProjectIds}
+                  alreadyAttached={[]} // Need to be defined
+                  currentAttachments={selectedProjectIds}
+                  setCurrentAttachments={setSelectedProjectIds}
                   icon={<Layers style={{ fontSize: '120px' }} />}
                 ></AttachEntity>
               </Col>
@@ -803,7 +805,7 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
               <UpdatesTimeline recordType={'programme'} recordId={entId} />
             </div>
           )}
-          {!isView && (
+          {method === 'create' && (
             <Row gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
@@ -821,6 +823,72 @@ const ProgrammeForm: React.FC<Props> = ({ method }) => {
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
                     {t('add')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+          {method === 'view' && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/programmes');
+                  }}
+                >
+                  {t('back')}
+                </Button>
+              </Col>
+              <Col span={2.5}>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    size="large"
+                    block
+                    onClick={() => {
+                      validateEntity();
+                    }}
+                  >
+                    {t('validate')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+          {method === 'update' && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/programmes');
+                  }}
+                >
+                  {t('cancel')}
+                </Button>
+              </Col>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    deleteEntity();
+                  }}
+                  style={{ color: 'red', borderColor: 'red' }}
+                >
+                  {t('delete')}
+                </Button>
+              </Col>
+              <Col span={2.5}>
+                <Form.Item>
+                  <Button type="primary" size="large" block htmlType="submit">
+                    {t('update')}
                   </Button>
                 </Form.Item>
               </Col>

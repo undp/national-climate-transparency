@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message } from 'antd';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './supportForm.scss';
 import {
@@ -13,30 +13,14 @@ import {
   NatFinInstrument,
   SupportDirection,
 } from '../../../Enums/support.enum';
+import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
+import { getValidationRules } from '../../../Utils/validationRules';
+import { getFormTitle } from '../../../Utils/utilServices';
 
 const { Option } = Select;
 
 const gutterSize = 30;
 const inputFontSize = '13px';
-
-const validation = {
-  required: { required: true, message: 'Required Field' },
-  number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
-  greaterThanZero: ({}) => ({
-    // eslint-disable-next-line no-unused-vars
-    validator(_rule: any, value: any) {
-      if (value) {
-        if (value > 0) {
-          return Promise.resolve();
-        } else {
-          return Promise.reject('Exchange Rate Cannot be Zero');
-        }
-      } else {
-        return Promise.resolve();
-      }
-    },
-  }),
-};
 
 interface Props {
   method: 'create' | 'view' | 'update';
@@ -50,10 +34,18 @@ type ParentData = {
 const SupportForm: React.FC<Props> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['supportForm']);
+
   const isView: boolean = method === 'view' ? true : false;
+  const formTitle = getFormTitle('Support', method)[0];
+  const formDesc = getFormTitle('Support', method)[1];
 
   const navigate = useNavigate();
   const { post } = useConnection();
+  const { entId } = useParams();
+
+  // Form Validation Rules
+
+  const validation = getValidationRules(method);
 
   // Currency Conversion
 
@@ -115,6 +107,18 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     }
   };
 
+  // Entity Validate
+
+  const validateEntity = () => {
+    console.log('Validate Clicked');
+  };
+
+  // Entity Delete
+
+  const deleteEntity = () => {
+    console.log('Delete Clicked');
+  };
+
   // State update for currency inputs
 
   const handleCurrencyChange = (value: number, whichField: 'needed' | 'received' | 'rate') => {
@@ -134,13 +138,16 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addSupportTitle')}</div>
-        <div className="body-sub-title">{t('addSupportDesc')}</div>
+        <div className="body-title">{t(formTitle)}</div>
+        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       <div className="support-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
+            {method !== 'create' && entId && (
+              <EntityIdCard calledIn="Support" entId={entId}></EntityIdCard>
+            )}
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
@@ -457,7 +464,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
           </div>
-          {!isView && (
+          {method === 'create' && (
             <Row gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
@@ -475,6 +482,72 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
                     {t('add')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+          {method === 'view' && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/support');
+                  }}
+                >
+                  {t('back')}
+                </Button>
+              </Col>
+              <Col span={2.5}>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    size="large"
+                    block
+                    onClick={() => {
+                      validateEntity();
+                    }}
+                  >
+                    {t('validate')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+          {method === 'update' && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/support');
+                  }}
+                >
+                  {t('cancel')}
+                </Button>
+              </Col>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    deleteEntity();
+                  }}
+                  style={{ color: 'red', borderColor: 'red' }}
+                >
+                  {t('delete')}
+                </Button>
+              </Col>
+              <Col span={2.5}>
+                <Form.Item>
+                  <Button type="primary" size="large" block htmlType="submit">
+                    {t('update')}
                   </Button>
                 </Form.Item>
               </Col>
