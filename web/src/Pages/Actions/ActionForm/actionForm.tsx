@@ -997,7 +997,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <div className="form-section-timelinecard">
                 <div className="form-section-header">{t('updatesInfoTitle')}</div>
                 <UpdatesTimeline recordType={'action'} recordId={entId} />
-            </div>
+              </div>
             )}
             {method === 'create' && (
               <Row gutter={20} justify={'end'}>

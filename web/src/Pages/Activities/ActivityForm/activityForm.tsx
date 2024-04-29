@@ -838,7 +838,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           {isView && (
             <div className="form-section-timelinecard">
               <div className="form-section-header">{t('updatesInfoTitle')}</div>
-              {/* <UpdatesTimeline recordType={'activity'} recordId={entId} /> */}
+              <UpdatesTimeline recordType={'activity'} recordId={entId} />
             </div>
           )}
           {method === 'create' && (

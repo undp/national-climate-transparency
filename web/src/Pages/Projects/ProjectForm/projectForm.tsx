@@ -889,7 +889,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
           {isView && (
             <div className="form-section-timelinecard">
               <div className="form-section-header">{t('updatesInfoTitle')}</div>
-              {/* <UpdatesTimeline recordType={'project'} recordId={entId} /> */}
+              <UpdatesTimeline recordType={'project'} recordId={entId} />
             </div>
           )}
           {method === 'create' && (
