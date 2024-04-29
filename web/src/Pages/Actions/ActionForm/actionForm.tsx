@@ -73,7 +73,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
-  // Activity Attachment State
+  // Activity Attachment state
 
   const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);

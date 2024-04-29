@@ -9,6 +9,15 @@ export type ProgrammeData = {
   estimatedInvestment: number;
 };
 
+export type ProgrammeMigratedData = {
+  type: string[];
+  intImplementor: string[];
+  recipientEntity: string[];
+  ghgsAffected: string;
+  achievedReduct: number;
+  expectedReduct: number;
+};
+
 export type ProgrammeSelectData = {
   id: string;
   title: string;

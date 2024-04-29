@@ -1,5 +1,17 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Popover, List, Typography } from 'antd';
+import {
+  Row,
+  Col,
+  Input,
+  Button,
+  Form,
+  Select,
+  message,
+  Popover,
+  List,
+  Typography,
+  Spin,
+} from 'antd';
 import { CloseCircleOutlined, EllipsisOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
@@ -19,7 +31,10 @@ import { ActionSelectData } from '../../../Definitions/actionDefinitions';
 import { ProjectData } from '../../../Definitions/projectDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle } from '../../../Utils/utilServices';
+import { getFormTitle, joinTwoArrays } from '../../../Utils/utilServices';
+import { ProgrammeMigratedData } from '../../../Definitions/programmeDefinitions';
+import { ActivityData } from '../../../Definitions/activityDefinitions';
+import { SupportData } from '../../../Definitions/supportDefinitions';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -36,34 +51,57 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const formDesc = getFormTitle('Programme', method)[1];
 
   const navigate = useNavigate();
-  const { get, post } = useConnection();
+  const { get, post, put } = useConnection();
   const { entId } = useParams();
 
   // Form Validation Rules
 
   const validation = getValidationRules(method);
 
-  // form state
+  // Parent Select state
 
-  const [programmeData, setProgrammeData] = useState<any>();
   const [actionList, setActionList] = useState<ActionSelectData[]>([]);
+
+  // Form General State
+
+  const [programmeMigratedData, setProgrammeMigratedData] = useState<ProgrammeMigratedData>();
   const [uploadedFiles, setUploadedFiles] = useState<
     { key: string; title: string; data: string }[]
   >([]);
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
+  // Spinner When Form Submit Occurs
+
+  const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
+
   // Popover state
 
   const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
 
-  // projects state
+  // Project Attachment state
 
   const [allProjectIds, setAllProjectIdList] = useState<string[]>([]);
-  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
+  const [attachedProjectIds, setAttachedProjectIds] = useState<string[]>([]);
+  const [tempProjectIds, setTempProjectIds] = useState<string[]>([]);
+
   const [projectData, setProjectData] = useState<ProjectData[]>([]);
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+
+  // Activity Attachment state
+
+  const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
+  const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
+  const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
+
+  const [activityData, setActivityData] = useState<ActivityData[]>([]);
+  const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
+  const [activityPageSize, setActivityPageSize] = useState<number>(10);
+
+  const [supportData, setSupportData] = useState<SupportData[]>([]);
+  const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
+  const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
   // KPI State
 
@@ -127,95 +165,148 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     const fetchData = async () => {
       if (method !== 'create' && entId) {
         const response: any = await get(`national/programmes/${entId}`);
-        setProgrammeData(response.data);
+        if (response.status === 200 || response.status === 201) {
+          const entityData: any = response.data;
+
+          // Populating Action owned data fields
+          form.setFieldsValue({
+            actionId: entityData.actionId,
+            instrumentType: entityData.instrumentType,
+            title: entityData.title,
+            description: entityData.description,
+            objective: entityData.objectives,
+            programmeStatus: entityData.programmeStatus,
+            startYear: entityData.startYear,
+            natAnchor: entityData.natAnchor,
+            affectedSectors: entityData.affectedSectors,
+            affectedSubSector: entityData.affectedSubSector,
+            natImplementor: entityData.nationalImplementor,
+            investment: entityData.investment,
+            comments: entityData.comments,
+          });
+
+          if (entityData.documents?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.documents.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredFiles(tempFiles);
+          }
+
+          // Populating Migrated Fields (Will be overwritten when attachments change)
+          setProgrammeMigratedData({
+            type: entityData.types ?? [],
+            intImplementor: entityData.interNationalImplementor ?? [],
+            recipientEntity: entityData.recipientEntity ?? [],
+            ghgsAffected: entityData.ghgsAffected,
+            achievedReduct: entityData.achievedGHGReduction,
+            expectedReduct: entityData.expectedGHGReduction,
+          });
+        }
       }
     };
     fetchData();
 
-    // Initially Loading the attached programme data when not in create mode
+    // Initially Loading the attached project data when not in create mode
 
-    // const fetchConnectedProjectIds = async () => {
-    //   if (method !== 'create') {
-    //     const payload = {
-    //       page: 1,
-    //       size: 100,
-    //       filterAnd: [
-    //         {
-    //           key: 'programmeId',
-    //           operation: '=',
-    //           value: entId,
-    //         },
-    //       ],
-    //       sort: {
-    //         key: 'projectId',
-    //         order: 'ASC',
-    //       },
-    //     };
-    //     const response: any = await post('national/project/query', payload);
+    const fetchConnectedProjectIds = async () => {
+      if (method !== 'create') {
+        const payload = {
+          page: 1,
+          size: 100,
+          filterAnd: [
+            {
+              key: 'programmeId',
+              operation: '=',
+              value: entId,
+            },
+          ],
+          sort: {
+            key: 'projectId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/projects/query', payload);
 
-    //     const connectedProjectIds: string[] = [];
-    //     response.data.forEach((prj: any) => {
-    //       connectedProjectIds.push(prj.projectId);
-    //     });
-    //     setSelectedProjectIds(connectedProjectIds);
-    //   }
-    // };
-    // fetchConnectedProjectIds();
+        const connectedProjectIds: string[] = [];
+        response.data.forEach((prj: any) => {
+          connectedProjectIds.push(prj.projectId);
+        });
+        setAttachedProjectIds(connectedProjectIds);
+        setTempProjectIds(connectedProjectIds);
+      }
+    };
+    fetchConnectedProjectIds();
+
+    const fetchConnectedActivityIds = async () => {
+      if (method !== 'create') {
+        const connectedActivityIds: string[] = [];
+        // const payload = {
+        //   page: 1,
+        //   size: 100,
+        //   filterAnd: [
+        //     {
+        //       key: 'actionId',
+        //       operation: '=',
+        //       value: entId,
+        //     },
+        //   ],
+        //   sort: {
+        //     key: 'activityId',
+        //     order: 'ASC',
+        //   },
+        // };
+        // const response: any = await post('national/activities/query', payload);
+        // response.data.forEach((act: any) => {
+        //   connectedActivityIds.push(act.activityId);
+        // });
+        setAttachedActivityIds(connectedActivityIds);
+        setTempActivityIds(connectedActivityIds);
+      }
+    };
+    fetchConnectedActivityIds();
   }, []);
 
-  // Populating data fields based on the loaded action data when not in create
+  // Populating Form Migrated Fields, when migration data changes
 
   useEffect(() => {
-    if (programmeData) {
+    if (programmeMigratedData) {
       form.setFieldsValue({
-        // Entity Data
-        title: programmeData.title,
-        description: programmeData.description,
-        objective: programmeData.objectives,
-        programmeStatus: programmeData.programmeStatus,
-        startYear: programmeData.startYear,
-        natAnchor: programmeData.natAnchor,
-        affectedSectors: programmeData.affectedSectors,
-        affectedSubSector: programmeData.affectedSubSector,
-        natImplementor: programmeData.nationalImplementor,
-        investment: programmeData.investment,
-        comments: programmeData.comments,
-        // Migrated Data
-        type: programmeData.types,
-        instrumentType: programmeData.instrumentType,
-        intImplementor: programmeData.interNationalImplementor,
-        recipientEntity: programmeData.recipientEntity,
-        // ghgsAffected: programmeData.migratedData.totalInvestment,
-        // achievedReduct: programmeData.migratedData.achievedReduct,
-        // expectedReduct: programmeData.migratedData.expectedReduct,
+        type: programmeMigratedData.type,
+        intImplementor: programmeMigratedData.intImplementor,
+        recipientEntity: programmeMigratedData.recipientEntity,
+        ghgsAffected: programmeMigratedData.ghgsAffected,
+        achievedReduct: programmeMigratedData.achievedReduct,
+        expectedReduct: programmeMigratedData.expectedReduct,
       });
-
-      if (programmeData.documents?.length > 0) {
-        const tempFiles: { key: string; title: string; url: string }[] = [];
-        programmeData.documents.forEach((document: any) => {
-          tempFiles.push({ key: document.createdTime, title: document.title, url: document.url });
-        });
-        setStoredFiles(tempFiles);
-      }
     }
-  }, [programmeData]);
+  }, [programmeMigratedData]);
 
-  // Loading project data when attachment changes
+  // Fetching Project data and calculating migrated fields when attachment changes
 
   useEffect(() => {
     const payload = {
       page: 1,
-      size: selectedProjectIds.length,
+      size: tempProjectIds.length,
       filterOr: [] as any[],
-      sort: {
-        key: 'projectId',
-        order: 'ASC',
-      },
+    };
+
+    const tempMigratedData: ProgrammeMigratedData = {
+      type: [],
+      intImplementor: [],
+      recipientEntity: [],
+      ghgsAffected: '',
+      achievedReduct: 0,
+      expectedReduct: 0,
     };
 
     const fetchData = async () => {
-      if (selectedProjectIds.length > 0) {
-        selectedProjectIds.forEach((projId) => {
+      if (tempProjectIds.length > 0) {
+        tempProjectIds.forEach((projId) => {
           payload.filterOr.push({
             key: 'projectId',
             operation: '=',
@@ -223,15 +314,48 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           });
         });
         const response: any = await post('national/projects/query', payload);
-        setProjectData(response.data);
+
+        const tempPRJData: ProjectData[] = [];
+
+        response.data.forEach((prj: any, index: number) => {
+          tempPRJData.push({
+            key: index.toString(),
+            projectId: prj.projectId,
+            projectName: prj.projectName,
+          });
+
+          tempMigratedData.type.push(prj.type);
+
+          tempMigratedData.intImplementor = joinTwoArrays(
+            tempMigratedData.intImplementor,
+            prj.internationalImplementingEntities ?? []
+          );
+
+          tempMigratedData.recipientEntity = joinTwoArrays(
+            tempMigratedData.recipientEntity,
+            prj.recipientEntities ?? []
+          );
+
+          const prgGHGAchievement = prj.migratedData[0]?.achievedGHGReduction;
+          const prgGHGExpected = prj.migratedData[0]?.expectedGHGReduction;
+
+          tempMigratedData.achievedReduct =
+            tempMigratedData.achievedReduct + prgGHGAchievement !== null ? prgGHGAchievement : 0;
+
+          tempMigratedData.expectedReduct =
+            tempMigratedData.expectedReduct + prgGHGExpected !== null ? prgGHGExpected : 0;
+        });
+        setProjectData(tempPRJData);
+        setProgrammeMigratedData(tempMigratedData);
       } else {
         setProjectData([]);
+        setProgrammeMigratedData(tempMigratedData);
       }
     };
     fetchData();
 
-    setDetachOpen(Array(selectedProjectIds.length).fill(false));
-  }, [selectedProjectIds]);
+    setDetachOpen(Array(tempProjectIds.length).fill(false));
+  }, [tempProjectIds]);
 
   useEffect(() => {
     console.log('Running KPI Migration Update');
@@ -252,10 +376,27 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     setMigratedKpiList(migratedKpis);
   }, [projectData]);
 
+  // Attachment resolve before updating an already created programme
+
+  const resolveAttachments = async () => {
+    const toAttach = tempProjectIds.filter((prj) => !attachedProjectIds.includes(prj));
+    const toDetach = attachedProjectIds.filter((prj) => !tempProjectIds.includes(prj));
+
+    if (toDetach.length > 0) {
+      await post('national/projects/unlink', { projects: toDetach });
+    }
+
+    if (toAttach.length > 0) {
+      await post('national/projects/link', { programmeId: entId, projects: toAttach });
+    }
+  };
+
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
     try {
+      setWaitingForBE(true);
+
       for (const key in payload) {
         if (key.startsWith('kpi_')) {
           delete payload[key];
@@ -263,9 +404,25 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       }
 
       if (uploadedFiles.length > 0) {
-        payload.documents = [];
-        uploadedFiles.forEach((file) => {
-          payload.documents.push({ title: file.title, data: file.data });
+        if (method === 'create') {
+          payload.documents = [];
+          uploadedFiles.forEach((file) => {
+            payload.documents.push({ title: file.title, data: file.data });
+          });
+        } else if (method === 'update') {
+          payload.newDocuments = [];
+          uploadedFiles.forEach((file) => {
+            payload.newDocuments.push({ title: file.title, data: file.data });
+          });
+        }
+      }
+
+      if (filesToRemove.length > 0) {
+        payload.removedDocuments = [];
+        filesToRemove.forEach((removedFileKey) => {
+          payload.removedDocuments.push(
+            storedFiles.find((file) => file.key === removedFileKey)?.url
+          );
         });
       }
 
@@ -280,24 +437,49 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         });
       }
 
-      if (selectedProjectIds.length > 0) {
-        payload.linkedProjects = selectedProjectIds;
+      if (projectData.length > 0 && method === 'create') {
+        payload.linkedProjects = [];
+        projectData.forEach((project) => {
+          payload.linkedProgrammes.push(project.projectId);
+        });
       }
 
       payload.investment = parseFloat(payload.investment);
 
-      const response = await post('national/programmes/add', payload);
+      let response: any;
+
+      if (method === 'create') {
+        response = await post('national/programmes/add', payload);
+      } else if (method === 'update') {
+        payload.programmeId = entId;
+        response = await put('national/programmes/update', payload);
+
+        resolveAttachments();
+      }
+
+      const successMsg =
+        method === 'create' ? t('programmeCreationSuccess') : t('programmeUpdateSuccess');
+
       if (response.status === 200 || response.status === 201) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
         message.open({
           type: 'success',
-          content: t('programmeCreationSuccess'),
+          content: successMsg,
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
+        setWaitingForBE(false);
         navigate('/programmes');
       }
     } catch (error: any) {
-      console.log('Error in action creation', error);
       message.open({
         type: 'error',
         content: `${error.message}`,
@@ -362,19 +544,17 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     });
   };
 
-  // Dettach Project
+  // Detach Programme
 
   const handleDetachOpen = (record: ProjectData) => {
-    const newOpenList = Array(selectedProjectIds.length).fill(false);
-    newOpenList[selectedProjectIds.indexOf(record.projectId)] = true;
+    const newOpenList = Array(tempProjectIds.length).fill(false);
+    newOpenList[tempProjectIds.indexOf(record.projectId)] = true;
     setDetachOpen(newOpenList);
   };
 
-  const detachProject = (prjId: string) => {
-    const filteredData = projectData.filter((prj) => prj.projectId !== prjId);
-    const filteredIds = selectedProjectIds.filter((id) => id !== prjId);
-    setProjectData(filteredData);
-    setSelectedProjectIds(filteredIds);
+  const detachProject = async (prjId: string) => {
+    const filteredIds = tempProjectIds.filter((id) => id !== prjId);
+    setTempProjectIds(filteredIds);
   };
 
   // Action Menu definition
@@ -420,7 +600,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             placement="bottomRight"
             content={actionMenu(record)}
             trigger="click"
-            open={detachOpen[selectedProjectIds.indexOf(record.projectId)]}
+            open={detachOpen[tempProjectIds.indexOf(record.projectId)]}
           >
             <EllipsisOutlined
               rotate={90}
@@ -446,454 +626,475 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         <div className="body-title">{t(formTitle)}</div>
         <div className="body-sub-title">{t(formDesc)}</div>
       </div>
-      <div className="programme-form">
-        <Form form={form} onFinish={handleSubmit} layout="vertical">
-          <div className="form-section-card">
-            <div className="form-section-header">{t('generalInfoTitle')}</div>
-            {method !== 'create' && entId && (
-              <EntityIdCard calledIn="Programme" entId={entId}></EntityIdCard>
-            )}
-            <Row gutter={gutterSize}>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('selectActionHeader')}</label>}
-                  name="actionId"
-                >
-                  <Select
-                    size={'large'}
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {actionList.map((action) => (
-                      <Option key={action.id} value={action.id}>
-                        {action.title}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('typesHeader')}</label>}
-                  name="type"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('progTitleHeader')}</label>}
-                  name="title"
-                  rules={[validation.required]}
-                >
-                  <Input className="form-input-box" disabled={isView} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('progDescTitle')}</label>}
-                  name="description"
-                  rules={[validation.required]}
-                >
-                  <TextArea maxLength={250} rows={3} disabled={isView} />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('progObjectivesTitle')}</label>}
-                  name="objective"
-                  rules={[validation.required]}
-                >
-                  <TextArea maxLength={250} rows={3} disabled={isView} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
-                  name="instrumentType"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('progStatusTitle')}</label>}
-                  name="programmeStatus"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(ProgrammeStatus).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('sectorsAffTitle')}</label>}
-                  name="affectedSectors"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    mode="multiple"
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(Sector).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('subSectorsAffTitle')}</label>}
-                  name="affectedSubSector"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    mode="multiple"
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(SubSector).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('startYearTitle')}</label>}
-                  name="startYear"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {yearsList.map((year) => (
-                      <Option key={year} value={year}>
-                        {year}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
-                  name="intImplementor"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('recipientEntityTitle')}</label>}
-                  name="recipientEntity"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
-                  name="natImplementor"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    mode="multiple"
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(NatImplementor).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item<number>
-                  label={<label className="form-item-header">{t('investmentNeedsTitle')}</label>}
-                  name="investment"
-                  rules={[validation.required]}
-                >
-                  <Input className="form-input-box" type="number" disabled={isView} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <div className="form-section-sub-header">{t('documentsHeader')}</div>
-            <UploadFileGrid
-              isSingleColumn={false}
-              usedIn={method}
-              buttonText={t('upload')}
-              acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
-              storedFiles={storedFiles}
-              uploadedFiles={uploadedFiles}
-              setUploadedFiles={setUploadedFiles}
-              removedFiles={filesToRemove}
-              setRemovedFiles={setFilesToRemove}
-            ></UploadFileGrid>
-            <Row gutter={gutterSize}>
-              <Col span={24}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('programmeCommentsTitle')}</label>}
-                  name="comments"
-                  rules={[validation.required]}
-                >
-                  <TextArea rows={3} disabled={isView} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                  {t('projectListTitle')}
-                </div>
-                <LayoutTable
-                  tableData={projectData}
-                  columns={projTableColumns}
-                  loading={false}
-                  pagination={{
-                    current: currentPage,
-                    pageSize: pageSize,
-                    total: projectData.length,
-                    showQuickJumper: true,
-                    pageSizeOptions: ['10', '20', '30'],
-                    showSizeChanger: true,
-                    style: { textAlign: 'center' },
-                    locale: { page: '' },
-                    position: ['bottomRight'],
-                  }}
-                  handleTableChange={handleTableChange}
-                  emptyMessage={t('noProjectsMessage')}
-                />
-              </Col>
-              <Col
-                span={5}
-                style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
-              >
-                <AttachEntity
-                  isDisabled={isView}
-                  content={{
-                    buttonName: t('attachProjects'),
-                    attach: t('attach'),
-                    contentTitle: t('attachProjects'),
-                    listTitle: t('projectList'),
-                    cancel: t('cancel'),
-                  }}
-                  options={allProjectIds}
-                  alreadyAttached={[]} // Need to be defined
-                  currentAttachments={selectedProjectIds}
-                  setCurrentAttachments={setSelectedProjectIds}
-                  icon={<Layers style={{ fontSize: '120px' }} />}
-                ></AttachEntity>
-              </Col>
-            </Row>
-          </div>
-          <div className="form-section-card">
-            <div className="form-section-header">{t('mitigationInfoTitle')}</div>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('ghgAffected')}</label>}
-                  name="ghgsAffected"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-            </Row>
-            <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('achieved')}</label>}
-                  name="achievedReduct"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('expected')}</label>}
-                  name="expectedReduct"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-            </Row>
-            <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-            {migratedKpiList.map((index: number) => (
-              <KpiGrid
-                key={index}
-                form={form}
-                rules={[]}
-                index={index}
-                calledTo={'view'}
-                gutterSize={gutterSize}
-                headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-              ></KpiGrid>
-            ))}
-            {newKpiList.map((kpi: any) => (
-              <KpiGrid
-                key={kpi.index}
-                form={form}
-                rules={[validation.required]}
-                index={kpi.index}
-                calledTo={'create'}
-                gutterSize={gutterSize}
-                headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                updateKPI={updateKPI}
-                removeKPI={removeKPI}
-              ></KpiGrid>
-            ))}
-            <Row justify={'start'}>
-              <Col span={2}>
-                {!isView && (
-                  <Button
-                    icon={<PlusCircleOutlined />}
-                    className="create-kpi-button"
-                    onClick={createKPI}
-                  >
-                    {t('addKPI')}
-                  </Button>
-                )}
-              </Col>
-            </Row>
-          </div>
-          {isView && (
+      {!waitingForBE ? (
+        <div className="programme-form">
+          <Form form={form} onFinish={handleSubmit} layout="vertical">
             <div className="form-section-card">
-              <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              <div className="form-section-header">{t('generalInfoTitle')}</div>
+              {method !== 'create' && entId && (
+                <EntityIdCard calledIn="Programme" entId={entId}></EntityIdCard>
+              )}
+              <Row gutter={gutterSize}>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('selectActionHeader')}</label>}
+                    name="actionId"
+                  >
+                    <Select
+                      size={'large'}
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {actionList.map((action) => (
+                        <Option key={action.id} value={action.id}>
+                          {action.title}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('typesHeader')}</label>}
+                    name="type"
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('progTitleHeader')}</label>}
+                    name="title"
+                    rules={[validation.required]}
+                  >
+                    <Input className="form-input-box" disabled={isView} />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('progDescTitle')}</label>}
+                    name="description"
+                    rules={[validation.required]}
+                  >
+                    <TextArea maxLength={250} rows={3} disabled={isView} />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('progObjectivesTitle')}</label>}
+                    name="objective"
+                    rules={[validation.required]}
+                  >
+                    <TextArea maxLength={250} rows={3} disabled={isView} />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
+                    name="instrumentType"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('progStatusTitle')}</label>}
+                    name="programmeStatus"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(ProgrammeStatus).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('sectorsAffTitle')}</label>}
+                    name="affectedSectors"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(Sector).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('subSectorsAffTitle')}</label>}
+                    name="affectedSubSector"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(SubSector).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('startYearTitle')}</label>}
+                    name="startYear"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {yearsList.map((year) => (
+                        <Option key={year} value={year}>
+                          {year}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
+                    name="intImplementor"
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('recipientEntityTitle')}</label>}
+                    name="recipientEntity"
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
+                    name="natImplementor"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(NatImplementor).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item<number>
+                    label={<label className="form-item-header">{t('investmentNeedsTitle')}</label>}
+                    name="investment"
+                    rules={[validation.required]}
+                  >
+                    <Input className="form-input-box" type="number" disabled={isView} />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <div className="form-section-sub-header">{t('documentsHeader')}</div>
+              <UploadFileGrid
+                isSingleColumn={false}
+                usedIn={method}
+                buttonText={t('upload')}
+                acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
+                storedFiles={storedFiles}
+                uploadedFiles={uploadedFiles}
+                setUploadedFiles={setUploadedFiles}
+                removedFiles={filesToRemove}
+                setRemovedFiles={setFilesToRemove}
+              ></UploadFileGrid>
+              <Row gutter={gutterSize}>
+                <Col span={24}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">{t('programmeCommentsTitle')}</label>
+                    }
+                    name="comments"
+                    rules={[validation.required]}
+                  >
+                    <TextArea rows={3} disabled={isView} />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
+                    {t('projectListTitle')}
+                  </div>
+                  <LayoutTable
+                    tableData={projectData}
+                    columns={projTableColumns}
+                    loading={false}
+                    pagination={{
+                      current: currentPage,
+                      pageSize: pageSize,
+                      total: projectData.length,
+                      showQuickJumper: true,
+                      pageSizeOptions: ['10', '20', '30'],
+                      showSizeChanger: true,
+                      style: { textAlign: 'center' },
+                      locale: { page: '' },
+                      position: ['bottomRight'],
+                    }}
+                    handleTableChange={handleTableChange}
+                    emptyMessage={t('noProjectsMessage')}
+                  />
+                </Col>
+                <Col
+                  span={5}
+                  style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
+                >
+                  <AttachEntity
+                    isDisabled={isView}
+                    content={{
+                      buttonName: t('attachProjects'),
+                      attach: t('attach'),
+                      contentTitle: t('attachProjects'),
+                      listTitle: t('projectList'),
+                      cancel: t('cancel'),
+                    }}
+                    options={allProjectIds}
+                    alreadyAttached={attachedProjectIds}
+                    currentAttachments={tempProjectIds}
+                    setCurrentAttachments={setTempProjectIds}
+                    icon={<Layers style={{ fontSize: '120px' }} />}
+                  ></AttachEntity>
+                </Col>
+              </Row>
             </div>
-          )}
-          {method === 'create' && (
-            <Row gutter={20} justify={'end'}>
-              <Col span={2}>
-                <Button
-                  type="default"
-                  size="large"
-                  block
-                  onClick={() => {
-                    navigate('/programmes');
-                  }}
-                >
-                  {t('cancel')}
-                </Button>
-              </Col>
-              <Col span={2}>
-                <Form.Item>
-                  <Button type="primary" size="large" block htmlType="submit">
-                    {t('add')}
-                  </Button>
-                </Form.Item>
-              </Col>
-            </Row>
-          )}
-          {method === 'view' && (
-            <Row gutter={20} justify={'end'}>
-              <Col span={2}>
-                <Button
-                  type="default"
-                  size="large"
-                  block
-                  onClick={() => {
-                    navigate('/programmes');
-                  }}
-                >
-                  {t('back')}
-                </Button>
-              </Col>
-              <Col span={2.5}>
-                <Form.Item>
+            <div className="form-section-card">
+              <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                    name="ghgsAffected"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('achieved')}</label>}
+                    name="achievedReduct"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('expected')}</label>}
+                    name="expectedReduct"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              {migratedKpiList.map((index: number) => (
+                <KpiGrid
+                  key={index}
+                  form={form}
+                  rules={[]}
+                  index={index}
+                  calledTo={'view'}
+                  gutterSize={gutterSize}
+                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                ></KpiGrid>
+              ))}
+              {newKpiList.map((kpi: any) => (
+                <KpiGrid
+                  key={kpi.index}
+                  form={form}
+                  rules={[validation.required]}
+                  index={kpi.index}
+                  calledTo={'create'}
+                  gutterSize={gutterSize}
+                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                  updateKPI={updateKPI}
+                  removeKPI={removeKPI}
+                ></KpiGrid>
+              ))}
+              <Row justify={'start'}>
+                <Col span={2}>
+                  {!isView && (
+                    <Button
+                      icon={<PlusCircleOutlined />}
+                      className="create-kpi-button"
+                      onClick={createKPI}
+                    >
+                      {t('addKPI')}
+                    </Button>
+                  )}
+                </Col>
+              </Row>
+            </div>
+            {isView && (
+              <div className="form-section-card">
+                <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              </div>
+            )}
+            {method === 'create' && (
+              <Row gutter={20} justify={'end'}>
+                <Col span={2}>
                   <Button
-                    type="primary"
+                    type="default"
                     size="large"
                     block
                     onClick={() => {
-                      validateEntity();
+                      navigate('/programmes');
                     }}
                   >
-                    {t('validate')}
+                    {t('cancel')}
                   </Button>
-                </Form.Item>
-              </Col>
-            </Row>
-          )}
-          {method === 'update' && (
-            <Row gutter={20} justify={'end'}>
-              <Col span={2}>
-                <Button
-                  type="default"
-                  size="large"
-                  block
-                  onClick={() => {
-                    navigate('/programmes');
-                  }}
-                >
-                  {t('cancel')}
-                </Button>
-              </Col>
-              <Col span={2}>
-                <Button
-                  type="default"
-                  size="large"
-                  block
-                  onClick={() => {
-                    deleteEntity();
-                  }}
-                  style={{ color: 'red', borderColor: 'red' }}
-                >
-                  {t('delete')}
-                </Button>
-              </Col>
-              <Col span={2.5}>
-                <Form.Item>
-                  <Button type="primary" size="large" block htmlType="submit">
-                    {t('update')}
+                </Col>
+                <Col span={2}>
+                  <Form.Item>
+                    <Button type="primary" size="large" block htmlType="submit">
+                      {t('add')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+            {method === 'view' && (
+              <Row gutter={20} justify={'end'}>
+                <Col span={2}>
+                  <Button
+                    type="default"
+                    size="large"
+                    block
+                    onClick={() => {
+                      navigate('/programmes');
+                    }}
+                  >
+                    {t('back')}
                   </Button>
-                </Form.Item>
-              </Col>
-            </Row>
-          )}
-        </Form>
-      </div>
+                </Col>
+                <Col span={2.5}>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => {
+                        validateEntity();
+                      }}
+                    >
+                      {t('validate')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+            {method === 'update' && (
+              <Row gutter={20} justify={'end'}>
+                <Col span={2}>
+                  <Button
+                    type="default"
+                    size="large"
+                    block
+                    onClick={() => {
+                      navigate('/programmes');
+                    }}
+                  >
+                    {t('cancel')}
+                  </Button>
+                </Col>
+                <Col span={2}>
+                  <Button
+                    type="default"
+                    size="large"
+                    block
+                    onClick={() => {
+                      deleteEntity();
+                    }}
+                    style={{ color: 'red', borderColor: 'red' }}
+                  >
+                    {t('delete')}
+                  </Button>
+                </Col>
+                <Col span={2.5}>
+                  <Form.Item>
+                    <Button type="primary" size="large" block htmlType="submit">
+                      {t('update')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+          </Form>
+        </div>
+      ) : (
+        <Spin className="loading-center" size="large" />
+      )}
     </div>
   );
 };
