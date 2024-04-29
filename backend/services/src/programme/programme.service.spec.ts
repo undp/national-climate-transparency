@@ -14,22 +14,22 @@ import { IntImplementor, NatImplementor, Recipient, SubSector } from "../enums/s
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { HttpException, HttpStatus } from "@nestjs/common";
-
 import { DocumentDto } from "../dtos/document.dto";
 import { KpiDto } from "../dtos/kpi.dto";
 import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { LinkProgrammesDto } from "../dtos/link.programmes.dto";
-// import { OrganisationService } from "../organisation/organisation.service";
 import { ProgrammeViewDto } from "../dtos/programme.view.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { ProjectType } from "../enums/project.enum";
 import { QueryDto } from "../dtos/query.dto";
 import { FilterEntry } from "../dtos/filter.entry";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
-import { ProgrammeUpdateDto } from "src/dtos/programmeUpdate.dto";
-import { KpiService } from "src/kpi/kpi.service";
-import { ProgrammeStatus } from "src/enums/programme-status.enum";
+import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
+import { KpiService } from "../kpi/kpi.service";
+import { DocumentEntityDto } from "../dtos/document.entity.dto";
+import { KpiEntity } from "../entities/kpi.entity";
+import { KpiUpdateDto } from "../dtos/kpi.update.dto";
 
 describe('ProgrammeService', () => {
 	let service: ProgrammeService;
@@ -884,7 +884,6 @@ describe('ProgrammeService', () => {
 		);
 	});
 
-
 	it('should build the query correctly without size and page', async () => {
 		const queryDto = new QueryDto();
 		const filterAnd: FilterEntry[] = [];
@@ -994,11 +993,15 @@ describe('ProgrammeService', () => {
 		user.id = 2;
 
 		const programmeUpdateDto = new ProgrammeUpdateDto();
-		programmeUpdateDto.title = "test Updated";
-		programmeUpdateDto.description = "test description Updated";
-		programmeUpdateDto.objective = "test objective Updated";
-		programmeUpdateDto.startYear = 2025;
-		programmeUpdateDto.comments = "test comment";
+		programmeUpdateDto.title = "test";
+		programmeUpdateDto.description = "test description";
+		programmeUpdateDto.objective = "test objective";
+		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateDto.startYear = 2024;
+		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateDto.investment = 1000;
+		programmeUpdateDto.comments = "test comment"
 
 		jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(new ProgrammeEntity());
 
@@ -1022,208 +1025,221 @@ describe('ProgrammeService', () => {
 
 	})
 
-	// it('should remove the action documents when user remove the documents', async () => {
-	// 	const user = new User();
-	// 	user.id = 2;
+	it('should remove the action documents when user remove the documents', async () => {
+		const user = new User();
+		user.id = 2;
 
-	// 	const actionUpdateDto = new ActionUpdateDto();
-	// 	actionUpdateDto.title = "test Updated";
-	// 	actionUpdateDto.description = "test description Updated";
-	// 	actionUpdateDto.objective = "test objective Updated";
-	// 	actionUpdateDto.instrumentType = InstrumentType.ECONOMIC;
-	// 	actionUpdateDto.status = ActionStatus.IMPLEMENTED;
-	// 	actionUpdateDto.startYear = 2025;
-	// 	actionUpdateDto.natAnchor = NatAnchor.OTHER;
-	// 	actionUpdateDto.removedDocuments = ["www.test.com/doc1"];
+		const programmeUpdateDto = new ProgrammeUpdateDto();
+		programmeUpdateDto.title = "test";
+		programmeUpdateDto.description = "test description";
+		programmeUpdateDto.objective = "test objective";
+		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateDto.startYear = 2024;
+		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateDto.investment = 1000;
+		programmeUpdateDto.comments = "test comment"
+		programmeUpdateDto.removedDocuments = ["www.test.com/doc1"];
 
-	// 	const actionUpdateEntity = new ActionEntity();
-	// 	actionUpdateEntity.title = "test Updated";
-	// 	actionUpdateEntity.description = "test description Updated";
-	// 	actionUpdateEntity.objective = "test objective Updated";
-	// 	actionUpdateEntity.instrumentType = InstrumentType.ECONOMIC;
-	// 	actionUpdateEntity.status = ActionStatus.IMPLEMENTED;
-	// 	actionUpdateEntity.startYear = 2025;
-	// 	actionUpdateEntity.natAnchor = NatAnchor.OTHER;
-	// 	actionUpdateEntity.documents = null;
+		const programmeUpdateEntity = new ProgrammeEntity();
+		programmeUpdateEntity.title = "test";
+		programmeUpdateEntity.description = "test description";
+		programmeUpdateEntity.objective = "test objective";
+		programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateEntity.startYear = 2024;
+		programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateEntity.investment = 1000;
+		programmeUpdateEntity.comments = "test comment"
+		programmeUpdateEntity.documents = null;
 
-	// 	const documentDto = new DocumentEntityDto();
-	// 	documentDto.url = "www.test.com/doc1";
-	// 	documentDto.title = "doc title"
+		const documentDto = new DocumentEntityDto();
+		documentDto.url = "www.test.com/doc1";
+		documentDto.title = "doc title"
 
-	// 	const actionEntity = new ActionEntity();
-	// 	actionEntity.title = "test";
-	// 	actionEntity.description = "test description";
-	// 	actionEntity.objective = "test objective";
-	// 	actionEntity.instrumentType = InstrumentType.POLICY;
-	// 	actionEntity.status = ActionStatus.PLANNED;
-	// 	actionEntity.startYear = 2024;
-	// 	actionEntity.natAnchor = NatAnchor.NDC;
-	// 	actionEntity.documents = [documentDto];
-
-
-	// 	jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
-
-	// 	entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
-	// 		const emMock = {
-	// 			save: jest.fn().mockResolvedValueOnce(actionUpdateEntity),
-	// 			remove: jest.fn().mockResolvedValueOnce(actionUpdateDto),
-	// 		};
-	// 		const savedAction = await callback(emMock);
-	// 		// expect(emMock.save).toHaveBeenNthCalledWith(1, actionUpdateEntity);
-	// 		expect(emMock.save).toHaveBeenCalledTimes(2);
-	// 		// expect(emMock.remove).toHaveBeenCalledTimes(1);
-	// 		return savedAction;
-	// 	});
-
-	// 	const result = await service.updateAction(actionUpdateDto, user);
-	// 	expect(result.statusCode).toEqual(HttpStatus.OK);
-
-	// 	expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
-	// 	expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-	// 	expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
-	// 	expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
-
-	// })
-
-	// it('should update the documents in action when user add new documents', async () => {
-	// 	const user = new User();
-	// 	user.id = 2;
-
-	// 	const documentDto = new DocumentEntityDto();
-	// 	documentDto.url = "www.test.com/doc1";
-	// 	documentDto.title = "doc title"
-
-	// 	const addedDocumentDto = new DocumentDto();
-	// 	addedDocumentDto.data = documentData;
-	// 	addedDocumentDto.title = "doc title"
-
-	// 	const actionUpdateDto = new ActionUpdateDto();
-	// 	actionUpdateDto.title = "test Updated";
-	// 	actionUpdateDto.description = "test description Updated";
-	// 	actionUpdateDto.objective = "test objective Updated";
-	// 	actionUpdateDto.instrumentType = InstrumentType.ECONOMIC;
-	// 	actionUpdateDto.status = ActionStatus.IMPLEMENTED;
-	// 	actionUpdateDto.startYear = 2025;
-	// 	actionUpdateDto.natAnchor = NatAnchor.OTHER;
-	// 	actionUpdateDto.newDocuments = [addedDocumentDto]
-
-	// 	const actionUpdateEntity = new ActionEntity();
-	// 	actionUpdateEntity.title = "test Updated";
-	// 	actionUpdateEntity.description = "test description Updated";
-	// 	actionUpdateEntity.objective = "test objective Updated";
-	// 	actionUpdateEntity.instrumentType = InstrumentType.ECONOMIC;
-	// 	actionUpdateEntity.status = ActionStatus.IMPLEMENTED;
-	// 	actionUpdateEntity.startYear = 2025;
-	// 	actionUpdateEntity.natAnchor = NatAnchor.OTHER;
-	// 	actionUpdateEntity.documents = [documentDto, addedDocumentDto];
-
-	// 	const actionEntity = new ActionEntity();
-	// 	actionEntity.title = "test";
-	// 	actionEntity.description = "test description";
-	// 	actionEntity.objective = "test objective";
-	// 	actionEntity.instrumentType = InstrumentType.POLICY;
-	// 	actionEntity.status = ActionStatus.PLANNED;
-	// 	actionEntity.startYear = 2024;
-	// 	actionEntity.natAnchor = NatAnchor.NDC;
-	// 	actionEntity.documents = [documentDto];
+		const programmeEntity = new ProgrammeEntity();
+		programmeEntity.title = "test";
+		programmeEntity.description = "test description";
+		programmeEntity.objective = "test objective";
+		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeEntity.startYear = 2020;
+		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeEntity.investment = 100;
+		programmeEntity.comments = "test comment"
+		programmeEntity.documents = [documentDto];
 
 
-	// 	jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
+		jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(programmeEntity);
 
-	// 	entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
-	// 		const emMock = {
-	// 			save: jest.fn().mockResolvedValueOnce(actionUpdateEntity),
-	// 			remove: jest.fn().mockResolvedValueOnce(actionUpdateDto),
-	// 		};
-	// 		const savedAction = await callback(emMock);
-	// 		// expect(emMock.save).toHaveBeenNthCalledWith(1, actionUpdateEntity);
-	// 		expect(emMock.save).toHaveBeenCalledTimes(2);
-	// 		// expect(emMock.remove).toHaveBeenCalledTimes(1);
-	// 		return savedAction;
-	// 	});
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(programmeUpdateEntity),
+				remove: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedAction;
+		});
 
-	// 	const result = await service.updateAction(actionUpdateDto, user);
-	// 	expect(result.statusCode).toEqual(HttpStatus.OK);
+		const result = await service.updateProgramme(programmeUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
 
-	// 	expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
-	// 	expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
-	// 	expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
-	// 	expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
-	// })
+	})
 
-	// it('should update kpis in action when user updated the Kpis', async () => {
-	// 	const user = new User();
-	// 	user.id = 2;
+	it('should update the documents in action when user add new documents', async () => {
+		const user = new User();
+		user.id = 2;
 
-	// 	const kpiDto1 = new KpiEntity();
-	// 	kpiDto1.kpiId = 1;
-	// 	kpiDto1.name = "KPI 1";
-	// 	kpiDto1.creatorType = "action";
-	// 	kpiDto1.expected = 100;
+		const documentDto = new DocumentEntityDto();
+		documentDto.url = "www.test.com/doc1";
+		documentDto.title = "doc title"
 
-	// 	const kpiDto2 = new KpiEntity();
-	// 	kpiDto2.kpiId = 2;
-	// 	kpiDto2.name = "KPI 2";
-	// 	kpiDto2.creatorType = "action";
-	// 	kpiDto2.expected = 100;
+		const addedDocumentDto = new DocumentDto();
+		addedDocumentDto.data = documentData;
+		addedDocumentDto.title = "doc title"
 
-	// 	const kpiAdded = new KpiUpdateDto();
-	// 	kpiDto2.name = "KPI Added";
-	// 	kpiDto2.creatorType = "action";
-	// 	kpiDto2.expected = 300;
+		const programmeUpdateDto = new ProgrammeUpdateDto();
+		programmeUpdateDto.title = "test";
+		programmeUpdateDto.description = "test description";
+		programmeUpdateDto.objective = "test objective";
+		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateDto.startYear = 2024;
+		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateDto.investment = 1000;
+		programmeUpdateDto.comments = "test comment"
+		programmeUpdateDto.newDocuments = [addedDocumentDto]
 
-	// 	const actionUpdateDto = new ActionUpdateDto();
-	// 	actionUpdateDto.title = "test Updated";
-	// 	actionUpdateDto.description = "test description Updated";
-	// 	actionUpdateDto.objective = "test objective Updated";
-	// 	actionUpdateDto.instrumentType = InstrumentType.ECONOMIC;
-	// 	actionUpdateDto.status = ActionStatus.IMPLEMENTED;
-	// 	actionUpdateDto.startYear = 2025;
-	// 	actionUpdateDto.natAnchor = NatAnchor.OTHER;
-	// 	actionUpdateDto.kpis = [kpiDto1, kpiAdded]
-
-	// 	const actionUpdateEntity = new ActionEntity();
-	// 	actionUpdateEntity.title = "test Updated";
-	// 	actionUpdateEntity.description = "test description Updated";
-	// 	actionUpdateEntity.objective = "test objective Updated";
-	// 	actionUpdateEntity.instrumentType = InstrumentType.ECONOMIC;
-	// 	actionUpdateEntity.status = ActionStatus.IMPLEMENTED;
-	// 	actionUpdateEntity.startYear = 2025;
-	// 	actionUpdateEntity.natAnchor = NatAnchor.OTHER;
-
-	// 	const actionEntity = new ActionEntity();
-	// 	actionEntity.title = "test";
-	// 	actionEntity.description = "test description";
-	// 	actionEntity.objective = "test objective";
-	// 	actionEntity.instrumentType = InstrumentType.POLICY;
-	// 	actionEntity.status = ActionStatus.PLANNED;
-	// 	actionEntity.startYear = 2024;
-	// 	actionEntity.natAnchor = NatAnchor.NDC;
+		const programmeUpdateEntity = new ProgrammeEntity();
+		programmeUpdateEntity.title = "test";
+		programmeUpdateEntity.description = "test description";
+		programmeUpdateEntity.objective = "test objective";
+		programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateEntity.startYear = 2024;
+		programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateEntity.investment = 1000;
+		programmeUpdateEntity.comments = "test comment"
+		programmeUpdateEntity.documents = [documentDto, addedDocumentDto];
 
 
-	// 	jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
-	// 	jest.spyOn(kpiServiceMock, 'findKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2])
+		const programmeEntity = new ProgrammeEntity();
+		programmeEntity.title = "test";
+		programmeEntity.description = "test description";
+		programmeEntity.objective = "test objective";
+		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeEntity.startYear = 2020;
+		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeEntity.investment = 100;
+		programmeEntity.comments = "test comment"
+		programmeEntity.documents = [documentDto];
 
-	// 	entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
-	// 		const emMock = {
-	// 			save: jest.fn().mockResolvedValueOnce(actionUpdateEntity),
-	// 			remove: jest.fn().mockResolvedValueOnce(actionUpdateDto),
-	// 		};
-	// 		const savedAction = await callback(emMock);
-	// 		// expect(emMock.save).toHaveBeenNthCalledWith(1, actionUpdateEntity);
-	// 		expect(emMock.save).toHaveBeenCalledTimes(5);
-	// 		expect(emMock.remove).toHaveBeenCalledTimes(1);
-	// 		return savedAction;
-	// 	});
+		jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(programmeEntity);
 
-	// 	const result = await service.updateAction(actionUpdateDto, user);
-	// 	expect(result.statusCode).toEqual(HttpStatus.OK);
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(programmeUpdateEntity),
+				remove: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedAction;
+		});
 
-	// 	expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
-	// 	expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-	// 	expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
-	// 	expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+		const result = await service.updateProgramme(programmeUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
 
-	// })
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	})
+
+	it('should update kpis in action when user updated the Kpis', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const kpiDto1 = new KpiEntity();
+		kpiDto1.kpiId = 1;
+		kpiDto1.name = "KPI 1";
+		kpiDto1.creatorType = "action";
+		kpiDto1.expected = 100;
+
+		const kpiDto2 = new KpiEntity();
+		kpiDto2.kpiId = 2;
+		kpiDto2.name = "KPI 2";
+		kpiDto2.creatorType = "action";
+		kpiDto2.expected = 100;
+
+		const kpiAdded = new KpiUpdateDto();
+		kpiDto2.name = "KPI Added";
+		kpiDto2.creatorType = "action";
+		kpiDto2.expected = 300;
+
+		const programmeUpdateDto = new ProgrammeUpdateDto();
+		programmeUpdateDto.title = "test";
+		programmeUpdateDto.description = "test description";
+		programmeUpdateDto.objective = "test objective";
+		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateDto.startYear = 2024;
+		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateDto.investment = 1000;
+		programmeUpdateDto.comments = "test comment"
+		programmeUpdateDto.kpis = [kpiDto1, kpiAdded]
+
+		const programmeUpdateEntity = new ProgrammeEntity();
+		programmeUpdateEntity.title = "test";
+		programmeUpdateEntity.description = "test description";
+		programmeUpdateEntity.objective = "test objective";
+		programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateEntity.startYear = 2024;
+		programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateEntity.investment = 1000;
+		programmeUpdateEntity.comments = "test comment"
+
+		const programmeEntity = new ProgrammeEntity();
+		programmeEntity.title = "test";
+		programmeEntity.description = "test description";
+		programmeEntity.objective = "test objective";
+		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeEntity.startYear = 2020;
+		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeEntity.investment = 100;
+		programmeEntity.comments = "test comment"
+
+
+		jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(programmeEntity);
+		jest.spyOn(kpiServiceMock, 'findKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2])
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(programmeUpdateEntity),
+				remove: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(5);
+			expect(emMock.remove).toHaveBeenCalledTimes(1);
+			return savedAction;
+		});
+
+		const result = await service.updateProgramme(programmeUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	})
 })

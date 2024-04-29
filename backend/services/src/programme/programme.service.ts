@@ -25,9 +25,9 @@ import { ProgrammeViewDto } from "../dtos/programme.view.dto";
 import { ActivityEntity } from "../entities/activity.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
-import { ProgrammeViewEntity } from "src/entities/programme.view.entity";
-import { ProgrammeUpdateDto } from "src/dtos/programmeUpdate.dto";
-import { KpiService } from "src/kpi/kpi.service";
+import { ProgrammeViewEntity } from "../entities/programme.view.entity";
+import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
+import { KpiService } from "../kpi/kpi.service";
 
 @Injectable()
 export class ProgrammeService {
@@ -224,8 +224,6 @@ export class ProgrammeService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
-
-		programmeUpdate.path = "";
 
 		// Parent Update Resolve
 
