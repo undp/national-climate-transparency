@@ -33,8 +33,8 @@ import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterf
 import { getValidationRules } from '../../../Utils/validationRules';
 import { getFormTitle, joinTwoArrays } from '../../../Utils/utilServices';
 import { ProgrammeMigratedData } from '../../../Definitions/programmeDefinitions';
-import { ActivityData } from '../../../Definitions/activityDefinitions';
-import { SupportData } from '../../../Definitions/supportDefinitions';
+// import { ActivityData } from '../../../Definitions/activityDefinitions';
+// import { SupportData } from '../../../Definitions/supportDefinitions';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -91,17 +91,17 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Activity Attachment state
 
-  const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
-  const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
-  const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
+  // const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
+  // const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
+  // const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
 
-  const [activityData, setActivityData] = useState<ActivityData[]>([]);
-  const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
-  const [activityPageSize, setActivityPageSize] = useState<number>(10);
+  // const [activityData, setActivityData] = useState<ActivityData[]>([]);
+  // const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
+  // const [activityPageSize, setActivityPageSize] = useState<number>(10);
 
-  const [supportData, setSupportData] = useState<SupportData[]>([]);
-  const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
-  const [supportPageSize, setSupportPageSize] = useState<number>(10);
+  // const [supportData, setSupportData] = useState<SupportData[]>([]);
+  // const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
+  // const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
   // KPI State
 
@@ -137,6 +137,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           tempActionData.push({
             id: action.actionId,
             title: action.title,
+            instrumentType: action.instrumentType,
           });
         });
         setActionList(tempActionData);
@@ -242,33 +243,33 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchConnectedProjectIds();
 
-    const fetchConnectedActivityIds = async () => {
-      if (method !== 'create') {
-        const connectedActivityIds: string[] = [];
-        // const payload = {
-        //   page: 1,
-        //   size: 100,
-        //   filterAnd: [
-        //     {
-        //       key: 'actionId',
-        //       operation: '=',
-        //       value: entId,
-        //     },
-        //   ],
-        //   sort: {
-        //     key: 'activityId',
-        //     order: 'ASC',
-        //   },
-        // };
-        // const response: any = await post('national/activities/query', payload);
-        // response.data.forEach((act: any) => {
-        //   connectedActivityIds.push(act.activityId);
-        // });
-        setAttachedActivityIds(connectedActivityIds);
-        setTempActivityIds(connectedActivityIds);
-      }
-    };
-    fetchConnectedActivityIds();
+    // const fetchConnectedActivityIds = async () => {
+    //   if (method !== 'create') {
+    //     const connectedActivityIds: string[] = [];
+    //     const payload = {
+    //       page: 1,
+    //       size: 100,
+    //       filterAnd: [
+    //         {
+    //           key: 'actionId',
+    //           operation: '=',
+    //           value: entId,
+    //         },
+    //       ],
+    //       sort: {
+    //         key: 'activityId',
+    //         order: 'ASC',
+    //       },
+    //     };
+    //     const response: any = await post('national/activities/query', payload);
+    //     response.data.forEach((act: any) => {
+    //       connectedActivityIds.push(act.activityId);
+    //     });
+    //     setAttachedActivityIds(connectedActivityIds);
+    //     setTempActivityIds(connectedActivityIds);
+    //   }
+    // };
+    // fetchConnectedActivityIds();
   }, []);
 
   // Populating Form Migrated Fields, when migration data changes
@@ -646,6 +647,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       allowClear
                       disabled={isView}
                       showSearch
+                      onChange={(value: any) => {
+                        form.setFieldsValue({
+                          instrumentType: actionList.find((action) => action.id === value)
+                            ?.instrumentType,
+                        });
+                      }}
                     >
                       {actionList.map((action) => (
                         <Option key={action.id} value={action.id}>

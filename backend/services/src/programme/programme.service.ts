@@ -592,7 +592,7 @@ export class ProgrammeService {
 		programmeViewDto.instrumentType = programme.action?.instrumentType;
 		programmeViewDto.affectedSectors = programme.affectedSectors;
 		programmeViewDto.affectedSubSector = programme.affectedSubSector;
-		programmeViewDto.programmeStatus = null;
+		programmeViewDto.programmeStatus = programme.programmeStatus;
 		programmeViewDto.recipientEntity = recipientEntity;
 		programmeViewDto.startYear = programme.startYear;
 		programmeViewDto.interNationalImplementor = interNationalImplementor;
