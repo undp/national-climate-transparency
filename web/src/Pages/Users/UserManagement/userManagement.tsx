@@ -3,12 +3,10 @@ import {
   EditOutlined,
   EllipsisOutlined,
   ExperimentOutlined,
-  EyeOutlined,
   FilterOutlined,
   PlusOutlined,
   KeyOutlined,
   StarOutlined,
-  ToolOutlined,
 } from '@ant-design/icons';
 import {
   Button,
@@ -29,24 +27,16 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
 import { RoleIcon } from '../../../Components/common/RoleIcon/role.icon';
-import { ProfileIcon } from '../../../Components/common/ProfileIcon/profile.icon';
 import { CompanyRole } from '../../../Enums/company.role.enum';
 
 import {
   GovBGColor,
-  CertBGColor,
-  // eslint-disable-next-line import/named
   ObsBGColor,
   AdminBGColor,
   RootBGColor,
-  ManagerBGColor,
-  ViewBGColor,
   AdminColor,
   RootColor,
-  ManagerColor,
-  ViewColor,
   GovColor,
-  // eslint-disable-next-line import/named
   ObsColor,
 } from '../../../Styles/role.color.constants';
 
@@ -62,7 +52,6 @@ import { Action } from '../../../Enums/action.enum';
 import { User } from '../../../Entities/user';
 import { PersonDash, PersonCheck } from 'react-bootstrap-icons';
 import { UserManagementColumns } from '../../../Enums/user.management.columns.enum';
-// import { OrganisationType } from '../../../Definitions/organisation.type.enum';
 import './userManagementComponent.scss';
 import '../../../Styles/common.table.scss';
 import { UserState } from '../../../Enums/user.state.enum';
@@ -78,7 +67,6 @@ const UserManagement = () => {
     UserManagementColumns.email,
     UserManagementColumns.phoneNo,
     UserManagementColumns.organisation,
-    // UserManagementColumns.organisationType,
     UserManagementColumns.status,
     UserManagementColumns.role,
     UserManagementColumns.actions,
@@ -92,7 +80,6 @@ const UserManagement = () => {
     navigate('/userManagement/addUSer');
   };
 
-  // const [formModal] = Form.useForm();
   const { post, put } = useConnection();
   const [totalUser, setTotalUser] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -103,12 +90,10 @@ const UserManagement = () => {
   const [searchValueUsers, setSearchValueUsers] = useState<string>('');
   const [networksearchUsers, setNetworkSearchUsers] = useState<string>('');
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
-  // const [filterByOrganisationType, setFilterByOrganisationType] = useState<string>('All');
   const [filterByRole, setFilterByRole] = useState<string>('All');
   const [sortOrder, setSortOrder] = useState<string>('');
   const [sortField, setSortField] = useState<string>('');
   const [userStatusChangeModalRecord, setUserStatusChangeModalRecord] = useState<any>();
-  //   const { i18n, t } = useTranslation(["user"]);
   const [actionInfo, setActionInfo] = useState<any>({});
   const [errorMsg, setErrorMsg] = useState<any>('');
   const [openDeactivationConfirmationModal, setOpenDeactivationConfirmationModal] = useState(false);

@@ -4,28 +4,10 @@ import { useEffect, useState } from 'react';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useTranslation } from 'react-i18next';
 import * as Icon from 'react-bootstrap-icons';
+import { CustomFormatDate } from '../../Utils/utilServices';
+import { UpdateProps } from '../../Definitions/InterfacesAndType/updatesInterface';
 
-const formatDate = (timestamp: number) => {
-  const date = new Date(timestamp * 1000);
-  const day = date.getDate();
-  const month = date.toLocaleString('default', { month: 'long' });
-  const year = date.getFullYear();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-
-  const formattedTime = `${day} ${month} ${year} @ ${hours.toString().padStart(2, '0')}:${minutes
-    .toString()
-    .padStart(2, '0')}`;
-
-  return formattedTime;
-};
-
-interface Props {
-  recordType: any;
-  recordId: any;
-}
-
-const UpdatesTimeline: React.FC<Props> = ({ recordType, recordId }) => {
+const UpdatesTimeline: React.FC<UpdateProps> = ({ recordType, recordId }) => {
   const { post } = useConnection();
   const { t } = useTranslation(['updateTimeline']);
 
@@ -42,11 +24,6 @@ const UpdatesTimeline: React.FC<Props> = ({ recordType, recordId }) => {
       const response: any = await post('national/log/query', payload);
       if (response) {
         setHistoryData(response.data);
-        console.log(
-          'Updates Component-------------------------------------------------------------------------------',
-          response,
-          recordId
-        );
       }
     } catch (error: any) {
       message.open({
@@ -124,19 +101,10 @@ const UpdatesTimeline: React.FC<Props> = ({ recordType, recordId }) => {
                     {item.logData && ` - ${item.logData}`}
                     <span className="date">
                       {' - '}
-                      {`${formatDate(Number(item.createdTime))}`}
+                      {`${CustomFormatDate(Number(item.createdTime))}`}
                     </span>
                   </span>
                 }
-                // subTitle={`${formatDate(Number(item.createdTime))}`}
-                // description={
-                //   <div>
-                //     {/* Add each line of text here */}
-                //     <div>scjndkcjdjcsncjdjcskdsdc</div>
-                //     <div>scjndkcjdjcsncjdjcskdsdc</div>
-                //     {/* Add more lines as needed */}
-                //   </div>
-                // }
                 icon={getClassByEventType(item.eventType)}
                 status="process"
               />
