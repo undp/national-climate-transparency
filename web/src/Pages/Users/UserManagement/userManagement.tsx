@@ -279,8 +279,7 @@ const UserManagement = () => {
   const columns = [
     {
       title: '',
-      // dataIndex: 'logo',
-      dataIndex: 'name',
+      dataIndex: 'logo',
       key: UserManagementColumns.logo,
       width: '20px',
       align: 'left' as const,
@@ -368,7 +367,8 @@ const UserManagement = () => {
       render: (_: any, record: UserTableDataType) => {
         return (
           ability.can(Action.Update, plainToClass(User, record)) &&
-          record.id !== userInfoState?.id && (
+          // eslint-disable-next-line eqeqeq
+          record.id != userInfoState?.id && (
             <Popover placement="bottomRight" content={actionMenu(record)} trigger="click">
               <EllipsisOutlined
                 rotate={90}

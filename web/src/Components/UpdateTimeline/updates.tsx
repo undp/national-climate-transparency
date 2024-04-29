@@ -2,7 +2,6 @@ import './updates.scss';
 import { Skeleton, Steps, message } from 'antd';
 import { useEffect, useState } from 'react';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-// import { LogEventType } from '../../../../backend/services/src/enums/shared.enum';
 import { useTranslation } from 'react-i18next';
 import * as Icon from 'react-bootstrap-icons';
 

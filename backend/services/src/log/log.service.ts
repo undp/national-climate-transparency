@@ -15,13 +15,8 @@ export class LogService {
 
     async getLogData(logDto: LogDto) {
         const eventTypes = [
-            // LogEventType.PROGRAMME_LINKED,
             LogEventType.LINKED_TO_ACTION,
-            LogEventType.UNLINKED_FROM_ACTION,
-            // LogEventType.PROJECT_LINKED,
             LogEventType.LINKED_TO_PROGRAMME,
-            LogEventType.UNLINKED_FROM_PROGRAMME,
-            // LogEventType.ACTIVITY_LINKED,
             LogEventType.LINKED_TO_PROJECT
         ];
 

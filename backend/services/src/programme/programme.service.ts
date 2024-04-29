@@ -118,7 +118,7 @@ export class ProgrammeService {
 					});
 					// linking projects and updating paths of projects and activities
 					if (projects && projects.length > 0) {
-						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programmeDto, user, em);
+						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
 					}
 				}
 				return savedProgramme;
@@ -255,7 +255,7 @@ export class ProgrammeService {
 			}
 		}
 
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto, user, this.entityManager);
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, user, this.entityManager);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 
