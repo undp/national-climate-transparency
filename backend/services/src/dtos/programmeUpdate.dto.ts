@@ -9,9 +9,9 @@ import { KpiUpdateDto } from "./kpi.update.dto";
 export class ProgrammeUpdateDto {
 
     @IsString()
-	@IsNotEmpty()
-	@ApiProperty()
-	programmeId: string;
+    @IsNotEmpty()
+    @ApiProperty()
+    programmeId: string;
 
     @IsNotEmpty()
     @IsString()
@@ -79,6 +79,7 @@ export class ProgrammeUpdateDto {
   
     @IsNotEmpty()
     @IsNumber()
+    @Min(0)
     @ApiProperty()
     investment: number;
 
@@ -86,12 +87,12 @@ export class ProgrammeUpdateDto {
     @IsEnum(ProgrammeStatus, {
 			each: true,
 			message: 'Invalid Programme Status. Supported following status:' + Object.values(ProgrammeStatus)
-	})
-	@ApiProperty({
-		type: [String],
-		enum: Object.values(ProgrammeStatus),
-	})
-	programmeStatus: number;
+    })
+    @ApiProperty({
+      type: [String],
+      enum: Object.values(ProgrammeStatus),
+    })
+    programmeStatus: number;
   
     @IsOptional()
     @ApiPropertyOptional()
@@ -99,48 +100,48 @@ export class ProgrammeUpdateDto {
     comments: string;
 
     @IsOptional()
-	@ApiPropertyOptional(
-		{
-			type: "array",
-			example: [{
-				title: "document 1",
-				data: "base64 document string"
-			}],
-			items: {
-				$ref: getSchemaPath(DocumentDto),
-			},
-		}
-	)
-	newDocuments: DocumentDto[];
+    @ApiPropertyOptional(
+      {
+        type: "array",
+        example: [{
+          title: "document 1",
+          data: "base64 document string"
+        }],
+        items: {
+          $ref: getSchemaPath(DocumentDto),
+        },
+      }
+    )
+    newDocuments: DocumentDto[];
 
-	@IsOptional()
-	@ApiPropertyOptional(
-		{
-			type: "array",
-			example: ["http://test.com/documents/programme_documents/testDoc1_1713334127897.csv"],
-		}
-	)
-	removedDocuments: string[];
+    @IsOptional()
+    @ApiPropertyOptional(
+      {
+        type: "array",
+        example: ["http://test.com/documents/programme_documents/testDoc1_1713334127897.csv"],
+      }
+    )
+    removedDocuments: string[];
 
     @IsOptional()
     @ApiPropertyOptional()
     actionId?: string;
 
     @IsOptional()
-	@ValidateNested()
-	@ApiPropertyOptional(
-		{
-			type: "array",
-			example: [{
-				kpiId: "1",
-				name: "KPI 1",
-				creatorType: "action",
-				expected: 100
-		}],
-			items: {
-				$ref: getSchemaPath(KpiUpdateDto),
-			},
-		}
-	)
-	kpis: KpiUpdateDto[];
+    @ValidateNested()
+    @ApiPropertyOptional(
+      {
+        type: "array",
+        example: [{
+          kpiId: "1",
+          name: "KPI 1",
+          creatorType: "action",
+          expected: 100
+      }],
+        items: {
+          $ref: getSchemaPath(KpiUpdateDto),
+        },
+      }
+    )
+    kpis: KpiUpdateDto[];
 }
