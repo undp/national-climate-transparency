@@ -250,8 +250,8 @@ export class ProgrammeService {
 
 		if (programmeUpdateDto.removedDocuments && programmeUpdateDto.removedDocuments.length > 0) {
 			if (documents.length > 0) {
-				documents = documents.filter(item => !programmeUpdateDto.removedDocuments.some(url => url === item.url));
-			} else {
+				documents = documents.filter(obj => !programmeUpdateDto.removedDocuments.includes(obj.url));
+			} else {                                                    
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"programme.noDocumentsFound",
@@ -274,7 +274,9 @@ export class ProgrammeService {
 			};
 		}
 
-		if (documents.length > 0) {
+		if (documents.length === 0) {
+			programmeUpdate.documents = null;
+		} else if (documents.length > 0){
 			programmeUpdate.documents = documents;
 		}
 
