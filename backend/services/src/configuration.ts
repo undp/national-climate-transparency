@@ -41,7 +41,8 @@ export default () => ({
     disabled: process.env.IS_EMAIL_DISABLED === "true" ? true : false,
     disableLowPriorityEmails:
       process.env.DISABLE_LOW_PRIORITY_EMAIL === "true" ? true : false,
-    getemailprefix: process.env.EMAILPREFIX || "🏬📐 🇦🇶",
+    // getemailprefix: process.env.EMAILPREFIX || "🏬📐 🇦🇶",
+    getemailprefix: process.env.EMAILPREFIX || "",
     adresss: process.env.HOST_ADDRESS || "Address <br>Region, Country Zipcode"
   },
   s3CommonBucket: {

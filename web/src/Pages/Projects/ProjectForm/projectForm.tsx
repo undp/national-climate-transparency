@@ -20,6 +20,7 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { getFormTitle } from '../../../Utils/utilServices';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -886,8 +887,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             </Row>
           </div>
           {isView && (
-            <div className="form-section-card">
+            <div className="form-section-timelinecard">
               <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              <UpdatesTimeline recordType={'project'} recordId={entId} />
             </div>
           )}
           {method === 'create' && (

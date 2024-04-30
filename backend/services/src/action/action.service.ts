@@ -86,7 +86,7 @@ export class ActionService {
 				if (savedAction) {
 					// link programmes here
 					if (programmes && programmes.length > 0) {
-						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, actionDto, user, em);
+						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, action.actionId, user, em);
 					}
 					if (actionDto.kpis) {
 						kpiList.forEach(async kpi => {

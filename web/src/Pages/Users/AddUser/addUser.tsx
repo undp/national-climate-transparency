@@ -4,7 +4,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { useAbilityContext } from '../../../Casl/Can';
 import { useEffect, useState } from 'react';
-import { Row, Col, Button, Form, Input, message, Tooltip, Skeleton, Radio, Select } from 'antd';
+import { Row, Col, Button, Form, Input, message, Skeleton, Radio, Select } from 'antd';
 import PhoneInput, {
   formatPhoneNumber,
   formatPhoneNumberIntl,
@@ -20,7 +20,7 @@ import ChangePasswordModel from '../../../Components/Models/changePasswordModel'
 import { Role } from '../../../Enums/role.enum';
 import { Sector } from '../../../Enums/sector.enum';
 import { Organisation } from '../../../Enums/organisation.enum';
-import { BankOutlined, ExperimentOutlined, EyeOutlined, StarOutlined } from '@ant-design/icons';
+import { BankOutlined, ExperimentOutlined, StarOutlined } from '@ant-design/icons';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -41,10 +41,8 @@ const AddUser = () => {
   const { updateToken } = useConnection();
   const { removeUserInfo } = useUserContext();
   const [loading, setLoading] = useState<boolean>(false);
-  // const [actionInfo, setActionInfo] = useState<any>({});
   const [isUpdate, setIsUpdate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingList, setLoadingList] = useState<boolean>(false);
   const [openPasswordChangeModal, setopenPasswordChangeModal] = useState(false);
   const [errorMsg, setErrorMsg] = useState<any>('');
   const { userInfoState } = useUserContext();
@@ -204,6 +202,7 @@ const AddUser = () => {
   const onChangeuserRole = (event: any) => {
     const value = event.target.value;
     setRole(value);
+    formOne.setFieldsValue({ subRole: undefined });
   };
 
   useEffect(() => {
@@ -252,6 +251,7 @@ const AddUser = () => {
                       message: '',
                     },
                     {
+                      // eslint-disable-next-line no-unused-vars
                       validator: async (rule, value) => {
                         if (
                           String(value).trim() === '' ||
@@ -277,6 +277,7 @@ const AddUser = () => {
                       message: '',
                     },
                     {
+                      // eslint-disable-next-line no-unused-vars
                       validator: async (rule, value) => {
                         if (
                           String(value).trim() === '' ||
@@ -317,6 +318,7 @@ const AddUser = () => {
                           required: false,
                         },
                         {
+                          // eslint-disable-next-line no-unused-vars
                           validator: async (rule: any, value: any) => {
                             const phoneNo = formatPhoneNumber(String(value));
                             if (String(value).trim() !== '') {
@@ -341,10 +343,9 @@ const AddUser = () => {
                       <PhoneInput
                         placeholder={t('addUser:phoneNo')}
                         international
-                        // value={contactNoInput}
                         defaultCountry="LK"
                         countryCallingCodeEditable={false}
-                        onChange={(v) => {}}
+                        onChange={() => {}}
                         countries={countries}
                       />
                     </Form.Item>
@@ -362,40 +363,13 @@ const AddUser = () => {
                       },
                     ]}
                   >
-                    <Select
-                      size="large"
-                      // style={{ fontSize: inputFontSize }}
-                      allowClear
-                      showSearch
-                    >
+                    <Select size="large" allowClear showSearch>
                       {Object.values(Organisation).map((instrument) => (
                         <Select.Option key={instrument} value={instrument}>
                           {instrument}
                         </Select.Option>
                       ))}
                     </Select>
-                    {/* rules={[
-                    {
-                      required: true,
-                      message: '',
-                    },
-                    {
-                      validator: async (rule, value) => {
-                        if (
-                          String(value).trim() === '' ||
-                          String(value).trim() === undefined ||
-                          value === null ||
-                          value === undefined
-                        ) {
-                          throw new Error(
-                            `${t('addUser:organisation')} ${t('addUser:isRequired')}`
-                          );
-                        }
-                      },
-                    },
-                  ]}
-                >
-                  <Input size="large" /> */}
                   </Form.Item>
                 )}
               </div>

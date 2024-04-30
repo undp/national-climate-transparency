@@ -23,6 +23,7 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
 import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 import { getProgrammeTableColumns } from '../../../Definitions/columns/programmeColumns';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -993,8 +994,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             </div>
             {isView && (
-              <div className="form-section-card">
+              <div className="form-section-timelinecard">
                 <div className="form-section-header">{t('updatesInfoTitle')}</div>
+                <UpdatesTimeline recordType={'action'} recordId={entId} />
               </div>
             )}
             {method === 'create' && (

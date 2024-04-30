@@ -70,3 +70,18 @@ export const getFormTitle = (
     return [`view${formType}Title`, `view${formType}Desc`];
   }
 };
+
+export const CustomFormatDate = (timestamp: number) => {
+  const date = new Date(timestamp * 1000);
+  const day = date.getDate();
+  const month = date.toLocaleString('default', { month: 'long' });
+  const year = date.getFullYear();
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+
+  const formattedTime = `${day} ${month} ${year} @ ${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}`;
+
+  return formattedTime;
+};

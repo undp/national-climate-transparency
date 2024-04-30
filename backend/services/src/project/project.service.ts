@@ -238,7 +238,7 @@ export class ProjectService {
 				);
 			}
 		}
-		const proj = await this.linkUnlinkService.linkProjectsToProgramme(programme, projects, linkProjectsDto, user, this.entityManager);
+		const proj = await this.linkUnlinkService.linkProjectsToProgramme(programme, projects, linkProjectsDto.programmeId, user, this.entityManager);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 

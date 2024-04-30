@@ -226,7 +226,7 @@ export class LinkUnlinkService {
 								EntityType.ACTIVITY,
 								activity.activityId,
 								user.id,
-								linkActivitiesDto
+								linkActivitiesDto.parentId
 							)
 						);
 					}
