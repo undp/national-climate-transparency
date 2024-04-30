@@ -79,10 +79,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 
-  // Popover state
-
-  const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
-
   // Project Attachment state
 
   const [allProjectIds, setAllProjectIdList] = useState<string[]>([]);
@@ -367,8 +363,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchData();
-
-    setDetachOpen(Array(tempProjectIds.length).fill(false));
   }, [tempProjectIds]);
 
   useEffect(() => {
@@ -560,12 +554,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Detach Programme
 
-  const handleDetachOpen = (record: ProjectData) => {
-    const newOpenList = Array(tempProjectIds.length).fill(false);
-    newOpenList[tempProjectIds.indexOf(record.projectId)] = true;
-    setDetachOpen(newOpenList);
-  };
-
   const detachProject = async (prjId: string) => {
     const filteredIds = tempProjectIds.filter((id) => id !== prjId);
     setTempProjectIds(filteredIds);
@@ -613,15 +601,14 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           <>
             {!isView && (
               <Popover
+                showArrow={false}
+                trigger={'click'}
                 placement="bottomRight"
                 content={actionMenu(record)}
-                trigger="click"
-                open={detachOpen[tempProjectIds.indexOf(record.projectId)]}
               >
                 <EllipsisOutlined
                   rotate={90}
                   style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-                  onClick={() => handleDetachOpen(record)}
                 />
               </Popover>
             )}

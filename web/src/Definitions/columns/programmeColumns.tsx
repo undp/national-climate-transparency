@@ -5,10 +5,7 @@ import { ProgrammeData } from '../programmeDefinitions';
 
 export const getProgrammeTableColumns = (
   isView: boolean,
-  detachProgramme: (arg0: string) => void,
-  handleDetachOpen: (arg0: any) => void,
-  detachOpen: boolean[],
-  tempProgramIds: string[]
+  detachProgramme: (arg0: string) => void
 ) => {
   const { t } = useTranslation(['actionForm']);
 
@@ -64,15 +61,14 @@ export const getProgrammeTableColumns = (
           <>
             {!isView && (
               <Popover
+                showArrow={false}
+                trigger={'click'}
                 placement="bottomRight"
-                trigger="click"
                 content={actionMenu(record)}
-                open={detachOpen[tempProgramIds.indexOf(record.programmeId)]}
               >
                 <EllipsisOutlined
                   rotate={90}
                   style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-                  onClick={() => handleDetachOpen(record)}
                 />
               </Popover>
             )}

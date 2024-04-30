@@ -62,10 +62,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 
-  // Popover state
-
-  const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
-
   // Programme Attachments state
 
   const [allProgramIds, setAllProgramIdList] = useState<string[]>([]);
@@ -343,8 +339,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchAttachmentData();
-
-    setDetachOpen(Array(tempProgramIds.length).fill(false));
   }, [tempProgramIds]);
 
   useEffect(() => {
@@ -512,12 +506,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Detach Programme
 
-  const handleDetachOpen = (record: ProgrammeData) => {
-    const newOpenList = Array(tempProgramIds.length).fill(false);
-    newOpenList[tempProgramIds.indexOf(record.programmeId)] = true;
-    setDetachOpen(newOpenList);
-  };
-
   const detachProgramme = async (prgId: string) => {
     const filteredIds = tempProgramIds.filter((id) => id !== prgId);
     setTempProgramIds(filteredIds);
@@ -568,13 +556,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Programme Column Definition
 
-  const progTableColumns = getProgrammeTableColumns(
-    isView,
-    detachProgramme,
-    handleDetachOpen,
-    detachOpen,
-    tempProgramIds
-  );
+  const progTableColumns = getProgrammeTableColumns(isView, detachProgramme);
 
   // Activity Column Definition
 

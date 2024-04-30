@@ -56,10 +56,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
-  // Popover state
-
-  const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
-
   // Activities state
 
   const [allActivityIds, setAllActivityList] = useState<string[]>([]);
@@ -131,7 +127,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     // Get the Support Data for each attached Activity
     setSupportData([]);
-    setDetachOpen(Array(selectedActivityIds.length).fill(false));
   }, [selectedActivityIds]);
 
   useEffect(() => {
@@ -293,13 +288,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Dettach Project
 
-  const handleDetachOpen = (record: ActivityData) => {
-    console.log(record);
-    const newOpenList = Array(selectedActivityIds.length).fill(false);
-    newOpenList[selectedActivityIds.indexOf(record.activityId)] = true;
-    setDetachOpen(newOpenList);
-  };
-
   const detachActivity = (actId: string) => {
     console.log(actId);
     const filteredData = activityData.filter((act) => act.activityId !== actId);
@@ -354,15 +342,14 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       render: (record: any) => {
         return (
           <Popover
+            showArrow={false}
+            trigger={'click'}
             placement="bottomRight"
             content={actionMenu(record)}
-            trigger="click"
-            open={detachOpen[selectedActivityIds.indexOf(record.activityId)]}
           >
             <EllipsisOutlined
               rotate={90}
               style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => handleDetachOpen(record)}
             />
           </Popover>
         );
