@@ -14,7 +14,7 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { GraphUpArrow } from 'react-bootstrap-icons';
-import ActionMenu from '../../../Components/Popups/tableAction';
+import { actionMenu } from '../../../Components/Popups/tableAction';
 import { ProjectEntity } from '../../../Entities/project';
 
 interface Item {
@@ -364,17 +364,17 @@ const projectList = () => {
             showArrow={false}
             trigger={'click'}
             placement="bottomRight"
-            content={
-              <ActionMenu
-                calledIn="project"
-                ability={ability}
-                entity={ProjectEntity}
-                recordId={record.projectId}
-                setOpenAttaching={setOpenAttaching}
-                setSelectedEntityId={setSelectedProjectId}
-                getAttachedEntityIds={getAttachedActivityIds}
-              />
-            }
+            content={actionMenu(
+              'project',
+              ability,
+              ProjectEntity,
+              record.projectId,
+              getAttachedActivityIds,
+              setOpenAttaching,
+              setSelectedProjectId,
+              navigate,
+              t
+            )}
           >
             <EllipsisOutlined
               rotate={90}

@@ -6,37 +6,25 @@ import { ProjectEntity } from '../../Entities/project';
 import { ActivityEntity } from '../../Entities/activity';
 import { SupportEntity } from '../../Entities/support';
 import { EditOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 
-interface Props {
-  calledIn: 'action' | 'programme' | 'project' | 'activity' | 'support';
-  ability: any;
-  entity: ActionEntity | ProgrammeEntity | ProjectEntity | ActivityEntity | SupportEntity;
-  recordId: string;
-  getAttachedEntityIds: (recordId: string) => void;
-  setOpenAttaching: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedEntityId: React.Dispatch<React.SetStateAction<string | undefined>>;
-}
-
-const ActionMenu: React.FC<Props> = ({
-  calledIn,
-  ability,
-  entity,
-  recordId,
-  setOpenAttaching,
-  setSelectedEntityId,
-  getAttachedEntityIds,
-}) => {
-  const navigate = useNavigate();
-  const { t } = useTranslation(['tableAction']);
+export const actionMenu = (
+  calledIn: 'action' | 'programme' | 'project' | 'activity' | 'support',
+  ability: any,
+  entity: ActionEntity | ProgrammeEntity | ProjectEntity | ActivityEntity | SupportEntity,
+  recordId: string,
+  getAttachedEntityIds: (recordId: string) => void,
+  setOpenAttaching: React.Dispatch<React.SetStateAction<boolean>>,
+  setSelectedEntityId: React.Dispatch<React.SetStateAction<string | undefined>>,
+  navigate: any,
+  t: any
+) => {
   return (
     <List
       className="action-menu"
       size="small"
       dataSource={[
         {
-          text: ability.can(Action.Validate, entity) ? t('View/Validate') : t('View'),
+          text: ability.can(Action.Validate, entity) ? t('tableAction:View/Validate') : t('View'),
           icon: <InfoCircleOutlined style={{ color: '#9155FD' }} />,
           isDisabled: false,
           click: () => {
@@ -46,7 +34,7 @@ const ActionMenu: React.FC<Props> = ({
           },
         },
         {
-          text: t(`${calledIn}Attach`),
+          text: t(`tableAction:${calledIn}Attach`),
           icon: <PlusOutlined style={{ color: '#9155FD' }} />,
           isDisabled: !ability.can(Action.Update, entity),
           click: () => {
@@ -58,7 +46,7 @@ const ActionMenu: React.FC<Props> = ({
           },
         },
         {
-          text: t(`${calledIn}Edit`),
+          text: t(`tableAction:${calledIn}Edit`),
           icon: <EditOutlined style={{ color: '#9155FD' }} />,
           isDisabled: !ability.can(Action.Update, entity),
           click: () => {
@@ -79,5 +67,3 @@ const ActionMenu: React.FC<Props> = ({
     />
   );
 };
-
-export default ActionMenu;

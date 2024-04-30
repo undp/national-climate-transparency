@@ -19,7 +19,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
-import ActionMenu from '../../../Components/Popups/tableAction';
+import { actionMenu } from '../../../Components/Popups/tableAction';
 
 interface Item {
   key: number;
@@ -45,7 +45,7 @@ const actionList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['actionList']);
+  const { t } = useTranslation(['actionList', 'tableAction']);
 
   // General Page State
 
@@ -373,17 +373,17 @@ const actionList = () => {
             showArrow={false}
             trigger={'click'}
             placement="bottomRight"
-            content={
-              <ActionMenu
-                calledIn="action"
-                ability={ability}
-                entity={ActionEntity}
-                recordId={record.actionId}
-                setOpenAttaching={setOpenAttaching}
-                setSelectedEntityId={setSelectedActionId}
-                getAttachedEntityIds={getAttachedProgrammeIds}
-              />
-            }
+            content={actionMenu(
+              'action',
+              ability,
+              ActionEntity,
+              record.actionId,
+              getAttachedProgrammeIds,
+              setOpenAttaching,
+              setSelectedActionId,
+              navigate,
+              t
+            )}
           >
             <EllipsisOutlined
               rotate={90}

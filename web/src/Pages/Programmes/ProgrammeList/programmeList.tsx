@@ -14,7 +14,7 @@ import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import { ProgrammeEntity } from '../../../Entities/programme';
 import { Layers } from 'react-bootstrap-icons';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
-import ActionMenu from '../../../Components/Popups/tableAction';
+import { actionMenu } from '../../../Components/Popups/tableAction';
 
 interface Item {
   key: number;
@@ -351,18 +351,17 @@ const programmeList = () => {
             showArrow={false}
             trigger={'click'}
             placement="bottomRight"
-            content={
-              <ActionMenu
-                key={record.key}
-                calledIn="programme"
-                ability={ability}
-                entity={ProgrammeEntity}
-                recordId={record.programmeId}
-                setOpenAttaching={setOpenAttaching}
-                setSelectedEntityId={setSelectedProgrammeId}
-                getAttachedEntityIds={getAttachedProjectIds}
-              />
-            }
+            content={actionMenu(
+              'programme',
+              ability,
+              ProgrammeEntity,
+              record.programmeId,
+              getAttachedProjectIds,
+              setOpenAttaching,
+              setSelectedProgrammeId,
+              navigate,
+              t
+            )}
           >
             <EllipsisOutlined
               rotate={90}
