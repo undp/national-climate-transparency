@@ -3,26 +3,11 @@ import '../../../Styles/app.scss';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import './actionList.scss';
 import { Action } from '../../../Enums/action.enum';
-import {
-  Button,
-  Col,
-  Row,
-  Input,
-  Dropdown,
-  Popover,
-  List,
-  Typography,
-  message,
-  Radio,
-  Space,
-  MenuProps,
-} from 'antd';
+import { Button, Col, Row, Input, Dropdown, Popover, message, Radio, Space, MenuProps } from 'antd';
 import {
   AppstoreOutlined,
-  EditOutlined,
   EllipsisOutlined,
   FilterOutlined,
-  InfoCircleOutlined,
   PlusOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
@@ -34,6 +19,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
+import ActionMenu from '../../../Components/Popups/tableAction';
 
 interface Item {
   key: number;
@@ -323,60 +309,6 @@ const actionList = () => {
     }
   }, [toBeAttached]);
 
-  // Popup Menu for Action List
-
-  const actionMenu = (record: any) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: 'View/Validate',
-            icon: <InfoCircleOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                navigate(`/actions/view/${record.actionId}`);
-              }
-            },
-          },
-          {
-            text: 'Attach Programme',
-            icon: <PlusOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                setOpenAttaching(true);
-                setSelectedActionId(record.actionId);
-                getAttachedProgrammeIds(record.actionId);
-                setOpenPopoverKey(undefined);
-              }
-            },
-          },
-          {
-            text: 'Edit Action',
-            icon: <EditOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                navigate(`/actions/edit/${record.actionId}`);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) =>
-          !item.isDisabled && (
-            <List.Item onClick={item.click}>
-              <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-              <span>{item.text}</span>
-            </List.Item>
-          )
-        }
-      />
-    );
-  };
-
   // Controlling Popover visibility
 
   const shouldPopoverOpen = (key: number) => {
@@ -442,16 +374,30 @@ const actionList = () => {
     },
     {
       title: '',
-      key: 'activityId',
+      key: 'actionId',
       align: 'right' as const,
       width: 6,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
         return (
           <Popover
-            open={shouldPopoverOpen(record.key)}
+            popupVisible={shouldPopoverOpen(record.key)}
             placement="bottomRight"
-            content={actionMenu(record)}
+            content={
+              <ActionMenu
+                calledIn="action"
+                ability={ability}
+                entity={ActionEntity}
+                recordId={record.actionId}
+                setOpenAttaching={setOpenAttaching}
+                setSelectedEntityId={setSelectedActionId}
+                getAttachedEntityIds={getAttachedProgrammeIds}
+                setOpenPopoverKey={setOpenPopoverKey}
+              />
+            }
+            onOpenChange={() => {
+              setOpenPopoverKey(undefined);
+            }}
           >
             <EllipsisOutlined
               rotate={90}

@@ -281,7 +281,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       ghgsAffected: '',
     };
 
-    const fetchData = async () => {
+    const fetchAttachmentData = async () => {
       if (tempProgramIds.length > 0) {
         tempProgramIds.forEach((progId) => {
           payload.filterOr.push({
@@ -339,7 +339,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         setActionMigratedData(tempMigratedData);
       }
     };
-    fetchData();
+    fetchAttachmentData();
 
     setDetachOpen(Array(tempProgramIds.length).fill(false));
   }, [tempProgramIds]);
