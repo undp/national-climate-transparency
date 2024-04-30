@@ -26,5 +26,7 @@
     "neededUSDHeader": "Estimated Amount Needed (USD)",
     "neededLCLHeader": "Estimated Amount Needed (XXX)",
     "recievedUSDHeader": "Amount Received (USD)",
-    "recievedLCLHeader":"Amount Received (XXX)"
+    "recievedLCLHeader":"Amount Received (XXX)",
+    
+    "detach": "Detach"
 }

@@ -29,7 +29,9 @@ export const actionMenu = (
       size="small"
       dataSource={[
         {
-          text: ability.can(Action.Validate, entity) ? t('tableAction:View/Validate') : t('View'),
+          text: ability.can(Action.Validate, entity)
+            ? t('tableAction:View/Validate')
+            : t('tableAction:View'),
           icon: <InfoCircleOutlined style={{ color: '#9155FD' }} />,
           isDisabled: false,
           click: () => {

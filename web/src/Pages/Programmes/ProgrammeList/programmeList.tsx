@@ -39,7 +39,7 @@ const programmeList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['programmeList']);
+  const { t } = useTranslation(['programmeList', 'tableAction']);
 
   // General Page State
 
