@@ -10,5 +10,14 @@
   "recipientEntity": "Recipient Entity (s)",
   "internationalImplementingEntity": "International Implementing Entity (s)",
   "nationalImplementingEntity": "National Implementing Entity (s)",
-  "estimatedInvestment": "Estimated investment needs (USD)"
+  "estimatedInvestment": "Estimated investment needs (USD)",
+  "validationStatus": "Validation Status",
+  "filterByProjectStatus": "Filter By Project Status",
+  "filterByValidationStatus": "Filter By Validation Status",
+  "attachActivity": "Attach Activity",
+  "attach" : "Attach",
+  "activityList" : "Activity List",
+  "cancel": "Cancel",
+  "activityLinkSuccess": "Activity/s Linked Successfully",
+  "addProject": "Add Project"
 }

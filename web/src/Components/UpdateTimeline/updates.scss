@@ -1,0 +1,117 @@
+
+.ant-steps-item-tail::after {
+    background-color: #ffff !important;
+    background-color: #ffff !important;
+    border-left: 1px dashed #d9d9d9;
+    border-style: dashed;
+    border-width: 1px;
+    border-color: #9155fd;
+  }
+
+.info-view {
+    .content {
+      margin-left: -8px;
+    }
+  
+    .map-content {
+      padding: 15px 0px;
+    }
+    .ant-steps-item-subtitle {
+      display: block;
+      margin-left: 0px;
+      font-size: 0.8rem;
+      color: #3A35414D;
+      margin-top: -12px;
+      font-weight: 500;
+    }
+  
+    .ant-steps-item-process
+      > .ant-steps-item-container
+      > .ant-steps-item-content
+      > .ant-steps-item-title {
+      color: #3A354199;
+      font-size: 0.8rem;
+      font-weight: 600;
+      strong {
+        color:#3a3541CC;
+      }
+      .date {
+        color:#3A35414D;
+      }
+    }
+  
+    .ant-steps-item-process
+      > .ant-steps-item-container
+      > .ant-steps-item-content
+      > .ant-steps-item-description {
+      font-size: 0.8rem;
+      font-weight: 500;
+    //   color: $body-text-color;
+    }
+  
+    .step-icon {
+      border-radius: 100%;
+      margin-right: 10px;
+      padding: 0.5rem 0.5rem 0.3rem 0.5rem;
+      font-size: 0.8rem;
+    }
+  
+    .created-step {
+      color: #ff8f56;
+      background-color: rgba(#fef1ad, 0.5);
+    }
+
+    .link-step {
+        color: #4f9d83;
+        background-color: rgba(#80ff00, 0.12);
+    }
+
+    .unlink-step {
+        color: #ff4d4f;
+        background-color: rgba(#ffd3d3, 0.5);
+    }
+
+    .addkpi-step {
+        color: rgba(#976ed7, 1);
+        background-color: rgba(#b7a4fe, 0.3);
+    }
+
+    .default-step {
+        background-color: rgba(#d7dfe2, 0.5);
+        color: #949599;
+    }
+    
+    // .auth-step {
+    //   color: #16b1ff;
+    //   background-color: rgba(#b9e2f4, 0.5);
+    // }
+    
+    // .upcom-auth-step {
+    //   color: #000000;
+    //   background-color: rgba(#1e1f1f, 0.5);
+    // }
+  
+    // .upcom-issue-step{
+    //   color: #000000;
+    //   background-color: rgba(#3A3541, 0.5);
+    // }
+  
+    // .reject-step {
+    //   color: #ff9900;
+    //   background-color: rgba(#feb39f, 0.3);
+    // }
+  
+    // .cert-step {
+    //   color: #4f9d83;
+    //   background-color: rgba(#80ff00, 0.12);
+    // }
+  
+    // .revoke-step {
+    //   color: rgba(#ff00c7, 0.56);
+    //   background-color: rgba(#ff9fde, 0.5);
+    // }
+  
+    // .region-list {
+    //   padding-top: 20px;
+    // }
+  }

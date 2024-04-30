@@ -47,3 +47,41 @@ export const addSpaces = (text: string) => {
   }
   return text.replace(/([A-Z])/g, ' $1').trim();
 };
+
+export const joinTwoArrays = (arrayOne: any[], arrayTwo: any[]) => {
+  const joinedArray = [...arrayOne];
+  arrayTwo.forEach((value) => {
+    if (!joinedArray.includes(value)) {
+      joinedArray.push(value);
+    }
+  });
+  return joinedArray;
+};
+
+export const getFormTitle = (
+  formType: 'Action' | 'Programme' | 'Project' | 'Activity' | 'Support',
+  formMethod: 'create' | 'update' | 'view'
+) => {
+  if (formMethod === 'create') {
+    return [`add${formType}Title`, `add${formType}Desc`];
+  } else if (formMethod === 'update') {
+    return [`edit${formType}Title`, `edit${formType}Desc`];
+  } else {
+    return [`view${formType}Title`, `view${formType}Desc`];
+  }
+};
+
+export const CustomFormatDate = (timestamp: number) => {
+  const date = new Date(timestamp * 1000);
+  const day = date.getDate();
+  const month = date.toLocaleString('default', { month: 'long' });
+  const year = date.getFullYear();
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+
+  const formattedTime = `${day} ${month} ${year} @ ${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}`;
+
+  return formattedTime;
+};

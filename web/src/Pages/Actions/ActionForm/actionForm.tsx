@@ -1,12 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
-import { Row, Col, Input, Button, Popover, List, Typography, Form, Select, message } from 'antd';
-import {
-  AppstoreOutlined,
-  CloseCircleOutlined,
-  EllipsisOutlined,
-  PlusCircleOutlined,
-} from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
+import { AppstoreOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { InstrumentType, ActionStatus, NatAnchor } from '../../../Enums/action.enum';
@@ -15,6 +10,20 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
 import { KpiGrid } from '../../../Components/KPI/kpiGrid';
+import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
+import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
+import { NewKpiData } from '../../../Definitions/kpiDefinitions';
+import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
+import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
+import { getFormTitle, joinTwoArrays } from '../../../Utils/utilServices';
+import { getValidationRules } from '../../../Utils/validationRules';
+import { GraphUpArrow } from 'react-bootstrap-icons';
+import { ActivityData } from '../../../Definitions/activityDefinitions';
+import { SupportData } from '../../../Definitions/supportDefinitions';
+import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
+import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
+import { getProgrammeTableColumns } from '../../../Definitions/columns/programmeColumns';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -22,70 +31,68 @@ const { TextArea } = Input;
 const gutterSize = 30;
 const inputFontSize = '13px';
 
-const validation = {
-  required: { required: true, message: 'Required Field' },
-  number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
-};
-
-interface Props {
-  method: 'create' | 'view' | 'update';
-}
-
-type NewKpiData = {
-  index: number;
-  name: string;
-  unit: string;
-  creatorType: string;
-  expected: number;
-};
-
-type ProgrammeData = {
-  key: string;
-  programmeId: string;
-  actionId: string;
-  title: string;
-  type: string;
-  status: string;
-  subSectorsAffected: string;
-  estimatedInvestment: number;
-};
-
-const actionForm: React.FC<Props> = ({ method }) => {
+const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['actionForm']);
+
   const isView: boolean = method === 'view' ? true : false;
+  const formTitle = getFormTitle('Action', method)[0];
+  const formDesc = getFormTitle('Action', method)[1];
 
   const navigate = useNavigate();
-  const { get, post } = useConnection();
+  const { get, post, put } = useConnection();
   const { entId } = useParams();
 
-  // form state
+  // Form Validation Rules
 
-  const [actionData, setActionData] = useState<any>();
-  const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
-    []
-  );
-  const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
-  const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
+  const validation = getValidationRules(method);
+
+  // Form General State
+
+  const [actionMigratedData, setActionMigratedData] = useState<ActionMigratedData>();
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { key: string; title: string; data: string }[]
+  >([]);
+  const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
+
+  // Spinner When Form Submit Occurs
+
+  const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 
   // Popover state
 
   const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
 
-  // projects state
+  // Programme Attachments state
 
   const [allProgramIds, setAllProgramIdList] = useState<string[]>([]);
-  const [selectedProgramIds, setSelectedProgramIds] = useState<string[]>([]);
+  const [attachedProgramIds, setAttachedProgramIds] = useState<string[]>([]);
+  const [tempProgramIds, setTempProgramIds] = useState<string[]>([]);
+
   const [programData, setProgramData] = useState<ProgrammeData[]>([]);
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+
+  // Activity Attachment State
+
+  const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
+  const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
+  const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
+
+  const [activityData, setActivityData] = useState<ActivityData[]>([]);
+  const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
+  const [activityPageSize, setActivityPageSize] = useState<number>(10);
+
+  const [supportData, setSupportData] = useState<SupportData[]>([]);
+  const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
+  const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
   // KPI State
 
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
   const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
 
-  // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
 
   const yearsList: number[] = [];
@@ -99,13 +106,21 @@ const actionForm: React.FC<Props> = ({ method }) => {
 
     const fetchFreeProgrammes = async () => {
       if (method !== 'view') {
-        const response: any = await get('national/programmes/link/eligible');
+        const prgResponse: any = await get('national/programmes/link/eligible');
 
         const freeProgrammeIds: string[] = [];
-        response.data.forEach((prg: any) => {
+        prgResponse.data.forEach((prg: any) => {
           freeProgrammeIds.push(prg.programmeId);
         });
         setAllProgramIdList(freeProgrammeIds);
+
+        const actResponse: any = await get('national/activities/link/eligible');
+
+        const freeActivityIds: string[] = [];
+        actResponse.data.forEach((act: any) => {
+          freeActivityIds.push(act.activityId);
+        });
+        setAllActivityIdList(freeActivityIds);
       }
     };
     fetchFreeProgrammes();
@@ -115,7 +130,43 @@ const actionForm: React.FC<Props> = ({ method }) => {
     const fetchData = async () => {
       if (method !== 'create' && entId) {
         const response: any = await get(`national/actions/${entId}`);
-        setActionData(response.data);
+        if (response.status === 200 || response.status === 201) {
+          const entityData: any = response.data;
+
+          // Populating Action owned data fields
+          form.setFieldsValue({
+            title: entityData.title,
+            description: entityData.description,
+            objective: entityData.objective,
+            instrumentType: entityData.instrumentType,
+            status: entityData.status,
+            startYear: entityData.startYear,
+            natAnchor: entityData.natAnchor,
+          });
+
+          if (entityData.documents?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.documents.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredFiles(tempFiles);
+          }
+
+          // Populating Migrated Fields (Will be overwritten when attachments change)
+          setActionMigratedData({
+            type: entityData.migratedData?.types ?? [],
+            ghgsAffected: entityData.migratedData?.ghgsAffected,
+            estimatedInvestment: entityData.migratedData?.totalInvestment,
+            achievedReduction: entityData.migratedData?.achievedGHGReduction,
+            expectedReduction: entityData.migratedData?.expectedGHGReduction,
+            natImplementer: entityData.migratedData?.natImplementors ?? [],
+            sectorsAffected: entityData.migratedData?.sectorsAffected ?? [],
+          });
+        }
       }
     };
     fetchData();
@@ -145,51 +196,65 @@ const actionForm: React.FC<Props> = ({ method }) => {
         response.data.forEach((prg: any) => {
           connectedProgrammeIds.push(prg.programmeId);
         });
-        setSelectedProgramIds(connectedProgrammeIds);
+        setAttachedProgramIds(connectedProgrammeIds);
+        setTempProgramIds(connectedProgrammeIds);
       }
     };
     fetchConnectedProgrammeIds();
+
+    // Initially Loading the attached activity data when not in create mode
+
+    const fetchConnectedActivityIds = async () => {
+      if (method !== 'create') {
+        const connectedActivityIds: string[] = [];
+        // const payload = {
+        //   page: 1,
+        //   size: 100,
+        //   filterAnd: [
+        //     {
+        //       key: 'actionId',
+        //       operation: '=',
+        //       value: entId,
+        //     },
+        //   ],
+        //   sort: {
+        //     key: 'activityId',
+        //     order: 'ASC',
+        //   },
+        // };
+        // const response: any = await post('national/activities/query', payload);
+        // response.data.forEach((act: any) => {
+        //   connectedActivityIds.push(act.activityId);
+        // });
+        setAttachedActivityIds(connectedActivityIds);
+        setTempActivityIds(connectedActivityIds);
+      }
+    };
+    fetchConnectedActivityIds();
   }, []);
 
-  // Populating data fields based on the loaded action data when not in create
+  // Populating Form Migrated Fields, when migration data changes
 
   useEffect(() => {
-    if (actionData) {
+    if (actionMigratedData) {
       form.setFieldsValue({
-        // Entity Data
-        title: actionData.title,
-        description: actionData.description,
-        objective: actionData.objective,
-        instrumentType: actionData.instrumentType,
-        status: actionData.status,
-        startYear: actionData.startYear,
-        natAnchor: actionData.natAnchor,
-        // Migrated Data
-        type: actionData.migratedData.types,
-        ghgsAffected: actionData.migratedData.ghgsAffected,
-        natImplementor: actionData.migratedData.natImplementors,
-        sectorsdAffected: actionData.migratedData.sectorsAffected,
-        estimatedInvestment: actionData.migratedData.totalInvestment,
-        achievedReduct: actionData.migratedData.achievedReduct,
-        expectedReduct: actionData.migratedData.expectedReduct,
+        type: actionMigratedData.type,
+        ghgsAffected: actionMigratedData.ghgsAffected,
+        natImplementor: actionMigratedData.natImplementer,
+        sectorsAffected: actionMigratedData.sectorsAffected,
+        estimatedInvestment: actionMigratedData.estimatedInvestment,
+        achievedReduct: actionMigratedData.achievedReduction,
+        expectedReduct: actionMigratedData.expectedReduction,
       });
-
-      if (actionData.documents?.length > 0) {
-        const tempFiles: { id: number; title: string; url: string }[] = [];
-        actionData.documents.forEach((document: any) => {
-          tempFiles.push({ id: document.createdTime, title: document.title, url: document.url });
-        });
-        setStoredFiles(tempFiles);
-      }
     }
-  }, [actionData]);
+  }, [actionMigratedData]);
 
-  // Loading programme data when attachment changes
+  // Fetching Programme data and calculating migrated fields when attachment changes
 
   useEffect(() => {
     const payload = {
       page: 1,
-      size: selectedProgramIds.length,
+      size: tempProgramIds.length,
       filterOr: [] as any[],
       sort: {
         key: 'programmeId',
@@ -197,9 +262,19 @@ const actionForm: React.FC<Props> = ({ method }) => {
       },
     };
 
+    const tempMigratedData: ActionMigratedData = {
+      natImplementer: [],
+      sectorsAffected: [],
+      estimatedInvestment: 0,
+      type: [],
+      achievedReduction: 0,
+      expectedReduction: 0,
+      ghgsAffected: '',
+    };
+
     const fetchData = async () => {
-      if (selectedProgramIds.length > 0) {
-        selectedProgramIds.forEach((progId) => {
+      if (tempProgramIds.length > 0) {
+        tempProgramIds.forEach((progId) => {
           payload.filterOr.push({
             key: 'programmeId',
             operation: '=',
@@ -207,19 +282,83 @@ const actionForm: React.FC<Props> = ({ method }) => {
           });
         });
         const response: any = await post('national/programmes/query', payload);
-        setProgramData(response.data);
+
+        const tempPRGData: ProgrammeData[] = [];
+
+        response.data.forEach((prg: any, index: number) => {
+          tempPRGData.push({
+            key: index.toString(),
+            programmeId: prg.programmeId,
+            actionId: prg.action?.actionId,
+            title: prg.title,
+            type: prg.migratedData[0]?.types,
+            status: prg.programmeStatus,
+            subSectorsAffected: prg.affectedSubSector,
+            estimatedInvestment: prg.investment,
+          });
+
+          tempMigratedData.type = joinTwoArrays(
+            tempMigratedData.type,
+            prg.migratedData[0]?.types ?? []
+          );
+
+          tempMigratedData.natImplementer = joinTwoArrays(
+            tempMigratedData.natImplementer,
+            prg.natImplementor ?? []
+          );
+          tempMigratedData.sectorsAffected = joinTwoArrays(
+            tempMigratedData.sectorsAffected,
+            prg.affectedSectors ?? []
+          );
+
+          tempMigratedData.estimatedInvestment =
+            tempMigratedData.estimatedInvestment + prg.investment ?? 0;
+
+          const prgGHGAchievement = prg.migratedData[0]?.achievedGHGReduction;
+          const prgGHGExpected = prg.migratedData[0]?.expectedGHGReduction;
+
+          tempMigratedData.achievedReduction =
+            tempMigratedData.achievedReduction + prgGHGAchievement !== null ? prgGHGAchievement : 0;
+
+          tempMigratedData.expectedReduction =
+            tempMigratedData.expectedReduction + prgGHGExpected !== null ? prgGHGExpected : 0;
+        });
+        setProgramData(tempPRGData);
+        setActionMigratedData(tempMigratedData);
       } else {
         setProgramData([]);
+        setActionMigratedData(tempMigratedData);
       }
     };
     fetchData();
 
-    setDetachOpen(Array(selectedProgramIds.length).fill(false));
-  }, [selectedProgramIds]);
+    setDetachOpen(Array(tempProgramIds.length).fill(false));
+  }, [tempProgramIds]);
 
   useEffect(() => {
-    console.log('Running KPI Migration Update');
+    const tempActivityData: ActivityData[] = [];
+    tempActivityIds.forEach((actId) => {
+      tempActivityData.push({
+        key: actId,
+        activityId: actId,
+        title: 'Title',
+        reductionMeasures: 'With Measures',
+        status: 'Planned',
+        startYear: 2014,
+        endYear: 2016,
+        natImplementor: 'Department of Energy',
+      });
+    });
+    setActivityData(tempActivityData);
 
+    // Get the Support Data for each attached Activity
+    setSupportData([]);
+  }, [tempActivityIds]);
+
+  // To Do :
+  // Populating the KPI UI Update when the attachments change
+
+  useEffect(() => {
     const migratedKpis = [];
     for (let i = 0; i < 2; i++) {
       const updatedValues = {
@@ -234,12 +373,29 @@ const actionForm: React.FC<Props> = ({ method }) => {
     }
 
     setMigratedKpiList(migratedKpis);
-  }, [programData]);
+  }, [tempProgramIds]);
+
+  // Attachment resolve before updating an already created action
+
+  const resolveAttachments = async () => {
+    const toAttach = tempProgramIds.filter((prg) => !attachedProgramIds.includes(prg));
+    const toDetach = attachedProgramIds.filter((prg) => !tempProgramIds.includes(prg));
+
+    if (toDetach.length > 0) {
+      await post('national/programmes/unlink', { programmes: toDetach });
+    }
+
+    if (toAttach.length > 0) {
+      await post('national/programmes/link', { actionId: entId, programmes: toAttach });
+    }
+  };
 
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
     try {
+      setWaitingForBE(true);
+
       for (const key in payload) {
         if (key.startsWith('kpi_')) {
           delete payload[key];
@@ -247,9 +403,25 @@ const actionForm: React.FC<Props> = ({ method }) => {
       }
 
       if (uploadedFiles.length > 0) {
-        payload.documents = [];
-        uploadedFiles.forEach((file) => {
-          payload.documents.push({ title: file.title, data: file.data });
+        if (method === 'create') {
+          payload.documents = [];
+          uploadedFiles.forEach((file) => {
+            payload.documents.push({ title: file.title, data: file.data });
+          });
+        } else if (method === 'update') {
+          payload.newDocuments = [];
+          uploadedFiles.forEach((file) => {
+            payload.newDocuments.push({ title: file.title, data: file.data });
+          });
+        }
+      }
+
+      if (filesToRemove.length > 0) {
+        payload.removedDocuments = [];
+        filesToRemove.forEach((removedFileKey) => {
+          payload.removedDocuments.push(
+            storedFiles.find((file) => file.key === removedFileKey)?.url
+          );
         });
       }
 
@@ -264,25 +436,47 @@ const actionForm: React.FC<Props> = ({ method }) => {
         });
       }
 
-      if (programData.length > 0) {
+      if (programData.length > 0 && method === 'create') {
         payload.linkedProgrammes = [];
         programData.forEach((program) => {
           payload.linkedProgrammes.push(program.programmeId);
         });
       }
 
-      const response = await post('national/actions/add', payload);
+      let response: any;
+
+      if (method === 'create') {
+        response = await post('national/actions/add', payload);
+      } else if (method === 'update') {
+        payload.actionId = entId;
+        response = await put('national/actions/update', payload);
+
+        resolveAttachments();
+      }
+
+      const successMsg =
+        method === 'create' ? t('actionCreationSuccess') : t('actionUpdateSuccess');
+
       if (response.status === 200 || response.status === 201) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
         message.open({
           type: 'success',
-          content: t('actionCreationSuccess'),
+          content: successMsg,
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
+        setWaitingForBE(false);
         navigate('/actions');
       }
     } catch (error: any) {
-      console.log('Error in action creation', error);
       message.open({
         type: 'error',
         content: `${error.message}`,
@@ -292,17 +486,29 @@ const actionForm: React.FC<Props> = ({ method }) => {
     }
   };
 
+  // Entity Validate
+
+  const validateEntity = () => {
+    console.log('Validate Clicked');
+  };
+
+  // Entity Delete
+
+  const deleteEntity = () => {
+    console.log('Delete Clicked');
+  };
+
   // Detach Programme
 
   const handleDetachOpen = (record: ProgrammeData) => {
-    const newOpenList = Array(selectedProgramIds.length).fill(false);
-    newOpenList[selectedProgramIds.indexOf(record.programmeId)] = true;
+    const newOpenList = Array(tempProgramIds.length).fill(false);
+    newOpenList[tempProgramIds.indexOf(record.programmeId)] = true;
     setDetachOpen(newOpenList);
   };
 
-  const detachProgramme = (prgId: string) => {
-    const filteredIds = selectedProgramIds.filter((id) => id !== prgId);
-    setSelectedProgramIds(filteredIds);
+  const detachProgramme = async (prgId: string) => {
+    const filteredIds = tempProgramIds.filter((id) => id !== prgId);
+    setTempProgramIds(filteredIds);
   };
 
   // Add New KPI
@@ -348,415 +554,545 @@ const actionForm: React.FC<Props> = ({ method }) => {
     });
   };
 
-  // Action Menu definition
+  // Programme Column Definition
 
-  const actionMenu = (record: ProgrammeData) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: t('detach'),
-            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            click: () => {
-              {
-                detachProgramme(record.programmeId);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) => (
-          <List.Item onClick={item.click}>
-            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{item.text}</span>
-          </List.Item>
-        )}
-      />
-    );
-  };
+  const progTableColumns = getProgrammeTableColumns(
+    isView,
+    detachProgramme,
+    handleDetachOpen,
+    detachOpen,
+    tempProgramIds
+  );
 
-  // Column Definition
-  const progTableColumns = [
-    { title: t('programmeId'), dataIndex: 'programmeId', key: 'programmeId' },
-    { title: t('actionId'), dataIndex: 'actionId', key: 'actionId' },
-    { title: t('programmeTitle'), dataIndex: 'title', key: 'title' },
-    { title: t('programmeType'), dataIndex: 'type', key: 'type' },
-    { title: t('programmeStatus'), dataIndex: 'status', key: 'status' },
-    {
-      title: t('subSectorAffected'),
-      dataIndex: 'affectedSubSector',
-      key: 'affectedSubSector',
-    },
-    {
-      title: t('investmentNeeds'),
-      dataIndex: 'investment',
-      key: 'investment',
-    },
-    {
-      title: '',
-      key: 'programmeAcion',
-      align: 'right' as const,
-      width: 6,
-      render: (record: any) => {
-        return (
-          <Popover
-            placement="bottomRight"
-            trigger="click"
-            content={actionMenu(record)}
-            open={detachOpen[selectedProgramIds.indexOf(record.programmeId)]}
-          >
-            <EllipsisOutlined
-              rotate={90}
-              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => handleDetachOpen(record)}
-            />
-          </Popover>
-        );
-      },
-    },
-  ];
+  // Activity Column Definition
 
-  // Table Behaviour
+  const activityTableColumns = getActivityTableColumns();
+
+  // Support Column Definition
+
+  const supportTableColumns = getSupportTableColumns();
+
+  // Programme Table Behaviour
 
   const handleTableChange = (pagination: any) => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
   };
 
+  // Activity Table Behaviour
+
+  const handleActivityTableChange = (pagination: any) => {
+    setActivityCurrentPage(pagination.current);
+    setActivityPageSize(pagination.pageSize);
+  };
+
+  // Support Table Behaviour
+
+  const handleSupportTableChange = (pagination: any) => {
+    setSupportCurrentPage(pagination.current);
+    setSupportPageSize(pagination.pageSize);
+  };
+
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addActionTitle')}</div>
-        <div className="body-sub-title">{t('addActionDesc')}</div>
+        <div className="body-title">{t(formTitle)}</div>
+        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
-      <div className="action-form">
-        <Form form={form} onFinish={handleSubmit} layout="vertical">
-          <div className="form-section-card">
-            <div className="form-section-header">{t('generalInfoTitle')}</div>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('typesTitle')}</label>}
-                  name="type"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('actionTitle')}</label>}
-                  name="title"
-                  rules={[validation.required]}
-                >
-                  <Input className="form-input-box" disabled={isView} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('actionDescTitle')}</label>}
-                  name="description"
-                  rules={[validation.required]}
-                >
-                  <TextArea rows={3} disabled={isView} />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('actionObjectivesTitle')}</label>}
-                  name="objective"
-                  rules={[validation.required]}
-                >
-                  <TextArea rows={3} disabled={isView} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('ghgAffected')}</label>}
-                  name="ghgsAffected"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
-                  name="instrumentType"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(InstrumentType).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('actionStatusTitle')}</label>}
-                  name="status"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(ActionStatus).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
-                  name="natImplementor"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('sectorsAffectedTitle')}</label>}
-                  name="sectorsdAffected"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('startYearTitle')}</label>}
-                  name="startYear"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {yearsList.map((year) => (
-                      <Option key={year} value={year}>
-                        {year}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('investmentNeeds')}</label>}
-                  name="estimatedInvestment"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('natAnchorTitle')}</label>}
-                  name="natAnchor"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(NatAnchor).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <div
-              style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}
-            >
-              {t('documentsHeader')}
-            </div>
-            <UploadFileGrid
-              isSingleColumn={false}
-              usedIn={method}
-              buttonText={t('upload')}
-              acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
-              storedFiles={storedFiles}
-              uploadedFiles={uploadedFiles}
-              setUploadedFiles={setUploadedFiles}
-              removedFiles={filesToRemove}
-              setRemovedFiles={setFilesToRemove}
-            ></UploadFileGrid>
-          </div>
-          <div className="form-section-card">
-            <Row>
-              <Col span={6} style={{ paddingTop: '6px' }}>
-                <div className="form-section-header">{t('programInfoTitle')}</div>
-              </Col>
-              <Col span={4}>
-                <AttachEntity
-                  isDisabled={isView}
-                  options={allProgramIds}
-                  content={{
-                    buttonName: t('attachProgramme'),
-                    attach: t('attach'),
-                    contentTitle: t('attachProgramme'),
-                    listTitle: t('programmeList'),
-                    cancel: t('cancel'),
-                  }}
-                  attachedUnits={selectedProgramIds}
-                  setAttachedUnits={setSelectedProgramIds}
-                  icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
-                ></AttachEntity>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={24}>
-                <LayoutTable
-                  tableData={programData}
-                  columns={progTableColumns}
-                  loading={false}
-                  pagination={{
-                    current: currentPage,
-                    pageSize: pageSize,
-                    total: programData.length,
-                    showQuickJumper: true,
-                    pageSizeOptions: ['10', '20', '30'],
-                    showSizeChanger: true,
-                    style: { textAlign: 'center' },
-                    locale: { page: '' },
-                    position: ['bottomRight'],
-                  }}
-                  handleTableChange={handleTableChange}
-                  emptyMessage={t('noProgramsMessage')}
-                />
-              </Col>
-            </Row>
-          </div>
-          <div className="form-section-card">
-            <div className="form-section-header">{t('mitigationInfoTitle')}</div>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('ghgAffected')}</label>}
-                  name="ghgsAffected"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-            </Row>
-            <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
-            <Row gutter={gutterSize}>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('achieved')}</label>}
-                  name="achievedReduct"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('expected')}</label>}
-                  name="expectedReduct"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-            </Row>
-            <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-            {migratedKpiList.map((index: number) => (
-              <KpiGrid
-                key={index}
-                form={form}
-                rules={[]}
-                index={index}
-                calledTo={'view'}
-                gutterSize={gutterSize}
-                headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-              ></KpiGrid>
-            ))}
-            {newKpiList.map((kpi: any) => (
-              <KpiGrid
-                key={kpi.index}
-                form={form}
-                rules={[validation.required]}
-                index={kpi.index}
-                calledTo={'create'}
-                gutterSize={gutterSize}
-                headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                updateKPI={updateKPI}
-                removeKPI={removeKPI}
-              ></KpiGrid>
-            ))}
-            <Row justify={'start'}>
-              <Col span={2}>
-                {!isView && (
-                  <Button
-                    icon={<PlusCircleOutlined />}
-                    className="create-kpi-button"
-                    onClick={createKPI}
-                  >
-                    {t('addKPI')}
-                  </Button>
-                )}
-              </Col>
-            </Row>
-          </div>
-          {isView && (
+      {!waitingForBE ? (
+        <div className="action-form">
+          <Form form={form} onFinish={handleSubmit} layout="vertical">
             <div className="form-section-card">
-              <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              <div className="form-section-header">{t('generalInfoTitle')}</div>
+              {method !== 'create' && entId && (
+                <EntityIdCard calledIn="Action" entId={entId}></EntityIdCard>
+              )}
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('typesTitle')}</label>}
+                    name="type"
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('actionTitle')}</label>}
+                    name="title"
+                    rules={[validation.required]}
+                  >
+                    <Input className="form-input-box" disabled={isView} />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('actionDescTitle')}</label>}
+                    name="description"
+                    rules={[validation.required]}
+                  >
+                    <TextArea rows={3} disabled={isView} />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('actionObjectivesTitle')}</label>}
+                    name="objective"
+                    rules={[validation.required]}
+                  >
+                    <TextArea rows={3} disabled={isView} />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                    name="ghgsAffected"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
+                    name="instrumentType"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(InstrumentType).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('actionStatusTitle')}</label>}
+                    name="status"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(ActionStatus).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
+                    name="natImplementor"
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('sectorsAffectedTitle')}</label>}
+                    name="sectorsAffected"
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
+                  </Form.Item>
+                </Col>
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('startYearTitle')}</label>}
+                    name="startYear"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {yearsList.map((year) => (
+                        <Option key={year} value={year}>
+                          {year}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('investmentNeeds')}</label>}
+                    name="estimatedInvestment"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('natAnchorTitle')}</label>}
+                    name="natAnchor"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(NatAnchor).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <div
+                style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}
+              >
+                {t('documentsHeader')}
+              </div>
+              <UploadFileGrid
+                isSingleColumn={false}
+                usedIn={method}
+                buttonText={t('upload')}
+                acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
+                storedFiles={storedFiles}
+                uploadedFiles={uploadedFiles}
+                setUploadedFiles={setUploadedFiles}
+                removedFiles={filesToRemove}
+                setRemovedFiles={setFilesToRemove}
+              ></UploadFileGrid>
             </div>
-          )}
-          {!isView && (
-            <Row gutter={20} justify={'end'}>
-              <Col span={2}>
-                <Button
-                  type="default"
-                  size="large"
-                  block
-                  onClick={() => {
-                    navigate('/actions');
-                  }}
-                >
-                  {t('cancel')}
-                </Button>
-              </Col>
-              <Col span={2}>
-                <Form.Item>
-                  <Button type="primary" size="large" block htmlType="submit">
-                    {t('add')}
+            <div className="form-section-card">
+              <Row>
+                <Col span={6} style={{ paddingTop: '6px' }}>
+                  <div className="form-section-header">{t('programInfoTitle')}</div>
+                </Col>
+                <Col span={4}>
+                  <AttachEntity
+                    isDisabled={isView}
+                    content={{
+                      buttonName: t('attachProgramme'),
+                      attach: t('attach'),
+                      contentTitle: t('attachProgramme'),
+                      listTitle: t('programmeList'),
+                      cancel: t('cancel'),
+                    }}
+                    options={allProgramIds}
+                    alreadyAttached={attachedProgramIds}
+                    currentAttachments={tempProgramIds}
+                    setCurrentAttachments={setTempProgramIds}
+                    icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
+                  ></AttachEntity>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <LayoutTable
+                    tableData={programData}
+                    columns={progTableColumns}
+                    loading={false}
+                    pagination={{
+                      current: currentPage,
+                      pageSize: pageSize,
+                      total: programData.length,
+                      showQuickJumper: true,
+                      pageSizeOptions: ['10', '20', '30'],
+                      showSizeChanger: true,
+                      style: { textAlign: 'center' },
+                      locale: { page: '' },
+                      position: ['bottomRight'],
+                    }}
+                    handleTableChange={handleTableChange}
+                    emptyMessage={t('noProgramsMessage')}
+                  />
+                </Col>
+              </Row>
+            </div>
+            <div className="form-section-card">
+              <Row>
+                <Col span={6} style={{ paddingTop: '6px' }}>
+                  <div className="form-section-header">{t('activityInfoTitle')}</div>
+                </Col>
+                <Col span={4}>
+                  <AttachEntity
+                    isDisabled={isView}
+                    content={{
+                      buttonName: t('attachActivity'),
+                      attach: t('attach'),
+                      contentTitle: t('attachActivity'),
+                      listTitle: t('activityList'),
+                      cancel: t('cancel'),
+                    }}
+                    options={allActivityIds}
+                    alreadyAttached={attachedActivityIds}
+                    currentAttachments={tempActivityIds}
+                    setCurrentAttachments={setTempActivityIds}
+                    icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
+                  ></AttachEntity>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <div style={{ overflowX: 'auto' }}>
+                    <LayoutTable
+                      tableData={activityData}
+                      columns={activityTableColumns}
+                      loading={false}
+                      pagination={{
+                        current: activityCurrentPage,
+                        pageSize: activityPageSize,
+                        total: activityData.length,
+                        showQuickJumper: true,
+                        pageSizeOptions: ['10', '20', '30'],
+                        showSizeChanger: true,
+                        style: { textAlign: 'center' },
+                        locale: { page: '' },
+                        position: ['bottomRight'],
+                      }}
+                      handleTableChange={handleActivityTableChange}
+                      emptyMessage={t('noActivityMessage')}
+                    />{' '}
+                  </div>
+                </Col>
+              </Row>
+            </div>
+            <div className="form-section-card">
+              <Row>
+                <Col span={6}>
+                  <div className="form-section-header">{t('supportInfoTitle')}</div>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <LayoutTable
+                    tableData={supportData}
+                    columns={supportTableColumns}
+                    loading={false}
+                    pagination={{
+                      current: supportCurrentPage,
+                      pageSize: supportPageSize,
+                      total: supportData.length,
+                      showQuickJumper: true,
+                      pageSizeOptions: ['10', '20', '30'],
+                      showSizeChanger: true,
+                      style: { textAlign: 'center' },
+                      locale: { page: '' },
+                      position: ['bottomRight'],
+                    }}
+                    handleTableChange={handleSupportTableChange}
+                    emptyMessage={t('noSupportMessage')}
+                  />
+                </Col>
+              </Row>
+            </div>
+            <div className="form-section-card">
+              <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                    name="ghgsAffected"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('achieved')}</label>}
+                    name="achievedReduct"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('expected')}</label>}
+                    name="expectedReduct"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              {migratedKpiList.map((index: number) => (
+                <KpiGrid
+                  key={index}
+                  form={form}
+                  rules={[]}
+                  index={index}
+                  calledTo={'view'}
+                  gutterSize={gutterSize}
+                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                ></KpiGrid>
+              ))}
+              {newKpiList.map((kpi: any) => (
+                <KpiGrid
+                  key={kpi.index}
+                  form={form}
+                  rules={[validation.required]}
+                  index={kpi.index}
+                  calledTo={'create'}
+                  gutterSize={gutterSize}
+                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                  updateKPI={updateKPI}
+                  removeKPI={removeKPI}
+                ></KpiGrid>
+              ))}
+              <Row justify={'start'}>
+                <Col span={2}>
+                  {!isView && (
+                    <Button
+                      icon={<PlusCircleOutlined />}
+                      className="create-kpi-button"
+                      onClick={createKPI}
+                    >
+                      {t('addKPI')}
+                    </Button>
+                  )}
+                </Col>
+              </Row>
+            </div>
+            {isView && (
+              <div className="form-section-timelinecard">
+                <div className="form-section-header">{t('updatesInfoTitle')}</div>
+                <UpdatesTimeline recordType={'action'} recordId={entId} />
+              </div>
+            )}
+            {method === 'create' && (
+              <Row gutter={20} justify={'end'}>
+                <Col span={2}>
+                  <Button
+                    type="default"
+                    size="large"
+                    block
+                    onClick={() => {
+                      navigate('/actions');
+                    }}
+                  >
+                    {t('cancel')}
                   </Button>
-                </Form.Item>
-              </Col>
-            </Row>
-          )}
-        </Form>
-      </div>
+                </Col>
+                <Col span={2}>
+                  <Form.Item>
+                    <Button type="primary" size="large" block htmlType="submit">
+                      {t('add')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+            {method === 'view' && (
+              <Row gutter={20} justify={'end'}>
+                <Col span={2}>
+                  <Button
+                    type="default"
+                    size="large"
+                    block
+                    onClick={() => {
+                      navigate('/actions');
+                    }}
+                  >
+                    {t('back')}
+                  </Button>
+                </Col>
+                <Col span={2.5}>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => {
+                        validateEntity();
+                      }}
+                    >
+                      {t('validate')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+            {method === 'update' && (
+              <Row gutter={20} justify={'end'}>
+                <Col span={2}>
+                  <Button
+                    type="default"
+                    size="large"
+                    block
+                    onClick={() => {
+                      navigate('/actions');
+                    }}
+                  >
+                    {t('cancel')}
+                  </Button>
+                </Col>
+                <Col span={2}>
+                  <Button
+                    type="default"
+                    size="large"
+                    block
+                    onClick={() => {
+                      deleteEntity();
+                    }}
+                    style={{ color: 'red', borderColor: 'red' }}
+                  >
+                    {t('delete')}
+                  </Button>
+                </Col>
+                <Col span={2.5}>
+                  <Form.Item>
+                    <Button type="primary" size="large" block htmlType="submit">
+                      {t('update')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+          </Form>
+        </div>
+      ) : (
+        <Spin className="loading-center" size="large" />
+      )}
     </div>
   );
 };

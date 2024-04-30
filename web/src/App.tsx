@@ -110,8 +110,8 @@ const App = () => {
                   <Route path="/support" element={<CustomLayout selectedKey="support" />}>
                     <Route path="" element={<SupportList />} />
                     <Route path="add" element={<SupportForm method="create" />} />
-                    <Route path="edit/:id" element={<SupportForm method="update" />} />
-                    <Route path="view/:id" element={<SupportForm method="view" />} />
+                    <Route path="edit/:entId" element={<SupportForm method="update" />} />
+                    <Route path="view/:entId" element={<SupportForm method="view" />} />
                   </Route>
 
                   <Route path="/reportings" element={<CustomLayout selectedKey="reportings" />}>

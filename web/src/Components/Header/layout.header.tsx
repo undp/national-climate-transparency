@@ -11,9 +11,10 @@ const LayoutHeader = () => {
       <div className="header-prof">
         <div className="header-country-logo">
           <PersonCircle
+            className="icon"
             color="#3A354199"
             style={{ cursor: 'pointer' }}
-            size={44}
+            // size={44}
             onClick={() => {
               navigate('/userProfile/view');
             }}

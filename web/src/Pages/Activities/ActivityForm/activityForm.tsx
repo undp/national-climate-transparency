@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message } from 'antd';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './activityForm.scss';
@@ -23,6 +23,13 @@ import {
   TechnologyType,
 } from '../../../Enums/activity.enum';
 import { IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
+import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
+import { SupportData } from '../../../Definitions/supportDefinitions';
+import { ParentData } from '../../../Definitions/activityDefinitions';
+import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
+import { getValidationRules } from '../../../Utils/validationRules';
+import { getFormTitle } from '../../../Utils/utilServices';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -30,68 +37,49 @@ const { TextArea } = Input;
 const gutterSize = 30;
 const inputFontSize = '13px';
 
-const validation = {
-  required: { required: true, message: 'Required Field' },
-  number: { pattern: /^[0-9]+$/, message: 'Please enter a valid number' },
-};
-
-interface Props {
-  method: 'create' | 'view' | 'update';
-}
-
-type ParentData = {
-  id: string;
-  title: string;
-  desc: string;
-};
-
-type SupportData = {
-  key: string;
-  supportId: string;
-  financeNature: string;
-  direction: string;
-  finInstrument: string;
-  estimatedUSD: number;
-  estimatedLC: number;
-  recievedUSD: number;
-  recievedLC: number;
-};
-
-const ActivityForm: React.FC<Props> = ({ method }) => {
+const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['activityForm']);
+
   const isView: boolean = method === 'view' ? true : false;
+  const formTitle = getFormTitle('Activity', method)[0];
+  const formDesc = getFormTitle('Activity', method)[1];
 
   const navigate = useNavigate();
   const { post } = useConnection();
+  const { entId } = useParams();
+
+  // Form Validation Rules
+
+  const validation = getValidationRules(method);
 
   // form state
 
-  const [uploadedFiles, setUploadedFiles] = useState<{ id: string; title: string; data: string }[]>(
-    []
-  );
-  const [storedFiles, setStoredFiles] = useState<{ id: number; title: string; url: string }[]>([]);
-  const [filesToRemove, setFilesToRemove] = useState<number[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { key: string; title: string; data: string }[]
+  >([]);
+  const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   // Methodology Doc state
 
   const [uploadedMthFiles, setUploadedMthFiles] = useState<
-    { id: string; title: string; data: string }[]
+    { key: string; title: string; data: string }[]
   >([]);
   const [storedMthFiles, setStoredMthFiles] = useState<
-    { id: number; title: string; url: string }[]
+    { key: string; title: string; url: string }[]
   >([]);
-  const [mthFilesToRemove, setMthFilesToRemove] = useState<number[]>([]);
+  const [mthFilesToRemove, setMthFilesToRemove] = useState<string[]>([]);
 
   // Results Doc state
 
   const [uploadedRstFiles, setUploadedRstFiles] = useState<
-    { id: string; title: string; data: string }[]
+    { key: string; title: string; data: string }[]
   >([]);
   const [storedRstFiles, setStoredRstFiles] = useState<
-    { id: number; title: string; url: string }[]
+    { key: string; title: string; url: string }[]
   >([]);
-  const [rstFilesToRemove, setRstFilesToRemove] = useState<number[]>([]);
+  const [rstFilesToRemove, setRstFilesToRemove] = useState<string[]>([]);
 
   // Parent Selection State
 
@@ -124,9 +112,9 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
 
   useEffect(() => {
     if (method !== 'create') {
-      const tempFiles: { id: number; title: string; url: string }[] = [];
+      const tempFiles: { key: string; title: string; url: string }[] = [];
       for (let i = 0; i < 6; i++) {
-        tempFiles.push({ id: i, title: `title_${i}.pdf`, url: `url_${i}` });
+        tempFiles.push({ key: `${i}`, title: `title_${i}.pdf`, url: `url_${i}` });
       }
       setStoredFiles(tempFiles);
 
@@ -248,7 +236,10 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
         payload.rst_documents.push({ title: file.title, data: file.data });
       });
 
-      const response = await post('national/activity/add', payload);
+      payload.achievedGHGReduction = parseFloat(payload.achievedGHGReduction);
+      payload.expectedGHGReduction = parseFloat(payload.expectedGHGReduction);
+
+      const response = await post('national/activities/add', payload);
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
@@ -256,7 +247,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
-        navigate('/programmes');
+        navigate('/activities');
       }
     } catch (error: any) {
       console.log('Error in activity creation', error);
@@ -267,6 +258,18 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
     }
+  };
+
+  // Entity Validate
+
+  const validateEntity = () => {
+    console.log('Validate Clicked');
+  };
+
+  // Entity Delete
+
+  const deleteEntity = () => {
+    console.log('Delete Clicked');
   };
 
   // Column Definition
@@ -324,13 +327,16 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{t('addActivityTitle')}</div>
-        <div className="body-sub-title">{t('addActivityDesc')}</div>
+        <div className="body-title">{t(formTitle)}</div>
+        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       <div className="activity-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
+            {method !== 'create' && entId && (
+              <EntityIdCard calledIn="Activity" entId={entId}></EntityIdCard>
+            )}
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
@@ -376,7 +382,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('activityStatusTitle')}</label>}
-                  name="activityStatus"
+                  name="status"
                   rules={[validation.required]}
                 >
                   <Select
@@ -662,7 +668,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               <Col span={24}>
                 <Form.Item
                   label={<label className="form-item-header">{t('activityCommentsTitle')}</label>}
-                  name="comments"
+                  name="comment"
                   rules={[validation.required]}
                 >
                   <TextArea rows={3} disabled={isView} />
@@ -675,7 +681,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('achieved')}</label>}
-                  name="achievedReduct"
+                  name="achievedGHGReduction"
                   rules={[validation.required]}
                 >
                   <Input type="number" className="form-input-box" />
@@ -684,7 +690,7 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('expected')}</label>}
-                  name="expectedReduct"
+                  name="expectedGHGReduction"
                   rules={[validation.required]}
                 >
                   <Input type="number" className="form-input-box" />
@@ -830,11 +836,12 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
             </Row>
           </div>
           {isView && (
-            <div className="form-section-card">
+            <div className="form-section-timelinecard">
               <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              <UpdatesTimeline recordType={'activity'} recordId={entId} />
             </div>
           )}
-          {!isView && (
+          {method === 'create' && (
             <Row gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
@@ -852,6 +859,72 @@ const ActivityForm: React.FC<Props> = ({ method }) => {
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
                     {t('add')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+          {method === 'view' && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/activities');
+                  }}
+                >
+                  {t('back')}
+                </Button>
+              </Col>
+              <Col span={2.5}>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    size="large"
+                    block
+                    onClick={() => {
+                      validateEntity();
+                    }}
+                  >
+                    {t('validate')}
+                  </Button>
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
+          {method === 'update' && (
+            <Row gutter={20} justify={'end'}>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    navigate('/activities');
+                  }}
+                >
+                  {t('cancel')}
+                </Button>
+              </Col>
+              <Col span={2}>
+                <Button
+                  type="default"
+                  size="large"
+                  block
+                  onClick={() => {
+                    deleteEntity();
+                  }}
+                  style={{ color: 'red', borderColor: 'red' }}
+                >
+                  {t('delete')}
+                </Button>
+              </Col>
+              <Col span={2.5}>
+                <Form.Item>
+                  <Button type="primary" size="large" block htmlType="submit">
+                    {t('update')}
                   </Button>
                 </Form.Item>
               </Col>

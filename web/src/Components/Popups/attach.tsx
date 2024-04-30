@@ -12,8 +12,9 @@ interface Props {
     attach: string;
   };
   options: string[];
-  attachedUnits: string[];
-  setAttachedUnits: React.Dispatch<React.SetStateAction<string[]>>;
+  alreadyAttached: string[];
+  currentAttachments: string[];
+  setCurrentAttachments: React.Dispatch<React.SetStateAction<string[]>>;
   icon: React.ReactNode;
 }
 
@@ -21,8 +22,9 @@ const AttachEntity: React.FC<Props> = ({
   isDisabled,
   content,
   options,
-  attachedUnits,
-  setAttachedUnits,
+  alreadyAttached,
+  currentAttachments,
+  setCurrentAttachments,
   icon,
 }) => {
   const [open, setOpen] = useState(false);
@@ -31,15 +33,28 @@ const AttachEntity: React.FC<Props> = ({
   const optionsList: SelectProps['options'] = [];
 
   options.forEach((entityId) => {
-    optionsList.push({
-      key: entityId,
-      label: entityId,
-      value: entityId,
-      disabled: false,
-    });
+    if (!currentAttachments.includes(entityId)) {
+      optionsList.push({
+        key: entityId,
+        label: entityId,
+        value: entityId,
+        disabled: false,
+      });
+    }
   });
 
-  attachedUnits.forEach((entityId) => {
+  alreadyAttached.forEach((entityId) => {
+    if (!currentAttachments.includes(entityId)) {
+      optionsList.push({
+        key: entityId,
+        label: entityId,
+        value: entityId,
+        disabled: false,
+      });
+    }
+  });
+
+  currentAttachments.forEach((entityId) => {
     optionsList.push({
       key: entityId,
       label: entityId,
@@ -50,12 +65,12 @@ const AttachEntity: React.FC<Props> = ({
 
   const showModal = () => {
     setOpen(true);
-    setPendingAttachments(attachedUnits);
+    setPendingAttachments(currentAttachments);
   };
 
   const attachProject = () => {
     setOpen(false);
-    setAttachedUnits(pendingAttachments);
+    setCurrentAttachments(pendingAttachments);
   };
 
   const attachCancel = () => {
