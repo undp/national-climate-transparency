@@ -108,7 +108,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
   const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
 
-  // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
 
   const yearsList: number[] = [];
@@ -121,27 +120,25 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     // Initially Loading Free Actions that can be parent
 
     const fetchFreeActions = async () => {
-      if (method !== 'view') {
-        const payload = {
-          page: 1,
-          size: 100,
-          sort: {
-            key: 'actionId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/actions/query', payload);
+      const payload = {
+        page: 1,
+        size: 100,
+        sort: {
+          key: 'actionId',
+          order: 'ASC',
+        },
+      };
+      const response: any = await post('national/actions/query', payload);
 
-        const tempActionData: ActionSelectData[] = [];
-        response.data.forEach((action: any) => {
-          tempActionData.push({
-            id: action.actionId,
-            title: action.title,
-            instrumentType: action.instrumentType,
-          });
+      const tempActionData: ActionSelectData[] = [];
+      response.data.forEach((action: any) => {
+        tempActionData.push({
+          id: action.actionId,
+          title: action.title,
+          instrumentType: action.instrumentType,
         });
-        setActionList(tempActionData);
-      }
+      });
+      setActionList(tempActionData);
     };
 
     fetchFreeActions();
@@ -322,7 +319,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           tempPRJData.push({
             key: index.toString(),
             projectId: prj.projectId,
-            projectName: prj.projectName,
+            projectName: prj.title,
           });
 
           tempMigratedData.type.push(prj.type);
@@ -388,7 +385,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     }
 
     if (toAttach.length > 0) {
-      await post('national/projects/link', { programmeId: entId, projects: toAttach });
+      await post('national/projects/link', { programmeId: entId, projectIds: toAttach });
     }
   };
 
@@ -597,18 +594,22 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       width: 6,
       render: (record: any) => {
         return (
-          <Popover
-            placement="bottomRight"
-            content={actionMenu(record)}
-            trigger="click"
-            open={detachOpen[tempProjectIds.indexOf(record.projectId)]}
-          >
-            <EllipsisOutlined
-              rotate={90}
-              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => handleDetachOpen(record)}
-            />
-          </Popover>
+          <>
+            {!isView && (
+              <Popover
+                placement="bottomRight"
+                content={actionMenu(record)}
+                trigger="click"
+                open={detachOpen[tempProjectIds.indexOf(record.projectId)]}
+              >
+                <EllipsisOutlined
+                  rotate={90}
+                  style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
+                  onClick={() => handleDetachOpen(record)}
+                />
+              </Popover>
+            )}
+          </>
         );
       },
     },
