@@ -162,47 +162,59 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchData = async () => {
       if (method !== 'create' && entId) {
-        const response: any = await get(`national/programmes/${entId}`);
-        if (response.status === 200 || response.status === 201) {
-          const entityData: any = response.data;
+        let response: any;
+        try {
+          response = await get(`national/programmes/${entId}`);
 
-          // Populating Action owned data fields
-          form.setFieldsValue({
-            actionId: entityData.actionId,
-            instrumentType: entityData.instrumentType,
-            title: entityData.title,
-            description: entityData.description,
-            objective: entityData.objectives,
-            programmeStatus: entityData.programmeStatus,
-            startYear: entityData.startYear,
-            natAnchor: entityData.natAnchor,
-            affectedSectors: entityData.affectedSectors,
-            affectedSubSector: entityData.affectedSubSector,
-            natImplementor: entityData.nationalImplementor,
-            investment: entityData.investment,
-            comments: entityData.comments,
-          });
+          if (response.status === 200 || response.status === 201) {
+            const entityData: any = response.data;
 
-          if (entityData.documents?.length > 0) {
-            const tempFiles: { key: string; title: string; url: string }[] = [];
-            entityData.documents.forEach((document: any) => {
-              tempFiles.push({
-                key: document.createdTime,
-                title: document.title,
-                url: document.url,
-              });
+            // Populating Action owned data fields
+            form.setFieldsValue({
+              actionId: entityData.actionId,
+              instrumentType: entityData.instrumentType,
+              title: entityData.title,
+              description: entityData.description,
+              objective: entityData.objectives,
+              programmeStatus: entityData.programmeStatus,
+              startYear: entityData.startYear,
+              natAnchor: entityData.natAnchor,
+              affectedSectors: entityData.affectedSectors,
+              affectedSubSector: entityData.affectedSubSector,
+              natImplementor: entityData.nationalImplementor,
+              investment: entityData.investment,
+              comments: entityData.comments,
             });
-            setStoredFiles(tempFiles);
-          }
 
-          // Populating Migrated Fields (Will be overwritten when attachments change)
-          setProgrammeMigratedData({
-            type: entityData.types ?? [],
-            intImplementor: entityData.interNationalImplementor ?? [],
-            recipientEntity: entityData.recipientEntity ?? [],
-            ghgsAffected: entityData.ghgsAffected,
-            achievedReduct: entityData.achievedGHGReduction,
-            expectedReduct: entityData.expectedGHGReduction,
+            if (entityData.documents?.length > 0) {
+              const tempFiles: { key: string; title: string; url: string }[] = [];
+              entityData.documents.forEach((document: any) => {
+                tempFiles.push({
+                  key: document.createdTime,
+                  title: document.title,
+                  url: document.url,
+                });
+              });
+              setStoredFiles(tempFiles);
+            }
+
+            // Populating Migrated Fields (Will be overwritten when attachments change)
+            setProgrammeMigratedData({
+              type: entityData.types ?? [],
+              intImplementor: entityData.interNationalImplementor ?? [],
+              recipientEntity: entityData.recipientEntity ?? [],
+              ghgsAffected: entityData.ghgsAffected,
+              achievedReduct: entityData.achievedGHGReduction,
+              expectedReduct: entityData.expectedGHGReduction,
+            });
+          }
+        } catch {
+          navigate('/programmes');
+          message.open({
+            type: 'error',
+            content: "Requested Programme doesn't exist !",
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
       }

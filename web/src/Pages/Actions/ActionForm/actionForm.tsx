@@ -128,42 +128,52 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchData = async () => {
       if (method !== 'create' && entId) {
-        const response: any = await get(`national/actions/${entId}`);
-        if (response.status === 200 || response.status === 201) {
-          const entityData: any = response.data;
+        try {
+          const response: any = await get(`national/actions/${entId}`);
+          if (response.status === 200 || response.status === 201) {
+            const entityData: any = response.data;
 
-          // Populating Action owned data fields
-          form.setFieldsValue({
-            title: entityData.title,
-            description: entityData.description,
-            objective: entityData.objective,
-            instrumentType: entityData.instrumentType,
-            status: entityData.status,
-            startYear: entityData.startYear,
-            natAnchor: entityData.natAnchor,
-          });
-
-          if (entityData.documents?.length > 0) {
-            const tempFiles: { key: string; title: string; url: string }[] = [];
-            entityData.documents.forEach((document: any) => {
-              tempFiles.push({
-                key: document.createdTime,
-                title: document.title,
-                url: document.url,
-              });
+            // Populating Action owned data fields
+            form.setFieldsValue({
+              title: entityData.title,
+              description: entityData.description,
+              objective: entityData.objective,
+              instrumentType: entityData.instrumentType,
+              status: entityData.status,
+              startYear: entityData.startYear,
+              natAnchor: entityData.natAnchor,
             });
-            setStoredFiles(tempFiles);
-          }
 
-          // Populating Migrated Fields (Will be overwritten when attachments change)
-          setActionMigratedData({
-            type: entityData.migratedData?.types ?? [],
-            ghgsAffected: entityData.migratedData?.ghgsAffected,
-            estimatedInvestment: entityData.migratedData?.totalInvestment,
-            achievedReduction: entityData.migratedData?.achievedGHGReduction,
-            expectedReduction: entityData.migratedData?.expectedGHGReduction,
-            natImplementer: entityData.migratedData?.natImplementors ?? [],
-            sectorsAffected: entityData.migratedData?.sectorsAffected ?? [],
+            if (entityData.documents?.length > 0) {
+              const tempFiles: { key: string; title: string; url: string }[] = [];
+              entityData.documents.forEach((document: any) => {
+                tempFiles.push({
+                  key: document.createdTime,
+                  title: document.title,
+                  url: document.url,
+                });
+              });
+              setStoredFiles(tempFiles);
+            }
+
+            // Populating Migrated Fields (Will be overwritten when attachments change)
+            setActionMigratedData({
+              type: entityData.migratedData?.types ?? [],
+              ghgsAffected: entityData.migratedData?.ghgsAffected,
+              estimatedInvestment: entityData.migratedData?.totalInvestment,
+              achievedReduction: entityData.migratedData?.achievedGHGReduction,
+              expectedReduction: entityData.migratedData?.expectedGHGReduction,
+              natImplementer: entityData.migratedData?.natImplementors ?? [],
+              sectorsAffected: entityData.migratedData?.sectorsAffected ?? [],
+            });
+          }
+        } catch {
+          navigate('/actions');
+          message.open({
+            type: 'error',
+            content: "Requested Action doesn't exist !",
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
       }
