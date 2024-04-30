@@ -17,7 +17,6 @@ interface Props {
   getAttachedEntityIds: (recordId: string) => void;
   setOpenAttaching: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedEntityId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setOpenPopoverKey: React.Dispatch<React.SetStateAction<number | undefined>>;
 }
 
 const ActionMenu: React.FC<Props> = ({
@@ -28,7 +27,6 @@ const ActionMenu: React.FC<Props> = ({
   setOpenAttaching,
   setSelectedEntityId,
   getAttachedEntityIds,
-  setOpenPopoverKey,
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation(['tableAction']);
@@ -56,7 +54,6 @@ const ActionMenu: React.FC<Props> = ({
               setOpenAttaching(true);
               setSelectedEntityId(recordId);
               getAttachedEntityIds(recordId);
-              setOpenPopoverKey(undefined);
             }
           },
         },

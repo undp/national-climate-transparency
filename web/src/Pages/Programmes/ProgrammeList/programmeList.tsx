@@ -44,7 +44,6 @@ const programmeList = () => {
   // General Page State
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [openPopoverKey, setOpenPopoverKey] = useState<number>();
 
   // Table Data State
 
@@ -293,16 +292,6 @@ const programmeList = () => {
     }
   }, [toBeAttached]);
 
-  // Controlling Popover visibility
-
-  const shouldPopoverOpen = (key: number) => {
-    if (key === openPopoverKey) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   // Action List Table Columns
 
   const columns = [
@@ -359,7 +348,8 @@ const programmeList = () => {
       render: (_: any, record: any) => {
         return (
           <Popover
-            popupVisible={shouldPopoverOpen(record.key)}
+            showArrow={false}
+            trigger={'click'}
             placement="bottomRight"
             content={
               <ActionMenu
@@ -371,19 +361,12 @@ const programmeList = () => {
                 setOpenAttaching={setOpenAttaching}
                 setSelectedEntityId={setSelectedProgrammeId}
                 getAttachedEntityIds={getAttachedProjectIds}
-                setOpenPopoverKey={setOpenPopoverKey}
               />
             }
-            onOpenChange={() => {
-              setOpenPopoverKey(undefined);
-            }}
           >
             <EllipsisOutlined
               rotate={90}
               style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => {
-                setOpenPopoverKey(record.key);
-              }}
             />
           </Popover>
         );

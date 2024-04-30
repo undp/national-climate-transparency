@@ -46,7 +46,6 @@ const projectList = () => {
   // General Page State
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [openPopoverKey, setOpenPopoverKey] = useState<number>();
 
   // Table Data State
 
@@ -297,16 +296,6 @@ const projectList = () => {
     }
   }, [toBeAttached]);
 
-  // Controlling Popover visibility
-
-  const shouldPopoverOpen = (key: number) => {
-    if (key === openPopoverKey) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   // Action List Table Columns
 
   const columns = [
@@ -372,7 +361,8 @@ const projectList = () => {
       render: (_: any, record: any) => {
         return (
           <Popover
-            popupVisible={shouldPopoverOpen(record.key)}
+            showArrow={false}
+            trigger={'click'}
             placement="bottomRight"
             content={
               <ActionMenu
@@ -383,19 +373,12 @@ const projectList = () => {
                 setOpenAttaching={setOpenAttaching}
                 setSelectedEntityId={setSelectedProjectId}
                 getAttachedEntityIds={getAttachedActivityIds}
-                setOpenPopoverKey={setOpenPopoverKey}
               />
             }
-            onOpenChange={() => {
-              setOpenPopoverKey(undefined);
-            }}
           >
             <EllipsisOutlined
               rotate={90}
               style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => {
-                setOpenPopoverKey(record.key);
-              }}
             />
           </Popover>
         );
