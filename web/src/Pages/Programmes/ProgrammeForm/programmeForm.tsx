@@ -1,18 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import {
-  Row,
-  Col,
-  Input,
-  Button,
-  Form,
-  Select,
-  message,
-  Popover,
-  List,
-  Typography,
-  Spin,
-} from 'antd';
-import { CloseCircleOutlined, EllipsisOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
+import { PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -36,6 +24,7 @@ import { ProgrammeMigratedData } from '../../../Definitions/programmeDefinitions
 import { Action } from '../../../Enums/action.enum';
 import { ProgrammeEntity } from '../../../Entities/programme';
 import { useAbilityContext } from '../../../Casl/Can';
+import { getProjectTableColumns } from '../../../Definitions/columns/projectColumns';
 // import { ActivityData } from '../../../Definitions/activityDefinitions';
 // import { SupportData } from '../../../Definitions/supportDefinitions';
 
@@ -559,64 +548,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     setTempProjectIds(filteredIds);
   };
 
-  // Action Menu definition
-
-  const actionMenu = (record: ProjectData) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: t('detach'),
-            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            click: () => {
-              {
-                detachProject(record.projectId);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) => (
-          <List.Item onClick={item.click}>
-            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{item.text}</span>
-          </List.Item>
-        )}
-      />
-    );
-  };
-
   // Column Definition
-  const projTableColumns = [
-    { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
-    { title: t('projectName'), dataIndex: 'projectName', key: 'projectName' },
-    {
-      title: '',
-      key: 'projectAction',
-      align: 'right' as const,
-      width: 6,
-      render: (record: any) => {
-        return (
-          <>
-            {!isView && (
-              <Popover
-                showArrow={false}
-                trigger={'click'}
-                placement="bottomRight"
-                content={actionMenu(record)}
-              >
-                <EllipsisOutlined
-                  rotate={90}
-                  style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-                />
-              </Popover>
-            )}
-          </>
-        );
-      },
-    },
-  ];
+
+  const projTableColumns = getProjectTableColumns(isView, detachProject);
 
   // Table Behaviour
 

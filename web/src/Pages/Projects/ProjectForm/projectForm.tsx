@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Popover, List, Typography } from 'antd';
-import { CloseCircleOutlined, EllipsisOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message } from 'antd';
+import { PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -23,6 +23,8 @@ import { getFormTitle } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ProjectEntity } from '../../../Entities/project';
 import { useAbilityContext } from '../../../Casl/Can';
+import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
+import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -286,7 +288,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     });
   };
 
-  // Dettach Project
+  // Detach Project
 
   const detachActivity = (actId: string) => {
     console.log(actId);
@@ -296,79 +298,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     setSelectedActivityIds(filteredIds);
   };
 
-  // Action Menu definition
-
-  const actionMenu = (record: ActivityData) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: t('detach'),
-            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            click: () => {
-              {
-                detachActivity(record.activityId);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) => (
-          <List.Item onClick={item.click}>
-            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{item.text}</span>
-          </List.Item>
-        )}
-      />
-    );
-  };
-
   // Activity Column Definition
 
-  const activityTableColumns = [
-    { title: t('activityIdTitle'), dataIndex: 'activityId', key: 'activityId' },
-    { title: t('titleTitle'), dataIndex: 'title', key: 'title' },
-    { title: t('redMeasuresTitle'), dataIndex: 'reductionMeasures', key: 'reductionMeasures' },
-    { title: t('statusTitle'), dataIndex: 'status', key: 'status' },
-    { title: t('startYearHeader'), dataIndex: 'startYear', key: 'startYear' },
-    { title: t('endYearHeader'), dataIndex: 'endYear', key: 'endYear' },
-    { title: t('natImplementorTitle'), dataIndex: 'natImplementor', key: 'natImplementor' },
-    {
-      title: '',
-      key: 'activityAction',
-      align: 'right' as const,
-      width: 6,
-      render: (record: any) => {
-        return (
-          <Popover
-            showArrow={false}
-            trigger={'click'}
-            placement="bottomRight"
-            content={actionMenu(record)}
-          >
-            <EllipsisOutlined
-              rotate={90}
-              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-            />
-          </Popover>
-        );
-      },
-    },
-  ];
+  const activityTableColumns = getActivityTableColumns(isView, detachActivity);
 
   // Support Column Definition
 
-  const supportTableColumns = [
-    { title: t('supportIdTitle'), dataIndex: 'supportId', key: 'activityId' },
-    { title: t('financeNatureTitle'), dataIndex: 'financeNature', key: 'financeNature' },
-    { title: t('directionTitle'), dataIndex: 'direction', key: 'direction' },
-    { title: t('finInstrumentTitle'), dataIndex: 'finInstrument', key: 'finInstrument' },
-    { title: t('neededUSDHeader'), dataIndex: 'estimatedUSD', key: 'estimatedUSD' },
-    { title: t('neededLCLHeader'), dataIndex: 'estimatedLC', key: 'estimatedLC' },
-    { title: t('recievedUSDHeader'), dataIndex: 'recievedUSD', key: 'recievedUSD' },
-    { title: t('recievedLCLHeader'), dataIndex: 'recievedLC', key: 'recievedLC' },
-  ];
+  const supportTableColumns = getSupportTableColumns();
 
   // Activity Table Behaviour
 

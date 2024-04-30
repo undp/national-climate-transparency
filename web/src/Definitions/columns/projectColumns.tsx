@@ -1,15 +1,12 @@
 import { CloseCircleOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { List, Popover, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { ActivityData } from '../activityDefinitions';
+import { ProjectData } from '../projectDefinitions';
 
-export const getActivityTableColumns = (
-  isView: boolean,
-  detachActivity: (arg0: string) => void
-) => {
-  const { t } = useTranslation(['projectForm']);
+export const getProjectTableColumns = (isView: boolean, detachProject: (arg0: string) => void) => {
+  const { t } = useTranslation(['programmeForm']);
 
-  const actionMenu = (record: ActivityData) => {
+  const actionMenu = (record: ProjectData) => {
     return (
       <List
         className="action-menu"
@@ -20,7 +17,7 @@ export const getActivityTableColumns = (
             icon: <CloseCircleOutlined style={{ color: 'red' }} />,
             click: () => {
               {
-                detachActivity(record.activityId);
+                detachProject(record.projectId);
               }
             },
           },
@@ -35,17 +32,12 @@ export const getActivityTableColumns = (
     );
   };
 
-  const activityTableColumns = [
-    { title: t('activityIdTitle'), dataIndex: 'activityId', key: 'activityId' },
-    { title: t('titleTitle'), dataIndex: 'title', key: 'title' },
-    { title: t('redMeasuresTitle'), dataIndex: 'reductionMeasures', key: 'reductionMeasures' },
-    { title: t('statusTitle'), dataIndex: 'status', key: 'status' },
-    { title: t('startYearHeader'), dataIndex: 'startYear', key: 'startYear' },
-    { title: t('endYearHeader'), dataIndex: 'endYear', key: 'endYear' },
-    { title: t('natImplementorTitle'), dataIndex: 'natImplementor', key: 'natImplementor' },
+  const projTableColumns = [
+    { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
+    { title: t('projectName'), dataIndex: 'projectName', key: 'projectName' },
     {
       title: '',
-      key: 'activityId',
+      key: 'projectAction',
       align: 'right' as const,
       width: 6,
       render: (record: any) => {
@@ -70,5 +62,5 @@ export const getActivityTableColumns = (
     },
   ];
 
-  return activityTableColumns;
+  return projTableColumns;
 };

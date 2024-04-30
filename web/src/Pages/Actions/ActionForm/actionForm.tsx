@@ -511,6 +511,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     setTempProgramIds(filteredIds);
   };
 
+  // Detach Activity
+
+  const detachActivity = async (actId: string) => {
+    console.log(actId);
+  };
+
   // Add New KPI
 
   const createKPI = () => {
@@ -560,7 +566,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Activity Column Definition
 
-  const activityTableColumns = getActivityTableColumns();
+  const activityTableColumns = getActivityTableColumns(isView, detachActivity);
 
   // Support Column Definition
 

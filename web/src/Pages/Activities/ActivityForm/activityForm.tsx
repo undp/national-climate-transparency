@@ -32,6 +32,7 @@ import { getFormTitle } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ActivityEntity } from '../../../Entities/activity';
 import { useAbilityContext } from '../../../Casl/Can';
+import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -276,16 +277,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   };
 
   // Column Definition
-  const supportTableColumns = [
-    { title: t('supportIdTitle'), dataIndex: 'supportId', key: 'activityId' },
-    { title: t('financeNatureTitle'), dataIndex: 'financeNature', key: 'financeNature' },
-    { title: t('directionTitle'), dataIndex: 'direction', key: 'direction' },
-    { title: t('finInstrumentTitle'), dataIndex: 'finInstrument', key: 'finInstrument' },
-    { title: t('neededUSDHeader'), dataIndex: 'estimatedUSD', key: 'estimatedUSD' },
-    { title: t('neededLCLHeader'), dataIndex: 'estimatedLC', key: 'estimatedLC' },
-    { title: t('recievedUSDHeader'), dataIndex: 'recievedUSD', key: 'recievedUSD' },
-    { title: t('recievedLCLHeader'), dataIndex: 'recievedLC', key: 'recievedLC' },
-  ];
+  const supportTableColumns = getSupportTableColumns();
 
   // Table Behaviour
 
