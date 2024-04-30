@@ -171,7 +171,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           navigate('/actions');
           message.open({
             type: 'error',
-            content: "Requested Action doesn't exist !",
+            content: t('noSuchEntity'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });

@@ -212,7 +212,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           navigate('/programmes');
           message.open({
             type: 'error',
-            content: "Requested Programme doesn't exist !",
+            content: t('noSuchEntity'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });

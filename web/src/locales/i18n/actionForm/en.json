@@ -48,5 +48,6 @@
     "detach": "Detach",
     "documentsHeader": "Documents",
     "activityInfoTitle": "List of Activities under the Project",
-    "supportInfoTitle": "List of Supports under the Project"
+    "supportInfoTitle": "List of Supports under the Project",
+    "noSuchEntity": "Requested Action doesn't exist !"
 }

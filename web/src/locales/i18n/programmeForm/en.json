@@ -40,6 +40,7 @@
     "programmeCreationSuccess": "Programme Added Succesfully",
     "updatesInfoTitle": "Updates",
     "noProjectsMessage": "No Projects Attached",
-    "documentsHeader": "Documents"
+    "documentsHeader": "Documents",
+    "noSuchEntity": "Requested Programme doesn't exist !"
   }
   
