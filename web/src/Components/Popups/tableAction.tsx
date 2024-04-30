@@ -5,7 +5,12 @@ import { ProgrammeEntity } from '../../Entities/programme';
 import { ProjectEntity } from '../../Entities/project';
 import { ActivityEntity } from '../../Entities/activity';
 import { SupportEntity } from '../../Entities/support';
-import { EditOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  CloseCircleOutlined,
+  EditOutlined,
+  InfoCircleOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 
 export const actionMenu = (
   calledIn: 'action' | 'programme' | 'project' | 'activity' | 'support',
@@ -64,6 +69,32 @@ export const actionMenu = (
           </List.Item>
         )
       }
+    />
+  );
+};
+
+export const detachMenu = (recordId: string, t: any, detachEntity: (recordId: string) => void) => {
+  return (
+    <List
+      className="action-menu"
+      size="small"
+      dataSource={[
+        {
+          text: t('detach'),
+          icon: <CloseCircleOutlined style={{ color: 'red' }} />,
+          click: () => {
+            {
+              detachEntity(recordId);
+            }
+          },
+        },
+      ]}
+      renderItem={(item) => (
+        <List.Item onClick={item.click}>
+          <Typography.Text className="action-icon">{item.icon}</Typography.Text>
+          <span>{item.text}</span>
+        </List.Item>
+      )}
     />
   );
 };

@@ -1,39 +1,13 @@
-import { CloseCircleOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { List, Popover, Typography } from 'antd';
+import { EllipsisOutlined } from '@ant-design/icons';
+import { Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { ProgrammeData } from '../programmeDefinitions';
+import { detachMenu } from '../../Components/Popups/tableAction';
 
 export const getProgrammeTableColumns = (
   isView: boolean,
   detachProgramme: (arg0: string) => void
 ) => {
   const { t } = useTranslation(['actionForm']);
-
-  const actionMenu = (record: ProgrammeData) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: t('detach'),
-            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            click: () => {
-              {
-                detachProgramme(record.programmeId);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) => (
-          <List.Item onClick={item.click}>
-            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{item.text}</span>
-          </List.Item>
-        )}
-      />
-    );
-  };
 
   const programmeTableColumns = [
     { title: t('programmeId'), dataIndex: 'programmeId', key: 'programmeId' },
@@ -61,10 +35,11 @@ export const getProgrammeTableColumns = (
           <>
             {!isView && (
               <Popover
+                key={`${record.programmeId}_prg_detach`}
                 showArrow={false}
                 trigger={'click'}
                 placement="bottomRight"
-                content={actionMenu(record)}
+                content={detachMenu(record.programmeId, t, detachProgramme)}
               >
                 <EllipsisOutlined
                   rotate={90}

@@ -1,36 +1,10 @@
-import { CloseCircleOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { List, Popover, Typography } from 'antd';
+import { EllipsisOutlined } from '@ant-design/icons';
+import { Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { ProjectData } from '../projectDefinitions';
+import { detachMenu } from '../../Components/Popups/tableAction';
 
 export const getProjectTableColumns = (isView: boolean, detachProject: (arg0: string) => void) => {
   const { t } = useTranslation(['programmeForm']);
-
-  const actionMenu = (record: ProjectData) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: t('detach'),
-            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            click: () => {
-              {
-                detachProject(record.projectId);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) => (
-          <List.Item onClick={item.click}>
-            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{item.text}</span>
-          </List.Item>
-        )}
-      />
-    );
-  };
 
   const projTableColumns = [
     { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
@@ -45,10 +19,11 @@ export const getProjectTableColumns = (isView: boolean, detachProject: (arg0: st
           <>
             {!isView && (
               <Popover
+                key={`${record.projectId}_prj_detach`}
                 showArrow={false}
                 trigger={'click'}
                 placement="bottomRight"
-                content={actionMenu(record)}
+                content={detachMenu(record.projectId, t, detachProject)}
               >
                 <EllipsisOutlined
                   rotate={90}
