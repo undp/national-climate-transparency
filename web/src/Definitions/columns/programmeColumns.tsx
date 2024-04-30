@@ -7,7 +7,7 @@ export const getProgrammeTableColumns = (
   isView: boolean,
   detachProgramme: (arg0: string) => void
 ) => {
-  const { t } = useTranslation(['actionForm']);
+  const { t } = useTranslation(['formTable']);
 
   const programmeTableColumns = [
     { title: t('programmeId'), dataIndex: 'programmeId', key: 'programmeId' },

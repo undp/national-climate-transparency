@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { detachMenu } from '../../Components/Popups/tableAction';
 
 export const getProjectTableColumns = (isView: boolean, detachProject: (arg0: string) => void) => {
-  const { t } = useTranslation(['programmeForm']);
+  const { t } = useTranslation(['formTable']);
 
   const projTableColumns = [
     { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },

@@ -7,7 +7,7 @@ export const getActivityTableColumns = (
   isView: boolean,
   detachActivity: (arg0: string) => void
 ) => {
-  const { t } = useTranslation(['projectForm']);
+  const { t } = useTranslation(['formTable']);
 
   const activityTableColumns = [
     { title: t('activityIdTitle'), dataIndex: 'activityId', key: 'activityId' },
