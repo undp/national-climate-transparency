@@ -20,6 +20,9 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { getFormTitle } from '../../../Utils/utilServices';
+import { Action } from '../../../Enums/action.enum';
+import { ProjectEntity } from '../../../Entities/project';
+import { useAbilityContext } from '../../../Casl/Can';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -37,6 +40,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const navigate = useNavigate();
   const { post } = useConnection();
+  const ability = useAbilityContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -927,20 +931,22 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   {t('back')}
                 </Button>
               </Col>
-              <Col span={2.5}>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={() => {
-                      validateEntity();
-                    }}
-                  >
-                    {t('validate')}
-                  </Button>
-                </Form.Item>
-              </Col>
+              {ability.can(Action.Validate, ProjectEntity) && (
+                <Col span={2.5}>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => {
+                        validateEntity();
+                      }}
+                    >
+                      {t('validate')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
           )}
           {method === 'update' && (

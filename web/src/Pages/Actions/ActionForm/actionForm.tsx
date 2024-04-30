@@ -4,7 +4,7 @@ import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
 import { AppstoreOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import { InstrumentType, ActionStatus, NatAnchor } from '../../../Enums/action.enum';
+import { InstrumentType, ActionStatus, NatAnchor, Action } from '../../../Enums/action.enum';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
@@ -23,6 +23,8 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
 import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 import { getProgrammeTableColumns } from '../../../Definitions/columns/programmeColumns';
+import { useAbilityContext } from '../../../Casl/Can';
+import { ActionEntity } from '../../../Entities/action';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -40,6 +42,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
+  const ability = useAbilityContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -1044,20 +1047,22 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('back')}
                   </Button>
                 </Col>
-                <Col span={2.5}>
-                  <Form.Item>
-                    <Button
-                      type="primary"
-                      size="large"
-                      block
-                      onClick={() => {
-                        validateEntity();
-                      }}
-                    >
-                      {t('validate')}
-                    </Button>
-                  </Form.Item>
-                </Col>
+                {ability.can(Action.Validate, ActionEntity) && (
+                  <Col span={2.5}>
+                    <Form.Item>
+                      <Button
+                        type="primary"
+                        size="large"
+                        block
+                        onClick={() => {
+                          validateEntity();
+                        }}
+                      >
+                        {t('validate')}
+                      </Button>
+                    </Form.Item>
+                  </Col>
+                )}
               </Row>
             )}
             {method === 'update' && (

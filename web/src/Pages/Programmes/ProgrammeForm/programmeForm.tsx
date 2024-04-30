@@ -33,6 +33,9 @@ import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterf
 import { getValidationRules } from '../../../Utils/validationRules';
 import { getFormTitle, joinTwoArrays } from '../../../Utils/utilServices';
 import { ProgrammeMigratedData } from '../../../Definitions/programmeDefinitions';
+import { Action } from '../../../Enums/action.enum';
+import { ProgrammeEntity } from '../../../Entities/programme';
+import { useAbilityContext } from '../../../Casl/Can';
 // import { ActivityData } from '../../../Definitions/activityDefinitions';
 // import { SupportData } from '../../../Definitions/supportDefinitions';
 
@@ -52,6 +55,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
+  const ability = useAbilityContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -1058,20 +1062,22 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('back')}
                   </Button>
                 </Col>
-                <Col span={2.5}>
-                  <Form.Item>
-                    <Button
-                      type="primary"
-                      size="large"
-                      block
-                      onClick={() => {
-                        validateEntity();
-                      }}
-                    >
-                      {t('validate')}
-                    </Button>
-                  </Form.Item>
-                </Col>
+                {ability.can(Action.Validate, ProgrammeEntity) && (
+                  <Col span={2.5}>
+                    <Form.Item>
+                      <Button
+                        type="primary"
+                        size="large"
+                        block
+                        onClick={() => {
+                          validateEntity();
+                        }}
+                      >
+                        {t('validate')}
+                      </Button>
+                    </Form.Item>
+                  </Col>
+                )}
               </Row>
             )}
             {method === 'update' && (
