@@ -99,14 +99,14 @@ export class ProjectService {
 				const savedProject = await em.save<ProjectEntity>(project);
 				if (savedProject) {
 					if (projectDto.kpis) {
-						kpiList.forEach(async kpi => {
-							await em.save<KpiEntity>(kpi)
-						});
+						for (const kpi of kpiList) {
+							await em.save<KpiEntity>(kpi);
+						}
 					}
 
-					eventLog.forEach(async event => {
+					for (const event of eventLog) {
 						await em.save<LogEntity>(event);
-					});
+					}
 				}
 				return savedProject;
 			})

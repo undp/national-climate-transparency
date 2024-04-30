@@ -44,22 +44,22 @@ GROUP BY
 export class ProgrammeViewEntity {
 	@Index()
 	@ViewColumn()
-	id: number
+	id: string;
 
 	@ViewColumn()
-	types: string[]
+	types: string[];
 
 	@ViewColumn()
-	internationalImplementingEntities: string[]
+	internationalImplementingEntities: string[];
 
 	@ViewColumn()
-	recipientEntities: string[]
+	recipientEntities: string[];
 
 	@ViewColumn()
-	achievedGHGReduction: number
+	achievedGHGReduction: number;
 
 	@ViewColumn()
-	expectedGHGReduction: number
+	expectedGHGReduction: number;
 
 	// No Clue of Location
 

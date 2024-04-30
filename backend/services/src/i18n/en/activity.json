@@ -6,8 +6,10 @@
     "projectNotFound": "A project with id {} is not found",
     "activityAlreadyLinked": "Activity with id {} is already attached",
     "activitiesNotFound": "Activities not found",
+    "activityNotFound": "Activity not found",
     "activitiesLinked": "Activities attached successfully",
     "activityIsNotLinked": "Activity with id {} is not attached",
     "activitiesUnlinked": "Activities detached successfully",
-    "cannotUnlinkNotRelatedActivity": "User is not allowed to detach the activity with id {}"
+    "cannotUnlinkNotRelatedActivity": "User is not allowed to detach the activity with id {}",
+    "userDoesNotHavePermission": "User does not have permission to access the activity with id {}"
 }

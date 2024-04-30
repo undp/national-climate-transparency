@@ -1,3 +1,4 @@
+import { Sector } from "src/enums/sector.enum";
 import { Role, SubRole } from "../casl/role.enum"
 
 export class JWTPayload {
@@ -6,7 +7,8 @@ export class JWTPayload {
         public n: string,
         public sub: number,
         public r: Role,
-        public sr: SubRole
+        public sr: SubRole,
+				public sc: Sector[],
     ) {
 
     }

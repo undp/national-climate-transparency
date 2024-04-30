@@ -24,7 +24,6 @@ import { nanoid } from "nanoid";
 import { ConfigService } from "@nestjs/config";
 import { Organisation, OrganisationType } from "../enums/organisation.enum";
 import { plainToClass } from "class-transformer";
-// import { OrganisationService } from "../organisation/organisation.service";
 import { HelperService } from "src/util/helpers.service";
 import { AsyncAction, AsyncOperationsInterface } from "src/async-operations/async-operations.interface";
 import { PasswordHashService } from "src/util/passwordHash.service";
@@ -49,19 +48,13 @@ export class UserService {
 		private configService: ConfigService,
 		private helperService: HelperService,
 		@InjectEntityManager() private entityManger: EntityManager,
-		// @Inject(forwardRef(() => OrganisationService))
-		// private organisationService: OrganisationService,
 		private asyncOperationsInterface: AsyncOperationsInterface,
 		private passwordHashService: PasswordHashService,
 		private httpUtilService: HttpUtilService
 	) { }
 
 	private async validateUserCreatePayload(
-		// user: User,
 		userDto: UserDto,
-		// organisation: Organisation,
-		// organisationId: number,
-		// organisationRole: OrganisationType
 	) {
 		const user = await this.findOne(userDto.email);
 		if (user) {
@@ -75,52 +68,6 @@ export class UserService {
 		}
 
 		this.validateRoleAndSubRole(userDto.role, userDto.subRole);
-
-		// if (!organisation) {
-		//   if (userDto.role === Role.DepartmentUser) {
-		//     throw new HttpException(
-		//       this.helperService.formatReqMessagesString(
-		//         "user.departmentDoesNotExist",
-		//         []
-		//       ),
-		//       HttpStatus.BAD_REQUEST
-		//     );
-		//   }
-		//   throw new HttpException(
-		//     this.helperService.formatReqMessagesString(
-		//       "user.orgDoesNotExist",
-		//       []
-		//     ),
-		//     HttpStatus.BAD_REQUEST
-		//   );
-		// }
-
-
-
-		// if (
-		//   OrganisationType.GOVERNMENT != organisationRole &&
-		//   userDto.organisationId &&
-		//   userDto.organisationId != organisationId
-		// ) {
-		//   throw new HttpException(
-		//     this.helperService.formatReqMessagesString("user.userUnAUth", []),
-		//     HttpStatus.FORBIDDEN
-		//   );
-		// }
-
-		// if (userDto.organisationType == OrganisationType.DEPARTMENT && userDto.role != Role.DepartmentUser) {
-		//   throw new HttpException(
-		//     this.helperService.formatReqMessagesString("user.departmentCanHaveOnlyDepUsers", []),
-		//     HttpStatus.FORBIDDEN
-		//   );
-		// }
-
-		// if (userDto.organisationType == OrganisationType.GOVERNMENT && userDto.role == Role.DepartmentUser) {
-		//   throw new HttpException(
-		//     this.helperService.formatReqMessagesString("user.govCannotHaveDepUsers", []),
-		//     HttpStatus.FORBIDDEN
-		//   );
-		// }
 
 	}
 
@@ -145,20 +92,15 @@ export class UserService {
 
 	async create(
 		userDto: UserDto,
-		// organisation: number,
-		// organisationType: OrganisationType,
 
 	): Promise<User | DataResponseMessageDto | undefined> {
 		this.logger.verbose(`User create received  ${userDto.email}`);
 		userDto.email = userDto.email?.toLowerCase();
-		// const organisation = await this.organisationService.findByCompanyId(userDto.organisationId);
 
 
 		await this.validateUserCreatePayload(userDto)
 
 		const u: User = plainToClass(User, userDto);
-		// u.organisationId = organisation.organisationId;
-		// u.organisationType = organisation.organisationType;
 		u.country = this.configService.get("systemCountry");
 
 		let generatedPassword = this.helperService.generateRandomPassword();
@@ -206,7 +148,6 @@ export class UserService {
 		const usr = await this.entityManger
 			.transaction(async (em) => {
 				const user = await em.save<User>(u);
-				// await this.organisationService.increaseUserCount(user.organisationId);
 				return user;
 			})
 			.catch((err: any) => {
@@ -279,7 +220,8 @@ export class UserService {
 				"apiKey",
 				"organisation",
 				"name",
-				"state"
+				"state",
+				"sector",
 			],
 			where: {
 				email: username,
@@ -308,12 +250,8 @@ export class UserService {
 
 	async getUserProfileDetails(id: number) {
 		const userProfileDetails = await this.findById(id);
-		// const organisationDetails = await this.organisationService.findByCompanyId(
-		//   userProfileDetails.organisationId
-		// );
 		return {
 			user: userProfileDetails,
-			// Organisation: organisationDetails,
 		};
 	}
 
@@ -325,7 +263,8 @@ export class UserService {
 
 	async update(
 		userDto: UserUpdateDto,
-		abilityCondition: string
+		abilityCondition: string,
+		requestingUser: User
 	): Promise<DataResponseDto | undefined> {
 		this.logger.verbose("User update received", abilityCondition);
 
@@ -344,13 +283,11 @@ export class UserService {
 
 		let isStateUpdate: boolean;
 
-		if (update.state && user.state != update.state) isStateUpdate = true;
-		if (update.state && update.state == UserState.SUSPENDED && !remarks) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString("user.remarksRequired", []),
-				HttpStatus.NOT_FOUND
-			);
+		if (update.state && user.state != update.state) {
+			this.validateStateChange(user, requestingUser, update, remarks);
+			isStateUpdate = true;
 		}
+		
 
 		const result = await this.userRepo
 			.createQueryBuilder()
@@ -537,6 +474,39 @@ export class UserService {
 			),
 			HttpStatus.INTERNAL_SERVER_ERROR
 		);
+	}
+
+
+	private validateStateChange(updatingUser: User, requestingUser: User, update: any, remarks?: any) {
+
+		if (updatingUser.role === Role.Root) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.cannotDeactivateRoot",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (updatingUser.id === requestingUser.id) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.cannotSelfDeactivate",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (update.state && update.state == UserState.SUSPENDED && !remarks) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString("user.remarksRequired", []),
+				HttpStatus.NOT_FOUND
+			);
+		}
+
+
 	}
 
 	private async notifyUserStateUpdate(userDto: UserUpdateDto) {

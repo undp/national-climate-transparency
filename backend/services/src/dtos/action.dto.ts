@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsString, IsOptional, ValidateNested, IsNumber, Min, Max } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString, IsOptional, ValidateNested, IsNumber, Min, Max, MaxLength, ArrayMinSize, IsArray } from "class-validator";
 import { ActionStatus, InstrumentType, NatAnchor } from "../enums/action.enum";
 import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
@@ -23,12 +23,19 @@ export class ActionDto {
 	@ApiProperty()
 	objective: string;
 
-	@IsNotEmpty()
-	@ApiProperty({ enum: InstrumentType })
+	@IsArray()
+	@ArrayMinSize(1)
+	@MaxLength(100, { each: true })
+	@IsNotEmpty({ each: true })
 	@IsEnum(InstrumentType, {
+		each: true,
 		message: "Invalid instrument type. Supported following instrument types:" + Object.values(InstrumentType),
 	})
-	instrumentType: InstrumentType;
+	@ApiProperty({
+		type: [String],
+		enum: Object.values(InstrumentType),
+	})
+	instrumentType: InstrumentType[];
 
 	@IsNotEmpty()
 	@ApiProperty({ enum: ActionStatus })
@@ -44,12 +51,19 @@ export class ActionDto {
 	@ApiProperty()
 	startYear: number;
 
-	@IsNotEmpty()
-	@ApiProperty({ enum: NatAnchor })
+	@IsArray()
+	@ArrayMinSize(1)
+	@MaxLength(100, { each: true })
+	@IsNotEmpty({ each: true })
 	@IsEnum(NatAnchor, {
+		each: true,
 		message: "Invalid Anchored National Strategy. Supported following strategies:" + Object.values(NatAnchor),
 	})
-	natAnchor: NatAnchor;
+	@ApiProperty({
+		type: [String],
+		enum: Object.values(NatAnchor),
+	})
+	natAnchor: NatAnchor[];
 
 	@IsOptional()
 	@ApiPropertyOptional(
@@ -79,7 +93,7 @@ export class ActionDto {
 				name: "KPI 1",
 				creatorType: "action",
 				expected: 100
-		}],
+			}],
 			items: {
 				$ref: getSchemaPath(KpiDto),
 			},

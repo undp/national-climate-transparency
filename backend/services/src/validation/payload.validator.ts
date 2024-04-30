@@ -13,6 +13,7 @@ export class PayloadValidator {
     validateKpiPayload = (kpi: KpiDto, parentType: EntityType) => {
         let msg;
         if (!kpi.creatorType) msg = "action.creatorTypeCannotBeNull";
+        else if (!kpi.kpiUnit) msg = "action.kpiUnitCannotBeNull";
         else if (!kpi.expected) msg = "action.expectedCannotBeNull";
         else if (!kpi.name) msg = "action.kpiNameCannotBeNull";
         else if (kpi.creatorType != parentType) msg = "action.kpiCreatorTypeMismatch"

@@ -64,7 +64,8 @@ export class AuthService {
       user.name,
       user.id,
       user.role,
-			user.subRole
+			user.subRole,
+			user.sector,
       // user.organisationId,
       // user.organisationType,
       // parseInt(organisationDetails.state)
@@ -78,6 +79,7 @@ export class AuthService {
       name: user.name,
       company: user.organisation,
       ability: JSON.stringify(ability),
+			sector: user.sector,
     };
   }
 

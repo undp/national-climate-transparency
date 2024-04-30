@@ -136,8 +136,6 @@ describe('ProjectService', () => {
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.achievedGHGReduction = 5;
-		projectDto.expectedGHGReduction = 1;
 		projectDto.expectedTimeFrame = 25;
 
 		const projectEntity = new ProjectEntity();
@@ -150,8 +148,6 @@ describe('ProjectService', () => {
 		projectEntity.endYear = 2030;
 		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectEntity.achievedGHGReduction = 5;
-		projectEntity.expectedGHGReduction = 1;
 		projectEntity.expectedTimeFrame = 25;
 		projectEntity.path = "";
 
@@ -193,8 +189,6 @@ describe('ProjectService', () => {
 		projectDto.programmeId = "002"
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.achievedGHGReduction = 5;
-		projectDto.expectedGHGReduction = 1;
 		projectDto.expectedTimeFrame = 25;
 
 		const projectEntity = new ProjectEntity();
@@ -207,8 +201,6 @@ describe('ProjectService', () => {
 		projectEntity.endYear = 2030;
 		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectEntity.achievedGHGReduction = 5;
-		projectEntity.expectedGHGReduction = 1;
 		projectEntity.expectedTimeFrame = 25;
 		projectEntity.path = "";
 
@@ -277,8 +269,6 @@ describe('ProjectService', () => {
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.achievedGHGReduction = 5;
-		projectDto.expectedGHGReduction = 1;
 		projectDto.expectedTimeFrame = 25;
 		projectDto.kpis = [kpiDto1, kpiDto2];
 		projectDto.documents = [documentDto];
@@ -294,8 +284,6 @@ describe('ProjectService', () => {
 		projectEntity.endYear = 2030;
 		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectEntity.achievedGHGReduction = 5;
-		projectEntity.expectedGHGReduction = 1;
 		projectEntity.expectedTimeFrame = 25;
 		projectEntity.path = "A001.P001";
 		projectEntity.programme = programmeEntity;
@@ -479,9 +467,6 @@ describe('ProjectService', () => {
 			expect(error).toBeInstanceOf(HttpException);
 			expect(error.status).toBe(HttpStatus.BAD_REQUEST);
 		}
-		// Assert the returned result
-		// expect(result).toEqual(expect.any(DataResponseMessageDto));
-		// expect(result.statusCode).toEqual(HttpStatus.OK);
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("project.cannotUnlinkNotRelatedProject", ["1"]);
 		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toBeCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
