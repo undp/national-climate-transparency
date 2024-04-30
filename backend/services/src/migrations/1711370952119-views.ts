@@ -27,9 +27,13 @@ CREATE AGGREGATE custom_array_agg(character varying[]) (
     STYPE = character varying[]
 );`
 
+const drop_array_agg_fn = `DROP AGGREGATE IF EXISTS custom_array_agg(character varying[]);`;
+
+
 export class Views1711370952119 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+				await queryRunner.query(drop_array_agg_fn);
         await queryRunner.query(array_merge_fn)
         await queryRunner.query(array_agg_fn)
 

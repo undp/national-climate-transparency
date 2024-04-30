@@ -25,7 +25,7 @@ import { ProgrammeViewDto } from "../dtos/programme.view.dto";
 import { ActivityEntity } from "../entities/activity.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
-import { ProgrammeViewEntity } from "src/entities/programme.view.entity";
+import { ProgrammeViewEntity } from "../entities/programme.view.entity";
 
 @Injectable()
 export class ProgrammeService {
@@ -39,7 +39,7 @@ export class ProgrammeService {
 		private fileUploadService: FileUploadService,
 		private payloadValidator: PayloadValidator,
 		private linkUnlinkService: LinkUnlinkService,
-
+		@InjectRepository(ProgrammeViewEntity) private programmeViewRepo: Repository<ProgrammeViewEntity>,
 	) { }
 
 	async createProgramme(programmeDto: ProgrammeDto, user: User) {
@@ -109,13 +109,17 @@ export class ProgrammeService {
 				const savedProgramme = await em.save<ProgrammeEntity>(programme);
 				if (savedProgramme) {
 					if (programmeDto.kpis) {
-						kpiList.forEach(async kpi => {
-							await em.save<KpiEntity>(kpi)
-						});
+						for (const kpi of kpiList) {
+							await em.save<KpiEntity>(kpi);
+						}
 					}
-					eventLog.forEach(async event => {
+
+					for (const event of eventLog) {
 						await em.save<LogEntity>(event);
-					});
+					}
+
+
+
 					// linking projects and updating paths of projects and activities
 					if (projects && projects.length > 0) {
 						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programmeDto, user, em);
@@ -254,8 +258,8 @@ export class ProgrammeService {
 				);
 			}
 		}
-
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto, user, this.entityManager);
+		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto, allLinkedProgrammes, user, this.entityManager);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 
@@ -267,7 +271,7 @@ export class ProgrammeService {
 	}
 
 	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User) {
-		const programmes = await this.findAllProgrammeByIds(unlinkProgrammesDto.programmes);
+		const programmes = await this.findAllProgrammeByIds([unlinkProgrammesDto.programme]);
 
 		if (!programmes || programmes.length <= 0) {
 			throw new HttpException(
@@ -279,19 +283,20 @@ export class ProgrammeService {
 			);
 		}
 
-		for (const programme of programmes) {
-			if (user.sector && user.sector.length > 0) {
-				const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
-				if (commonSectors.length === 0) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"programme.cannotUnlinkNotRelatedProgrammes",
-							[programme.programmeId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				}
+		const programme = programmes[0];
+		// for (const programme of programmes) {
+		if (user.sector && user.sector.length > 0) {
+			const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
+			if (commonSectors.length === 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.cannotUnlinkNotRelatedProgrammes",
+						[programme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
 			}
+			// }
 			if (!programme.action) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -302,7 +307,9 @@ export class ProgrammeService {
 				);
 			}
 		}
-		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programmes, unlinkProgrammesDto, user, this.entityManager);
+
+		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(programme.action.actionId, programme.programmeId)
+		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programme, unlinkProgrammesDto, allLinkedProgrammes, user, this.entityManager);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
@@ -340,6 +347,24 @@ export class ProgrammeService {
 		})
 	}
 
+	async findAllLinkedProgrammesToActionByActionId(actionId: string, unlinkRequestProgrammeId: string | null) {
+		const queryBuilder = this.programmeRepo.createQueryBuilder('programme')
+			.select('programme.*') // Select all columns without any alias
+			.where('programme.actionId = :actionId', { actionId });
+
+		if (unlinkRequestProgrammeId !== null) {
+			queryBuilder.andWhere('programme.programmeId != :unlinkRequestProgrammeId', { unlinkRequestProgrammeId });
+		}
+
+		return await queryBuilder.getRawMany();
+	}
+
+	async findProgrammeViewById(programmeId: string) {
+		return await this.programmeViewRepo.findOneBy({
+			id: programmeId
+		})
+	}
+
 	async findAllProjectsByIds(projectIds: string[]) {
 		return await this.projectRepo.createQueryBuilder('project')
 			.leftJoinAndSelect('project.programme', 'programme')
@@ -355,12 +380,12 @@ export class ProgrammeService {
 	}
 
 	async findProgrammesEligibleForLinking() {
-    return await this.programmeRepo.createQueryBuilder('programme')
-        .select(['"programmeId"', 'title'])
-        .where('programme.actionId IS NULL')
-        .orderBy('programme.programmeId', 'ASC') 
-        .getRawMany();
-}
+		return await this.programmeRepo.createQueryBuilder('programme')
+			.select(['"programmeId"', 'title'])
+			.where('programme.actionId IS NULL')
+			.orderBy('programme.programmeId', 'ASC')
+			.getRawMany();
+	}
 
 	private addEventLogEntry = (
 		eventLog: any[],

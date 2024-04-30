@@ -107,14 +107,6 @@ export class ProjectDto {
 			}
 		)
     documents: DocumentDto[];
-
-		@IsNumber()
-		@ApiProperty()
-		achievedGHGReduction: number;
-	
-		@IsNumber()
-		@ApiProperty()
-		expectedGHGReduction: number;
   
     @IsOptional()
     @ApiPropertyOptional()

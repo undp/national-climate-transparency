@@ -5,6 +5,7 @@ import {
   Post,
   Body,
 	Get,
+	Param,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -16,6 +17,7 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { ActivityDto } from "../dtos/activity.dto";
 import { LinkActivitiesDto } from "src/dtos/link.activities.dto";
 import { UnlinkActivitiesDto } from "src/dtos/unlink.activities.dto";
+import { QueryDto } from "../dtos/query.dto";
 
 @ApiTags("Activities")
 @ApiBearerAuth()
@@ -55,4 +57,20 @@ export class ActivityController {
 	unlinkProjects(@Body() unlinkActivitiesDto: UnlinkActivitiesDto, @Request() req) {
 			return this.activityService.unlinkActivitiesFromParents(unlinkActivitiesDto, req.user);
 	}
+
+	@ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ActivityEntity, true))
+  @Post("query")
+  queryActivity(@Body() query: QueryDto, @Request() req) {
+    console.log(req.abilityCondition);
+    return this.activityService.query(query, req.abilityCondition);
+  }
+
+	@ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ActivityEntity, true))
+  @Get('/:id')
+  getActivityViewData(@Param('id') id: string, @Request() req) {
+    return this.activityService.getActivityViewData(id, req.user);
+  }
+
 }

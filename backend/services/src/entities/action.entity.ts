@@ -3,6 +3,7 @@ import { InstrumentType } from "../enums/action.enum";
 import { ActionStatus } from "../enums/action.enum";
 import { NatAnchor } from "../enums/action.enum";
 import { ProgrammeEntity } from "./programme.entity";
+import { Sector } from "src/enums/sector.enum";
 
 @Entity("action")
 export class ActionEntity {
@@ -18,8 +19,8 @@ export class ActionEntity {
   @Column()
   objective: string;
 
-  @Column({ type: "enum", enum: InstrumentType })
-  instrumentType: string;
+  @Column("varchar", { array: true, nullable: false })
+  instrumentType: InstrumentType[];
 
   @Column({ type: "enum", enum: ActionStatus })
   status: string;
@@ -27,11 +28,14 @@ export class ActionEntity {
   @Column()
   startYear: number;
 
-  @Column({ type: "enum", enum: NatAnchor })
-  natAnchor: string;
+  @Column("varchar", { array: true, nullable: false })
+  natAnchor: NatAnchor[];
 
   @Column({ type: 'jsonb', nullable: true })
   documents: any;
+
+	@Column("varchar", { array: true, nullable: true })
+  sectors: Sector[];
 
   @OneToMany(() => ProgrammeEntity, (programmeEntity) => programmeEntity.action)
   programmes?: ProgrammeEntity[];

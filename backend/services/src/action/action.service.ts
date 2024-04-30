@@ -35,7 +35,8 @@ export class ActionService {
 		private fileUploadService: FileUploadService,
 		private payloadValidator: PayloadValidator,
 		private linkUnlinkService: LinkUnlinkService,
-		private kpiService: KpiService
+		private kpiService: KpiService,
+		@InjectRepository(ActionViewEntity) private actionViewRepo: Repository<ActionViewEntity>,
 	) { }
 
 	async createAction(actionDto: ActionDto, user: User) {
@@ -86,17 +87,17 @@ export class ActionService {
 				if (savedAction) {
 					// link programmes here
 					if (programmes && programmes.length > 0) {
-						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, actionDto, user, em);
+						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, actionDto, null, user, em);
 					}
 					if (actionDto.kpis) {
-						kpiList.forEach(async kpi => {
-							await em.save<KpiEntity>(kpi)
-						});
+						for (const kpi of kpiList) {
+							await em.save<KpiEntity>(kpi);
+						}
 					}
 
-					eventLog.forEach(async event => {
+					for (const event of eventLog) {
 						await em.save<LogEntity>(event);
-					});
+					}
 				}
 				return savedAction;
 			})
@@ -124,6 +125,12 @@ export class ActionService {
 	async findActionById(actionId: string) {
 		return await this.actionRepo.findOneBy({
 			actionId
+		})
+	}
+
+	async findActionViewById(actionId: string) {
+		return await this.actionViewRepo.findOneBy({
+			id: actionId
 		})
 	}
 
@@ -230,24 +237,7 @@ export class ActionService {
 			);
 		}
 
-		// upload the documents and create the doc array here
-
-		if (actionUpdateDto.removedDocuments && actionUpdateDto.removedDocuments.length > 0) {
-			if (currentAction.documents && currentAction.documents.length > 0) {
-				const updatedDocs = currentAction.documents.filter(item => !actionUpdateDto.removedDocuments.some(url => url === item.url));
-				actionUpdate.documents = (updatedDocs && updatedDocs.length > 0) ? updatedDocs : null;
-			} else {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"action.noDocumentsFound",
-						[actionUpdateDto.actionId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
-
-		}
-
+		// add new documents
 		if (actionUpdateDto.newDocuments) {
 			const documents = [];
 			for (const documentItem of actionUpdateDto.newDocuments) {
@@ -258,7 +248,36 @@ export class ActionService {
 				docEntity.createdTime = new Date().getTime();
 				documents.push(docEntity)
 			};
-			actionUpdate.documents = (actionUpdate.documents) ? [...actionUpdate.documents, documents] : documents;
+
+			if (currentAction.documents) {
+				actionUpdate.documents = actionUpdate.documents ? [...actionUpdate.documents, ...currentAction.documents] : [...currentAction.documents];
+			} else if (actionUpdate.documents) {
+				actionUpdate.documents = [...actionUpdate.documents];
+			}
+
+			if (documents) {
+				actionUpdate.documents = actionUpdate.documents ? [...actionUpdate.documents, ...documents] : [...documents];
+			}
+
+		}
+
+		// remove documents
+		if (actionUpdateDto.removedDocuments && actionUpdateDto.removedDocuments.length > 0) {
+
+			if (!currentAction.documents || currentAction.documents.length < 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"action.noDocumentsFound",
+						[actionUpdateDto.actionId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			actionUpdate.documents = actionUpdate.documents ? actionUpdate.documents : currentAction.documents
+			const updatedDocs = actionUpdate.documents.filter(item => !actionUpdateDto.removedDocuments.some(url => url === item.url));
+			actionUpdate.documents = (updatedDocs && updatedDocs.length > 0) ? updatedDocs : null;
+
 
 		}
 

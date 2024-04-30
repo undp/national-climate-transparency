@@ -19,6 +19,7 @@ import { ActivityService } from './activity.service';
 import { ActionModule } from 'src/action/action.module';
 import { ProgrammeModule } from 'src/programme/programme.module';
 import { ProjectModule } from 'src/project/project.module';
+import { ProgrammeViewEntity } from 'src/entities/programme.view.entity';
 
 @Module({
 	imports: [
@@ -41,6 +42,7 @@ import { ProjectModule } from 'src/project/project.module';
 					ActivityEntity,
 					SupportEntity,
 					ActionViewEntity,
+					ProgrammeViewEntity
 			]),
 			ActionModule,
 			ProgrammeModule,

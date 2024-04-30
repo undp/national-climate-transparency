@@ -52,7 +52,7 @@ GROUP BY
 export class ProjectViewEntity {
     @Index()
     @ViewColumn()
-    id: number
+    id: string;
 
     // From Activity
 

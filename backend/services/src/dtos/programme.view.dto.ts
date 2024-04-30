@@ -22,7 +22,7 @@ export class ProgrammeViewDto {
 
   objectives: string;
 
-  instrumentType: string;
+  instrumentType: string[];
 
   affectedSectors: Sector[];
 
