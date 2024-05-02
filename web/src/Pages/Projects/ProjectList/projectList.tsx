@@ -3,28 +3,8 @@ import '../../../Styles/app.scss';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import './projectList.scss';
 import { Action } from '../../../Enums/action.enum';
-import {
-  Button,
-  Col,
-  Row,
-  Input,
-  Dropdown,
-  Popover,
-  List,
-  Typography,
-  message,
-  Radio,
-  Space,
-  MenuProps,
-} from 'antd';
-import {
-  EditOutlined,
-  EllipsisOutlined,
-  FilterOutlined,
-  InfoCircleOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { Button, Col, Row, Input, Dropdown, Popover, message, Radio, Space, MenuProps } from 'antd';
+import { EllipsisOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -34,6 +14,8 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { GraphUpArrow } from 'react-bootstrap-icons';
+import { actionMenu } from '../../../Components/Popups/tableAction';
+import { ProjectEntity } from '../../../Entities/project';
 
 interface Item {
   key: number;
@@ -64,7 +46,6 @@ const projectList = () => {
   // General Page State
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [openPopoverKey, setOpenPopoverKey] = useState<number>();
 
   // Table Data State
 
@@ -315,70 +296,6 @@ const projectList = () => {
     }
   }, [toBeAttached]);
 
-  // Popup Menu for Action List
-
-  const actionMenu = (record: any) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: 'View/Validate',
-            icon: <InfoCircleOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                navigate(`/projects/view/${record.projectId}`);
-              }
-            },
-          },
-          {
-            text: 'Attach Activity',
-            icon: <PlusOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                setOpenAttaching(true);
-                setSelectedProjectId(record.projectId);
-                getAttachedActivityIds(record.projectId);
-                setOpenPopoverKey(undefined);
-              }
-            },
-          },
-          {
-            text: 'Edit Project',
-            icon: <EditOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                navigate(`/projects/edit/${record.projectId}`);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) =>
-          !item.isDisabled && (
-            <List.Item onClick={item.click}>
-              <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-              <span>{item.text}</span>
-            </List.Item>
-          )
-        }
-      />
-    );
-  };
-
-  // Controlling Popover visibility
-
-  const shouldPopoverOpen = (key: number) => {
-    if (key === openPopoverKey) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   // Action List Table Columns
 
   const columns = [
@@ -444,19 +361,24 @@ const projectList = () => {
       render: (_: any, record: any) => {
         return (
           <Popover
-            open={shouldPopoverOpen(record.key)}
+            showArrow={false}
+            trigger={'click'}
             placement="bottomRight"
-            content={actionMenu(record)}
-            onOpenChange={() => {
-              setOpenPopoverKey(undefined);
-            }}
+            content={actionMenu(
+              'project',
+              ability,
+              ProjectEntity,
+              record.projectId,
+              getAttachedActivityIds,
+              setOpenAttaching,
+              setSelectedProjectId,
+              navigate,
+              t
+            )}
           >
             <EllipsisOutlined
               rotate={90}
               style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => {
-                setOpenPopoverKey(record.key);
-              }}
             />
           </Popover>
         );

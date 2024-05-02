@@ -49,26 +49,31 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
 
       can(Action.Read, ActionEntity);
       can(Action.Create, ActionEntity);
+      can(Action.Validate, ActionEntity);
       can(Action.Update, ActionEntity);
       can(Action.Delete, ActionEntity);
 
       can(Action.Read, ProgrammeEntity);
       can(Action.Create, ProgrammeEntity);
+      can(Action.Validate, ProgrammeEntity);
       can(Action.Update, ProgrammeEntity);
       can(Action.Delete, ProgrammeEntity);
 
       can(Action.Read, ProjectEntity);
       can(Action.Create, ProjectEntity);
+      can(Action.Validate, ProjectEntity);
       can(Action.Update, ProjectEntity);
       can(Action.Delete, ProjectEntity);
 
       can(Action.Read, ActivityEntity);
       can(Action.Create, ActivityEntity);
+      can(Action.Validate, ActivityEntity);
       can(Action.Update, ActivityEntity);
       can(Action.Delete, ActivityEntity);
 
       can(Action.Read, SupportEntity);
       can(Action.Create, SupportEntity);
+      can(Action.Validate, SupportEntity);
       can(Action.Update, SupportEntity);
       can(Action.Delete, SupportEntity);
     }
@@ -88,26 +93,31 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
 
       can(Action.Read, ActionEntity);
       can(Action.Create, ActionEntity);
+      can(Action.Validate, ActionEntity);
       can(Action.Update, ActionEntity);
       can(Action.Delete, ActionEntity);
 
       can(Action.Read, ProgrammeEntity);
       can(Action.Create, ProgrammeEntity);
+      can(Action.Validate, ProgrammeEntity);
       can(Action.Update, ProgrammeEntity);
       can(Action.Delete, ProgrammeEntity);
 
       can(Action.Read, ProjectEntity);
       can(Action.Create, ProjectEntity);
+      can(Action.Validate, ProjectEntity);
       can(Action.Update, ProjectEntity);
       can(Action.Delete, ProjectEntity);
 
       can(Action.Read, ActivityEntity);
       can(Action.Create, ActivityEntity);
+      can(Action.Validate, ActivityEntity);
       can(Action.Update, ActivityEntity);
       can(Action.Delete, ActivityEntity);
 
       can(Action.Read, SupportEntity);
       can(Action.Create, SupportEntity);
+      can(Action.Validate, SupportEntity);
       can(Action.Update, SupportEntity);
       can(Action.Delete, SupportEntity);
     }
@@ -127,29 +137,34 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       });
 
       can(Action.Read, ActionEntity);
-      cannot(Action.Create, ActionEntity);
-      cannot(Action.Update, ActionEntity);
-      cannot(Action.Delete, ActionEntity);
+      can(Action.Create, ActionEntity);
+      can(Action.Validate, ActionEntity);
+      can(Action.Update, ActionEntity);
+      can(Action.Delete, ActionEntity);
 
       can(Action.Read, ProgrammeEntity);
-      cannot(Action.Create, ProgrammeEntity);
-      cannot(Action.Update, ProgrammeEntity);
-      cannot(Action.Delete, ProgrammeEntity);
+      can(Action.Create, ProgrammeEntity);
+      can(Action.Validate, ProgrammeEntity);
+      can(Action.Update, ProgrammeEntity);
+      can(Action.Delete, ProgrammeEntity);
 
       can(Action.Read, ProjectEntity);
-      cannot(Action.Create, ProjectEntity);
-      cannot(Action.Update, ProjectEntity);
-      cannot(Action.Delete, ProjectEntity);
+      can(Action.Create, ProjectEntity);
+      can(Action.Validate, ProjectEntity);
+      can(Action.Update, ProjectEntity);
+      can(Action.Delete, ProjectEntity);
 
       can(Action.Read, ActivityEntity);
-      cannot(Action.Create, ActivityEntity);
-      cannot(Action.Update, ActivityEntity);
-      cannot(Action.Delete, ActivityEntity);
+      can(Action.Create, ActivityEntity);
+      can(Action.Validate, ActivityEntity);
+      can(Action.Update, ActivityEntity);
+      can(Action.Delete, ActivityEntity);
 
       can(Action.Read, SupportEntity);
-      cannot(Action.Create, SupportEntity);
-      cannot(Action.Update, SupportEntity);
-      cannot(Action.Delete, SupportEntity);
+      can(Action.Create, SupportEntity);
+      can(Action.Validate, SupportEntity);
+      can(Action.Update, SupportEntity);
+      can(Action.Delete, SupportEntity);
     }
 
     if (user.role == Role.Observer) {
@@ -168,26 +183,31 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
 
       can(Action.Read, ActionEntity);
       cannot(Action.Create, ActionEntity);
+      cannot(Action.Validate, ActionEntity);
       cannot(Action.Update, ActionEntity);
       cannot(Action.Delete, ActionEntity);
 
       can(Action.Read, ProgrammeEntity);
       cannot(Action.Create, ProgrammeEntity);
+      cannot(Action.Validate, ProgrammeEntity);
       cannot(Action.Update, ProgrammeEntity);
       cannot(Action.Delete, ProgrammeEntity);
 
       can(Action.Read, ProjectEntity);
       cannot(Action.Create, ProjectEntity);
+      cannot(Action.Validate, ProjectEntity);
       cannot(Action.Update, ProjectEntity);
       cannot(Action.Delete, ProjectEntity);
 
       can(Action.Read, ActivityEntity);
       cannot(Action.Create, ActivityEntity);
+      cannot(Action.Validate, ActivityEntity);
       cannot(Action.Update, ActivityEntity);
       cannot(Action.Delete, ActivityEntity);
 
       can(Action.Read, SupportEntity);
       cannot(Action.Create, SupportEntity);
+      cannot(Action.Validate, SupportEntity);
       cannot(Action.Update, SupportEntity);
       cannot(Action.Delete, SupportEntity);
     }

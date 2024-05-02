@@ -699,9 +699,6 @@ describe('ActionService', () => {
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
-
-
-
 });
 
 

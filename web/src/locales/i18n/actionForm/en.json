@@ -13,13 +13,6 @@
     "mitigationInfoTitle": "Mitigation Information",
     "actionCreationSuccess": "Action Added Successfully",
     "actionUpdateSuccess": "Action Updated Successfully",
-    "programmeId": "Programme ID",
-    "actionId": "Action ID",
-    "programmeTitle": "Title of Programme",
-    "programmeType": "Type",
-    "programmeStatus": "Programme Status",
-    "subSectorAffected": "Sub-Sector Affected",
-    "investmentNeeds": " Estimated investment needs (USD)",
     "attachProgramme": "Attach Programme",
     "attachActivity": "Attach Activity",
     "addKPI": "Add KPI",
@@ -48,5 +41,9 @@
     "detach": "Detach",
     "documentsHeader": "Documents",
     "activityInfoTitle": "List of Activities under the Project",
-    "supportInfoTitle": "List of Supports under the Project"
+    "supportInfoTitle": "List of Supports under the Project",
+    "noSuchEntity": "Requested Action doesn't exist !",
+    "investmentNeeds": " Estimated investment needs (USD)",
+    "noActivityMessage": "No Activities Attached",
+    "noSupportMessage": "No Supports Attached"
 }

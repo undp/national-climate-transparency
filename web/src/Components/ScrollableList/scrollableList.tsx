@@ -1,6 +1,5 @@
 import { Col, List, Popover, Row, Tag } from 'antd';
 import './scrollableList.scss';
-import { useState } from 'react';
 
 interface Props {
   listToShow: any[];
@@ -14,8 +13,6 @@ interface ListDataType {
 }
 
 const ScrollableList: React.FC<Props> = ({ listToShow }) => {
-  const [fullListVisible, setFullListVisible] = useState<boolean>(false);
-
   const options: ListDataType[] = [];
   listToShow.map((item: string, index: number) =>
     options.push({
@@ -42,30 +39,17 @@ const ScrollableList: React.FC<Props> = ({ listToShow }) => {
 
   return (
     <div>
-      <Row
-        gutter={[30, 5]}
-        onClick={() => {
-          setFullListVisible(true);
-        }}
-      >
-        {options.map((listValue: any, index: number) => (
-          <Col key={index} span={24}>
-            <Tag color={listValue.color} className="table-full-width-tag">
-              {listValue.label}
-            </Tag>
-          </Col>
-        ))}
-      </Row>
-      <Popover
-        open={fullListVisible}
-        placement="bottom"
-        trigger="click"
-        showArrow={false}
-        content={fullList()}
-        onOpenChange={() => {
-          setFullListVisible(false);
-        }}
-      ></Popover>
+      <Popover placement="bottom" trigger={'click'} showArrow={false} content={fullList()}>
+        <Row gutter={[30, 5]}>
+          {options.map((listValue: any, index: number) => (
+            <Col key={index} span={24}>
+              <Tag color={listValue.color} className="table-full-width-tag">
+                {listValue.label}
+              </Tag>
+            </Col>
+          ))}
+        </Row>
+      </Popover>
     </div>
   );
 };

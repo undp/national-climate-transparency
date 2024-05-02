@@ -1,36 +1,13 @@
-import { CloseCircleOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { List, Popover, Typography } from 'antd';
+import { EllipsisOutlined } from '@ant-design/icons';
+import { Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { ActivityData } from '../activityDefinitions';
+import { detachMenu } from '../../Components/Popups/tableAction';
 
-export const getActivityTableColumns = () => {
-  const { t } = useTranslation(['projectForm']);
-
-  const actionMenu = (record: ActivityData) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: t('detach'),
-            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            click: () => {
-              {
-                // detachActivity(record.activityId);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) => (
-          <List.Item onClick={item.click}>
-            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{item.text}</span>
-          </List.Item>
-        )}
-      />
-    );
-  };
+export const getActivityTableColumns = (
+  isView: boolean,
+  detachActivity: (arg0: string) => void
+) => {
+  const { t } = useTranslation(['formTable']);
 
   const activityTableColumns = [
     { title: t('activityIdTitle'), dataIndex: 'activityId', key: 'activityId' },
@@ -42,23 +19,27 @@ export const getActivityTableColumns = () => {
     { title: t('natImplementorTitle'), dataIndex: 'natImplementor', key: 'natImplementor' },
     {
       title: '',
-      key: 'activityAction',
+      key: 'activityId',
       align: 'right' as const,
       width: 6,
       render: (record: any) => {
         return (
-          <Popover
-            placement="bottomRight"
-            content={actionMenu(record)}
-            trigger="click"
-            // open={detachOpen[tempActivityIds.indexOf(record.activityId)]}
-          >
-            <EllipsisOutlined
-              rotate={90}
-              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              //   onClick={() => handleDetachOpen(record)}
-            />
-          </Popover>
+          <>
+            {!isView && (
+              <Popover
+                key={`${record.activityId}_act_detach`}
+                showArrow={false}
+                trigger={'click'}
+                placement="bottomRight"
+                content={detachMenu(record.activityId, t, detachActivity)}
+              >
+                <EllipsisOutlined
+                  rotate={90}
+                  style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
+                />
+              </Popover>
+            )}
+          </>
         );
       },
     },

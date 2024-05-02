@@ -14,19 +14,22 @@ import { IntImplementor, NatImplementor, Recipient, SubSector } from "../enums/s
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { HttpException, HttpStatus } from "@nestjs/common";
-
 import { DocumentDto } from "../dtos/document.dto";
 import { KpiDto } from "../dtos/kpi.dto";
 import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { LinkProgrammesDto } from "../dtos/link.programmes.dto";
-// import { OrganisationService } from "../organisation/organisation.service";
 import { ProgrammeViewDto } from "../dtos/programme.view.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { ProjectType } from "../enums/project.enum";
 import { QueryDto } from "../dtos/query.dto";
 import { FilterEntry } from "../dtos/filter.entry";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
+import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
+import { KpiService } from "../kpi/kpi.service";
+import { DocumentEntityDto } from "../dtos/document.entity.dto";
+import { KpiEntity } from "../entities/kpi.entity";
+import { KpiUpdateDto } from "../dtos/kpi.update.dto";
 import { ProgrammeViewEntity } from "../entities/programme.view.entity";
 
 describe('ProgrammeService', () => {
@@ -41,6 +44,7 @@ describe('ProgrammeService', () => {
 	let payloadValidatorMock: Partial<PayloadValidator>;
 	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
 	let programmeViewRepositoryMock: Partial<Repository<ProgrammeViewEntity>>;
+	let kpiServiceMock: Partial<KpiService>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -79,6 +83,10 @@ describe('ProgrammeService', () => {
 			linkProjectsToProgramme: jest.fn(),
 			unlinkProgrammesFromAction: jest.fn(),
 		}
+
+		kpiServiceMock = {
+			findKpisByCreatorTypeAndCreatorId: jest.fn(),
+		};
 
 		programmeRepositoryMock = {
 			createQueryBuilder: jest.fn(() => ({
@@ -152,6 +160,10 @@ describe('ProgrammeService', () => {
 				{
 					provide: getRepositoryToken(ProgrammeViewEntity),
 					useValue: programmeViewRepositoryMock,
+				},
+				{
+					provide: KpiService,
+					useValue: kpiServiceMock,
 				},
 			],
 		}).compile();
@@ -842,7 +854,6 @@ describe('ProgrammeService', () => {
 		);
 	});
 
-
 	it('should build the query correctly without size and page', async () => {
 		const queryDto = new QueryDto();
 		const filterAnd: FilterEntry[] = [];
@@ -950,5 +961,258 @@ describe('ProgrammeService', () => {
 		expect(programmeRepositoryMock.createQueryBuilder().getManyAndCount).toHaveBeenCalled();
 	});
 
+	it('should update the programme without documents', async () => {
+		const user = new User();
+		user.id = 2;
 
+		const programmeUpdateDto = new ProgrammeUpdateDto();
+		programmeUpdateDto.title = "test";
+		programmeUpdateDto.description = "test description";
+		programmeUpdateDto.objective = "test objective";
+		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateDto.startYear = 2024;
+		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateDto.investment = 1000;
+		programmeUpdateDto.comments = "test comment"
+
+		jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(new ProgrammeEntity());
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			expect(emMock.save).toHaveBeenNthCalledWith(1, programmeUpdateDto);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedAction;
+		});
+
+		const result = await service.updateProgramme(programmeUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	})
+
+	it('should remove the action documents when user remove the documents', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const programmeUpdateDto = new ProgrammeUpdateDto();
+		programmeUpdateDto.title = "test";
+		programmeUpdateDto.description = "test description";
+		programmeUpdateDto.objective = "test objective";
+		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateDto.startYear = 2024;
+		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateDto.investment = 1000;
+		programmeUpdateDto.comments = "test comment"
+		programmeUpdateDto.removedDocuments = ["www.test.com/doc1"];
+
+		const programmeUpdateEntity = new ProgrammeEntity();
+		programmeUpdateEntity.title = "test";
+		programmeUpdateEntity.description = "test description";
+		programmeUpdateEntity.objective = "test objective";
+		programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateEntity.startYear = 2024;
+		programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateEntity.investment = 1000;
+		programmeUpdateEntity.comments = "test comment"
+		programmeUpdateEntity.documents = null;
+
+		const documentDto = new DocumentEntityDto();
+		documentDto.url = "www.test.com/doc1";
+		documentDto.title = "doc title"
+
+		const programmeEntity = new ProgrammeEntity();
+		programmeEntity.title = "test";
+		programmeEntity.description = "test description";
+		programmeEntity.objective = "test objective";
+		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeEntity.startYear = 2020;
+		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeEntity.investment = 100;
+		programmeEntity.comments = "test comment"
+		programmeEntity.documents = [documentDto];
+
+
+		jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(programmeEntity);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(programmeUpdateEntity),
+				remove: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedAction;
+		});
+
+		const result = await service.updateProgramme(programmeUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	})
+
+	it('should update the documents in action when user add new documents', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const documentDto = new DocumentEntityDto();
+		documentDto.url = "www.test.com/doc1";
+		documentDto.title = "doc title"
+
+		const addedDocumentDto = new DocumentDto();
+		addedDocumentDto.data = documentData;
+		addedDocumentDto.title = "doc title"
+
+		const programmeUpdateDto = new ProgrammeUpdateDto();
+		programmeUpdateDto.title = "test";
+		programmeUpdateDto.description = "test description";
+		programmeUpdateDto.objective = "test objective";
+		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateDto.startYear = 2024;
+		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateDto.investment = 1000;
+		programmeUpdateDto.comments = "test comment"
+		programmeUpdateDto.newDocuments = [addedDocumentDto]
+
+		const programmeUpdateEntity = new ProgrammeEntity();
+		programmeUpdateEntity.title = "test";
+		programmeUpdateEntity.description = "test description";
+		programmeUpdateEntity.objective = "test objective";
+		programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateEntity.startYear = 2024;
+		programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateEntity.investment = 1000;
+		programmeUpdateEntity.comments = "test comment"
+		programmeUpdateEntity.documents = [documentDto, addedDocumentDto];
+
+
+		const programmeEntity = new ProgrammeEntity();
+		programmeEntity.title = "test";
+		programmeEntity.description = "test description";
+		programmeEntity.objective = "test objective";
+		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeEntity.startYear = 2020;
+		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeEntity.investment = 100;
+		programmeEntity.comments = "test comment"
+		programmeEntity.documents = [documentDto];
+
+		jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(programmeEntity);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(programmeUpdateEntity),
+				remove: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedAction;
+		});
+
+		const result = await service.updateProgramme(programmeUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	})
+
+	it('should update kpis in action when user updated the Kpis', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const kpiDto1 = new KpiEntity();
+		kpiDto1.kpiId = 1;
+		kpiDto1.name = "KPI 1";
+		kpiDto1.creatorType = "action";
+		kpiDto1.expected = 100;
+
+		const kpiDto2 = new KpiEntity();
+		kpiDto2.kpiId = 2;
+		kpiDto2.name = "KPI 2";
+		kpiDto2.creatorType = "action";
+		kpiDto2.expected = 100;
+
+		const kpiAdded = new KpiUpdateDto();
+		kpiDto2.name = "KPI Added";
+		kpiDto2.creatorType = "action";
+		kpiDto2.expected = 300;
+
+		const programmeUpdateDto = new ProgrammeUpdateDto();
+		programmeUpdateDto.title = "test";
+		programmeUpdateDto.description = "test description";
+		programmeUpdateDto.objective = "test objective";
+		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateDto.startYear = 2024;
+		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateDto.investment = 1000;
+		programmeUpdateDto.comments = "test comment"
+		programmeUpdateDto.kpis = [kpiDto1, kpiAdded]
+
+		const programmeUpdateEntity = new ProgrammeEntity();
+		programmeUpdateEntity.title = "test";
+		programmeUpdateEntity.description = "test description";
+		programmeUpdateEntity.objective = "test objective";
+		programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeUpdateEntity.startYear = 2024;
+		programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeUpdateEntity.investment = 1000;
+		programmeUpdateEntity.comments = "test comment"
+
+		const programmeEntity = new ProgrammeEntity();
+		programmeEntity.title = "test";
+		programmeEntity.description = "test description";
+		programmeEntity.objective = "test objective";
+		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+		programmeEntity.startYear = 2020;
+		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+		programmeEntity.investment = 100;
+		programmeEntity.comments = "test comment"
+
+
+		jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(programmeEntity);
+		jest.spyOn(kpiServiceMock, 'findKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2])
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(programmeUpdateEntity),
+				remove: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+			};
+			const savedAction = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(5);
+			expect(emMock.remove).toHaveBeenCalledTimes(1);
+			return savedAction;
+		});
+
+		const result = await service.updateProgramme(programmeUpdateDto, user);
+		expect(result.statusCode).toEqual(HttpStatus.OK);
+
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	})
 })
