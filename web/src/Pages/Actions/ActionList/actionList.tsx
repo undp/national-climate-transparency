@@ -19,7 +19,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
-import { actionMenu } from '../../../Components/Popups/tableAction';
+import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
 
 interface Item {
   key: number;
@@ -373,7 +373,7 @@ const actionList = () => {
             showArrow={false}
             trigger={'click'}
             placement="bottomRight"
-            content={actionMenu(
+            content={actionMenuWithAttaching(
               'action',
               ability,
               ActionEntity,

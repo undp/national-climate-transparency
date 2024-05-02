@@ -14,7 +14,7 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { GraphUpArrow } from 'react-bootstrap-icons';
-import { actionMenu } from '../../../Components/Popups/tableAction';
+import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
 import { ProjectEntity } from '../../../Entities/project';
 
 interface Item {
@@ -364,7 +364,7 @@ const projectList = () => {
             showArrow={false}
             trigger={'click'}
             placement="bottomRight"
-            content={actionMenu(
+            content={actionMenuWithAttaching(
               'project',
               ability,
               ProjectEntity,

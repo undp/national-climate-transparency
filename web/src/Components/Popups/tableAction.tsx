@@ -12,10 +12,10 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 
-export const actionMenu = (
-  calledIn: 'action' | 'programme' | 'project' | 'activity' | 'support',
+export const actionMenuWithAttaching = (
+  calledIn: 'action' | 'programme' | 'project',
   ability: any,
-  entity: ActionEntity | ProgrammeEntity | ProjectEntity | ActivityEntity | SupportEntity,
+  entity: ActionEntity | ProgrammeEntity | ProjectEntity,
   recordId: string,
   getAttachedEntityIds: (recordId: string) => void,
   setOpenAttaching: React.Dispatch<React.SetStateAction<boolean>>,
@@ -59,6 +59,54 @@ export const actionMenu = (
           click: () => {
             {
               navigate(`/${calledIn}s/edit/${recordId}`);
+            }
+          },
+        },
+      ]}
+      renderItem={(item) =>
+        !item.isDisabled && (
+          <List.Item onClick={item.click}>
+            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
+            <span>{item.text}</span>
+          </List.Item>
+        )
+      }
+    />
+  );
+};
+
+export const actionMenuWithoutAttaching = (
+  calledIn: 'activities' | 'supports',
+  ability: any,
+  entity: ActivityEntity | SupportEntity,
+  recordId: string,
+  navigate: any,
+  t: any
+) => {
+  return (
+    <List
+      className="action-menu"
+      size="small"
+      dataSource={[
+        {
+          text: ability.can(Action.Validate, entity)
+            ? t('tableAction:View/Validate')
+            : t('tableAction:View'),
+          icon: <InfoCircleOutlined style={{ color: '#9155FD' }} />,
+          isDisabled: false,
+          click: () => {
+            {
+              navigate(`/${calledIn}/view/${recordId}`);
+            }
+          },
+        },
+        {
+          text: t(`tableAction:${calledIn}Edit`),
+          icon: <EditOutlined style={{ color: '#9155FD' }} />,
+          isDisabled: !ability.can(Action.Update, entity),
+          click: () => {
+            {
+              navigate(`/${calledIn}/edit/${recordId}`);
             }
           },
         },
