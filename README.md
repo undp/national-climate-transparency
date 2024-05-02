@@ -1,15 +1,15 @@
-# National NDC Transparency Tool
+# National Climate Transparency Tool
  
 <a name="about"></a>
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/undp/carbon-registry)
 [![SparkBlue Chat](https://img.shields.io/badge/chat-SparkBlue-blue)](https://www.sparkblue.org/group/keeping-track-digital-public-goods-paris-agreement)
 
-The National Measurement, Reporting and Verification (MRV) Tool is your gateway to ensure accountability and compliance toward the Enhanced Transparency Framework (ETF).
+The National Climate Transparency Tool is your gateway to ensure robust Measurement, Reporting and Verification (MRV) toward the Enhanced Transparency Framework (ETF) and to accelerate implementation of the Nationally Determined Contribution (NDC).
 
-In an era where climate action is not just a responsibility but a mandate, our National NDC Transparency tool stands as a beacon of uncompromising commitment towards environmental stewardship. This tool is an integral part of our open-source software ecosystem designed around the Paris Agreement. It provides a robust platform for nations to meticulously track, report, and manage their Nationally Determined Contributions (NDCs) towards global climate goals. The intuitive interface coupled with a powerful backend ensures that managing complex climate data becomes a seamless experience, fostering a culture of transparency and accountability.
+In an era where climate action is not just an aspiration but a responsibility, the National Climate Transparency System is a tool to support the country's uncompromising commitment towards environmental stewardship. This module is an integral part of our open-source software ecosystem, to support countries in easing the process of developing national data management systems for NDC tracking, GHG inventory data management and Biennal Transparency Reporting (BTR). The interface co-designed with countries, coupled with a robust backend ensures that managing complex climate data becomes a seamless experience, fostering a culture of transparency and accountability.
 
-By employing the National MRV tool, countries can effortlessly align their climate actions with international standards, ensuring a harmonized approach towards a sustainable future. The tool is engineered to provide a clear lens into the progress and impact of NDC actions, making compliance with international commitments and national institutional arrangements a streamlined process. Our tool encapsulates the essence of effective climate action management, offering a clear roadmap towards achieving and exceeding NDC targets.
+By employing the National Climate Transparency tool, countries can effortlessly align their climate actions with international standards, ensuring a harmonized approach towards a sustainable future. The tool is engineered to provide a clear lens into the progress and impact of NDC actions, making compliance with international commitments and national institutional arrangements a streamlined process. This Digital Public Good codebase envisions to encapsulate the essence of effective climate action management, which countries can configure, adapt and build on to meet national circumstance.
 
 The system has 3 key features, and to be uploaded by the third quarter of 2024.
 
