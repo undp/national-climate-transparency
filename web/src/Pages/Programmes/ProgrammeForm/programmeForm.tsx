@@ -945,6 +945,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             {isView && (
               <div className="form-section-card">
                 <div className="form-section-header">{t('updatesInfoTitle')}</div>
+                <UpdatesTimeline recordType={'programme'} recordId={entId} />
               </div>
             )}
             {method === 'create' && (
