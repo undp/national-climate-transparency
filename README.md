@@ -5,22 +5,22 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/undp/carbon-registry)
 [![SparkBlue Chat](https://img.shields.io/badge/chat-SparkBlue-blue)](https://www.sparkblue.org/group/keeping-track-digital-public-goods-paris-agreement)
 
-The National NDC Transparency Tool is your gateway to environmental accountability and compliance.
+The National Measurement, Reporting and Verification (MRV) Tool is your gateway to ensure accountability and compliance toward the Enhanced Transparency Framework (ETF).
 
 In an era where climate action is not just a responsibility but a mandate, our National NDC Transparency tool stands as a beacon of uncompromising commitment towards environmental stewardship. This tool is an integral part of our open-source software ecosystem designed around the Paris Agreement. It provides a robust platform for nations to meticulously track, report, and manage their Nationally Determined Contributions (NDCs) towards global climate goals. The intuitive interface coupled with a powerful backend ensures that managing complex climate data becomes a seamless experience, fostering a culture of transparency and accountability.
 
-By employing the National NDC Transparency tool, countries can effortlessly align their climate actions with international standards, ensuring a harmonized approach towards a sustainable future. The tool is engineered to provide a clear lens into the progress and impact of NDC actions, making compliance with international commitments and national institutional arrangements a streamlined process. Our tool encapsulates the essence of effective climate action management, offering a clear roadmap towards achieving and exceeding NDC targets.
+By employing the National MRV tool, countries can effortlessly align their climate actions with international standards, ensuring a harmonized approach towards a sustainable future. The tool is engineered to provide a clear lens into the progress and impact of NDC actions, making compliance with international commitments and national institutional arrangements a streamlined process. Our tool encapsulates the essence of effective climate action management, offering a clear roadmap towards achieving and exceeding NDC targets.
 
-The system has 3 key features:
+The system has 3 key features, and to be uploaded by the third quarter of 2024.
 
-* **NDC Actions:** Effortlessly track and report NDC mitigation / adaptation actions. The system supports monitoring, co-benefits reporting, & methodology synchronization, facilitating compliance with international commitments and national institutional arrangements.
-* **GHG Inventory:** [Coming Soon] Maintains a comprehensive inventory of greenhouse gas (GHG) emissions with ease. The system allows for accurate data collection (with Excel integration), automated calculations, and reporting, supporting informed decision-making.
-* **Support Tracking:** Gain full visibility into financial flows and support mechanisms related to NDC actions. The system provides a clear picture of investments, capacity building, and technology transfer, ensuring both accountability & effective management.
+* **NDC Actions Tracking:** Effortlessly track and report NDC mitigation / adaptation actions, programmes, projects, activities and support. The system is intended to support monitoring and reporting of national activities and finance, facilitating compliance with international reporting commitments. The codebase can be configured to national institutional arrangements and NDC context.
+* **GHG Inventory:** Maintains a comprehensive inventory of greenhouse gas (GHG) emissions with ease. The system allows for accurate data collection (with Excel integration), automated calculations, and reporting, supporting informed decision-making.
+* **Reporting Module:** Pulls together data collected and managed across the above two modules into a format that is required for reporting to UNFCCCC. The standard codebase uses the recently approved Common Tabular Format and can be configured to any other format. 
 
-**This is part of an ecosystem of code and tightly integrates with the [D4C National Carbon Registry DPG](https://github.com/undp/carbon-registry) **
+**The National MRV System can be interoperable with the [National Carbon Registry DPG](https://github.com/undp/carbon-registry)**
 
 ## Index
-
+Below contents are planned to be updated by the third quarter of 2024 based on user feedback and recent change in international requirements. 
 * [About](#about)
 * [Standards](#standards)
 * [System Architecture](#architecture)
