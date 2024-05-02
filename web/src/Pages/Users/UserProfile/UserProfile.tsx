@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { Row, Col, Card, Button, Skeleton } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { PersonCircle } from 'react-bootstrap-icons';
-import { CompanyDetailsComponent } from '../../../Components/CompanyDetails/companyDetailsComponent';
 import { UserRoleIcon } from '../../../Components/UserRoleIcon/userRoleIcon';
 import LanguageSelection from '../../../Components/LanguageSelection/languageSelection';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
@@ -33,11 +32,11 @@ const CompanyProfile = () => {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
         {subRole === 'GovernmentDepartment'
-          ? 'Government Department'
+          ? 'Department'
           : subRole === 'Consultant'
           ? 'Consultant'
           : subRole === 'SEO'
-          ? 'Seo'
+          ? 'SEO'
           : subRole === 'TechnicalReviewer'
           ? 'Technical Reviewer'
           : subRole === 'DevelopmentPartner'

@@ -25,6 +25,7 @@ import { getSupportTableColumns } from '../../../Definitions/columns/supportColu
 import { getProgrammeTableColumns } from '../../../Definitions/columns/programmeColumns';
 import { useAbilityContext } from '../../../Casl/Can';
 import { ActionEntity } from '../../../Entities/action';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -994,8 +995,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             </div>
             {isView && (
-              <div className="form-section-card">
+              <div className="form-section-timelinecard">
                 <div className="form-section-header">{t('updatesInfoTitle')}</div>
+                <UpdatesTimeline recordType={'action'} recordId={entId} />
               </div>
             )}
             {method === 'create' && (

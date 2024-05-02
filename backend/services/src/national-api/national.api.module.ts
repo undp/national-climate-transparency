@@ -22,6 +22,8 @@ import { ProjectController } from './project.controller';
 import { ProjectModule } from '../project/project.module';
 import { ActivityModule } from 'src/activity/activity.module';
 import { ActivityController } from './activity.controller';
+import { LogController } from './log.controller';
+import { LogModule } from 'src/log/log.module';
 
 
 @Module({
@@ -44,6 +46,7 @@ import { ActivityController } from './activity.controller';
     ProgrammeModule, 
 		ProjectModule,
 		ActivityModule,
+    LogModule,
   ],
   controllers: [ 
     NationalAPIController, 
@@ -54,7 +57,8 @@ import { ActivityController } from './activity.controller';
     ActionController, 
     ProgrammeController,
 		ProjectController, 
-		ActivityController 
+		ActivityController,
+    LogController
   ],
   providers: [
     NationalAPIService, 

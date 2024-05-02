@@ -30,6 +30,7 @@ import { KpiService } from "../kpi/kpi.service";
 import { DocumentEntityDto } from "../dtos/document.entity.dto";
 import { KpiEntity } from "../entities/kpi.entity";
 import { KpiUpdateDto } from "../dtos/kpi.update.dto";
+import { ProgrammeViewEntity } from "../entities/programme.view.entity";
 
 describe('ProgrammeService', () => {
 	let service: ProgrammeService;
@@ -42,6 +43,7 @@ describe('ProgrammeService', () => {
 	let fileUploadServiceMock: Partial<FileUploadService>;
 	let payloadValidatorMock: Partial<PayloadValidator>;
 	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
+	let programmeViewRepositoryMock: Partial<Repository<ProgrammeViewEntity>>;
 	let kpiServiceMock: Partial<KpiService>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
@@ -88,12 +90,16 @@ describe('ProgrammeService', () => {
 
 		programmeRepositoryMock = {
 			createQueryBuilder: jest.fn(() => ({
+				select: jest.fn().mockReturnThis(),
 				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
 				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				leftJoinAndMapMany: jest.fn().mockReturnThis(),
 				orderBy: jest.fn().mockReturnThis(),
 				offset: jest.fn().mockReturnThis(),
 				limit: jest.fn().mockReturnThis(),
 				getManyAndCount: jest.fn(),
+				getRawMany: jest.fn(),
 			})) as unknown as () => SelectQueryBuilder<ProgrammeEntity>,
 		};
 
@@ -150,6 +156,10 @@ describe('ProgrammeService', () => {
 				{
 					provide: LinkUnlinkService,
 					useValue: linkUnlinkServiceMock,
+				},
+				{
+					provide: getRepositoryToken(ProgrammeViewEntity),
+					useValue: programmeViewRepositoryMock,
 				},
 				{
 					provide: KpiService,
@@ -592,7 +602,7 @@ describe('ProgrammeService', () => {
 	});
 
 	it('should unlink programmes from action', async () => {
-		const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
+		const unlinkProgrammesDto: UnlinkProgrammesDto = { programme: '1' };
 		const user = new User();
 		user.sector = [Sector.Agriculture]
 
@@ -602,19 +612,7 @@ describe('ProgrammeService', () => {
 		programme1.path = 'path1';
 		programme1.affectedSectors = [Sector.Agriculture];
 
-		const programme2 = new ProgrammeEntity();
-		programme2.programmeId = '2';
-		programme2.action = new ActionEntity();
-		programme2.path = 'path2';
-		programme2.affectedSectors = [Sector.Agriculture];
-
-		const programme3 = new ProgrammeEntity();
-		programme3.programmeId = '3';
-		programme3.action = new ActionEntity();
-		programme3.path = 'path3';
-		programme3.affectedSectors = [Sector.Agriculture];
-
-		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1]);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -624,10 +622,6 @@ describe('ProgrammeService', () => {
 
 			expect(programme1.action).toBeNull();
 			expect(programme1.path).toBe('');
-			expect(programme2.action).toBeNull();
-			expect(programme2.path).toBe('');
-			expect(programme3.action).toBeNull();
-			expect(programme3.path).toBe('');
 
 			expect(emMock.save).toHaveBeenCalledTimes(6);
 
@@ -644,7 +638,7 @@ describe('ProgrammeService', () => {
 	});
 
 	it('should throw an exception when not linked programme sent for unlinking', async () => {
-		const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
+		const unlinkProgrammesDto: UnlinkProgrammesDto = { programme: '1' };
 		const user = new User();
 		user.sector = [Sector.Agriculture]
 		
@@ -654,19 +648,7 @@ describe('ProgrammeService', () => {
 		programme1.path = '';
 		programme1.affectedSectors = [Sector.Agriculture];
 
-		const programme2 = new ProgrammeEntity();
-		programme2.programmeId = '2';
-		programme2.action = new ActionEntity();
-		programme2.path = 'path2';
-		programme2.affectedSectors = [Sector.Agriculture];
-
-		const programme3 = new ProgrammeEntity();
-		programme3.programmeId = '3';
-		programme3.action = new ActionEntity();
-		programme3.path = 'path3';
-		programme3.affectedSectors = [Sector.Agriculture];
-
-		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1]);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -742,7 +724,7 @@ describe('ProgrammeService', () => {
 	});
 
 	it('should throw an exception when mismatch sector user trying to unlink programme', async () => {
-		const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
+		const unlinkProgrammesDto: UnlinkProgrammesDto = { programme: '1' };
 		const user = new User();
 		user.sector = [Sector.Agriculture];
 
@@ -750,21 +732,9 @@ describe('ProgrammeService', () => {
 		programme1.programmeId = '1';
 		programme1.action = new ActionEntity();;
 		programme1.path = 'path1';
-		programme1.affectedSectors = [Sector.Agriculture];
+		programme1.affectedSectors = [Sector.CrossCutting];
 
-		const programme2 = new ProgrammeEntity();
-		programme2.programmeId = '2';
-		programme2.action = new ActionEntity();
-		programme2.path = 'path2';
-		programme2.affectedSectors = [Sector.Energy];
-
-		const programme3 = new ProgrammeEntity();
-		programme3.programmeId = '3';
-		programme3.action = new ActionEntity();
-		programme3.path = 'path3';
-		programme3.affectedSectors = [Sector.Agriculture];
-
-		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1]);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -784,7 +754,7 @@ describe('ProgrammeService', () => {
 		}
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
 			'programme.cannotUnlinkNotRelatedProgrammes',
-			["2"],
+			["1"],
 		);
 		expect(entityManagerMock.transaction).toBeCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
@@ -898,6 +868,7 @@ describe('ProgrammeService', () => {
 		const mockQueryBuilder = {
 			where: jest.fn().mockReturnThis(),
 			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
 			orderBy: jest.fn().mockReturnThis(),
 			offset: jest.fn().mockReturnThis(),
 			limit: jest.fn().mockReturnThis(),
@@ -932,6 +903,7 @@ describe('ProgrammeService', () => {
 		const mockQueryBuilder = {
 			where: jest.fn().mockReturnThis(),
 			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
 			orderBy: jest.fn().mockReturnThis(),
 			offset: jest.fn().mockReturnThis(),
 			limit: jest.fn().mockReturnThis(),
@@ -968,6 +940,7 @@ describe('ProgrammeService', () => {
 		const mockQueryBuilder = {
 			where: jest.fn().mockReturnThis(),
 			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
 			orderBy: jest.fn().mockReturnThis(),
 			offset: jest.fn().mockReturnThis(),
 			limit: jest.fn().mockReturnThis(),

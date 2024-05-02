@@ -33,6 +33,7 @@ import { Action } from '../../../Enums/action.enum';
 import { ActivityEntity } from '../../../Entities/activity';
 import { useAbilityContext } from '../../../Casl/Can';
 import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -831,8 +832,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             </Row>
           </div>
           {isView && (
-            <div className="form-section-card">
+            <div className="form-section-timelinecard">
               <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              <UpdatesTimeline recordType={'activity'} recordId={entId} />
             </div>
           )}
           {method === 'create' && (

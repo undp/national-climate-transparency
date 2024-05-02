@@ -5,12 +5,9 @@ import { ActionService } from "../action/action.service";
 import { ActivityDto } from "../dtos/activity.dto";
 import { DataResponseMessageDto } from "../dtos/data.response.message";
 import { DocumentEntityDto } from "../dtos/document.entity.dto";
-import { FilterEntry } from "../dtos/filter.entry";
 import { QueryDto } from "../dtos/query.dto";
-import { ActionEntity } from "../entities/action.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { LogEntity } from "../entities/log.entity";
-import { ProgrammeEntity } from "../entities/programme.entity";
 import { User } from "../entities/user.entity";
 import { CounterType } from "../enums/counter.type.enum";
 import { LogEventType, EntityType } from "../enums/shared.enum";
@@ -20,11 +17,11 @@ import { CounterService } from "../util/counter.service";
 import { FileUploadService } from "../util/fileUpload.service";
 import { HelperService } from "../util/helpers.service";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
-import { PayloadValidator } from "../validation/payload.validator";
 import { EntityManager, Repository } from "typeorm";
-import { LinkActivitiesDto } from "src/dtos/link.activities.dto";
-import { ProjectEntity } from "src/entities/project.entity";
-import { UnlinkActivitiesDto } from "src/dtos/unlink.activities.dto";
+import { LinkActivitiesDto } from "../dtos/link.activities.dto";
+import { UnlinkActivitiesDto } from "../dtos/unlink.activities.dto";
+import { DataListResponseDto } from "../dtos/data.list.response";
+import { ActivityResponseDto } from "../dtos/activity.response.dto";
 
 @Injectable()
 export class ActivityService {
@@ -59,7 +56,7 @@ export class ActivityService {
 				}
 				case EntityType.PROGRAMME: {
 					const programme = await this.isProgrammeValid(activityDto.parentId);
-					activity.path = programme.path ? `${programme.path}.${activityDto.parentId}._`: `_.${activityDto.parentId}._`;
+					activity.path = programme.path ? `${programme.path}.${activityDto.parentId}._` : `_.${activityDto.parentId}._`;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROGRAMME, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
 					break;
@@ -93,9 +90,9 @@ export class ActivityService {
 			.transaction(async (em) => {
 				const savedActivity = await em.save<ActivityEntity>(activity);
 				if (savedActivity) {
-					eventLog.forEach(async event => {
+					for (const event of eventLog) {
 						await em.save<LogEntity>(event);
-					});
+					}
 				}
 				return savedActivity;
 			})
@@ -175,12 +172,12 @@ export class ActivityService {
 	}
 
 	async findActivitiesEligibleForLinking() {
-    return await this.activityRepo.createQueryBuilder('activity')
-        .select(['"activityId"', 'title'])
-        .where('activity.parentType IS NULL AND activity.parentId IS NULL')
-        .orderBy('activity.activityId', 'ASC') 
-        .getRawMany();
-}
+		return await this.activityRepo.createQueryBuilder('activity')
+			.select(['"activityId"', 'title'])
+			.where('activity.parentType IS NULL AND activity.parentId IS NULL')
+			.orderBy('activity.activityId', 'ASC')
+			.getRawMany();
+	}
 
 	async linkActivitiesToParent(linkActivitiesDto: LinkActivitiesDto, user: User) {
 		let parentEntity: any;
@@ -265,7 +262,7 @@ export class ActivityService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
-			
+
 			if (user.sector && user.sector.length > 0) {
 				const commonSectors = activity.sectors.filter(sector => user.sector.includes(sector));
 				if (commonSectors.length === 0) {
@@ -290,11 +287,113 @@ export class ActivityService {
 
 	}
 
+	async query(query: QueryDto, abilityCondition: string): Promise<any> {
+		const queryBuilder = await this.activityRepo
+			.createQueryBuilder("activity")
+			.where(
+				this.helperService.generateWhereSQL(
+					query,
+					this.helperService.parseMongoQueryToSQLWithTable(
+						'"activity"',
+						abilityCondition
+					),
+					'"activity"'
+				)
+			)
+			.orderBy(
+				query?.sort?.key ? `"activity"."${query?.sort?.key}"` : `"activity"."activityId"`,
+				query?.sort?.order ? query?.sort?.order : "DESC"
+			);
+
+		if (query.size && query.page) {
+			queryBuilder.offset(query.size * query.page - query.size)
+				.limit(query.size);
+		}
+
+		const resp = await queryBuilder.getManyAndCount();
+
+		const final = [];
+		for (const activity of resp[0]) {
+			let migratedData;
+			const activityResponseDto: ActivityResponseDto = plainToClass(ActivityResponseDto, activity);
+			if (activity.parentId && activity.parentType) {
+				migratedData = await this.getParentEntity(activity.parentType, activity.parentId)
+				activityResponseDto.migratedData = migratedData
+			}
+			final.push(activityResponseDto);
+		}
+
+		return new DataListResponseDto(
+			resp.length > 0 ? final : undefined,
+			resp.length > 1 ? resp[1] : undefined
+		);
+	}
+
+	async getActivityViewData(activityId: string, user: User) {
+		const activity = await this.findActivityById(activityId);
+
+		if (!activity) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.activityNotFound",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.checkSectorPermissions(activity.sectors, user.sector)) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.userDoesNotHavePermission",
+					[activity.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const activityResponseDto: ActivityResponseDto = plainToClass(ActivityResponseDto, activity);
+		if (activity && activity.parentId && activity.parentType) {
+			const migratedData = await this.getParentEntity(activity.parentType, activity.parentId)
+			activityResponseDto.migratedData = migratedData
+		}
+		return activityResponseDto;
+	}
+
+	async findActivityById(activityId: string) {
+		return await this.activityRepo.findOneBy({
+			activityId
+		})
+	}
 
 	async findAllActivitiesByIds(activityIds: string[]) {
 		return await this.activityRepo.createQueryBuilder('activity')
 			.where('activity.activityId IN (:...activityIds)', { activityIds })
 			.getMany();
+	}
+
+	async getParentEntity(parentType: string, parentId: string): Promise<any> {
+		switch (parentType) {
+			case "action":
+				return await this.actionService.findActionViewById(parentId);
+			case "programme":
+				return await this.programmeService.findProgrammeViewById(parentId);
+			case "project":
+				return await this.projectService.findProjectById(parentId);
+			default:
+				throw new Error("Invalid parent type");
+		}
+	}
+
+	checkSectorPermissions(activitySectors: any, userSectors: any) {
+		let canAccess = true;
+		if (userSectors && userSectors.length > 0 && activitySectors && activitySectors.length > 0) {
+			const commonSectors = activitySectors.filter(sector => userSectors.includes(sector));
+			if (commonSectors.length === 0) {
+				canAccess = false;
+			}
+		}
+		return canAccess;
 	}
 
 	private addEventLogEntry = (

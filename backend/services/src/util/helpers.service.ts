@@ -443,6 +443,11 @@ export class HelperService {
           return `'${mongoQuery["$elemMatch"]["$eq"]}' ${
             isNot ? " <> ANY " : " =ANY "
           }(${table ? table + "." : ""}"${key}")`;
+        } else if (operator == "$exists") {
+					const value = mongoQuery["$exists"]
+          return `${table ? table + "." : ""}"${key}" ${
+            value ? "IS NOT NULL" : "IS NULL"
+          }`;
         }
       } else {
         return this.parseMongoQueryToSQLWithTable(
@@ -477,7 +482,7 @@ export class HelperService {
     }
 
     if(isSubject) 
-      return `${this.configService.get("email.getemailprefix")} Carbon Registry: ${template}`;
+      return `${this.configService.get("email.getemailprefix")} NDC Transparency System: ${template}`;
     else 
       return template;
 }

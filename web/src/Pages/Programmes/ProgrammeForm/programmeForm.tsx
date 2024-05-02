@@ -27,6 +27,7 @@ import { useAbilityContext } from '../../../Casl/Can';
 import { getProjectTableColumns } from '../../../Definitions/columns/projectColumns';
 // import { ActivityData } from '../../../Definitions/activityDefinitions';
 // import { SupportData } from '../../../Definitions/supportDefinitions';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;

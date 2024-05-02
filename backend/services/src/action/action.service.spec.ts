@@ -23,6 +23,7 @@ import { KpiService } from "../kpi/kpi.service";
 import { DocumentEntityDto } from "../dtos/document.entity.dto";
 import { KpiEntity } from "../entities/kpi.entity";
 import { KpiUpdateDto } from "../dtos/kpi.update.dto";
+import { ActionViewEntity } from "../entities/action.view.entity";
 
 describe('ActionService', () => {
 	let service: ActionService;
@@ -35,6 +36,7 @@ describe('ActionService', () => {
 	let payloadValidatorMock: Partial<PayloadValidator>;
 	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
 	let kpiServiceMock: Partial<KpiService>;
+	let actionViewRepositoryMock: Partial<Repository<ActionViewEntity>>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -51,6 +53,7 @@ describe('ActionService', () => {
 			createQueryBuilder: jest.fn(() => ({
 				where: jest.fn().mockReturnThis(),
 				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				leftJoinAndMapMany: jest.fn().mockReturnThis(),
 				orderBy: jest.fn().mockReturnThis(),
 				offset: jest.fn().mockReturnThis(),
 				limit: jest.fn().mockReturnThis(),
@@ -120,6 +123,10 @@ describe('ActionService', () => {
 					provide: KpiService,
 					useValue: kpiServiceMock,
 				},
+				{
+					provide: getRepositoryToken(ActionViewEntity),
+					useValue: actionViewRepositoryMock,
+				},
 			],
 		}).compile();
 
@@ -134,29 +141,29 @@ describe('ActionService', () => {
 		actionDto.title = "test";
 		actionDto.description = "test description";
 		actionDto.objective = "test objective";
-		actionDto.instrumentType = InstrumentType.POLICY;
+		actionDto.instrumentType = [InstrumentType.POLICY];
 		actionDto.status = ActionStatus.PLANNED;
 		actionDto.startYear = 2024;
-		actionDto.natAnchor = NatAnchor.NDC;
+		actionDto.natAnchor = [NatAnchor.NDC];
 
 		const actionEntity = new ActionEntity();
 		actionEntity.title = "test";
 		actionEntity.description = "test description";
 		actionEntity.objective = "test objective";
-		actionEntity.instrumentType = InstrumentType.POLICY;
+		actionEntity.instrumentType = [InstrumentType.POLICY];
 		actionEntity.status = ActionStatus.PLANNED;
 		actionEntity.startYear = 2024;
-		actionEntity.natAnchor = NatAnchor.NDC;
+		actionEntity.natAnchor = [NatAnchor.NDC];
 		actionEntity.actionId = "A001";
 
 		const expectedResult = {
 			"title": "test",
 			"description": "test description",
 			"objective": "test objective",
-			"instrumentType": "Policy",
+			"instrumentType": ["Policy"],
 			"status": "Planned",
 			"startYear": 2024,
-			"natAnchor": "NDC",
+			"natAnchor": ["NDC"],
 			"actionId": "A001"
 		};
 
@@ -219,10 +226,10 @@ describe('ActionService', () => {
 		actionDto.title = "test";
 		actionDto.description = "test description";
 		actionDto.objective = "test objective";
-		actionDto.instrumentType = InstrumentType.POLICY;
+		actionDto.instrumentType = [InstrumentType.POLICY];
 		actionDto.status = ActionStatus.PLANNED;
 		actionDto.startYear = 2024;
-		actionDto.natAnchor = NatAnchor.NDC;
+		actionDto.natAnchor = [NatAnchor.NDC];
 		actionDto.kpis = [kpiDto1, kpiDto2];
 		actionDto.documents = [documentDto];
 		actionDto.linkedProgrammes = ['1', '2', '3'];
@@ -303,10 +310,10 @@ describe('ActionService', () => {
 		actionDto.title = "test";
 		actionDto.description = "test description";
 		actionDto.objective = "test objective";
-		actionDto.instrumentType = InstrumentType.POLICY;
+		actionDto.instrumentType = [InstrumentType.POLICY];
 		actionDto.status = ActionStatus.PLANNED;
 		actionDto.startYear = 2024;
-		actionDto.natAnchor = NatAnchor.NDC;
+		actionDto.natAnchor = [NatAnchor.NDC];
 		actionDto.kpis = [kpiDto1]
 
 		const expectedResult = {
@@ -389,6 +396,7 @@ describe('ActionService', () => {
 		const mockQueryBuilder = {
 			where: jest.fn().mockReturnThis(),
 			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
 			orderBy: jest.fn().mockReturnThis(),
 			offset: jest.fn().mockReturnThis(),
 			limit: jest.fn().mockReturnThis(),
@@ -422,6 +430,7 @@ describe('ActionService', () => {
 		const mockQueryBuilder = {
 			where: jest.fn().mockReturnThis(),
 			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
 			orderBy: jest.fn().mockReturnThis(),
 			offset: jest.fn().mockReturnThis(),
 			limit: jest.fn().mockReturnThis(),
@@ -459,10 +468,10 @@ describe('ActionService', () => {
 		actionDto.title = "test";
 		actionDto.description = "test description";
 		actionDto.objective = "test objective";
-		actionDto.instrumentType = InstrumentType.POLICY;
+		actionDto.instrumentType = [InstrumentType.POLICY];
 		actionDto.status = ActionStatus.PLANNED;
 		actionDto.startYear = 2024;
-		actionDto.natAnchor = NatAnchor.NDC;
+		actionDto.natAnchor = [NatAnchor.NDC];
 
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(new ActionEntity());
 
@@ -504,10 +513,10 @@ describe('ActionService', () => {
 		actionUpdateEntity.title = "test Updated";
 		actionUpdateEntity.description = "test description Updated";
 		actionUpdateEntity.objective = "test objective Updated";
-		actionUpdateEntity.instrumentType = InstrumentType.ECONOMIC;
+		actionUpdateEntity.instrumentType = [InstrumentType.ECONOMIC];
 		actionUpdateEntity.status = ActionStatus.IMPLEMENTED;
 		actionUpdateEntity.startYear = 2025;
-		actionUpdateEntity.natAnchor = NatAnchor.OTHER;
+		actionUpdateEntity.natAnchor = [NatAnchor.OTHER];
 		actionUpdateEntity.documents = null;
 
 		const documentDto = new DocumentEntityDto();
@@ -518,10 +527,10 @@ describe('ActionService', () => {
 		actionEntity.title = "test";
 		actionEntity.description = "test description";
 		actionEntity.objective = "test objective";
-		actionEntity.instrumentType = InstrumentType.POLICY;
+		actionEntity.instrumentType = [InstrumentType.POLICY];
 		actionEntity.status = ActionStatus.PLANNED;
 		actionEntity.startYear = 2024;
-		actionEntity.natAnchor = NatAnchor.NDC;
+		actionEntity.natAnchor = [NatAnchor.NDC];
 		actionEntity.documents = [documentDto];
 
 
@@ -575,20 +584,20 @@ describe('ActionService', () => {
 		actionUpdateEntity.title = "test Updated";
 		actionUpdateEntity.description = "test description Updated";
 		actionUpdateEntity.objective = "test objective Updated";
-		actionUpdateEntity.instrumentType = InstrumentType.ECONOMIC;
+		actionUpdateEntity.instrumentType = [InstrumentType.ECONOMIC];
 		actionUpdateEntity.status = ActionStatus.IMPLEMENTED;
 		actionUpdateEntity.startYear = 2025;
-		actionUpdateEntity.natAnchor = NatAnchor.OTHER;
+		actionUpdateEntity.natAnchor = [NatAnchor.OTHER];
 		actionUpdateEntity.documents = [documentDto, addedDocumentDto];
 
 		const actionEntity = new ActionEntity();
 		actionEntity.title = "test";
 		actionEntity.description = "test description";
 		actionEntity.objective = "test objective";
-		actionEntity.instrumentType = InstrumentType.POLICY;
+		actionEntity.instrumentType = [InstrumentType.POLICY];
 		actionEntity.status = ActionStatus.PLANNED;
 		actionEntity.startYear = 2024;
-		actionEntity.natAnchor = NatAnchor.NDC;
+		actionEntity.natAnchor = [NatAnchor.NDC];
 		actionEntity.documents = [documentDto];
 
 
@@ -651,19 +660,19 @@ describe('ActionService', () => {
 		actionUpdateEntity.title = "test Updated";
 		actionUpdateEntity.description = "test description Updated";
 		actionUpdateEntity.objective = "test objective Updated";
-		actionUpdateEntity.instrumentType = InstrumentType.ECONOMIC;
+		actionUpdateEntity.instrumentType = [InstrumentType.ECONOMIC];
 		actionUpdateEntity.status = ActionStatus.IMPLEMENTED;
 		actionUpdateEntity.startYear = 2025;
-		actionUpdateEntity.natAnchor = NatAnchor.OTHER;
+		actionUpdateEntity.natAnchor = [NatAnchor.OTHER];
 
 		const actionEntity = new ActionEntity();
 		actionEntity.title = "test";
 		actionEntity.description = "test description";
 		actionEntity.objective = "test objective";
-		actionEntity.instrumentType = InstrumentType.POLICY;
+		actionEntity.instrumentType = [InstrumentType.POLICY];
 		actionEntity.status = ActionStatus.PLANNED;
 		actionEntity.startYear = 2024;
-		actionEntity.natAnchor = NatAnchor.NDC;
+		actionEntity.natAnchor = [NatAnchor.NDC];
 
 
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);

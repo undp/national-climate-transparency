@@ -25,6 +25,7 @@ import { ProjectEntity } from '../../../Entities/project';
 import { useAbilityContext } from '../../../Casl/Can';
 import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
+import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -813,8 +814,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             </Row>
           </div>
           {isView && (
-            <div className="form-section-card">
+            <div className="form-section-timelinecard">
               <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              <UpdatesTimeline recordType={'project'} recordId={entId} />
             </div>
           )}
           {method === 'create' && (
