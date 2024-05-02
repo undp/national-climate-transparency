@@ -63,6 +63,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [allActivityIds, setAllActivityList] = useState<string[]>([]);
   const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([]);
+
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
   const [activityPageSize, setActivityPageSize] = useState<number>(10);
@@ -130,6 +131,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     // Get the Support Data for each attached Activity
     setSupportData([]);
+
+    // Setting Pagination
+    setActivityCurrentPage(1);
+    setActivityPageSize(10);
   }, [selectedActivityIds]);
 
   useEffect(() => {
@@ -763,7 +768,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={24}>
                 <div style={{ overflowX: 'auto' }}>
                   <LayoutTable
-                    tableData={activityData}
+                    tableData={activityData.slice(
+                      (activityCurrentPage - 1) * activityPageSize,
+                      (activityCurrentPage - 1) * activityPageSize + activityPageSize
+                    )}
                     columns={activityTableColumns}
                     loading={false}
                     pagination={{

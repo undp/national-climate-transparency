@@ -353,6 +353,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchData();
+
+    // Setting Pagination
+    setCurrentPage(1);
+    setPageSize(10);
   }, [tempProjectIds]);
 
   useEffect(() => {
@@ -844,7 +848,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('projectListTitle')}
                   </div>
                   <LayoutTable
-                    tableData={projectData}
+                    tableData={projectData.slice(
+                      (currentPage - 1) * pageSize,
+                      (currentPage - 1) * pageSize + pageSize
+                    )}
                     columns={projTableColumns}
                     loading={false}
                     pagination={{

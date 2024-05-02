@@ -340,6 +340,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchAttachmentData();
+
+    // Setting Pagination
+    setCurrentPage(1);
+    setPageSize(10);
   }, [tempProgramIds]);
 
   useEffect(() => {
@@ -838,7 +842,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row>
                 <Col span={24}>
                   <LayoutTable
-                    tableData={programData}
+                    tableData={programData.slice(
+                      (currentPage - 1) * pageSize,
+                      (currentPage - 1) * pageSize + pageSize
+                    )}
                     columns={progTableColumns}
                     loading={false}
                     pagination={{
