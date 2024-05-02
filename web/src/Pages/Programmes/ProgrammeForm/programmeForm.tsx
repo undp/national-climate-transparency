@@ -484,6 +484,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         duration: 3,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      setWaitingForBE(false);
+      navigate('/programmes');
     }
   };
 
@@ -650,7 +657,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
                     name="instrumentType"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
                   </Form.Item>
                 </Col>
                 <Col span={6}>

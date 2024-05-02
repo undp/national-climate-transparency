@@ -389,7 +389,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     const toDetach = attachedProgramIds.filter((prg) => !tempProgramIds.includes(prg));
 
     if (toDetach.length > 0) {
-      await post('national/programmes/unlink', { programmes: toDetach });
+      toDetach.forEach(async (prg) => {
+        await post('national/programmes/unlink', { programme: prg });
+      });
     }
 
     if (toAttach.length > 0) {
@@ -490,6 +492,13 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         duration: 3,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      setWaitingForBE(false);
+      navigate('/actions');
     }
   };
 
@@ -669,6 +678,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   >
                     <Select
                       size="large"
+                      mode="multiple"
                       style={{ fontSize: inputFontSize }}
                       allowClear
                       disabled={isView}
@@ -770,6 +780,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   >
                     <Select
                       size="large"
+                      mode="multiple"
                       style={{ fontSize: inputFontSize }}
                       allowClear
                       disabled={isView}

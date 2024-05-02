@@ -42,5 +42,8 @@
     "documentsHeader": "Documents",
     "activityInfoTitle": "List of Activities under the Project",
     "supportInfoTitle": "List of Supports under the Project",
-    "noSuchEntity": "Requested Action doesn't exist !"
+    "noSuchEntity": "Requested Action doesn't exist !",
+    "investmentNeeds": " Estimated investment needs (USD)",
+    "noActivityMessage": "No Activities Attached",
+    "noSupportMessage": "No Supports Attached"
 }
