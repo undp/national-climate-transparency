@@ -72,7 +72,7 @@ export class ProgrammeController {
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeEntity))
     @Post("link")
     linkProgrammes(@Body() linkProgrammesDto: LinkProgrammesDto, @Request() req) {
-        return this.programmeService.linkProgrammesToAction(linkProgrammesDto, req.user);
+        return this.programmeService.linkProgrammesToAction(linkProgrammesDto, req.user, false);
     }
 
     @ApiBearerAuth('api_key')

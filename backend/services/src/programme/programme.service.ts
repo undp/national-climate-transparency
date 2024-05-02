@@ -218,7 +218,7 @@ export class ProgrammeService {
 		const programmeUpdate: ProgrammeEntity = plainToClass(ProgrammeEntity, programmeUpdateDto);
 		const eventLog = [];
 
-		const currentProgramme = await this.findProgrammeById(programmeUpdateDto.programmeId);
+		const currentProgramme = await this.findProgrammeWithLinkedActionByProgrammeId(programmeUpdateDto.programmeId);
 		if (!currentProgramme) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -229,24 +229,8 @@ export class ProgrammeService {
 			);
 		}
 
-		// Parent Update Resolve
-
-		if (programmeUpdateDto.actionId) {
-			const action = await this.actionService.findActionById(programmeUpdateDto.actionId);
-			if (!action) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.actionNotFound",
-						[programmeUpdateDto.actionId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
-			programmeUpdate.action = action;
-			programmeUpdate.path = programmeUpdateDto.actionId;
-			this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_LINKED, EntityType.ACTION, action.actionId, user.id, programmeUpdate.programmeId);
-			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, action.actionId);
-		}
+		programmeUpdate.action = currentProgramme.action;
+		programmeUpdate.path = currentProgramme.path;
 
 		// Document update resolve
 
@@ -335,6 +319,17 @@ export class ProgrammeService {
 			.transaction(async (em) => {
 				const savedProgramme = await em.save<ProgrammeEntity>(programmeUpdate);
 				if (savedProgramme) {
+
+					// Update Parent
+					if (!currentProgramme.action && programmeUpdateDto.actionId) {
+						await this.linkProgrammesToAction({actionId: programmeUpdateDto.actionId, programmes: [programmeUpdate.programmeId]}, user, false, em)
+					} else if (currentProgramme.action && !programmeUpdateDto.actionId) {
+						await this.unlinkProgrammesFromAction({programme: programmeUpdate.programmeId}, user, em)
+					} else if (currentProgramme.action?.actionId != programmeUpdateDto.actionId) {
+						await this.unlinkProgrammesFromAction({programme: programmeUpdate.programmeId}, user, em)
+						await this.linkProgrammesToAction({actionId: programmeUpdateDto.actionId, programmes: [programmeUpdate.programmeId]}, user, true, em)
+					} 
+
 					// Save new KPIs
 					if (kpiList.length > 0) {
 						await Promise.all(kpiList.map(async kpi => {
@@ -376,7 +371,7 @@ export class ProgrammeService {
 		);
 	}
 
-	async linkProgrammesToAction(linkProgrammesDto: LinkProgrammesDto, user: User) {
+	async linkProgrammesToAction(linkProgrammesDto: LinkProgrammesDto, user: User, isActionSwap: boolean, em?: EntityManager) {
 		const action = await this.actionService.findActionById(linkProgrammesDto.actionId);
 		if (!action) {
 			throw new HttpException(
@@ -412,7 +407,7 @@ export class ProgrammeService {
 					);
 				}
 			}
-			if (programme.action) {
+			if (programme.action && !isActionSwap) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"programme.programmeAlreadyLinked",
@@ -423,9 +418,9 @@ export class ProgrammeService {
 			}
 		}
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, allLinkedProgrammes, user, this.entityManager);
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, allLinkedProgrammes, user, em? em : this.entityManager);
 
-		await this.helperService.refreshMaterializedViews(this.entityManager);
+		await this.helperService.refreshMaterializedViews(em? em : this.entityManager);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -434,7 +429,8 @@ export class ProgrammeService {
 		);
 	}
 
-	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User) {
+	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User, em?: EntityManager) {
+
 		const programmes = await this.findAllProgrammeByIds([unlinkProgrammesDto.programme]);
 
 		if (!programmes || programmes.length <= 0) {
@@ -473,9 +469,10 @@ export class ProgrammeService {
 		}
 
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(programme.action.actionId, programme.programmeId)
-		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programme, unlinkProgrammesDto, allLinkedProgrammes, user, this.entityManager);
+		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programme, unlinkProgrammesDto, allLinkedProgrammes, user, em? em : this.entityManager);
 
-		await this.helperService.refreshMaterializedViews(this.entityManager);
+		await this.helperService.refreshMaterializedViews(em? em : this.entityManager);
+
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
 			this.helperService.formatReqMessagesString("programme.programmesUnlinkedFromAction", []),
@@ -509,6 +506,13 @@ export class ProgrammeService {
 		return await this.programmeRepo.findOneBy({
 			programmeId
 		})
+	}
+
+	async findProgrammeWithLinkedActionByProgrammeId(programmeId: string) {
+		return await this.programmeRepo.createQueryBuilder('programme')
+		.leftJoinAndSelect('programme.action', 'action')
+		.where('programme.programmeId = :programmeId', { programmeId })
+		.getOne();
 	}
 
 	async findAllLinkedProgrammesToActionByActionId(actionId: string, unlinkRequestProgrammeId: string | null) {
