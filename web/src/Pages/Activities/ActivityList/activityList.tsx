@@ -17,7 +17,7 @@ import { ActivityEntity } from '../../../Entities/activity';
 interface Item {
   key: number;
   activityId: string;
-  parentType: 'action' | 'programme' | 'project';
+  parentType: 'Action' | 'Programme' | 'Project' | '';
   parentId: string;
   title: string;
   supportType: string;
@@ -39,7 +39,7 @@ const activityList = () => {
   const { post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['activityList']);
+  const { t } = useTranslation(['activityList', 'tableAction']);
 
   // General Page State
 
@@ -126,18 +126,26 @@ const activityList = () => {
         const unstructuredData: any[] = response.data;
         const structuredData: Item[] = [];
         for (let i = 0; i < unstructuredData.length; i++) {
+          const tempParentType = unstructuredData[i].parentType ?? '';
           structuredData.push({
             key: i,
             activityId: unstructuredData[i].activityId,
-            parentType: 'action',
-            parentId: 'parent',
+            parentType:
+              tempParentType === 'action'
+                ? 'Action'
+                : tempParentType === 'programme'
+                ? 'Programme'
+                : tempParentType === 'project'
+                ? 'Project'
+                : '',
+            parentId: unstructuredData[i].parentId,
             title: unstructuredData[i].title,
-            supportType: 'Mitigation',
             activityStatus: unstructuredData[i].status,
-            recipientEntity: unstructuredData[i].recipientEntity ?? [],
+            supportType: unstructuredData[i].program?.type ?? '',
+            recipientEntity: unstructuredData[i].program?.recipientEntity ?? [],
             intImplementingEntity: unstructuredData[i].internationalImplementingEntity ?? [],
             validationStatus: unstructuredData[i].validationStatus,
-            natImplementingEntity: unstructuredData[i].natImplementor ?? [],
+            natImplementingEntity: unstructuredData[i].nationalImplementingEntity ?? [],
           });
         }
         setTableData(structuredData);
@@ -213,6 +221,8 @@ const activityList = () => {
 
   const columns = [
     { title: t('activityId'), dataIndex: 'activityId', key: 'activityId', sorter: false },
+    { title: t('parentType'), dataIndex: 'parentType', key: 'parentType', sorter: false },
+    { title: t('parentId'), dataIndex: 'parentId', key: 'parentId', sorter: false },
     {
       title: t('titleOfActivity'),
       dataIndex: 'title',
@@ -241,9 +251,10 @@ const activityList = () => {
     },
     {
       title: t('internationalImplementingEntity'),
-      dataIndex: 'intImplemetor',
-      key: 'intImplemetor',
-      sorter: false,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: Item) => {
+        return <ScrollableList listToShow={record.intImplementingEntity}></ScrollableList>;
+      },
     },
     {
       title: t('validationStatus'),
@@ -480,7 +491,7 @@ const activityList = () => {
                 position: ['bottomRight'],
               }}
               handleTableChange={handleTableChange}
-              emptyMessage="No Actions Available"
+              emptyMessage="No Activities Available"
             />
           </Col>
         </Row>

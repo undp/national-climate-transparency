@@ -209,7 +209,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     const parentIds: ParentData[] = [];
     for (let i = 0; i < 15; i++) {
       parentIds.push({
-        id: `${prefix}00${i}`,
+        id: `P00${i}`,
         title: `${prefix}00${i}`,
         desc: `This is the description migrated from the parent 00${i}`,
       });
@@ -493,9 +493,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
-                  name="natImplementor"
+                  name="nationalImplementingEntity"
                 >
                   <Select
+                    mode="multiple"
                     size="large"
                     style={{ fontSize: inputFontSize }}
                     allowClear
@@ -515,9 +516,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
-                  name="intImplementor"
+                  name="internationalImplementingEntity"
                 >
                   <Select
+                    mode="multiple"
                     size="large"
                     style={{ fontSize: inputFontSize }}
                     allowClear
@@ -579,7 +581,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('anchoredTitle')}</label>}
-                  name="isAnchored"
+                  name="anchoredInNationalStrategy"
                 >
                   <Select
                     size="large"
@@ -600,7 +602,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('implMeansTitle')}</label>}
-                  name="implMeans"
+                  name="meansOfImplementation"
                 >
                   <Select
                     size={'large'}
@@ -622,7 +624,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('techTypeTitle')}</label>}
-                  name="techType"
+                  name="technologyType"
                 >
                   <Select
                     size="large"
@@ -642,7 +644,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('additionalInfoTitle')}</label>}
-                  name="addInfo"
+                  name="etfDescription"
                 >
                   <TextArea maxLength={250} rows={3} disabled={isView} />
                 </Form.Item>

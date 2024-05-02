@@ -41,7 +41,7 @@ const projectList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['projectList']);
+  const { t } = useTranslation(['projectList', 'tableAction']);
 
   // General Page State
 
@@ -590,7 +590,7 @@ const projectList = () => {
                 position: ['bottomRight'],
               }}
               handleTableChange={handleTableChange}
-              emptyMessage="No Actions Available"
+              emptyMessage="No Projects Available"
             />
           </Col>
         </Row>
