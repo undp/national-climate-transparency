@@ -300,9 +300,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             programmeId: prg.programmeId,
             actionId: prg.action?.actionId,
             title: prg.title,
-            type: prg.migratedData[0]?.types,
+            type: prg.migratedData[0]?.types ?? [],
             status: prg.programmeStatus,
-            subSectorsAffected: prg.affectedSubSector,
+            subSectorsAffected: prg.affectedSubSector ?? [],
             estimatedInvestment: prg.investment,
           });
 

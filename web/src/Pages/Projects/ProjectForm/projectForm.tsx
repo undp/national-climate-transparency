@@ -36,7 +36,7 @@ const inputFontSize = '13px';
 
 const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['projectForm']);
+  const { t } = useTranslation(['projectForm', 'tableAction']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Project', method)[0];
@@ -368,7 +368,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             status: act.status,
             startYear: act.migratedData?.startYear,
             endYear: act.migratedData?.endYear,
-            natImplementor: act.nationalImplementingEntity,
+            natImplementor: act.nationalImplementingEntity ?? [],
           });
 
           // tempMigratedData.type.push(act.type);
