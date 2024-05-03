@@ -3,6 +3,7 @@ import { IsEnum, IsNotEmpty, IsString, IsOptional, ValidateNested, IsNumber, Min
 import { ActionStatus, InstrumentType, NatAnchor } from "../enums/action.enum";
 import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
+import { KpiUnits } from "../enums/kpi.enum";
 
 export class ActionDto {
 
@@ -91,6 +92,7 @@ export class ActionDto {
 			type: "array",
 			example: [{
 				name: "KPI 1",
+				kpiUnits: KpiUnits.GWp_INSTALLED,
 				creatorType: "action",
 				expected: 100
 			}],

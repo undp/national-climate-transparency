@@ -49,7 +49,7 @@ export class ProgrammeEntity {
   @Column({ type: 'jsonb', nullable: true })
   documents: any;
 
-  @Column()
+  @Column({ nullable: true })
   comments: string;
 
   @Column({ type: "ltree" })

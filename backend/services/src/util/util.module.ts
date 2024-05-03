@@ -24,6 +24,7 @@ import { Organisation } from "src/entities/organisation.entity";
 import { FileHandlerModule } from "src/file-handler/filehandler.module";
 import { FileUploadService } from "./fileUpload.service";
 import { LinkUnlinkService } from "./linkUnlink.service";
+import { IsTwoDecimalPointsConstraint } from "./twoDecimalPointNumber.decorator";
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { LinkUnlinkService } from "./linkUnlink.service";
     HttpUtilService,
     FileUploadService,
 		LinkUnlinkService,
+		IsTwoDecimalPointsConstraint,
   ],
   exports: [
     CounterService,

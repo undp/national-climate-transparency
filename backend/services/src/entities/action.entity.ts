@@ -40,4 +40,7 @@ export class ActionEntity {
   @OneToMany(() => ProgrammeEntity, (programmeEntity) => programmeEntity.action)
   programmes?: ProgrammeEntity[];
 
+	@Column({ type: "boolean", default: false })
+	validated: boolean;
+	
 }
