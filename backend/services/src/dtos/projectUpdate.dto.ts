@@ -1,12 +1,17 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max, ValidateNested } from 'class-validator';
 import { ProjectStatus, ProjectType } from "../enums/project.enum";
 import { IntImplementor, Recipient } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
-import { KpiDto } from "./kpi.dto";
 import { KpiUnits } from "../enums/kpi.enum";
+import { KpiUpdateDto } from "./kpi.update.dto";
 
-export class ProjectDto {
+export class ProjectUpdateDto {
+
+	@IsString()
+	@IsNotEmpty()
+	@ApiProperty()
+	projectId: string;
 
 	@IsString()
 	@IsOptional()
@@ -98,6 +103,11 @@ export class ProjectDto {
 	internationalImplementingEntities: IntImplementor[];
 
 	@IsOptional()
+	@ApiPropertyOptional()
+	@IsString()
+	comments: string;
+
+	@IsOptional()
 	@ApiPropertyOptional(
 		{
 			type: "array",
@@ -110,32 +120,34 @@ export class ProjectDto {
 			},
 		}
 	)
-	documents: DocumentDto[];
-
-	@IsOptional()
-	@ApiPropertyOptional()
-	@IsString()
-	comments: string;
-
-	@IsOptional()
-	@ApiPropertyOptional()
-	linkedActivities: string[];
+	newDocuments: DocumentDto[];
 
 	@IsOptional()
 	@ApiPropertyOptional(
 		{
 			type: "array",
+			example: ["http://test.com/documents/programme_documents/testDoc1_1713334127897.csv"],
+		}
+	)
+	removedDocuments: string[];
+
+	@IsOptional()
+	@ValidateNested()
+	@ApiPropertyOptional(
+		{
+			type: "array",
 			example: [{
-				name: "KPI 1",
+				kpiId: "1",
 				kpiUnits: KpiUnits.GWp_INSTALLED,
-				creatorType: "project",
+				name: "KPI 1",
+				creatorType: "action",
 				expected: 100
-			}],
+		}],
 			items: {
-				$ref: getSchemaPath(KpiDto),
+				$ref: getSchemaPath(KpiUpdateDto),
 			},
 		}
 	)
-	kpis: KpiDto[];
+	kpis: KpiUpdateDto[];
 
 }

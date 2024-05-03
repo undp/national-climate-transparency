@@ -1,10 +1,12 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max, Matches, registerDecorator, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface} from 'class-validator';
 import { Sector } from "../enums/sector.enum";
 import { SubSector, NatImplementor } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { KpiDto } from "./kpi.dto";
 import { ProgrammeStatus } from "../enums/programme-status.enum";
+import { KpiUnits } from "../enums/kpi.enum";
+import { IsTwoDecimalPoints } from "../util/twoDecimalPointNumber.decorator";
 
 export class ProgrammeDto {
 
@@ -76,6 +78,7 @@ export class ProgrammeDto {
   
     @IsNotEmpty()
     @IsNumber()
+		@IsTwoDecimalPoints()
     @ApiProperty()
     investment: number;
 
@@ -126,6 +129,7 @@ export class ProgrammeDto {
 				type: "array",
 				example: [{
 					name: "KPI 1",
+					kpiUnits: KpiUnits.GWp_INSTALLED,
 					creatorType: "programme",
 					expected: 100
 			}],

@@ -18,6 +18,7 @@ import { ActionDto } from "../dtos/action.dto";
 import { ActionEntity } from "../entities/action.entity";
 import { QueryDto } from "../dtos/query.dto";
 import { ActionUpdateDto } from "src/dtos/actionUpdate.dto";
+import { ValidateDto } from "src/dtos/validate.dto";
 
 @ApiTags("Actions")
 @ApiBearerAuth()
@@ -57,4 +58,12 @@ export class ActionController {
   updateAction(@Body() actionUpdateDto: ActionUpdateDto, @Request() req) {
     return this.actionService.updateAction(actionUpdateDto, req.user);
   }
+	
+	@ApiBearerAuth('api_key')
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ActionEntity))
+	@Post("validate")
+	validateActions(@Body() validateDto: ValidateDto, @Request() req) {
+			return this.actionService.validateAction(validateDto, req.user);
+	}
 }
