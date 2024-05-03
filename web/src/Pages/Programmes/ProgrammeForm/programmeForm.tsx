@@ -442,7 +442,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       if (projectData.length > 0 && method === 'create') {
         payload.linkedProjects = [];
         projectData.forEach((project) => {
-          payload.linkedProgrammes.push(project.projectId);
+          payload.linkedProjects.push(project.projectId);
         });
       }
 
