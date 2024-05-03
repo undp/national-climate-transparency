@@ -171,7 +171,7 @@ const actionList = () => {
         payload.filterAnd.push({
           key: appliedFilterValue.searchBy,
           operation: 'LIKE',
-          value: [searchValue + '%'],
+          value: ['%' + searchValue + '%'],
         });
       }
 

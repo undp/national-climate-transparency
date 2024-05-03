@@ -117,7 +117,7 @@ const activityList = () => {
         payload.filterAnd.push({
           key: appliedFilterValue.searchBy,
           operation: 'LIKE',
-          value: [searchValue + '%'],
+          value: ['%' + searchValue + '%'],
         });
       }
 
