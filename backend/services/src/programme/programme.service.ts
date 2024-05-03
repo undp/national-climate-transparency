@@ -26,6 +26,8 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ProgrammeViewEntity } from "../entities/programme.view.entity";
+import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
+import { KpiService } from "../kpi/kpi.service";
 
 @Injectable()
 export class ProgrammeService {
@@ -39,7 +41,7 @@ export class ProgrammeService {
 		private fileUploadService: FileUploadService,
 		private payloadValidator: PayloadValidator,
 		private linkUnlinkService: LinkUnlinkService,
-		@InjectRepository(ProgrammeViewEntity) private programmeViewRepo: Repository<ProgrammeViewEntity>,
+		@InjectRepository(ProgrammeViewEntity) private programmeViewRepo: Repository<ProgrammeViewEntity>,		private kpiService: KpiService
 	) { }
 
 	async createProgramme(programmeDto: ProgrammeDto, user: User) {
@@ -212,7 +214,164 @@ export class ProgrammeService {
 		);
 	}
 
-	async linkProgrammesToAction(linkProgrammesDto: LinkProgrammesDto, user: User) {
+	async updateProgramme(programmeUpdateDto: ProgrammeUpdateDto, user: User) {
+		const programmeUpdate: ProgrammeEntity = plainToClass(ProgrammeEntity, programmeUpdateDto);
+		const eventLog = [];
+
+		const currentProgramme = await this.findProgrammeWithLinkedActionByProgrammeId(programmeUpdateDto.programmeId);
+		if (!currentProgramme) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeNotFound",
+					[programmeUpdateDto.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		programmeUpdate.action = currentProgramme.action;
+		programmeUpdate.path = currentProgramme.path;
+
+		// Document update resolve
+
+		let documents = (currentProgramme.documents && currentProgramme.documents.length > 0) ? [...currentProgramme.documents] : [];
+
+		if (programmeUpdateDto.removedDocuments && programmeUpdateDto.removedDocuments.length > 0) {
+			if (documents.length > 0) {
+				documents = documents.filter(obj => !programmeUpdateDto.removedDocuments.includes(obj.url));
+			} else {                                                    
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.noDocumentsFound",
+						[programmeUpdateDto.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+		}
+
+		if (programmeUpdateDto.newDocuments) {
+			for (const documentItem of programmeUpdateDto.newDocuments) {
+				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.PROGRAMME);
+				const docEntity = new DocumentEntityDto();
+				docEntity.title = documentItem.title;
+				docEntity.url = response;
+				docEntity.createdTime = new Date().getTime();
+				documents.push(docEntity)
+			};
+		}
+
+		if (documents.length === 0) {
+			programmeUpdate.documents = null;
+		} else if (documents.length > 0){
+			programmeUpdate.documents = documents;
+		}
+
+		// KPI Update resolve
+
+		const kpiList = [];
+		const kpisToRemove = [];
+		let kpisUpdated = false;
+
+		if (programmeUpdateDto.kpis && programmeUpdateDto.kpis.length > 0) {
+			const currentKpis = await this.kpiService.findKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programmeUpdate.programmeId);
+
+			const addedKpis = programmeUpdateDto.kpis.filter(kpi => !kpi.kpiId);
+
+			if (addedKpis && addedKpis.length > 0) {
+				for (const kpiItem of addedKpis) {
+					this.payloadValidator.validateKpiPayload(kpiItem, EntityType.PROGRAMME);
+					const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
+					kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
+					kpi.creatorId = programmeUpdateDto.programmeId;
+					kpiList.push(kpi);
+				}
+				kpisUpdated = true;
+			}
+
+			for (const currentKpi of currentKpis) {
+				const kpiToUpdate = programmeUpdateDto.kpis.find(kpi => currentKpi.kpiId == kpi.kpiId);
+				if (kpiToUpdate) {
+					const kpi = new KpiEntity();
+					kpi.kpiId = kpiToUpdate.kpiId;
+					kpi.creatorId = kpiToUpdate.creatorId;
+					kpi.creatorType = kpiToUpdate.creatorType;
+					kpi.name = kpiToUpdate.name;
+					kpi.expected = kpiToUpdate.expected;
+					kpiList.push(kpi);
+					kpisUpdated = true;
+				} else {
+					kpisToRemove.push(currentKpi);
+					kpisUpdated = true;
+				}
+			}
+		}
+
+		this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_UPDATED, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, programmeUpdateDto);
+
+		if (kpisUpdated) {
+			// Add event log entry after the loop completes
+			this.addEventLogEntry(eventLog, LogEventType.KPI_UPDATED, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, kpiList);
+		}
+
+		const prg = await this.entityManager
+			.transaction(async (em) => {
+				const savedProgramme = await em.save<ProgrammeEntity>(programmeUpdate);
+				if (savedProgramme) {
+
+					// Update Parent
+					if (!currentProgramme.action && programmeUpdateDto.actionId) {
+						await this.linkProgrammesToAction({actionId: programmeUpdateDto.actionId, programmes: [programmeUpdate.programmeId]}, user, false, em)
+					} else if (currentProgramme.action && !programmeUpdateDto.actionId) {
+						await this.unlinkProgrammesFromAction({programme: programmeUpdate.programmeId}, user, em)
+					} else if (currentProgramme.action?.actionId != programmeUpdateDto.actionId) {
+						await this.unlinkProgrammesFromAction({programme: programmeUpdate.programmeId}, user, em)
+						await this.linkProgrammesToAction({actionId: programmeUpdateDto.actionId, programmes: [programmeUpdate.programmeId]}, user, true, em)
+					} 
+
+					// Save new KPIs
+					if (kpiList.length > 0) {
+						await Promise.all(kpiList.map(async kpi => {
+							await em.save<KpiEntity>(kpi);
+						}));
+					}
+					// Remove KPIs
+					if (kpisToRemove.length > 0) {
+						await Promise.all(kpisToRemove.map(async kpi => {
+							await em.remove<KpiEntity>(kpi);
+						}));
+					}
+					// Save event logs
+					if (eventLog.length > 0) {
+						await Promise.all(eventLog.map(async event => {
+							await em.save<LogEntity>(event);
+						}));
+					}
+				}
+				return savedProgramme;
+			})
+			.catch((err: any) => {
+				console.log(err);
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.programmeUpdateFailed",
+						[err]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("programme.updateProgrammeSuccess", []),
+			prg
+		);
+	}
+
+	async linkProgrammesToAction(linkProgrammesDto: LinkProgrammesDto, user: User, isActionSwap: boolean, em?: EntityManager) {
 		const action = await this.actionService.findActionById(linkProgrammesDto.actionId);
 		if (!action) {
 			throw new HttpException(
@@ -248,7 +407,7 @@ export class ProgrammeService {
 					);
 				}
 			}
-			if (programme.action) {
+			if (programme.action && !isActionSwap) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"programme.programmeAlreadyLinked",
@@ -259,9 +418,9 @@ export class ProgrammeService {
 			}
 		}
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, allLinkedProgrammes, user, this.entityManager);
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, allLinkedProgrammes, user, em? em : this.entityManager);
 
-		await this.helperService.refreshMaterializedViews(this.entityManager);
+		await this.helperService.refreshMaterializedViews(em? em : this.entityManager);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -270,7 +429,8 @@ export class ProgrammeService {
 		);
 	}
 
-	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User) {
+	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User, em?: EntityManager) {
+
 		const programmes = await this.findAllProgrammeByIds([unlinkProgrammesDto.programme]);
 
 		if (!programmes || programmes.length <= 0) {
@@ -309,9 +469,10 @@ export class ProgrammeService {
 		}
 
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(programme.action.actionId, programme.programmeId)
-		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programme, unlinkProgrammesDto, allLinkedProgrammes, user, this.entityManager);
+		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programme, unlinkProgrammesDto, allLinkedProgrammes, user, em? em : this.entityManager);
 
-		await this.helperService.refreshMaterializedViews(this.entityManager);
+		await this.helperService.refreshMaterializedViews(em? em : this.entityManager);
+
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
 			this.helperService.formatReqMessagesString("programme.programmesUnlinkedFromAction", []),
@@ -345,6 +506,13 @@ export class ProgrammeService {
 		return await this.programmeRepo.findOneBy({
 			programmeId
 		})
+	}
+
+	async findProgrammeWithLinkedActionByProgrammeId(programmeId: string) {
+		return await this.programmeRepo.createQueryBuilder('programme')
+		.leftJoinAndSelect('programme.action', 'action')
+		.where('programme.programmeId = :programmeId', { programmeId })
+		.getOne();
 	}
 
 	async findAllLinkedProgrammesToActionByActionId(actionId: string, unlinkRequestProgrammeId: string | null) {
@@ -455,7 +623,7 @@ export class ProgrammeService {
 		programmeViewDto.instrumentType = programme.action?.instrumentType;
 		programmeViewDto.affectedSectors = programme.affectedSectors;
 		programmeViewDto.affectedSubSector = programme.affectedSubSector;
-		programmeViewDto.programmeStatus = null;
+		programmeViewDto.programmeStatus = programme.programmeStatus;
 		programmeViewDto.recipientEntity = recipientEntity;
 		programmeViewDto.startYear = programme.startYear;
 		programmeViewDto.interNationalImplementor = interNationalImplementor;

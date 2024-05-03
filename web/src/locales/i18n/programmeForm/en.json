@@ -1,6 +1,10 @@
 {
     "addProgrammeTitle": "Add New Programme",
     "addProgrammeDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
+    "viewProgrammeTitle":"View Programme",
+    "viewProgrammeDesc":"Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    "editProgrammeTitle":"Edit Programme",
+    "editProgrammeDesc":"Lorem ipsum dolor sit amet, consectetur adipiscing elit",
     "generalInfoTitle": "General Programme Information",
     "selectActionHeader": "Select Action",
     "typesHeader": "Type (s)",
@@ -19,8 +23,6 @@
     "documents": "Documents",
     "programmeCommentsTitle": "Comments on the Programme",
     "projectListTitle": "List of Projects under the Programme",
-    "projectId": "Project ID",
-    "projectName": "Project Name",
     "mitigationInfoTitle": "Mitigation  Information ",
     "ghgAffected": "GHG(s) Affected",
     "emmissionInfoTitle": "Estimates of GHG emission reductions (ktCO2e)",
@@ -37,9 +39,15 @@
     "attachProjects": "ATTACH PROJECTS",
     "projectList": "Project List",
     "addKPI": "Add KPI",
-    "programmeCreationSuccess": "Programme Added Succesfully",
+    "programmeCreationSuccess": "Programme Added Successfully",
+    "programmeUpdateSuccess": "Programme Updated Successfully",
     "updatesInfoTitle": "Updates",
     "noProjectsMessage": "No Projects Attached",
-    "documentsHeader": "Documents"
+    "documentsHeader": "Documents",
+    "noSuchEntity": "Requested Programme doesn't exist !",
+    "validate": "Validate",
+    "back": "Back",
+    "delete": "Delete",
+    "update": "Update"
   }
   

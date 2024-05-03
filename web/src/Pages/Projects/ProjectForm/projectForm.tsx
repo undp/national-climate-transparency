@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Popover, List, Typography } from 'antd';
-import { CloseCircleOutlined, EllipsisOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message } from 'antd';
+import { PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -20,6 +20,11 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { getFormTitle } from '../../../Utils/utilServices';
+import { Action } from '../../../Enums/action.enum';
+import { ProjectEntity } from '../../../Entities/project';
+import { useAbilityContext } from '../../../Casl/Can';
+import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
+import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
@@ -38,6 +43,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const navigate = useNavigate();
   const { post } = useConnection();
+  const ability = useAbilityContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -53,14 +59,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
-  // Popover state
-
-  const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
-
   // Activities state
 
   const [allActivityIds, setAllActivityList] = useState<string[]>([]);
   const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([]);
+
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
   const [activityPageSize, setActivityPageSize] = useState<number>(10);
@@ -128,7 +131,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     // Get the Support Data for each attached Activity
     setSupportData([]);
-    setDetachOpen(Array(selectedActivityIds.length).fill(false));
+
+    // Setting Pagination
+    setActivityCurrentPage(1);
+    setActivityPageSize(10);
   }, [selectedActivityIds]);
 
   useEffect(() => {
@@ -288,14 +294,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     });
   };
 
-  // Dettach Project
-
-  const handleDetachOpen = (record: ActivityData) => {
-    console.log(record);
-    const newOpenList = Array(selectedActivityIds.length).fill(false);
-    newOpenList[selectedActivityIds.indexOf(record.activityId)] = true;
-    setDetachOpen(newOpenList);
-  };
+  // Detach Project
 
   const detachActivity = (actId: string) => {
     console.log(actId);
@@ -305,80 +304,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     setSelectedActivityIds(filteredIds);
   };
 
-  // Action Menu definition
-
-  const actionMenu = (record: ActivityData) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: t('detach'),
-            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            click: () => {
-              {
-                detachActivity(record.activityId);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) => (
-          <List.Item onClick={item.click}>
-            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{item.text}</span>
-          </List.Item>
-        )}
-      />
-    );
-  };
-
   // Activity Column Definition
 
-  const activityTableColumns = [
-    { title: t('activityIdTitle'), dataIndex: 'activityId', key: 'activityId' },
-    { title: t('titleTitle'), dataIndex: 'title', key: 'title' },
-    { title: t('redMeasuresTitle'), dataIndex: 'reductionMeasures', key: 'reductionMeasures' },
-    { title: t('statusTitle'), dataIndex: 'status', key: 'status' },
-    { title: t('startYearHeader'), dataIndex: 'startYear', key: 'startYear' },
-    { title: t('endYearHeader'), dataIndex: 'endYear', key: 'endYear' },
-    { title: t('natImplementorTitle'), dataIndex: 'natImplementor', key: 'natImplementor' },
-    {
-      title: '',
-      key: 'activityAction',
-      align: 'right' as const,
-      width: 6,
-      render: (record: any) => {
-        return (
-          <Popover
-            placement="bottomRight"
-            content={actionMenu(record)}
-            trigger="click"
-            open={detachOpen[selectedActivityIds.indexOf(record.activityId)]}
-          >
-            <EllipsisOutlined
-              rotate={90}
-              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => handleDetachOpen(record)}
-            />
-          </Popover>
-        );
-      },
-    },
-  ];
+  const activityTableColumns = getActivityTableColumns(isView, detachActivity);
 
   // Support Column Definition
 
-  const supportTableColumns = [
-    { title: t('supportIdTitle'), dataIndex: 'supportId', key: 'activityId' },
-    { title: t('financeNatureTitle'), dataIndex: 'financeNature', key: 'financeNature' },
-    { title: t('directionTitle'), dataIndex: 'direction', key: 'direction' },
-    { title: t('finInstrumentTitle'), dataIndex: 'finInstrument', key: 'finInstrument' },
-    { title: t('neededUSDHeader'), dataIndex: 'estimatedUSD', key: 'estimatedUSD' },
-    { title: t('neededLCLHeader'), dataIndex: 'estimatedLC', key: 'estimatedLC' },
-    { title: t('recievedUSDHeader'), dataIndex: 'recievedUSD', key: 'recievedUSD' },
-    { title: t('recievedLCLHeader'), dataIndex: 'recievedLC', key: 'recievedLC' },
-  ];
+  const supportTableColumns = getSupportTableColumns();
 
   // Activity Table Behaviour
 
@@ -836,7 +768,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={24}>
                 <div style={{ overflowX: 'auto' }}>
                   <LayoutTable
-                    tableData={activityData}
+                    tableData={activityData.slice(
+                      (activityCurrentPage - 1) * activityPageSize,
+                      (activityCurrentPage - 1) * activityPageSize + activityPageSize
+                    )}
                     columns={activityTableColumns}
                     loading={false}
                     pagination={{
@@ -929,20 +864,22 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   {t('back')}
                 </Button>
               </Col>
-              <Col span={2.5}>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={() => {
-                      validateEntity();
-                    }}
-                  >
-                    {t('validate')}
-                  </Button>
-                </Form.Item>
-              </Col>
+              {ability.can(Action.Validate, ProjectEntity) && (
+                <Col span={2.5}>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => {
+                        validateEntity();
+                      }}
+                    >
+                      {t('validate')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
           )}
           {method === 'update' && (

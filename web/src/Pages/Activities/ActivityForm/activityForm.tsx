@@ -29,6 +29,10 @@ import { ParentData } from '../../../Definitions/activityDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { getFormTitle } from '../../../Utils/utilServices';
+import { Action } from '../../../Enums/action.enum';
+import { ActivityEntity } from '../../../Entities/activity';
+import { useAbilityContext } from '../../../Casl/Can';
+import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
@@ -47,6 +51,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const navigate = useNavigate();
   const { post } = useConnection();
+  const ability = useAbilityContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -273,16 +278,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   };
 
   // Column Definition
-  const supportTableColumns = [
-    { title: t('supportIdTitle'), dataIndex: 'supportId', key: 'activityId' },
-    { title: t('financeNatureTitle'), dataIndex: 'financeNature', key: 'financeNature' },
-    { title: t('directionTitle'), dataIndex: 'direction', key: 'direction' },
-    { title: t('finInstrumentTitle'), dataIndex: 'finInstrument', key: 'finInstrument' },
-    { title: t('neededUSDHeader'), dataIndex: 'estimatedUSD', key: 'estimatedUSD' },
-    { title: t('neededLCLHeader'), dataIndex: 'estimatedLC', key: 'estimatedLC' },
-    { title: t('recievedUSDHeader'), dataIndex: 'recievedUSD', key: 'recievedUSD' },
-    { title: t('recievedLCLHeader'), dataIndex: 'recievedLC', key: 'recievedLC' },
-  ];
+  const supportTableColumns = getSupportTableColumns();
 
   // Table Behaviour
 
@@ -878,20 +874,22 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   {t('back')}
                 </Button>
               </Col>
-              <Col span={2.5}>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={() => {
-                      validateEntity();
-                    }}
-                  >
-                    {t('validate')}
-                  </Button>
-                </Form.Item>
-              </Col>
+              {ability.can(Action.Validate, ActivityEntity) && (
+                <Col span={2.5}>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => {
+                        validateEntity();
+                      }}
+                    >
+                      {t('validate')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
           )}
           {method === 'update' && (
