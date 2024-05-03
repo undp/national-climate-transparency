@@ -91,7 +91,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
   const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
 
-  // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
 
   const yearsList: number[] = [];
@@ -103,7 +102,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   useEffect(() => {
     // Initially Loading Free Actions that can be parent
 
-    const fetchFreeProgrammes = async () => {
+    const fetchAllProgrammes = async () => {
       const payload = {
         page: 1,
         size: 100,
@@ -123,7 +122,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       });
       setProgrammeList(tempProgrammeData);
     };
-    fetchFreeProgrammes();
+    fetchAllProgrammes();
 
     // Initially Loading Free Activities that can be attached
 
@@ -346,6 +345,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       expectedGHGReduction: 0,
     };
 
+    const meansOfImplementation: string[] = [];
+
     const fetchData = async () => {
       if (tempActivityIds.length > 0) {
         tempActivityIds.forEach((actId) => {
@@ -371,27 +372,36 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             natImplementor: act.nationalImplementingEntity ?? [],
           });
 
-          // tempMigratedData.type.push(act.type);
+          if (act.technologyType) {
+            tempMigratedData.techType.push(act.technologyType);
+          }
 
-          // tempMigratedData.intImplementor = joinTwoArrays(
-          //   tempMigratedData.intImplementor,
-          //   prj.internationalImplementingEntities ?? []
-          // );
+          if (act.meansOfImplementation) {
+            meansOfImplementation.push(act.meansOfImplementation);
+          }
 
-          // tempMigratedData.recipientEntity = joinTwoArrays(
-          //   tempMigratedData.recipientEntity,
-          //   prj.recipientEntities ?? []
-          // );
+          const activityGHGAchievement =
+            act.achievedGHGReduction !== null ? act.achievedGHGReduction : 0;
+          const activityGHGExpected =
+            act.expectedGHGReduction !== null ? act.expectedGHGReduction : 0;
 
-          // const prgGHGAchievement = prj.migratedData[0]?.achievedGHGReduction;
-          // const prgGHGExpected = prj.migratedData[0]?.expectedGHGReduction;
+          tempMigratedData.achievedGHGReduction =
+            tempMigratedData.achievedGHGReduction + activityGHGAchievement;
 
-          // tempMigratedData.achievedReduct =
-          //   tempMigratedData.achievedReduct + prgGHGAchievement !== null ? prgGHGAchievement : 0;
-
-          // tempMigratedData.expectedReduct =
-          //   tempMigratedData.expectedReduct + prgGHGExpected !== null ? prgGHGExpected : 0;
+          tempMigratedData.expectedGHGReduction =
+            tempMigratedData.expectedGHGReduction + activityGHGExpected;
         });
+
+        console.log(meansOfImplementation);
+
+        if (meansOfImplementation.includes('Technology Development & Transfer')) {
+          tempMigratedData.techDevContribution = 'Yes';
+        }
+
+        if (meansOfImplementation.includes('Capacity Building')) {
+          tempMigratedData.capBuildObjectives = 'Yes';
+        }
+
         setActivityData(tempActivityData);
         setProjectMigratedData(tempMigratedData);
       } else {
@@ -432,7 +442,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
 
     if (toDetach.length > 0) {
-      await post('national/activities/unlink', { activities: toDetach });
+      await post('national/activities/unlink', { activityIds: toDetach });
     }
 
     if (toAttach.length > 0) {
