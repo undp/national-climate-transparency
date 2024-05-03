@@ -177,6 +177,7 @@ export class ProjectService {
 		const queryBuilder = await this.projectRepo
 			.createQueryBuilder("project")
 			.where('project.projectId = :projectId', { projectId })
+			.leftJoinAndSelect("project.programme", "programme")
 			.leftJoinAndMapOne(
 				"project.migratedData",
 				ProjectViewEntity,

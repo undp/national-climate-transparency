@@ -54,6 +54,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   // Parent Selection State
 
   const [programmeList, setProgrammeList] = useState<ProgrammeSelectData[]>([]);
+  const [projectConnectedProgramme, setProjectConnectedProgramme] = useState<string>();
+  const [programmeConnectedAction, setProgrammeConnectedAction] = useState<string>();
 
   // Form General State
 
@@ -176,15 +178,28 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               setStoredFiles(tempFiles);
             }
 
+            // Setting the Programme Information
+            if (entityData.programme) {
+              setProjectConnectedProgramme(entityData.programme.programmeId);
+
+              // Setting the Programme Connected Action Information
+              if (entityData.programme?.path) {
+                setProgrammeConnectedAction(entityData.programme.path);
+              }
+            }
+
             // Populating Migrated Fields (Will be overwritten when attachments change)
-            // setProjectMigratedData({
-            //   type: entityData.types ?? [],
-            //   intImplementor: entityData.interNationalImplementor ?? [],
-            //   recipientEntity: entityData.recipientEntity ?? [],
-            //   ghgsAffected: entityData.ghgsAffected,
-            //   achievedReduct: entityData.achievedGHGReduction,
-            //   expectedReduct: entityData.expectedGHGReduction,
-            // });
+            setProjectMigratedData({
+              techDevContribution: 'No',
+              capBuildObjectives: 'No',
+              techType: entityData.migratedData?.technologyTypes ?? [],
+              neededUSD: entityData.migratedData?.estimatedAmount ?? 0,
+              neededLCL: entityData.migratedData?.estimatedAmountDomestic ?? 0,
+              receivedUSD: entityData.migratedData?.receivedAmount ?? 0,
+              receivedLCL: entityData.migratedData?.receivedAmountDomestic ?? 0,
+              achievedGHGReduction: entityData.migratedData?.achievedGHGReduction ?? 0,
+              expectedGHGReduction: entityData.migratedData?.expectedGHGReduction ?? 0,
+            });
           }
         } catch {
           navigate('/projects');
@@ -238,17 +253,77 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   useEffect(() => {
     if (projectMigratedData) {
-      console.log('came here');
-      // form.setFieldsValue({
-      //   type: projectMigratedData.type,
-      //   intImplementor: projectMigratedData.intImplementor,
-      //   recipientEntity: projectMigratedData.recipientEntity,
-      //   ghgsAffected: projectMigratedData.ghgsAffected,
-      //   achievedReduct: projectMigratedData.achievedReduct,
-      //   expectedReduct: projectMigratedData.expectedReduct,
-      // });
+      form.setFieldsValue({
+        techDevContribution: projectMigratedData.techDevContribution,
+        capBuildObjectives: projectMigratedData.capBuildObjectives,
+        techType: projectMigratedData.techType,
+        neededUSD: projectMigratedData.neededUSD,
+        neededLCL: projectMigratedData.neededLCL,
+        receivedUSD: projectMigratedData.receivedUSD,
+        receivedLCL: projectMigratedData.receivedLCL,
+        achievedGHGReduction: projectMigratedData.achievedGHGReduction,
+        expectedGHGReduction: projectMigratedData.expectedGHGReduction,
+      });
     }
   }, [projectMigratedData]);
+
+  useEffect(() => {
+    const fetchConnectedAction = async () => {
+      if (programmeConnectedAction) {
+        try {
+          const response = await get(`national/actions/${programmeConnectedAction}`);
+
+          if (response.status === 200 || response.status === 201) {
+            const actionData: any = response.data;
+            form.setFieldsValue({
+              actionTitle: actionData.title,
+              natAnchor: actionData.natAnchor,
+            });
+          }
+        } catch {
+          navigate('/projects');
+          message.open({
+            type: 'error',
+            content: t('actionNotFound'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchConnectedAction();
+  }, [programmeConnectedAction]);
+
+  useEffect(() => {
+    const fetchConnectedProgramme = async () => {
+      if (projectConnectedProgramme) {
+        try {
+          const response = await get(`national/programmes/${projectConnectedProgramme}`);
+
+          if (response.status === 200 || response.status === 201) {
+            const programmeData: any = response.data;
+            form.setFieldsValue({
+              programmeId: programmeData.programmeId,
+              programmeTitle: programmeData.title,
+              instrTypes: programmeData.instrumentType,
+              sectorsAffected: programmeData.affectedSectors,
+              subSectorsAffected: programmeData.affectedSubSector,
+              nationalImplementor: programmeData.nationalImplementor,
+            });
+          }
+        } catch {
+          navigate('/projects');
+          message.open({
+            type: 'error',
+            content: t('programmeNotFound'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchConnectedProgramme();
+  }, [projectConnectedProgramme]);
 
   // Fetching Project data and calculating migrated fields when attachment changes
 
@@ -260,19 +335,22 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     };
 
     const tempMigratedData: ProjectMigratedData = {
-      type: [],
-      intImplementor: [],
-      recipientEntity: [],
-      ghgsAffected: '',
-      achievedReduct: 0,
-      expectedReduct: 0,
+      techDevContribution: 'No',
+      capBuildObjectives: 'No',
+      techType: [],
+      neededUSD: 0,
+      neededLCL: 0,
+      receivedUSD: 0,
+      receivedLCL: 0,
+      achievedGHGReduction: 0,
+      expectedGHGReduction: 0,
     };
 
     const fetchData = async () => {
       if (tempActivityIds.length > 0) {
         tempActivityIds.forEach((actId) => {
           payload.filterOr.push({
-            key: 'parentId',
+            key: 'activityId',
             operation: '=',
             value: actId,
           });
@@ -287,10 +365,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             activityId: act.activityId,
             title: act.title,
             reductionMeasures: act.measure,
-            status: act.activityStatus,
-            startYear: act.startYear,
-            endYear: act.endYear,
-            natImplementor: act.natImplementor,
+            status: act.status,
+            startYear: act.migratedData?.startYear,
+            endYear: act.migratedData?.endYear,
+            natImplementor: act.nationalImplementingEntity,
           });
 
           // tempMigratedData.type.push(act.type);
@@ -358,7 +436,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     }
 
     if (toAttach.length > 0) {
-      await post('national/activities/link', { projectId: entId, activityIds: toAttach });
+      await post('national/activities/link', {
+        parentId: entId,
+        parentType: 'project',
+        activityIds: toAttach,
+      });
     }
   };
 
@@ -703,7 +785,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('sectorsAffectedHeader')}</label>}
                     name="sectorsAffected"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled
+                    ></Select>
                   </Form.Item>
                 </Col>
                 <Col span={6}>
@@ -713,7 +801,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     }
                     name="subSectorsAffected"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled
+                    ></Select>
                   </Form.Item>
                 </Col>
                 <Col span={6}>
@@ -772,7 +866,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item<number>
                     label={<label className="form-item-header">{t('natImplementorHeader')}</label>}
-                    name="natImplementor"
+                    name="nationalImplementor"
                   >
                     <Input className="form-input-box" disabled />
                   </Form.Item>
@@ -954,7 +1048,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('recievedUSDHeader')}</label>}
-                    name="recievedUSD"
+                    name="receivedUSD"
                   >
                     <Input className="form-input-box" disabled />
                   </Form.Item>
@@ -962,7 +1056,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('recievedLCLHeader')}</label>}
-                    name="recievedLCL"
+                    name="receivedLCL"
                   >
                     <Input className="form-input-box" disabled />
                   </Form.Item>

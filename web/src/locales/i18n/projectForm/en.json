@@ -1,6 +1,10 @@
 {
     "addProjectTitle": "Add New Project",
     "addProjectDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    "viewProjectTitle": "View Project",
+    "viewProjectDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    "editProjectTitle": "Edit Project",
+    "editProjectDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
     "generalInfoTitle": "General Project  Information ",
     "selectProgrammeHeader": "Select Programme",
     "typeHeader": "Type",
@@ -51,5 +55,9 @@
     "updatesInfoTitle": "Updates",
     "noProjectsMessage": "No Activities Attached",
     "documentsHeader": "Documents",
-    "projectCreationSuccess": "Project Added Successfully"
+    "projectCreationSuccess": "Project Added Successfully",
+    "validate": "Validate",
+    "back": "Back",
+    "noSupportMessage": "No Supports Connected",
+    "noActivityMessage": "No Activities Connected"
   }
