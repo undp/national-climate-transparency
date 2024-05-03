@@ -23,6 +23,7 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
+import { ValidateDto } from "src/dtos/validate.dto";
 
 @Injectable()
 export class ActionService {
@@ -371,13 +372,80 @@ export class ActionService {
 			this.helperService.formatReqMessagesString("action.updateActionSuccess", []),
 			act
 		);
+	}
 
+	async validateAction(validateDto: ValidateDto, user: User) {
+		const action = await this.findActionById(validateDto.entityId);
+		if (!action) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.actionNotFound",
+					[validateDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
 
+		if (action.validated) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.actionAlreadyValidated",
+					[validateDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		action.validated = true;
+		const eventLog = this.buildLogEntity(LogEventType.ACTION_VERIFIED, EntityType.ACTION, action.actionId, user.id, validateDto)
+
+		const act = await this.entityManager
+			.transaction(async (em) => {
+				const savedAction = await em.save<ActionEntity>(action);
+				if (savedAction) {
+					// Save event logs
+					await em.save<LogEntity>(eventLog);
+				}
+				return savedAction;
+			})
+			.catch((err: any) => {
+				console.log(err);
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"action.actionVerificationFailed",
+						[err]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("action.verifyActionSuccess", []),
+			act
+		);
 
 	}
 
 	private addEventLogEntry = (
 		eventLog: any[],
+		eventType: LogEventType,
+		recordType: EntityType,
+		recordId: any,
+		userId: number,
+		data: any) => {
+		eventLog.push(
+			this.buildLogEntity(
+				eventType,
+				recordType,
+				recordId,
+				userId,
+				data));
+		return eventLog;
+	}
+
+	private buildLogEntity = (
 		eventType: LogEventType,
 		recordType: EntityType,
 		recordId: any,
@@ -389,8 +457,6 @@ export class ActionService {
 		log.recordId = recordId;
 		log.userId = userId;
 		log.logData = data;
-
-		eventLog.push(log);
-		return eventLog;
+		return log;
 	}
 }
