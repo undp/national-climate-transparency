@@ -323,7 +323,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             projectName: prj.title,
           });
 
-          tempMigratedData.type.push(prj.type);
+          if (!tempMigratedData.type.includes(prj.type)) {
+            tempMigratedData.type.push(prj.type);
+          }
 
           tempMigratedData.intImplementor = joinTwoArrays(
             tempMigratedData.intImplementor,

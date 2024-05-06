@@ -373,11 +373,14 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             natImplementor: act.nationalImplementingEntity ?? [],
           });
 
-          if (act.technologyType) {
+          if (act.technologyType && !tempMigratedData.techType.includes(act.technologyType)) {
             tempMigratedData.techType.push(act.technologyType);
           }
 
-          if (act.meansOfImplementation) {
+          if (
+            act.meansOfImplementation &&
+            !meansOfImplementation.includes(act.meansOfImplementation)
+          ) {
             meansOfImplementation.push(act.meansOfImplementation);
           }
 
