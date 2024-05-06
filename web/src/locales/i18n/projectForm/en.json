@@ -55,9 +55,11 @@
     "updatesInfoTitle": "Updates",
     "noProjectsMessage": "No Activities Attached",
     "documentsHeader": "Documents",
-    "projectCreationSuccess": "Project Added Successfully",
+    "projectUpdateSuccess": "Project Updated Successfully",
     "validate": "Validate",
     "back": "Back",
     "noSupportMessage": "No Supports Connected",
-    "noActivityMessage": "No Activities Connected"
+    "noActivityMessage": "No Activities Connected",
+    "update": "Update",
+    "delete": "Delete"
   }
