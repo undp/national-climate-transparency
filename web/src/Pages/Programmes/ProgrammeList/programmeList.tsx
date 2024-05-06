@@ -180,7 +180,7 @@ const programmeList = () => {
             actionId: unstructuredData[i].action?.actionId,
             title: unstructuredData[i].title,
             status: unstructuredData[i].programmeStatus,
-            validationStatus: unstructuredData[i].validationStatus ?? '',
+            validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             subSectorsAffected: unstructuredData[i].affectedSubSector,
             investment: unstructuredData[i].investment,
             type: unstructuredData[i].migratedData[0]?.types ?? [],

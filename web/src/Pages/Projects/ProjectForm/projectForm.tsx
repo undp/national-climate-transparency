@@ -49,6 +49,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   // Form Validation Rules
 
   const validation = getValidationRules(method);
+  // Entity Validation Status
+
+  const [isValidated, setIsValidated] = useState<boolean>(false);
 
   // Parent Selection State
 
@@ -163,6 +166,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               internationalImplementingEntities: entityData.internationalImplementingEntities,
               comment: entityData.comment,
             });
+
+            setIsValidated(entityData.validated ?? false);
 
             if (entityData.documents?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
@@ -567,8 +572,33 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Validate
 
-  const validateEntity = () => {
-    console.log('Validate Clicked');
+  const validateEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await post('national/projects/validate', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: 'Successfully Validated !',
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/projects');
+        }
+      }
+    } catch {
+      message.open({
+        type: 'error',
+        content: `${entId} Validation Failed`,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    }
   };
 
   // Entity Delete
@@ -1228,6 +1258,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Col span={2.5}>
                     <Form.Item>
                       <Button
+                        disabled={isValidated}
                         type="primary"
                         size="large"
                         block

@@ -144,7 +144,7 @@ const activityList = () => {
             supportType: unstructuredData[i].migratedData?.types ?? '',
             recipientEntity: unstructuredData[i].migratedData?.recipientEntities ?? [],
             intImplementingEntity: unstructuredData[i].internationalImplementingEntity ?? [],
-            validationStatus: unstructuredData[i].validationStatus,
+            validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             natImplementingEntity: unstructuredData[i].nationalImplementingEntity ?? [],
           });
         }

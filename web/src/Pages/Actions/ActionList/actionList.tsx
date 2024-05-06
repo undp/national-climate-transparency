@@ -185,7 +185,7 @@ const actionList = () => {
             actionId: unstructuredData[i].actionId,
             title: unstructuredData[i].title,
             status: unstructuredData[i].status,
-            validationStatus: unstructuredData[i].validationStatus ?? '',
+            validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             actionType: unstructuredData[i].migratedData[0]?.types ?? [],
             affectedSectors: unstructuredData[i].migratedData[0]?.sectorsAffected ?? [],
             nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? [],
