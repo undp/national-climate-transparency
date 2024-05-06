@@ -126,7 +126,7 @@ export class ProjectUpdateDto {
 	@ApiPropertyOptional(
 		{
 			type: "array",
-			example: ["http://test.com/documents/programme_documents/testDoc1_1713334127897.csv"],
+			example: ["http://test.com/documents/project_documents/testDoc1_1713334127897.csv"],
 		}
 	)
 	removedDocuments: string[];
@@ -138,7 +138,7 @@ export class ProjectUpdateDto {
 			type: "array",
 			example: [{
 				kpiId: "1",
-				kpiUnits: KpiUnits.GWp_INSTALLED,
+				kpiUnit: KpiUnits.GWp_INSTALLED,
 				name: "KPI 1",
 				creatorType: "action",
 				expected: 100

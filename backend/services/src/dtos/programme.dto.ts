@@ -129,7 +129,7 @@ export class ProgrammeDto {
 				type: "array",
 				example: [{
 					name: "KPI 1",
-					kpiUnits: KpiUnits.GWp_INSTALLED,
+					kpiUnit: KpiUnits.GWp_INSTALLED,
 					creatorType: "programme",
 					expected: 100
 			}],

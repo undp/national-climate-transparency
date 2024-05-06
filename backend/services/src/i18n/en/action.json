@@ -4,6 +4,7 @@
     "docUploadFailed": "Document/s upload failed",
     "unsupportedFileType": "Uploaded document/s type is not supported",
     "creatorTypeCannotBeNull": "KPI creatorType field cannot be null or empty",
+    "kpiUnitCannotBeNull" : "KPI unit field cannot be null or empty",
     "expectedCannotBeNull" : "KPI expected field cannot be null or empty",
     "kpiNameCannotBeNull" : "KPI name field cannot be null or empty",
     "noDocumentsFound": "No documents found for the action",

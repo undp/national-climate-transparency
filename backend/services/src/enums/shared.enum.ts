@@ -97,6 +97,8 @@ export enum LogEventType {
 	PROJECT_UPDATED = 17,
 	ACTION_VERIFIED = 18,
 	PROJECT_VERIFIED = 19,
+	ACTIVITY_UPDATED = 20,
+	ACTIVITY_VERIFIED = 21,
 }
 
 export enum GHGS {

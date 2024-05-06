@@ -238,6 +238,19 @@ export class ActionService {
 			);
 		}
 
+		if (user.sector && user.sector.length > 0 && currentAction.sectors && currentAction.sectors.length > 0) {
+			const commonSectors = currentAction.sectors.filter(sector => user.sector.includes(sector));
+			if (commonSectors.length === 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"activity.cannotUpdateNotRelatedAction",
+						[currentAction.actionId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+		}
+
 		// add new documents
 		if (actionUpdateDto.newDocuments) {
 			const documents = [];

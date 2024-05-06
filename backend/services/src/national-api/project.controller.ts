@@ -70,7 +70,7 @@ export class ProjectController {
 
 		@ApiBearerAuth('api_key')
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProjectEntity))
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, ProjectEntity))
     @Post("validate")
     validateProjects(@Body() validateDto: ValidateDto, @Request() req) {
         return this.projectService.validateProject(validateDto, req.user);

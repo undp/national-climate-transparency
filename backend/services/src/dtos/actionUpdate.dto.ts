@@ -48,6 +48,13 @@ export class ActionUpdateDto {
 	})
 	status: ActionStatus;
 
+	@IsNotEmpty()
+	@IsNumber()
+	@Min(2013)
+	@Max(2050)
+	@ApiProperty()
+	startYear: number;
+	
 	@IsArray()
 	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
@@ -81,7 +88,7 @@ export class ActionUpdateDto {
 	@ApiPropertyOptional(
 		{
 			type: "array",
-			example: ["http://test.com/documents/programme_documents/testDoc1_1713334127897.csv"],
+			example: ["http://test.com/documents/action_documents/testDoc1_1713334127897.csv"],
 		}
 	)
 	removedDocuments: string[];
@@ -97,7 +104,7 @@ export class ActionUpdateDto {
 			type: "array",
 			example: [{
 				kpiId: "1",
-				kpiUnits: KpiUnits.GWp_INSTALLED,
+				kpiUnit: KpiUnits.GWp_INSTALLED,
 				name: "KPI 1",
 				creatorType: "action",
 				expected: 100

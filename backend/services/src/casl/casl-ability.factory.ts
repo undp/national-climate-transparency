@@ -45,24 +45,28 @@ export class CaslAbilityFactory {
 				can(Action.Create, ActionEntity);
 				can(Action.Update, ActionEntity);
 				can(Action.Delete, ActionEntity);
+				can(Action.Validate, ActionEntity);
 
 				// Programme
 				can(Action.Read, ProgrammeEntity);
 				can(Action.Create, ProgrammeEntity);
 				can(Action.Update, ProgrammeEntity);
 				can(Action.Delete, ProgrammeEntity);
-
+				can(Action.Validate, ProgrammeEntity);
+				
 				// Project
 				can(Action.Read, ProjectEntity);
 				can(Action.Create, ProjectEntity);
 				can(Action.Update, ProjectEntity);
 				can(Action.Delete, ProjectEntity);
+				can(Action.Validate, ProjectEntity);
 
 				// Activity
 				can(Action.Read, ActivityEntity);
 				can(Action.Create, ActivityEntity);
 				can(Action.Update, ActivityEntity);
 				can(Action.Delete, ActivityEntity);
+				can(Action.Validate, ActivityEntity);
 			}
 
 			if (user.role == Role.Admin) {
@@ -79,24 +83,28 @@ export class CaslAbilityFactory {
 				can(Action.Create, ActionEntity);
 				can(Action.Update, ActionEntity);
 				can(Action.Delete, ActionEntity);
+				can(Action.Validate, ActionEntity);
 
 				// Programme
 				can(Action.Read, ProgrammeEntity);
 				can(Action.Create, ProgrammeEntity);
 				can(Action.Update, ProgrammeEntity);
 				can(Action.Delete, ProgrammeEntity);
+				can(Action.Validate, ProgrammeEntity);
 
 				// Project
 				can(Action.Read, ProjectEntity);
 				can(Action.Create, ProjectEntity);
 				can(Action.Update, ProjectEntity);
 				can(Action.Delete, ProjectEntity);
+				can(Action.Validate, ProjectEntity);
 
 				// Activity
 				can(Action.Read, ActivityEntity);
 				can(Action.Create, ActivityEntity);
 				can(Action.Update, ActivityEntity);
 				can(Action.Delete, ActivityEntity);
+				can(Action.Validate, ActivityEntity);
 
 			}
 
@@ -123,6 +131,7 @@ export class CaslAbilityFactory {
 				can(Action.Create, ActionEntity);
 				can(Action.Update, ActionEntity);
 				can(Action.Delete, ActionEntity);
+				cannot(Action.Validate, ActionEntity);
 
 				
 				// ----------------------------- Programme ------------------------------
@@ -134,7 +143,7 @@ export class CaslAbilityFactory {
 				can(Action.Create, ProgrammeEntity);
 				can(Action.Update, ProgrammeEntity);
 				can(Action.Delete, ProgrammeEntity);
-
+				cannot(Action.Validate, ProgrammeEntity);
 
 				// ----------------------------- Project ------------------------------
 				user.sector.forEach(userSector => {
@@ -150,7 +159,8 @@ export class CaslAbilityFactory {
 				can(Action.Create, ProjectEntity);
 				can(Action.Update, ProjectEntity);
 				can(Action.Delete, ProjectEntity);
-
+				cannot(Action.Validate, ProjectEntity);
+				
 				// ----------------------------- Activity ------------------------------
 				user.sector.forEach(userSector => {
 					can(Action.Read, ActivityEntity, {
@@ -165,6 +175,7 @@ export class CaslAbilityFactory {
 				can(Action.Create, ActivityEntity);
 				can(Action.Update, ActivityEntity);
 				can(Action.Delete, ActivityEntity);
+				cannot(Action.Validate, ActivityEntity);
 
 			}
 
@@ -191,6 +202,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, ActionEntity);
 				cannot(Action.Update, ActionEntity);
 				cannot(Action.Delete, ActionEntity);
+				cannot(Action.Validate, ActionEntity);
 
 				// ----------------------------- Programme ------------------------------
 				user.sector.forEach(userSector => {
@@ -202,6 +214,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, ProgrammeEntity);
 				cannot(Action.Update, ProgrammeEntity);
 				cannot(Action.Delete, ProgrammeEntity);
+				cannot(Action.Validate, ProgrammeEntity);
 
 				// ----------------------------- Project ------------------------------
 				user.sector.forEach(userSector => {
@@ -217,6 +230,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, ProjectEntity);
 				cannot(Action.Update, ProjectEntity);
 				cannot(Action.Delete, ProjectEntity);
+				cannot(Action.Validate, ProjectEntity);
 
 				// ----------------------------- Activity ------------------------------
 				user.sector.forEach(userSector => {
@@ -232,6 +246,8 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, ActivityEntity);
 				cannot(Action.Update, ActivityEntity);
 				cannot(Action.Delete, ActivityEntity);
+				cannot(Action.Validate, ActivityEntity);
+
 			}
 
 
