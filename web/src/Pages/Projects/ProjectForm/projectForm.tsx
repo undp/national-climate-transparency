@@ -309,6 +309,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               subSectorsAffected: programmeData.affectedSubSector,
               nationalImplementor: programmeData.nationalImplementor,
             });
+
+            setProgrammeConnectedAction(programmeData.actionId);
           }
         } catch {
           navigate('/projects');
@@ -671,6 +673,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       allowClear
                       disabled={isView}
                       showSearch
+                      onChange={(value: any) => {
+                        setProjectConnectedProgramme(value);
+                      }}
                     >
                       {programmeList.map((program) => (
                         <Option key={program.id} value={program.id}>
@@ -693,9 +698,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       disabled={isView}
                       showSearch
                     >
-                      {Object.values(ProjectType).map((instrument) => (
-                        <Option key={instrument} value={instrument}>
-                          {instrument}
+                      {Object.values(ProjectType).map((pType) => (
+                        <Option key={pType} value={pType}>
+                          {pType}
                         </Option>
                       ))}
                     </Select>
@@ -754,7 +759,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('natAnchorHeader')}</label>}
                     name="natAnchor"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>
@@ -764,7 +775,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('instrTypesHeader')}</label>}
                     name="instrTypes"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled
+                    ></Select>
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -780,9 +797,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       disabled={isView}
                       showSearch
                     >
-                      {Object.values(ProjectStatus).map((instrument) => (
-                        <Option key={instrument} value={instrument}>
-                          {instrument}
+                      {Object.values(ProjectStatus).map((pStatus) => (
+                        <Option key={pStatus} value={pStatus}>
+                          {pStatus}
                         </Option>
                       ))}
                     </Select>
@@ -905,9 +922,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       disabled={isView}
                       showSearch
                     >
-                      {Object.values(Recipient).map((instrument) => (
-                        <Option key={instrument} value={instrument}>
-                          {instrument}
+                      {Object.values(Recipient).map((recipient) => (
+                        <Option key={recipient} value={recipient}>
+                          {recipient}
                         </Option>
                       ))}
                     </Select>
