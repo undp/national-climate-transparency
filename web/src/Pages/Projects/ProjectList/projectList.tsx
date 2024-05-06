@@ -85,27 +85,6 @@ const projectList = () => {
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
   const [toBeAttached, setToBeAttached] = useState<string[]>([]);
 
-  // Attach Multiple Activities for a Project
-
-  const attachActivities = async () => {
-    if (toBeAttached.length > 0) {
-      const payload = {
-        projectId: selectedProjectId,
-        activityIds: toBeAttached,
-      };
-      const response: any = await post('national/activities/link', payload);
-      if (response.status === 200 || response.status === 201) {
-        message.open({
-          type: 'success',
-          content: t('activityLinkSuccess'),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        navigate('/projects');
-      }
-    }
-  };
-
   // Free Act Read from DB
 
   const getFreeActivityIds = async () => {
@@ -222,6 +201,36 @@ const projectList = () => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
       setLoading(false);
+    }
+  };
+
+  // Attach Multiple Activities for a Project
+
+  const attachActivities = async () => {
+    if (toBeAttached.length > 0) {
+      const payload = {
+        projectId: selectedProjectId,
+        activityIds: toBeAttached,
+      };
+      const response: any = await post('national/activities/link', payload);
+      if (response.status === 200 || response.status === 201) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
+        message.open({
+          type: 'success',
+          content: t('activityLinkSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
+        getAllData();
+      }
     }
   };
 

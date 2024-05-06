@@ -83,25 +83,6 @@ const programmeList = () => {
   const [attachedProjectIds, setAttachedProjectIds] = useState<string[]>([]);
   const [toBeAttached, setToBeAttached] = useState<string[]>([]);
 
-  // Attach Multiple Projects for a Project
-
-  const attachProjects = async () => {
-    const payload = {
-      programmeId: selectedProgrammeId,
-      projectIds: toBeAttached,
-    };
-    const response: any = await post('national/projects/link', payload);
-    if (response.status === 200 || response.status === 201) {
-      message.open({
-        type: 'success',
-        content: t('projectLinkSuccess'),
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-      navigate('/programmes');
-    }
-  };
-
   // Free Prg Read from DB
 
   const getFreeProjectIds = async () => {
@@ -217,6 +198,34 @@ const programmeList = () => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
       setLoading(false);
+    }
+  };
+
+  // Attach Multiple Projects for a Project
+
+  const attachProjects = async () => {
+    const payload = {
+      programmeId: selectedProgrammeId,
+      projectIds: toBeAttached,
+    };
+    const response: any = await post('national/projects/link', payload);
+    if (response.status === 200 || response.status === 201) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      message.open({
+        type: 'success',
+        content: t('projectLinkSuccess'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      getAllData();
     }
   };
 
