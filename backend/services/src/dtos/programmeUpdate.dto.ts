@@ -5,6 +5,7 @@ import { SubSector, NatImplementor } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { ProgrammeStatus } from "../enums/programme-status.enum";
 import { KpiUpdateDto } from "./kpi.update.dto";
+import { IsTwoDecimalPoints } from "src/util/twoDecimalPointNumber.decorator";
 
 export class ProgrammeUpdateDto {
 
@@ -76,10 +77,10 @@ export class ProgrammeUpdateDto {
       enum: Object.values(NatImplementor),
     })
     natImplementor: NatImplementor[];
-  
+
     @IsNotEmpty()
     @IsNumber()
-    @Min(0)
+		@IsTwoDecimalPoints()
     @ApiProperty()
     investment: number;
 
