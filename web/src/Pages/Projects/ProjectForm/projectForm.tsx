@@ -39,8 +39,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const { t } = useTranslation(['projectForm', 'tableAction']);
 
   const isView: boolean = method === 'view' ? true : false;
-  const formTitle = getFormTitle('Project', method)[0];
-  const formDesc = getFormTitle('Project', method)[1];
+  const formTitle = getFormTitle('Project', method);
 
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
@@ -651,7 +650,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
-        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       {!waitingForBE ? (
         <div className="project-form">

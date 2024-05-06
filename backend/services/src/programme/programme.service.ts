@@ -322,12 +322,12 @@ export class ProgrammeService {
 
 					// Update Parent
 					if (!currentProgramme.action && programmeUpdateDto.actionId) {
-						await this.linkProgrammesToAction({actionId: programmeUpdateDto.actionId, programmes: [programmeUpdate.programmeId]}, user, false, em)
+						await this.linkUpdatedProgrammeToAction(programmeUpdateDto.actionId, programmeUpdate, user, em);
 					} else if (currentProgramme.action && !programmeUpdateDto.actionId) {
-						await this.unlinkProgrammesFromAction({programme: programmeUpdate.programmeId}, user, em)
+						await this.unlinkUpdatedProgrammeFromAction(programmeUpdate, user, em);
 					} else if (currentProgramme.action?.actionId != programmeUpdateDto.actionId) {
-						await this.unlinkProgrammesFromAction({programme: programmeUpdate.programmeId}, user, em)
-						await this.linkProgrammesToAction({actionId: programmeUpdateDto.actionId, programmes: [programmeUpdate.programmeId]}, user, true, em)
+						await this.unlinkUpdatedProgrammeFromAction(programmeUpdate, user, em);
+						await this.linkUpdatedProgrammeToAction(programmeUpdateDto.actionId, programmeUpdate, user, em);
 					} 
 
 					// Save new KPIs
@@ -368,6 +368,86 @@ export class ProgrammeService {
 			HttpStatus.OK,
 			this.helperService.formatReqMessagesString("programme.updateProgrammeSuccess", []),
 			prg
+		);
+	}
+
+	async linkUpdatedProgrammeToAction(actionId: string, updatedProgramme: ProgrammeEntity, user: User, em?: EntityManager) {
+		const action = await this.actionService.findActionById(actionId);
+		if (!action) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.actionNotFound",
+					[actionId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (user.sector && user.sector.length > 0) {
+			const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
+			if (commonSectors.length === 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.cannotLinkNotRelatedProgrammes",
+						[updatedProgramme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+		}
+
+		if (updatedProgramme.action) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeAlreadyLinked",
+					[updatedProgramme.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+		
+		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, [updatedProgramme], actionId, allLinkedProgrammes, user, em? em : this.entityManager);
+
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("programme.programmesLinkedToAction", []),
+			prog
+		);
+	}
+
+	async unlinkUpdatedProgrammeFromAction(updatedProgramme: ProgrammeEntity, user: User, em?: EntityManager) {
+
+		if (user.sector && user.sector.length > 0) {
+			const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
+			if (commonSectors.length === 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.cannotUnlinkNotRelatedProgrammes",
+						[updatedProgramme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			if (!updatedProgramme.action) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.programmeIsNotLinked",
+						[updatedProgramme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+		}
+
+		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(updatedProgramme.action.actionId, updatedProgramme.programmeId)
+		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(updatedProgramme, updatedProgramme.programmeId, allLinkedProgrammes, user, em? em : this.entityManager);
+
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("programme.programmesUnlinkedFromAction", []),
+			prog
 		);
 	}
 

@@ -46,8 +46,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const { t } = useTranslation(['activityForm']);
 
   const isView: boolean = method === 'view' ? true : false;
-  const formTitle = getFormTitle('Activity', method)[0];
-  const formDesc = getFormTitle('Activity', method)[1];
+  const formTitle = getFormTitle('Activity', method);
 
   const navigate = useNavigate();
   const { post } = useConnection();
@@ -324,7 +323,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
-        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       <div className="activity-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">

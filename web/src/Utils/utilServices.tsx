@@ -63,11 +63,11 @@ export const getFormTitle = (
   formMethod: 'create' | 'update' | 'view'
 ) => {
   if (formMethod === 'create') {
-    return [`add${formType}Title`, `add${formType}Desc`];
+    return `add${formType}Title`;
   } else if (formMethod === 'update') {
-    return [`edit${formType}Title`, `edit${formType}Desc`];
+    return `edit${formType}Title`;
   } else {
-    return [`view${formType}Title`, `view${formType}Desc`];
+    return `view${formType}Title`;
   }
 };
 
