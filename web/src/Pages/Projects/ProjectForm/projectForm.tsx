@@ -860,7 +860,18 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('endYearHeader')}</label>}
                     name="endYear"
-                    rules={[validation.required]}
+                    rules={[
+                      validation.required,
+                      ({ getFieldValue }) => ({
+                        // eslint-disable-next-line no-unused-vars
+                        validator(_, value) {
+                          if (!value || getFieldValue('startYear') <= value) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject('Cannot be lower than Start Year!');
+                        },
+                      }),
+                    ]}
                   >
                     <Select
                       size="large"
