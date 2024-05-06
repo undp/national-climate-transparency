@@ -451,7 +451,7 @@ export class ProgrammeService {
 		);
 	}
 
-	async linkProgrammesToAction(linkProgrammesDto: LinkProgrammesDto, user: User, isActionSwap: boolean, em?: EntityManager) {
+	async linkProgrammesToAction(linkProgrammesDto: LinkProgrammesDto, user: User) {
 		const action = await this.actionService.findActionById(linkProgrammesDto.actionId);
 		if (!action) {
 			throw new HttpException(
@@ -487,7 +487,7 @@ export class ProgrammeService {
 					);
 				}
 			}
-			if (programme.action && !isActionSwap) {
+			if (programme.action) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"programme.programmeAlreadyLinked",
@@ -498,9 +498,9 @@ export class ProgrammeService {
 			}
 		}
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, allLinkedProgrammes, user, em? em : this.entityManager);
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, allLinkedProgrammes, user, this.entityManager);
 
-		await this.helperService.refreshMaterializedViews(em? em : this.entityManager);
+		await this.helperService.refreshMaterializedViews(this.entityManager);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -509,7 +509,7 @@ export class ProgrammeService {
 		);
 	}
 
-	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User, em?: EntityManager) {
+	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User) {
 
 		const programmes = await this.findAllProgrammeByIds([unlinkProgrammesDto.programme]);
 
@@ -549,9 +549,9 @@ export class ProgrammeService {
 		}
 
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(programme.action.actionId, programme.programmeId)
-		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programme, unlinkProgrammesDto, allLinkedProgrammes, user, em? em : this.entityManager);
+		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programme, unlinkProgrammesDto, allLinkedProgrammes, user, this.entityManager);
 
-		await this.helperService.refreshMaterializedViews(em? em : this.entityManager);
+		await this.helperService.refreshMaterializedViews(this.entityManager);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
