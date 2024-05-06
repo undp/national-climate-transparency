@@ -806,7 +806,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 isSingleColumn={false}
                 usedIn={method}
                 buttonText={t('upload')}
-                acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
                 storedFiles={storedFiles}
                 uploadedFiles={uploadedFiles}
                 setUploadedFiles={setUploadedFiles}

@@ -653,7 +653,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               isSingleColumn={false}
               usedIn={method}
               buttonText={t('upload')}
-              acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
               storedFiles={storedFiles}
               uploadedFiles={uploadedFiles}
               setUploadedFiles={setUploadedFiles}
@@ -756,7 +755,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     isSingleColumn={true}
                     usedIn={method}
                     buttonText={t('upload')}
-                    acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
                     storedFiles={storedMthFiles}
                     uploadedFiles={uploadedMthFiles}
                     setUploadedFiles={setUploadedMthFiles}
@@ -783,7 +781,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     isSingleColumn={true}
                     usedIn={method}
                     buttonText={t('upload')}
-                    acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
                     storedFiles={storedRstFiles}
                     uploadedFiles={uploadedRstFiles}
                     setUploadedFiles={setUploadedRstFiles}

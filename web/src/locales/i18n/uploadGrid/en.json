@@ -2,6 +2,7 @@
   "primaryMsg": "Are you sure you want to remove this document?",
   "secondaryMsg": "You can’t undo this action",
   "cancelTitle": "cancel",
-  "actionTitle": "remove"
+  "actionTitle": "remove",
+  "fileNotSupported": "File type not supported !"
   }
   
