@@ -223,7 +223,7 @@ export class ProjectService {
 						"project.cannotUpdateNotRelatedProject",
 						[currentProject.projectId]
 					),
-					HttpStatus.BAD_REQUEST
+					HttpStatus.FORBIDDEN
 				);
 			}
 		}
@@ -258,7 +258,7 @@ export class ProjectService {
 		if (projectUpdateDto.newDocuments) {
 			const documents = [];
 			for (const documentItem of projectUpdateDto.newDocuments) {
-				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.ACTION);
+				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.PROJECT);
 				const docEntity = new DocumentEntityDto();
 				docEntity.title = documentItem.title;
 				docEntity.url = response;

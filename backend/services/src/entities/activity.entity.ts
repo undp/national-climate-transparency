@@ -89,4 +89,7 @@ export class ActivityEntity implements EntitySubject {
 
   @OneToMany(() => SupportEntity, (supportEntity) => supportEntity.activity)
   support?: SupportEntity[];
+
+	@Column({ type: "boolean", default: false })
+	validated: boolean;
 }

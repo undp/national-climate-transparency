@@ -8,11 +8,11 @@ import { EntityManager, Repository } from "typeorm";
 import { ActivityService } from "./activity.service";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { Test, TestingModule } from "@nestjs/testing";
-import { ActivityStatus, Measure } from "../enums/activity.enum";
+import { ActivityStatus, ImpleMeans, Measure } from "../enums/activity.enum";
 import { ProgrammeService } from "../programme/programme.service";
 import { ProjectService } from "../project/project.service";
 import { ActionService } from "../action/action.service";
-import { EntityType } from "../enums/shared.enum";
+import { EntityType, IntImplementor, NatImplementor } from "../enums/shared.enum";
 import { DocumentDto } from "../dtos/document.dto";
 import { Sector } from "../enums/sector.enum";
 import { ActivityEntity } from "../entities/activity.entity";
@@ -23,6 +23,8 @@ import { DataResponseMessageDto } from "../dtos/data.response.message";
 import { LinkActivitiesDto } from "../dtos/link.activities.dto";
 import { ActionEntity } from "../entities/action.entity";
 import { ProjectEntity } from "../entities/project.entity";
+import { ActivityUpdateDto } from "../dtos/activityUpdate.dto";
+import { DocumentEntityDto } from "../dtos/document.entity.dto";
 
 describe('ActivityService', () => {
 	let service: ActivityService;
@@ -63,7 +65,13 @@ describe('ActivityService', () => {
 		linkUnlinkServiceMock = {
 			linkActivitiesToParent: jest.fn(),
 			unlinkActivitiesFromParent: jest.fn(),
-		}
+		};
+		programmeServiceMock = {
+			findProgrammeById: jest.fn()
+		};
+		projectServiceMock = {
+			findProjectById: jest.fn()
+		};
 
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
@@ -291,6 +299,444 @@ describe('ActivityService', () => {
 			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 			expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
 			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+		});
+
+	});
+
+	describe('Update Activity', () => {
+		it('should update an activity', async () => {
+			const user = new User();
+			user.id = 2;
+			user.sector = [Sector.CrossCutting, Sector.Energy, Sector.Forestry]
+
+			const documentDto = new DocumentDto();
+			documentDto.data = documentData;
+			documentDto.title = "doc title";
+
+			const currentMitigationMethodologyDoc = new DocumentEntityDto();
+			currentMitigationMethodologyDoc.title = "crr mit 01";
+			currentMitigationMethodologyDoc.url = "www.test.com/crr_mit_01.pdf";
+
+			const currentMitigationMethodologyDocToRemove = new DocumentEntityDto();
+			currentMitigationMethodologyDocToRemove.title = "crr mit remove 01";
+			currentMitigationMethodologyDocToRemove.url = "www.test.com/crr_mit_remove.pdf";
+
+			const currentMitigationResultDoc = new DocumentEntityDto();
+			currentMitigationResultDoc.title = "crr mit res 01";
+			currentMitigationResultDoc.url = "www.test.com/crr_mit_res_01.pdf";
+
+			const currentMitigationResultDocToRemove = new DocumentEntityDto();
+			currentMitigationResultDocToRemove.title = "crr mit res remove 01";
+			currentMitigationResultDocToRemove.url = "www.test.com/crr_mit_res_remove.pdf";
+
+			const currentDoc = new DocumentEntityDto();
+			currentDoc.title = "crr 01";
+			currentDoc.url = "www.test.com/crr_01.pdf";
+
+			const currentDocToRemove = new DocumentEntityDto();
+			currentDocToRemove.title = "crr doc to remove 01";
+			currentDocToRemove.url = "www.test.com/crr_to_remove_01.pdf";
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = "P001";
+			programme.path = "A001";
+			programme.affectedSectors = [Sector.Forestry];
+
+			const activityUpdateDto = new ActivityUpdateDto();
+			activityUpdateDto.title = "test updated";
+			activityUpdateDto.description = "test description updated";
+			activityUpdateDto.parentType = EntityType.PROGRAMME;
+			activityUpdateDto.parentId = "P001"
+			activityUpdateDto.status = ActivityStatus.ONGOING;
+			activityUpdateDto.measure = Measure.WITH_MEASURE;
+			activityUpdateDto.nationalImplementingEntity = [NatImplementor.AGRI_DEPT, NatImplementor.CLIMATE_DEPT]
+			activityUpdateDto.internationalImplementingEntity = [IntImplementor.AFC, IntImplementor.EBRD];
+			activityUpdateDto.anchoredInNationalStrategy = false;
+			activityUpdateDto.meansOfImplementation = ImpleMeans.FINANCE;
+			activityUpdateDto.expectedGHGReduction = 22.25
+			activityUpdateDto.achievedGHGReduction = 100.25
+			activityUpdateDto.removedDocuments = ["www.test.com/crr_to_remove_01.pdf"]
+			activityUpdateDto.newDocuments = [documentDto]
+			activityUpdateDto.mitigationInfo = {
+				mitigationCalcEntity: "ABB updated",
+				mitigationMethodology: "CO2 updated",
+				mitigationMethodologyDescription: "test updated",
+				comments: "test mitigation comments updated",
+				methodologyDocuments: [currentMitigationMethodologyDoc],
+				resultDocuments: [currentMitigationResultDoc]
+			}
+
+			const activity = new ActivityEntity();
+			activity.title = "test";
+			activity.description = "test description";
+			activity.parentType = EntityType.PROJECT;
+			activity.parentId = "J001"
+			activity.status = ActivityStatus.PLANNED;
+			activity.measure = Measure.WITHOUT_MEASURES;
+			activity.nationalImplementingEntity = [NatImplementor.CLIMATE_DEPT]
+			activity.internationalImplementingEntity = [IntImplementor.IUCN];
+			activity.anchoredInNationalStrategy = true;
+			activity.meansOfImplementation = ImpleMeans.NONE;
+			activity.expectedGHGReduction = 10.25
+			activity.achievedGHGReduction = 10
+			activity.documents = [currentDoc, currentDocToRemove];
+			activity.mitigationInfo = {
+				mitigationCalcEntity: "ABB",
+				mitigationMethodology: "CO2",
+				mitigationMethodologyDescription: "test",
+				comments: "test mitigation comments",
+				methodologyDocuments: [currentMitigationMethodologyDoc, currentMitigationMethodologyDocToRemove],
+				resultDocuments: [currentMitigationResultDoc, currentMitigationResultDocToRemove]
+			}
+			activity.sectors = [Sector.Energy];
+			activity.path = "_._.J001";
+
+			const activityUpdated = {
+				title: "test updated",
+				description: "test description updated",
+				parentType: EntityType.PROGRAMME,
+				parentId: "P001",
+				status: ActivityStatus.ONGOING,
+				measure: Measure.WITH_MEASURE,
+				nationalImplementingEntity: [NatImplementor.AGRI_DEPT, NatImplementor.CLIMATE_DEPT],
+				internationalImplementingEntity: [IntImplementor.AFC, IntImplementor.EBRD],
+				anchoredInNationalStrategy: false,
+				meansOfImplementation: ImpleMeans.FINANCE,
+				expectedGHGReduction: 22.25,
+				achievedGHGReduction: 100.25,
+				documents: [
+					currentDoc,
+					expect.objectContaining({
+						createdTime: expect.any(Number), // Ignore the createdTime field
+						title: "doc title",
+						url: "http://test.com/documents/action_documents/test.csv",
+					})
+				],
+				newDocuments: [
+					{
+						"data": "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm=",
+						"title": "doc title",
+					}
+				],
+				removedDocuments: ["www.test.com/crr_to_remove_01.pdf"],
+				mitigationInfo: {
+					mitigationCalcEntity: "ABB updated",
+					mitigationMethodology: "CO2 updated",
+					mitigationMethodologyDescription: "test updated",
+					comments: "test mitigation comments updated",
+				methodologyDocuments: [
+					{
+            createdTime: undefined,
+            title: "crr mit 01",
+            updatedTime: undefined,
+            url: "www.test.com/crr_mit_01.pdf",
+          }, 
+				],
+				resultDocuments: [
+					{
+            createdTime: undefined,
+            title: "crr mit res 01",
+            updatedTime: undefined,
+            url: "www.test.com/crr_mit_res_01.pdf",
+          }, 
+				]
+				},
+				path: "A001.P001._",
+				sectors: [Sector.Forestry]
+			};
+
+			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
+			jest.spyOn(programmeServiceMock, "findProgrammeById").mockResolvedValueOnce(programme);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(activityUpdated),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.save).toHaveBeenNthCalledWith(1, activityUpdated);
+				expect(emMock.save).toHaveBeenCalledTimes(5);
+				return savedAction;
+			});
+
+			const result = await service.updateActivity(activityUpdateDto, user);
+
+			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+			expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
+			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+		});
+
+
+		it('should throw an error when activity is not found', async () => {
+			const user = new User();
+			user.id = 2;
+			user.sector = [Sector.CrossCutting, Sector.Energy, Sector.Forestry]
+
+			const activityUpdateDto = new ActivityUpdateDto();
+			activityUpdateDto.activityId = "T0001"
+			activityUpdateDto.title = "test updated";
+			activityUpdateDto.description = "test description updated";
+			activityUpdateDto.parentType = EntityType.PROGRAMME;
+			activityUpdateDto.parentId = "P001"
+			activityUpdateDto.status = ActivityStatus.ONGOING;
+			activityUpdateDto.measure = Measure.WITH_MEASURE;
+			activityUpdateDto.nationalImplementingEntity = [NatImplementor.AGRI_DEPT, NatImplementor.CLIMATE_DEPT]
+			activityUpdateDto.internationalImplementingEntity = [IntImplementor.AFC, IntImplementor.EBRD];
+			activityUpdateDto.anchoredInNationalStrategy = false;
+			activityUpdateDto.meansOfImplementation = ImpleMeans.FINANCE;
+			activityUpdateDto.expectedGHGReduction = 22.25
+			activityUpdateDto.achievedGHGReduction = 100.25
+			activityUpdateDto.mitigationInfo = {
+				mitigationCalcEntity: "ABB updated",
+				mitigationMethodology: "CO2 updated",
+				mitigationMethodologyDescription: "test updated",
+				comments: "test mitigation comments updated",
+			}
+
+			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(new ActionEntity()),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.save).toHaveBeenCalledTimes(0);
+				return savedAction;
+			});
+
+			try {
+				const result = await service.updateActivity(activityUpdateDto, user);
+			} catch (error) {
+				expect(error).toBeInstanceOf(HttpException);
+				expect(error.status).toBe(HttpStatus.BAD_REQUEST);
+			}
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.activityNotFound", ["T0001"]);
+			
+			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(0);
+			expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
+		});
+
+		it('should throw an error when user dont have permission to the activity', async () => {
+			const user = new User();
+			user.id = 2;
+			user.sector = [Sector.Agriculture]
+
+			const activityUpdateDto = new ActivityUpdateDto();
+			activityUpdateDto.activityId = "T0001"
+			activityUpdateDto.title = "test updated";
+			activityUpdateDto.description = "test description updated";
+			activityUpdateDto.parentType = EntityType.PROGRAMME;
+			activityUpdateDto.parentId = "P001"
+			activityUpdateDto.status = ActivityStatus.ONGOING;
+			activityUpdateDto.measure = Measure.WITH_MEASURE;
+			activityUpdateDto.nationalImplementingEntity = [NatImplementor.AGRI_DEPT, NatImplementor.CLIMATE_DEPT]
+			activityUpdateDto.internationalImplementingEntity = [IntImplementor.AFC, IntImplementor.EBRD];
+			activityUpdateDto.anchoredInNationalStrategy = false;
+			activityUpdateDto.meansOfImplementation = ImpleMeans.FINANCE;
+			activityUpdateDto.expectedGHGReduction = 22.25
+			activityUpdateDto.achievedGHGReduction = 100.25
+			activityUpdateDto.mitigationInfo = {
+				mitigationCalcEntity: "ABB updated",
+				mitigationMethodology: "CO2 updated",
+				mitigationMethodologyDescription: "test updated",
+				comments: "test mitigation comments updated",
+			}
+
+			const activity = new ActivityEntity();
+			activity.activityId = "T0001"
+			activity.title = "test";
+			activity.description = "test description";
+			activity.parentType = EntityType.PROJECT;
+			activity.parentId = "J001"
+			activity.status = ActivityStatus.PLANNED;
+			activity.measure = Measure.WITHOUT_MEASURES;
+			activity.nationalImplementingEntity = [NatImplementor.CLIMATE_DEPT]
+			activity.internationalImplementingEntity = [IntImplementor.IUCN];
+			activity.anchoredInNationalStrategy = true;
+			activity.meansOfImplementation = ImpleMeans.NONE;
+			activity.expectedGHGReduction = 10.25
+			activity.achievedGHGReduction = 10
+			activity.mitigationInfo = {
+				mitigationCalcEntity: "ABB",
+				mitigationMethodology: "CO2",
+				mitigationMethodologyDescription: "test",
+				comments: "test mitigation comments",
+			}
+			activity.sectors = [Sector.Energy];
+			activity.path = "_._.J001";
+
+			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(new ActionEntity()),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.save).toHaveBeenCalledTimes(0);
+				return savedAction;
+			});
+
+			try {
+				await service.updateActivity(activityUpdateDto, user);
+			} catch (error) {
+				expect(error).toBeInstanceOf(HttpException);
+				expect(error.status).toBe(HttpStatus.FORBIDDEN);
+			}
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.cannotUpdateNotRelatedActivity", ["T0001"]);
+			
+			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(0);
+			expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
+		});
+
+		it('should throw an error when parent is not found', async () => {
+			const user = new User();
+			user.id = 2;
+			user.sector = [Sector.CrossCutting, Sector.Energy, Sector.Forestry]
+
+			const activityUpdateDto = new ActivityUpdateDto();
+			activityUpdateDto.activityId = "T0001"
+			activityUpdateDto.title = "test updated";
+			activityUpdateDto.description = "test description updated";
+			activityUpdateDto.parentType = EntityType.PROGRAMME;
+			activityUpdateDto.parentId = "P001"
+			activityUpdateDto.status = ActivityStatus.ONGOING;
+			activityUpdateDto.measure = Measure.WITH_MEASURE;
+			activityUpdateDto.nationalImplementingEntity = [NatImplementor.AGRI_DEPT, NatImplementor.CLIMATE_DEPT]
+			activityUpdateDto.internationalImplementingEntity = [IntImplementor.AFC, IntImplementor.EBRD];
+			activityUpdateDto.anchoredInNationalStrategy = false;
+			activityUpdateDto.meansOfImplementation = ImpleMeans.FINANCE;
+			activityUpdateDto.expectedGHGReduction = 22.25
+			activityUpdateDto.achievedGHGReduction = 100.25
+			activityUpdateDto.mitigationInfo = {
+				mitigationCalcEntity: "ABB updated",
+				mitigationMethodology: "CO2 updated",
+				mitigationMethodologyDescription: "test updated",
+				comments: "test mitigation comments updated",
+			}
+
+			const activity = new ActivityEntity();
+			activity.title = "test";
+			activity.description = "test description";
+			activity.parentType = EntityType.PROJECT;
+			activity.parentId = "J001"
+			activity.status = ActivityStatus.PLANNED;
+			activity.measure = Measure.WITHOUT_MEASURES;
+			activity.nationalImplementingEntity = [NatImplementor.CLIMATE_DEPT]
+			activity.internationalImplementingEntity = [IntImplementor.IUCN];
+			activity.anchoredInNationalStrategy = true;
+			activity.meansOfImplementation = ImpleMeans.NONE;
+			activity.expectedGHGReduction = 10.25
+			activity.achievedGHGReduction = 10
+			activity.mitigationInfo = {
+				mitigationCalcEntity: "ABB",
+				mitigationMethodology: "CO2",
+				mitigationMethodologyDescription: "test",
+				comments: "test mitigation comments",
+			}
+			activity.sectors = [Sector.Energy];
+			activity.path = "_._.J001";
+
+			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
+			jest.spyOn(programmeServiceMock, "findProgrammeById").mockResolvedValueOnce(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(new ActionEntity()),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.save).toHaveBeenCalledTimes(0);
+				return savedAction;
+			});
+
+			try {
+				const result = await service.updateActivity(activityUpdateDto, user);
+			} catch (error) {
+				expect(error).toBeInstanceOf(HttpException);
+				expect(error.status).toBe(HttpStatus.BAD_REQUEST);
+			}
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.programmeNotFound", ["P001"]);
+			
+			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(0);
+			expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
+		});
+
+		it('should throw an error when user do not have permission to parent', async () => {
+			const user = new User();
+			user.id = 2;
+			user.sector = [Sector.CrossCutting, Sector.Energy, Sector.Forestry]
+
+			const project = new ProjectEntity();
+			project.projectId = "J002";
+			project.sectors = [Sector.LandUse];
+
+			const activityUpdateDto = new ActivityUpdateDto();
+			activityUpdateDto.activityId = "T0001"
+			activityUpdateDto.title = "test updated";
+			activityUpdateDto.description = "test description updated";
+			activityUpdateDto.parentType = EntityType.PROJECT;
+			activityUpdateDto.parentId = "J002"
+			activityUpdateDto.status = ActivityStatus.ONGOING;
+			activityUpdateDto.measure = Measure.WITH_MEASURE;
+			activityUpdateDto.nationalImplementingEntity = [NatImplementor.AGRI_DEPT, NatImplementor.CLIMATE_DEPT]
+			activityUpdateDto.internationalImplementingEntity = [IntImplementor.AFC, IntImplementor.EBRD];
+			activityUpdateDto.anchoredInNationalStrategy = false;
+			activityUpdateDto.meansOfImplementation = ImpleMeans.FINANCE;
+			activityUpdateDto.expectedGHGReduction = 22.25
+			activityUpdateDto.achievedGHGReduction = 100.25
+			activityUpdateDto.mitigationInfo = {
+				mitigationCalcEntity: "ABB updated",
+				mitigationMethodology: "CO2 updated",
+				mitigationMethodologyDescription: "test updated",
+				comments: "test mitigation comments updated",
+			}
+
+			const activity = new ActivityEntity();
+			activity.title = "test";
+			activity.description = "test description";
+			activity.parentType = EntityType.PROJECT;
+			activity.parentId = "J001"
+			activity.status = ActivityStatus.PLANNED;
+			activity.measure = Measure.WITHOUT_MEASURES;
+			activity.nationalImplementingEntity = [NatImplementor.CLIMATE_DEPT]
+			activity.internationalImplementingEntity = [IntImplementor.IUCN];
+			activity.anchoredInNationalStrategy = true;
+			activity.meansOfImplementation = ImpleMeans.NONE;
+			activity.expectedGHGReduction = 10.25
+			activity.achievedGHGReduction = 10
+			activity.mitigationInfo = {
+				mitigationCalcEntity: "ABB",
+				mitigationMethodology: "CO2",
+				mitigationMethodologyDescription: "test",
+				comments: "test mitigation comments",
+			}
+			activity.sectors = [Sector.Energy];
+			activity.path = "_._.J001";
+
+			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
+			jest.spyOn(projectServiceMock, "findProjectById").mockResolvedValueOnce(project);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(new ActionEntity()),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.save).toHaveBeenCalledTimes(0);
+				return savedAction;
+			});
+
+			try {
+				const result = await service.updateActivity(activityUpdateDto, user);
+			} catch (error) {
+				expect(error).toBeInstanceOf(HttpException);
+				expect(error.status).toBe(HttpStatus.FORBIDDEN);
+			}
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.cannotLinkToNotRelatedProject", ["J002"]);
+			
+			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(0);
+			expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
 		});
 
 	});

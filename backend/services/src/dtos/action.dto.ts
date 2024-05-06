@@ -92,7 +92,7 @@ export class ActionDto {
 			type: "array",
 			example: [{
 				name: "KPI 1",
-				kpiUnits: KpiUnits.GWp_INSTALLED,
+				kpiUnit: KpiUnits.GWp_INSTALLED,
 				creatorType: "action",
 				expected: 100
 			}],

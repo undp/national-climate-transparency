@@ -61,7 +61,7 @@ export class ActionController {
 	
 	@ApiBearerAuth('api_key')
 	@ApiBearerAuth()
-	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ActionEntity))
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, ActionEntity))
 	@Post("validate")
 	validateActions(@Body() validateDto: ValidateDto, @Request() req) {
 			return this.actionService.validateAction(validateDto, req.user);

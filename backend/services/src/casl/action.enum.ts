@@ -6,4 +6,5 @@ export enum Action {
     Delete = 'delete',
     Approve = 'approve',
     Reject = 'reject',
+		Validate = 'validate',
 }
