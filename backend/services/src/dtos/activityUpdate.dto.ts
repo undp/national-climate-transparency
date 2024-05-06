@@ -152,14 +152,30 @@ export class ActivityUpdateDto {
 			mitigationMethodologyDescription: "test",
 			mitigationCalcEntity: "ABB",
 			comments: "test mitigation comments",
-			methodologyDocuments: [{
-				title: "mitigation document 1",
-				data: "base64 document string"
-			}],
-			resultDocuments: [{
-				title: "result document 1",
-				data: "base64 document string"
-			}]
+			methodologyDocuments: [
+				{
+					title: "added mitigation document ",
+					data: "base64 document string"
+				},
+				{
+					createdTime: 12556988775,
+					title: "existing document",
+					updatedTime: undefined,
+					url: "www.test.com/documents/activity_documents/crr_mit_01.pdf",
+				}
+			],
+			resultDocuments: [
+				{
+					title: "added result document ",
+					data: "base64 document string"
+				},
+				{
+					createdTime: 12556988775,
+					title: "existing document",
+					updatedTime: undefined,
+					url: "www.test.com/documents/activity_documents/crr_rep_01.pdf",
+				}
+			]
 		},
 	})
 	mitigationInfo: any;
