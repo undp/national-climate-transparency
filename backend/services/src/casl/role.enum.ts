@@ -1,8 +1,8 @@
 export enum Role {
+	Observer = 'Observer',
+	GovernmentUser = 'GovernmentUser',
+	Admin = 'Admin',
     Root = 'Root',
-    Admin = 'Admin',
-    GovernmentUser = 'GovernmentUser',
-    Observer = 'Observer',
 }
 
 export enum SubRole {

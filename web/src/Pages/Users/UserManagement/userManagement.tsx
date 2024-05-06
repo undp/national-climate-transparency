@@ -292,10 +292,10 @@ const UserManagement = () => {
       dataIndex: 'name',
       key: UserManagementColumns.name,
       sorter: true,
-      width: 120,
+      align: 'left' as const,
       render: (item: any) => {
         return (
-          <div style={{ display: 'flex', alignItems: 'center', marginLeft: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{ fontWeight: 600 }}>{item}</div>
           </div>
         );
@@ -378,7 +378,7 @@ const UserManagement = () => {
   const getAllUsers = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize };
+      const payload: any = { page: currentPage, size: pageSize + 1 };
 
       // Adding Sort By Conditions
 
