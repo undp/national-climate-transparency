@@ -79,7 +79,7 @@ const activityList = () => {
   const getAllData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize };
+      const payload: any = { page: currentPage, size: pageSize + 1 };
 
       // Adding Sort By Conditions
 
