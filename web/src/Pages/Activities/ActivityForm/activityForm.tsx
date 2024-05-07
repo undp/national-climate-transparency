@@ -58,6 +58,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // Parent Selection State
 
   const [parentType, setParentType] = useState<string>();
+  const [connectedParentId, setConnectedParentId] = useState<string>();
   const [parentList, setParentList] = useState<ParentData[]>([]);
 
   // form state
@@ -118,28 +119,65 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   const handleParentIdSelect = (id: string) => {
-    form.setFieldsValue({
-      parentDescription: parentList.find((obj) => obj.id === id)?.desc,
-    });
+    setConnectedParentId(id);
   };
 
   // Tracking Parent selection
 
   const handleSelectChange = (value: string) => {
     setParentType(value);
+    setConnectedParentId(undefined);
     form.setFieldsValue({
       parentId: '',
       parentDescription: '',
     });
   };
 
-  const getConnectedParentData = async (
-    parent: 'action' | 'programme' | 'project',
-    parentId: string
-  ) => {
-    const response: any = await get(`national/${parent}s/${parentId}`);
-    return { title: response.data.title, desc: response.data.description };
-  };
+  useEffect(() => {
+    const fetchConnectedParent = async () => {
+      const tempMigratedData: ActivityMigratedData = {
+        description: undefined,
+        type: undefined,
+        recipient: undefined,
+        affSectors: undefined,
+        affSubSectors: undefined,
+        startYear: undefined,
+        endYear: undefined,
+        expectedTimeFrame: undefined,
+      };
+
+      if (
+        (parentType === 'action' || parentType === 'programme' || parentType === 'project') &&
+        connectedParentId
+      ) {
+        const response: any = await get(`national/${parentType}s/${connectedParentId}`);
+
+        if (parentType === 'action') {
+          tempMigratedData.description = response.data.description;
+          tempMigratedData.affSectors = response.data.migratedData?.sectorsAffected ?? [];
+          tempMigratedData.startYear = response.data.startYear;
+        } else if (parentType === 'programme') {
+          tempMigratedData.description = response.data.description;
+          tempMigratedData.recipient = response.data.recipientEntity;
+          tempMigratedData.affSectors = response.data.affectedSectors;
+          tempMigratedData.affSubSectors = response.data.affectedSubSector;
+          tempMigratedData.startYear = response.data.startYear;
+        } else {
+          tempMigratedData.description = response.data.description;
+          tempMigratedData.recipient = response.data.recipientEntities;
+          tempMigratedData.affSectors = response.data.programme?.affectedSectors ?? [];
+          tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
+          tempMigratedData.startYear = response.data.startYear;
+          tempMigratedData.type = response.data.type;
+          tempMigratedData.endYear = response.data.endYear;
+          tempMigratedData.expectedTimeFrame = response.data.expectedTimeFrame;
+        }
+      }
+      setActivityMigratedData(tempMigratedData);
+    };
+
+    fetchConnectedParent();
+  }, [connectedParentId]);
 
   useEffect(() => {
     const fetchAvailableParents = async () => {
@@ -164,7 +202,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 ? parent.programmeId
                 : parent.projectId,
             title: parent.title,
-            desc: parent.description,
           });
         });
         setParentList(tempParentData);
@@ -172,6 +209,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchAvailableParents();
   }, [parentType]);
+
+  // Initializing Section
 
   useEffect(() => {
     // Initially Loading the underlying Activity data when not in create mode
@@ -202,7 +241,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               expectedGHGReduction: entityData.expectedGHGReduction,
             });
 
-            console.log('Came here 1');
             // Populating Mitigation data fields
             form.setFieldsValue({
               mtgMethodName: entityData.mitigationInfo?.mitigationMethodology ?? undefined,
@@ -212,18 +250,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               mtgComments: entityData.mitigationInfo?.comments ?? undefined,
             });
 
-            console.log('Came here 2');
             // Parent Data Update
 
             if (entityData.parentType) {
-              const parentData = await getConnectedParentData(
-                entityData.parentType,
-                entityData.parentId
-              );
               form.setFieldsValue({
                 parentType: entityData.parentType,
                 parentId: entityData.parentId,
-                parentDescription: parentData.desc,
               });
               setParentType(entityData.parentType ?? '');
             }
@@ -246,8 +278,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               setStoredFiles(tempFiles);
             }
 
-            console.log('Came here 3');
-
             if (entityData.mitigationInfo?.methodologyDocuments?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
               entityData.mitigationInfo?.methodologyDocuments.forEach((document: any) => {
@@ -260,8 +290,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               setStoredMthFiles(tempFiles);
             }
 
-            console.log('Came here 4');
-
             if (entityData.mitigationInfo?.resultDocuments?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
               entityData.mitigationInfo?.resultDocuments.forEach((document: any) => {
@@ -273,17 +301,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               });
               setStoredRstFiles(tempFiles);
             }
-
-            // Populating Migrated Fields (Will be overwritten when attachments change)
-            setActivityMigratedData({
-              type: entityData.migratedData?.type ?? '',
-              recipient: entityData.migratedData?.recipientEntities ?? [],
-              affSectors: entityData.migratedData?.sectors ?? [],
-              affSubSectors: entityData.migratedData?.subSectors ?? [],
-              startYear: entityData.migratedData?.startYear ?? undefined,
-              endYear: entityData.migratedData?.endYear ?? undefined,
-              expectedTimeFrame: entityData.migratedData?.expectedTimeFrame ?? undefined,
-            });
           }
         } catch {
           navigate('/activities');
@@ -298,7 +315,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchData();
 
-    // Uncomment this after endpoint creation
     const fetchSupportData = async () => {
       try {
         const payload = {
@@ -364,6 +380,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   useEffect(() => {
     if (activityMigratedData) {
       form.setFieldsValue({
+        parentDescription: activityMigratedData.description,
         supportType: activityMigratedData.type,
         recipient: activityMigratedData.recipient,
         affSectors: activityMigratedData.affSectors,
@@ -769,17 +786,29 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
                     name="affSectors"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      mode="multiple"
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      disabled
+                    ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
-                  <Form.Item
-                    label={<label className="form-item-header">{t('affSubSectorsTitle')}</label>}
-                    name="affSubSectors"
-                  >
-                    <Input className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
+                {(parentType === 'programme' || parentType === 'project') && (
+                  <Col span={6}>
+                    <Form.Item
+                      label={<label className="form-item-header">{t('affSubSectorsTitle')}</label>}
+                      name="affSubSectors"
+                    >
+                      <Select
+                        mode="multiple"
+                        size="large"
+                        style={{ fontSize: inputFontSize }}
+                        disabled
+                      ></Select>
+                    </Form.Item>
+                  </Col>
+                )}
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('startYearTitle')}</label>}
@@ -808,7 +837,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       }
                       name="recipient"
                     >
-                      <Input className="form-input-box" disabled />
+                      <Select
+                        mode="multiple"
+                        size="large"
+                        style={{ fontSize: inputFontSize }}
+                        disabled
+                      ></Select>
                     </Form.Item>
                   </Col>
                 )}

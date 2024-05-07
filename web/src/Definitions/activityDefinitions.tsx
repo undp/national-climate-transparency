@@ -12,15 +12,15 @@ export type ActivityData = {
 export type ParentData = {
   id: string;
   title: string;
-  desc: string;
 };
 
 export type ActivityMigratedData = {
-  type: string;
-  recipient: string[];
-  affSectors: string[];
-  affSubSectors: string[];
-  startYear: number;
-  endYear: number;
-  expectedTimeFrame: number;
+  description: string | undefined;
+  type: string | undefined;
+  recipient: string[] | undefined;
+  affSectors: string[] | undefined;
+  affSubSectors: string[] | undefined;
+  startYear: number | undefined;
+  endYear: number | undefined;
+  expectedTimeFrame: number | undefined;
 };
