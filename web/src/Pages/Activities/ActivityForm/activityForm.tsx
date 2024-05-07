@@ -209,6 +209,17 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               expectedGHGReduction: entityData.expectedGHGReduction,
             });
 
+            console.log('Came here 1');
+            // Populating Mitigation data fields
+            form.setFieldsValue({
+              mtgMethodName: entityData.mitigationInfo?.mitigationMethodology ?? undefined,
+              mtgMethodDesc:
+                entityData.mitigationInfo?.mitigationMethodologyDescription ?? undefined,
+              mtgCalculateEntity: entityData.mitigationInfo?.mitigationCalcEntity ?? undefined,
+              mtgComments: entityData.mitigationInfo?.comments ?? undefined,
+            });
+
+            console.log('Came here 2');
             // Parent Data Update
 
             if (entityData.parentType) {
@@ -240,6 +251,34 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 });
               });
               setStoredFiles(tempFiles);
+            }
+
+            console.log('Came here 3');
+
+            if (entityData.mitigationInfo?.methodologyDocuments?.length > 0) {
+              const tempFiles: { key: string; title: string; url: string }[] = [];
+              entityData.mitigationInfo?.methodologyDocuments.forEach((document: any) => {
+                tempFiles.push({
+                  key: document.createdTime,
+                  title: document.title,
+                  url: document.url,
+                });
+              });
+              setStoredMthFiles(tempFiles);
+            }
+
+            console.log('Came here 4');
+
+            if (entityData.mitigationInfo?.resultDocuments?.length > 0) {
+              const tempFiles: { key: string; title: string; url: string }[] = [];
+              entityData.mitigationInfo?.resultDocuments.forEach((document: any) => {
+                tempFiles.push({
+                  key: document.createdTime,
+                  title: document.title,
+                  url: document.url,
+                });
+              });
+              setStoredRstFiles(tempFiles);
             }
 
             // Populating Migrated Fields (Will be overwritten when attachments change)
@@ -343,18 +382,25 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         payload.documents.push({ title: file.title, data: file.data });
       });
 
-      payload.mth_documents = [];
-      uploadedMthFiles.forEach((file) => {
-        payload.mth_documents.push({ title: file.title, data: file.data });
-      });
-
-      payload.rst_documents = [];
-      uploadedRstFiles.forEach((file) => {
-        payload.rst_documents.push({ title: file.title, data: file.data });
-      });
-
       payload.achievedGHGReduction = parseFloat(payload.achievedGHGReduction);
       payload.expectedGHGReduction = parseFloat(payload.expectedGHGReduction);
+
+      payload.mitigationInfo = {
+        mitigationMethodology: payload.mtgMethodName,
+        mitigationMethodologyDescription: payload.mtgMethodDesc,
+        mitigationCalcEntity: payload.mtgCalculateEntity,
+        comments: payload.mtgComments,
+        methodologyDocuments: [],
+        resultDocuments: [],
+      };
+
+      uploadedMthFiles.forEach((file) => {
+        payload.mitigationInfo.methodologyDocuments.push({ title: file.title, data: file.data });
+      });
+
+      uploadedRstFiles.forEach((file) => {
+        payload.mitigationInfo.resultDocuments.push({ title: file.title, data: file.data });
+      });
 
       const response = await post('national/activities/add', payload);
       if (response.status === 200 || response.status === 201) {
@@ -579,7 +625,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('measuresTitle')}</label>}
-                  name="measures"
+                  name="measure"
                 >
                   <Select
                     size="large"
@@ -837,7 +883,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 form={form}
                 rules={[validation.required]}
                 index={index}
-                calledTo={'add_ach'}
+                calledTo={isView ? 'view' : 'add_ach'}
                 gutterSize={gutterSize}
                 headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
               ></KpiGrid>
