@@ -25,6 +25,8 @@ import { EntityManager, Repository } from "typeorm";
 import { LinkActivitiesDto } from "src/dtos/link.activities.dto";
 import { ProjectEntity } from "src/entities/project.entity";
 import { UnlinkActivitiesDto } from "src/dtos/unlink.activities.dto";
+import { mitigationTimelineDto } from "src/dtos/mitigationTimeline.dto";
+import { ResponseMessageDto } from "src/dtos/response.message";
 
 @Injectable()
 export class ActivityService {
@@ -37,7 +39,8 @@ export class ActivityService {
 		private linkUnlinkService: LinkUnlinkService,
 		private projectService: ProjectService,
 		private programmeService: ProgrammeService,
-		private actionService: ActionService
+		private actionService: ActionService,
+		private payloadValidator: PayloadValidator,
 	) { }
 
 	async createActivity(activityDto: ActivityDto, user: User) {
@@ -59,7 +62,7 @@ export class ActivityService {
 				}
 				case EntityType.PROGRAMME: {
 					const programme = await this.isProgrammeValid(activityDto.parentId);
-					activity.path = programme.path ? `${programme.path}.${activityDto.parentId}._`: `_.${activityDto.parentId}._`;
+					activity.path = programme.path ? `${programme.path}.${activityDto.parentId}._` : `_.${activityDto.parentId}._`;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROGRAMME, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
 					break;
@@ -88,6 +91,9 @@ export class ActivityService {
 			activity.mitigationInfo.resultDocuments = await this.uploadDocuments(activityDto.mitigationInfo.resultDocuments);
 		}
 
+		if (activityDto.mitigationTimeline) {
+			  this.payloadValidator.validateMitigationTimelinePayload(activityDto);
+		}
 
 		const activ = await this.entityManager
 			.transaction(async (em) => {
@@ -175,12 +181,12 @@ export class ActivityService {
 	}
 
 	async findActivitiesEligibleForLinking() {
-    return await this.activityRepo.createQueryBuilder('activity')
-        .select(['"activityId"', 'title'])
-        .where('activity.parentType IS NULL AND activity.parentId IS NULL')
-        .orderBy('activity.activityId', 'ASC') 
-        .getRawMany();
-}
+		return await this.activityRepo.createQueryBuilder('activity')
+			.select(['"activityId"', 'title'])
+			.where('activity.parentType IS NULL AND activity.parentId IS NULL')
+			.orderBy('activity.activityId', 'ASC')
+			.getRawMany();
+	}
 
 	async linkActivitiesToParent(linkActivitiesDto: LinkActivitiesDto, user: User) {
 		let parentEntity: any;
@@ -265,7 +271,7 @@ export class ActivityService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
-			
+
 			if (user.sector && user.sector.length > 0) {
 				const commonSectors = activity.sectors.filter(sector => user.sector.includes(sector));
 				if (commonSectors.length === 0) {
@@ -329,4 +335,37 @@ export class ActivityService {
 		return log;
 	}
 
+	async findActivityById(activityId: string) {
+		return await this.activityRepo.findOneBy({
+			activityId
+		})
+	}
+
+	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto) {
+		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto);
+		const { activityId, mitigationTimeline } = mitigationTimelineDto;
+		const activity = await this.findActivityById(activityId);
+
+		if (!activity) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.activityNotFound",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		await this.activityRepo
+      	.createQueryBuilder()
+      	.update(ActivityEntity)
+      	.set({ mitigationTimeline })
+      	.where('activityId = :activityId', { activityId })
+      	.execute();
+
+		  return new ResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("activity.mitigationTimelineUpdate", []),
+		);
+	}
 }

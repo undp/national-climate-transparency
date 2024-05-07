@@ -6,6 +6,8 @@
     "projectNotFound": "A project with id {} is not found",
     "activityAlreadyLinked": "Activity with id {} is already attached",
     "activitiesNotFound": "Activities not found",
+    "activityNotFound": "Activity not found",
+    "mitigationTimelineUpdate": "Activity Mitigation Timeline updated successfully",
     "activitiesLinked": "Activities attached successfully",
     "activityIsNotLinked": "Activity with id {} is not attached",
     "activitiesUnlinked": "Activities detached successfully",
