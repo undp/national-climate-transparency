@@ -666,14 +666,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('recipientEntityTitle')}</label>}
-                  name="recipient"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
                   label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
                   name="nationalImplementingEntity"
                 >
@@ -693,8 +685,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Select>
                 </Form.Item>
               </Col>
-            </Row>
-            <Row gutter={gutterSize}>
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
@@ -716,6 +706,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Select>
                 </Form.Item>
               </Col>
+            </Row>
+            <Row gutter={gutterSize}>
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
@@ -732,8 +724,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Input className="form-input-box" disabled />
                 </Form.Item>
               </Col>
-            </Row>
-            <Row gutter={gutterSize}>
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('startYearTitle')}</label>}
@@ -742,22 +732,38 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Input className="form-input-box" disabled />
                 </Form.Item>
               </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('endYearTitle')}</label>}
-                  name="endYear"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('timeFrameTitle')}</label>}
-                  name="expectedTimeFrame"
-                >
-                  <Input className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
+              {parentType === 'project' && (
+                <Col span={6}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('endYearTitle')}</label>}
+                    name="endYear"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+              )}
+            </Row>
+            <Row gutter={gutterSize}>
+              {(parentType === 'programme' || parentType === 'project') && (
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('recipientEntityTitle')}</label>}
+                    name="recipient"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+              )}
+              {parentType === 'project' && (
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('timeFrameTitle')}</label>}
+                    name="expectedTimeFrame"
+                  >
+                    <Input className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
             <Row gutter={gutterSize}>
               <Col span={12}>
