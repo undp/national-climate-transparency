@@ -16,6 +16,7 @@ export type ParentData = {
 };
 
 export type ActivityMigratedData = {
+  type: string;
   recipient: string[];
   affSectors: string[];
   affSubSectors: string[];
