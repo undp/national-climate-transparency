@@ -25,7 +25,7 @@ import {
 import { IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { SupportData } from '../../../Definitions/supportDefinitions';
-import { ParentData } from '../../../Definitions/activityDefinitions';
+import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { getFormTitle } from '../../../Utils/utilServices';
@@ -49,7 +49,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const formTitle = getFormTitle('Activity', method);
 
   const navigate = useNavigate();
-  const { post } = useConnection();
+  const { get, post, put } = useConnection();
   const ability = useAbilityContext();
   const { entId } = useParams();
 
@@ -61,13 +61,23 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
 
+  // Parent Selection State
+
+  const [parentType, setParentType] = useState<string>();
+  const [parentList, setParentList] = useState<ParentData[]>([]);
+
   // form state
 
+  const [activityMigratedData, setActivityMigratedData] = useState<ActivityMigratedData>();
   const [uploadedFiles, setUploadedFiles] = useState<
     { key: string; title: string; data: string }[]
   >([]);
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
+
+  // Spinner When Form Submit Occurs
+
+  const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 
   // Methodology Doc state
 
@@ -88,11 +98,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     { key: string; title: string; url: string }[]
   >([]);
   const [rstFilesToRemove, setRstFilesToRemove] = useState<string[]>([]);
-
-  // Parent Selection State
-
-  const [parentType, setParentType] = useState<string>();
-  const [parentList, setParentList] = useState<ParentData[]>([]);
 
   // Support state
 
@@ -118,21 +123,149 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     yearsList.push(year);
   }
 
+  const handleParentIdSelect = (id: string) => {
+    form.setFieldsValue({
+      parentDescription: parentList.find((obj) => obj.id === id)?.desc,
+    });
+  };
+
+  // Tracking Parent selection
+
+  const handleSelectChange = (value: string) => {
+    setParentType(value);
+    form.setFieldsValue({
+      parentId: '',
+      parentDescription: '',
+    });
+  };
+
+  const getConnectedParentData = async (
+    parent: 'action' | 'programme' | 'project',
+    parentId: string
+  ) => {
+    const response: any = await get(`national/${parent}s/${parentId}`);
+    return { title: response.data.title, desc: response.data.description };
+  };
+
   useEffect(() => {
-    if (method !== 'create') {
-      const tempFiles: { key: string; title: string; url: string }[] = [];
-      for (let i = 0; i < 6; i++) {
-        tempFiles.push({ key: `${i}`, title: `title_${i}.pdf`, url: `url_${i}` });
+    const fetchAvailableParents = async () => {
+      if (parentType === 'action' || parentType === 'programme' || parentType === 'project') {
+        const payload = {
+          page: 1,
+          size: 100,
+          sort: {
+            key: `${parentType}Id`,
+            order: 'ASC',
+          },
+        };
+        const response: any = await post(`national/${parentType}s/query`, payload);
+
+        const tempParentData: ParentData[] = [];
+        response.data.forEach((parent: any) => {
+          tempParentData.push({
+            id:
+              parentType === 'action'
+                ? parent.actionId
+                : parentType === 'programme'
+                ? parent.programmeId
+                : parent.projectId,
+            title: parent.title,
+            desc: parent.description,
+          });
+        });
+        setParentList(tempParentData);
       }
-      setStoredFiles(tempFiles);
+    };
+    fetchAvailableParents();
+  }, [parentType]);
 
-      // Get the attached supports
+  useEffect(() => {
+    // Initially Loading the underlying Activity data when not in create mode
 
-      setIsValidated(false);
-      setSupportData([]);
-      setStoredMthFiles([]);
-      setStoredRstFiles([]);
-    }
+    const fetchData = async () => {
+      if (method !== 'create' && entId) {
+        let response: any;
+        try {
+          response = await get(`national/activities/${entId}`);
+
+          if (response.status === 200 || response.status === 201) {
+            const entityData: any = response.data;
+
+            // Populating Action owned data fields
+            form.setFieldsValue({
+              title: entityData.title,
+              description: entityData.description,
+              status: entityData.status,
+              measure: entityData.measure,
+              supportType: entityData.migratedData?.type ?? '',
+              nationalImplementingEntity: entityData.nationalImplementingEntity ?? [],
+              internationalImplementingEntity: entityData.internationalImplementingEntity ?? [],
+              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy ?? 'No',
+              meansOfImplementation: entityData.meansOfImplementation,
+              technologyType: entityData.technologyType,
+              etfDescription: entityData.etfDescription,
+              comment: entityData.comment,
+              achievedGHGReduction: entityData.achievedGHGReduction,
+              expectedGHGReduction: entityData.expectedGHGReduction,
+            });
+
+            // Parent Data Update
+
+            if (entityData.parentType) {
+              const parentData = await getConnectedParentData(
+                entityData.parentType,
+                entityData.parentId
+              );
+              form.setFieldsValue({
+                parentType: entityData.parentType,
+                parentId: entityData.parentId,
+                parentDescription: parentData.desc,
+              });
+              setParentType(entityData.parentType ?? '');
+            }
+
+            // Setting validation status
+
+            setIsValidated(entityData.validated ?? false);
+
+            // Setting up uploaded files
+
+            if (entityData.documents?.length > 0) {
+              const tempFiles: { key: string; title: string; url: string }[] = [];
+              entityData.documents.forEach((document: any) => {
+                tempFiles.push({
+                  key: document.createdTime,
+                  title: document.title,
+                  url: document.url,
+                });
+              });
+              setStoredFiles(tempFiles);
+            }
+
+            // Populating Migrated Fields (Will be overwritten when attachments change)
+            setActivityMigratedData({
+              recipient: entityData.migratedData?.recipientEntities ?? [],
+              affSectors: entityData.migratedData?.sectors ?? [],
+              affSubSectors: entityData.migratedData?.subSectors ?? [],
+              startYear: entityData.migratedData?.startYear ?? undefined,
+              endYear: entityData.migratedData?.endYear ?? undefined,
+              expectedTimeFrame: entityData.migratedData?.expectedTimeFrame ?? undefined,
+            });
+          }
+        } catch {
+          navigate('/activities');
+          message.open({
+            type: 'error',
+            content: t('noSuchEntity'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchData();
+
+    // Initializing mtg timeline data when in create mode
 
     if (method === 'create') {
       const tempExpectedEntries: ExpectedTimeline[] = [];
@@ -158,22 +291,27 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, []);
 
+  // Populating Form Migrated Fields, when migration data changes
+
+  useEffect(() => {
+    if (activityMigratedData) {
+      form.setFieldsValue({
+        recipient: activityMigratedData.recipient,
+        affSectors: activityMigratedData.affSectors,
+        affSubSectors: activityMigratedData.affSubSectors,
+        startYear: activityMigratedData.startYear,
+        endYear: activityMigratedData.endYear,
+        expectedTimeFrame: activityMigratedData.expectedTimeFrame,
+      });
+    }
+  }, [activityMigratedData]);
+
   useEffect(() => {
     console.log('Running Migration Update');
 
     if (method !== 'create') {
       console.log('Get the Action Information and load them');
     }
-
-    // Get Migrated Data for the Activity
-    form.setFieldsValue({
-      recipient: 'Ministry of Agriculture, Climate Change and Environment',
-      affSectors: 'Energy',
-      affSubSectors: 'Grid-Connected Generation',
-      startYear: 2019,
-      endYear: 2020,
-      expectedTimeFrame: 2,
-    });
 
     const migratedKpis = [];
     for (let i = 0; i < 2; i++) {
@@ -190,36 +328,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
     setMigratedKpiList(migratedKpis);
   }, [supportData]);
-
-  // Tracking Parent selection
-
-  const handleSelectChange = (value: string) => {
-    setParentType(value);
-    form.setFieldsValue({
-      parentId: '',
-      parentDescription: '',
-    });
-  };
-
-  const handleParentIdSelect = (id: string) => {
-    form.setFieldsValue({
-      parentDescription: parentList.find((obj) => obj.id === id)?.desc,
-    });
-  };
-
-  useEffect(() => {
-    console.log('Running Parent Id Population');
-    const prefix = parentType?.slice(0, 3);
-    const parentIds: ParentData[] = [];
-    for (let i = 0; i < 15; i++) {
-      parentIds.push({
-        id: `P00${i}`,
-        title: `${prefix}00${i}`,
-        desc: `This is the description migrated from the parent 00${i}`,
-      });
-    }
-    setParentList(parentIds);
-  }, [parentType]);
 
   // Form Submit
 
@@ -368,7 +476,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   name="title"
                   rules={[validation.required]}
                 >
-                  <Input className="form-input-box" />
+                  <Input className="form-input-box" disabled={isView} />
                 </Form.Item>
               </Col>
               <Col span={12}>
@@ -709,7 +817,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   name="achievedGHGReduction"
                   rules={[validation.required]}
                 >
-                  <Input type="number" className="form-input-box" />
+                  <Input type="number" className="form-input-box" disabled={isView} />
                 </Form.Item>
               </Col>
               <Col span={12}>
@@ -718,7 +826,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   name="expectedGHGReduction"
                   rules={[validation.required]}
                 >
-                  <Input type="number" className="form-input-box" />
+                  <Input type="number" className="form-input-box" disabled={isView} />
                 </Form.Item>
               </Col>
             </Row>
@@ -774,7 +882,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   label={<label className="form-item-header">{t('mtgMethodName')}</label>}
                   name="mtgMethodName"
                 >
-                  <Input className="form-input-box" />
+                  <Input className="form-input-box" disabled={isView} />
                 </Form.Item>
               </Col>
               <Col span={12}>
@@ -826,7 +934,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   label={<label className="form-item-header">{t('mtgCalculateEntityTitle')}</label>}
                   name="mtgCalculateEntity"
                 >
-                  <Input className="form-input-box" />
+                  <Input className="form-input-box" disabled={isView} />
                 </Form.Item>
               </Col>
             </Row>

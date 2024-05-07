@@ -14,3 +14,12 @@ export type ParentData = {
   title: string;
   desc: string;
 };
+
+export type ActivityMigratedData = {
+  recipient: string[];
+  affSectors: string[];
+  affSubSectors: string[];
+  startYear: number;
+  endYear: number;
+  expectedTimeFrame: number;
+};
