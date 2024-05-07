@@ -40,8 +40,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const { t } = useTranslation(['programmeForm']);
 
   const isView: boolean = method === 'view' ? true : false;
-  const formTitle = getFormTitle('Programme', method)[0];
-  const formDesc = getFormTitle('Programme', method)[1];
+  const formTitle = getFormTitle('Programme', method);
 
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
@@ -51,6 +50,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   // Form Validation Rules
 
   const validation = getValidationRules(method);
+
+  // Entity Validation Status
+
+  const [isValidated, setIsValidated] = useState<boolean>(false);
 
   // Parent Select state
 
@@ -175,6 +178,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               investment: entityData.investment,
               comments: entityData.comments,
             });
+
+            setIsValidated(entityData.validated ?? false);
 
             if (entityData.documents?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
@@ -324,7 +329,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             projectName: prj.title,
           });
 
-          tempMigratedData.type.push(prj.type);
+          if (!tempMigratedData.type.includes(prj.type)) {
+            tempMigratedData.type.push(prj.type);
+          }
 
           tempMigratedData.intImplementor = joinTwoArrays(
             tempMigratedData.intImplementor,
@@ -442,7 +449,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       if (projectData.length > 0 && method === 'create') {
         payload.linkedProjects = [];
         projectData.forEach((project) => {
-          payload.linkedProgrammes.push(project.projectId);
+          payload.linkedProjects.push(project.projectId);
         });
       }
 
@@ -500,8 +507,33 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Validate
 
-  const validateEntity = () => {
-    console.log('Validate Clicked');
+  const validateEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await post('national/programmes/validate', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: 'Successfully Validated !',
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/programmes');
+        }
+      }
+    } catch {
+      message.open({
+        type: 'error',
+        content: `${entId} Validation Failed`,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    }
   };
 
   // Entity Delete
@@ -575,7 +607,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
-        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       {!waitingForBE ? (
         <div className="programme-form">
@@ -822,7 +853,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 isSingleColumn={false}
                 usedIn={method}
                 buttonText={t('upload')}
-                acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
                 storedFiles={storedFiles}
                 uploadedFiles={uploadedFiles}
                 setUploadedFiles={setUploadedFiles}
@@ -836,7 +866,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       <label className="form-item-header">{t('programmeCommentsTitle')}</label>
                     }
                     name="comments"
-                    rules={[validation.required]}
                   >
                     <TextArea rows={3} disabled={isView} />
                   </Form.Item>
@@ -1008,6 +1037,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Col span={2.5}>
                     <Form.Item>
                       <Button
+                        disabled={isValidated}
                         type="primary"
                         size="large"
                         block

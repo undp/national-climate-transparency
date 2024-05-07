@@ -36,8 +36,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   const { t } = useTranslation(['supportForm']);
 
   const isView: boolean = method === 'view' ? true : false;
-  const formTitle = getFormTitle('Support', method)[0];
-  const formDesc = getFormTitle('Support', method)[1];
+  const formTitle = getFormTitle('Support', method);
 
   const navigate = useNavigate();
   const { post } = useConnection();
@@ -46,6 +45,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   // Form Validation Rules
 
   const validation = getValidationRules(method);
+
+  // Entity Validation Status
+
+  const [isValidated, setIsValidated] = useState<boolean>(false);
 
   // Currency Conversion
 
@@ -71,6 +74,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       });
     }
     setParentList(parentIds);
+
+    setIsValidated(false);
   }, []);
 
   useEffect(() => {
@@ -109,8 +114,33 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   // Entity Validate
 
-  const validateEntity = () => {
-    console.log('Validate Clicked');
+  const validateEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await post('national/supports/validate', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: 'Successfully Validated !',
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/support');
+        }
+      }
+    } catch {
+      message.open({
+        type: 'error',
+        content: `${entId} Validation Failed`,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    }
   };
 
   // Entity Delete
@@ -139,7 +169,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
-        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       <div className="support-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">
@@ -504,6 +533,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={2.5}>
                 <Form.Item>
                   <Button
+                    disabled={isValidated}
                     type="primary"
                     size="large"
                     block

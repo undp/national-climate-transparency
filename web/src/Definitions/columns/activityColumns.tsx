@@ -2,6 +2,7 @@ import { EllipsisOutlined } from '@ant-design/icons';
 import { Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { detachMenu } from '../../Components/Popups/tableAction';
+import ScrollableList from '../../Components/ScrollableList/scrollableList';
 
 export const getActivityTableColumns = (
   isView: boolean,
@@ -16,7 +17,14 @@ export const getActivityTableColumns = (
     { title: t('statusTitle'), dataIndex: 'status', key: 'status' },
     { title: t('startYearHeader'), dataIndex: 'startYear', key: 'startYear' },
     { title: t('endYearHeader'), dataIndex: 'endYear', key: 'endYear' },
-    { title: t('natImplementorTitle'), dataIndex: 'natImplementor', key: 'natImplementor' },
+    {
+      title: t('natImplementorTitle'),
+      width: 100,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        return <ScrollableList listToShow={record.natImplementor}></ScrollableList>;
+      },
+    },
     {
       title: '',
       key: 'activityId',

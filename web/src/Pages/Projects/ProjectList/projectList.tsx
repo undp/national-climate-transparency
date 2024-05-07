@@ -14,7 +14,7 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { GraphUpArrow } from 'react-bootstrap-icons';
-import { actionMenu } from '../../../Components/Popups/tableAction';
+import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
 import { ProjectEntity } from '../../../Entities/project';
 
 interface Item {
@@ -41,7 +41,7 @@ const projectList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['projectList']);
+  const { t } = useTranslation(['projectList', 'tableAction']);
 
   // General Page State
 
@@ -84,27 +84,6 @@ const projectList = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
   const [toBeAttached, setToBeAttached] = useState<string[]>([]);
-
-  // Attach Multiple Activities for a Project
-
-  const attachActivities = async () => {
-    if (toBeAttached.length > 0) {
-      const payload = {
-        projectId: selectedProjectId,
-        activityIds: toBeAttached,
-      };
-      const response: any = await post('national/activities/link', payload);
-      if (response.status === 200 || response.status === 201) {
-        message.open({
-          type: 'success',
-          content: t('activityLinkSuccess'),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        navigate('/projects');
-      }
-    }
-  };
 
   // Free Act Read from DB
 
@@ -150,7 +129,7 @@ const projectList = () => {
   const getAllData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize };
+      const payload: any = { page: currentPage, size: pageSize + 1 };
 
       // Adding Sort By Conditions
 
@@ -188,7 +167,7 @@ const projectList = () => {
         payload.filterAnd.push({
           key: appliedFilterValue.searchBy,
           operation: 'LIKE',
-          value: [searchValue + '%'],
+          value: ['%' + searchValue + '%'],
         });
       }
 
@@ -205,7 +184,7 @@ const projectList = () => {
             projectStatus: unstructuredData[i].projectStatus,
             recipientEntity: unstructuredData[i].recipientEntities,
             intImplementingEntity: unstructuredData[i].internationalImplementingEntities,
-            validationStatus: unstructuredData[i].validationStatus ?? '',
+            validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             natImplementingEntity: unstructuredData[i].programme?.natImplementor ?? [],
             estimatedInvestment: unstructuredData[i].programme?.investment,
           });
@@ -222,6 +201,36 @@ const projectList = () => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
       setLoading(false);
+    }
+  };
+
+  // Attach Multiple Activities for a Project
+
+  const attachActivities = async () => {
+    if (toBeAttached.length > 0) {
+      const payload = {
+        projectId: selectedProjectId,
+        activityIds: toBeAttached,
+      };
+      const response: any = await post('national/activities/link', payload);
+      if (response.status === 200 || response.status === 201) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
+        message.open({
+          type: 'success',
+          content: t('activityLinkSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
+        getAllData();
+      }
     }
   };
 
@@ -364,7 +373,7 @@ const projectList = () => {
             showArrow={false}
             trigger={'click'}
             placement="bottomRight"
-            content={actionMenu(
+            content={actionMenuWithAttaching(
               'project',
               ability,
               ProjectEntity,
@@ -590,7 +599,7 @@ const projectList = () => {
                 position: ['bottomRight'],
               }}
               handleTableChange={handleTableChange}
-              emptyMessage="No Actions Available"
+              emptyMessage="No Projects Available"
             />
           </Col>
         </Row>

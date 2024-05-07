@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { RcFile, UploadFile } from 'antd/lib/upload/interface';
-import { Button, Card, Col, Row, Upload } from 'antd';
+import { Button, Card, Col, Row, Upload, message } from 'antd';
 import {
   CloseCircleOutlined,
   DeleteOutlined,
@@ -11,11 +11,11 @@ import ConfirmPopup from '../Popups/Confirmation/confirmPopup';
 import './uploadFiles.scss';
 import { XOctagon } from 'react-bootstrap-icons';
 import { useTranslation } from 'react-i18next';
+import { AcceptedMimeTypes } from '../../Definitions/fileTypes';
 
 interface Props {
   isSingleColumn: boolean;
   buttonText: string;
-  acceptedFiles: string;
   usedIn: 'create' | 'view' | 'update';
   storedFiles: { key: string; title: string; url: string }[];
   uploadedFiles: { key: string; title: string; data: string }[];
@@ -29,7 +29,6 @@ interface Props {
 const UploadFileGrid: React.FC<Props> = ({
   isSingleColumn,
   buttonText,
-  acceptedFiles,
   usedIn,
   storedFiles,
   uploadedFiles,
@@ -67,8 +66,19 @@ const UploadFileGrid: React.FC<Props> = ({
     });
 
   const beforeUpload = async (file: RcFile): Promise<boolean> => {
-    const base64 = await handleFileRead(file);
-    setUploadedFiles([...uploadedFiles, { key: file.uid, title: file.name, data: base64 }]);
+    console.log(file);
+    if (!AcceptedMimeTypes.includes(file.type)) {
+      message.open({
+        type: 'error',
+        content: t('fileNotSupported'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      return Upload.LIST_IGNORE as any;
+    } else {
+      const base64 = await handleFileRead(file);
+      setUploadedFiles([...uploadedFiles, { key: file.uid, title: file.name, data: base64 }]);
+    }
     return false;
   };
 
@@ -81,7 +91,7 @@ const UploadFileGrid: React.FC<Props> = ({
     fileList: documentList,
     showUploadList: false,
     beforeUpload,
-    accept: acceptedFiles,
+    accept: '.xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg',
   };
 
   // Delete function for stored files

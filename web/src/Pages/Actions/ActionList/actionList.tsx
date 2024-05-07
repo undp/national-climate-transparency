@@ -19,7 +19,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
-import { actionMenu } from '../../../Components/Popups/tableAction';
+import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
 
 interface Item {
   key: number;
@@ -133,7 +133,7 @@ const actionList = () => {
   const getAllData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize };
+      const payload: any = { page: currentPage, size: pageSize + 1 };
 
       // Adding Sort By Conditions
 
@@ -171,7 +171,7 @@ const actionList = () => {
         payload.filterAnd.push({
           key: appliedFilterValue.searchBy,
           operation: 'LIKE',
-          value: [searchValue + '%'],
+          value: ['%' + searchValue + '%'],
         });
       }
 
@@ -185,7 +185,7 @@ const actionList = () => {
             actionId: unstructuredData[i].actionId,
             title: unstructuredData[i].title,
             status: unstructuredData[i].status,
-            validationStatus: unstructuredData[i].validationStatus ?? '',
+            validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             actionType: unstructuredData[i].migratedData[0]?.types ?? [],
             affectedSectors: unstructuredData[i].migratedData[0]?.sectorsAffected ?? [],
             nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? [],
@@ -373,7 +373,7 @@ const actionList = () => {
             showArrow={false}
             trigger={'click'}
             placement="bottomRight"
-            content={actionMenu(
+            content={actionMenuWithAttaching(
               'action',
               ability,
               ActionEntity,

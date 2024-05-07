@@ -126,7 +126,6 @@ const AttachEntity: React.FC<Props> = ({
           showSearch
           maxTagCount={'responsive'}
           mode="multiple"
-          allowClear
           value={pendingAttachments}
           onChange={handleItemSelect}
           options={optionsList}

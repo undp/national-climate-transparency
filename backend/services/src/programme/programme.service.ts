@@ -322,12 +322,12 @@ export class ProgrammeService {
 
 					// Update Parent
 					if (!currentProgramme.action && programmeUpdateDto.actionId) {
-						await this.linkProgrammesToAction({actionId: programmeUpdateDto.actionId, programmes: [programmeUpdate.programmeId]}, user, false, em)
+						await this.linkUpdatedProgrammeToAction(programmeUpdateDto.actionId, programmeUpdate, user, em);
 					} else if (currentProgramme.action && !programmeUpdateDto.actionId) {
-						await this.unlinkProgrammesFromAction({programme: programmeUpdate.programmeId}, user, em)
+						await this.unlinkUpdatedProgrammeFromAction(programmeUpdate, user, em);
 					} else if (currentProgramme.action?.actionId != programmeUpdateDto.actionId) {
-						await this.unlinkProgrammesFromAction({programme: programmeUpdate.programmeId}, user, em)
-						await this.linkProgrammesToAction({actionId: programmeUpdateDto.actionId, programmes: [programmeUpdate.programmeId]}, user, true, em)
+						await this.unlinkUpdatedProgrammeFromAction(programmeUpdate, user, em);
+						await this.linkUpdatedProgrammeToAction(programmeUpdateDto.actionId, programmeUpdate, user, em);
 					} 
 
 					// Save new KPIs
@@ -371,7 +371,87 @@ export class ProgrammeService {
 		);
 	}
 
-	async linkProgrammesToAction(linkProgrammesDto: LinkProgrammesDto, user: User, isActionSwap: boolean, em?: EntityManager) {
+	async linkUpdatedProgrammeToAction(actionId: string, updatedProgramme: ProgrammeEntity, user: User, em?: EntityManager) {
+		const action = await this.actionService.findActionById(actionId);
+		if (!action) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.actionNotFound",
+					[actionId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (user.sector && user.sector.length > 0) {
+			const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
+			if (commonSectors.length === 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.cannotLinkNotRelatedProgrammes",
+						[updatedProgramme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+		}
+
+		if (updatedProgramme.action) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeAlreadyLinked",
+					[updatedProgramme.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+		
+		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, [updatedProgramme], actionId, allLinkedProgrammes, user, em? em : this.entityManager);
+
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("programme.programmesLinkedToAction", []),
+			prog
+		);
+	}
+
+	async unlinkUpdatedProgrammeFromAction(updatedProgramme: ProgrammeEntity, user: User, em?: EntityManager) {
+
+		if (user.sector && user.sector.length > 0) {
+			const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
+			if (commonSectors.length === 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.cannotUnlinkNotRelatedProgrammes",
+						[updatedProgramme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			if (!updatedProgramme.action) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.programmeIsNotLinked",
+						[updatedProgramme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+		}
+
+		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(updatedProgramme.action.actionId, updatedProgramme.programmeId)
+		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(updatedProgramme, updatedProgramme.programmeId, allLinkedProgrammes, user, em? em : this.entityManager);
+
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("programme.programmesUnlinkedFromAction", []),
+			prog
+		);
+	}
+
+	async linkProgrammesToAction(linkProgrammesDto: LinkProgrammesDto, user: User) {
 		const action = await this.actionService.findActionById(linkProgrammesDto.actionId);
 		if (!action) {
 			throw new HttpException(
@@ -407,7 +487,7 @@ export class ProgrammeService {
 					);
 				}
 			}
-			if (programme.action && !isActionSwap) {
+			if (programme.action) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"programme.programmeAlreadyLinked",
@@ -418,9 +498,9 @@ export class ProgrammeService {
 			}
 		}
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, allLinkedProgrammes, user, em? em : this.entityManager);
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, allLinkedProgrammes, user, this.entityManager);
 
-		await this.helperService.refreshMaterializedViews(em? em : this.entityManager);
+		await this.helperService.refreshMaterializedViews(this.entityManager);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -429,7 +509,7 @@ export class ProgrammeService {
 		);
 	}
 
-	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User, em?: EntityManager) {
+	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User) {
 
 		const programmes = await this.findAllProgrammeByIds([unlinkProgrammesDto.programme]);
 
@@ -469,9 +549,9 @@ export class ProgrammeService {
 		}
 
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(programme.action.actionId, programme.programmeId)
-		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programme, unlinkProgrammesDto, allLinkedProgrammes, user, em? em : this.entityManager);
+		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programme, unlinkProgrammesDto, allLinkedProgrammes, user, this.entityManager);
 
-		await this.helperService.refreshMaterializedViews(em? em : this.entityManager);
+		await this.helperService.refreshMaterializedViews(this.entityManager);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,

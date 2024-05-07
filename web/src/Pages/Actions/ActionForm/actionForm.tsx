@@ -38,8 +38,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const { t } = useTranslation(['actionForm']);
 
   const isView: boolean = method === 'view' ? true : false;
-  const formTitle = getFormTitle('Action', method)[0];
-  const formDesc = getFormTitle('Action', method)[1];
+  const formTitle = getFormTitle('Action', method);
 
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
@@ -49,6 +48,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Form Validation Rules
 
   const validation = getValidationRules(method);
+
+  // Entity Validation Status
+
+  const [isValidated, setIsValidated] = useState<boolean>(false);
 
   // Form General State
 
@@ -143,6 +146,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               startYear: entityData.startYear,
               natAnchor: entityData.natAnchor,
             });
+
+            setIsValidated(entityData.validated ?? false);
 
             if (entityData.documents?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
@@ -300,9 +305,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             programmeId: prg.programmeId,
             actionId: prg.action?.actionId,
             title: prg.title,
-            type: prg.migratedData[0]?.types,
+            type: prg.migratedData[0]?.types ?? [],
             status: prg.programmeStatus,
-            subSectorsAffected: prg.affectedSubSector,
+            subSectorsAffected: prg.affectedSubSector ?? [],
             estimatedInvestment: prg.investment,
           });
 
@@ -508,8 +513,33 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Validate
 
-  const validateEntity = () => {
-    console.log('Validate Clicked');
+  const validateEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await post('national/actions/validate', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: 'Successfully Validated !',
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/actions');
+        }
+      }
+    } catch {
+      message.open({
+        type: 'error',
+        content: `${entId} Validation Failed`,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    }
   };
 
   // Entity Delete
@@ -611,7 +641,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
-        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       {!waitingForBE ? (
         <div className="action-form">
@@ -808,7 +837,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 isSingleColumn={false}
                 usedIn={method}
                 buttonText={t('upload')}
-                acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
                 storedFiles={storedFiles}
                 uploadedFiles={uploadedFiles}
                 setUploadedFiles={setUploadedFiles}
@@ -1059,6 +1087,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Col span={2.5}>
                     <Form.Item>
                       <Button
+                        disabled={isValidated}
                         type="primary"
                         size="large"
                         block

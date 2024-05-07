@@ -14,7 +14,7 @@ import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import { ProgrammeEntity } from '../../../Entities/programme';
 import { Layers } from 'react-bootstrap-icons';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
-import { actionMenu } from '../../../Components/Popups/tableAction';
+import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
 
 interface Item {
   key: number;
@@ -83,25 +83,6 @@ const programmeList = () => {
   const [attachedProjectIds, setAttachedProjectIds] = useState<string[]>([]);
   const [toBeAttached, setToBeAttached] = useState<string[]>([]);
 
-  // Attach Multiple Projects for a Project
-
-  const attachProjects = async () => {
-    const payload = {
-      programmeId: selectedProgrammeId,
-      projectIds: toBeAttached,
-    };
-    const response: any = await post('national/projects/link', payload);
-    if (response.status === 200 || response.status === 201) {
-      message.open({
-        type: 'success',
-        content: t('projectLinkSuccess'),
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-      navigate('/programmes');
-    }
-  };
-
   // Free Prg Read from DB
 
   const getFreeProjectIds = async () => {
@@ -146,7 +127,7 @@ const programmeList = () => {
   const getAllData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize };
+      const payload: any = { page: currentPage, size: pageSize + 1 };
 
       // Adding Sort By Conditions
 
@@ -184,7 +165,7 @@ const programmeList = () => {
         payload.filterAnd.push({
           key: appliedFilterValue.searchBy,
           operation: 'LIKE',
-          value: [searchValue + '%'],
+          value: ['%' + searchValue + '%'],
         });
       }
 
@@ -199,7 +180,7 @@ const programmeList = () => {
             actionId: unstructuredData[i].action?.actionId,
             title: unstructuredData[i].title,
             status: unstructuredData[i].programmeStatus,
-            validationStatus: unstructuredData[i].validationStatus ?? '',
+            validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             subSectorsAffected: unstructuredData[i].affectedSubSector,
             investment: unstructuredData[i].investment,
             type: unstructuredData[i].migratedData[0]?.types ?? [],
@@ -217,6 +198,34 @@ const programmeList = () => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
       setLoading(false);
+    }
+  };
+
+  // Attach Multiple Projects for a Project
+
+  const attachProjects = async () => {
+    const payload = {
+      programmeId: selectedProgrammeId,
+      projectIds: toBeAttached,
+    };
+    const response: any = await post('national/projects/link', payload);
+    if (response.status === 200 || response.status === 201) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      message.open({
+        type: 'success',
+        content: t('projectLinkSuccess'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      getAllData();
     }
   };
 
@@ -351,7 +360,7 @@ const programmeList = () => {
             showArrow={false}
             trigger={'click'}
             placement="bottomRight"
-            content={actionMenu(
+            content={actionMenuWithAttaching(
               'programme',
               ability,
               ProgrammeEntity,

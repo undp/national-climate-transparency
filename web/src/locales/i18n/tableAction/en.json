@@ -1,13 +1,13 @@
 {
     "View/Validate": "View/Validate",
     "View": "View",
-    "actionAttach": "Attach Programme",
-    "programmeAttach": "Attach Project",
-    "projectAttach": "Attach Activity",
+    "actionAttach": "Attach Programmes",
+    "programmeAttach": "Attach Projects",
+    "projectAttach": "Attach Activities",
     "actionEdit": "Edit Action",
     "programmeEdit": "Edit Programme",
     "projectEdit": "Edit Project",
-    "activityEdit": "Edit Activity",
-    "supportEdit": "Edit Support"
+    "activitiesEdit": "Edit Activity",
+    "supportsEdit": "Edit Support"
 }
   

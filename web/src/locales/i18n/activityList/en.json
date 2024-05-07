@@ -1,13 +1,18 @@
 {
   "viewTitle": "Activity List",
   "viewDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-  "addButtonType": "ADD activity",
   "searchBarText": "Search by Activity Title",
   "activityId": "Activity ID",
-  "projectId": "Project ID",
-  "titleOfActivity": "Type of Support",
+  "parentId": "Attached Type ID",
+  "parentType": "Attached Type",
+  "titleOfActivity": "Title of Activity",
+  "supportType": "Type of Support",
   "activityStatus": "Activity Status",
   "recipientEntity": "Recipient Entity (s)",
   "internationalImplementingEntity": "International Implementing Entity (s)",
-  "nationalImplementingEntity": "National Implementing Entity (s)"
+  "nationalImplementingEntity": "National Implementing Entity (s)",
+  "validationStatus": "Validation Status",
+  "addActivity": "Add Activity",
+  "filterByValidationStatus": "",
+  "filterByActivityStatus": ""
 }
