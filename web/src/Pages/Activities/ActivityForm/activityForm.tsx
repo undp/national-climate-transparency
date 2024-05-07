@@ -29,6 +29,10 @@ import { ParentData } from '../../../Definitions/activityDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { getFormTitle } from '../../../Utils/utilServices';
+import { Action } from '../../../Enums/action.enum';
+import { ActivityEntity } from '../../../Entities/activity';
+import { useAbilityContext } from '../../../Casl/Can';
+import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
@@ -42,16 +46,20 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const { t } = useTranslation(['activityForm']);
 
   const isView: boolean = method === 'view' ? true : false;
-  const formTitle = getFormTitle('Activity', method)[0];
-  const formDesc = getFormTitle('Activity', method)[1];
+  const formTitle = getFormTitle('Activity', method);
 
   const navigate = useNavigate();
   const { post } = useConnection();
+  const ability = useAbilityContext();
   const { entId } = useParams();
 
   // Form Validation Rules
 
   const validation = getValidationRules(method);
+
+  // Entity Validation Status
+
+  const [isValidated, setIsValidated] = useState<boolean>(false);
 
   // form state
 
@@ -120,6 +128,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
       // Get the attached supports
 
+      setIsValidated(false);
       setSupportData([]);
       setStoredMthFiles([]);
       setStoredRstFiles([]);
@@ -204,7 +213,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     const parentIds: ParentData[] = [];
     for (let i = 0; i < 15; i++) {
       parentIds.push({
-        id: `${prefix}00${i}`,
+        id: `P00${i}`,
         title: `${prefix}00${i}`,
         desc: `This is the description migrated from the parent 00${i}`,
       });
@@ -262,8 +271,33 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Validate
 
-  const validateEntity = () => {
-    console.log('Validate Clicked');
+  const validateEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await post('national/activities/validate', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: 'Successfully Validated !',
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/activities');
+        }
+      }
+    } catch {
+      message.open({
+        type: 'error',
+        content: `${entId} Validation Failed`,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    }
   };
 
   // Entity Delete
@@ -273,16 +307,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   };
 
   // Column Definition
-  const supportTableColumns = [
-    { title: t('supportIdTitle'), dataIndex: 'supportId', key: 'activityId' },
-    { title: t('financeNatureTitle'), dataIndex: 'financeNature', key: 'financeNature' },
-    { title: t('directionTitle'), dataIndex: 'direction', key: 'direction' },
-    { title: t('finInstrumentTitle'), dataIndex: 'finInstrument', key: 'finInstrument' },
-    { title: t('neededUSDHeader'), dataIndex: 'estimatedUSD', key: 'estimatedUSD' },
-    { title: t('neededLCLHeader'), dataIndex: 'estimatedLC', key: 'estimatedLC' },
-    { title: t('recievedUSDHeader'), dataIndex: 'recievedUSD', key: 'recievedUSD' },
-    { title: t('recievedLCLHeader'), dataIndex: 'recievedLC', key: 'recievedLC' },
-  ];
+  const supportTableColumns = getSupportTableColumns();
 
   // Table Behaviour
 
@@ -328,7 +353,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
-        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       <div className="activity-form">
         <Form form={form} onFinish={handleSubmit} layout="vertical">
@@ -497,9 +521,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
-                  name="natImplementor"
+                  name="nationalImplementingEntity"
                 >
                   <Select
+                    mode="multiple"
                     size="large"
                     style={{ fontSize: inputFontSize }}
                     allowClear
@@ -519,9 +544,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
-                  name="intImplementor"
+                  name="internationalImplementingEntity"
                 >
                   <Select
+                    mode="multiple"
                     size="large"
                     style={{ fontSize: inputFontSize }}
                     allowClear
@@ -583,7 +609,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('anchoredTitle')}</label>}
-                  name="isAnchored"
+                  name="anchoredInNationalStrategy"
                 >
                   <Select
                     size="large"
@@ -604,7 +630,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('implMeansTitle')}</label>}
-                  name="implMeans"
+                  name="meansOfImplementation"
                 >
                   <Select
                     size={'large'}
@@ -626,7 +652,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('techTypeTitle')}</label>}
-                  name="techType"
+                  name="technologyType"
                 >
                   <Select
                     size="large"
@@ -646,7 +672,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('additionalInfoTitle')}</label>}
-                  name="addInfo"
+                  name="etfDescription"
                 >
                   <TextArea maxLength={250} rows={3} disabled={isView} />
                 </Form.Item>
@@ -657,7 +683,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               isSingleColumn={false}
               usedIn={method}
               buttonText={t('upload')}
-              acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
               storedFiles={storedFiles}
               uploadedFiles={uploadedFiles}
               setUploadedFiles={setUploadedFiles}
@@ -760,7 +785,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     isSingleColumn={true}
                     usedIn={method}
                     buttonText={t('upload')}
-                    acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
                     storedFiles={storedMthFiles}
                     uploadedFiles={uploadedMthFiles}
                     setUploadedFiles={setUploadedMthFiles}
@@ -787,7 +811,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     isSingleColumn={true}
                     usedIn={method}
                     buttonText={t('upload')}
-                    acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
                     storedFiles={storedRstFiles}
                     uploadedFiles={uploadedRstFiles}
                     setUploadedFiles={setUploadedRstFiles}
@@ -878,20 +901,23 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   {t('back')}
                 </Button>
               </Col>
-              <Col span={2.5}>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={() => {
-                      validateEntity();
-                    }}
-                  >
-                    {t('validate')}
-                  </Button>
-                </Form.Item>
-              </Col>
+              {ability.can(Action.Validate, ActivityEntity) && (
+                <Col span={2.5}>
+                  <Form.Item>
+                    <Button
+                      disabled={isValidated}
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => {
+                        validateEntity();
+                      }}
+                    >
+                      {t('validate')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
           )}
           {method === 'update' && (

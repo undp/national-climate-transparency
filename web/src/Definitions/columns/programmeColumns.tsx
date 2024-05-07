@@ -1,53 +1,35 @@
-import { CloseCircleOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { List, Popover, Typography } from 'antd';
+import { EllipsisOutlined } from '@ant-design/icons';
+import { Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { ProgrammeData } from '../programmeDefinitions';
+import { detachMenu } from '../../Components/Popups/tableAction';
+import ScrollableList from '../../Components/ScrollableList/scrollableList';
 
 export const getProgrammeTableColumns = (
   isView: boolean,
-  detachProgramme: (arg0: string) => void,
-  handleDetachOpen: (arg0: any) => void,
-  detachOpen: boolean[],
-  tempProgramIds: string[]
+  detachProgramme: (arg0: string) => void
 ) => {
-  const { t } = useTranslation(['actionForm']);
-
-  const actionMenu = (record: ProgrammeData) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: t('detach'),
-            icon: <CloseCircleOutlined style={{ color: 'red' }} />,
-            click: () => {
-              {
-                detachProgramme(record.programmeId);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) => (
-          <List.Item onClick={item.click}>
-            <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-            <span>{item.text}</span>
-          </List.Item>
-        )}
-      />
-    );
-  };
+  const { t } = useTranslation(['formTable']);
 
   const programmeTableColumns = [
     { title: t('programmeId'), dataIndex: 'programmeId', key: 'programmeId' },
     { title: t('actionId'), dataIndex: 'actionId', key: 'actionId' },
     { title: t('programmeTitle'), dataIndex: 'title', key: 'title' },
-    { title: t('programmeType'), dataIndex: 'type', key: 'type' },
+    {
+      title: t('programmeType'),
+      width: 100,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        return <ScrollableList listToShow={record.type}></ScrollableList>;
+      },
+    },
     { title: t('programmeStatus'), dataIndex: 'status', key: 'status' },
     {
       title: t('subSectorAffected'),
-      dataIndex: 'subSectorsAffected',
-      key: 'subSectorsAffected',
+      width: 100,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        return <ScrollableList listToShow={record.subSectorsAffected}></ScrollableList>;
+      },
     },
     {
       title: t('investmentNeeds'),
@@ -64,15 +46,15 @@ export const getProgrammeTableColumns = (
           <>
             {!isView && (
               <Popover
+                key={`${record.programmeId}_prg_detach`}
+                showArrow={false}
+                trigger={'click'}
                 placement="bottomRight"
-                trigger="click"
-                content={actionMenu(record)}
-                open={detachOpen[tempProgramIds.indexOf(record.programmeId)]}
+                content={detachMenu(record.programmeId, t, detachProgramme)}
               >
                 <EllipsisOutlined
                   rotate={90}
                   style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-                  onClick={() => handleDetachOpen(record)}
                 />
               </Popover>
             )}

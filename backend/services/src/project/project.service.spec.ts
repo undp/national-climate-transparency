@@ -9,7 +9,7 @@ import { CounterService } from "../util/counter.service";
 import { FileUploadService } from "../util/fileUpload.service";
 import { HelperService } from "../util/helpers.service";
 import { PayloadValidator } from "../validation/payload.validator";
-import { IntImplementor, Recipient } from "../enums/shared.enum";
+import { IntImplementor, Recipient, SubSector } from "../enums/shared.enum";
 import { DataResponseMessageDto } from "../dtos/data.response.message";
 import { ProjectDto } from "../dtos/project.dto";
 import { User } from "../entities/user.entity";
@@ -21,6 +21,8 @@ import { LinkProjectsDto } from "../dtos/link.projects.dto";
 import { Sector } from "../enums/sector.enum";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
+import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
+import { KpiService } from "../kpi/kpi.service";
 
 describe('ProjectService', () => {
 	let service: ProjectService;
@@ -32,6 +34,7 @@ describe('ProjectService', () => {
 	let fileUploadServiceMock: Partial<FileUploadService>;
 	let payloadValidatorMock: Partial<PayloadValidator>;
 	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
+	let kpiServiceMock: Partial<KpiService>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -78,6 +81,7 @@ describe('ProjectService', () => {
 				offset: jest.fn().mockReturnThis(),
 				limit: jest.fn().mockReturnThis(),
 				getManyAndCount: jest.fn(),
+				getOne: jest.fn(),
 			})) as unknown as () => SelectQueryBuilder<ProjectEntity>,
 		};
 
@@ -116,6 +120,10 @@ describe('ProjectService', () => {
 					provide: LinkUnlinkService,
 					useValue: linkUnlinkServiceMock,
 				},
+				{
+					provide: KpiService,
+					useValue: kpiServiceMock,
+				},
 			],
 		}).compile();
 
@@ -136,8 +144,6 @@ describe('ProjectService', () => {
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.achievedGHGReduction = 5;
-		projectDto.expectedGHGReduction = 1;
 		projectDto.expectedTimeFrame = 25;
 
 		const projectEntity = new ProjectEntity();
@@ -150,8 +156,6 @@ describe('ProjectService', () => {
 		projectEntity.endYear = 2030;
 		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectEntity.achievedGHGReduction = 5;
-		projectEntity.expectedGHGReduction = 1;
 		projectEntity.expectedTimeFrame = 25;
 		projectEntity.path = "";
 
@@ -193,8 +197,6 @@ describe('ProjectService', () => {
 		projectDto.programmeId = "002"
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.achievedGHGReduction = 5;
-		projectDto.expectedGHGReduction = 1;
 		projectDto.expectedTimeFrame = 25;
 
 		const projectEntity = new ProjectEntity();
@@ -207,8 +209,6 @@ describe('ProjectService', () => {
 		projectEntity.endYear = 2030;
 		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectEntity.achievedGHGReduction = 5;
-		projectEntity.expectedGHGReduction = 1;
 		projectEntity.expectedTimeFrame = 25;
 		projectEntity.path = "";
 
@@ -277,8 +277,6 @@ describe('ProjectService', () => {
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.achievedGHGReduction = 5;
-		projectDto.expectedGHGReduction = 1;
 		projectDto.expectedTimeFrame = 25;
 		projectDto.kpis = [kpiDto1, kpiDto2];
 		projectDto.documents = [documentDto];
@@ -294,8 +292,6 @@ describe('ProjectService', () => {
 		projectEntity.endYear = 2030;
 		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectEntity.achievedGHGReduction = 5;
-		projectEntity.expectedGHGReduction = 1;
 		projectEntity.expectedTimeFrame = 25;
 		projectEntity.path = "A001.P001";
 		projectEntity.programme = programmeEntity;
@@ -479,12 +475,249 @@ describe('ProjectService', () => {
 			expect(error).toBeInstanceOf(HttpException);
 			expect(error.status).toBe(HttpStatus.BAD_REQUEST);
 		}
-		// Assert the returned result
-		// expect(result).toEqual(expect.any(DataResponseMessageDto));
-		// expect(result.statusCode).toEqual(HttpStatus.OK);
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("project.cannotUnlinkNotRelatedProject", ["1"]);
 		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toBeCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
+	});
+
+	it('should update a project without programme id, documents and kpis', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const projectDto = new ProjectUpdateDto();
+		projectDto.projectId = "J001";
+		projectDto.title = "Project 4";
+		projectDto.description = "test description";
+		projectDto.type = ProjectType.MITIGATION;
+		projectDto.projectStatus = ProjectStatus.PLANNED;
+		projectDto.startYear = 2025;
+		projectDto.endYear = 2030;
+		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
+		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
+		projectDto.expectedTimeFrame = 25;
+
+		const projectEntity = new ProjectEntity();
+		projectEntity.projectId = "J001";
+		projectEntity.title = "Project 4";
+		projectEntity.description = "test description";
+		projectEntity.type = ProjectType.MITIGATION;
+		projectEntity.projectStatus = ProjectStatus.PLANNED;
+		projectEntity.startYear = 2025;
+		projectEntity.endYear = 2030;
+		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
+		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
+		projectEntity.expectedTimeFrame = 25;
+		projectEntity.path = "";
+
+		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
+		jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
+
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(projectEntity),
+				query: jest.fn().mockResolvedValueOnce(projectEntity),
+			};
+			const savedProgramme = await callback(emMock);
+			expect(emMock.save).toHaveBeenNthCalledWith(1, projectEntity);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedProgramme;
+		});
+
+		const result = await service.updateProject(projectDto, user);
+
+		expect(result.statusCode).toEqual(expectedResponse.statusCode);
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(0);
+		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalledTimes(0);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
+	});
+
+
+	it('should update a not attached project with programme id', async () => {
+		const user = new User();
+		user.id = 2;
+		user.sector = [Sector.Agriculture]
+
+		const projectDto = new ProjectUpdateDto();
+		projectDto.projectId = "J001";
+		projectDto.title = "Project 4";
+		projectDto.description = "test description";
+		projectDto.type = ProjectType.MITIGATION;
+		projectDto.projectStatus = ProjectStatus.PLANNED;
+		projectDto.startYear = 2025;
+		projectDto.endYear = 2030;
+		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
+		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
+		projectDto.expectedTimeFrame = 25;
+		projectDto.programmeId = "P001"
+
+		const projectEntity = new ProjectEntity();
+		projectEntity.projectId = "J001";
+		projectEntity.title = "Project 4";
+		projectEntity.description = "test description";
+		projectEntity.type = ProjectType.MITIGATION;
+		projectEntity.projectStatus = ProjectStatus.PLANNED;
+		projectEntity.startYear = 2025;
+		projectEntity.endYear = 2030;
+		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
+		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
+		projectEntity.expectedTimeFrame = 25;
+		projectEntity.path = "";
+
+		const programme = new ProgrammeEntity();
+		programme.programmeId = "P001";
+		programme.affectedSectors = [Sector.Agriculture];
+		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+
+		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
+		jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
+
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(projectEntity),
+				query: jest.fn().mockResolvedValueOnce(projectEntity),
+			};
+			const savedProgramme = await callback(emMock);
+			// expect(emMock.save).toHaveBeenNthCalledWith(1, projectEntity);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedProgramme;
+		});
+
+		const result = await service.updateProject(projectDto, user);
+
+		expect(result.statusCode).toEqual(expectedResponse.statusCode);
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(1);
+		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalledTimes(0);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
+	});
+
+	it('should update an attached project without programme id', async () => {
+		const user = new User();
+		user.id = 2;
+		user.sector = [Sector.Agriculture]
+
+		const programme = new ProgrammeEntity();
+		programme.programmeId = "P001";
+		programme.affectedSectors = [Sector.Agriculture];
+
+		const projectDto = new ProjectUpdateDto();
+		projectDto.projectId = "J001";
+		projectDto.title = "Project 4";
+		projectDto.description = "test description";
+		projectDto.type = ProjectType.MITIGATION;
+		projectDto.projectStatus = ProjectStatus.PLANNED;
+		projectDto.startYear = 2025;
+		projectDto.endYear = 2030;
+		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
+		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
+		projectDto.expectedTimeFrame = 25;
+
+		const projectEntity = new ProjectEntity();
+		projectEntity.projectId = "J001";
+		projectEntity.title = "Project 4";
+		projectEntity.description = "test description";
+		projectEntity.type = ProjectType.MITIGATION;
+		projectEntity.projectStatus = ProjectStatus.PLANNED;
+		projectEntity.startYear = 2025;
+		projectEntity.endYear = 2030;
+		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
+		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
+		projectEntity.expectedTimeFrame = 25;
+		projectEntity.path = "";
+		projectEntity.programme = programme;
+
+		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+
+		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
+		jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(projectEntity),
+				query: jest.fn().mockResolvedValueOnce(projectEntity),
+			};
+			const savedProgramme = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedProgramme;
+		});
+
+		const result = await service.updateProject(projectDto, user);
+
+		expect(result.statusCode).toEqual(expectedResponse.statusCode);
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(0);
+		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
+	});
+
+	it('should update an attached project with new programme id', async () => {
+		const user = new User();
+		user.id = 2;
+		user.sector = [Sector.Agriculture]
+
+		const programme = new ProgrammeEntity();
+		programme.programmeId = "P001";
+		programme.affectedSectors = [Sector.Agriculture];
+
+		const newProgramme = new ProgrammeEntity();
+		newProgramme.programmeId = "P001";
+		newProgramme.affectedSectors = [Sector.Agriculture];
+
+		const projectDto = new ProjectUpdateDto();
+		projectDto.projectId = "J001";
+		projectDto.title = "Project 4";
+		projectDto.description = "test description";
+		projectDto.type = ProjectType.MITIGATION;
+		projectDto.projectStatus = ProjectStatus.PLANNED;
+		projectDto.startYear = 2025;
+		projectDto.endYear = 2030;
+		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
+		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
+		projectDto.expectedTimeFrame = 25;
+
+		const projectEntity = new ProjectEntity();
+		projectEntity.projectId = "J001";
+		projectEntity.title = "Project 4";
+		projectEntity.description = "test description";
+		projectEntity.type = ProjectType.MITIGATION;
+		projectEntity.projectStatus = ProjectStatus.PLANNED;
+		projectEntity.startYear = 2025;
+		projectEntity.endYear = 2030;
+		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
+		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
+		projectEntity.expectedTimeFrame = 25;
+		projectEntity.path = "";
+		projectEntity.programme = programme;
+
+		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+
+		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
+		jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(projectEntity),
+				query: jest.fn().mockResolvedValueOnce(projectEntity),
+			};
+			const savedProgramme = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedProgramme;
+		});
+
+		const result = await service.updateProject(projectDto, user);
+
+		expect(result.statusCode).toEqual(expectedResponse.statusCode);
+		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(0);
+		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalledTimes(1);
+		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
 	});
 
 })

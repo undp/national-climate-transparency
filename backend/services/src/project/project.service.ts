@@ -23,6 +23,9 @@ import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { QueryDto } from "../dtos/query.dto";
 import { DataListResponseDto } from "../dtos/data.list.response";
 import { ProjectViewEntity } from "../entities/project.view.entity";
+import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
+import { KpiService } from "../kpi/kpi.service";
+import { ValidateDto } from "../dtos/validate.dto";
 
 @Injectable()
 export class ProjectService {
@@ -34,7 +37,8 @@ export class ProjectService {
 		private helperService: HelperService,
 		private fileUploadService: FileUploadService,
 		private payloadValidator: PayloadValidator,
-		private linkUnlinkService: LinkUnlinkService
+		private linkUnlinkService: LinkUnlinkService,
+		private kpiService: KpiService,
 	) { }
 
 	async createProject(projectDto: ProjectDto, user: User) {
@@ -99,14 +103,14 @@ export class ProjectService {
 				const savedProject = await em.save<ProjectEntity>(project);
 				if (savedProject) {
 					if (projectDto.kpis) {
-						kpiList.forEach(async kpi => {
-							await em.save<KpiEntity>(kpi)
-						});
+						for (const kpi of kpiList) {
+							await em.save<KpiEntity>(kpi);
+						}
 					}
 
-					eventLog.forEach(async event => {
+					for (const event of eventLog) {
 						await em.save<LogEntity>(event);
-					});
+					}
 				}
 				return savedProject;
 			})
@@ -173,6 +177,7 @@ export class ProjectService {
 		const queryBuilder = await this.projectRepo
 			.createQueryBuilder("project")
 			.where('project.projectId = :projectId', { projectId })
+			.leftJoinAndSelect("project.programme", "programme")
 			.leftJoinAndMapOne(
 				"project.migratedData",
 				ProjectViewEntity,
@@ -184,7 +189,7 @@ export class ProjectService {
 		if (!result) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
-					"programme.programmesNotFound",
+					"project.projectNotFound",
 					[]
 				),
 				HttpStatus.BAD_REQUEST
@@ -195,13 +200,222 @@ export class ProjectService {
 
 	}
 
+	async updateProject(projectUpdateDto: ProjectUpdateDto, user: User) {
+		const projectUpdate: ProjectEntity = plainToClass(ProjectEntity, projectUpdateDto);
+		const eventLog = [];
+		let programme;
+
+		const currentProject = await this.findProjectWithLinkedProgrammeByProjectId(projectUpdateDto.projectId);
+		if (!currentProject) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.projectNotFound",
+					[projectUpdateDto.projectId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (user.sector && user.sector.length > 0 && currentProject.sectors && currentProject.sectors.length > 0) {
+			const commonSectors = currentProject.sectors.filter(sector => user.sector.includes(sector));
+			if (commonSectors.length === 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.cannotUpdateNotRelatedProject",
+						[currentProject.projectId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+		}
+
+		if (projectUpdateDto.endYear < projectUpdateDto.startYear) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.startYearCantBeLargerThanEndYear",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (projectUpdateDto.programmeId) {
+			programme = await this.programmeService.findProgrammeById(projectUpdateDto.programmeId);
+			if (!programme) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.programmeNotFound",
+						[projectUpdateDto.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+		}
+
+		projectUpdate.path = currentProject.path;
+		projectUpdate.programme = currentProject.programme;
+
+		// add new documents
+		if (projectUpdateDto.newDocuments) {
+			const documents = [];
+			for (const documentItem of projectUpdateDto.newDocuments) {
+				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.PROJECT);
+				const docEntity = new DocumentEntityDto();
+				docEntity.title = documentItem.title;
+				docEntity.url = response;
+				docEntity.createdTime = new Date().getTime();
+				documents.push(docEntity)
+			};
+
+			if (currentProject.documents) {
+				projectUpdate.documents = projectUpdate.documents ? [...projectUpdate.documents, ...currentProject.documents] : [...currentProject.documents];
+			} else if (projectUpdate.documents) {
+				projectUpdate.documents = [...projectUpdate.documents];
+			}
+
+			if (documents) {
+				projectUpdate.documents = projectUpdate.documents ? [...projectUpdate.documents, ...documents] : [...documents];
+			}
+
+		}
+
+		// remove documents
+		if (projectUpdateDto.removedDocuments && projectUpdateDto.removedDocuments.length > 0) {
+
+			if (!currentProject.documents || currentProject.documents.length < 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.noDocumentsFound",
+						[projectUpdateDto.projectId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			projectUpdate.documents = projectUpdate.documents ? projectUpdate.documents : currentProject.documents
+			const updatedDocs = projectUpdate.documents.filter(
+				item => !projectUpdateDto.removedDocuments.some(
+					url => url === item.url
+				)
+			);
+			projectUpdate.documents = (updatedDocs && updatedDocs.length > 0) ? updatedDocs : null;
+
+
+		}
+
+		const kpiList = [];
+		const kpisToRemove = [];
+		let kpisUpdated = false;
+
+		if (projectUpdateDto.kpis && projectUpdateDto.kpis.length > 0) {
+			const currentKpis = await this.kpiService.findKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, projectUpdate.projectId);
+
+			const addedKpis = projectUpdateDto.kpis.filter(kpi => !kpi.kpiId);
+
+			if (addedKpis && addedKpis.length > 0) {
+				for (const kpiItem of addedKpis) {
+					this.payloadValidator.validateKpiPayload(kpiItem, EntityType.PROJECT);
+					const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
+					kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
+					kpi.creatorId = projectUpdateDto.projectId;
+					kpiList.push(kpi);
+				}
+				kpisUpdated = true;
+			}
+
+			for (const currentKpi of currentKpis) {
+				const kpiToUpdate = projectUpdateDto.kpis.find(kpi => currentKpi.kpiId == kpi.kpiId);
+				if (kpiToUpdate) {
+					const kpi = new KpiEntity();
+					kpi.kpiId = kpiToUpdate.kpiId;
+					kpi.creatorId = kpiToUpdate.creatorId;
+					kpi.creatorType = kpiToUpdate.creatorType;
+					kpi.name = kpiToUpdate.name;
+					kpi.expected = kpiToUpdate.expected;
+					kpiList.push(kpi);
+					kpisUpdated = true;
+				} else {
+					kpisToRemove.push(currentKpi);
+					kpisUpdated = true;
+				}
+			}
+
+		}
+
+		this.addEventLogEntry(eventLog, LogEventType.PROJECT_UPDATED, EntityType.PROJECT, projectUpdate.projectId, user.id, projectUpdateDto);
+
+		if (kpisUpdated) {
+			// Add event log entry after the loop completes
+			this.addEventLogEntry(eventLog, LogEventType.KPI_UPDATED, EntityType.PROJECT, projectUpdate.projectId, user.id, kpiList);
+		}
+
+		const proj = await this.entityManager
+			.transaction(async (em) => {
+				const savedProject = await em.save<ProjectEntity>(projectUpdate);
+				if (savedProject) {
+					// update linked programme
+					if (!currentProject.programme && projectUpdateDto.programmeId) {
+						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
+
+					} else if (!projectUpdateDto.programmeId) {
+						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em);
+
+					} else if (currentProject.programme.programmeId != projectUpdateDto.programmeId) {
+						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em);
+						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
+
+					}
+
+					// Save new KPIs
+					if (kpiList.length > 0) {
+						await Promise.all(kpiList.map(async kpi => {
+							await em.save<KpiEntity>(kpi);
+						}));
+					}
+					// Remove KPIs
+					if (kpisToRemove.length > 0) {
+						await Promise.all(kpisToRemove.map(async kpi => {
+							await em.remove<KpiEntity>(kpi);
+						}));
+					}
+					// Save event logs
+					if (eventLog.length > 0) {
+						await Promise.all(eventLog.map(async event => {
+							await em.save<LogEntity>(event);
+						}));
+					}
+				}
+				return savedProject;
+			})
+			.catch((err: any) => {
+				console.log(err);
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.projectUpdateFailed",
+						[err]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("project.updateProjectSuccess", []),
+			proj
+		);
+
+
+
+	}
+
 	async findProjectsEligibleForLinking() {
-    return await this.projectRepo.createQueryBuilder('project')
-        .select(['"projectId"', 'title'])
-        .where('project.programmeId IS NULL')
-        .orderBy('project.projectId', 'ASC') 
-        .getRawMany();
-}
+		return await this.projectRepo.createQueryBuilder('project')
+			.select(['"projectId"', 'title'])
+			.where('project.programmeId IS NULL')
+			.orderBy('project.projectId', 'ASC')
+			.getRawMany();
+	}
 
 	async linkProjectsToProgramme(linkProjectsDto: LinkProjectsDto, user: User) {
 		const programme = await this.programmeService.findProgrammeById(linkProjectsDto.programmeId);
@@ -315,6 +529,67 @@ export class ProjectService {
 		return await this.projectRepo.findOneBy({
 			projectId
 		})
+	}
+
+	async findProjectWithLinkedProgrammeByProjectId(projectId: string) {
+		return await this.projectRepo.createQueryBuilder('project')
+			.leftJoinAndSelect('project.programme', 'programme')
+			.where('project.projectId = :projectId', { projectId })
+			.getOne();
+	}
+
+	async validateProject(validateDto: ValidateDto, user: User) {
+		const project = await this.findProjectById(validateDto.entityId);
+		if (!project) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.projectNotFound",
+					[validateDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (project.validated) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.projectAlreadyValidated",
+					[validateDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		project.validated = true;
+		const eventLog = this.buildLogEntity(LogEventType.PROJECT_VERIFIED,EntityType.PROJECT,project.projectId,user.id,validateDto)
+
+		const proj = await this.entityManager
+		.transaction(async (em) => {
+			const savedProject = await em.save<ProjectEntity>(project);
+			if (savedProject) {
+				// Save event logs
+				await em.save<LogEntity>(eventLog);
+			}
+			return savedProject;
+		})
+		.catch((err: any) => {
+			console.log(err);
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.projectVerificationFailed",
+					[err]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("project.verifyProjectSuccess", []),
+			proj
+		);
+
 	}
 
 	private addEventLogEntry = (

@@ -17,6 +17,7 @@ import { ValidationModule } from '../validation/validation.module';
 import { ProgrammeModule } from 'src/programme/programme.module';
 import { ProjectService } from './project.service';
 import { ProjectViewEntity } from 'src/entities/project.view.entity';
+import { KpiModule } from 'src/kpi/kpi.module';
 
 @Module({
 	imports: [
@@ -43,7 +44,8 @@ import { ProjectViewEntity } from 'src/entities/project.view.entity';
 		UtilModule,
 		forwardRef(() => ProgrammeModule),
 		FileHandlerModule,
-		ValidationModule
+		ValidationModule,
+		KpiModule
 	],
 	providers: [
 		ProjectService

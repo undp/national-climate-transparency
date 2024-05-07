@@ -3,28 +3,8 @@ import '../../../Styles/app.scss';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import './projectList.scss';
 import { Action } from '../../../Enums/action.enum';
-import {
-  Button,
-  Col,
-  Row,
-  Input,
-  Dropdown,
-  Popover,
-  List,
-  Typography,
-  message,
-  Radio,
-  Space,
-  MenuProps,
-} from 'antd';
-import {
-  EditOutlined,
-  EllipsisOutlined,
-  FilterOutlined,
-  InfoCircleOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { Button, Col, Row, Input, Dropdown, Popover, message, Radio, Space, MenuProps } from 'antd';
+import { EllipsisOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -34,6 +14,8 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { GraphUpArrow } from 'react-bootstrap-icons';
+import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
+import { ProjectEntity } from '../../../Entities/project';
 
 interface Item {
   key: number;
@@ -59,12 +41,11 @@ const projectList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['projectList']);
+  const { t } = useTranslation(['projectList', 'tableAction']);
 
   // General Page State
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [openPopoverKey, setOpenPopoverKey] = useState<number>();
 
   // Table Data State
 
@@ -103,27 +84,6 @@ const projectList = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
   const [toBeAttached, setToBeAttached] = useState<string[]>([]);
-
-  // Attach Multiple Activities for a Project
-
-  const attachActivities = async () => {
-    if (toBeAttached.length > 0) {
-      const payload = {
-        projectId: selectedProjectId,
-        activityIds: toBeAttached,
-      };
-      const response: any = await post('national/activities/link', payload);
-      if (response.status === 200 || response.status === 201) {
-        message.open({
-          type: 'success',
-          content: t('activityLinkSuccess'),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        navigate('/projects');
-      }
-    }
-  };
 
   // Free Act Read from DB
 
@@ -169,7 +129,7 @@ const projectList = () => {
   const getAllData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize };
+      const payload: any = { page: currentPage, size: pageSize + 1 };
 
       // Adding Sort By Conditions
 
@@ -207,7 +167,7 @@ const projectList = () => {
         payload.filterAnd.push({
           key: appliedFilterValue.searchBy,
           operation: 'LIKE',
-          value: [searchValue + '%'],
+          value: ['%' + searchValue + '%'],
         });
       }
 
@@ -224,7 +184,7 @@ const projectList = () => {
             projectStatus: unstructuredData[i].projectStatus,
             recipientEntity: unstructuredData[i].recipientEntities,
             intImplementingEntity: unstructuredData[i].internationalImplementingEntities,
-            validationStatus: unstructuredData[i].validationStatus ?? '',
+            validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             natImplementingEntity: unstructuredData[i].programme?.natImplementor ?? [],
             estimatedInvestment: unstructuredData[i].programme?.investment,
           });
@@ -241,6 +201,36 @@ const projectList = () => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
       setLoading(false);
+    }
+  };
+
+  // Attach Multiple Activities for a Project
+
+  const attachActivities = async () => {
+    if (toBeAttached.length > 0) {
+      const payload = {
+        projectId: selectedProjectId,
+        activityIds: toBeAttached,
+      };
+      const response: any = await post('national/activities/link', payload);
+      if (response.status === 200 || response.status === 201) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
+        message.open({
+          type: 'success',
+          content: t('activityLinkSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
+        getAllData();
+      }
     }
   };
 
@@ -315,70 +305,6 @@ const projectList = () => {
     }
   }, [toBeAttached]);
 
-  // Popup Menu for Action List
-
-  const actionMenu = (record: any) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: 'View/Validate',
-            icon: <InfoCircleOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                navigate(`/projects/view/${record.projectId}`);
-              }
-            },
-          },
-          {
-            text: 'Attach Activity',
-            icon: <PlusOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                setOpenAttaching(true);
-                setSelectedProjectId(record.projectId);
-                getAttachedActivityIds(record.projectId);
-                setOpenPopoverKey(undefined);
-              }
-            },
-          },
-          {
-            text: 'Edit Project',
-            icon: <EditOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                navigate(`/projects/edit/${record.projectId}`);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) =>
-          !item.isDisabled && (
-            <List.Item onClick={item.click}>
-              <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-              <span>{item.text}</span>
-            </List.Item>
-          )
-        }
-      />
-    );
-  };
-
-  // Controlling Popover visibility
-
-  const shouldPopoverOpen = (key: number) => {
-    if (key === openPopoverKey) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   // Action List Table Columns
 
   const columns = [
@@ -444,19 +370,24 @@ const projectList = () => {
       render: (_: any, record: any) => {
         return (
           <Popover
-            open={shouldPopoverOpen(record.key)}
+            showArrow={false}
+            trigger={'click'}
             placement="bottomRight"
-            content={actionMenu(record)}
-            onOpenChange={() => {
-              setOpenPopoverKey(undefined);
-            }}
+            content={actionMenuWithAttaching(
+              'project',
+              ability,
+              ProjectEntity,
+              record.projectId,
+              getAttachedActivityIds,
+              setOpenAttaching,
+              setSelectedProjectId,
+              navigate,
+              t
+            )}
           >
             <EllipsisOutlined
               rotate={90}
               style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => {
-                setOpenPopoverKey(record.key);
-              }}
             />
           </Popover>
         );
@@ -668,7 +599,7 @@ const projectList = () => {
                 position: ['bottomRight'],
               }}
               handleTableChange={handleTableChange}
-              emptyMessage="No Actions Available"
+              emptyMessage="No Projects Available"
             />
           </Col>
         </Row>

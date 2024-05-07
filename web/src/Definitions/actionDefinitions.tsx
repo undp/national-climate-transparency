@@ -11,4 +11,5 @@ export type ActionMigratedData = {
 export type ActionSelectData = {
   id: string;
   title: string;
+  instrumentType: string;
 };

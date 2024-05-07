@@ -11,9 +11,10 @@ import {
 } from "../enums/activity.enum";
 import { NatImplementor, IntImplementor } from "../enums/shared.enum";
 import { Sector } from "../enums/sector.enum";
+import { EntitySubject } from "./entity.subject";
 
 @Entity("activity")
-export class ActivityEntity {
+export class ActivityEntity implements EntitySubject {
   @PrimaryColumn()
   activityId: string;
 
@@ -59,13 +60,13 @@ export class ActivityEntity {
   @Column({nullable: true})
   etfDescription: string;
 
-	@Column()
+	@Column({type: 'double precision'})
   achievedGHGReduction: number;
 
-  @Column()
+  @Column({type: 'double precision'})
   expectedGHGReduction: number;
 
-  @Column()
+  @Column({ nullable: true })
   comment: string;
 
   @Column("jsonb", { nullable: true })
@@ -101,4 +102,7 @@ export class ActivityEntity {
 
   @OneToMany(() => SupportEntity, (supportEntity) => supportEntity.activity)
   support?: SupportEntity[];
+
+	@Column({ type: "boolean", default: false })
+	validated: boolean;
 }

@@ -14,19 +14,23 @@ import { IntImplementor, NatImplementor, Recipient, SubSector } from "../enums/s
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { HttpException, HttpStatus } from "@nestjs/common";
-
 import { DocumentDto } from "../dtos/document.dto";
 import { KpiDto } from "../dtos/kpi.dto";
 import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { LinkProgrammesDto } from "../dtos/link.programmes.dto";
-// import { OrganisationService } from "../organisation/organisation.service";
 import { ProgrammeViewDto } from "../dtos/programme.view.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { ProjectType } from "../enums/project.enum";
 import { QueryDto } from "../dtos/query.dto";
 import { FilterEntry } from "../dtos/filter.entry";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
+import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
+import { KpiService } from "../kpi/kpi.service";
+import { DocumentEntityDto } from "../dtos/document.entity.dto";
+import { KpiEntity } from "../entities/kpi.entity";
+import { KpiUpdateDto } from "../dtos/kpi.update.dto";
+import { ProgrammeViewEntity } from "../entities/programme.view.entity";
 
 describe('ProgrammeService', () => {
 	let service: ProgrammeService;
@@ -39,6 +43,8 @@ describe('ProgrammeService', () => {
 	let fileUploadServiceMock: Partial<FileUploadService>;
 	let payloadValidatorMock: Partial<PayloadValidator>;
 	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
+	let programmeViewRepositoryMock: Partial<Repository<ProgrammeViewEntity>>;
+	let kpiServiceMock: Partial<KpiService>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -78,14 +84,22 @@ describe('ProgrammeService', () => {
 			unlinkProgrammesFromAction: jest.fn(),
 		}
 
+		kpiServiceMock = {
+			findKpisByCreatorTypeAndCreatorId: jest.fn(),
+		};
+
 		programmeRepositoryMock = {
 			createQueryBuilder: jest.fn(() => ({
+				select: jest.fn().mockReturnThis(),
 				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
 				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				leftJoinAndMapMany: jest.fn().mockReturnThis(),
 				orderBy: jest.fn().mockReturnThis(),
 				offset: jest.fn().mockReturnThis(),
 				limit: jest.fn().mockReturnThis(),
 				getManyAndCount: jest.fn(),
+				getRawMany: jest.fn(),
 			})) as unknown as () => SelectQueryBuilder<ProgrammeEntity>,
 		};
 
@@ -142,6 +156,14 @@ describe('ProgrammeService', () => {
 				{
 					provide: LinkUnlinkService,
 					useValue: linkUnlinkServiceMock,
+				},
+				{
+					provide: getRepositoryToken(ProgrammeViewEntity),
+					useValue: programmeViewRepositoryMock,
+				},
+				{
+					provide: KpiService,
+					useValue: kpiServiceMock,
 				},
 			],
 		}).compile();
@@ -580,7 +602,7 @@ describe('ProgrammeService', () => {
 	});
 
 	it('should unlink programmes from action', async () => {
-		const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
+		const unlinkProgrammesDto: UnlinkProgrammesDto = { programme: '1' };
 		const user = new User();
 		user.sector = [Sector.Agriculture]
 
@@ -590,19 +612,7 @@ describe('ProgrammeService', () => {
 		programme1.path = 'path1';
 		programme1.affectedSectors = [Sector.Agriculture];
 
-		const programme2 = new ProgrammeEntity();
-		programme2.programmeId = '2';
-		programme2.action = new ActionEntity();
-		programme2.path = 'path2';
-		programme2.affectedSectors = [Sector.Agriculture];
-
-		const programme3 = new ProgrammeEntity();
-		programme3.programmeId = '3';
-		programme3.action = new ActionEntity();
-		programme3.path = 'path3';
-		programme3.affectedSectors = [Sector.Agriculture];
-
-		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1]);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -612,10 +622,6 @@ describe('ProgrammeService', () => {
 
 			expect(programme1.action).toBeNull();
 			expect(programme1.path).toBe('');
-			expect(programme2.action).toBeNull();
-			expect(programme2.path).toBe('');
-			expect(programme3.action).toBeNull();
-			expect(programme3.path).toBe('');
 
 			expect(emMock.save).toHaveBeenCalledTimes(6);
 
@@ -632,7 +638,7 @@ describe('ProgrammeService', () => {
 	});
 
 	it('should throw an exception when not linked programme sent for unlinking', async () => {
-		const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
+		const unlinkProgrammesDto: UnlinkProgrammesDto = { programme: '1' };
 		const user = new User();
 		user.sector = [Sector.Agriculture]
 		
@@ -642,19 +648,7 @@ describe('ProgrammeService', () => {
 		programme1.path = '';
 		programme1.affectedSectors = [Sector.Agriculture];
 
-		const programme2 = new ProgrammeEntity();
-		programme2.programmeId = '2';
-		programme2.action = new ActionEntity();
-		programme2.path = 'path2';
-		programme2.affectedSectors = [Sector.Agriculture];
-
-		const programme3 = new ProgrammeEntity();
-		programme3.programmeId = '3';
-		programme3.action = new ActionEntity();
-		programme3.path = 'path3';
-		programme3.affectedSectors = [Sector.Agriculture];
-
-		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1]);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -730,7 +724,7 @@ describe('ProgrammeService', () => {
 	});
 
 	it('should throw an exception when mismatch sector user trying to unlink programme', async () => {
-		const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
+		const unlinkProgrammesDto: UnlinkProgrammesDto = { programme: '1' };
 		const user = new User();
 		user.sector = [Sector.Agriculture];
 
@@ -738,21 +732,9 @@ describe('ProgrammeService', () => {
 		programme1.programmeId = '1';
 		programme1.action = new ActionEntity();;
 		programme1.path = 'path1';
-		programme1.affectedSectors = [Sector.Agriculture];
+		programme1.affectedSectors = [Sector.CrossCutting];
 
-		const programme2 = new ProgrammeEntity();
-		programme2.programmeId = '2';
-		programme2.action = new ActionEntity();
-		programme2.path = 'path2';
-		programme2.affectedSectors = [Sector.Energy];
-
-		const programme3 = new ProgrammeEntity();
-		programme3.programmeId = '3';
-		programme3.action = new ActionEntity();
-		programme3.path = 'path3';
-		programme3.affectedSectors = [Sector.Agriculture];
-
-		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1]);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -772,7 +754,7 @@ describe('ProgrammeService', () => {
 		}
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
 			'programme.cannotUnlinkNotRelatedProgrammes',
-			["2"],
+			["1"],
 		);
 		expect(entityManagerMock.transaction).toBeCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
@@ -872,7 +854,6 @@ describe('ProgrammeService', () => {
 		);
 	});
 
-
 	it('should build the query correctly without size and page', async () => {
 		const queryDto = new QueryDto();
 		const filterAnd: FilterEntry[] = [];
@@ -887,6 +868,7 @@ describe('ProgrammeService', () => {
 		const mockQueryBuilder = {
 			where: jest.fn().mockReturnThis(),
 			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
 			orderBy: jest.fn().mockReturnThis(),
 			offset: jest.fn().mockReturnThis(),
 			limit: jest.fn().mockReturnThis(),
@@ -921,6 +903,7 @@ describe('ProgrammeService', () => {
 		const mockQueryBuilder = {
 			where: jest.fn().mockReturnThis(),
 			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
 			orderBy: jest.fn().mockReturnThis(),
 			offset: jest.fn().mockReturnThis(),
 			limit: jest.fn().mockReturnThis(),
@@ -957,6 +940,7 @@ describe('ProgrammeService', () => {
 		const mockQueryBuilder = {
 			where: jest.fn().mockReturnThis(),
 			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
 			orderBy: jest.fn().mockReturnThis(),
 			offset: jest.fn().mockReturnThis(),
 			limit: jest.fn().mockReturnThis(),
@@ -977,5 +961,260 @@ describe('ProgrammeService', () => {
 		expect(programmeRepositoryMock.createQueryBuilder().getManyAndCount).toHaveBeenCalled();
 	});
 
+	// Need to refined
 
+	// it('should update the programme without documents', async () => {
+	// 	const user = new User();
+	// 	user.id = 2;
+
+	// 	const programmeUpdateDto = new ProgrammeUpdateDto();
+	// 	programmeUpdateDto.title = "test";
+	// 	programmeUpdateDto.description = "test description";
+	// 	programmeUpdateDto.objective = "test objective";
+	// 	programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+	// 	programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+	// 	programmeUpdateDto.startYear = 2024;
+	// 	programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+	// 	programmeUpdateDto.investment = 1000;
+	// 	programmeUpdateDto.comments = "test comment"
+
+	// 	jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(new ProgrammeEntity());
+
+	// 	entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+	// 		const emMock = {
+	// 			save: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+	// 		};
+	// 		const savedAction = await callback(emMock);
+	// 		expect(emMock.save).toHaveBeenNthCalledWith(1, programmeUpdateDto);
+	// 		expect(emMock.save).toHaveBeenCalledTimes(2);
+	// 		return savedAction;
+	// 	});
+
+	// 	const result = await service.updateProgramme(programmeUpdateDto, user);
+	// 	expect(result.statusCode).toEqual(HttpStatus.OK);
+
+	// 	expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+	// 	expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+	// 	expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+	// 	expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	// })
+
+	// it('should remove the action documents when user remove the documents', async () => {
+	// 	const user = new User();
+	// 	user.id = 2;
+
+	// 	const programmeUpdateDto = new ProgrammeUpdateDto();
+	// 	programmeUpdateDto.title = "test";
+	// 	programmeUpdateDto.description = "test description";
+	// 	programmeUpdateDto.objective = "test objective";
+	// 	programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+	// 	programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+	// 	programmeUpdateDto.startYear = 2024;
+	// 	programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+	// 	programmeUpdateDto.investment = 1000;
+	// 	programmeUpdateDto.comments = "test comment"
+	// 	programmeUpdateDto.removedDocuments = ["www.test.com/doc1"];
+
+	// 	const programmeUpdateEntity = new ProgrammeEntity();
+	// 	programmeUpdateEntity.title = "test";
+	// 	programmeUpdateEntity.description = "test description";
+	// 	programmeUpdateEntity.objective = "test objective";
+	// 	programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+	// 	programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+	// 	programmeUpdateEntity.startYear = 2024;
+	// 	programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+	// 	programmeUpdateEntity.investment = 1000;
+	// 	programmeUpdateEntity.comments = "test comment"
+	// 	programmeUpdateEntity.documents = null;
+
+	// 	const documentDto = new DocumentEntityDto();
+	// 	documentDto.url = "www.test.com/doc1";
+	// 	documentDto.title = "doc title"
+
+	// 	const programmeEntity = new ProgrammeEntity();
+	// 	programmeEntity.title = "test";
+	// 	programmeEntity.description = "test description";
+	// 	programmeEntity.objective = "test objective";
+	// 	programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+	// 	programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+	// 	programmeEntity.startYear = 2020;
+	// 	programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+	// 	programmeEntity.investment = 100;
+	// 	programmeEntity.comments = "test comment"
+	// 	programmeEntity.documents = [documentDto];
+
+
+	// 	jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(programmeEntity);
+
+	// 	entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+	// 		const emMock = {
+	// 			save: jest.fn().mockResolvedValueOnce(programmeUpdateEntity),
+	// 			remove: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+	// 		};
+	// 		const savedAction = await callback(emMock);
+	// 		expect(emMock.save).toHaveBeenCalledTimes(2);
+	// 		return savedAction;
+	// 	});
+
+	// 	const result = await service.updateProgramme(programmeUpdateDto, user);
+	// 	expect(result.statusCode).toEqual(HttpStatus.OK);
+
+	// 	expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+	// 	expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+	// 	expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+	// 	expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	// })
+
+	// it('should update the documents in action when user add new documents', async () => {
+	// 	const user = new User();
+	// 	user.id = 2;
+
+	// 	const documentDto = new DocumentEntityDto();
+	// 	documentDto.url = "www.test.com/doc1";
+	// 	documentDto.title = "doc title"
+
+	// 	const addedDocumentDto = new DocumentDto();
+	// 	addedDocumentDto.data = documentData;
+	// 	addedDocumentDto.title = "doc title"
+
+	// 	const programmeUpdateDto = new ProgrammeUpdateDto();
+	// 	programmeUpdateDto.title = "test";
+	// 	programmeUpdateDto.description = "test description";
+	// 	programmeUpdateDto.objective = "test objective";
+	// 	programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+	// 	programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+	// 	programmeUpdateDto.startYear = 2024;
+	// 	programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+	// 	programmeUpdateDto.investment = 1000;
+	// 	programmeUpdateDto.comments = "test comment"
+	// 	programmeUpdateDto.newDocuments = [addedDocumentDto]
+
+	// 	const programmeUpdateEntity = new ProgrammeEntity();
+	// 	programmeUpdateEntity.title = "test";
+	// 	programmeUpdateEntity.description = "test description";
+	// 	programmeUpdateEntity.objective = "test objective";
+	// 	programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+	// 	programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+	// 	programmeUpdateEntity.startYear = 2024;
+	// 	programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+	// 	programmeUpdateEntity.investment = 1000;
+	// 	programmeUpdateEntity.comments = "test comment"
+	// 	programmeUpdateEntity.documents = [documentDto, addedDocumentDto];
+
+
+	// 	const programmeEntity = new ProgrammeEntity();
+	// 	programmeEntity.title = "test";
+	// 	programmeEntity.description = "test description";
+	// 	programmeEntity.objective = "test objective";
+	// 	programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+	// 	programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+	// 	programmeEntity.startYear = 2020;
+	// 	programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+	// 	programmeEntity.investment = 100;
+	// 	programmeEntity.comments = "test comment"
+	// 	programmeEntity.documents = [documentDto];
+
+	// 	jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(programmeEntity);
+
+	// 	entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+	// 		const emMock = {
+	// 			save: jest.fn().mockResolvedValueOnce(programmeUpdateEntity),
+	// 			remove: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+	// 		};
+	// 		const savedAction = await callback(emMock);
+	// 		expect(emMock.save).toHaveBeenCalledTimes(2);
+	// 		return savedAction;
+	// 	});
+
+	// 	const result = await service.updateProgramme(programmeUpdateDto, user);
+	// 	expect(result.statusCode).toEqual(HttpStatus.OK);
+
+	// 	expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+	// 	expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
+	// 	expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+	// 	expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	// })
+
+	// it('should update kpis in action when user updated the Kpis', async () => {
+	// 	const user = new User();
+	// 	user.id = 2;
+
+	// 	const kpiDto1 = new KpiEntity();
+	// 	kpiDto1.kpiId = 1;
+	// 	kpiDto1.name = "KPI 1";
+	// 	kpiDto1.creatorType = "action";
+	// 	kpiDto1.expected = 100;
+
+	// 	const kpiDto2 = new KpiEntity();
+	// 	kpiDto2.kpiId = 2;
+	// 	kpiDto2.name = "KPI 2";
+	// 	kpiDto2.creatorType = "action";
+	// 	kpiDto2.expected = 100;
+
+	// 	const kpiAdded = new KpiUpdateDto();
+	// 	kpiDto2.name = "KPI Added";
+	// 	kpiDto2.creatorType = "action";
+	// 	kpiDto2.expected = 300;
+
+	// 	const programmeUpdateDto = new ProgrammeUpdateDto();
+	// 	programmeUpdateDto.title = "test";
+	// 	programmeUpdateDto.description = "test description";
+	// 	programmeUpdateDto.objective = "test objective";
+	// 	programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+	// 	programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+	// 	programmeUpdateDto.startYear = 2024;
+	// 	programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
+	// 	programmeUpdateDto.investment = 1000;
+	// 	programmeUpdateDto.comments = "test comment"
+	// 	programmeUpdateDto.kpis = [kpiDto1, kpiAdded]
+
+	// 	const programmeUpdateEntity = new ProgrammeEntity();
+	// 	programmeUpdateEntity.title = "test";
+	// 	programmeUpdateEntity.description = "test description";
+	// 	programmeUpdateEntity.objective = "test objective";
+	// 	programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+	// 	programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+	// 	programmeUpdateEntity.startYear = 2024;
+	// 	programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+	// 	programmeUpdateEntity.investment = 1000;
+	// 	programmeUpdateEntity.comments = "test comment"
+
+	// 	const programmeEntity = new ProgrammeEntity();
+	// 	programmeEntity.title = "test";
+	// 	programmeEntity.description = "test description";
+	// 	programmeEntity.objective = "test objective";
+	// 	programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
+	// 	programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
+	// 	programmeEntity.startYear = 2020;
+	// 	programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
+	// 	programmeEntity.investment = 100;
+	// 	programmeEntity.comments = "test comment"
+
+
+	// 	jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(programmeEntity);
+	// 	jest.spyOn(kpiServiceMock, 'findKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2])
+
+	// 	entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+	// 		const emMock = {
+	// 			save: jest.fn().mockResolvedValueOnce(programmeUpdateEntity),
+	// 			remove: jest.fn().mockResolvedValueOnce(programmeUpdateDto),
+	// 		};
+	// 		const savedAction = await callback(emMock);
+	// 		expect(emMock.save).toHaveBeenCalledTimes(5);
+	// 		expect(emMock.remove).toHaveBeenCalledTimes(1);
+	// 		return savedAction;
+	// 	});
+
+	// 	const result = await service.updateProgramme(programmeUpdateDto, user);
+	// 	expect(result.statusCode).toEqual(HttpStatus.OK);
+
+	// 	expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+	// 	expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
+	// 	expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
+	// 	expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+
+	// })
 })

@@ -4,7 +4,7 @@ import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
 import { AppstoreOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import { InstrumentType, ActionStatus, NatAnchor } from '../../../Enums/action.enum';
+import { InstrumentType, ActionStatus, NatAnchor, Action } from '../../../Enums/action.enum';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
@@ -23,6 +23,8 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
 import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 import { getProgrammeTableColumns } from '../../../Definitions/columns/programmeColumns';
+import { useAbilityContext } from '../../../Casl/Can';
+import { ActionEntity } from '../../../Entities/action';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 
 const { Option } = Select;
@@ -36,16 +38,20 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const { t } = useTranslation(['actionForm']);
 
   const isView: boolean = method === 'view' ? true : false;
-  const formTitle = getFormTitle('Action', method)[0];
-  const formDesc = getFormTitle('Action', method)[1];
+  const formTitle = getFormTitle('Action', method);
 
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
+  const ability = useAbilityContext();
   const { entId } = useParams();
 
   // Form Validation Rules
 
   const validation = getValidationRules(method);
+
+  // Entity Validation Status
+
+  const [isValidated, setIsValidated] = useState<boolean>(false);
 
   // Form General State
 
@@ -60,10 +66,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 
-  // Popover state
-
-  const [detachOpen, setDetachOpen] = useState<boolean[]>([]);
-
   // Programme Attachments state
 
   const [allProgramIds, setAllProgramIdList] = useState<string[]>([]);
@@ -74,7 +76,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
-  // Activity Attachment State
+  // Activity Attachment state
 
   const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
@@ -129,42 +131,54 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchData = async () => {
       if (method !== 'create' && entId) {
-        const response: any = await get(`national/actions/${entId}`);
-        if (response.status === 200 || response.status === 201) {
-          const entityData: any = response.data;
+        try {
+          const response: any = await get(`national/actions/${entId}`);
+          if (response.status === 200 || response.status === 201) {
+            const entityData: any = response.data;
 
-          // Populating Action owned data fields
-          form.setFieldsValue({
-            title: entityData.title,
-            description: entityData.description,
-            objective: entityData.objective,
-            instrumentType: entityData.instrumentType,
-            status: entityData.status,
-            startYear: entityData.startYear,
-            natAnchor: entityData.natAnchor,
-          });
-
-          if (entityData.documents?.length > 0) {
-            const tempFiles: { key: string; title: string; url: string }[] = [];
-            entityData.documents.forEach((document: any) => {
-              tempFiles.push({
-                key: document.createdTime,
-                title: document.title,
-                url: document.url,
-              });
+            // Populating Action owned data fields
+            form.setFieldsValue({
+              title: entityData.title,
+              description: entityData.description,
+              objective: entityData.objective,
+              instrumentType: entityData.instrumentType,
+              status: entityData.status,
+              startYear: entityData.startYear,
+              natAnchor: entityData.natAnchor,
             });
-            setStoredFiles(tempFiles);
-          }
 
-          // Populating Migrated Fields (Will be overwritten when attachments change)
-          setActionMigratedData({
-            type: entityData.migratedData?.types ?? [],
-            ghgsAffected: entityData.migratedData?.ghgsAffected,
-            estimatedInvestment: entityData.migratedData?.totalInvestment,
-            achievedReduction: entityData.migratedData?.achievedGHGReduction,
-            expectedReduction: entityData.migratedData?.expectedGHGReduction,
-            natImplementer: entityData.migratedData?.natImplementors ?? [],
-            sectorsAffected: entityData.migratedData?.sectorsAffected ?? [],
+            setIsValidated(entityData.validated ?? false);
+
+            if (entityData.documents?.length > 0) {
+              const tempFiles: { key: string; title: string; url: string }[] = [];
+              entityData.documents.forEach((document: any) => {
+                tempFiles.push({
+                  key: document.createdTime,
+                  title: document.title,
+                  url: document.url,
+                });
+              });
+              setStoredFiles(tempFiles);
+            }
+
+            // Populating Migrated Fields (Will be overwritten when attachments change)
+            setActionMigratedData({
+              type: entityData.migratedData?.types ?? [],
+              ghgsAffected: entityData.migratedData?.ghgsAffected,
+              estimatedInvestment: entityData.migratedData?.totalInvestment,
+              achievedReduction: entityData.migratedData?.achievedGHGReduction,
+              expectedReduction: entityData.migratedData?.expectedGHGReduction,
+              natImplementer: entityData.migratedData?.natImplementors ?? [],
+              sectorsAffected: entityData.migratedData?.sectorsAffected ?? [],
+            });
+          }
+        } catch {
+          navigate('/actions');
+          message.open({
+            type: 'error',
+            content: t('noSuchEntity'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
       }
@@ -272,7 +286,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       ghgsAffected: '',
     };
 
-    const fetchData = async () => {
+    const fetchAttachmentData = async () => {
       if (tempProgramIds.length > 0) {
         tempProgramIds.forEach((progId) => {
           payload.filterOr.push({
@@ -291,9 +305,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             programmeId: prg.programmeId,
             actionId: prg.action?.actionId,
             title: prg.title,
-            type: prg.migratedData[0]?.types,
+            type: prg.migratedData[0]?.types ?? [],
             status: prg.programmeStatus,
-            subSectorsAffected: prg.affectedSubSector,
+            subSectorsAffected: prg.affectedSubSector ?? [],
             estimatedInvestment: prg.investment,
           });
 
@@ -330,9 +344,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         setActionMigratedData(tempMigratedData);
       }
     };
-    fetchData();
+    fetchAttachmentData();
 
-    setDetachOpen(Array(tempProgramIds.length).fill(false));
+    // Setting Pagination
+    setCurrentPage(1);
+    setPageSize(10);
   }, [tempProgramIds]);
 
   useEffect(() => {
@@ -382,7 +398,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     const toDetach = attachedProgramIds.filter((prg) => !tempProgramIds.includes(prg));
 
     if (toDetach.length > 0) {
-      await post('national/programmes/unlink', { programmes: toDetach });
+      toDetach.forEach(async (prg) => {
+        await post('national/programmes/unlink', { programme: prg });
+      });
     }
 
     if (toAttach.length > 0) {
@@ -483,13 +501,45 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         duration: 3,
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      setWaitingForBE(false);
+      navigate('/actions');
     }
   };
 
   // Entity Validate
 
-  const validateEntity = () => {
-    console.log('Validate Clicked');
+  const validateEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await post('national/actions/validate', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: 'Successfully Validated !',
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/actions');
+        }
+      }
+    } catch {
+      message.open({
+        type: 'error',
+        content: `${entId} Validation Failed`,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    }
   };
 
   // Entity Delete
@@ -500,15 +550,15 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Detach Programme
 
-  const handleDetachOpen = (record: ProgrammeData) => {
-    const newOpenList = Array(tempProgramIds.length).fill(false);
-    newOpenList[tempProgramIds.indexOf(record.programmeId)] = true;
-    setDetachOpen(newOpenList);
-  };
-
   const detachProgramme = async (prgId: string) => {
     const filteredIds = tempProgramIds.filter((id) => id !== prgId);
     setTempProgramIds(filteredIds);
+  };
+
+  // Detach Activity
+
+  const detachActivity = async (actId: string) => {
+    console.log(actId);
   };
 
   // Add New KPI
@@ -556,17 +606,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Programme Column Definition
 
-  const progTableColumns = getProgrammeTableColumns(
-    isView,
-    detachProgramme,
-    handleDetachOpen,
-    detachOpen,
-    tempProgramIds
-  );
+  const progTableColumns = getProgrammeTableColumns(isView, detachProgramme);
 
   // Activity Column Definition
 
-  const activityTableColumns = getActivityTableColumns();
+  const activityTableColumns = getActivityTableColumns(isView, detachActivity);
 
   // Support Column Definition
 
@@ -597,7 +641,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
-        <div className="body-sub-title">{t(formDesc)}</div>
       </div>
       {!waitingForBE ? (
         <div className="action-form">
@@ -668,6 +711,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   >
                     <Select
                       size="large"
+                      mode="multiple"
                       style={{ fontSize: inputFontSize }}
                       allowClear
                       disabled={isView}
@@ -769,6 +813,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   >
                     <Select
                       size="large"
+                      mode="multiple"
                       style={{ fontSize: inputFontSize }}
                       allowClear
                       disabled={isView}
@@ -792,7 +837,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 isSingleColumn={false}
                 usedIn={method}
                 buttonText={t('upload')}
-                acceptedFiles=".xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg"
                 storedFiles={storedFiles}
                 uploadedFiles={uploadedFiles}
                 setUploadedFiles={setUploadedFiles}
@@ -826,7 +870,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row>
                 <Col span={24}>
                   <LayoutTable
-                    tableData={programData}
+                    tableData={programData.slice(
+                      (currentPage - 1) * pageSize,
+                      (currentPage - 1) * pageSize + pageSize
+                    )}
                     columns={progTableColumns}
                     loading={false}
                     pagination={{
@@ -1036,20 +1083,23 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('back')}
                   </Button>
                 </Col>
-                <Col span={2.5}>
-                  <Form.Item>
-                    <Button
-                      type="primary"
-                      size="large"
-                      block
-                      onClick={() => {
-                        validateEntity();
-                      }}
-                    >
-                      {t('validate')}
-                    </Button>
-                  </Form.Item>
-                </Col>
+                {ability.can(Action.Validate, ActionEntity) && (
+                  <Col span={2.5}>
+                    <Form.Item>
+                      <Button
+                        disabled={isValidated}
+                        type="primary"
+                        size="large"
+                        block
+                        onClick={() => {
+                          validateEntity();
+                        }}
+                      >
+                        {t('validate')}
+                      </Button>
+                    </Form.Item>
+                  </Col>
+                )}
               </Row>
             )}
             {method === 'update' && (

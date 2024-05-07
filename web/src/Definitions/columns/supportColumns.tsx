@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 export const getSupportTableColumns = () => {
-  const { t } = useTranslation(['projectForm']);
+  const { t } = useTranslation(['formTable']);
 
   const supportTableColumns = [
     { title: t('supportIdTitle'), dataIndex: 'supportId', key: 'activityId' },

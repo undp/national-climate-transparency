@@ -6,6 +6,7 @@ import {
     Body,
 		Get,
 		Param,
+		Put,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -18,6 +19,8 @@ import { LinkProjectsDto } from "../dtos/link.projects.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
 import { QueryDto } from "src/dtos/query.dto";
+import { ProjectUpdateDto } from "src/dtos/projectUpdate.dto";
+import { ValidateDto } from "src/dtos/validate.dto";
 
 @ApiTags("Projects")
 @ApiBearerAuth()
@@ -50,11 +53,27 @@ export class ProjectController {
 			return this.projectService.getProjectViewData(id, req.abilityCondition);
 		}
 
+		@ApiBearerAuth('api_key')
+		@ApiBearerAuth()
+		@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProjectEntity))
+		@Put("update")
+		updateProject(@Body() projectUpdateDto: ProjectUpdateDto, @Request() req) {
+			return this.projectService.updateProject(projectUpdateDto, req.user);
+		}
+
 		@ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectEntity, true))
     @Get('link/eligible')
     findEligibleProjectsForLinking(@Request() req) {
       return this.projectService.findProjectsEligibleForLinking();
+    }
+
+		@ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, ProjectEntity))
+    @Post("validate")
+    validateProjects(@Body() validateDto: ValidateDto, @Request() req) {
+        return this.projectService.validateProject(validateDto, req.user);
     }
 
     @ApiBearerAuth('api_key')

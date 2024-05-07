@@ -3,28 +3,8 @@ import '../../../Styles/app.scss';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import './programmeList.scss';
 import { Action } from '../../../Enums/action.enum';
-import {
-  Button,
-  Col,
-  Row,
-  Input,
-  Dropdown,
-  Popover,
-  List,
-  Typography,
-  message,
-  Radio,
-  Space,
-  MenuProps,
-} from 'antd';
-import {
-  EditOutlined,
-  EllipsisOutlined,
-  FilterOutlined,
-  InfoCircleOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { Button, Col, Row, Input, Dropdown, Popover, message, Radio, Space, MenuProps } from 'antd';
+import { EllipsisOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -34,6 +14,7 @@ import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import { ProgrammeEntity } from '../../../Entities/programme';
 import { Layers } from 'react-bootstrap-icons';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
+import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
 
 interface Item {
   key: number;
@@ -58,12 +39,11 @@ const programmeList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['programmeList']);
+  const { t } = useTranslation(['programmeList', 'tableAction']);
 
   // General Page State
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [openPopoverKey, setOpenPopoverKey] = useState<number>();
 
   // Table Data State
 
@@ -102,25 +82,6 @@ const programmeList = () => {
   const [selectedProgrammeId, setSelectedProgrammeId] = useState<string>();
   const [attachedProjectIds, setAttachedProjectIds] = useState<string[]>([]);
   const [toBeAttached, setToBeAttached] = useState<string[]>([]);
-
-  // Attach Multiple Projects for a Project
-
-  const attachProjects = async () => {
-    const payload = {
-      programmeId: selectedProgrammeId,
-      projectIds: toBeAttached,
-    };
-    const response: any = await post('national/projects/link', payload);
-    if (response.status === 200 || response.status === 201) {
-      message.open({
-        type: 'success',
-        content: t('projectLinkSuccess'),
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-      navigate('/programmes');
-    }
-  };
 
   // Free Prg Read from DB
 
@@ -166,7 +127,7 @@ const programmeList = () => {
   const getAllData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize };
+      const payload: any = { page: currentPage, size: pageSize + 1 };
 
       // Adding Sort By Conditions
 
@@ -204,7 +165,7 @@ const programmeList = () => {
         payload.filterAnd.push({
           key: appliedFilterValue.searchBy,
           operation: 'LIKE',
-          value: [searchValue + '%'],
+          value: ['%' + searchValue + '%'],
         });
       }
 
@@ -219,7 +180,7 @@ const programmeList = () => {
             actionId: unstructuredData[i].action?.actionId,
             title: unstructuredData[i].title,
             status: unstructuredData[i].programmeStatus,
-            validationStatus: unstructuredData[i].validationStatus ?? '',
+            validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             subSectorsAffected: unstructuredData[i].affectedSubSector,
             investment: unstructuredData[i].investment,
             type: unstructuredData[i].migratedData[0]?.types ?? [],
@@ -237,6 +198,34 @@ const programmeList = () => {
         style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
       });
       setLoading(false);
+    }
+  };
+
+  // Attach Multiple Projects for a Project
+
+  const attachProjects = async () => {
+    const payload = {
+      programmeId: selectedProgrammeId,
+      projectIds: toBeAttached,
+    };
+    const response: any = await post('national/projects/link', payload);
+    if (response.status === 200 || response.status === 201) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      message.open({
+        type: 'success',
+        content: t('projectLinkSuccess'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      getAllData();
     }
   };
 
@@ -312,70 +301,6 @@ const programmeList = () => {
     }
   }, [toBeAttached]);
 
-  // Popup Menu for Action List
-
-  const actionMenu = (record: any) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: 'View/Validate',
-            icon: <InfoCircleOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                navigate(`/programmes/view/${record.programmeId}`);
-              }
-            },
-          },
-          {
-            text: 'Attach Project',
-            icon: <PlusOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                setOpenAttaching(true);
-                setSelectedProgrammeId(record.programmeId);
-                getAttachedProjectIds(record.programmeId);
-                setOpenPopoverKey(undefined);
-              }
-            },
-          },
-          {
-            text: 'Edit Programme',
-            icon: <EditOutlined style={{ color: '#9155FD' }} />,
-            isDisabled: false,
-            click: () => {
-              {
-                navigate(`/programmes/edit/${record.programmeId}`);
-              }
-            },
-          },
-        ]}
-        renderItem={(item) =>
-          !item.isDisabled && (
-            <List.Item onClick={item.click}>
-              <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-              <span>{item.text}</span>
-            </List.Item>
-          )
-        }
-      />
-    );
-  };
-
-  // Controlling Popover visibility
-
-  const shouldPopoverOpen = (key: number) => {
-    if (key === openPopoverKey) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   // Action List Table Columns
 
   const columns = [
@@ -432,16 +357,24 @@ const programmeList = () => {
       render: (_: any, record: any) => {
         return (
           <Popover
-            open={shouldPopoverOpen(record.key)}
+            showArrow={false}
+            trigger={'click'}
             placement="bottomRight"
-            content={actionMenu(record)}
+            content={actionMenuWithAttaching(
+              'programme',
+              ability,
+              ProgrammeEntity,
+              record.programmeId,
+              getAttachedProjectIds,
+              setOpenAttaching,
+              setSelectedProgrammeId,
+              navigate,
+              t
+            )}
           >
             <EllipsisOutlined
               rotate={90}
               style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-              onClick={() => {
-                setOpenPopoverKey(record.key);
-              }}
             />
           </Popover>
         );

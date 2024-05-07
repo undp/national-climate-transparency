@@ -17,6 +17,7 @@ import { ProgrammeService } from './programme.service';
 import { ValidationModule } from '../validation/validation.module';
 import { ActionModule } from '../action/action.module';
 import { ProgrammeViewEntity } from 'src/entities/programme.view.entity';
+import { KpiModule } from 'src/kpi/kpi.module';
 // import { OrganisationModule } from 'src/organisation/organisation.module';
 
 @Module({
@@ -45,7 +46,7 @@ import { ProgrammeViewEntity } from 'src/entities/programme.view.entity';
         forwardRef(() => ActionModule),
         FileHandlerModule,
         ValidationModule,
-        // OrganisationModule
+        KpiModule
     ],
     providers: [
         ProgrammeService

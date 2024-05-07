@@ -9,6 +9,7 @@ import { LogEventType, EntityType } from "../enums/shared.enum";
 import { EntityManager } from "typeorm";
 import { LinkActivitiesDto } from "src/dtos/link.activities.dto";
 import { UnlinkActivitiesDto } from "src/dtos/unlink.activities.dto";
+import { Sector } from "src/enums/sector.enum";
 
 @Injectable()
 export class LinkUnlinkService {
@@ -17,9 +18,11 @@ export class LinkUnlinkService {
 		action: ActionEntity,
 		programmes: ProgrammeEntity[],
 		payload: any,
+		allLinkedProgrammes: ProgrammeEntity[],
 		user: User,
 		entityManager: EntityManager
 	) {
+		const sectorsSet = new Set<Sector>();
 		const prog = await entityManager
 			.transaction(async (em) => {
 				for (const programme of programmes) {
@@ -28,6 +31,9 @@ export class LinkUnlinkService {
 					const linkedProgramme = await em.save<ProgrammeEntity>(programme);
 
 					if (linkedProgramme) {
+						//add sectors to action
+						programme.affectedSectors.forEach(sector => sectorsSet.add(sector));
+
 						if (programme.activities && programme.activities.length > 0) {
 							// update each activity's path that are directly linked to the programme
 							for (const activity of programme.activities) {
@@ -62,61 +68,80 @@ export class LinkUnlinkService {
 						);
 					}
 				}
+
+				if (allLinkedProgrammes) {
+					// Iterate over each programme and add its affected sectors to the set
+					allLinkedProgrammes.forEach(programme => {
+						programme.affectedSectors.forEach(sector => {
+							sectorsSet.add(sector);
+						});
+					});
+				}
+				action.sectors = Array.from(sectorsSet);
+				await em.save<ActionEntity>(action);
 			});
 	}
 
 	async unlinkProgrammesFromAction(
-		programmes: ProgrammeEntity[],
+		programme: ProgrammeEntity,
 		payload: any,
+		allLinkedProgrammes: ProgrammeEntity[],
 		user: User,
 		entityManager: EntityManager
 	) {
 		const prog = await entityManager
 			.transaction(async (em) => {
-				for (const programme of programmes) {
-					programme.action = null;
-					programme.path = "";
-					const unlinkedProgramme = await em.save<ProgrammeEntity>(programme);
+				const action = programme.action; const uniqueAffectedSectorsSet = new Set<Sector>();
+				allLinkedProgrammes.forEach(programme => {
+					programme.affectedSectors.forEach(sector => {
+						uniqueAffectedSectorsSet.add(sector);
+					});
+				});
+				action.sectors = Array.from(uniqueAffectedSectorsSet);
+				await em.save<ActionEntity>(action);
 
-					if (unlinkedProgramme) {
-						if (programme.activities && programme.activities.length > 0) {
-							// update each activity's path that are directly linked to the programme
-							for (const activity of programme.activities) {
-								const parts = activity.path.split(".");
-								activity.path = ["_", parts[1], parts[2]].join(".");
-								await em.save<ActivityEntity>(activity);
-							}
+				programme.action = null;
+				programme.path = "";
+				const unlinkedProgramme = await em.save<ProgrammeEntity>(programme);
+
+				if (unlinkedProgramme) {
+					if (programme.activities && programme.activities.length > 0) {
+						// update each activity's path that are directly linked to the programme
+						for (const activity of programme.activities) {
+							const parts = activity.path.split(".");
+							activity.path = ["_", parts[1], parts[2]].join(".");
+							await em.save<ActivityEntity>(activity);
 						}
-						if (programme.projects && programme.projects.length > 0) {
-							for (const project of programme.projects) {
-								// update project's path
-								const parts = project.path.split(".");
-								// const partOne = parts[0].replace("_", action.actionId);
-								project.path = ["_", parts[1]].join(".");
-								await em.save<ProjectEntity>(project);
-
-								// update each activity's path that are linked to the project
-								if (project.activities && project.activities.length > 0) {
-									for (const activity of project.activities) {
-										const parts = activity.path.split(".");
-										// const partOne = parts[0].replace("_", action.actionId);
-										activity.path = ["_", parts[1], parts[2]].join(".");
-										await em.save<ActivityEntity>(activity);
-									}
-								}
-
-							}
-						}
-						await em.save<LogEntity>(
-							this.buildLogEntity(
-								LogEventType.UNLINKED_FROM_ACTION,
-								EntityType.PROGRAMME,
-								programme.programmeId,
-								user.id,
-								payload
-							)
-						);
 					}
+					if (programme.projects && programme.projects.length > 0) {
+						for (const project of programme.projects) {
+							// update project's path
+							const parts = project.path.split(".");
+							// const partOne = parts[0].replace("_", action.actionId);
+							project.path = ["_", parts[1]].join(".");
+							await em.save<ProjectEntity>(project);
+
+							// update each activity's path that are linked to the project
+							if (project.activities && project.activities.length > 0) {
+								for (const activity of project.activities) {
+									const parts = activity.path.split(".");
+									// const partOne = parts[0].replace("_", action.actionId);
+									activity.path = ["_", parts[1], parts[2]].join(".");
+									await em.save<ActivityEntity>(activity);
+								}
+							}
+
+						}
+					}
+					await em.save<LogEntity>(
+						this.buildLogEntity(
+							LogEventType.UNLINKED_FROM_ACTION,
+							EntityType.PROGRAMME,
+							programme.programmeId,
+							user.id,
+							payload
+						)
+					);
 				}
 			});
 	}

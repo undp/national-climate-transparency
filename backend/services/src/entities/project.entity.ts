@@ -59,4 +59,7 @@ export class ProjectEntity {
   programme: ProgrammeEntity;
 
 	activities?: ActivityEntity[];
+
+	@Column({ type: "boolean", default: false })
+	validated: boolean;
 }

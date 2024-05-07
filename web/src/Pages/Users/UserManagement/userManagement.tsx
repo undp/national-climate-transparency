@@ -7,21 +7,20 @@ import {
   PlusOutlined,
   KeyOutlined,
   StarOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import {
   Button,
   Col,
   Dropdown,
-  Empty,
+  Input,
   List,
   MenuProps,
   message,
-  PaginationProps,
   Popover,
   Radio,
   Row,
   Space,
-  Table,
   Typography,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -44,7 +43,6 @@ import { useUserContext } from '../../../Context/UserInformationContext/userInfo
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { useTranslation } from 'react-i18next';
 import UserActionConfirmationModel from '../../../Components/Models/userActionConfirmationModel';
-import Search from 'antd/lib/input/Search';
 import { useEffect, useState } from 'react';
 import { UserTableDataType } from '../../../Definitions/userManagement.definitions';
 import { plainToClass } from 'class-transformer';
@@ -56,6 +54,12 @@ import './userManagementComponent.scss';
 import '../../../Styles/common.table.scss';
 import { UserState } from '../../../Enums/user.state.enum';
 import { Role } from '../../../Enums/role.enum';
+import LayoutTable from '../../../Components/common/Table/layout.table';
+
+interface Filter {
+  searchBy: string;
+  roleFilter: string;
+}
 
 const UserManagement = () => {
   const navigate = useNavigate();
@@ -80,27 +84,48 @@ const UserManagement = () => {
     navigate('/userManagement/addUSer');
   };
 
+  const ability = useAbilityContext();
+  const { userInfoState } = useUserContext();
   const { post, put } = useConnection();
-  const [totalUser, setTotalUser] = useState<number>();
+
+  // Users List Page State
+
   const [loading, setLoading] = useState<boolean>(false);
-  const [tableData, setTableData] = useState<UserTableDataType[]>([]);
-  const [currentPage, setCurrentPage] = useState<any>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [searchByTermUser, setSearchByTermUser] = useState<any>('name');
-  const [searchValueUsers, setSearchValueUsers] = useState<string>('');
-  const [networksearchUsers, setNetworkSearchUsers] = useState<string>('');
-  const [filterVisible, setFilterVisible] = useState<boolean>(false);
-  const [filterByRole, setFilterByRole] = useState<string>('All');
-  const [sortOrder, setSortOrder] = useState<string>('');
-  const [sortField, setSortField] = useState<string>('');
+
   const [userStatusChangeModalRecord, setUserStatusChangeModalRecord] = useState<any>();
   const [actionInfo, setActionInfo] = useState<any>({});
   const [errorMsg, setErrorMsg] = useState<any>('');
   const [openDeactivationConfirmationModal, setOpenDeactivationConfirmationModal] = useState(false);
   const [openActivationConfirmationModal, setOpenActivationConfirmationModal] = useState(false);
-  const [dataQuery, setDataQuery] = useState<any>();
-  const ability = useAbilityContext();
-  const { userInfoState } = useUserContext();
+
+  // Table Data State
+
+  const [tableData, setTableData] = useState<UserTableDataType[]>([]);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<any>(1);
+  const [totalRowCount, setTotalRowRowCount] = useState<number>();
+
+  const [sortField, setSortField] = useState<string>('name');
+  const [sortOrder, setSortOrder] = useState<string>('DESC');
+
+  // Filters State
+  const [filterVisible, setFilterVisible] = useState<boolean>(false);
+
+  const [appliedFilterValue, setAppliedFilterValue] = useState<Filter>({
+    searchBy: 'name',
+    roleFilter: 'All',
+  });
+  const [tempFilterValue, setTempFilterValue] = useState<Filter>({
+    searchBy: 'name',
+    roleFilter: 'All',
+  });
+
+  // Search Value State
+
+  const [tempSearchValue, setTempSearchValue] = useState<string>('');
+  const [searchValue, setSearchValue] = useState<string>('');
+
+  // Page Functions
 
   document.addEventListener('mousedown', (event: any) => {
     const userFilterArea1 = document.querySelector('.filter-bar');
@@ -159,7 +184,7 @@ const UserManagement = () => {
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
         // eslint-disable-next-line no-use-before-define, @typescript-eslint/no-use-before-define
-        getAllUser();
+        getAllUsers();
         setLoading(false);
         setOpenDeactivationConfirmationModal(false);
         setOpenActivationConfirmationModal(false);
@@ -263,32 +288,12 @@ const UserManagement = () => {
 
   const columns = [
     {
-      title: '',
-      dataIndex: 'logo',
-      key: UserManagementColumns.logo,
-      width: '20px',
-      align: 'left' as const,
-      render: (item: any, itemObj: any) => {
-        console.log({ item, ...itemObj });
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {/* <ProfileIcon
-              icon={itemObj?.company?.logo}
-              bg={getCompanyBgColor(itemObj.companyRole)}
-              // name={itemObj?.company?.name}
-              name={item}
-            /> */}
-          </div>
-        );
-      },
-    },
-    {
       title: t('user:name'),
       dataIndex: 'name',
       key: UserManagementColumns.name,
       sorter: true,
       align: 'left' as const,
-      render: (item: any, itemObj: any) => {
+      render: (item: any) => {
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{ fontWeight: 600 }}>{item}</div>
@@ -308,7 +313,7 @@ const UserManagement = () => {
       dataIndex: 'phoneNo',
       key: UserManagementColumns.phoneNo,
       align: 'left' as const,
-      render: (item: any, itemObj: UserTableDataType) => {
+      render: (item: any) => {
         return item ? item : '-';
       },
     },
@@ -330,7 +335,7 @@ const UserManagement = () => {
       dataIndex: 'state',
       key: UserManagementColumns.status,
       align: 'left' as const,
-      render: (item: any, itemObj: UserTableDataType) => {
+      render: (item: any) => {
         return item === '1' ? 'Activated' : 'Deactivated';
       },
     },
@@ -340,6 +345,7 @@ const UserManagement = () => {
       key: UserManagementColumns.role,
       sorter: true,
       align: 'left' as const,
+      // eslint-disable-next-line no-unused-vars
       render: (item: any, itemObj: UserTableDataType) => {
         return getRoleComponent(itemObj);
       },
@@ -349,6 +355,7 @@ const UserManagement = () => {
       key: UserManagementColumns.actions,
       width: 6,
       align: 'right' as const,
+      // eslint-disable-next-line no-unused-vars
       render: (_: any, record: UserTableDataType) => {
         return (
           ability.can(Action.Update, plainToClass(User, record)) &&
@@ -366,129 +373,52 @@ const UserManagement = () => {
     },
   ].filter((column: any) => visibleColumns.includes(column.key));
 
-  const filterOr = () => {
-    if (
-      searchByTermUser !== null &&
-      searchByTermUser !== '' &&
-      networksearchUsers !== null &&
-      networksearchUsers !== '' &&
-      filterByRole === 'All'
-    ) {
-      return [
-        {
-          key: searchByTermUser,
-          operation: 'like',
-          value: '%' + networksearchUsers + '%',
-        },
-      ];
-    } else return undefined;
-  };
+  // Users Query with BE handled Pagination
 
-  const filterAnd = () => {
-    if (
-      searchByTermUser !== null &&
-      searchByTermUser !== '' &&
-      networksearchUsers !== null &&
-      networksearchUsers !== '' &&
-      filterByRole !== 'All'
-    ) {
-      return [
-        {
-          key: searchByTermUser,
-          operation: 'like',
-          value: '%' + networksearchUsers + '%',
-        },
-        {
-          key: 'role',
-          operation: '=',
-          value: filterByRole,
-        },
-      ];
-    } else if (
-      searchByTermUser !== null &&
-      searchByTermUser !== '' &&
-      networksearchUsers !== null &&
-      networksearchUsers !== '' &&
-      filterByRole !== 'All'
-    ) {
-      return [
-        {
-          key: searchByTermUser,
-          operation: 'like',
-          value: '%' + networksearchUsers + '%',
-        },
-        {
-          key: 'role',
-          operation: '=',
-          value: filterByRole,
-        },
-      ];
-    } else if (
-      searchByTermUser !== null &&
-      searchByTermUser !== '' &&
-      networksearchUsers !== null &&
-      networksearchUsers !== ''
-    ) {
-      return [
-        {
-          key: searchByTermUser,
-          operation: 'like',
-          value: '%' + networksearchUsers + '%',
-        },
-      ];
-    } else if (filterByRole !== 'All') {
-      return [
-        {
-          key: 'role',
-          operation: '=',
-          value: filterByRole,
-        },
-      ];
-    } else return undefined;
-  };
+  const getAllUsers = async () => {
+    setLoading(true);
+    try {
+      const payload: any = { page: currentPage, size: pageSize + 1 };
 
-  const sort = () => {
-    if (sortOrder !== '' && sortField !== '') {
-      return {
+      // Adding Sort By Conditions
+
+      payload.sort = {
         key: sortField,
         order: sortOrder,
       };
-    } else
-      return {
-        key: 'id',
-        order: 'DESC',
-      };
-  };
 
-  const getAllUserParams = () => {
-    return {
-      page: currentPage,
-      size: pageSize,
-      filterOr: filterOr(),
-      filterAnd: filterAnd(),
-      sort: sort(),
-    };
-  };
+      // Adding Filter Conditions
 
-  const getAllUser = async () => {
-    setLoading(true);
-    try {
-      const response: any = await post('national/users/query', getAllUserParams());
+      if (appliedFilterValue.roleFilter !== 'All') {
+        payload.filterAnd = [];
+        payload.filterAnd.push({
+          key: 'role',
+          operation: '=',
+          value: appliedFilterValue.roleFilter,
+        });
+      }
+
+      if (searchValue !== '') {
+        if (!payload.hasOwnProperty('filterAnd')) {
+          payload.filterAnd = [];
+        }
+        payload.filterAnd.push({
+          key: appliedFilterValue.searchBy,
+          operation: 'LIKE',
+          value: ['%' + searchValue + '%'],
+        });
+      }
+
+      const response: any = await post('national/users/query', payload);
       if (response && response.data) {
         const availableUsers = response.data.filter(
           (user: any) => user.companyRole !== CompanyRole.API
         );
         setTableData(availableUsers);
-        setTotalUser(response?.response?.data?.total);
+        setTotalRowRowCount(response.response.data.total);
       }
-      setDataQuery({
-        filterAnd: filterAnd(),
-        filterOr: filterOr(),
-        sort: sort(),
-      });
       setLoading(false);
     } catch (error: any) {
-      console.log('Error in getting users', error);
       message.open({
         type: 'error',
         content: error.message,
@@ -499,35 +429,56 @@ const UserManagement = () => {
     }
   };
 
-  useEffect(() => {
-    getAllUser();
-  }, [
-    currentPage,
-    pageSize,
-    searchByTermUser,
-    networksearchUsers,
-    filterByRole,
-    sortField,
-    sortOrder,
-  ]);
+  // Handling Table Pagination and Sorting Changes
 
-  const onChange: PaginationProps['onChange'] = (page: number, size: number) => {
-    setCurrentPage(page);
-    setPageSize(size);
+  // eslint-disable-next-line no-unused-vars
+  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+    // Setting Pagination
+    setCurrentPage(pagination.current);
+    setPageSize(pagination.pageSize);
+
+    // Setting the Sort Direction
+    if (sorter.order === 'ascend') {
+      setSortOrder('ASC');
+    } else if (sorter.order === 'descend') {
+      setSortOrder('DESC');
+    } else if (sorter.order === undefined) {
+      setSortOrder('DESC');
+    }
+
+    // Setting the Sort By Column
+    if (sorter.columnKey !== undefined) {
+      setSortField(sorter.field);
+    } else {
+      setSortField('name');
+    }
   };
 
-  const handleFilterVisibleChange = () => {
-    setFilterVisible(true);
-  };
+  // Search Value Handling
 
-  const searchByTermHandler = (event: any) => {
-    setSearchByTermUser(event?.target?.value);
-  };
-
-  const onFilterRole = (checkedValue: any) => {
+  const onSearch = () => {
     setCurrentPage(1);
-    setFilterByRole(checkedValue?.target?.value);
+    setSearchValue(tempSearchValue);
   };
+
+  // Search Value Handling
+
+  const updatedTempFilters = (filterSection: string, newValue: string) => {
+    const updatedFilters = { ...tempFilterValue };
+    if (filterSection === 'roleFilter') {
+      updatedFilters.roleFilter = newValue;
+      setTempFilterValue(updatedFilters);
+    } else if (filterSection === 'search') {
+      updatedFilters.searchBy = newValue;
+      setTempFilterValue(updatedFilters);
+    }
+  };
+
+  useEffect(() => {
+    getAllUsers();
+  }, [currentPage, pageSize, sortField, sortOrder, searchValue, appliedFilterValue]);
+
+  // Items for the filter dropdown
 
   const items: MenuProps['items'] = [
     {
@@ -536,7 +487,12 @@ const UserManagement = () => {
       label: (
         <div className="filter-menu-item">
           <div className="filter-title">{t('user:searchBy')}</div>
-          <Radio.Group onChange={searchByTermHandler} value={searchByTermUser}>
+          <Radio.Group
+            onChange={(e) => {
+              updatedTempFilters('search', e?.target?.value);
+            }}
+            value={tempFilterValue.searchBy}
+          >
             <Space direction="vertical">
               <Radio value="name">Name</Radio>
               <Radio value="email">Email</Radio>
@@ -547,11 +503,16 @@ const UserManagement = () => {
     },
     {
       key: '2',
-      title: 'Filter by',
+      title: 'Filter by User Role',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('user:filterByRole')}</div>
-          <Radio.Group onChange={onFilterRole} value={filterByRole}>
+          <div className="filter-title">{t('filterByUserRole')}</div>
+          <Radio.Group
+            onChange={(e) => {
+              updatedTempFilters('roleFilter', e?.target?.value);
+            }}
+            value={tempFilterValue.roleFilter}
+          >
             <Space direction="vertical">
               <Radio value="All">All</Radio>
               <Radio value="Admin">Administrator</Radio>
@@ -562,33 +523,45 @@ const UserManagement = () => {
         </div>
       ),
     },
+    {
+      key: '3',
+      title: 'Action',
+      label: (
+        <div className="filter-menu-actions">
+          <Row gutter={10}>
+            <Col span={12}>
+              <Button
+                style={{ width: '100%' }}
+                size="small"
+                type="default"
+                onClick={() => {
+                  setFilterVisible(false);
+                  setTempFilterValue({ ...appliedFilterValue });
+                }}
+              >
+                Cancel
+              </Button>
+            </Col>
+            <Col span={12}>
+              <Button
+                style={{ width: '100%' }}
+                size="small"
+                type="primary"
+                onClick={() => {
+                  setFilterVisible(false);
+                  setSearchValue('');
+                  setTempSearchValue('');
+                  setAppliedFilterValue({ ...tempFilterValue });
+                }}
+              >
+                Apply
+              </Button>
+            </Col>
+          </Row>
+        </div>
+      ),
+    },
   ];
-
-  const onSearch = () => {
-    setCurrentPage(1);
-    setNetworkSearchUsers(searchValueUsers);
-  };
-
-  const handleTableChange = (pag: any, sorter: any) => {
-    console.log(pag, sorter);
-    if (sorter.order === 'ascend') {
-      setSortOrder('ASC');
-    } else if (sorter.order === 'descend') {
-      setSortOrder('DESC');
-    } else if (sorter.order === undefined) {
-      setSortOrder('');
-    }
-    if (sorter.columnKey !== undefined) {
-      if (sorter.columnKey === 'company') {
-        setSortField('company.name');
-      } else {
-        setSortField(sorter.field);
-      }
-    } else {
-      setSortField('id');
-      setSortOrder('DESC');
-    }
-  };
 
   return (
     <div className="content-container">
@@ -616,40 +589,36 @@ const UserManagement = () => {
           <Col md={16} xs={24}>
             <div className="filter-section">
               <div className="search-bar">
-                <Search
-                  onPressEnter={onSearch}
-                  placeholder={searchByTermUser === 'email' ? 'Search by Email' : 'Search by Name'}
-                  allowClear
-                  onChange={(e) =>
-                    e.target.value === ''
-                      ? setNetworkSearchUsers(e.target.value)
-                      : setSearchValueUsers(e.target.value)
+                <Input
+                  addonAfter={<SearchOutlined style={{ color: '#615d67' }} onClick={onSearch} />}
+                  placeholder={
+                    appliedFilterValue.searchBy === 'name' ? 'Search by Name' : 'Search by Email'
                   }
-                  onSearch={onSearch}
+                  allowClear
+                  onPressEnter={onSearch}
+                  onChange={(e) => setTempSearchValue(e.target.value)}
                   style={{ width: 265 }}
+                  value={tempSearchValue}
                 />
               </div>
-              <div className="filter-bar">
+              <div className="filter-bar" style={{ marginTop: '0.3rem' }}>
                 <Dropdown
                   arrow={false}
-                  menu={{ items }}
                   placement="bottomRight"
-                  open={filterVisible}
-                  onOpenChange={handleFilterVisibleChange}
-                  overlayClassName="filter-dropdown"
                   trigger={['click']}
+                  open={filterVisible}
+                  menu={{ items }}
+                  overlayStyle={{ width: '240px' }}
                 >
-                  <a
-                    className="ant-dropdown-link"
-                    onClick={(e) => setFilterVisible(!filterVisible)}
-                  >
-                    <FilterOutlined
-                      style={{
-                        color: 'rgba(58, 53, 65, 0.3)',
-                        fontSize: '20px',
-                      }}
-                    />
-                  </a>
+                  <FilterOutlined
+                    style={{
+                      color: '#615d67',
+                      fontSize: '20px',
+                    }}
+                    onClick={() => {
+                      setFilterVisible(true);
+                    }}
+                  />
                 </Dropdown>
               </div>
             </div>
@@ -658,28 +627,22 @@ const UserManagement = () => {
         <Row>
           <Col span={24}>
             <div className="userManagement-table-container">
-              <Table
-                dataSource={tableData}
+              <LayoutTable
+                tableData={tableData}
                 columns={columns}
-                className="common-table-class"
                 loading={loading}
                 pagination={{
+                  total: totalRowCount,
                   current: currentPage,
                   pageSize: pageSize,
-                  total: totalUser,
                   showQuickJumper: true,
+                  pageSizeOptions: ['10', '20', '30'],
                   showSizeChanger: true,
-                  onChange: onChange,
+                  locale: { page: '' },
+                  position: ['bottomRight'],
                 }}
-                onChange={(val: any, filter: any, sorter: any) => handleTableChange(val, sorter)}
-                locale={{
-                  emptyText: (
-                    <Empty
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      description={tableData.length === 0 ? 'No Users' : null}
-                    />
-                  ),
-                }}
+                handleTableChange={handleTableChange}
+                emptyMessage="No Users Available"
               />
             </div>
           </Col>

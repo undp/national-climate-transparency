@@ -1,9 +1,10 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsString, IsOptional, ValidateNested, IsNumber, Min, Max, isNotEmpty } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString, IsOptional, ValidateNested, IsNumber, Min, Max, isNotEmpty, ArrayMinSize, MaxLength, IsArray } from "class-validator";
 import { ActionStatus, InstrumentType, NatAnchor } from "../enums/action.enum";
 import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
 import { KpiUpdateDto } from "./kpi.update.dto";
+import { KpiUnits } from "../enums/kpi.enum";
 
 export class ActionUpdateDto {
 
@@ -27,12 +28,18 @@ export class ActionUpdateDto {
 	@ApiProperty()
 	objective: string;
 
-	@IsNotEmpty()
-	@ApiProperty({ enum: InstrumentType })
+	@ArrayMinSize(1)
+	@MaxLength(100, { each: true })
+	@IsNotEmpty({ each: true })
 	@IsEnum(InstrumentType, {
+		each: true,
 		message: "Invalid instrument type. Supported following instrument types:" + Object.values(InstrumentType),
 	})
-	instrumentType: InstrumentType;
+	@ApiProperty({
+		type: [String],
+		enum: Object.values(InstrumentType),
+	})
+	instrumentType: InstrumentType[];
 
 	@IsNotEmpty()
 	@ApiProperty({ enum: ActionStatus })
@@ -47,13 +54,20 @@ export class ActionUpdateDto {
 	@Max(2050)
 	@ApiProperty()
 	startYear: number;
-
-	@IsNotEmpty()
-	@ApiProperty({ enum: NatAnchor })
+	
+	@IsArray()
+	@ArrayMinSize(1)
+	@MaxLength(100, { each: true })
+	@IsNotEmpty({ each: true })
 	@IsEnum(NatAnchor, {
+		each: true,
 		message: "Invalid Anchored National Strategy. Supported following strategies:" + Object.values(NatAnchor),
 	})
-	natAnchor: NatAnchor;
+	@ApiProperty({
+		type: [String],
+		enum: Object.values(NatAnchor),
+	})
+	natAnchor: NatAnchor[];
 
 	@IsOptional()
 	@ApiPropertyOptional(
@@ -74,7 +88,7 @@ export class ActionUpdateDto {
 	@ApiPropertyOptional(
 		{
 			type: "array",
-			example: ["http://test.com/documents/programme_documents/testDoc1_1713334127897.csv"],
+			example: ["http://test.com/documents/action_documents/testDoc1_1713334127897.csv"],
 		}
 	)
 	removedDocuments: string[];
@@ -90,6 +104,7 @@ export class ActionUpdateDto {
 			type: "array",
 			example: [{
 				kpiId: "1",
+				kpiUnit: KpiUnits.GWp_INSTALLED,
 				name: "KPI 1",
 				creatorType: "action",
 				expected: 100

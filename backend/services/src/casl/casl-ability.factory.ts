@@ -1,10 +1,11 @@
 import {
-  AbilityBuilder,
-  CreateAbility,
-  createMongoAbility,
-  ExtractSubjectType,
-  InferSubjects,
-  MongoAbility,
+	AbilityBuilder,
+	CreateAbility,
+	createMongoAbility,
+	ExtractSubjectType,
+	InferSubjects,
+	MongoAbility,
+	MongoQuery,
 } from "@casl/ability";
 import { Injectable } from "@nestjs/common";
 import { User } from "../entities/user.entity";
@@ -26,158 +27,235 @@ const unAuthErrorMessage = "This action is unauthorised";
 
 @Injectable()
 export class CaslAbilityFactory {
-  createForUser(user: User) {
-    console.log("createForUser", user);
-    const { can, cannot, build } = new AbilityBuilder(createAppAbility);
-    if (user) {
-      if (user.role == Role.Root) {
-        
-        can(Action.Read, Organisation);
-        can(Action.Create, Organisation);
-        can(Action.Update, Organisation);
-        can(Action.Delete, Organisation);
-        // cannot(Action.Update, Organisation, ['organisationType']);
+	createForUser(user: User) {
+		console.log("createForUser", user);
+		const { can, cannot, build } = new AbilityBuilder(createAppAbility);
+		if (user) {
+			if (user.role == Role.Root) {
 
-        can(Action.Read, User);
-        can(Action.Create, User);
-        can(Action.Update, User);
-        can(Action.Delete, User);
-        cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
-        
-        can(Action.Read, ActionEntity);
-        can(Action.Create, ActionEntity);
-        can(Action.Update, ActionEntity);
-        can(Action.Delete, ActionEntity);
+				// User
+				can(Action.Read, User);
+				can(Action.Create, User);
+				can(Action.Update, User);
+				can(Action.Delete, User);
+				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
 
-        can(Action.Read, ProgrammeEntity);
-        can(Action.Create, ProgrammeEntity);
-        can(Action.Update, ProgrammeEntity);
-        can(Action.Delete, ProgrammeEntity);
+				// Action
+				can(Action.Read, ActionEntity);
+				can(Action.Create, ActionEntity);
+				can(Action.Update, ActionEntity);
+				can(Action.Delete, ActionEntity);
+				can(Action.Validate, ActionEntity);
 
+				// Programme
+				can(Action.Read, ProgrammeEntity);
+				can(Action.Create, ProgrammeEntity);
+				can(Action.Update, ProgrammeEntity);
+				can(Action.Delete, ProgrammeEntity);
+				can(Action.Validate, ProgrammeEntity);
+				
+				// Project
 				can(Action.Read, ProjectEntity);
-        can(Action.Create, ProjectEntity);
-        can(Action.Update, ProjectEntity);
-        can(Action.Delete, ProjectEntity);
+				can(Action.Create, ProjectEntity);
+				can(Action.Update, ProjectEntity);
+				can(Action.Delete, ProjectEntity);
+				can(Action.Validate, ProjectEntity);
 
+				// Activity
 				can(Action.Read, ActivityEntity);
-        can(Action.Create, ActivityEntity);
-        can(Action.Update, ActivityEntity);
-        can(Action.Delete, ActivityEntity);
-      }
+				can(Action.Create, ActivityEntity);
+				can(Action.Update, ActivityEntity);
+				can(Action.Delete, ActivityEntity);
+				can(Action.Validate, ActivityEntity);
+			}
 
-      if (user.role == Role.Admin) {
-        
-        can(Action.Read, Organisation);
-        can(Action.Create, Organisation);
-        can(Action.Update, Organisation);
-        can(Action.Delete, Organisation);
-        // cannot(Action.Update, Organisation, ['organisationType']);
+			if (user.role == Role.Admin) {
 
-        can(Action.Read, User);
-        can(Action.Create, User);
-        can(Action.Update, User);
-        can(Action.Delete, User);
-        cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
-        
-        can(Action.Read, ActionEntity);
-        can(Action.Create, ActionEntity);
-        can(Action.Update, ActionEntity);
-        can(Action.Delete, ActionEntity);
+				// User
+				can(Action.Read, User);
+				can(Action.Create, User);
+				can(Action.Update, User);
+				can(Action.Delete, User);
+				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
 
-        can(Action.Read, ProgrammeEntity);
-        can(Action.Create, ProgrammeEntity);
-        can(Action.Update, ProgrammeEntity);
-        can(Action.Delete, ProgrammeEntity);
+				// Action
+				can(Action.Read, ActionEntity);
+				can(Action.Create, ActionEntity);
+				can(Action.Update, ActionEntity);
+				can(Action.Delete, ActionEntity);
+				can(Action.Validate, ActionEntity);
 
+				// Programme
+				can(Action.Read, ProgrammeEntity);
+				can(Action.Create, ProgrammeEntity);
+				can(Action.Update, ProgrammeEntity);
+				can(Action.Delete, ProgrammeEntity);
+				can(Action.Validate, ProgrammeEntity);
+
+				// Project
 				can(Action.Read, ProjectEntity);
-        can(Action.Create, ProjectEntity);
-        can(Action.Update, ProjectEntity);
-        can(Action.Delete, ProjectEntity);
+				can(Action.Create, ProjectEntity);
+				can(Action.Update, ProjectEntity);
+				can(Action.Delete, ProjectEntity);
+				can(Action.Validate, ProjectEntity);
 
+				// Activity
 				can(Action.Read, ActivityEntity);
-        can(Action.Create, ActivityEntity);
-        can(Action.Update, ActivityEntity);
-        can(Action.Delete, ActivityEntity);
+				can(Action.Create, ActivityEntity);
+				can(Action.Update, ActivityEntity);
+				can(Action.Delete, ActivityEntity);
+				can(Action.Validate, ActivityEntity);
 
-      }
+			}
 
-      if (user.role == Role.GovernmentUser) {        
-        can(Action.Read, Organisation);
-        cannot(Action.Create, Organisation);
-        cannot(Action.Update, Organisation);
-        cannot(Action.Delete, Organisation);
+			if (user.role == Role.GovernmentUser) {
 
-        can(Action.Read, User);
-        cannot(Action.Create, User);
-        cannot(Action.Delete, User);
-        can(Action.Update, User, { id: { $eq: user.id } });
-        cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
-          id: { $eq: user.id },
-        });
+				// User
+				can(Action.Read, User);
+				cannot(Action.Create, User);
+				cannot(Action.Delete, User);
+				can(Action.Update, User, { id: { $eq: user.id } });
+				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
+					id: { $eq: user.id },
+				});
 
-        can(Action.Read, ActionEntity);
-        can(Action.Create, ActionEntity);
-        can(Action.Update, ActionEntity);
-        can(Action.Delete, ActionEntity);
+				// ----------------------------- Action ------------------------------
+				user.sector.forEach(userSector => {
+					can(Action.Read, ActionEntity, {
+						$or: [{ sectors: { $elemMatch: { $eq: userSector } } }]
+					} as MongoQuery<ActionEntity>);
+				});
+				can(Action.Read, ActionEntity, {
+					sectors: { $exists: false }
+				} as MongoQuery<ActionEntity>);
+				can(Action.Create, ActionEntity);
+				can(Action.Update, ActionEntity);
+				can(Action.Delete, ActionEntity);
+				cannot(Action.Validate, ActionEntity);
 
-        can(Action.Read, ProgrammeEntity);
-        can(Action.Create, ProgrammeEntity);
-        can(Action.Update, ProgrammeEntity);
-        can(Action.Delete, ProgrammeEntity);
+				
+				// ----------------------------- Programme ------------------------------
+				user.sector.forEach(userSector => {
+					can(Action.Read, ProgrammeEntity, {
+						$or: [{ affectedSectors: { $elemMatch: { $eq: userSector } } }]
+					} as MongoQuery<ProgrammeEntity>);
+				});
+				can(Action.Create, ProgrammeEntity);
+				can(Action.Update, ProgrammeEntity);
+				can(Action.Delete, ProgrammeEntity);
+				cannot(Action.Validate, ProgrammeEntity);
 
-				can(Action.Read, ProjectEntity);
-        can(Action.Create, ProjectEntity);
-        can(Action.Update, ProjectEntity);
-        can(Action.Delete, ProjectEntity);
+				// ----------------------------- Project ------------------------------
+				user.sector.forEach(userSector => {
+					can(Action.Read, ProjectEntity, {
+						$or: [{ sectors: { $elemMatch: { $eq: userSector } } }]
+					} as MongoQuery<ProjectEntity>);
+				});
 
-				can(Action.Read, ActivityEntity);
-        can(Action.Create, ActivityEntity);
-        can(Action.Update, ActivityEntity);
-        can(Action.Delete, ActivityEntity);
+				can(Action.Read, ProjectEntity, {
+					sectors: { $exists: false }
+				} as MongoQuery<ProjectEntity>);
 
-      }
+				can(Action.Create, ProjectEntity);
+				can(Action.Update, ProjectEntity);
+				can(Action.Delete, ProjectEntity);
+				cannot(Action.Validate, ProjectEntity);
+				
+				// ----------------------------- Activity ------------------------------
+				user.sector.forEach(userSector => {
+					can(Action.Read, ActivityEntity, {
+						$or: [{ sectors: { $elemMatch: { $eq: userSector } } }]
+					} as MongoQuery<ActivityEntity>);
+				});
 
-      if (user.role == Role.Observer) {
-        can(Action.Read, Organisation);
-        cannot(Action.Create, Organisation);
-        cannot(Action.Update, Organisation);
-        cannot(Action.Delete, Organisation);
+				can(Action.Read, ActivityEntity, {
+					sectors: { $exists: false }
+				} as MongoQuery<ActivityEntity>);
 
-        can(Action.Read, User);
-        cannot(Action.Create, User);
+				can(Action.Create, ActivityEntity);
+				can(Action.Update, ActivityEntity);
+				can(Action.Delete, ActivityEntity);
+				cannot(Action.Validate, ActivityEntity);
 
-        can(Action.Update, User, { id: { $eq: user.id } });
-        cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
-          id: { $eq: user.id },
-        });
+			}
 
-        can(Action.Read, ActionEntity);
-        cannot(Action.Create, ActionEntity);
-        cannot(Action.Update, ActionEntity);
-        cannot(Action.Delete, ActionEntity);
+			if (user.role == Role.Observer) {
 
-        can(Action.Read, ProgrammeEntity);
-        cannot(Action.Create, ProgrammeEntity);
-        cannot(Action.Update, ProgrammeEntity);
-        cannot(Action.Delete, ProgrammeEntity);
+				can(Action.Read, User);
+				cannot(Action.Create, User);
+				can(Action.Update, User, { id: { $eq: user.id } });
+				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
+					id: { $eq: user.id },
+				});
 
-				can(Action.Read, ProjectEntity);
-        cannot(Action.Create, ProjectEntity);
-        cannot(Action.Update, ProjectEntity);
-        cannot(Action.Delete, ProjectEntity);
+				// ----------------------------- Action ------------------------------
+				user.sector.forEach(userSector => {
+					can(Action.Read, ActionEntity, {
+						$or: [{ sectors: { $elemMatch: { $eq: userSector } } }]
+					} as MongoQuery<ActionEntity>);
+				});
 
-				can(Action.Read, ActivityEntity);
-        cannot(Action.Create, ActivityEntity);
-        cannot(Action.Update, ActivityEntity);
-        cannot(Action.Delete, ActivityEntity);
-      }
+				can(Action.Read, ActionEntity, {
+					sectors: { $exists: false }
+				} as MongoQuery<ActionEntity>);
+
+				cannot(Action.Create, ActionEntity);
+				cannot(Action.Update, ActionEntity);
+				cannot(Action.Delete, ActionEntity);
+				cannot(Action.Validate, ActionEntity);
+
+				// ----------------------------- Programme ------------------------------
+				user.sector.forEach(userSector => {
+					can(Action.Read, ProgrammeEntity, {
+						$or: [{ affectedSectors: { $elemMatch: { $eq: userSector } } }]
+					} as MongoQuery<ProgrammeEntity>);
+				});
+
+				cannot(Action.Create, ProgrammeEntity);
+				cannot(Action.Update, ProgrammeEntity);
+				cannot(Action.Delete, ProgrammeEntity);
+				cannot(Action.Validate, ProgrammeEntity);
+
+				// ----------------------------- Project ------------------------------
+				user.sector.forEach(userSector => {
+					can(Action.Read, ProjectEntity, {
+						$or: [{ sectors: { $elemMatch: { $eq: userSector } } }]
+					} as MongoQuery<ProjectEntity>);
+				});
+
+				can(Action.Read, ProjectEntity, {
+					sectors: { $exists: false }
+				} as MongoQuery<ProjectEntity>);
+				
+				cannot(Action.Create, ProjectEntity);
+				cannot(Action.Update, ProjectEntity);
+				cannot(Action.Delete, ProjectEntity);
+				cannot(Action.Validate, ProjectEntity);
+
+				// ----------------------------- Activity ------------------------------
+				user.sector.forEach(userSector => {
+					can(Action.Read, ActivityEntity, {
+						$or: [{ sectors: { $elemMatch: { $eq: userSector } } }]
+					} as MongoQuery<ActivityEntity>);
+				});
+
+				can(Action.Read, ActivityEntity, {
+					sectors: { $exists: false }
+				} as MongoQuery<ActivityEntity>);
+				
+				cannot(Action.Create, ActivityEntity);
+				cannot(Action.Update, ActivityEntity);
+				cannot(Action.Delete, ActivityEntity);
+				cannot(Action.Validate, ActivityEntity);
+
+			}
 
 
-    }
+		}
 
-    return build({
-      detectSubjectType: (item) =>
-        item.constructor as ExtractSubjectType<Subjects>,
-    });
-  }
+		return build({
+			detectSubjectType: (item) =>
+				item.constructor as ExtractSubjectType<Subjects>,
+		});
+	}
 }

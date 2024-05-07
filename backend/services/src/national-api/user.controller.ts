@@ -74,7 +74,7 @@ export class UserController {
   @Put("update")
   updateUser(@Body() user: UserUpdateDto, @Request() req) {
     global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-    return this.userService.update(user, req.abilityCondition);
+    return this.userService.update(user, req.abilityCondition, req.user);
   }
 
   @ApiBearerAuth()
