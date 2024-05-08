@@ -937,7 +937,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('natImplementorHeader')}</label>}
                     name="nationalImplementor"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled
+                    ></Select>
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -945,7 +951,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('techTypeHeader')}</label>}
                     name="techType"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>
