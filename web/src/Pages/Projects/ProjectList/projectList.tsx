@@ -105,13 +105,13 @@ const projectList = () => {
       size: 100,
       filterAnd: [
         {
-          key: 'projectId',
+          key: 'parentId',
           operation: '=',
           value: projectId,
         },
       ],
       sort: {
-        key: 'projectId',
+        key: 'activityId',
         order: 'ASC',
       },
     };
@@ -208,7 +208,8 @@ const projectList = () => {
   const attachActivities = async () => {
     if (toBeAttached.length > 0) {
       const payload = {
-        projectId: selectedProjectId,
+        parentType: 'project',
+        parentId: selectedProjectId,
         activityIds: toBeAttached,
       };
       const response: any = await post('national/activities/link', payload);
