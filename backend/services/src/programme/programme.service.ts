@@ -230,8 +230,10 @@ export class ProgrammeService {
 			);
 		}
 
-		programmeUpdate.action = currentProgramme.action;
-		programmeUpdate.path = currentProgramme.path;
+		if (currentProgramme.action) {
+			programmeUpdate.action = currentProgramme.action;
+			programmeUpdate.path = currentProgramme.path;
+		}
 
 		// Document update resolve
 
@@ -263,9 +265,7 @@ export class ProgrammeService {
 			};
 		}
 
-		if (documents.length === 0) {
-			programmeUpdate.documents = null;
-		} else if (documents.length > 0){
+		if (documents.length > 0){
 			programmeUpdate.documents = documents;
 		}
 
