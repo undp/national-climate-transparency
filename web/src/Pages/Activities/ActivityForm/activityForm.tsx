@@ -109,7 +109,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [expectedTimeline, setExpectedTimeline] = useState<ExpectedTimeline[]>([]);
   const [actualTimeline, setActualTimeline] = useState<ActualTimeline[]>([]);
 
-  // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
 
   const yearsList: number[] = [];
@@ -257,7 +256,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 parentType: entityData.parentType,
                 parentId: entityData.parentId,
               });
-              setParentType(entityData.parentType ?? '');
+              setParentType(entityData.parentType ?? undefined);
+              setConnectedParentId(entityData.parentId ?? undefined);
             }
 
             // Setting validation status
@@ -701,44 +701,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col span={12}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('measuresTitle')}</label>}
-                    name="measure"
-                  >
-                    <Select
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      allowClear
-                      disabled={isView}
-                      showSearch
-                    >
-                      {Object.values(Measure).map((measure) => (
-                        <Option key={measure} value={measure}>
-                          {measure}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-                {parentType === 'project' && (
-                  <Col span={12}>
-                    <Form.Item
-                      label={<label className="form-item-header">{t('supportTypeTitle')}</label>}
-                      name="supportType"
-                    >
-                      <Select
-                        size="large"
-                        style={{ fontSize: inputFontSize }}
-                        allowClear
-                        disabled
-                        showSearch
-                      ></Select>
-                    </Form.Item>
-                  </Col>
-                )}
-              </Row>
-              <Row gutter={gutterSize}>
-                <Col span={12}>
-                  <Form.Item
                     label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
                     name="nationalImplementingEntity"
                   >
@@ -779,6 +741,44 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('measuresTitle')}</label>}
+                    name="measure"
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(Measure).map((measure) => (
+                        <Option key={measure} value={measure}>
+                          {measure}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                {parentType === 'project' && (
+                  <Col span={12}>
+                    <Form.Item
+                      label={<label className="form-item-header">{t('supportTypeTitle')}</label>}
+                      name="supportType"
+                    >
+                      <Select
+                        size="large"
+                        style={{ fontSize: inputFontSize }}
+                        allowClear
+                        disabled
+                        showSearch
+                      ></Select>
+                    </Form.Item>
+                  </Col>
+                )}
               </Row>
               <Row gutter={gutterSize}>
                 <Col span={6}>
