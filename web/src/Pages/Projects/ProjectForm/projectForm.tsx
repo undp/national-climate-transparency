@@ -862,7 +862,19 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('startYearHeader')}</label>}
                     name="startYear"
-                    rules={[validation.required]}
+                    rules={[
+                      validation.required,
+                      ({ getFieldValue }) => ({
+                        // eslint-disable-next-line no-unused-vars
+                        validator(_, value) {
+                          if (!value || getFieldValue('endYear') >= value) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject('Cannot be greater than End Year!');
+                        },
+                      }),
+                    ]}
+                    dependencies={['endYear']}
                   >
                     <Select
                       size="large"
@@ -895,6 +907,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                         },
                       }),
                     ]}
+                    dependencies={['startYear']}
                   >
                     <Select
                       size="large"
