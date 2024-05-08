@@ -24,6 +24,7 @@ import { ValidateDto } from "src/dtos/validate.dto";
 import { SupportService } from "src/support/support.service";
 import { SupportDto } from "src/dtos/support.dto";
 import { SupportEntity } from "src/entities/support.entity";
+import { SupportUpdateDto } from "src/dtos/supportUpdate.dto";
 
 @ApiTags("Supports")
 @ApiBearerAuth()
@@ -56,13 +57,13 @@ export class SupportController {
   //   return this.activityService.getActivityViewData(id, req.user);
   // }
 
-	// @ApiBearerAuth('api_key')
-  // @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ActivityEntity))
-  // @Put("update")
-  // updateActivity(@Body() activityUpdateDto: ActivityUpdateDto, @Request() req) {
-  //   return this.activityService.updateActivity(activityUpdateDto, req.user);
-  // }
+	@ApiBearerAuth('api_key')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, SupportEntity))
+  @Put("update")
+  updateSupport(@Body() supportUpdateDto: SupportUpdateDto, @Request() req) {
+    return this.supportService.updateSupport(supportUpdateDto, req.user);
+  }
 
 	@ApiBearerAuth('api_key')
 	@ApiBearerAuth()
