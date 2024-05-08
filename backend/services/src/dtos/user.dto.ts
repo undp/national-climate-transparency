@@ -65,7 +65,7 @@ export class UserDto {
 	@IsString()
 	@IsNotEmpty()
 	@IsOptional()
-	@Matches(/^[+]\d{1,3}\d{6,15}$/, { message: 'Invalid phone number format. Please provide a valid country code followed by a phone number.' })
+	@Matches(/^[+]\d{1,3}(?:\s?\d{1,15})+$/, { message: 'Invalid phone number format. Please provide a valid country code followed by a phone number.' })
 	@ApiPropertyOptional()
 	phoneNo: string;
   
