@@ -13,6 +13,6 @@
   "nationalImplementingEntity": "National Implementing Entity (s)",
   "validationStatus": "Validation Status",
   "addActivity": "Add Activity",
-  "filterByValidationStatus": "",
-  "filterByActivityStatus": ""
+  "filterByActivityStatus": "Filter By Activity Status",
+  "filterByValidationStatus": "Filter By Validation Status"
 }
