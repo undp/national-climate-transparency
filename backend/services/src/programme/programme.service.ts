@@ -606,6 +606,8 @@ export class ProgrammeService {
 			);
 		});
 
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
 			this.helperService.formatReqMessagesString("programme.verifyProgrammeSuccess", []),
