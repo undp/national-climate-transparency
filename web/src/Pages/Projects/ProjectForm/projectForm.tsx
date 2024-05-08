@@ -1089,7 +1089,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       <label className="form-item-header">{t('programmeCommentsTitle')}</label>
                     }
                     name="comment"
-                    rules={[validation.required]}
                   >
                     <TextArea rows={3} disabled={isView} />
                   </Form.Item>
