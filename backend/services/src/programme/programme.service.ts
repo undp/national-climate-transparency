@@ -28,8 +28,8 @@ import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ProgrammeViewEntity } from "../entities/programme.view.entity";
 import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
-import { SupportEntity } from "src/entities/support.entity";
-import { ValidateDto } from "src/dtos/validate.dto";
+import { SupportEntity } from "../entities/support.entity";
+import { ValidateDto } from "../dtos/validate.dto";
 
 @Injectable()
 export class ProgrammeService {
