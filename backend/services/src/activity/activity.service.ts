@@ -165,6 +165,14 @@ export class ActivityService {
 
 		activityUpdate.path = currentActivity.path;
 
+		if (isActivityLinked && (!activityUpdateDto.parentType || !activityUpdateDto.parentId)) {
+			this.addEventLogEntry(eventLog, logEventType, EntityType.ACTIVITY, activityUpdate.activityId, user.id, currentActivity.parentId);
+			activityUpdate.parentId = null;
+			activityUpdate.parentType = null;
+			activityUpdate.sectors = null;
+			activityUpdate.path = '_._._';
+		}
+
 		if (activityUpdateDto.parentType && activityUpdateDto.parentId && activityUpdateDto.parentId != currentActivity.parentId) {
 			if (isActivityLinked) {
 				this.addEventLogEntry(eventLog, logEventType, EntityType.ACTIVITY, activityUpdate.activityId, user.id, currentActivity.parentId);

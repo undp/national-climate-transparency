@@ -6,6 +6,7 @@ import { DataListResponseDto } from "src/dtos/data.list.response";
 import { DataResponseMessageDto } from "src/dtos/data.response.message";
 import { QueryDto } from "src/dtos/query.dto";
 import { SupportDto } from "src/dtos/support.dto";
+import { SupportUpdateDto } from "src/dtos/supportUpdate.dto";
 import { ValidateDto } from "src/dtos/validate.dto";
 import { LogEntity } from "src/entities/log.entity";
 import { SupportEntity } from "src/entities/support.entity";
@@ -131,9 +132,118 @@ export class SupportService {
 
 	//MARK: Find Support by Id
 	async findSupportById(supportId: string) {
-		return await this.supportRepo.findOneBy({
-			supportId
-		})
+		return await this.supportRepo.createQueryBuilder('support')
+		.leftJoinAndSelect('support.activity', 'activity')
+		.where('support.supportId = :supportId', { supportId })
+		.getOne();
+	}
+
+	//MARK: Update Support
+	async updateSupport(supportUpdateDto: SupportUpdateDto, user: User) {
+		const currentSupport = await this.findSupportById(supportUpdateDto.supportId);
+		if (!currentSupport) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.supportNotFound",
+					[supportUpdateDto.supportId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+		const eventLog = [];
+
+		if (user.sector && user.sector.length > 0 && currentSupport.sectors && currentSupport.sectors.length > 0) {
+			const commonSectors = currentSupport.sectors.filter(sector => user.sector.includes(sector));
+			if (commonSectors.length === 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"support.cannotUpdateNotRelatedSupport",
+						[currentSupport.supportId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+		}
+
+		const activity = await this.activityService.findActivityById(supportUpdateDto.activityId);
+		if (!activity) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.activityNotFound",
+					[supportUpdateDto.activityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (user.sector && user.sector.length > 0 && activity.sectors && activity.sectors.length > 0) {
+			const commonSectors = activity.sectors.filter(sector => user.sector.includes(sector));
+			if (commonSectors.length === 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"support.cannotLinkToNotRelatedActivity",
+						[supportUpdateDto.activityId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+		}
+
+		this.addEventLogEntry(eventLog, LogEventType.SUPPORT_UPDATED, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, supportUpdateDto);
+
+		if (supportUpdateDto.activityId != currentSupport.activity.activityId) {
+			this.addEventLogEntry(eventLog, LogEventType.UNLINKED_FROM_ACTIVITY, EntityType.SUPPORT, currentSupport.supportId, user.id, currentSupport.activity.activityId);
+			this.addEventLogEntry(eventLog, LogEventType.SUPPORT_LINKED, EntityType.ACTIVITY, activity.activityId, user.id, supportUpdateDto.supportId);
+			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTIVITY, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, activity.activityId);
+
+			currentSupport.activity = activity;
+			currentSupport.sectors = activity.sectors;
+		}
+
+		currentSupport.direction = supportUpdateDto.direction;
+		currentSupport.financeNature = supportUpdateDto.financeNature;
+		currentSupport.internationalSupportChannel = supportUpdateDto.internationalSupportChannel;
+		currentSupport.otherInternationalSupportChannel = supportUpdateDto.otherInternationalSupportChannel;
+		currentSupport.internationalFinancialInstrument = supportUpdateDto.internationalFinancialInstrument;
+		currentSupport.otherInternationalFinancialInstrument = supportUpdateDto.otherInternationalFinancialInstrument;
+		currentSupport.nationalFinancialInstrument = supportUpdateDto.nationalFinancialInstrument;
+		if (supportUpdateDto.otherNationalFinancialInstrument) currentSupport.otherNationalFinancialInstrument = supportUpdateDto.otherNationalFinancialInstrument;
+		currentSupport.financingStatus = supportUpdateDto.financingStatus;
+		if (supportUpdateDto.internationalSource) currentSupport.internationalSource = supportUpdateDto.internationalSource;
+		currentSupport.nationalSource = supportUpdateDto.nationalSource;
+		currentSupport.requiredAmount = supportUpdateDto.requiredAmount;
+		currentSupport.receivedAmount = supportUpdateDto.receivedAmount;
+		currentSupport.exchangeRate = supportUpdateDto.exchangeRate;
+		currentSupport.requiredAmountDomestic = currentSupport.requiredAmount * currentSupport.exchangeRate;
+		currentSupport.receivedAmountDomestic = currentSupport.receivedAmount * currentSupport.exchangeRate;
+
+		const sup = await this.entityManager
+			.transaction(async (em) => {
+				const savedSupport = await em.save<SupportEntity>(currentSupport);
+				if (savedSupport) {
+					for (const event of eventLog) {
+						await em.save<LogEntity>(event);
+					}
+				}
+				return savedSupport;
+			})
+			.catch((err: any) => {
+				console.log(err);
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"support.supportUpdateFailed",
+						[err]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("support.updateSupportSuccess", []),
+			sup
+		);
 	}
 
 	//MARK: Validate Support
