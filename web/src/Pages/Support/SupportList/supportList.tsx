@@ -20,7 +20,6 @@ import data from '../../../Testing/supportList.json';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
 import { Action } from '../../../Enums/action.enum';
-import { ActivityEntity } from '../../../Entities/activity';
 import { SupportEntity } from '../../../Entities/support';
 
 interface Item {
@@ -254,7 +253,6 @@ const supportList = () => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t('viewTitle')}</div>
-        <div className="body-sub-title">{t('viewDesc')}</div>
       </div>
       <div className="content-card">
         <Row className="table-actions-section">

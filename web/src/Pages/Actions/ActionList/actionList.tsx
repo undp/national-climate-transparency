@@ -505,7 +505,6 @@ const actionList = () => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t('viewTitle')}</div>
-        <div className="body-sub-title">{t('viewDesc')}</div>
       </div>
       <div className="content-card">
         <SimpleAttachEntity
