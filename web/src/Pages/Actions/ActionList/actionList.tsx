@@ -105,8 +105,6 @@ const actionList = () => {
 
   const getAttachedProgrammeIds = async (actionId: string) => {
     const payload = {
-      page: 1,
-      size: 100,
       filterAnd: [
         {
           key: 'actionId',

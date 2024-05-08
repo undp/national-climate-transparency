@@ -101,8 +101,6 @@ const projectList = () => {
 
   const getAttachedActivityIds = async (projectId: string) => {
     const payload = {
-      page: 1,
-      size: 100,
       filterAnd: [
         {
           key: 'parentId',

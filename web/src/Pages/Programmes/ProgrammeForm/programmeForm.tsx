@@ -113,15 +113,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     // Initially Loading Free Actions that can be parent
 
     const fetchFreeActions = async () => {
-      const payload = {
-        page: 1,
-        size: 100,
-        sort: {
-          key: 'actionId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/actions/query', payload);
+      const response: any = await post('national/actions/query', {});
 
       const tempActionData: ActionSelectData[] = [];
       response.data.forEach((action: any) => {
@@ -221,8 +213,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     const fetchConnectedProjectIds = async () => {
       if (method !== 'create') {
         const payload = {
-          page: 1,
-          size: 100,
           filterAnd: [
             {
               key: 'programmeId',
@@ -251,8 +241,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     //   if (method !== 'create') {
     //     const connectedActivityIds: string[] = [];
     //     const payload = {
-    //       page: 1,
-    //       size: 100,
     //       filterAnd: [
     //         {
     //           key: 'actionId',

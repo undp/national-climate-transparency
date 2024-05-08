@@ -181,15 +181,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   useEffect(() => {
     const fetchAvailableParents = async () => {
       if (parentType === 'action' || parentType === 'programme' || parentType === 'project') {
-        const payload = {
-          page: 1,
-          size: 100,
-          sort: {
-            key: `${parentType}Id`,
-            order: 'ASC',
-          },
-        };
-        const response: any = await post(`national/${parentType}s/query`, payload);
+        const response: any = await post(`national/${parentType}s/query`, {});
 
         const tempParentData: ParentData[] = [];
         response.data.forEach((parent: any) => {
@@ -317,15 +309,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchSupportData = async () => {
       try {
-        const payload = {
-          page: 1,
-          size: 100,
-          sort: {
-            key: `supportId`,
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/supports/query', payload);
+        const response: any = await post('national/supports/query', {});
 
         const tempSupportData: SupportData[] = [];
 

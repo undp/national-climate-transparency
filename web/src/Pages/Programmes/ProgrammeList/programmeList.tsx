@@ -99,8 +99,6 @@ const programmeList = () => {
 
   const getAttachedProjectIds = async (programmeId: string) => {
     const payload = {
-      page: 1,
-      size: 100,
       filterAnd: [
         {
           key: 'programmeId',
