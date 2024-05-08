@@ -38,14 +38,14 @@ export class SupportController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Create, SupportEntity))
   @Post("add")
-  addActivity(@Body() supportDto: SupportDto, @Request() req) {
+  addSupport(@Body() supportDto: SupportDto, @Request() req) {
     return this.supportService.createSupport(supportDto, req.user);
   }
 
 	@ApiBearerAuth()
   @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, SupportEntity, true))
   @Post("query")
-  queryActivity(@Body() query: QueryDto, @Request() req) {
+  querySupport(@Body() query: QueryDto, @Request() req) {
     console.log(req.abilityCondition);
     return this.supportService.query(query, req.abilityCondition);
   }
@@ -69,7 +69,7 @@ export class SupportController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, SupportEntity))
 	@Post("validate")
-	validateActivity(@Body() validateDto: ValidateDto, @Request() req) {
+	validateSupport(@Body() validateDto: ValidateDto, @Request() req) {
 			return this.supportService.validateSupport(validateDto, req.user);
 	}
 
