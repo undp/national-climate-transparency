@@ -8,6 +8,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+	Matches,
 	MaxLength,
 	ValidateIf,
 } from "class-validator";
@@ -61,11 +62,12 @@ export class UserDto {
   })
   sector: Sector[];
 
-  @IsString()
-  @ApiPropertyOptional()
-  @IsNotEmpty()
-  @IsOptional()
-  phoneNo: string;
+	@IsString()
+	@IsNotEmpty()
+	@IsOptional()
+	@Matches(/^[+]\d{1,3}\d{6,15}$/, { message: 'Invalid phone number format. Please provide a valid country code followed by a phone number.' })
+	@ApiPropertyOptional()
+	phoneNo: string;
   
   @IsValidCountry()
   @IsOptional()

@@ -28,6 +28,7 @@ import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ProgrammeViewEntity } from "../entities/programme.view.entity";
 import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
+import { SupportEntity } from "src/entities/support.entity";
 
 @Injectable()
 export class ProgrammeService {
@@ -623,6 +624,12 @@ export class ProgrammeService {
 				"activity.parentType = :project AND activity.parentId = project.projectId",
 				{ project: EntityType.PROJECT }
 			)
+			.leftJoinAndMapMany(
+				"activity.supports", // Property name to map supports to activities
+				SupportEntity, // Entity to join
+				"support", // Alias for the joined table
+				"support.activityId = activity.activityId" // Join condition
+		)
 			.where('project.projectId IN (:...projectIds)', { projectIds })
 			.getMany();
 	}
