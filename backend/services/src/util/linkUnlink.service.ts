@@ -10,6 +10,7 @@ import { EntityManager } from "typeorm";
 import { LinkActivitiesDto } from "src/dtos/link.activities.dto";
 import { UnlinkActivitiesDto } from "src/dtos/unlink.activities.dto";
 import { Sector } from "src/enums/sector.enum";
+import { SupportEntity } from "src/entities/support.entity";
 
 @Injectable()
 export class LinkUnlinkService {
@@ -149,6 +150,8 @@ export class LinkUnlinkService {
 	async linkProjectsToProgramme(programme: ProgrammeEntity, projects: ProjectEntity[], payload: any, user: User, entityManager: EntityManager) {
 		const proj = await entityManager
 			.transaction(async (em) => {
+				const saveOperations: Promise<any>[] = [];
+
 				for (const project of projects) {
 					project.programme = programme;
 					project.path = this.addProgrammeToProjectPath(project.path, programme.programmeId);
@@ -156,30 +159,65 @@ export class LinkUnlinkService {
 					const linkedProject = await em.save<ProjectEntity>(project);
 
 					if (linkedProject) {
+						// if (project.activities && project.activities.length > 0) {
+						// 	for (const activity of project.activities) {
+						// 		if (activity.support && activity.support.length > 0) {
+						// 			for (const support of activity.support) {
+						// 				support.sectors = programme.affectedSectors;
+						// 				await em.save<SupportEntity>(support);
+						// 			}
+						// 		}
+						// 		activity.path = this.addProgrammeToActivityPath(activity.path, programme.programmeId);
+						// 		activity.sectors = programme.affectedSectors;
+						// 		await em.save<ActivityEntity>(activity);
+						// 	}
+						// }
+						// await em.save<LogEntity>(
+						// 	this.buildLogEntity(
+						// 		LogEventType.LINKED_TO_PROGRAMME,
+						// 		EntityType.PROJECT,
+						// 		project.projectId,
+						// 		user.id,
+						// 		payload
+						// 	)
+						// );
+
 						if (project.activities && project.activities.length > 0) {
 							for (const activity of project.activities) {
+								if (activity.support && activity.support.length > 0) {
+									activity.support.forEach((support) => {
+										support.sectors = programme.affectedSectors;
+										saveOperations.push(em.save<SupportEntity>(support));
+									});
+								}
 								activity.path = this.addProgrammeToActivityPath(activity.path, programme.programmeId);
 								activity.sectors = programme.affectedSectors;
-								await em.save<ActivityEntity>(activity);
+								saveOperations.push(em.save<ActivityEntity>(activity));
 							}
 						}
-						await em.save<LogEntity>(
-							this.buildLogEntity(
-								LogEventType.LINKED_TO_PROGRAMME,
-								EntityType.PROJECT,
-								project.projectId,
-								user.id,
-								payload
+
+						saveOperations.push(
+							em.save<LogEntity>(
+								this.buildLogEntity(
+									LogEventType.LINKED_TO_PROGRAMME,
+									EntityType.PROJECT,
+									project.projectId,
+									user.id,
+									payload
+								)
 							)
 						);
 					}
 				}
+				await Promise.all(saveOperations);
 			});
 	}
 
 	async unlinkProjectsFromProgramme(projects: ProjectEntity[], payload: any, user: User, entityManager: EntityManager) {
 		const proj = await entityManager
 			.transaction(async (em) => {
+				const saveOperations: Promise<any>[] = [];
+
 				for (const project of projects) {
 					project.programme = null;
 					project.path = `_._`;
@@ -187,24 +225,52 @@ export class LinkUnlinkService {
 					const unLinkedProgramme = await em.save<ProjectEntity>(project);
 
 					if (unLinkedProgramme) {
+
 						if (project.activities && project.activities.length > 0) {
 							for (const activity of project.activities) {
+								if (activity.support && activity.support.length > 0) {
+									activity.support.forEach((support) => {
+										support.sectors = null;
+										saveOperations.push(em.save<SupportEntity>(support));
+									});
+								}
 								activity.path = `_._.${project.projectId}`
 								activity.sectors = null;
-								await em.save<ActivityEntity>(activity);
+								saveOperations.push(em.save<ActivityEntity>(activity));
 							}
 						}
-						await em.save<LogEntity>(
-							this.buildLogEntity(
-								LogEventType.UNLINKED_FROM_PROGRAMME,
-								EntityType.PROJECT,
-								project.projectId,
-								user.id,
-								payload
+
+						saveOperations.push(
+							em.save<LogEntity>(
+								this.buildLogEntity(
+									LogEventType.UNLINKED_FROM_PROGRAMME,
+									EntityType.PROJECT,
+									project.projectId,
+									user.id,
+									payload
+								)
 							)
 						);
+
+						// if (project.activities && project.activities.length > 0) {
+						// 	for (const activity of project.activities) {
+						// 		activity.path = `_._.${project.projectId}`
+						// 		activity.sectors = null;
+						// 		await em.save<ActivityEntity>(activity);
+						// 	}
+						// }
+						// await em.save<LogEntity>(
+						// 	this.buildLogEntity(
+						// 		LogEventType.UNLINKED_FROM_PROGRAMME,
+						// 		EntityType.PROJECT,
+						// 		project.projectId,
+						// 		user.id,
+						// 		payload
+						// 	)
+						// );
 					}
 				}
+				await Promise.all(saveOperations);
 			});
 	}
 
@@ -217,6 +283,7 @@ export class LinkUnlinkService {
 	) {
 		const act = await entityManager
 			.transaction(async (em) => {
+				const saveOperations: Promise<any>[] = [];
 				for (const activity of activities) {
 					let logEventType;
 					switch (linkActivitiesDto.parentType) {
@@ -245,17 +312,26 @@ export class LinkUnlinkService {
 					const linkedActivity = await em.save<ActivityEntity>(activity);
 
 					if (linkedActivity) {
-						await em.save<LogEntity>(
-							this.buildLogEntity(
-								logEventType,
-								EntityType.ACTIVITY,
-								activity.activityId,
-								user.id,
-								linkActivitiesDto.parentId
+						if (activity.support && activity.support.length > 0) {
+							activity.support.forEach((support) => {
+								support.sectors = linkedActivity.sectors;
+								saveOperations.push(em.save<SupportEntity>(support));
+							});
+						}
+						saveOperations.push(
+							em.save<LogEntity>(
+								this.buildLogEntity(
+									logEventType,
+									EntityType.ACTIVITY,
+									activity.activityId,
+									user.id,
+									linkActivitiesDto.parentId
+								)
 							)
 						);
 					}
 				}
+				await Promise.all(saveOperations);
 			});
 
 	}
@@ -268,6 +344,7 @@ export class LinkUnlinkService {
 	) {
 		const act = await entityManager
 			.transaction(async (em) => {
+				const saveOperations: Promise<any>[] = [];
 				for (const activity of activities) {
 					let logEventType;
 					switch (activity.parentType) {
@@ -292,17 +369,26 @@ export class LinkUnlinkService {
 					const unlinkedActivity = await em.save<ActivityEntity>(activity);
 
 					if (unlinkedActivity) {
-						await em.save<LogEntity>(
-							this.buildLogEntity(
-								logEventType,
-								EntityType.ACTIVITY,
-								activity.activityId,
-								user.id,
-								unlinkActivitiesDto
+						if (activity.support && activity.support.length > 0) {
+							activity.support.forEach((support) => {
+								support.sectors = null;
+								saveOperations.push(em.save<SupportEntity>(support));
+							});
+						}
+						saveOperations.push(
+							em.save<LogEntity>(
+								this.buildLogEntity(
+									logEventType,
+									EntityType.ACTIVITY,
+									activity.activityId,
+									user.id,
+									unlinkActivitiesDto
+								)
 							)
 						);
 					}
 				}
+				await Promise.all(saveOperations);
 			});
 
 	}

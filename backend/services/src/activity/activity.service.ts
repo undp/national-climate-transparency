@@ -671,6 +671,7 @@ export class ActivityService {
 
 	async findAllActivitiesByIds(activityIds: string[]) {
 		return await this.activityRepo.createQueryBuilder('activity')
+			.leftJoinAndSelect('activity.support', 'support')
 			.where('activity.activityId IN (:...activityIds)', { activityIds })
 			.getMany();
 	}

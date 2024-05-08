@@ -17,6 +17,7 @@ import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
+import { SupportEntity } from "src/entities/support.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -67,6 +68,13 @@ export class CaslAbilityFactory {
 				can(Action.Update, ActivityEntity);
 				can(Action.Delete, ActivityEntity);
 				can(Action.Validate, ActivityEntity);
+
+				// Support
+				can(Action.Read, SupportEntity);
+				can(Action.Create, SupportEntity);
+				can(Action.Update, SupportEntity);
+				can(Action.Delete, SupportEntity);
+				can(Action.Validate, SupportEntity);
 			}
 
 			if (user.role == Role.Admin) {
@@ -105,6 +113,13 @@ export class CaslAbilityFactory {
 				can(Action.Update, ActivityEntity);
 				can(Action.Delete, ActivityEntity);
 				can(Action.Validate, ActivityEntity);
+
+				// Support
+				can(Action.Read, SupportEntity);
+				can(Action.Create, SupportEntity);
+				can(Action.Update, SupportEntity);
+				can(Action.Delete, SupportEntity);
+				can(Action.Validate, SupportEntity);
 
 			}
 
@@ -177,6 +192,20 @@ export class CaslAbilityFactory {
 				can(Action.Delete, ActivityEntity);
 				cannot(Action.Validate, ActivityEntity);
 
+				// ----------------------------- Support ------------------------------
+				user.sector.forEach(userSector => {
+					can(Action.Read, SupportEntity, {
+						$or: [{ sectors: { $elemMatch: { $eq: userSector } } }]
+					} as MongoQuery<SupportEntity>);
+				});
+				can(Action.Read, SupportEntity, {
+					sectors: { $exists: false }
+				} as MongoQuery<SupportEntity>);
+				can(Action.Create, SupportEntity);
+				can(Action.Update, SupportEntity);
+				can(Action.Delete, SupportEntity);
+				cannot(Action.Validate, SupportEntity);
+
 			}
 
 			if (user.role == Role.Observer) {
@@ -247,6 +276,22 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, ActivityEntity);
 				cannot(Action.Delete, ActivityEntity);
 				cannot(Action.Validate, ActivityEntity);
+
+				// ----------------------------- Support ------------------------------
+				user.sector.forEach(userSector => {
+					can(Action.Read, SupportEntity, {
+						$or: [{ sectors: { $elemMatch: { $eq: userSector } } }]
+					} as MongoQuery<SupportEntity>);
+				});
+
+				can(Action.Read, SupportEntity, {
+					sectors: { $exists: false }
+				} as MongoQuery<SupportEntity>);
+
+				cannot(Action.Create, SupportEntity);
+				cannot(Action.Update, SupportEntity);
+				cannot(Action.Delete, SupportEntity);
+				cannot(Action.Validate, SupportEntity);
 
 			}
 

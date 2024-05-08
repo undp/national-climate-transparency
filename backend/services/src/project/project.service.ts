@@ -26,6 +26,7 @@ import { ProjectViewEntity } from "../entities/project.view.entity";
 import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { ValidateDto } from "../dtos/validate.dto";
+import { SupportEntity } from "src/entities/support.entity";
 
 @Injectable()
 export class ProjectService {
@@ -521,6 +522,12 @@ export class ProjectService {
 				"activity.parentType = :project AND activity.parentId = project.projectId",
 				{ project: EntityType.PROJECT }
 			)
+			.leftJoinAndMapMany(
+				"activity.support", // Property name to map supports to activities
+				SupportEntity, // Entity to join
+				"support", // Alias for the joined table
+				"support.activityId = activity.activityId" // Join condition
+		)
 			.where('project.projectId IN (:...projectIds)', { projectIds })
 			.getMany();
 	}

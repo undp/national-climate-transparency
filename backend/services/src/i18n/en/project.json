@@ -14,7 +14,7 @@
     "projectUpdateFailed": "Project update failed due to {}",
     "updateProjectSuccess": "Project updated successfully",
     "projectAlreadyValidated": "The project with id {} is already validated",
-    "verifyActionSuccess": "Project verified successfully",
+    "verifyProjectSuccess": "Project verified successfully",
     "projectVerificationFailed": "Project verification failed due to {}"
 
 
