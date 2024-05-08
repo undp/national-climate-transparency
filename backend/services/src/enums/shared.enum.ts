@@ -74,6 +74,7 @@ export enum EntityType {
   PROGRAMME = "programme",
   PROJECT = "project",
   ACTIVITY = "activity",
+	SUPPORT = "support",
 }
 
 export enum LogEventType {
@@ -99,7 +100,13 @@ export enum LogEventType {
 	PROJECT_VERIFIED = 19,
 	ACTIVITY_UPDATED = 20,
 	ACTIVITY_VERIFIED = 21,
-  PROGRAMME_VERIFIED = 22,
+	SUPPORT_CREATED = 22,
+	SUPPORT_LINKED = 23,
+	LINKED_TO_ACTIVITY = 24,
+	SUPPORT_VERIFIED = 25,
+	SUPPORT_UPDATED = 26,
+	UNLINKED_FROM_ACTIVITY = 27,
+  PROGRAMME_VERIFIED = 28,
 }
 
 export enum GHGS {

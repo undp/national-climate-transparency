@@ -371,7 +371,7 @@ export class ActionService {
 				console.log(err);
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
-						"action.actionCreationFailed",
+						"action.actionUpdateFailed",
 						[err]
 					),
 					HttpStatus.BAD_REQUEST

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
-import { ArrayMinSize, IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
+import { ArrayMinSize, IsArray, IsBoolean, IsEnum, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
 import { ActivityStatus, ImpleMeans, Measure, TechnologyType } from "../enums/activity.enum";
 import { EntityType, IntImplementor, NatImplementor } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
@@ -23,9 +23,9 @@ export class ActivityUpdateDto {
 
 	@ValidateIf((c) => c.parentType)
 	@IsNotEmpty()
-	@ApiPropertyOptional({ enum: EntityType })
-	@IsEnum(EntityType, {
-		message: "Invalid parent type. Supported following paren types:" + Object.values(EntityType),
+	@ApiProperty({ enum: [EntityType.ACTION, EntityType.PROGRAMME, EntityType.PROJECT] })
+	@IsIn([EntityType.ACTION, EntityType.PROGRAMME, EntityType.PROJECT], {
+		message: 'Invalid Entity Type. Supported types are:' + Object.values([EntityType.ACTION, EntityType.PROGRAMME, EntityType.PROJECT]),
 	})
 	parentType: EntityType;
 

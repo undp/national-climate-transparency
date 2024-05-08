@@ -9,6 +9,7 @@ import {
   IntSource,
 } from "../enums/support.enum";
 import { ActivityEntity } from "./activity.entity";
+import { Sector } from "src/enums/sector.enum";
 
 @Entity("support")
 export class SupportEntity {
@@ -22,40 +23,40 @@ export class SupportEntity {
   financeNature: string;
 
   @Column({ type: "enum", enum: IntSupChannel })
-  intSupChannel: string;
+  internationalSupportChannel: string;
+
+	@Column()
+  otherInternationalSupportChannel: string;
 
   @Column({ type: "enum", enum: IntFinInstrument })
-  intFinInstrument: string;
+  internationalFinancialInstrument: string;
+
+	@Column()
+	otherInternationalFinancialInstrument: string;
 
   @Column({ type: "enum", enum: NatFinInstrument })
-  natFinInstrument: string;
+  nationalFinancialInstrument: string;
 
-  @Column()
-  otherIntSupChannel: string;
-
-  @Column()
-  otherIntFinInstrument: string;
-
-  @Column()
-  otherNatFinInstrument: string;
+  @Column({ nullable: true })
+  otherNationalFinancialInstrument: string;
 
   @Column({ type: "enum", enum: FinancingStatus })
   financingStatus: string;
 
-  @Column({ type: "enum", enum: IntSource })
-  intSource: string;
+  @Column({ type: "enum", enum: IntSource,  nullable: true })
+  internationalSource: string;
 
-  @Column()
-  natSource: string;
+  @Column({ nullable: true })
+  nationalSource: string;
 
-  @Column()
+  @Column({nullable: false, type: 'double precision' })
   requiredAmount: number;
 
-  @Column()
+  @Column({nullable: false, type: 'double precision' })
   receivedAmount: number;
 
   @Column()
-  exchRate: number;
+  exchangeRate: number;
 
 	@Column()
   requiredAmountDomestic: number;
@@ -63,9 +64,15 @@ export class SupportEntity {
   @Column()
   receivedAmountDomestic: number;
 
+	@Column("varchar", { array: true, nullable: true })
+  sectors: Sector[];
+
   @ManyToOne(() => ActivityEntity, (activity) => activity.support, {
     nullable: false,
   })
   @JoinColumn([{ name: "activityId", referencedColumnName: "activityId" }])
   activity: ActivityEntity;
+
+	@Column({ type: "boolean", default: false })
+	validated: boolean;
 }
