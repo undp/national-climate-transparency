@@ -171,11 +171,23 @@ export class ActivityDto {
 				activityEmissionsWithAM: [7,8,9,7],
 				expectedEmissionReductWithM: [7,8,9,7],
 				expectedEmissionReductWithAM: [7,8,9,7],
+				total: {
+					baselineEmissions:31,
+					activityEmissionsWithM:31,
+					activityEmissionsWithAM:31,
+					expectedEmissionReductWithM:31,
+					expectedEmissionReductWithAM:31,
+				}
 			  },
 			  actual: {
 				baselineActualEmissions: [7,8,9,7],
 				activityActualEmissions: [7,8,9,7],
 				actualEmissionReduct: [7,8,9,7],
+				total: {
+					baselineActualEmissions:31,
+					activityActualEmissions:31,
+					actualEmissionReduct:31,
+				}
 			  }
 		},
 	})

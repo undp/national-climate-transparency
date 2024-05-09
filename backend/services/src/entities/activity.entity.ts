@@ -80,11 +80,23 @@ export class ActivityEntity implements EntitySubject {
       activityEmissionsWithAM: number[];
       expectedEmissionReductWithM: number[];
       expectedEmissionReductWithAM: number[];
+      total: {
+        baselineEmissions:number;
+        activityEmissionsWithM:number;
+        activityEmissionsWithAM:number;
+        expectedEmissionReductWithM:number;
+        expectedEmissionReductWithAM:number;
+      };
     };
     actual: {
       baselineActualEmissions: number[];
       activityActualEmissions: number[];
       actualEmissionReduct: number[];
+      total: {
+        baselineActualEmissions: number;
+        activityActualEmissions: number;
+        actualEmissionReduct: number;
+      };
     };
   };
 
