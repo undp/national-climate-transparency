@@ -1,6 +1,7 @@
 {
     "addActivityTitle": "Add New Activity",
-    "addActivityDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
+    "viewActivityTitle": "View Activity",
+    "editActivityTitle": "Edit Activity",
     "generalInfoTitle": "General Activity Information",
     "activityTitle": "Title of Activity",
     "activityDescTitle": "Short Description of Activity ",

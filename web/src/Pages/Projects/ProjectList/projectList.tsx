@@ -101,17 +101,15 @@ const projectList = () => {
 
   const getAttachedActivityIds = async (projectId: string) => {
     const payload = {
-      page: 1,
-      size: 100,
       filterAnd: [
         {
-          key: 'projectId',
+          key: 'parentId',
           operation: '=',
           value: projectId,
         },
       ],
       sort: {
-        key: 'projectId',
+        key: 'activityId',
         order: 'ASC',
       },
     };
@@ -129,7 +127,7 @@ const projectList = () => {
   const getAllData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize + 1 };
+      const payload: any = { page: currentPage, size: pageSize };
 
       // Adding Sort By Conditions
 
@@ -149,17 +147,16 @@ const projectList = () => {
         });
       }
 
-      // if (appliedFilterValue.validationFilter !== 'All') {
-      //   if (!payload.hasOwnProperty('filterAnd')) {
-      //     payload.filterAnd = [];
-      //   }
-      //   payload.filterAnd.push({
-      //     key: 'validationStatus',
-      //     operation: '=',
-      //     value: appliedFilterValue.validationFilter,
-      //   });
-      // }
-
+      if (appliedFilterValue.validationFilter !== 'All') {
+        if (!payload.hasOwnProperty('filterAnd')) {
+          payload.filterAnd = [];
+        }
+        payload.filterAnd.push({
+          key: 'validated',
+          operation: '=',
+          value: appliedFilterValue.validationFilter === 'Validated' ? true : false,
+        });
+      }
       if (searchValue !== '') {
         if (!payload.hasOwnProperty('filterAnd')) {
           payload.filterAnd = [];
@@ -209,7 +206,8 @@ const projectList = () => {
   const attachActivities = async () => {
     if (toBeAttached.length > 0) {
       const payload = {
-        projectId: selectedProjectId,
+        parentType: 'project',
+        parentId: selectedProjectId,
         activityIds: toBeAttached,
       };
       const response: any = await post('national/activities/link', payload);
@@ -505,7 +503,6 @@ const projectList = () => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t('viewTitle')}</div>
-        <div className="body-sub-title">{t('viewDesc')}</div>
       </div>
       <div className="content-card">
         <SimpleAttachEntity

@@ -1,0 +1,13 @@
+{
+    "supportCreationFailed": "Support creation failed due to {}",
+    "createSupportSuccess": "Support created successfully",
+    "supportNotFound": "A support with id {} is not found",
+    "activityNotFound": "Activity not found",
+    "cannotUpdateNotRelatedSupport": "User is not allowed to update the support with id {}",
+    "cannotLinkToNotRelatedActivity": "User is not allowed to link the support to the activity with id {}",
+    "supportUpdateFailed": "Support update failed due to {}",
+    "updateSupportSuccess": "Support updated successfully",
+    "supportAlreadyValidated": "The support with id {} is already validated",
+    "verifySupportSuccess": "Support verified successfully",
+    "supportVerificationFailed": "Support verification failed due to {}"
+}

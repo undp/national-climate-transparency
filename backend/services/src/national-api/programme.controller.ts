@@ -20,6 +20,7 @@ import { LinkProgrammesDto } from "src/dtos/link.programmes.dto";
 import { UnlinkProgrammesDto } from "src/dtos/unlink.programmes.dto";
 import { QueryDto } from "../dtos/query.dto";
 import { ProgrammeUpdateDto } from "src/dtos/programmeUpdate.dto";
+import { ValidateDto } from "src/dtos/validate.dto";
 
 @ApiTags("Programmes")
 @ApiBearerAuth()
@@ -81,5 +82,13 @@ export class ProgrammeController {
     @Post("unlink")
     unlinkProgrammes(@Body() unlinkProgrammesDto: UnlinkProgrammesDto, @Request() req) {
         return this.programmeService.unlinkProgrammesFromAction(unlinkProgrammesDto, req.user);
+    }
+
+    @ApiBearerAuth('api_key')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, ProgrammeEntity))
+    @Post("validate")
+    validateProgrammes(@Body() validateDto: ValidateDto, @Request() req) {
+        return this.programmeService.validateProgramme(validateDto, req.user);
     }
 }

@@ -28,6 +28,8 @@ import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ProgrammeViewEntity } from "../entities/programme.view.entity";
 import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
+import { SupportEntity } from "../entities/support.entity";
+import { ValidateDto } from "../dtos/validate.dto";
 
 @Injectable()
 export class ProgrammeService {
@@ -229,8 +231,10 @@ export class ProgrammeService {
 			);
 		}
 
-		programmeUpdate.action = currentProgramme.action;
-		programmeUpdate.path = currentProgramme.path;
+		if (currentProgramme.action) {
+			programmeUpdate.action = currentProgramme.action;
+			programmeUpdate.path = currentProgramme.path;
+		}
 
 		// Document update resolve
 
@@ -262,9 +266,7 @@ export class ProgrammeService {
 			};
 		}
 
-		if (documents.length === 0) {
-			programmeUpdate.documents = null;
-		} else if (documents.length > 0){
+		if (documents.length > 0){
 			programmeUpdate.documents = documents;
 		}
 
@@ -560,6 +562,60 @@ export class ProgrammeService {
 		);
 	}
 
+	async validateProgramme(validateDto: ValidateDto, user: User) {
+		const programme = await this.findProgrammeById(validateDto.entityId);
+		if (!programme) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeNotFound",
+					[validateDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (programme.validated) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.projectAlreadyValidated",
+					[validateDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		programme.validated = true;
+		const eventLog = this.buildLogEntity(LogEventType.PROGRAMME_VERIFIED,EntityType.PROGRAMME,programme.programmeId,user.id,validateDto)
+
+		const prog = await this.entityManager
+		.transaction(async (em) => {
+			const savedProgramme = await em.save<ProgrammeEntity>(programme);
+			if (savedProgramme) {
+				await em.save<LogEntity>(eventLog);
+			}
+			return savedProgramme;
+		})
+		.catch((err: any) => {
+			console.log(err);
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeVerificationFailed",
+					[err]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("programme.verifyProgrammeSuccess", []),
+			prog
+		);
+
+	}
+
 	async findAllProgrammeByIds(programmeIds: string[]) {
 		return await this.programmeRepo.createQueryBuilder('programme')
 			.leftJoinAndSelect('programme.action', 'action')
@@ -623,6 +679,12 @@ export class ProgrammeService {
 				"activity.parentType = :project AND activity.parentId = project.projectId",
 				{ project: EntityType.PROJECT }
 			)
+			.leftJoinAndMapMany(
+				"activity.supports", // Property name to map supports to activities
+				SupportEntity, // Entity to join
+				"support", // Alias for the joined table
+				"support.activityId = activity.activityId" // Join condition
+		)
 			.where('project.projectId IN (:...projectIds)', { projectIds })
 			.getMany();
 	}

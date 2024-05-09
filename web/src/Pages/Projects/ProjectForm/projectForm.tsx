@@ -105,15 +105,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     // Initially Loading Free Actions that can be parent
 
     const fetchAllProgrammes = async () => {
-      const payload = {
-        page: 1,
-        size: 100,
-        sort: {
-          key: 'programmeId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/programmes/query', payload);
+      const response: any = await post('national/programmes/query', {});
 
       const tempProgrammeData: ProgrammeSelectData[] = [];
       response.data.forEach((prg: any) => {
@@ -222,8 +214,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     const fetchConnectedActivityIds = async () => {
       if (method !== 'create') {
         const payload = {
-          page: 1,
-          size: 100,
           filterAnd: [
             {
               key: 'parentId',
@@ -872,7 +862,19 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('startYearHeader')}</label>}
                     name="startYear"
-                    rules={[validation.required]}
+                    rules={[
+                      validation.required,
+                      ({ getFieldValue }) => ({
+                        // eslint-disable-next-line no-unused-vars
+                        validator(_, value) {
+                          if (!value || getFieldValue('endYear') >= value) {
+                            return Promise.resolve();
+                          }
+                          return Promise.reject('Cannot be greater than End Year!');
+                        },
+                      }),
+                    ]}
+                    dependencies={['endYear']}
                   >
                     <Select
                       size="large"
@@ -905,6 +907,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                         },
                       }),
                     ]}
+                    dependencies={['startYear']}
                   >
                     <Select
                       size="large"
@@ -937,7 +940,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('natImplementorHeader')}</label>}
                     name="nationalImplementor"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled
+                    ></Select>
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -945,7 +954,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('techTypeHeader')}</label>}
                     name="techType"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>
@@ -1089,7 +1104,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       <label className="form-item-header">{t('programmeCommentsTitle')}</label>
                     }
                     name="comment"
-                    rules={[validation.required]}
                   >
                     <TextArea rows={3} disabled={isView} />
                   </Form.Item>

@@ -9,6 +9,7 @@ export enum CounterType {
   ACTION = 7,
   KPI = 8,
 	PROJECT = 9,
-	ACTIVITY = 10
+	ACTIVITY = 10,
+	SUPPORT = 11
 
 }

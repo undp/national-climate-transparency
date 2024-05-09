@@ -378,7 +378,7 @@ const UserManagement = () => {
   const getAllUsers = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize + 1 };
+      const payload: any = { page: currentPage, size: pageSize };
 
       // Adding Sort By Conditions
 

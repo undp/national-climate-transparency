@@ -190,8 +190,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     const fetchConnectedProgrammeIds = async () => {
       if (method !== 'create') {
         const payload = {
-          page: 1,
-          size: 100,
           filterAnd: [
             {
               key: 'actionId',
@@ -222,8 +220,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       if (method !== 'create') {
         const connectedActivityIds: string[] = [];
         // const payload = {
-        //   page: 1,
-        //   size: 100,
         //   filterAnd: [
         //     {
         //       key: 'actionId',
