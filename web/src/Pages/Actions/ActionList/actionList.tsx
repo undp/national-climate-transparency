@@ -105,8 +105,6 @@ const actionList = () => {
 
   const getAttachedProgrammeIds = async (actionId: string) => {
     const payload = {
-      page: 1,
-      size: 100,
       filterAnd: [
         {
           key: 'actionId',
@@ -133,7 +131,7 @@ const actionList = () => {
   const getAllData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize + 1 };
+      const payload: any = { page: currentPage, size: pageSize };
 
       // Adding Sort By Conditions
 
@@ -153,16 +151,16 @@ const actionList = () => {
         });
       }
 
-      // if (appliedFilterValue.validationFilter !== 'All') {
-      //   if (!payload.hasOwnProperty('filterAnd')) {
-      //     payload.filterAnd = [];
-      //   }
-      //   payload.filterAnd.push({
-      //     key: 'validationStatus',
-      //     operation: '=',
-      //     value: appliedFilterValue.validationFilter,
-      //   });
-      // }
+      if (appliedFilterValue.validationFilter !== 'All') {
+        if (!payload.hasOwnProperty('filterAnd')) {
+          payload.filterAnd = [];
+        }
+        payload.filterAnd.push({
+          key: 'validated',
+          operation: '=',
+          value: appliedFilterValue.validationFilter === 'Validated' ? true : false,
+        });
+      }
 
       if (searchValue !== '') {
         if (!payload.hasOwnProperty('filterAnd')) {
@@ -505,7 +503,6 @@ const actionList = () => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t('viewTitle')}</div>
-        <div className="body-sub-title">{t('viewDesc')}</div>
       </div>
       <div className="content-card">
         <SimpleAttachEntity

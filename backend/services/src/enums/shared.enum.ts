@@ -106,6 +106,7 @@ export enum LogEventType {
 	SUPPORT_VERIFIED = 25,
 	SUPPORT_UPDATED = 26,
 	UNLINKED_FROM_ACTIVITY = 27,
+  PROGRAMME_VERIFIED = 28,
 }
 
 export enum GHGS {

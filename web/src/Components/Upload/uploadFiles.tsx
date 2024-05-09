@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { RcFile, UploadFile } from 'antd/lib/upload/interface';
-import { Button, Card, Col, Row, Upload, message } from 'antd';
+import { Button, Card, Col, Row, Tooltip, Upload, message } from 'antd';
 import {
   CloseCircleOutlined,
   DeleteOutlined,
   DownloadOutlined,
+  FileSearchOutlined,
   UploadOutlined,
 } from '@ant-design/icons';
 import ConfirmPopup from '../Popups/Confirmation/confirmPopup';
@@ -141,33 +142,40 @@ const UploadFileGrid: React.FC<Props> = ({
         setOpen={setConfirmOpen}
       />
       {/* Section to show the already uploaded files */}
-      {storedVisibleList.length > 0 && (
+      {storedVisibleList.length > 0 ? (
         <Row gutter={[30, 10]} style={{ marginBottom: '25px' }}>
           {storedVisibleList.map((file) => (
-            <Col key={file.key} span={8} className="file-column">
-              {/* <Tooltip placement="topLeft" title={file.title} showArrow={false}> */}
-              <Card className="file-card">
-                <div className="file-content">
-                  <span>{file.title.slice(0, 20)}</span>
-                  {usedIn !== 'create' && (
-                    <DownloadOutlined
-                      className="download-icon"
-                      onClick={() => handleDownloadClick(file)}
-                    />
-                  )}
-                  {usedIn !== 'view' && (
-                    <DeleteOutlined
-                      className="delete-icon"
-                      onClick={() => handleDeleteClick(file.key)}
-                    />
-                  )}
-                </div>
-              </Card>
-              {/* </Tooltip> */}
+            <Col key={file.key} span={isSingleColumn ? 12 : 8} className="file-column">
+              <Tooltip placement="topLeft" title={file.title} showArrow={false}>
+                <Card className="file-card">
+                  <div className="file-content">
+                    <span>
+                      {isSingleColumn ? file.title.slice(0, 12) : file.title.slice(0, 20)}
+                    </span>
+                    {usedIn !== 'create' && (
+                      <DownloadOutlined
+                        className="download-icon"
+                        onClick={() => handleDownloadClick(file)}
+                      />
+                    )}
+                    {usedIn !== 'view' && (
+                      <DeleteOutlined
+                        className="delete-icon"
+                        onClick={() => handleDeleteClick(file.key)}
+                      />
+                    )}
+                  </div>
+                </Card>
+              </Tooltip>
             </Col>
           ))}
         </Row>
-      )}
+      ) : usedIn === 'view' ? (
+        <div className="no-documents-box">
+          <FileSearchOutlined />
+          <span style={{ marginLeft: '15px' }}>{'No Documents Found'}</span>
+        </div>
+      ) : null}
       {/* Section to upload files */}
       {usedIn !== 'view' && (
         <div className="upload-box">
@@ -183,17 +191,17 @@ const UploadFileGrid: React.FC<Props> = ({
               <Row gutter={[30, 10]}>
                 {documentList.map((file: any) => (
                   <Col key={file.uid} span={isSingleColumn ? 24 : 8} className="file-column">
-                    {/* <Tooltip placement="topLeft" title={file.name} showArrow={false}> */}
-                    <Card className="file-card">
-                      <div className="file-content">
-                        <span>{file.name.slice(0, 20)}</span>
-                        <CloseCircleOutlined
-                          className="close-icon"
-                          onClick={() => handleUploadDelete(file.uid)}
-                        />
-                      </div>
-                    </Card>
-                    {/* </Tooltip> */}
+                    <Tooltip placement="topLeft" title={file.name} showArrow={false}>
+                      <Card className="file-card">
+                        <div className="file-content">
+                          <span>{file.name.slice(0, 20)}</span>
+                          <CloseCircleOutlined
+                            className="close-icon"
+                            onClick={() => handleUploadDelete(file.uid)}
+                          />
+                        </div>
+                      </Card>
+                    </Tooltip>
                   </Col>
                 ))}
               </Row>

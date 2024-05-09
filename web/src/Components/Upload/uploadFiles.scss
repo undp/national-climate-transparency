@@ -15,6 +15,17 @@
         margin-bottom: 20px;
     }
 
+    .no-documents-box {
+        opacity: 0.8;
+        padding: 10px;
+        border: 1px solid hsl(0, 7%, 75%);
+        height: 42px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
     .file-card {
         height: 100%;
         display: flex;

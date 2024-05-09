@@ -20,7 +20,7 @@ interface Item {
   parentType: 'Action' | 'Programme' | 'Project' | '';
   parentId: string;
   title: string;
-  supportType: string;
+  supportType: string[];
   activityStatus: string;
   recipientEntity: string[];
   intImplementingEntity: string[];
@@ -79,7 +79,7 @@ const activityList = () => {
   const getAllData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize + 1 };
+      const payload: any = { page: currentPage, size: pageSize };
 
       // Adding Sort By Conditions
 
@@ -93,22 +93,22 @@ const activityList = () => {
       if (appliedFilterValue.statusFilter !== 'All') {
         payload.filterAnd = [];
         payload.filterAnd.push({
-          key: 'activityStatus',
+          key: 'status',
           operation: '=',
           value: appliedFilterValue.statusFilter,
         });
       }
 
-      // if (appliedFilterValue.validationFilter !== 'All') {
-      //   if (!payload.hasOwnProperty('filterAnd')) {
-      //     payload.filterAnd = [];
-      //   }
-      //   payload.filterAnd.push({
-      //     key: 'validationStatus',
-      //     operation: '=',
-      //     value: appliedFilterValue.validationFilter,
-      //   });
-      // }
+      if (appliedFilterValue.validationFilter !== 'All') {
+        if (!payload.hasOwnProperty('filterAnd')) {
+          payload.filterAnd = [];
+        }
+        payload.filterAnd.push({
+          key: 'validated',
+          operation: '=',
+          value: appliedFilterValue.validationFilter === 'Validated' ? true : false,
+        });
+      }
 
       if (searchValue !== '') {
         if (!payload.hasOwnProperty('filterAnd')) {
@@ -141,7 +141,7 @@ const activityList = () => {
             parentId: unstructuredData[i].parentId,
             title: unstructuredData[i].title,
             activityStatus: unstructuredData[i].status,
-            supportType: unstructuredData[i].migratedData?.types ?? '',
+            supportType: unstructuredData[i].migratedData?.types ?? [],
             recipientEntity: unstructuredData[i].migratedData?.recipientEntities ?? [],
             intImplementingEntity: unstructuredData[i].internationalImplementingEntity ?? [],
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
@@ -231,9 +231,10 @@ const activityList = () => {
     },
     {
       title: t('supportType'),
-      dataIndex: 'supportType',
-      key: 'supportType',
-      sorter: false,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: Item) => {
+        return <ScrollableList listToShow={record.supportType}></ScrollableList>;
+      },
     },
     {
       title: t('activityStatus'),
@@ -412,7 +413,6 @@ const activityList = () => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t('viewTitle')}</div>
-        <div className="body-sub-title">{t('viewDesc')}</div>
       </div>
       <div className="content-card">
         <Row className="table-actions-section">
