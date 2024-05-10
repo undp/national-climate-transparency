@@ -6,8 +6,10 @@ import { UserContextProps, UserProps } from '../../Definitions/userContext.defin
 export const UserContext = createContext<UserContextProps>({
   setUserInfo: () => {},
   removeUserInfo: () => {},
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   IsAuthenticated: (tkn?: any) => false,
   isTokenExpired: false,
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   setIsTokenExpired: (val: boolean) => {},
 });
 
@@ -36,12 +38,13 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
       : process.env.STORYBOOK_COMPANY_STATE
       ? parseInt(process.env.STORYBOOK_COMPANY_STATE)
       : 0,
+    userSectors: localStorage.getItem('userSectors') ?? '',
   };
   const [userInfoState, setUserInfoState] = useState<UserProps>(initialUserProps);
 
   const setUserInfo = (value: UserProps) => {
     const state = userInfoState?.companyState === 1 ? userInfoState?.companyState : 0;
-    const { id, userRole, companyName, companyState = state } = value;
+    const { id, userRole, companyName, companyState = state, userSectors } = value;
     if (id) {
       setUserInfoState((prev) => ({ ...prev, id }));
       localStorage.setItem('userId', id);
@@ -59,6 +62,9 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
 
     setUserInfoState((prev) => ({ ...prev, companyState }));
     localStorage.setItem('companyState', companyState + '');
+
+    setUserInfoState((prev) => ({ ...prev, userSectors }));
+    localStorage.setItem('userSectors', userSectors + '');
   };
 
   const IsAuthenticated = useCallback(
@@ -94,6 +100,7 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     localStorage.removeItem('userRole');
     localStorage.removeItem('companyName');
     localStorage.removeItem('companyState');
+    localStorage.removeItem('userSectors');
     setUserInfoState(initialUserProps);
   };
 

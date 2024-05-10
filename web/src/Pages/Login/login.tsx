@@ -67,6 +67,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
           userRole: response.data.role,
           companyName: response.data.companyName,
           companyState: response.data.companyState,
+          userSectors: response.data.sector,
         });
         removeToken();
         setIsTokenExpired(false);
