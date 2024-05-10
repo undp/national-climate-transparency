@@ -122,8 +122,6 @@ export class ProgrammeService {
 						await em.save<LogEntity>(event);
 					}
 
-
-
 					// linking projects and updating paths of projects and activities
 					if (projects && projects.length > 0) {
 						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
