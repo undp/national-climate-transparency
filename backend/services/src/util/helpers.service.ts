@@ -92,7 +92,12 @@ export class HelperService {
         "serialNo",
         "programmeTitle",
         "programmeName",
-        "id"
+        "id",
+        "actionId",
+        "programmeId",
+        "projectId",
+        "activityId",
+        "supportId",
       ].includes(key)
     )
       return true;
