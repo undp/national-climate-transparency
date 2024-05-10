@@ -39,7 +39,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   const formTitle = getFormTitle('Support', method);
 
   const navigate = useNavigate();
-  const { post } = useConnection();
+  const { post, put } = useConnection();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -153,18 +153,28 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       payload.requiredAmount = parseFloat(payload.requiredAmount);
       payload.receivedAmount = parseFloat(payload.receivedAmount);
 
-      const response = await post('national/supports/add', payload);
+      let response: any;
+
+      if (method === 'create') {
+        response = await post('national/supports/add', payload);
+      } else if (method === 'update') {
+        payload.supportId = entId;
+        response = await put('national/supports/update', payload);
+      }
+
+      const successMsg =
+        method === 'create' ? t('supportCreationSuccess') : t('supportUpdateSuccess');
+
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
-          content: t('supportCreationSuccess'),
+          content: successMsg,
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
         navigate('/support');
       }
     } catch (error: any) {
-      console.log('Error in Support creation', error);
       message.open({
         type: 'error',
         content: `${error.message}`,
