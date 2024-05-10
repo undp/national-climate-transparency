@@ -76,9 +76,63 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       });
       setParentList(tempActivityData);
     };
-
     fetchAllActivities();
-    setIsValidated(false);
+
+    // Initially Loading the underlying programme data when not in create mode
+
+    const fetchData = async () => {
+      if (method !== 'create' && entId) {
+        let response: any;
+        try {
+          const payload = {
+            filterAnd: [
+              {
+                key: 'supportId',
+                operation: '=',
+                value: entId,
+              },
+            ],
+          };
+          response = await post('national/supports/query', payload);
+
+          if (response.response.data.total === 1) {
+            const entityData: any = response.data[0];
+            // Populating Action owned data fields
+            form.setFieldsValue({
+              direction: entityData.direction,
+              financeNature: entityData.financeNature,
+              internationalSupportChannel: entityData.internationalSupportChannel,
+              otherInternationalSupportChannel: entityData.otherInternationalSupportChannel,
+              internationalFinancialInstrument: entityData.internationalFinancialInstrument,
+              otherInternationalFinancialInstrument:
+                entityData.otherInternationalFinancialInstrument,
+              nationalFinancialInstrument: entityData.nationalFinancialInstrument,
+              otherNationalFinancialInstrument: entityData.otherNationalFinancialInstrument,
+              financingStatus: entityData.financingStatus,
+              internationalSource: entityData.internationalSource,
+              nationalSource: entityData.nationalSource,
+              requiredAmount: entityData.requiredAmount,
+              receivedAmount: entityData.receivedAmount,
+              exchangeRate: entityData.exchangeRate,
+            });
+
+            setAmountNeeded(entityData.requiredAmount ?? undefined);
+            setAmountReceived(entityData.receivedAmount ?? undefined);
+            setExchangeRate(entityData.exchangeRate ?? undefined);
+            setIsValidated(entityData.validated ?? false);
+          }
+        } catch {
+          navigate('/support');
+          message.open({
+            type: 'error',
+            content: t('noSuchEntity'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
