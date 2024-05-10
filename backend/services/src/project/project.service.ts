@@ -26,7 +26,7 @@ import { ProjectViewEntity } from "../entities/project.view.entity";
 import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { ValidateDto } from "../dtos/validate.dto";
-import { SupportEntity } from "src/entities/support.entity";
+import { SupportEntity } from "../entities/support.entity";
 
 @Injectable()
 export class ProjectService {
@@ -368,14 +368,11 @@ export class ProjectService {
 					// update linked programme
 					if (!currentProject.programme && projectUpdateDto.programmeId) {
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
-
-					} else if (!projectUpdateDto.programmeId) {
+					} else if (currentProject.programme && !projectUpdateDto.programmeId) {
 						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em);
-
-					} else if (currentProject.programme.programmeId != projectUpdateDto.programmeId) {
+					} else if (currentProject.programme?.programmeId != projectUpdateDto.programmeId) {
 						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em);
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
-
 					}
 
 					// Save new KPIs
