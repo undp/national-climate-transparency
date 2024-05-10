@@ -215,9 +215,6 @@ const AddUser = () => {
       <div className="title-container">
         <div className="titles">
           <div className="main">{isUpdate ? t('addUser:editUser') : t('addUser:addNewUser')}</div>
-          <div className="sub">
-            {state?.record?.name ? t('addUser:editUserSub') : t('addUser:addUserSub')}
-          </div>
         </div>
         {isUpdate &&
           userInfoState?.id === state?.record?.id &&
