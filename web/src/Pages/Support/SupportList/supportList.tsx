@@ -267,7 +267,7 @@ const supportList = () => {
             trigger={'click'}
             placement="bottomRight"
             content={actionMenuWithoutAttaching(
-              'supports',
+              'support',
               ability,
               SupportEntity,
               record.supportId,
