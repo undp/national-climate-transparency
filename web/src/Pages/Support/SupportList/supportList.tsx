@@ -126,7 +126,7 @@ const supportList = () => {
           structuredData.push({
             key: i,
             supportId: unstructuredData[i].supportId,
-            activityId: unstructuredData[i].activityId,
+            activityId: unstructuredData[i].activity?.activityId ?? undefined,
             direction: unstructuredData[i].direction,
             financeNature: unstructuredData[i].financeNature,
             internationalSupportChannel: unstructuredData[i].internationalSupportChannel,

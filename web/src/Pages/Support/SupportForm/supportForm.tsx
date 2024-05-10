@@ -99,6 +99,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             const entityData: any = response.data[0];
             // Populating Action owned data fields
             form.setFieldsValue({
+              activityId: entityData.activity?.activityId ?? undefined,
               direction: entityData.direction,
               financeNature: entityData.financeNature,
               internationalSupportChannel: entityData.internationalSupportChannel,
