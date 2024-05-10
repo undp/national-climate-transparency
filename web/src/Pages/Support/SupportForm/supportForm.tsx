@@ -64,17 +64,20 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   // Initialization Logic
 
   useEffect(() => {
-    console.log('Running Parent Id Population');
-    const prefix = 'T';
-    const parentIds: ParentData[] = [];
-    for (let i = 0; i < 15; i++) {
-      parentIds.push({
-        id: `${prefix}00${i}`,
-        title: `${prefix}00${i}`,
+    // Fetching All Activities which can be the parent
+    const fetchAllActivities = async () => {
+      const response: any = await post('national/activities/query', {});
+      const tempActivityData: ParentData[] = [];
+      response.data.forEach((activity: any) => {
+        tempActivityData.push({
+          id: activity.activityId,
+          title: activity.title,
+        });
       });
-    }
-    setParentList(parentIds);
+      setParentList(tempActivityData);
+    };
 
+    fetchAllActivities();
     setIsValidated(false);
   }, []);
 
@@ -91,6 +94,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const handleSubmit = async (payload: any) => {
     try {
+      payload.exchangeRate = parseFloat(payload.exchangeRate);
+      payload.requiredAmount = parseFloat(payload.requiredAmount);
+      payload.receivedAmount = parseFloat(payload.receivedAmount);
+
       const response = await post('national/supports/add', payload);
       if (response.status === 200 || response.status === 201) {
         message.open({
@@ -202,7 +209,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('supportDirectionTitle')}</label>}
-                  name="supportDirection"
+                  name="direction"
                   rules={[validation.required]}
                 >
                   <Select
@@ -246,7 +253,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('intSupportChannelTitle')}</label>}
-                  name="intSupportChannel"
+                  name="internationalSupportChannel"
                   rules={[validation.required]}
                 >
                   <Select
@@ -269,7 +276,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('otherIntSupportChannel')}</label>}
-                  name="otherIntSupportChannel"
+                  name="otherInternationalSupportChannel"
                   rules={[validation.required]}
                 >
                   <Input className="form-input-box" disabled={isView} />
@@ -280,7 +287,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   label={
                     <label className="form-item-header">{t('intFinancialInstrumentTitle')}</label>
                   }
-                  name="intFinancialInstrument"
+                  name="internationalFinancialInstrument"
                   rules={[validation.required]}
                 >
                   <Select
@@ -307,7 +314,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                       {t('otherIntFinanceInstrumentTitle')}
                     </label>
                   }
-                  name="otherIntFinanceInstrument"
+                  name="otherInternationalFinancialInstrument"
                   rules={[validation.required]}
                 >
                   <Input className="form-input-box" disabled={isView} />
@@ -318,7 +325,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   label={
                     <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
                   }
-                  name="nationalFinanceInstrument"
+                  name="nationalFinancialInstrument"
                   rules={[validation.required]}
                 >
                   <Select
@@ -345,7 +352,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                       {t('otherNatFinanceInstrumentTitle')}
                     </label>
                   }
-                  name="otherNatFinanceInstrument"
+                  name="otherNationalFinancialInstrument"
                 >
                   <Input className="form-input-box" disabled={isView} />
                 </Form.Item>
@@ -353,7 +360,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('financeStatus')}</label>}
-                  name="financeStatus"
+                  name="financingStatus"
                   rules={[validation.required]}
                 >
                   <Select
@@ -408,7 +415,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('neededUSDTitle')}</label>}
-                  name="neededUSD"
+                  name="requiredAmount"
                   rules={[validation.required]}
                 >
                   <Input
@@ -438,7 +445,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('receivedUSDTitle')}</label>}
-                  name="receivedUSD"
+                  name="receivedAmount"
                   rules={[validation.required]}
                 >
                   <Input

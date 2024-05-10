@@ -1,233 +1,143 @@
 import { useTranslation } from 'react-i18next';
 import '../../../Styles/app.scss';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import {
-  Button,
-  Col,
-  Row,
-  Input,
-  Dropdown,
-  Popover,
-  List,
-  Typography,
-  message,
-  PaginationProps,
-} from 'antd';
-import { EditOutlined, EllipsisOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons';
+import { Action } from '../../../Enums/action.enum';
+import { Button, Col, Row, Input, Dropdown, Popover, message, Radio, Space, MenuProps } from 'antd';
+import { EllipsisOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-const { Search } = Input;
-import data from '../../../Testing/supportList.json';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
-import { Action } from '../../../Enums/action.enum';
+import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
+import StatusChip from '../../../Components/StatusChip/statusChip';
+import { actionMenuWithoutAttaching } from '../../../Components/Popups/tableAction';
 import { SupportEntity } from '../../../Entities/support';
 
 interface Item {
-  key: string;
+  key: number;
   supportId: string;
   activityId: string;
-  supportNeededORReceived: string;
-  internationalORNationalFinance: string;
-  internationalChannelOFSupport: string;
+  direction: string;
+  financeNature: string;
+  internationalSupportChannel: string;
   internationalFinancialInstrument: string;
   financingStatus: string;
+  validationStatus: string;
   internationalSource: string;
 }
 
+interface Filter {
+  searchBy: string;
+  directionFilter: string;
+  validationFilter: string;
+}
+
 const supportList = () => {
-  const { t } = useTranslation(['supportList']);
+  const navigate = useNavigate();
+  const { post } = useConnection();
   const ability = useAbilityContext();
-  const [tableData, setTableData] = useState<Item[]>([]);
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState<any>(1);
+
+  const { t } = useTranslation(['supportList', 'tableAction']);
+
+  // General Page State
+
   const [loading, setLoading] = useState<boolean>(false);
-  const [sortField, setSortField] = useState<string>('');
+
+  // Table Data State
+
+  const [tableData, setTableData] = useState<Item[]>([]);
   const [pageSize, setPageSize] = useState<number>(10);
-  const [sortOrder, setSortOrder] = useState<string>('');
-  const [searchByTermUser, setSearchByTermUser] = useState<any>('name');
-  const [valueOnSearch, setValueOnSearch] = useState<string>('');
-  const [totalUser, setTotalUser] = useState<number>();
+  const [currentPage, setCurrentPage] = useState<any>(1);
+  const [totalRowCount, setTotalRowRowCount] = useState<number>();
+
+  const [sortField, setSortField] = useState<string>('supportId');
+  const [sortOrder, setSortOrder] = useState<string>('DESC');
+
+  // Filters State
   const [filterVisible, setFilterVisible] = useState<boolean>(false);
 
-  const navigate = useNavigate();
+  const [appliedFilterValue, setAppliedFilterValue] = useState<Filter>({
+    searchBy: 'supportId',
+    directionFilter: 'All',
+    validationFilter: 'All',
+  });
+  const [tempFilterValue, setTempFilterValue] = useState<Filter>({
+    searchBy: 'supportId',
+    directionFilter: 'All',
+    validationFilter: 'All',
+  });
 
-  const actionMenu = (record: any) => {
-    return (
-      <List
-        className="action-menu"
-        size="small"
-        dataSource={[
-          {
-            text: 'Edit Support',
-            icon: <EditOutlined />,
-            isDisabled: false,
-            click: () => {
-              {
-              }
-            },
-          },
-        ]}
-        renderItem={(item) =>
-          !item.isDisabled && (
-            <List.Item onClick={item.click}>
-              <Typography.Text className="action-icon">{item.icon}</Typography.Text>
-              <span>{item.text}</span>
-            </List.Item>
-          )
-        }
-      />
-    );
-  };
+  // Search Value State
 
-  // Define columns for your table (example)
-  const columns = [
-    { title: t('supportId'), dataIndex: 'supportId', key: 'supportId', sorter: false },
-    { title: t('activityId'), dataIndex: 'activityId', key: 'activityId', sorter: true },
-    {
-      title: t('supportNeededORReceived'),
-      dataIndex: 'supportNeededORReceived',
-      key: 'supportNeededORReceived',
-      sorter: false,
-    },
-    {
-      title: t('internationalORNationalFinance'),
-      dataIndex: 'internationalORNationalFinance',
-      key: 'internationalORNationalFinance',
-      sorter: false,
-    },
-    {
-      title: t('internationalChannelOFSupport'),
-      dataIndex: 'internationalChannelOFSupport',
-      key: 'internationalChannelOFSupport',
-      sorter: true,
-    },
-    {
-      title: t('internationalFinancialInstrument'),
-      dataIndex: 'internationalFinancialInstrument',
-      key: 'internationalFinancialInstrument',
-      sorter: false,
-    },
-    {
-      title: t('financingStatus'),
-      dataIndex: 'financingStatus',
-      key: 'financingStatus',
-      sorter: true,
-    },
-    {
-      title: t('internationalSource'),
-      dataIndex: 'internationalSource',
-      key: 'internationalSource',
-      sorter: false,
-    },
-    {
-      title: '',
-      key: 'supportId',
-      align: 'right' as const,
-      width: 6,
-      render: (_: any, record: any) => {
-        return (
-          <Popover placement="bottomRight" trigger="click" content={actionMenu(record)}>
-            <EllipsisOutlined
-              rotate={90}
-              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
-            />
-          </Popover>
-        );
-      },
-    },
-    // Add more columns as needed
-  ];
+  const [tempSearchValue, setTempSearchValue] = useState<string>('');
+  const [searchValue, setSearchValue] = useState<string>('');
 
-  const onChange: PaginationProps['onChange'] = (page: number, size: number) => {
-    setCurrentPage(page);
-    setPageSize(size);
-  };
-
-  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
-    // Handle table change event (e.g., sorting, pagination)
-    console.log('Pagination:', pagination);
-    console.log('Filters:', filters);
-    console.log('Sorter:', sorter);
-    if (sorter.order === 'ascend') {
-      setSortOrder('ASC');
-    } else if (sorter.order === 'descend') {
-      setSortOrder('DESC');
-    } else if (sorter.order === undefined) {
-      setSortOrder('ASC');
-    }
-    if (sorter.columnKey !== undefined) {
-      setSortField(sorter.field);
-    } else {
-      setSortField('id');
-      setSortOrder('DESC');
-    }
-  };
-  const customItemRender = (page: any, type: any, element: any) => {
-    return element;
-  };
-
-  const onSearch = () => {
-    console.log('onSearch', searchValue);
-    setCurrentPage(1);
-    setValueOnSearch(searchValue);
-  };
-
-  const sort = () => {
-    if (sortOrder !== '' && sortField !== '') {
-      return {
-        key: sortField,
-        order: sortOrder,
-      };
-    } else
-      return {
-        key: 'id',
-        order: 'DESC',
-      };
-  };
-
-  // get All Data Params
-  const getAllDataParams = () => {
-    return {
-      page: currentPage,
-      size: pageSize,
-      // filterOr: filterOr(),
-      // filterAnd: filterAnd(),
-      sort: sort(),
-    };
-  };
-  const dummyDataQuery = () => {
-    console.log('dummyDataQuery', currentPage, pageSize, sortField, sortOrder, valueOnSearch);
-    if (sortField) {
-      data.sort((a: any, b: any) => {
-        const valueA = a[sortField];
-        const valueB = b[sortField];
-        if (sortOrder === 'ASC') {
-          if (valueA < valueB) return -1;
-          if (valueA > valueB) return 1;
-        } else if (sortOrder === 'DESC') {
-          if (valueA > valueB) return -1;
-          if (valueA < valueB) return 1;
-        }
-        return 0;
-      });
-    } else if (valueOnSearch) {
-      const searchData = data.filter((item) =>
-        item.supportNeededORReceived.toLowerCase().includes(searchValue.toLowerCase())
-      );
-      return searchData;
-    }
-    return data;
-  };
+  // Data Read from DB
 
   const getAllData = async () => {
     setLoading(true);
     try {
-      // set value for backend response
-      // const response: any = await post('national/user/query', getAllUserParams());
-      const response: any = dummyDataQuery();
+      const payload: any = { page: currentPage, size: pageSize };
+
+      // Adding Sort By Conditions
+
+      payload.sort = {
+        key: sortField,
+        order: sortOrder,
+      };
+
+      // Adding Filter Conditions
+
+      if (appliedFilterValue.directionFilter !== 'All') {
+        payload.filterAnd = [];
+        payload.filterAnd.push({
+          key: 'direction',
+          operation: '=',
+          value: appliedFilterValue.directionFilter,
+        });
+      }
+
+      if (appliedFilterValue.validationFilter !== 'All') {
+        if (!payload.hasOwnProperty('filterAnd')) {
+          payload.filterAnd = [];
+        }
+        payload.filterAnd.push({
+          key: 'validated',
+          operation: '=',
+          value: appliedFilterValue.validationFilter === 'Validated' ? true : false,
+        });
+      }
+
+      if (searchValue !== '') {
+        if (!payload.hasOwnProperty('filterAnd')) {
+          payload.filterAnd = [];
+        }
+        payload.filterAnd.push({
+          key: appliedFilterValue.searchBy,
+          operation: 'LIKE',
+          value: ['%' + searchValue + '%'],
+        });
+      }
+
+      const response: any = await post('national/supports/query', payload);
       if (response) {
-        console.log('dummyDataQuer-response', response);
-        setTableData(response);
+        const unstructuredData: any[] = response.data;
+        const structuredData: Item[] = [];
+        for (let i = 0; i < unstructuredData.length; i++) {
+          structuredData.push({
+            key: i,
+            supportId: unstructuredData[i].supportId,
+            activityId: unstructuredData[i].activityId,
+            direction: unstructuredData[i].direction,
+            financeNature: unstructuredData[i].financeNature,
+            internationalSupportChannel: unstructuredData[i].internationalSupportChannel,
+            internationalFinancialInstrument: unstructuredData[i].internationalFinancialInstrument,
+            financingStatus: unstructuredData[i].financingStatus,
+            validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
+            internationalSource: unstructuredData[i].internationalSource,
+          });
+        }
+        setTableData(structuredData);
+        setTotalRowRowCount(response.response.data.total);
         setLoading(false);
       }
     } catch (error: any) {
@@ -241,13 +151,244 @@ const supportList = () => {
     }
   };
 
-  const handleFilterVisibleChange = () => {
-    setFilterVisible(false);
+  // Handling Table Pagination and Sorting Changes
+
+  // eslint-disable-next-line no-unused-vars
+  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+    // Setting Pagination
+    setCurrentPage(pagination.current);
+    setPageSize(pagination.pageSize);
+
+    // Setting the Sort Direction
+    if (sorter.order === 'ascend') {
+      setSortOrder('ASC');
+    } else if (sorter.order === 'descend') {
+      setSortOrder('DESC');
+    } else if (sorter.order === undefined) {
+      setSortOrder('DESC');
+    }
+
+    // Setting the Sort By Column
+    if (sorter.columnKey !== undefined) {
+      setSortField(sorter.field);
+    } else {
+      setSortField('supportId');
+    }
   };
+
+  // Search Value Handling
+
+  const onSearch = () => {
+    setCurrentPage(1);
+    setSearchValue(tempSearchValue);
+  };
+
+  // Search Value Handling
+
+  const updatedTempFilters = (filterSection: string, newValue: string) => {
+    const updatedFilters = { ...tempFilterValue };
+    if (filterSection === 'validation') {
+      updatedFilters.validationFilter = newValue;
+      setTempFilterValue(updatedFilters);
+    } else if (filterSection === 'direction') {
+      updatedFilters.directionFilter = newValue;
+      setTempFilterValue(updatedFilters);
+    } else if (filterSection === 'search') {
+      updatedFilters.searchBy = newValue;
+      setTempFilterValue(updatedFilters);
+    }
+  };
+
+  // State Management
 
   useEffect(() => {
     getAllData();
-  }, [currentPage, pageSize, searchByTermUser, valueOnSearch, sortField, sortOrder]);
+  }, [currentPage, pageSize, sortField, sortOrder, searchValue, appliedFilterValue]);
+
+  // Action List Table Columns
+
+  const columns = [
+    { title: t('supportId'), dataIndex: 'supportId', key: 'supportId', sorter: false },
+    { title: t('activityId'), dataIndex: 'activityId', key: 'activityId', sorter: false },
+    {
+      title: t('supportNeededORReceived'),
+      dataIndex: 'direction',
+      key: 'direction',
+      sorter: false,
+    },
+    {
+      title: t('internationalORNationalFinance'),
+      dataIndex: 'financeNature',
+      key: 'financeNature',
+      sorter: false,
+    },
+    {
+      title: t('internationalChannelOFSupport'),
+      dataIndex: 'internationalSupportChannel',
+      key: 'internationalSupportChannel',
+      sorter: false,
+    },
+    {
+      title: t('internationalFinancialInstrument'),
+      dataIndex: 'internationalFinancialInstrument',
+      key: 'internationalFinancialInstrument',
+      sorter: false,
+    },
+    {
+      title: t('financingStatus'),
+      dataIndex: 'financingStatus',
+      key: 'financingStatus',
+      sorter: false,
+    },
+    {
+      title: t('validationStatus'),
+      key: 'validationStatus',
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        return <StatusChip message={record.validationStatus} defaultMessage="pending" />;
+      },
+    },
+    {
+      title: t('internationalSource'),
+      dataIndex: 'internationalSource',
+      key: 'internationalSource',
+      sorter: false,
+    },
+    {
+      title: '',
+      key: 'supportId',
+      align: 'right' as const,
+      width: 6,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        return (
+          <Popover
+            showArrow={false}
+            trigger={'click'}
+            placement="bottomRight"
+            content={actionMenuWithoutAttaching(
+              'support',
+              ability,
+              SupportEntity,
+              record.supportId,
+              navigate,
+              t
+            )}
+          >
+            <EllipsisOutlined
+              rotate={90}
+              style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}
+            />
+          </Popover>
+        );
+      },
+    },
+  ];
+
+  // Items for the filter dropdown
+
+  const items: MenuProps['items'] = [
+    {
+      key: '1',
+      title: 'Search by',
+      label: (
+        <div className="filter-menu-item">
+          <div className="filter-title">{t('user:searchBy')}</div>
+          <Radio.Group
+            onChange={(e) => {
+              updatedTempFilters('search', e?.target?.value);
+            }}
+            value={tempFilterValue.searchBy}
+          >
+            <Space direction="vertical">
+              <Radio value="supportId">Support ID</Radio>
+              <Radio value="activityId">Activity ID</Radio>
+            </Space>
+          </Radio.Group>
+        </div>
+      ),
+    },
+    {
+      key: '2',
+      title: 'Filter by Support Direction',
+      label: (
+        <div className="filter-menu-item">
+          <div className="filter-title">{t('filterBySupportDirection')}</div>
+          <Radio.Group
+            onChange={(e) => {
+              updatedTempFilters('direction', e?.target?.value);
+            }}
+            value={tempFilterValue.directionFilter}
+          >
+            <Space direction="vertical">
+              <Radio value="All">All</Radio>
+              <Radio value="Needed">Needed</Radio>
+              <Radio value="Received">Received</Radio>
+            </Space>
+          </Radio.Group>
+        </div>
+      ),
+    },
+    {
+      key: '3',
+      title: 'Filter by Validation Status',
+      label: (
+        <div className="filter-menu-item">
+          <div className="filter-title">{t('filterByValidationStatus')}</div>
+          <Radio.Group
+            onChange={(e) => {
+              updatedTempFilters('validation', e?.target?.value);
+            }}
+            value={tempFilterValue.validationFilter}
+          >
+            <Space direction="vertical">
+              <Radio value="All">All</Radio>
+              <Radio value="Pending">Pending</Radio>
+              <Radio value="Validated">Validated</Radio>
+            </Space>
+          </Radio.Group>
+        </div>
+      ),
+    },
+    {
+      key: '4',
+      title: 'Action',
+      label: (
+        <div className="filter-menu-actions">
+          <Row gutter={10}>
+            <Col span={12}>
+              <Button
+                style={{ width: '100%' }}
+                size="small"
+                type="default"
+                onClick={() => {
+                  setFilterVisible(false);
+                  setTempFilterValue({ ...appliedFilterValue });
+                }}
+              >
+                Cancel
+              </Button>
+            </Col>
+            <Col span={12}>
+              <Button
+                style={{ width: '100%' }}
+                size="small"
+                type="primary"
+                onClick={() => {
+                  setFilterVisible(false);
+                  setSearchValue('');
+                  setTempSearchValue('');
+                  setAppliedFilterValue({ ...tempFilterValue });
+                }}
+              >
+                Apply
+              </Button>
+            </Col>
+          </Row>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="content-container">
@@ -276,33 +417,38 @@ const supportList = () => {
           <Col md={16} xs={24}>
             <div className="filter-section">
               <div className="search-bar">
-                <Search
-                  onPressEnter={onSearch}
-                  placeholder="Search by Action Title"
+                <Input
+                  addonAfter={<SearchOutlined style={{ color: '#615d67' }} onClick={onSearch} />}
+                  placeholder={
+                    appliedFilterValue.searchBy === 'supportId'
+                      ? 'Search by Support ID'
+                      : 'Search by Activity ID'
+                  }
                   allowClear
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  onSearch={onSearch}
+                  onPressEnter={onSearch}
+                  onChange={(e) => setTempSearchValue(e.target.value)}
                   style={{ width: 265 }}
+                  value={tempSearchValue}
                 />
               </div>
               <div className="filter-bar" style={{ marginTop: '0.3rem' }}>
                 <Dropdown
                   arrow={false}
-                  menu={{}} // Assuming 'items' is defined elsewhere
                   placement="bottomRight"
-                  overlayClassName="filter-dropdown"
                   trigger={['click']}
                   open={filterVisible}
-                  onOpenChange={handleFilterVisibleChange}
+                  menu={{ items }}
+                  overlayStyle={{ width: '240px' }}
                 >
-                  <a className="ant-dropdown-link" onClick={(e) => {}}>
-                    <FilterOutlined
-                      style={{
-                        color: 'rgba(58, 53, 65, 0.3)',
-                        fontSize: '20px',
-                      }}
-                    />
-                  </a>
+                  <FilterOutlined
+                    style={{
+                      color: '#615d67',
+                      fontSize: '20px',
+                    }}
+                    onClick={() => {
+                      setFilterVisible(true);
+                    }}
+                  />
                 </Dropdown>
               </div>
             </div>
@@ -313,22 +459,20 @@ const supportList = () => {
             <LayoutTable
               tableData={tableData}
               columns={columns}
-              loading={false} // Set loading state as needed
+              loading={loading}
               pagination={{
+                total: totalRowCount,
                 current: currentPage,
                 pageSize: pageSize,
-                total: totalUser,
-                showQuickJumper: true, // Enable jump page functionality,
+                showQuickJumper: true,
                 pageSizeOptions: ['10', '20', '30'],
                 showSizeChanger: true,
                 style: { textAlign: 'center' },
                 locale: { page: '' },
-                itemRender: customItemRender,
                 position: ['bottomRight'],
-                onChange: onChange,
-              }} // Set pagination configuration
+              }}
               handleTableChange={handleTableChange}
-              emptyMessage="No Support Available"
+              emptyMessage="No Supports Available"
             />
           </Col>
         </Row>

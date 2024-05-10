@@ -10,5 +10,8 @@
   "internationalChannelOFSupport": "International Channel of Support",
   "internationalFinancialInstrument": "International Financial Instrument",
   "financingStatus": "Financing Status",
-  "internationalSource": "International Source"
+  "validationStatus": "Validation Status",
+  "internationalSource": "International Source",
+  "filterByValidationStatus": "Filter By Validation Status",
+  "filterBySupportDirection": "Filter By Support Direction"
 }
