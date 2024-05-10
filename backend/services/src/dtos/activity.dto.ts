@@ -3,6 +3,7 @@ import { ArrayMinSize, IsArray, IsBoolean, IsEnum, IsIn, IsNotEmpty, IsNumber, I
 import { ActivityStatus, ImpleMeans, Measure, SupportType, TechnologyType } from "../enums/activity.enum";
 import { EntityType, IntImplementor, NatImplementor } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
+import { Type } from "class-transformer";
 
 export class ActivityDto {
 
@@ -160,4 +161,35 @@ export class ActivityDto {
 	})
 	mitigationInfo: any;
 
+	@IsOptional()
+	@ApiPropertyOptional({
+		type: "object",
+		example: {
+			expected: {
+				baselineEmissions: [7,8,9,7],
+				activityEmissionsWithM: [7,8,9,7],
+				activityEmissionsWithAM: [7,8,9,7],
+				expectedEmissionReductWithM: [7,8,9,7],
+				expectedEmissionReductWithAM: [7,8,9,7],
+				total: {
+					baselineEmissions:31,
+					activityEmissionsWithM:31,
+					activityEmissionsWithAM:31,
+					expectedEmissionReductWithM:31,
+					expectedEmissionReductWithAM:31,
+				}
+			  },
+			  actual: {
+				baselineActualEmissions: [7,8,9,7],
+				activityActualEmissions: [7,8,9,7],
+				actualEmissionReduct: [7,8,9,7],
+				total: {
+					baselineActualEmissions:31,
+					activityActualEmissions:31,
+					actualEmissionReduct:31,
+				}
+			  }
+		},
+	})
+	mitigationTimeline: any;
 }

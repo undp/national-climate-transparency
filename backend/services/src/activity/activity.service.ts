@@ -18,12 +18,16 @@ import { FileUploadService } from "../util/fileUpload.service";
 import { HelperService } from "../util/helpers.service";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { EntityManager, Repository } from "typeorm";
+import { ProjectEntity } from "src/entities/project.entity";
+import { mitigationTimelineDto } from "../dtos/mitigationTimeline.dto";
+import { ResponseMessageDto } from "../dtos/response.message";
 import { LinkActivitiesDto } from "../dtos/link.activities.dto";
 import { UnlinkActivitiesDto } from "../dtos/unlink.activities.dto";
 import { DataListResponseDto } from "../dtos/data.list.response";
 import { ActivityResponseDto } from "../dtos/activity.response.dto";
 import { ActivityUpdateDto } from "../dtos/activityUpdate.dto";
-import { ValidateDto } from "src/dtos/validate.dto";
+import { ValidateDto } from "../dtos/validate.dto";
+import { PayloadValidator } from "../validation/payload.validator";
 
 @Injectable()
 export class ActivityService {
@@ -36,7 +40,8 @@ export class ActivityService {
 		private linkUnlinkService: LinkUnlinkService,
 		private projectService: ProjectService,
 		private programmeService: ProgrammeService,
-		private actionService: ActionService
+		private actionService: ActionService,
+		private payloadValidator: PayloadValidator,
 	) { }
 
 	//MARK: Activity Create
@@ -91,6 +96,9 @@ export class ActivityService {
 			activity.mitigationInfo.resultDocuments = await this.uploadDocuments(activityDto.mitigationInfo.resultDocuments);
 		}
 
+		if (activityDto.mitigationTimeline) {
+			  this.payloadValidator.validateMitigationTimelinePayload(activityDto);
+		}
 
 		const activ = await this.entityManager
 			.transaction(async (em) => {
@@ -740,4 +748,69 @@ export class ActivityService {
 		return log;
 	}
 
+	//MARK: update mitigation timeline Data
+	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto ,user: User) {
+		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto);
+		const { activityId, mitigationTimeline } = mitigationTimelineDto;
+		const activity = await this.findActivityById(activityId);
+
+		if (!activity) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.activityNotFound",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.checkSectorPermissions(activity.sectors, user.sector)) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.userDoesNotHavePermission",
+					[activity.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		await this.activityRepo
+      	.createQueryBuilder()
+      	.update(ActivityEntity)
+      	.set({ mitigationTimeline })
+      	.where('activityId = :activityId', { activityId })
+      	.execute();
+
+		  return new ResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("activity.mitigationTimelineUpdate", []),
+		);
+	}
+
+	//MARK: get mitigation timeline Data
+	async getActivityMitigationTimeline(activityId: string, user: User) {
+		const activity = await this.findActivityById(activityId);
+
+		if (!activity) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.activityNotFound",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.checkSectorPermissions(activity.sectors, user.sector)) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.userDoesNotHavePermission",
+					[activity.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		return activity.mitigationTimeline;
+	}
 }

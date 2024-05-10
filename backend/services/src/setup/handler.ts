@@ -227,7 +227,7 @@ export const handler: Handler = async (event) => {
     user.role = Role.Root;
     user.phoneNo = "-";
     // user.organisationId = gov.organisationId;
-		user.organisation = Organisation.Government
+		// user.organisation = Organisation.Government
     user.country = event["systemCountryCode"];
     console.log("Adding user", user);
     await userService.create(user);
