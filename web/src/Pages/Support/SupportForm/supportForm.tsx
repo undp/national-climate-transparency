@@ -60,7 +60,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const [parentList, setParentList] = useState<ParentData[]>([]);
 
-  // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
 
   useEffect(() => {
@@ -78,7 +77,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     };
     fetchAllActivities();
 
-    // Initially Loading the underlying programme data when not in create mode
+    // Initially Loading the underlying support data when not in create mode
 
     const fetchData = async () => {
       if (method !== 'create' && entId) {
