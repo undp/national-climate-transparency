@@ -112,6 +112,7 @@ export class SupportService {
 					'"support"'
 				)
 			)
+			.leftJoinAndSelect("support.activity", "activity")
 			.orderBy(
 				query?.sort?.key ? `"support"."${query?.sort?.key}"` : `"support"."supportId"`,
 				query?.sort?.order ? query?.sort?.order : "DESC"

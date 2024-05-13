@@ -28,6 +28,7 @@ import { getProjectTableColumns } from '../../../Definitions/columns/projectColu
 // import { ActivityData } from '../../../Definitions/activityDefinitions';
 // import { SupportData } from '../../../Definitions/supportDefinitions';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -45,6 +46,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
   const ability = useAbilityContext();
+  const { userInfoState } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -103,10 +105,18 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Initialization Logic
 
+  const availableSectors: string[] = [];
+  const userSectors = userInfoState?.userSectors?.split(',') ?? [];
   const yearsList: number[] = [];
 
   for (let year = 2013; year <= 2050; year++) {
     yearsList.push(year);
+  }
+
+  if (userInfoState?.userRole === 'Root' || userInfoState?.userSectors === 'Admin') {
+    Object.values(Sector).map((sector) => availableSectors.push(sector));
+  } else {
+    userSectors.map((sector) => availableSectors.push(sector));
   }
 
   useEffect(() => {
@@ -723,9 +733,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       disabled={isView}
                       showSearch
                     >
-                      {Object.values(Sector).map((instrument) => (
-                        <Option key={instrument} value={instrument}>
-                          {instrument}
+                      {availableSectors.map((sector) => (
+                        <Option key={sector} value={sector}>
+                          {sector}
                         </Option>
                       ))}
                     </Select>

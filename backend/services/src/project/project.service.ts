@@ -26,13 +26,14 @@ import { ProjectViewEntity } from "../entities/project.view.entity";
 import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { ValidateDto } from "../dtos/validate.dto";
-import { SupportEntity } from "src/entities/support.entity";
+import { SupportEntity } from "../entities/support.entity";
 
 @Injectable()
 export class ProjectService {
 	constructor(
 		@InjectEntityManager() private entityManager: EntityManager,
 		@InjectRepository(ProjectEntity) private projectRepo: Repository<ProjectEntity>,
+		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
 		private readonly programmeService: ProgrammeService,
 		private counterService: CounterService,
 		private helperService: HelperService,
@@ -99,6 +100,11 @@ export class ProjectService {
 
 		project.path = "";
 
+		let activities;
+		if (projectDto.linkedActivities) {
+			activities = await this.findAllActivitiesByIds(projectDto.linkedActivities);
+		}
+
 		const proj = await this.entityManager
 			.transaction(async (em) => {
 				const savedProject = await em.save<ProjectEntity>(project);
@@ -111,6 +117,11 @@ export class ProjectService {
 
 					for (const event of eventLog) {
 						await em.save<LogEntity>(event);
+					}
+
+					// linking activities and updating paths of projects and activities
+					if (activities && activities.length > 0) {
+						await this.linkUnlinkService.linkActivitiesToParent(savedProject, activities, {parentType: EntityType.PROJECT, parentId: savedProject.projectId, activityIds: activities}, user, em);
 					}
 				}
 				return savedProject;
@@ -357,14 +368,11 @@ export class ProjectService {
 					// update linked programme
 					if (!currentProject.programme && projectUpdateDto.programmeId) {
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
-
-					} else if (!projectUpdateDto.programmeId) {
+					} else if (currentProject.programme && !projectUpdateDto.programmeId) {
 						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em);
-
-					} else if (currentProject.programme.programmeId != projectUpdateDto.programmeId) {
+					} else if (currentProject.programme?.programmeId != projectUpdateDto.programmeId) {
 						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em);
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
-
 					}
 
 					// Save new KPIs
@@ -510,6 +518,12 @@ export class ProjectService {
 			proj
 		);
 
+	}
+
+	async findAllActivitiesByIds(activityIds: string[]) {
+		return await this.activityRepo.createQueryBuilder('activity')
+			.where('activity.activityId IN (:...activityIds)', { activityIds })
+			.getMany();
 	}
 
 	async findAllProjectsByIds(projectIds: string[]) {

@@ -74,17 +74,6 @@ const LayoutSider = (props: LayoutSiderProps) => {
               <div className="country-name">{process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}</div>
             </div>
           )}
-          {collapsed && (
-            <div className="country-flag">
-              <img
-                alt="country flag"
-                src={
-                  process.env.REACT_APP_COUNTRY_FLAG_URL ||
-                  'https://mrv-common-dev.s3.amazonaws.com/flag.png'
-                }
-              />
-            </div>
-          )}
         </div>
         <div className="layout-sider-menu-container">
           <Menu
