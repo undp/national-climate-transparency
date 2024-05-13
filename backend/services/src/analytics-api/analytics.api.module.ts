@@ -8,7 +8,6 @@ import { AnalyticsController } from "./analytics.api.controller";
 import { AnalyticsService } from "./analytics.api.service";
 import { AuthModule } from "../auth/auth.module";
 import { CaslModule } from "../casl/casl.module";
-import { UtilModule } from "../util/util.module";
 
 @Module({
   imports: [
@@ -26,7 +25,6 @@ import { UtilModule } from "../util/util.module";
     ]),
     AuthModule,
     CaslModule,
-    UtilModule,
   ],
   controllers: [AnalyticsController],
   providers: [Logger, AnalyticsService],
