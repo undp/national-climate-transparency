@@ -24,6 +24,7 @@
     "add": "ADD",
     "cancel": "CANCEL",
     "supportCreationSuccess": "Support Added Successfully",
+    "supportUpdateSuccess": "Support Updated Successfully",
     "validate": "Validate",
     "back": "Back",
     "delete": "Delete",
