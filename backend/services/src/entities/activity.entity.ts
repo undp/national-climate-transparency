@@ -96,7 +96,7 @@ export class ActivityEntity implements EntitySubject {
     };
   };
 
-	@Column("varchar", { array: true, nullable: true })
+	@Column({ type: "enum", enum: Sector, nullable: true })
   sector: Sector;
 
   @Column({ type: "ltree" })

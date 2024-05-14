@@ -29,7 +29,7 @@ export class ProgrammeEntity {
   @Column()
   objective: string;
 
-  @Column("varchar", { array: true, nullable: true })
+	@Column({ type: "enum", enum: Sector, nullable: true })
   sector: Sector;
 
   @Column("varchar", { array: true, nullable: false })

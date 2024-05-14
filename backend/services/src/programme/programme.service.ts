@@ -99,6 +99,8 @@ export class ProgrammeService {
 			}
 			programme.action = action;
 			programme.path = programmeDto.actionId;
+			programme.sector = action.sector;
+
 			this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_LINKED, EntityType.ACTION, action.actionId, user.id, programme.programmeId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, action.actionId);
 		}
@@ -245,6 +247,7 @@ export class ProgrammeService {
 		if (currentProgramme.action) {
 			programmeUpdate.action = currentProgramme.action;
 			programmeUpdate.path = currentProgramme.path;
+			programmeUpdate.sector = currentProgramme.sector;
 		}
 
 		// Document update resolve
@@ -396,19 +399,6 @@ export class ProgrammeService {
 			);
 		}
 
-		// if (user.sector && user.sector.length > 0) {
-		// 	const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
-		// 	if (!user.sector.includes(curre)) {
-		// 		throw new HttpException(
-		// 			this.helperService.formatReqMessagesString(
-		// 				"programme.cannotLinkNotRelatedProgrammes",
-		// 				[updatedProgramme.programmeId]
-		// 			),
-		// 			HttpStatus.BAD_REQUEST
-		// 		);
-		// 	}
-		// }
-
 		if (updatedProgramme.action) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -430,29 +420,16 @@ export class ProgrammeService {
 
 	async unlinkUpdatedProgrammeFromAction(updatedProgramme: ProgrammeEntity, user: User, em?: EntityManager) {
 
-		if (user.sector && user.sector.length > 0) {
-			// const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
-			// if (commonSectors.length === 0) {
-			// 	throw new HttpException(
-			// 		this.helperService.formatReqMessagesString(
-			// 			"programme.cannotUnlinkNotRelatedProgrammes",
-			// 			[updatedProgramme.programmeId]
-			// 		),
-			// 		HttpStatus.BAD_REQUEST
-			// 	);
-			// }
-
-			if (!updatedProgramme.action) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.programmeIsNotLinked",
-						[updatedProgramme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
+		if (!updatedProgramme.action) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeIsNotLinked",
+					[updatedProgramme.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
 		}
-
+		
 		const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
 			updatedProgramme.action.actionId, 
 			EntityType.ACTION, 

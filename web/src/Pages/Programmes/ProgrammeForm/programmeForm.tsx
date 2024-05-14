@@ -113,7 +113,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     yearsList.push(year);
   }
 
-  if (userInfoState?.userRole === 'Root' || userInfoState?.userSectors === 'Admin') {
+  if (userInfoState?.userRole === 'Root' || userInfoState?.userRole === 'Admin') {
     Object.values(Sector).map((sector) => availableSectors.push(sector));
   } else {
     userSectors.map((sector) => availableSectors.push(sector));

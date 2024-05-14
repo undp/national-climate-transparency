@@ -46,22 +46,28 @@ export class ActionService {
 		const action: ActionEntity = plainToClass(ActionEntity, actionDto);
 		const eventLog = [];
 
+		if (user.sector && user.sector.length > 0 && action.sector) {
+			if (!user.sector.includes(action.sector)) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"activity.cannotCreateNotRelatedAction",
+						[action.actionId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+		}
+
 		action.actionId = 'A' + await this.counterService.incrementCount(CounterType.ACTION, 3);
 
-		let programmes;
+		let filteredProgrammes: ProgrammeEntity[] = [];
 		if (actionDto.linkedProgrammes) {
-			programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
+			const programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
 
-			// check if programmes are already linked
+			// Filtering already linked programmes
 			for (const programme of programmes) {
-				if (programme.action) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"programme.programmeAlreadyLinked",
-							[programme.programmeId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
+				if (!programme.action) {
+					filteredProgrammes.push(programme)
 				}
 			}
 		}
@@ -100,9 +106,10 @@ export class ActionService {
 				const savedAction = await em.save<ActionEntity>(action);
 				if (savedAction) {
 					// link programmes here
-					if (programmes && programmes.length > 0) {
-						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, action.actionId, user, em);
+					if (filteredProgrammes && filteredProgrammes.length > 0) {
+						await this.linkUnlinkService.linkProgrammesToAction(savedAction, filteredProgrammes, action.actionId, user, em);
 					}
+
 					if (actionDto.kpis) {
 						for (const kpi of kpiList) {
 							await em.save<KpiEntity>(kpi);
@@ -168,6 +175,27 @@ export class ActionService {
 				{ project: EntityType.PROJECT }
 			)
 			.where('programme.programmeId IN (:...programmeIds)', { programmeIds })
+			.getMany();
+	}
+
+	async findAllActionChildren(actionId: string) {
+		return await this.programmeRepo.createQueryBuilder('programme')
+			.leftJoinAndSelect('programme.projects', 'project')
+			.leftJoinAndMapMany(
+				"programme.activities",
+				ActivityEntity,
+				"programmeActivity", // Unique alias for programme activities
+				"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
+				{ programme: EntityType.PROGRAMME }
+			)
+			.leftJoinAndMapMany(
+				"project.activities",
+				ActivityEntity,
+				"projectActivity", // Unique alias for project activities
+				"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
+				{ project: EntityType.PROJECT }
+			)
+			.where('programme.actionId IN (:...actionIds)', { actionIds: [actionId] })
 			.getMany();
 	}
 
@@ -263,6 +291,9 @@ export class ActionService {
 			}
 		}
 
+		// Finding children to update their sector value
+		const children = await this.findAllActionChildren(actionUpdateDto.actionId);
+
 		// add new documents
 		if (actionUpdateDto.newDocuments) {
 			const documents = [];
@@ -303,8 +334,6 @@ export class ActionService {
 			actionUpdate.documents = actionUpdate.documents ? actionUpdate.documents : currentAction.documents
 			const updatedDocs = actionUpdate.documents.filter(item => !actionUpdateDto.removedDocuments.some(url => url === item.url));
 			actionUpdate.documents = (updatedDocs && updatedDocs.length > 0) ? updatedDocs : null;
-
-
 		}
 
 		const kpiList = [];
@@ -358,6 +387,12 @@ export class ActionService {
 			.transaction(async (em) => {
 				const savedAction = await em.save<ActionEntity>(actionUpdate);
 				if (savedAction) {
+					// Update children sector
+					if (children.length > 0 && (actionUpdate.sector !== actionUpdate.sector)){
+						console.log(`Updating all the children of the Action ${actionUpdate.actionId}`);
+						await this.linkUnlinkService.updateActionChildrenSector(children, actionUpdate.sector, em);
+					}
+
 					// Save new KPIs
 					if (kpiList.length > 0) {
 						await Promise.all(kpiList.map(async kpi => {
