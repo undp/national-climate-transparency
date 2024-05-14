@@ -26,13 +26,14 @@ import { ProjectViewEntity } from "../entities/project.view.entity";
 import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { ValidateDto } from "../dtos/validate.dto";
-import { SupportEntity } from "src/entities/support.entity";
+import { SupportEntity } from "../entities/support.entity";
 
 @Injectable()
 export class ProjectService {
 	constructor(
 		@InjectEntityManager() private entityManager: EntityManager,
 		@InjectRepository(ProjectEntity) private projectRepo: Repository<ProjectEntity>,
+		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
 		private readonly programmeService: ProgrammeService,
 		private counterService: CounterService,
 		private helperService: HelperService,
@@ -49,6 +50,16 @@ export class ProjectService {
 		const eventLog = [];
 
 		project.projectId = 'J' + await this.counterService.incrementCount(CounterType.PROJECT, 3);
+
+		if (projectDto.endYear < projectDto.startYear) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.startYearCantBeLargerThanEndYear",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
 
 		if (projectDto.programmeId) {
 			const programme = await this.programmeService.findProgrammeById(projectDto.programmeId);
@@ -99,6 +110,11 @@ export class ProjectService {
 
 		project.path = "";
 
+		let activities;
+		if (projectDto.linkedActivities) {
+			activities = await this.findAllActivitiesByIds(projectDto.linkedActivities);
+		}
+
 		const proj = await this.entityManager
 			.transaction(async (em) => {
 				const savedProject = await em.save<ProjectEntity>(project);
@@ -111,6 +127,11 @@ export class ProjectService {
 
 					for (const event of eventLog) {
 						await em.save<LogEntity>(event);
+					}
+
+					// linking activities and updating paths of projects and activities
+					if (activities && activities.length > 0) {
+						await this.linkUnlinkService.linkActivitiesToParent(savedProject, activities, {parentType: EntityType.PROJECT, parentId: savedProject.projectId, activityIds: activities}, user, em);
 					}
 				}
 				return savedProject;
@@ -309,7 +330,7 @@ export class ProjectService {
 		let kpisUpdated = false;
 
 		if (projectUpdateDto.kpis && projectUpdateDto.kpis.length > 0) {
-			const currentKpis = await this.kpiService.findKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, projectUpdate.projectId);
+			const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, projectUpdate.projectId);
 
 			const addedKpis = projectUpdateDto.kpis.filter(kpi => !kpi.kpiId);
 
@@ -357,14 +378,27 @@ export class ProjectService {
 					// update linked programme
 					if (!currentProject.programme && projectUpdateDto.programmeId) {
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
+						
+					} else if (currentProject.programme && !projectUpdateDto.programmeId) {
 
-					} else if (!projectUpdateDto.programmeId) {
-						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em);
+						const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
+							currentProject.programme.programmeId, 
+							EntityType.PROGRAMME, 
+							currentProject.projectId, 
+							EntityType.PROJECT
+						);
+						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove);
 
-					} else if (currentProject.programme.programmeId != projectUpdateDto.programmeId) {
-						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em);
+					} else if (currentProject.programme?.programmeId != projectUpdateDto.programmeId) {
+
+						const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
+							currentProject.programme.programmeId, 
+							EntityType.PROGRAMME, 
+							currentProject.projectId, 
+							EntityType.PROJECT
+						);
+						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove);
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
-
 					}
 
 					// Save new KPIs
@@ -501,8 +535,21 @@ export class ProjectService {
 				}
 			}
 		}
+		const achievementsToRemove = [];
+		for(const project of projects) {
+			const projectAchievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
+				project.programme.programmeId, 
+				EntityType.PROGRAMME, 
+				project.projectId, 
+				EntityType.PROJECT
+			);
 
-		const proj = await this.linkUnlinkService.unlinkProjectsFromProgramme(projects, unlinkProjectsDto, user, this.entityManager);
+			if (projectAchievementsToRemove) {
+				achievementsToRemove.push(...projectAchievementsToRemove);
+			}
+		}
+
+		const proj = await this.linkUnlinkService.unlinkProjectsFromProgramme(projects, unlinkProjectsDto, user, this.entityManager, achievementsToRemove);
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -510,6 +557,12 @@ export class ProjectService {
 			proj
 		);
 
+	}
+
+	async findAllActivitiesByIds(activityIds: string[]) {
+		return await this.activityRepo.createQueryBuilder('activity')
+			.where('activity.activityId IN (:...activityIds)', { activityIds })
+			.getMany();
 	}
 
 	async findAllProjectsByIds(projectIds: string[]) {
@@ -523,10 +576,10 @@ export class ProjectService {
 				{ project: EntityType.PROJECT }
 			)
 			.leftJoinAndMapMany(
-				"activity.support", // Property name to map supports to activities
-				SupportEntity, // Entity to join
-				"support", // Alias for the joined table
-				"support.activityId = activity.activityId" // Join condition
+				"activity.support",
+				SupportEntity, 
+				"support", 
+				"support.activityId = activity.activityId" 
 		)
 			.where('project.projectId IN (:...projectIds)', { projectIds })
 			.getMany();

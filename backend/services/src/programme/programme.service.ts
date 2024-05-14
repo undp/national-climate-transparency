@@ -30,6 +30,7 @@ import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { SupportEntity } from "../entities/support.entity";
 import { ValidateDto } from "../dtos/validate.dto";
+import { AchievementEntity } from "src/entities/achievement.entity";
 
 @Injectable()
 export class ProgrammeService {
@@ -106,6 +107,18 @@ export class ProgrammeService {
 		if (programmeDto.linkedProjects) {
 			projects = await this.findAllProjectsByIds(programmeDto.linkedProjects);
 
+			// check if programmes are already linked
+			for (const project of projects) {
+				if (project.programme) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"project.projectAlreadyLinked",
+							[project.projectId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
+			}
 		}
 
 		const prog = await this.entityManager
@@ -121,8 +134,6 @@ export class ProgrammeService {
 					for (const event of eventLog) {
 						await em.save<LogEntity>(event);
 					}
-
-
 
 					// linking projects and updating paths of projects and activities
 					if (projects && projects.length > 0) {
@@ -277,7 +288,7 @@ export class ProgrammeService {
 		let kpisUpdated = false;
 
 		if (programmeUpdateDto.kpis && programmeUpdateDto.kpis.length > 0) {
-			const currentKpis = await this.kpiService.findKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programmeUpdate.programmeId);
+			const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programmeUpdate.programmeId);
 
 			const addedKpis = programmeUpdateDto.kpis.filter(kpi => !kpi.kpiId);
 
@@ -443,8 +454,22 @@ export class ProgrammeService {
 			}
 		}
 
+		const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
+			updatedProgramme.action.actionId, 
+			EntityType.ACTION, 
+			updatedProgramme.programmeId, 
+			EntityType.PROGRAMME
+		);
+
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(updatedProgramme.action.actionId, updatedProgramme.programmeId)
-		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(updatedProgramme, updatedProgramme.programmeId, allLinkedProgrammes, user, em? em : this.entityManager);
+		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(
+			updatedProgramme, 
+			updatedProgramme.programmeId, 
+			allLinkedProgrammes, 
+			user, 
+			em? em : this.entityManager, 
+			achievementsToRemove
+		);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -539,7 +564,7 @@ export class ProgrammeService {
 				);
 			}
 			// }
-			if (!programme.action) {
+			if (!programme.action || programme.action == null) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"programme.programmeIsNotLinked",
@@ -550,8 +575,22 @@ export class ProgrammeService {
 			}
 		}
 
+		const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
+			programme.action.actionId, 
+			EntityType.ACTION, 
+			programme.programmeId, 
+			EntityType.PROGRAMME
+		);
+
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(programme.action.actionId, programme.programmeId)
-		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(programme, unlinkProgrammesDto, allLinkedProgrammes, user, this.entityManager);
+		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(
+			programme, 
+			unlinkProgrammesDto, 
+			allLinkedProgrammes, 
+			user, 
+			this.entityManager, 
+			achievementsToRemove
+		);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 
@@ -680,10 +719,10 @@ export class ProgrammeService {
 				{ project: EntityType.PROJECT }
 			)
 			.leftJoinAndMapMany(
-				"activity.supports", // Property name to map supports to activities
-				SupportEntity, // Entity to join
-				"support", // Alias for the joined table
-				"support.activityId = activity.activityId" // Join condition
+				"activity.supports", 
+				SupportEntity, 
+				"support", 
+				"support.activityId = activity.activityId" 
 		)
 			.where('project.projectId IN (:...projectIds)', { projectIds })
 			.getMany();

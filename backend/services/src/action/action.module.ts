@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ActionService } from './action.service';
 import { ConfigModule } from '@nestjs/config';
 import configuration from '../configuration';
@@ -43,7 +43,7 @@ import { KpiModule } from '../kpi/kpi.module';
         UtilModule,
         FileHandlerModule,
         ValidationModule,
-				KpiModule
+				forwardRef(() => KpiModule)
     ],
     providers: [
         ActionService
