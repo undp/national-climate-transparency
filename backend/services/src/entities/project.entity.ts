@@ -37,13 +37,13 @@ export class ProjectEntity {
   @Column("varchar", { array: true, nullable: false })
   recipientEntities: Recipient[];
 
-  @Column("varchar", { array: true, nullable: false })
+  @Column("varchar", { array: true, nullable: true })
   internationalImplementingEntities: IntImplementor[];
 
   @Column({ type: 'jsonb', nullable: true })
   documents: any;
 
-  @Column()
+  @Column({ nullable: true })
   comment: string;
 
 	@Column("varchar", { array: true, nullable: true })

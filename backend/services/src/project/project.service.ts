@@ -50,6 +50,16 @@ export class ProjectService {
 
 		project.projectId = 'J' + await this.counterService.incrementCount(CounterType.PROJECT, 3);
 
+		if (projectDto.endYear < projectDto.startYear) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.startYearCantBeLargerThanEndYear",
+					[]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
 		if (projectDto.programmeId) {
 			const programme = await this.programmeService.findProgrammeById(projectDto.programmeId);
 			if (!programme) {
@@ -309,7 +319,7 @@ export class ProjectService {
 		let kpisUpdated = false;
 
 		if (projectUpdateDto.kpis && projectUpdateDto.kpis.length > 0) {
-			const currentKpis = await this.kpiService.findKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, projectUpdate.projectId);
+			const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, projectUpdate.projectId);
 
 			const addedKpis = projectUpdateDto.kpis.filter(kpi => !kpi.kpiId);
 
@@ -359,10 +369,22 @@ export class ProjectService {
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
 
 					} else if (!projectUpdateDto.programmeId) {
-						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em);
+							const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
+								currentProject.programme.programmeId, 
+								EntityType.PROGRAMME, 
+								currentProject.projectId, 
+								EntityType.PROJECT
+							);
+						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove);
 
 					} else if (currentProject.programme.programmeId != projectUpdateDto.programmeId) {
-						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em);
+						const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
+							currentProject.programme.programmeId, 
+							EntityType.PROGRAMME, 
+							currentProject.projectId, 
+							EntityType.PROJECT
+						);
+						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove);
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
 
 					}
@@ -501,8 +523,21 @@ export class ProjectService {
 				}
 			}
 		}
+		const achievementsToRemove = [];
+		for(const project of projects) {
+			const projectAchievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
+				project.programme.programmeId, 
+				EntityType.PROGRAMME, 
+				project.projectId, 
+				EntityType.PROJECT
+			);
 
-		const proj = await this.linkUnlinkService.unlinkProjectsFromProgramme(projects, unlinkProjectsDto, user, this.entityManager);
+			if (projectAchievementsToRemove) {
+				achievementsToRemove.push(...projectAchievementsToRemove);
+			}
+		}
+
+		const proj = await this.linkUnlinkService.unlinkProjectsFromProgramme(projects, unlinkProjectsDto, user, this.entityManager, achievementsToRemove);
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -523,10 +558,10 @@ export class ProjectService {
 				{ project: EntityType.PROJECT }
 			)
 			.leftJoinAndMapMany(
-				"activity.support", // Property name to map supports to activities
-				SupportEntity, // Entity to join
-				"support", // Alias for the joined table
-				"support.activityId = activity.activityId" // Join condition
+				"activity.support",
+				SupportEntity, 
+				"support", 
+				"support.activityId = activity.activityId" 
 		)
 			.where('project.projectId IN (:...projectIds)', { projectIds })
 			.getMany();

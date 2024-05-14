@@ -3,18 +3,18 @@ import {
   JoinColumn,
   ManyToOne,
   Column,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
 } from "typeorm";
 import { KpiEntity } from "./kpi.entity";
 import { ActivityEntity } from "./activity.entity";
 
 @Entity("achievement")
 export class AchievementEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn()
+  activityId: string;
 
-  @Column()
-  title: string;
+  @PrimaryColumn()
+  kpiId: number;
 
   @ManyToOne(() => KpiEntity, (kpi) => kpi.achievements, {
     nullable: false,
@@ -31,6 +31,4 @@ export class AchievementEntity {
   @Column()
   achieved: number;
 
-  @Column({ type: "ltree" })
-  activityPath: string;
 }

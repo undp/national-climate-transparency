@@ -4,8 +4,6 @@ import {
   Request,
   Post,
   Body,
-	Get,
-	Param,
 	Put,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
@@ -13,13 +11,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
 import { Action } from "../casl/action.enum";
 import { PoliciesGuardEx } from "../casl/policy.guard";
-import { ActivityService } from "../activity/activity.service";
-import { ActivityEntity } from "../entities/activity.entity";
-import { ActivityDto } from "../dtos/activity.dto";
-import { LinkActivitiesDto } from "src/dtos/link.activities.dto";
-import { UnlinkActivitiesDto } from "src/dtos/unlink.activities.dto";
 import { QueryDto } from "../dtos/query.dto";
-import { ActivityUpdateDto } from "src/dtos/activityUpdate.dto";
 import { ValidateDto } from "src/dtos/validate.dto";
 import { SupportService } from "src/support/support.service";
 import { SupportDto } from "src/dtos/support.dto";
@@ -49,13 +41,6 @@ export class SupportController {
     console.log(req.abilityCondition);
     return this.supportService.query(query, req.abilityCondition);
   }
-
-	// @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ActivityEntity, true))
-  // @Get('/:id')
-  // getActivityViewData(@Param('id') id: string, @Request() req) {
-  //   return this.activityService.getActivityViewData(id, req.user);
-  // }
 
 	@ApiBearerAuth('api_key')
   @ApiBearerAuth()

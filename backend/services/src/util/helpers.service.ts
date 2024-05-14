@@ -7,6 +7,7 @@ import { ConfigService } from "@nestjs/config";
 import { I18nService } from "nestjs-i18n";
 import { programmeStatusRequestDto } from "../dtos/programmeStatus.request.dto";
 import { EntityManager } from "typeorm";
+import { SubpathDto } from "../dtos/subpath.dto";
 
 @Injectable()
 export class HelperService {
@@ -504,6 +505,11 @@ public formatTimestamp(timestamp: any) {
     }
   }
   
+}
+
+public generateSubPathSQL(query: SubpathDto) {
+  let whereSQL = `subpath(${query.ltree}, ${query.startLevel}, ${query.traverseDepth}) = '${query.match}'`;
+  return whereSQL;
 }
 
   // public async uploadCompanyLogoS3(companyId: number, companyLogo: string) {

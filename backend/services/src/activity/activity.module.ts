@@ -20,6 +20,7 @@ import { ActionModule } from 'src/action/action.module';
 import { ProgrammeModule } from 'src/programme/programme.module';
 import { ProjectModule } from 'src/project/project.module';
 import { ProgrammeViewEntity } from 'src/entities/programme.view.entity';
+import { KpiModule } from 'src/kpi/kpi.module';
 
 @Module({
 	imports: [
@@ -50,6 +51,7 @@ import { ProgrammeViewEntity } from 'src/entities/programme.view.entity';
 			UtilModule,
 			FileHandlerModule,
 			ValidationModule,
+			KpiModule
 	],
 	providers: [
 			ActivityService

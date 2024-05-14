@@ -18,6 +18,7 @@ import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { SupportEntity } from "src/entities/support.entity";
+import { KpiEntity } from "src/entities/kpi.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -75,6 +76,12 @@ export class CaslAbilityFactory {
 				can(Action.Update, SupportEntity);
 				can(Action.Delete, SupportEntity);
 				can(Action.Validate, SupportEntity);
+
+				// KPI
+				can(Action.Read, KpiEntity);
+				can(Action.Create, KpiEntity);
+				can(Action.Update, KpiEntity);
+				can(Action.Delete, KpiEntity);
 			}
 
 			if (user.role == Role.Admin) {
@@ -121,6 +128,12 @@ export class CaslAbilityFactory {
 				can(Action.Delete, SupportEntity);
 				can(Action.Validate, SupportEntity);
 
+				// KPI
+				can(Action.Read, KpiEntity);
+				can(Action.Create, KpiEntity);
+				can(Action.Update, KpiEntity);
+				can(Action.Delete, KpiEntity);
+
 			}
 
 			if (user.role == Role.GovernmentUser) {
@@ -130,7 +143,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, User);
 				cannot(Action.Delete, User);
 				can(Action.Update, User, { id: { $eq: user.id } });
-				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
+				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'sector'], {
 					id: { $eq: user.id },
 				});
 
@@ -206,6 +219,12 @@ export class CaslAbilityFactory {
 				can(Action.Delete, SupportEntity);
 				cannot(Action.Validate, SupportEntity);
 
+				// ----------------------------- KPI ------------------------------
+				can(Action.Read, KpiEntity);
+				can(Action.Create, KpiEntity);
+				can(Action.Update, KpiEntity);
+				can(Action.Delete, KpiEntity);
+
 			}
 
 			if (user.role == Role.Observer) {
@@ -213,7 +232,7 @@ export class CaslAbilityFactory {
 				can(Action.Read, User);
 				cannot(Action.Create, User);
 				can(Action.Update, User, { id: { $eq: user.id } });
-				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
+				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'sector'], {
 					id: { $eq: user.id },
 				});
 
@@ -292,6 +311,12 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, SupportEntity);
 				cannot(Action.Delete, SupportEntity);
 				cannot(Action.Validate, SupportEntity);
+
+				// ----------------------------- KPI ------------------------------
+				can(Action.Read, KpiEntity);
+				cannot(Action.Create, KpiEntity);
+				cannot(Action.Update, KpiEntity);
+				cannot(Action.Delete, KpiEntity);
 
 			}
 
