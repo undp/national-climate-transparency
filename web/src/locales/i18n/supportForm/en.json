@@ -21,5 +21,6 @@
     "exchangeRateTitle": "Exchange Rate (USD/Domestic currency)",
     "add": "ADD",
     "cancel": "CANCEL",
+    "update": "Save",
     "supportCreationSuccess": "Support Added Successfully"
   }
