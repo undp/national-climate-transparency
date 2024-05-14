@@ -5,7 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from '../typeorm.config.service';
 import { KpiEntity } from '../entities/kpi.entity';
 import { KpiService } from './kpi.service';
-// import { OrganisationModule } from 'src/organisation/organisation.module';
+import { ActivityEntity } from '../entities/activity.entity';
+import { UtilModule } from '../util/util.module';
+import { AchievementEntity } from '../entities/achievement.entity';
+import { ActionEntity } from '../entities/action.entity';
+import { ProgrammeEntity } from '../entities/programme.entity';
+import { ProjectEntity } from '../entities/project.entity';
 
 @Module({
 	imports: [
@@ -19,9 +24,14 @@ import { KpiService } from './kpi.service';
 			imports: undefined,
 		}),
 		TypeOrmModule.forFeature([
-			KpiEntity
+			KpiEntity,
+			ActivityEntity, 
+			AchievementEntity,
+			ActionEntity, 
+			ProgrammeEntity,
+			ProjectEntity
 		]),
-		// OrganisationModule
+		UtilModule
 	],
 	providers: [
 		KpiService

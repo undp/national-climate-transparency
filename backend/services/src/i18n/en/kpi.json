@@ -1,0 +1,12 @@
+{
+  "actionNotFound": "An action with id {} is not found",
+  "programmeNotFound": "A programme with id {} is not found",
+  "projectNotFound": "A project with id {} is not found",
+  "entityNotFound": "An entity with id {} is not found",
+  "activityNotFound": "Activity with id {} is not found",
+  "kpiNotFound": "Kpi with id {} is not found",
+  "kpiNotLinkedToActivity": "Kpi {} is not related to activity {}",
+  "achievementCreationFailed": "Kpi achieved data save failed",
+  "createAchievementSuccess": "Kpi achieved data saved"
+
+}

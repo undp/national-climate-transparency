@@ -16,9 +16,8 @@ import { FileHandlerModule } from '../file-handler/filehandler.module';
 import { ProgrammeService } from './programme.service';
 import { ValidationModule } from '../validation/validation.module';
 import { ActionModule } from '../action/action.module';
-import { ProgrammeViewEntity } from 'src/entities/programme.view.entity';
-import { KpiModule } from 'src/kpi/kpi.module';
-// import { OrganisationModule } from 'src/organisation/organisation.module';
+import { ProgrammeViewEntity } from '../entities/programme.view.entity';
+import { KpiModule } from '../kpi/kpi.module';
 
 @Module({
     imports: [
@@ -46,7 +45,7 @@ import { KpiModule } from 'src/kpi/kpi.module';
         forwardRef(() => ActionModule),
         FileHandlerModule,
         ValidationModule,
-        KpiModule
+        forwardRef(() => KpiModule)
     ],
     providers: [
         ProgrammeService
