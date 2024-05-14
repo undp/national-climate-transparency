@@ -60,11 +60,10 @@ export class ActionService {
 
 		action.actionId = 'A' + await this.counterService.incrementCount(CounterType.ACTION, 3);
 
-		let filteredProgrammes: ProgrammeEntity[] = [];
+		// Filtering already linked programmes
+		const filteredProgrammes: ProgrammeEntity[] = [];
 		if (actionDto.linkedProgrammes) {
 			const programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
-
-			// Filtering already linked programmes
 			for (const programme of programmes) {
 				if (!programme.action) {
 					filteredProgrammes.push(programme)
@@ -106,7 +105,7 @@ export class ActionService {
 				const savedAction = await em.save<ActionEntity>(action);
 				if (savedAction) {
 					// link programmes here
-					if (filteredProgrammes && filteredProgrammes.length > 0) {
+					if (filteredProgrammes.length > 0) {
 						await this.linkUnlinkService.linkProgrammesToAction(savedAction, filteredProgrammes, action.actionId, user, em);
 					}
 

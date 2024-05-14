@@ -105,20 +105,13 @@ export class ProgrammeService {
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, action.actionId);
 		}
 
-		let projects;
+		// Filtering already linked projects
+		const filteredProjects: ProjectEntity[] = [];
 		if (programmeDto.linkedProjects) {
-			projects = await this.findAllProjectsByIds(programmeDto.linkedProjects);
-
-			// check if programmes are already linked
+			const projects = await this.findAllProjectsByIds(programmeDto.linkedProjects);
 			for (const project of projects) {
-				if (project.programme) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"project.projectAlreadyLinked",
-							[project.projectId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
+				if (!project.programme) {
+					filteredProjects.push(project)
 				}
 			}
 		}
@@ -138,8 +131,8 @@ export class ProgrammeService {
 					}
 
 					// linking projects and updating paths of projects and activities
-					if (projects && projects.length > 0) {
-						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
+					if (filteredProjects.length > 0) {
+						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, filteredProjects, programme.programmeId, user, em);
 					}
 				}
 				return savedProgramme;
@@ -387,7 +380,7 @@ export class ProgrammeService {
 		);
 	}
 
-	async linkUpdatedProgrammeToAction(actionId: string, updatedProgramme: ProgrammeEntity, user: User, em?: EntityManager) {
+	async linkUpdatedProgrammeToAction(actionId: string, updatedProgramme: ProgrammeEntity, user: User, em: EntityManager) {
 		const action = await this.actionService.findActionById(actionId);
 		if (!action) {
 			throw new HttpException(
@@ -409,7 +402,7 @@ export class ProgrammeService {
 			);
 		}
 		
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, [updatedProgramme], actionId, user, em? em : this.entityManager);
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, [updatedProgramme], actionId, user, em);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
