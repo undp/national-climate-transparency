@@ -5,7 +5,6 @@ export enum OrganisationType {
 }
 
 export enum Organisation {
-	Government = "Government of Antarctica",
   MIN_OF_FISH = "Ministry of Fisheries",
   FIN_ECON_TRADE = "Ministry of Finance,Economic Planning & Trade",
   FOREIGN_AFFAIRS = "Ministry of Foreign Affairs and Tourism",

@@ -991,7 +991,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item<number>
                     label={<label className="form-item-header">{t('intImplementorHeader')}</label>}
                     name="internationalImplementingEntities"
-                    rules={[validation.required]}
                   >
                     <Select
                       size="large"

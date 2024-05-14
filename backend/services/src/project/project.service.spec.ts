@@ -23,11 +23,13 @@ import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
 import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
+import { ActivityEntity } from "../entities/activity.entity";
 
 describe('ProjectService', () => {
 	let service: ProjectService;
 	let entityManagerMock: Partial<EntityManager>;
 	let projectRepositoryMock: Partial<Repository<ProjectEntity>>;
+	let activityRepositoryMock: Partial<Repository<ActivityEntity>>;
 	let programmeServiceMock: Partial<ProgrammeService>;
 	let counterServiceMock: Partial<CounterService>;
 	let helperServiceMock: Partial<HelperService>;
@@ -45,6 +47,10 @@ describe('ProjectService', () => {
 		};
 
 		projectRepositoryMock = {
+			save: jest.fn(),
+		};
+
+		activityRepositoryMock = {
 			save: jest.fn(),
 		};
 
@@ -115,6 +121,10 @@ describe('ProjectService', () => {
 				{
 					provide: getRepositoryToken(ProjectEntity),
 					useValue: projectRepositoryMock,
+				},
+				{
+					provide: getRepositoryToken(ActivityEntity),
+					useValue: activityRepositoryMock,
 				},
 				{
 					provide: LinkUnlinkService,

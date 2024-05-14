@@ -39,7 +39,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   const formTitle = getFormTitle('Support', method);
 
   const navigate = useNavigate();
-  const { post } = useConnection();
+  const { post, put } = useConnection();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -60,22 +60,79 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const [parentList, setParentList] = useState<ParentData[]>([]);
 
-  // TODO : Connect to the BE Endpoints for data fetching
   // Initialization Logic
 
   useEffect(() => {
-    console.log('Running Parent Id Population');
-    const prefix = 'T';
-    const parentIds: ParentData[] = [];
-    for (let i = 0; i < 15; i++) {
-      parentIds.push({
-        id: `${prefix}00${i}`,
-        title: `${prefix}00${i}`,
+    // Fetching All Activities which can be the parent
+    const fetchAllActivities = async () => {
+      const response: any = await post('national/activities/query', {});
+      const tempActivityData: ParentData[] = [];
+      response.data.forEach((activity: any) => {
+        tempActivityData.push({
+          id: activity.activityId,
+          title: activity.title,
+        });
       });
-    }
-    setParentList(parentIds);
+      setParentList(tempActivityData);
+    };
+    fetchAllActivities();
 
-    setIsValidated(false);
+    // Initially Loading the underlying support data when not in create mode
+
+    const fetchData = async () => {
+      if (method !== 'create' && entId) {
+        let response: any;
+        try {
+          const payload = {
+            filterAnd: [
+              {
+                key: 'supportId',
+                operation: '=',
+                value: entId,
+              },
+            ],
+          };
+          response = await post('national/supports/query', payload);
+
+          if (response.response.data.total === 1) {
+            const entityData: any = response.data[0];
+            // Populating Action owned data fields
+            form.setFieldsValue({
+              activityId: entityData.activity?.activityId ?? undefined,
+              direction: entityData.direction,
+              financeNature: entityData.financeNature,
+              internationalSupportChannel: entityData.internationalSupportChannel,
+              otherInternationalSupportChannel: entityData.otherInternationalSupportChannel,
+              internationalFinancialInstrument: entityData.internationalFinancialInstrument,
+              otherInternationalFinancialInstrument:
+                entityData.otherInternationalFinancialInstrument,
+              nationalFinancialInstrument: entityData.nationalFinancialInstrument,
+              otherNationalFinancialInstrument: entityData.otherNationalFinancialInstrument,
+              financingStatus: entityData.financingStatus,
+              internationalSource: entityData.internationalSource,
+              nationalSource: entityData.nationalSource,
+              requiredAmount: entityData.requiredAmount,
+              receivedAmount: entityData.receivedAmount,
+              exchangeRate: entityData.exchangeRate,
+            });
+
+            setAmountNeeded(entityData.requiredAmount ?? undefined);
+            setAmountReceived(entityData.receivedAmount ?? undefined);
+            setExchangeRate(entityData.exchangeRate ?? undefined);
+            setIsValidated(entityData.validated ?? false);
+          }
+        } catch {
+          navigate('/support');
+          message.open({
+            type: 'error',
+            content: t('noSuchEntity'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -91,18 +148,32 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const handleSubmit = async (payload: any) => {
     try {
-      const response = await post('national/supports/add', payload);
+      payload.exchangeRate = parseFloat(payload.exchangeRate);
+      payload.requiredAmount = parseFloat(payload.requiredAmount);
+      payload.receivedAmount = parseFloat(payload.receivedAmount);
+
+      let response: any;
+
+      if (method === 'create') {
+        response = await post('national/supports/add', payload);
+      } else if (method === 'update') {
+        payload.supportId = entId;
+        response = await put('national/supports/update', payload);
+      }
+
+      const successMsg =
+        method === 'create' ? t('supportCreationSuccess') : t('supportUpdateSuccess');
+
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
-          content: t('supportCreationSuccess'),
+          content: successMsg,
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
         navigate('/support');
       }
     } catch (error: any) {
-      console.log('Error in Support creation', error);
       message.open({
         type: 'error',
         content: `${error.message}`,
@@ -202,7 +273,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('supportDirectionTitle')}</label>}
-                  name="supportDirection"
+                  name="direction"
                   rules={[validation.required]}
                 >
                   <Select
@@ -246,7 +317,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('intSupportChannelTitle')}</label>}
-                  name="intSupportChannel"
+                  name="internationalSupportChannel"
                   rules={[validation.required]}
                 >
                   <Select
@@ -269,7 +340,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('otherIntSupportChannel')}</label>}
-                  name="otherIntSupportChannel"
+                  name="otherInternationalSupportChannel"
                   rules={[validation.required]}
                 >
                   <Input className="form-input-box" disabled={isView} />
@@ -280,7 +351,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   label={
                     <label className="form-item-header">{t('intFinancialInstrumentTitle')}</label>
                   }
-                  name="intFinancialInstrument"
+                  name="internationalFinancialInstrument"
                   rules={[validation.required]}
                 >
                   <Select
@@ -307,7 +378,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                       {t('otherIntFinanceInstrumentTitle')}
                     </label>
                   }
-                  name="otherIntFinanceInstrument"
+                  name="otherInternationalFinancialInstrument"
                   rules={[validation.required]}
                 >
                   <Input className="form-input-box" disabled={isView} />
@@ -318,7 +389,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   label={
                     <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
                   }
-                  name="nationalFinanceInstrument"
+                  name="nationalFinancialInstrument"
                   rules={[validation.required]}
                 >
                   <Select
@@ -345,7 +416,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                       {t('otherNatFinanceInstrumentTitle')}
                     </label>
                   }
-                  name="otherNatFinanceInstrument"
+                  name="otherNationalFinancialInstrument"
                 >
                   <Input className="form-input-box" disabled={isView} />
                 </Form.Item>
@@ -353,7 +424,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={12}>
                 <Form.Item
                   label={<label className="form-item-header">{t('financeStatus')}</label>}
-                  name="financeStatus"
+                  name="financingStatus"
                   rules={[validation.required]}
                 >
                   <Select
@@ -408,7 +479,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('neededUSDTitle')}</label>}
-                  name="neededUSD"
+                  name="requiredAmount"
                   rules={[validation.required]}
                 >
                   <Input
@@ -438,7 +509,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <Col span={6}>
                 <Form.Item
                   label={<label className="form-item-header">{t('receivedUSDTitle')}</label>}
-                  name="receivedUSD"
+                  name="receivedAmount"
                   rules={[validation.required]}
                 >
                   <Input

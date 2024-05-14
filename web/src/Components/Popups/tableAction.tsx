@@ -76,7 +76,7 @@ export const actionMenuWithAttaching = (
 };
 
 export const actionMenuWithoutAttaching = (
-  calledIn: 'activities' | 'supports',
+  calledIn: 'activities' | 'support',
   ability: any,
   entity: ActivityEntity | SupportEntity,
   recordId: string,

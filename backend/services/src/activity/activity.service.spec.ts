@@ -25,6 +25,7 @@ import { ActionEntity } from "../entities/action.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityUpdateDto } from "../dtos/activityUpdate.dto";
 import { DocumentEntityDto } from "../dtos/document.entity.dto";
+import { PayloadValidator } from "../validation/payload.validator";
 
 describe('ActivityService', () => {
 	let service: ActivityService;
@@ -37,6 +38,7 @@ describe('ActivityService', () => {
 	let projectServiceMock: Partial<ProjectService>;
 	let actionServiceMock: Partial<ActionService>;
 	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
+	let payloadValidatorServiceMock: Partial<PayloadValidator>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -71,6 +73,9 @@ describe('ActivityService', () => {
 		};
 		projectServiceMock = {
 			findProjectById: jest.fn()
+		};
+		payloadValidatorServiceMock = {
+			validateMitigationTimelinePayload: jest.fn()
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -111,6 +116,10 @@ describe('ActivityService', () => {
 				{
 					provide: LinkUnlinkService,
 					useValue: linkUnlinkServiceMock,
+				},
+				{
+					provide: PayloadValidator,
+					useValue: payloadValidatorServiceMock,
 				},
 			],
 		}).compile();

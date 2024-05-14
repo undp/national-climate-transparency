@@ -72,8 +72,33 @@ export class ActivityEntity implements EntitySubject {
   @Column("jsonb", { nullable: true })
   mitigationInfo: any;
 
-  @Column("jsonb", { nullable: true })
-  mitigationTimeline: any;
+  @Column({ type: 'jsonb', nullable: true })
+  mitigationTimeline: {
+    expected: {
+      baselineEmissions: number[];
+      activityEmissionsWithM: number[];
+      activityEmissionsWithAM: number[];
+      expectedEmissionReductWithM: number[];
+      expectedEmissionReductWithAM: number[];
+      total: {
+        baselineEmissions:number;
+        activityEmissionsWithM:number;
+        activityEmissionsWithAM:number;
+        expectedEmissionReductWithM:number;
+        expectedEmissionReductWithAM:number;
+      };
+    };
+    actual: {
+      baselineActualEmissions: number[];
+      activityActualEmissions: number[];
+      actualEmissionReduct: number[];
+      total: {
+        baselineActualEmissions: number;
+        activityActualEmissions: number;
+        actualEmissionReduct: number;
+      };
+    };
+  };
 
 	@Column("varchar", { array: true, nullable: true })
   sectors: Sector[];
