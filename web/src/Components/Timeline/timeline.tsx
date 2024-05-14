@@ -7,6 +7,7 @@ interface Props {
   expectedTimeline: any;
   actualTimeline: any;
   loading: boolean;
+  method: 'create' | 'view' | 'update';
   onValueEnter: (
     tableTYpe: 'expected' | 'actual',
     rowId: string,
@@ -19,9 +20,11 @@ const TimelineTable: React.FC<Props> = ({
   expectedTimeline,
   actualTimeline,
   loading,
+  method,
   onValueEnter,
 }) => {
   const { t } = useTranslation(['timelineTable']);
+  const isView: boolean = method === 'view' ? true : false;
 
   const expectedTableColumns: TableProps<ExpectedTimeline>['columns'] = [
     {
@@ -37,7 +40,15 @@ const TimelineTable: React.FC<Props> = ({
       align: 'left',
       width: 350,
     },
-    { title: t('total'), dataIndex: 'total', align: 'center', width: 100 },
+    {
+      title: t('total'),
+      dataIndex: 'total',
+      align: 'center',
+      width: 100,
+      render: (colValue: any) => {
+        return colValue;
+      },
+    },
   ];
 
   const actualTableColumns: TableProps<ActualTimeline>['columns'] = [
@@ -54,10 +65,18 @@ const TimelineTable: React.FC<Props> = ({
       align: 'left',
       width: 350,
     },
-    { title: t('total'), dataIndex: 'total', align: 'center', width: 100 },
+    {
+      title: t('total'),
+      dataIndex: 'total',
+      align: 'center',
+      width: 100,
+      render: (colValue: any) => {
+        return colValue;
+      },
+    },
   ];
 
-  for (let year = 2023; year <= 2050; year++) {
+  for (let year = 2023; year <= 2048; year++) {
     expectedTableColumns.push({
       title: year.toString(),
       dataIndex: year.toString(),
@@ -67,6 +86,7 @@ const TimelineTable: React.FC<Props> = ({
         return (
           <Input
             value={colValue}
+            disabled={isView}
             onChange={(event: any) => {
               const inputValue = event.target.value;
               const regex = /^\d*$/;
@@ -89,6 +109,7 @@ const TimelineTable: React.FC<Props> = ({
         return (
           <Input
             value={colValue}
+            disabled={isView}
             onChange={(event: any) => {
               const inputValue = event.target.value;
               const regex = /^\d*$/;

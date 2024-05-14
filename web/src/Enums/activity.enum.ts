@@ -36,5 +36,5 @@ export enum TechnologyType {
   RESILIENCE = 'Resilience',
   COASTAL_MGT = 'Coastal Management',
   CIVIL = 'Civil',
-  OTHER = 'other',
+  OTHER = 'Other',
 }

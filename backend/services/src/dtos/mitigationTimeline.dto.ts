@@ -33,7 +33,7 @@ export class mitigationTimelineDto {
                 baselineActualEmissions: number;
                 activityActualEmissions: number;
                 actualEmissionReduct: number;
-            }
+            };
         };
     }
 
