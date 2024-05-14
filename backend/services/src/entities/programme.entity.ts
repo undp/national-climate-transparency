@@ -13,6 +13,7 @@ import { ActionEntity } from "./action.entity";
 import { ProjectEntity } from "./project.entity";
 import { ActivityEntity } from "./activity.entity";
 import { ProgrammeStatus } from "../enums/programme-status.enum";
+import { KpiEntity } from "./kpi.entity";
 
 @Entity("programme")
 export class ProgrammeEntity {
@@ -65,6 +66,8 @@ export class ProgrammeEntity {
   projects?: ProjectEntity[];
 
 	activities?: ActivityEntity[];
+
+	kpis?: KpiEntity[];
 
   @Column({ type: "boolean", default: false })
 	validated: boolean;
