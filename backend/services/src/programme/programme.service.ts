@@ -419,8 +419,7 @@ export class ProgrammeService {
 			);
 		}
 		
-		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, [updatedProgramme], actionId, allLinkedProgrammes, user, em? em : this.entityManager);
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, [updatedProgramme], actionId, user, em? em : this.entityManager);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -461,11 +460,9 @@ export class ProgrammeService {
 			EntityType.PROGRAMME
 		);
 
-		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(updatedProgramme.action.actionId, updatedProgramme.programmeId)
 		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(
 			updatedProgramme, 
 			updatedProgramme.programmeId, 
-			allLinkedProgrammes, 
 			user, 
 			em? em : this.entityManager, 
 			achievementsToRemove
@@ -525,7 +522,7 @@ export class ProgrammeService {
 			}
 		}
 		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, allLinkedProgrammes, user, this.entityManager);
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, user, this.entityManager);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 
@@ -581,11 +578,9 @@ export class ProgrammeService {
 			EntityType.PROGRAMME
 		);
 
-		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(programme.action.actionId, programme.programmeId)
 		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(
 			programme, 
 			unlinkProgrammesDto, 
-			allLinkedProgrammes, 
 			user, 
 			this.entityManager, 
 			achievementsToRemove

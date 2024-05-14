@@ -83,14 +83,12 @@ export class LinkUnlinkService {
 	async unlinkProgrammesFromAction(
 		programme: ProgrammeEntity,
 		payload: any,
-		allLinkedProgrammes: ProgrammeEntity[],
 		user: User,
 		entityManager: EntityManager,
 		achievementsToRemove: AchievementEntity[]
 	) {
-		const prog = await entityManager
+		await entityManager
 			.transaction(async (em) => {
-				const action = programme.action;
 
 				programme.action = null;
 				programme.path = "";
@@ -151,13 +149,14 @@ export class LinkUnlinkService {
 	}
 
 	async linkProjectsToProgramme(programme: ProgrammeEntity, projects: ProjectEntity[], payload: any, user: User, entityManager: EntityManager) {
-		const proj = await entityManager
+		await entityManager
 			.transaction(async (em) => {
 
 				for (const project of projects) {
 					project.programme = programme;
 					project.path = this.addProgrammeToProjectPath(project.path, programme.programmeId, programme.path);
-					project.sectors = programme.affectedSectors;
+					project.sector = programme.sector;
+
 					const linkedProject = await em.save<ProjectEntity>(project);
 
 					if (linkedProject) {
@@ -167,12 +166,12 @@ export class LinkUnlinkService {
 							for (const activity of project.activities) {
 								if (activity.support && activity.support.length > 0) {
 									activity.support.forEach((support) => {
-										support.sectors = programme.affectedSectors;
+										support.sector = programme.sector;
 										supports.push(support);
 									});
 								}
 								activity.path = this.addProgrammeToActivityPath(activity.path, programme.programmeId, programme.path);
-								activity.sectors = programme.affectedSectors;
+								activity.sector = programme.sector;
 								activities.push(activity);
 							}
 							await em.save<SupportEntity>(supports);
@@ -200,12 +199,13 @@ export class LinkUnlinkService {
 		entityManager: EntityManager,
 		achievementsToRemove: AchievementEntity[]
 	) {
-		const proj = await entityManager
+		await entityManager
 			.transaction(async (em) => {
 				for (const project of projects) {
 					project.programme = null;
 					project.path = `_._`;
-					project.sectors = null;
+					project.sector = null;
+
 					const unLinkedProgramme = await em.save<ProjectEntity>(project);
 
 					if (unLinkedProgramme) {
@@ -215,12 +215,12 @@ export class LinkUnlinkService {
 							for (const activity of project.activities) {
 								if (activity.support && activity.support.length > 0) {
 									activity.support.forEach((support) => {
-										support.sectors = null;
+										support.sector = null;
 										supports.push(support);
 									});
 								}
 								activity.path = `_._.${project.projectId}`
-								activity.sectors = null;
+								activity.sector = null;
 								activities.push(activity);
 							}
 							await em.save<SupportEntity>(supports);
@@ -257,19 +257,19 @@ export class LinkUnlinkService {
 						case EntityType.ACTION: {
 							activity.path = `${linkActivitiesDto.parentId}._._`;
 							logEventType = LogEventType.LINKED_TO_ACTION;
-							activity.sectors = parentEntity?.migratedData?.sectorsAffected;
+							activity.sector = parentEntity?.sector;
 							break;
 						}
 						case EntityType.PROGRAMME: {
 							activity.path = parentEntity.path ? `${parentEntity.path}.${linkActivitiesDto.parentId}._` : `_.${linkActivitiesDto.parentId}._`;
 							logEventType = LogEventType.LINKED_TO_PROGRAMME;
-							activity.sectors = parentEntity?.affectedSectors;
+							activity.sector = parentEntity?.sector;
 							break;
 						}
 						case EntityType.PROJECT: {
 							activity.path = parentEntity.path ? `${parentEntity.path}.${linkActivitiesDto.parentId}` : `_._.${linkActivitiesDto.parentId}`;
 							logEventType = LogEventType.LINKED_TO_PROJECT;
-							activity.sectors = parentEntity?.sectors;
+							activity.sector = parentEntity?.sector;
 							break;
 						}
 					}
@@ -282,7 +282,7 @@ export class LinkUnlinkService {
 						const supports = [];
 						if (activity.support && activity.support.length > 0) {
 							activity.support.forEach((support) => {
-								support.sectors = linkedActivity.sectors;
+								support.sector = linkedActivity.sector;
 								supports.push(support);
 							});
 						}
@@ -330,7 +330,7 @@ export class LinkUnlinkService {
 					activity.parentId = null;
 					activity.parentType = null;
 					activity.path = '_._._';
-					activity.sectors = null;
+					activity.sector = null;
 
 					const unlinkedActivity = await em.save<ActivityEntity>(activity);
 
@@ -338,7 +338,7 @@ export class LinkUnlinkService {
 						const supports = [];
 						if (activity.support && activity.support.length > 0) {
 							activity.support.forEach((support) => {
-								support.sectors = null;
+								support.sector = null;
 								supports.push(support);
 							});
 						}
