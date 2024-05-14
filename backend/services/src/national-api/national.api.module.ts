@@ -26,6 +26,8 @@ import { LogController } from './log.controller';
 import { LogModule } from 'src/log/log.module';
 import { SupportController } from './support.controller';
 import { SupportModule } from 'src/support/support.module';
+import { KpiModule } from 'src/kpi/kpi.module';
+import { KpiController } from './kpi.controller';
 
 
 @Module({
@@ -42,27 +44,27 @@ import { SupportModule } from 'src/support/support.module';
     AuthModule,
     UserModule,
     CaslModule,
-    // OrganisationModule,
     UtilModule,
     ActionModule,
     ProgrammeModule, 
 		ProjectModule,
 		ActivityModule,
     LogModule,
-		SupportModule
+		SupportModule,
+		KpiModule
   ],
   controllers: [ 
     NationalAPIController, 
     UserController, 
     AuthController, 
-    // CompanyController, 
     SettingsController, 
     ActionController, 
     ProgrammeController,
 		ProjectController, 
 		ActivityController,
     LogController,
-		SupportController
+		SupportController,
+		KpiController
   ],
   providers: [
     NationalAPIService, 

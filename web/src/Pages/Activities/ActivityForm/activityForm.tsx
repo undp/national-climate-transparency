@@ -108,17 +108,54 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [expectedTimeline, setExpectedTimeline] = useState<ExpectedTimeline[]>([]);
   const [actualTimeline, setActualTimeline] = useState<ActualTimeline[]>([]);
+  const [isMtgButtonEnabled, setisMtgButtonEnabled] = useState(false);
 
   // Initialization Logic
 
   const yearsList: number[] = [];
 
-  for (let year = 2013; year <= 2050; year++) {
+  for (let year = 2023; year <= 2048; year++) {
     yearsList.push(year);
   }
 
   const handleParentIdSelect = (id: string) => {
     setConnectedParentId(id);
+  };
+
+  // MTG timeline Fields Mapping
+
+  const mtgFieldMapping = (longName: string) => {
+    switch (longName) {
+      case 'Baseline Emissions (without measures)':
+        return 'baselineEmissions';
+      case 'Activity Emissions (with measures)':
+        return 'activityEmissionsWithM';
+      case 'Activity Emissions (with additional measures)':
+        return 'activityEmissionsWithAM';
+      case 'Expected Emission Reductions (with measures)':
+        return 'expectedEmissionReductWithM';
+      case 'Expected Emission Reductions (with additional measures)':
+        return 'expectedEmissionReductWithAM';
+      case 'Baseline Actual Emissions':
+        return 'baselineActualEmissions';
+      case 'Activity Actual Emissions':
+        return 'activityActualEmissions';
+      case 'Actual Equivalent Emission Reductions':
+        return 'actualEmissionReduct';
+      default:
+        return '';
+    }
+  };
+
+  //MTG timeline create array from row
+
+  const mtgRowMapping = (row: { [year: string]: number }) => {
+    const arr = [];
+    for (let year = 2023; year <= 2048; year++) {
+      const value = row[year.toString()] || 0;
+      arr.push(value);
+    }
+    return arr;
   };
 
   // Tracking Parent selection
@@ -333,13 +370,62 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchSupportData();
 
+    // Get mtg timeline data
+
+    const fetchMtgTimelineData = async () => {
+      if (method !== 'create' && entId) {
+        let response: any;
+        try {
+          response = await get(`national/activities/mitigation/${entId}`);
+
+          if (response.status === 200 || response.status === 201) {
+            const tempExpectedEntries: ExpectedTimeline[] = [];
+            Object.entries(ExpectedRows).forEach(([key, value]) => {
+              const rowData: ExpectedTimeline = {
+                key: key,
+                ghg: value[0],
+                topic: value[1],
+                total: response.data.expected.total[mtgFieldMapping(value[1])],
+              };
+              for (let year = 2023; year <= 2048; year++) {
+                rowData[year.toString()] =
+                  response.data.expected[mtgFieldMapping(value[1])][year - 2023];
+              }
+              tempExpectedEntries.push(rowData);
+            });
+
+            const tempActualEntries: ActualTimeline[] = [];
+            Object.entries(ActualRows).forEach(([key, value]) => {
+              const rowData: ActualTimeline = {
+                key: key,
+                ghg: value[0],
+                topic: value[1],
+                total: response.data.actual.total[mtgFieldMapping(value[1])],
+              };
+              for (let year = 2023; year <= 2048; year++) {
+                rowData[year.toString()] =
+                  response.data.actual[mtgFieldMapping(value[1])][year - 2023];
+              }
+              tempActualEntries.push(rowData);
+            });
+
+            setExpectedTimeline(tempExpectedEntries);
+            setActualTimeline(tempActualEntries);
+          }
+        } catch (error) {
+          console.error('Error fetching timeline data:', error);
+        }
+      }
+    };
+    fetchMtgTimelineData();
+
     // Initializing mtg timeline data when in create mode
 
     if (method === 'create') {
       const tempExpectedEntries: ExpectedTimeline[] = [];
       Object.entries(ExpectedRows).forEach(([key, value]) => {
         const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-        for (let year = 2023; year <= 2050; year++) {
+        for (let year = 2023; year <= 2048; year++) {
           rowData[year.toString()] = 0;
         }
         tempExpectedEntries.push(rowData);
@@ -348,7 +434,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       const tempActualEntries: ActualTimeline[] = [];
       Object.entries(ActualRows).forEach(([key, value]) => {
         const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-        for (let year = 2023; year <= 2050; year++) {
+        for (let year = 2023; year <= 2048; year++) {
           rowData[year.toString()] = 0;
         }
         tempActualEntries.push(rowData);
@@ -440,6 +526,35 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         resultDocuments: [],
       };
 
+      if (method === 'create') {
+        payload.mitigationTimeline = {
+          expected: {
+            baselineEmissions: mtgRowMapping(expectedTimeline[0]),
+            activityEmissionsWithM: mtgRowMapping(expectedTimeline[1]),
+            activityEmissionsWithAM: mtgRowMapping(expectedTimeline[2]),
+            expectedEmissionReductWithM: mtgRowMapping(expectedTimeline[3]),
+            expectedEmissionReductWithAM: mtgRowMapping(expectedTimeline[4]),
+            total: {
+              baselineEmissions: expectedTimeline[0].total,
+              activityEmissionsWithM: expectedTimeline[1].total,
+              activityEmissionsWithAM: expectedTimeline[2].total,
+              expectedEmissionReductWithM: expectedTimeline[3].total,
+              expectedEmissionReductWithAM: expectedTimeline[4].total,
+            },
+          },
+          actual: {
+            baselineActualEmissions: mtgRowMapping(actualTimeline[0]),
+            activityActualEmissions: mtgRowMapping(actualTimeline[1]),
+            actualEmissionReduct: mtgRowMapping(actualTimeline[2]),
+            total: {
+              baselineActualEmissions: actualTimeline[0].total,
+              activityActualEmissions: actualTimeline[1].total,
+              actualEmissionReduct: actualTimeline[2].total,
+            },
+          },
+        };
+      }
+
       uploadedMthFiles.forEach((file) => {
         payload.mitigationInfo.methodologyDocuments.push({ title: file.title, data: file.data });
       });
@@ -530,6 +645,17 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     setPageSize(pagination.pageSize);
   };
 
+  //MTG timeline calculate array sum from row
+
+  const mtgCalculateArraySum = (row: any) => {
+    let arrSum = 0;
+    for (let year = 2023; year <= 2048; year++) {
+      arrSum += row[year.toString()] || 0;
+    }
+    console.log(arrSum);
+    return arrSum;
+  };
+
   // Mtg Data Change
 
   const onMtgValueEnter = (
@@ -541,25 +667,83 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     const newValue = value ? parseInt(value) : 0;
 
     if (tableType === 'expected') {
-      setExpectedTimeline((prevState) =>
-        prevState.map((entry) => {
-          if (entry.topic === rowId) {
-            entry[year] = newValue;
-            return entry;
-          }
+      const updatedTimeline = expectedTimeline.map((entry) => {
+        if (entry.topic === rowId) {
+          entry[year] = newValue;
+          entry.total = mtgCalculateArraySum(entry);
           return entry;
-        })
-      );
+        }
+        return entry;
+      });
+      setExpectedTimeline(updatedTimeline);
     } else {
-      setActualTimeline((prevState) =>
-        prevState.map((entry) => {
-          if (entry.topic === rowId) {
-            entry[year] = newValue;
-            return entry;
-          }
+      const updatedTimeline = actualTimeline.map((entry) => {
+        if (entry.topic === rowId) {
+          entry[year] = newValue;
+          entry.total = mtgCalculateArraySum(entry);
           return entry;
-        })
-      );
+        }
+        return entry;
+      });
+      setActualTimeline(updatedTimeline);
+    }
+    setisMtgButtonEnabled(true);
+  };
+
+  // MTG timeline update
+
+  const MtgTimelineUpdate = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          activityId: entId,
+          mitigationTimeline: {
+            expected: {
+              baselineEmissions: mtgRowMapping(expectedTimeline[0]),
+              activityEmissionsWithM: mtgRowMapping(expectedTimeline[1]),
+              activityEmissionsWithAM: mtgRowMapping(expectedTimeline[2]),
+              expectedEmissionReductWithM: mtgRowMapping(expectedTimeline[3]),
+              expectedEmissionReductWithAM: mtgRowMapping(expectedTimeline[4]),
+              total: {
+                baselineEmissions: expectedTimeline[0].total,
+                activityEmissionsWithM: expectedTimeline[1].total,
+                activityEmissionsWithAM: expectedTimeline[2].total,
+                expectedEmissionReductWithM: expectedTimeline[3].total,
+                expectedEmissionReductWithAM: expectedTimeline[4].total,
+              },
+            },
+            actual: {
+              baselineActualEmissions: mtgRowMapping(actualTimeline[0]),
+              activityActualEmissions: mtgRowMapping(actualTimeline[1]),
+              actualEmissionReduct: mtgRowMapping(actualTimeline[2]),
+              total: {
+                baselineActualEmissions: actualTimeline[0].total,
+                activityActualEmissions: actualTimeline[1].total,
+                actualEmissionReduct: actualTimeline[2].total,
+              },
+            },
+          },
+        };
+        const response: any = await put('national/activities/mitigation/update', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: 'Mitigation Timeline Successfully Updated  !',
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          setisMtgButtonEnabled(false);
+        }
+      }
+    } catch {
+      message.open({
+        type: 'error',
+        content: `${entId} Mitigation Timeline Failed to Update !`,
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
     }
   };
 
@@ -1081,8 +1265,23 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={6}>
+                <Col span={3} style={{ paddingTop: '6px', marginRight: '10px' }}>
                   <div className="form-section-header">{t('mitigationTimelineTitle')}</div>
+                </Col>
+                <Col span={2.5}>
+                  {method === 'update' && (
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => {
+                        MtgTimelineUpdate();
+                      }}
+                      disabled={!isMtgButtonEnabled}
+                    >
+                      {t('update')}
+                    </Button>
+                  )}
                 </Col>
               </Row>
               <Row>
@@ -1091,6 +1290,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     expectedTimeline={expectedTimeline}
                     actualTimeline={actualTimeline}
                     loading={false}
+                    method={method}
                     onValueEnter={onMtgValueEnter}
                   />
                 </Col>
