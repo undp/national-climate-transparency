@@ -47,7 +47,7 @@ export class ProjectEntity {
   comment: string;
 
 	@Column("varchar", { array: true, nullable: true })
-  sectors: Sector[];
+  sector: Sector;
 
   @Column({ type: "ltree" })
   path: string;

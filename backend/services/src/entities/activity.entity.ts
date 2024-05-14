@@ -6,7 +6,6 @@ import {
   Measure,
   TechnologyType,
   ImpleMeans,
-  SupportType,
   ActivityStatus,
 } from "../enums/activity.enum";
 import { NatImplementor, IntImplementor } from "../enums/shared.enum";
@@ -29,9 +28,6 @@ export class ActivityEntity implements EntitySubject {
 
   @Column({ nullable: true })
   parentId: string;
-
-  // @Column({ type: "enum", enum: SupportType, nullable: true })
-  // supportType: string;
 
   @Column({ type: "enum", enum: Measure, nullable: true })
   measure: string;
@@ -101,7 +97,7 @@ export class ActivityEntity implements EntitySubject {
   };
 
 	@Column("varchar", { array: true, nullable: true })
-  sectors: Sector[];
+  sector: Sector;
 
   @Column({ type: "ltree" })
   path: string;

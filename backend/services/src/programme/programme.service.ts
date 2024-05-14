@@ -383,18 +383,18 @@ export class ProgrammeService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0) {
-			const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.cannotLinkNotRelatedProgrammes",
-						[updatedProgramme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
-		}
+		// if (user.sector && user.sector.length > 0) {
+		// 	const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
+		// 	if (!user.sector.includes(curre)) {
+		// 		throw new HttpException(
+		// 			this.helperService.formatReqMessagesString(
+		// 				"programme.cannotLinkNotRelatedProgrammes",
+		// 				[updatedProgramme.programmeId]
+		// 			),
+		// 			HttpStatus.BAD_REQUEST
+		// 		);
+		// 	}
+		// }
 
 		if (updatedProgramme.action) {
 			throw new HttpException(
@@ -419,16 +419,16 @@ export class ProgrammeService {
 	async unlinkUpdatedProgrammeFromAction(updatedProgramme: ProgrammeEntity, user: User, em?: EntityManager) {
 
 		if (user.sector && user.sector.length > 0) {
-			const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.cannotUnlinkNotRelatedProgrammes",
-						[updatedProgramme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
+			// const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
+			// if (commonSectors.length === 0) {
+			// 	throw new HttpException(
+			// 		this.helperService.formatReqMessagesString(
+			// 			"programme.cannotUnlinkNotRelatedProgrammes",
+			// 			[updatedProgramme.programmeId]
+			// 		),
+			// 		HttpStatus.BAD_REQUEST
+			// 	);
+			// }
 
 			if (!updatedProgramme.action) {
 				throw new HttpException(
@@ -475,18 +475,18 @@ export class ProgrammeService {
 			);
 		}
 		for (const programme of programmes) {
-			if (user.sector && user.sector.length > 0) {
-				const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
-				if (commonSectors.length === 0) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"programme.cannotLinkNotRelatedProgrammes",
-							[programme.programmeId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				}
-			}
+			// if (user.sector && user.sector.length > 0) {
+			// 	const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
+			// 	if (commonSectors.length === 0) {
+			// 		throw new HttpException(
+			// 			this.helperService.formatReqMessagesString(
+			// 				"programme.cannotLinkNotRelatedProgrammes",
+			// 				[programme.programmeId]
+			// 			),
+			// 			HttpStatus.BAD_REQUEST
+			// 		);
+			// 	}
+			// }
 			if (programme.action) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -526,16 +526,15 @@ export class ProgrammeService {
 		const programme = programmes[0];
 		// for (const programme of programmes) {
 		if (user.sector && user.sector.length > 0) {
-			const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.cannotUnlinkNotRelatedProgrammes",
-						[programme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
+			// const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
+			// if (commonSectors.length === 0) {
+			// 	throw new HttpException(
+			// 		this.helperService.formatReqMessagesString(
+			// 			"programme.cannotUnlinkNotRelatedProgrammes",
+			// 			[programme.programmeId]
+			// 		),
+			// 		HttpStatus.BAD_REQUEST
+			// 	);
 			// }
 			if (!programme.action) {
 				throw new HttpException(
@@ -761,7 +760,7 @@ export class ProgrammeService {
 		programmeViewDto.description = programme.description;
 		programmeViewDto.objectives = programme.objective;
 		programmeViewDto.instrumentType = programme.action?.instrumentType;
-		programmeViewDto.affectedSectors = programme.affectedSectors;
+		programmeViewDto.sector = programme.sector;
 		programmeViewDto.affectedSubSector = programme.affectedSubSector;
 		programmeViewDto.programmeStatus = programme.programmeStatus;
 		programmeViewDto.recipientEntity = recipientEntity;

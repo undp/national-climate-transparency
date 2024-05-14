@@ -65,7 +65,7 @@ export class SupportEntity {
   receivedAmountDomestic: number;
 
 	@Column("varchar", { array: true, nullable: true })
-  sectors: Sector[];
+  sector: Sector;
 
   @ManyToOne(() => ActivityEntity, (activity) => activity.support, {
     nullable: false,

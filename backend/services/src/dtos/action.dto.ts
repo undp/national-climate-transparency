@@ -4,6 +4,7 @@ import { ActionStatus, InstrumentType, NatAnchor } from "../enums/action.enum";
 import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
 import { KpiUnits } from "../enums/kpi.enum";
+import { Sector } from "src/enums/sector.enum";
 
 export class ActionDto {
 
@@ -23,6 +24,17 @@ export class ActionDto {
 	@IsString()
 	@ApiProperty()
 	objective: string;
+
+	@IsNotEmpty()
+	@IsEnum(Sector, {
+		each: true,
+		message: 'Invalid Affected Sector. Supported following types:' + Object.values(Sector)
+	})
+	@ApiProperty({
+		type: [String],
+		enum: Object.values(Sector),
+	})
+	sector: Sector;
 
 	@IsArray()
 	@ArrayMinSize(1)

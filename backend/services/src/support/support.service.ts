@@ -46,9 +46,8 @@ export class SupportService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && activity.sectors && activity.sectors.length > 0) {
-			const commonSectors = activity.sectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
+		if (user.sector && user.sector.length > 0 && activity.sector) {
+			if (!user.sector.includes(activity.sector)) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"support.cannotLinkToNotRelatedActivity",
@@ -61,7 +60,7 @@ export class SupportService {
 
 		support.requiredAmountDomestic = support.requiredAmount * support.exchangeRate;
 		support.receivedAmountDomestic = support.receivedAmount * support.exchangeRate;
-		support.sectors = activity.sectors;
+		support.sector = activity.sector;
 
 		support.activity = activity;
 		this.addEventLogEntry(eventLog, LogEventType.SUPPORT_CREATED, EntityType.SUPPORT, support.supportId, user.id, supportDto);
@@ -153,9 +152,8 @@ export class SupportService {
 		}
 		const eventLog = [];
 
-		if (user.sector && user.sector.length > 0 && currentSupport.sectors && currentSupport.sectors.length > 0) {
-			const commonSectors = currentSupport.sectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
+		if (user.sector && user.sector.length > 0 && currentSupport.sector) {
+			if (!user.sector.includes(currentSupport.sector)) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"support.cannotUpdateNotRelatedSupport",
@@ -177,9 +175,8 @@ export class SupportService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && activity.sectors && activity.sectors.length > 0) {
-			const commonSectors = activity.sectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
+		if (user.sector && user.sector.length > 0 && activity.sector) {
+			if (!user.sector.includes(activity.sector)) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"support.cannotLinkToNotRelatedActivity",
@@ -198,7 +195,7 @@ export class SupportService {
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTIVITY, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, activity.activityId);
 
 			currentSupport.activity = activity;
-			currentSupport.sectors = activity.sectors;
+			currentSupport.sector = activity.sector;
 		}
 
 		currentSupport.direction = supportUpdateDto.direction;

@@ -228,18 +228,18 @@ export class ProjectService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && currentProject.sectors && currentProject.sectors.length > 0) {
-			const commonSectors = currentProject.sectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"project.cannotUpdateNotRelatedProject",
-						[currentProject.projectId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
-		}
+		// if (user.sector && user.sector.length > 0 && currentProject.sectors && currentProject.sectors.length > 0) {
+		// 	const commonSectors = currentProject.sectors.filter(sector => user.sector.includes(sector));
+		// 	if (commonSectors.length === 0) {
+		// 		throw new HttpException(
+		// 			this.helperService.formatReqMessagesString(
+		// 				"project.cannotUpdateNotRelatedProject",
+		// 				[currentProject.projectId]
+		// 			),
+		// 			HttpStatus.FORBIDDEN
+		// 		);
+		// 	}
+		// }
 
 		if (projectUpdateDto.endYear < projectUpdateDto.startYear) {
 			throw new HttpException(
@@ -496,18 +496,18 @@ export class ProjectService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
-			if (user.sector && user.sector.length > 0) {
-				const commonSectors = project.programme.affectedSectors.filter(sector => user.sector.includes(sector));
-				if (commonSectors.length === 0) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"project.cannotUnlinkNotRelatedProject",
-							[project.projectId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				}
-			}
+			// if (user.sector && user.sector.length > 0) {
+			// 	const commonSectors = project.programme.affectedSectors.filter(sector => user.sector.includes(sector));
+			// 	if (commonSectors.length === 0) {
+			// 		throw new HttpException(
+			// 			this.helperService.formatReqMessagesString(
+			// 				"project.cannotUnlinkNotRelatedProject",
+			// 				[project.projectId]
+			// 			),
+			// 			HttpStatus.BAD_REQUEST
+			// 		);
+			// 	}
+			// }
 		}
 
 		const proj = await this.linkUnlinkService.unlinkProjectsFromProgramme(projects, unlinkProjectsDto, user, this.entityManager);

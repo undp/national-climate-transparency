@@ -47,7 +47,6 @@ export class ActionService {
 
 		action.actionId = 'A' + await this.counterService.incrementCount(CounterType.ACTION, 3);
 
-		const linkedProgrammeList = [];
 		let programmes;
 		if (actionDto.linkedProgrammes) {
 			programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
@@ -238,9 +237,8 @@ export class ActionService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && currentAction.sectors && currentAction.sectors.length > 0) {
-			const commonSectors = currentAction.sectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
+		if (user.sector && user.sector.length > 0 && currentAction.sector) {
+			if (!user.sector.includes(currentAction.sector)) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"activity.cannotUpdateNotRelatedAction",
