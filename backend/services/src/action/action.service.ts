@@ -58,13 +58,19 @@ export class ActionService {
 
 		action.actionId = 'A' + await this.counterService.incrementCount(CounterType.ACTION, 3);
 
-		// Filtering already linked programmes
-		const filteredProgrammes: ProgrammeEntity[] = [];
+		// Checking for programmes having a  parent
+		let programmes: ProgrammeEntity[];
 		if (actionDto.linkedProgrammes) {
-			const programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
+			programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
 			for (const programme of programmes) {
-				if (!programme.action) {
-					filteredProgrammes.push(programme)
+				if (programme.action) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"action.programmeAlreadyLinked",
+							[programme.programmeId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
 				}
 			}
 		}
@@ -103,8 +109,8 @@ export class ActionService {
 				const savedAction = await em.save<ActionEntity>(action);
 				if (savedAction) {
 					// link programmes here
-					if (filteredProgrammes.length > 0) {
-						await this.linkUnlinkService.linkProgrammesToAction(savedAction, filteredProgrammes, action.actionId, user, em);
+					if (programmes.length > 0) {
+						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, action.actionId, user, em);
 					}
 
 					if (actionDto.kpis) {

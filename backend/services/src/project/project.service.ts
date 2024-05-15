@@ -125,6 +125,17 @@ export class ProjectService {
 		let activities: any;
 		if (projectDto.linkedActivities) {
 			activities = await this.findAllActivitiesByIds(projectDto.linkedActivities);
+			for (const activity of activities) {
+				if (activity.parentId || activity.parentType) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"project.activityAlreadyLinked",
+							[project.projectId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
+			}
 		}
 
 		const proj = await this.entityManager

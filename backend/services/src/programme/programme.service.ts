@@ -116,13 +116,19 @@ export class ProgrammeService {
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, action.actionId);
 		}
 
-		// Filtering already linked projects
-		const filteredProjects: ProjectEntity[] = [];
+		// Checking for programmes having a  parent
+		let projects: ProjectEntity[];
 		if (programmeDto.linkedProjects) {
-			const projects = await this.findAllProjectsByIds(programmeDto.linkedProjects);
+			projects = await this.findAllProjectsByIds(programmeDto.linkedProjects);
 			for (const project of projects) {
-				if (!project.programme) {
-					filteredProjects.push(project)
+				if (project.programme) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"programme.projectAlreadyLinked",
+							[project.projectId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
 				}
 			}
 		}
@@ -142,8 +148,8 @@ export class ProgrammeService {
 					}
 
 					// linking projects and updating paths of projects and activities
-					if (filteredProjects.length > 0) {
-						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, filteredProjects, programme.programmeId, user, em);
+					if (projects.length > 0) {
+						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
 					}
 				}
 				return savedProgramme;
