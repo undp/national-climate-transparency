@@ -109,7 +109,7 @@ export class ActionService {
 				const savedAction = await em.save<ActionEntity>(action);
 				if (savedAction) {
 					// link programmes here
-					if (programmes.length > 0) {
+					if (programmes && programmes.length > 0) {
 						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, action.actionId, user, em);
 					}
 

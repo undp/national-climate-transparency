@@ -449,7 +449,7 @@ export class HelperService {
           } ${value}`;
         } else if (operator == "$elemMatch") {
           return `'${mongoQuery["$elemMatch"]["$eq"]}' ${
-            isNot ? " <> ANY " : " =ANY "
+            isNot ? " <> ANY " : " = "
           }(${table ? table + "." : ""}"${key}")`;
         } else if (operator == "$exists") {
 					const value = mongoQuery["$exists"]

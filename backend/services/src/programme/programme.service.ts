@@ -148,7 +148,7 @@ export class ProgrammeService {
 					}
 
 					// linking projects and updating paths of projects and activities
-					if (projects.length > 0) {
+					if (projects && projects.length > 0) {
 						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
 					}
 				}

@@ -698,14 +698,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col span={12}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('ghgAffected')}</label>}
-                    name="ghgsAffected"
-                  >
-                    <Input className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
-                <Col span={6}>
-                  <Form.Item
                     label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
                     name="instrumentType"
                     rules={[validation.required]}
@@ -726,7 +718,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col span={12}>
                   <Form.Item
                     label={<label className="form-item-header">{t('actionStatusTitle')}</label>}
                     name="status"

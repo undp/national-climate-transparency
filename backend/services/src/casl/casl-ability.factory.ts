@@ -146,14 +146,13 @@ export class CaslAbilityFactory {
 				});
 
 				// ----------------------------- Action ------------------------------
+
 				user.sector.forEach(userSector => {
 					can(Action.Read, ActionEntity, {
 						$or: [{ sector: { $elemMatch: { $eq: userSector } } }]
 					} as MongoQuery<ActionEntity>);
 				});
-				can(Action.Read, ActionEntity, {
-					sector: { $exists: false }
-				} as MongoQuery<ActionEntity>);
+
 				can(Action.Create, ActionEntity);
 				can(Action.Update, ActionEntity);
 				can(Action.Delete, ActionEntity);
@@ -161,17 +160,25 @@ export class CaslAbilityFactory {
 
 				
 				// ----------------------------- Programme ------------------------------
+
 				user.sector.forEach(userSector => {
 					can(Action.Read, ProgrammeEntity, {
 						$or: [{ sector: { $elemMatch: { $eq: userSector } } }]
 					} as MongoQuery<ProgrammeEntity>);
 				});
+
+				can(Action.Read, ProgrammeEntity, {
+					sector: { $exists: false }
+				} as MongoQuery<ProgrammeEntity>);
+				
+
 				can(Action.Create, ProgrammeEntity);
 				can(Action.Update, ProgrammeEntity);
 				can(Action.Delete, ProgrammeEntity);
 				cannot(Action.Validate, ProgrammeEntity);
 
 				// ----------------------------- Project ------------------------------
+
 				user.sector.forEach(userSector => {
 					can(Action.Read, ProjectEntity, {
 						$or: [{ sector: { $elemMatch: { $eq: userSector } } }]
@@ -188,6 +195,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Validate, ProjectEntity);
 				
 				// ----------------------------- Activity ------------------------------
+
 				user.sector.forEach(userSector => {
 					can(Action.Read, ActivityEntity, {
 						$or: [{ sector: { $elemMatch: { $eq: userSector } } }]
@@ -204,14 +212,17 @@ export class CaslAbilityFactory {
 				cannot(Action.Validate, ActivityEntity);
 
 				// ----------------------------- Support ------------------------------
+
 				user.sector.forEach(userSector => {
 					can(Action.Read, SupportEntity, {
 						$or: [{ sector: { $elemMatch: { $eq: userSector } } }]
 					} as MongoQuery<SupportEntity>);
 				});
+
 				can(Action.Read, SupportEntity, {
 					sector: { $exists: false }
 				} as MongoQuery<SupportEntity>);
+
 				can(Action.Create, SupportEntity);
 				can(Action.Update, SupportEntity);
 				can(Action.Delete, SupportEntity);
@@ -235,15 +246,12 @@ export class CaslAbilityFactory {
 				});
 
 				// ----------------------------- Action ------------------------------
+
 				user.sector.forEach(userSector => {
 					can(Action.Read, ActionEntity, {
 						$or: [{ sector: { $elemMatch: { $eq: userSector } } }]
 					} as MongoQuery<ActionEntity>);
 				});
-
-				can(Action.Read, ActionEntity, {
-					sector: { $exists: false }
-				} as MongoQuery<ActionEntity>);
 
 				cannot(Action.Create, ActionEntity);
 				cannot(Action.Update, ActionEntity);
@@ -251,11 +259,16 @@ export class CaslAbilityFactory {
 				cannot(Action.Validate, ActionEntity);
 
 				// ----------------------------- Programme ------------------------------
+
 				user.sector.forEach(userSector => {
 					can(Action.Read, ProgrammeEntity, {
 						$or: [{ sector: { $elemMatch: { $eq: userSector } } }]
 					} as MongoQuery<ProgrammeEntity>);
 				});
+
+				can(Action.Read, ProgrammeEntity, {
+					sector: { $exists: false }
+				} as MongoQuery<ProgrammeEntity>);
 
 				cannot(Action.Create, ProgrammeEntity);
 				cannot(Action.Update, ProgrammeEntity);
@@ -263,6 +276,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Validate, ProgrammeEntity);
 
 				// ----------------------------- Project ------------------------------
+
 				user.sector.forEach(userSector => {
 					can(Action.Read, ProjectEntity, {
 						$or: [{ sector: { $elemMatch: { $eq: userSector } } }]
@@ -279,6 +293,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Validate, ProjectEntity);
 
 				// ----------------------------- Activity ------------------------------
+
 				user.sector.forEach(userSector => {
 					can(Action.Read, ActivityEntity, {
 						$or: [{ sector: { $elemMatch: { $eq: userSector } } }]
@@ -295,6 +310,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Validate, ActivityEntity);
 
 				// ----------------------------- Support ------------------------------
+
 				user.sector.forEach(userSector => {
 					can(Action.Read, SupportEntity, {
 						$or: [{ sector: { $elemMatch: { $eq: userSector } } }]
@@ -311,6 +327,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Validate, SupportEntity);
 
 				// ----------------------------- KPI ------------------------------
+
 				can(Action.Read, KpiEntity);
 				cannot(Action.Create, KpiEntity);
 				cannot(Action.Update, KpiEntity);
