@@ -105,7 +105,7 @@ const UserManagement = () => {
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [totalRowCount, setTotalRowRowCount] = useState<number>();
 
-  const [sortField, setSortField] = useState<string>('name');
+  const [sortField, setSortField] = useState<string>('id');
   const [sortOrder, setSortOrder] = useState<string>('DESC');
 
   // Filters State
@@ -405,7 +405,7 @@ const UserManagement = () => {
         payload.filterAnd.push({
           key: appliedFilterValue.searchBy,
           operation: 'LIKE',
-          value: ['%' + searchValue + '%'],
+          value: `%${searchValue}%`,
         });
       }
 
@@ -450,7 +450,7 @@ const UserManagement = () => {
     if (sorter.columnKey !== undefined) {
       setSortField(sorter.field);
     } else {
-      setSortField('name');
+      setSortField('id');
     }
   };
 
@@ -567,7 +567,6 @@ const UserManagement = () => {
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t('user:viewUsers')}</div>
-        <div className="body-sub-title">{t('user:viewDesc')}</div>
       </div>
       <div className="content-card">
         <Row className="table-actions-section">

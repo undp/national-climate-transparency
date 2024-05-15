@@ -81,7 +81,7 @@ describe('ActionService', () => {
 			linkProgrammesToAction: jest.fn(),
 		};
 		kpiServiceMock = {
-			findKpisByCreatorTypeAndCreatorId: jest.fn(),
+			getKpisByCreatorTypeAndCreatorId: jest.fn(),
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -490,7 +490,7 @@ describe('ActionService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
@@ -553,7 +553,7 @@ describe('ActionService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
@@ -620,7 +620,7 @@ describe('ActionService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
-		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
@@ -676,7 +676,7 @@ describe('ActionService', () => {
 
 
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
-		jest.spyOn(kpiServiceMock, 'findKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2])
+		jest.spyOn(kpiServiceMock, 'getKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2])
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -695,7 +695,7 @@ describe('ActionService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})

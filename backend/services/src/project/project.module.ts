@@ -45,7 +45,7 @@ import { KpiModule } from 'src/kpi/kpi.module';
 		forwardRef(() => ProgrammeModule),
 		FileHandlerModule,
 		ValidationModule,
-		KpiModule
+		forwardRef(() => KpiModule)
 	],
 	providers: [
 		ProjectService

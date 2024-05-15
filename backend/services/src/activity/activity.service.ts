@@ -26,7 +26,8 @@ import { UnlinkActivitiesDto } from "../dtos/unlink.activities.dto";
 import { DataListResponseDto } from "../dtos/data.list.response";
 import { ActivityResponseDto } from "../dtos/activity.response.dto";
 import { ActivityUpdateDto } from "../dtos/activityUpdate.dto";
-import { ValidateDto } from "../dtos/validate.dto";
+import { ValidateDto } from "src/dtos/validate.dto";
+import { KpiService } from "src/kpi/kpi.service";
 import { PayloadValidator } from "../validation/payload.validator";
 
 @Injectable()
@@ -41,6 +42,7 @@ export class ActivityService {
 		private projectService: ProjectService,
 		private programmeService: ProgrammeService,
 		private actionService: ActionService,
+		private kpiService: KpiService,
 		private payloadValidator: PayloadValidator,
 	) { }
 
@@ -104,9 +106,7 @@ export class ActivityService {
 			.transaction(async (em) => {
 				const savedActivity = await em.save<ActivityEntity>(activity);
 				if (savedActivity) {
-					for (const event of eventLog) {
-						await em.save<LogEntity>(event);
-					}
+					em.save<LogEntity>(eventLog);
 				}
 				return savedActivity;
 			})
@@ -127,7 +127,6 @@ export class ActivityService {
 			this.helperService.formatReqMessagesString("activity.createActivitySuccess", []),
 			activ
 		);
-
 	}
 
 	//MARK: Activity Update
@@ -318,9 +317,7 @@ export class ActivityService {
 				if (savedActivity) {
 					// Save event logs
 					if (eventLog.length > 0) {
-						await Promise.all(eventLog.map(async event => {
-							await em.save<LogEntity>(event);
-						}));
+						await em.save<LogEntity>(eventLog);
 					}
 				}
 				return savedActivity;
@@ -470,6 +467,8 @@ export class ActivityService {
 			);
 		}
 
+		// let achievementList: any[] = [];
+
 		for (const activity of activities) {
 			if (activity.parentId || activity.parentType) {
 				throw new HttpException(
@@ -513,7 +512,7 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
-
+		const achievements = [];
 		for (const activity of activities) {
 			if (!activity.parentId && !activity.parentType) {
 				throw new HttpException(
@@ -537,9 +536,12 @@ export class ActivityService {
 					);
 				}
 			}
+
+			const activityAchievements = await this.kpiService.findAchievementsByActivityId(activity.activityId);
+			achievements.push(...activityAchievements);
 		}
 
-		const proj = await this.linkUnlinkService.unlinkActivitiesFromParent(activities, unlinkActivitiesDto, user, this.entityManager);
+		const proj = await this.linkUnlinkService.unlinkActivitiesFromParent(activities, unlinkActivitiesDto, user, this.entityManager, achievements);
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,

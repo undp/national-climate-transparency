@@ -1,5 +1,7 @@
 {
     "addSupportTitle": "Add New Support",
+    "viewSupportTitle": "View Support",
+    "editSupportTitle": "Edit Support",
     "addSupportDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
     "generalInfoTitle": "General Project  Information ",
     "selectActivityTitle": "Select Activity",
@@ -21,6 +23,10 @@
     "exchangeRateTitle": "Exchange Rate (USD/Domestic currency)",
     "add": "ADD",
     "cancel": "CANCEL",
-    "update": "Save",
-    "supportCreationSuccess": "Support Added Successfully"
+    "supportCreationSuccess": "Support Added Successfully",
+    "supportUpdateSuccess": "Support Updated Successfully",
+    "validate": "Validate",
+    "back": "Back",
+    "delete": "Delete",
+    "update": "Save"
   }

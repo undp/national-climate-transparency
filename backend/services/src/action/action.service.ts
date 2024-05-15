@@ -24,6 +24,7 @@ import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { ValidateDto } from "src/dtos/validate.dto";
+import { AchievementEntity } from "src/entities/achievement.entity";
 
 @Injectable()
 export class ActionService {
@@ -47,10 +48,22 @@ export class ActionService {
 
 		action.actionId = 'A' + await this.counterService.incrementCount(CounterType.ACTION, 3);
 
-		const linkedProgrammeList = [];
 		let programmes;
 		if (actionDto.linkedProgrammes) {
 			programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
+
+			// check if programmes are already linked
+			for (const programme of programmes) {
+				if (programme.action) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"programme.programmeAlreadyLinked",
+							[programme.programmeId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
+			}
 		}
 
 		// upload the documents and create the doc array here
@@ -300,7 +313,7 @@ export class ActionService {
 		let kpisUpdated = false;
 
 		if (actionUpdateDto.kpis && actionUpdateDto.kpis.length > 0) {
-			const currentKpis = await this.kpiService.findKpisByCreatorTypeAndCreatorId(EntityType.ACTION, actionUpdate.actionId);
+			const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, actionUpdate.actionId);
 
 			const addedKpis = actionUpdateDto.kpis.filter(kpi => !kpi.kpiId);
 
