@@ -148,18 +148,17 @@ export class ActivityService {
 			);
 		}
 
-		// if (user.sector && user.sector.length > 0 && currentActivity.sectors && currentActivity.sectors.length > 0) {
-		// 	const commonSectors = currentActivity.sectors.filter(sector => user.sector.includes(sector));
-		// 	if (commonSectors.length === 0) {
-		// 		throw new HttpException(
-		// 			this.helperService.formatReqMessagesString(
-		// 				"activity.cannotUpdateNotRelatedActivity",
-		// 				[currentActivity.activityId]
-		// 			),
-		// 			HttpStatus.FORBIDDEN
-		// 		);
-		// 	}
-		// }
+		if (user.sector && user.sector.length > 0 && currentActivity.sector) {
+			if (!user.sector.includes(currentActivity.sector)) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"activity.cannotUpdateNotRelatedActivity",
+						[currentActivity.activityId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+		}
 
 		let isActivityLinked = false;
 		let logEventType;
@@ -464,8 +463,6 @@ export class ActivityService {
 			);
 		}
 
-		// let achievementList: any[] = [];
-
 		for (const activity of activities) {
 			if (activity.parentId || activity.parentType) {
 				throw new HttpException(
@@ -475,6 +472,17 @@ export class ActivityService {
 					),
 					HttpStatus.BAD_REQUEST
 				);
+			}
+			if (user.sector && user.sector.length > 0 && parentEntity.sector) {
+				if (!user.sector.includes(parentEntity.sector)) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"activity.cannotLinkNotRelatedActivity",
+							[activity.activityId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
 			}
 		}
 
@@ -521,7 +529,7 @@ export class ActivityService {
 				);
 			}
 
-			if (user.sector && user.sector.length > 0) {
+			if (user.sector && user.sector.length > 0 && activity.sector) {
 				if (!user.sector.includes(activity.sector)) {
 					throw new HttpException(
 						this.helperService.formatReqMessagesString(
@@ -549,7 +557,7 @@ export class ActivityService {
 
 	//MARK: Activity Query
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
-		const queryBuilder = await this.activityRepo
+		const queryBuilder = this.activityRepo
 			.createQueryBuilder("activity")
 			.where(
 				this.helperService.generateWhereSQL(
@@ -575,7 +583,7 @@ export class ActivityService {
 
 		const final = [];
 		for (const activity of resp[0]) {
-			let migratedData;
+			let migratedData: any;
 			const activityResponseDto: ActivityResponseDto = plainToClass(ActivityResponseDto, activity);
 			if (activity.parentId && activity.parentType) {
 				migratedData = await this.getParentEntity(activity.parentType, activity.parentId)

@@ -99,7 +99,7 @@ export class SupportService {
 
 	//MARK: Support Query
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
-		const queryBuilder = await this.supportRepo
+		const queryBuilder = this.supportRepo
 			.createQueryBuilder("support")
 			.where(
 				this.helperService.generateWhereSQL(
@@ -212,8 +212,8 @@ export class SupportService {
 		currentSupport.requiredAmount = supportUpdateDto.requiredAmount;
 		currentSupport.receivedAmount = supportUpdateDto.receivedAmount;
 		currentSupport.exchangeRate = supportUpdateDto.exchangeRate;
-		currentSupport.requiredAmountDomestic = currentSupport.requiredAmount * currentSupport.exchangeRate;
-		currentSupport.receivedAmountDomestic = currentSupport.receivedAmount * currentSupport.exchangeRate;
+		currentSupport.requiredAmountDomestic = currentSupport.requiredAmount / currentSupport.exchangeRate;
+		currentSupport.receivedAmountDomestic = currentSupport.receivedAmount / currentSupport.exchangeRate;
 
 		const sup = await this.entityManager
 			.transaction(async (em) => {

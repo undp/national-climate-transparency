@@ -74,6 +74,7 @@ export class ProjectService {
 			}
 			project.programme = programme;
 			project.path = `${programme.path}.${programme.programmeId}`;
+			project.sector = programme.sector;
 			this.addEventLogEntry(eventLog, LogEventType.PROJECT_LINKED, EntityType.PROGRAMME, programme.programmeId, user.id, project.projectId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, programme.programmeId);
 		}
@@ -110,7 +111,7 @@ export class ProjectService {
 
 		project.path = "";
 
-		let activities;
+		let activities: any;
 		if (projectDto.linkedActivities) {
 			activities = await this.findAllActivitiesByIds(projectDto.linkedActivities);
 		}
@@ -157,7 +158,7 @@ export class ProjectService {
 	}
 
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
-		const queryBuilder = await this.projectRepo
+		const queryBuilder = this.projectRepo
 			.createQueryBuilder("project")
 			.where(
 				this.helperService.generateWhereSQL(
@@ -196,7 +197,7 @@ export class ProjectService {
 
 	async getProjectViewData(projectId: string, abilityCondition: string) {
 
-		const queryBuilder = await this.projectRepo
+		const queryBuilder = this.projectRepo
 			.createQueryBuilder("project")
 			.where('project.projectId = :projectId', { projectId })
 			.leftJoinAndSelect("project.programme", "programme")
@@ -238,18 +239,17 @@ export class ProjectService {
 			);
 		}
 
-		// if (user.sector && user.sector.length > 0 && currentProject.sectors && currentProject.sectors.length > 0) {
-		// 	const commonSectors = currentProject.sectors.filter(sector => user.sector.includes(sector));
-		// 	if (commonSectors.length === 0) {
-		// 		throw new HttpException(
-		// 			this.helperService.formatReqMessagesString(
-		// 				"project.cannotUpdateNotRelatedProject",
-		// 				[currentProject.projectId]
-		// 			),
-		// 			HttpStatus.FORBIDDEN
-		// 		);
-		// 	}
-		// }
+		if (user.sector && user.sector.length > 0 && currentProject.sector) {
+			if (!user.sector.includes(currentProject.sector)) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.cannotUpdateNotRelatedProject",
+						[currentProject.projectId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+		}
 
 		if (projectUpdateDto.endYear < projectUpdateDto.startYear) {
 			throw new HttpException(
@@ -274,8 +274,11 @@ export class ProjectService {
 			}
 		}
 
-		projectUpdate.path = currentProject.path;
-		projectUpdate.programme = currentProject.programme;
+		if (currentProject.programme) {
+			projectUpdate.path = currentProject.path;
+			projectUpdate.programme = currentProject.programme;
+			projectUpdate.sector = currentProject.sector;
+		}
 
 		// add new documents
 		if (projectUpdateDto.newDocuments) {
@@ -378,9 +381,7 @@ export class ProjectService {
 					// update linked programme
 					if (!currentProject.programme && projectUpdateDto.programmeId) {
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
-						
 					} else if (currentProject.programme && !projectUpdateDto.programmeId) {
-
 						const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
 							currentProject.programme.programmeId, 
 							EntityType.PROGRAMME, 
@@ -388,9 +389,7 @@ export class ProjectService {
 							EntityType.PROJECT
 						);
 						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove);
-
 					} else if (currentProject.programme?.programmeId != projectUpdateDto.programmeId) {
-
 						const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
 							currentProject.programme.programmeId, 
 							EntityType.PROGRAMME, 
@@ -477,6 +476,17 @@ export class ProjectService {
 		}
 
 		for (const project of projects) {
+			if (user.sector && user.sector.length > 0) {
+				if (!user.sector.includes(programme.sector)) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"project.cannotLinkNotRelatedProject",
+							[programme.programmeId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
+			}
 			if (project.programme) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -522,18 +532,17 @@ export class ProjectService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
-			// if (user.sector && user.sector.length > 0) {
-			// 	const commonSectors = project.programme.affectedSectors.filter(sector => user.sector.includes(sector));
-			// 	if (commonSectors.length === 0) {
-			// 		throw new HttpException(
-			// 			this.helperService.formatReqMessagesString(
-			// 				"project.cannotUnlinkNotRelatedProject",
-			// 				[project.projectId]
-			// 			),
-			// 			HttpStatus.BAD_REQUEST
-			// 		);
-			// 	}
-			// }
+			if (user.sector && user.sector.length > 0) {
+				if (!user.sector.includes(project.sector)) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"project.cannotUnlinkNotRelatedProject",
+							[project.projectId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
+			}
 		}
 		const achievementsToRemove = [];
 		for(const project of projects) {

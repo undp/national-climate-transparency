@@ -184,7 +184,7 @@ export class ProgrammeService {
 	}
 
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
-		const queryBuilder = await this.programmeRepo
+		const queryBuilder = this.programmeRepo
 			.createQueryBuilder("programme")
 			.where(
 				this.helperService.generateWhereSQL(
@@ -235,6 +235,18 @@ export class ProgrammeService {
 				),
 				HttpStatus.BAD_REQUEST
 			);
+		}
+
+		if (user.sector && user.sector.length > 0 && currentProgramme.sector) {
+			if (!user.sector.includes(currentProgramme.sector)) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.cannotUpdateNotRelatedProgramme",
+						[currentProgramme.programmeId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
 		}
 
 		if (currentProgramme.action) {
@@ -469,18 +481,17 @@ export class ProgrammeService {
 			);
 		}
 		for (const programme of programmes) {
-			// if (user.sector && user.sector.length > 0) {
-			// 	const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
-			// 	if (commonSectors.length === 0) {
-			// 		throw new HttpException(
-			// 			this.helperService.formatReqMessagesString(
-			// 				"programme.cannotLinkNotRelatedProgrammes",
-			// 				[programme.programmeId]
-			// 			),
-			// 			HttpStatus.BAD_REQUEST
-			// 		);
-			// 	}
-			// }
+			if (user.sector && user.sector.length > 0) {
+				if (!user.sector.includes(action.sector)) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"programme.cannotLinkNotRelatedProgrammes",
+							[programme.programmeId]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				}
+			}
 			if (programme.action) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -491,7 +502,6 @@ export class ProgrammeService {
 				);
 			}
 		}
-		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
 		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, user, this.entityManager);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
@@ -518,18 +528,17 @@ export class ProgrammeService {
 		}
 
 		const programme = programmes[0];
-		// for (const programme of programmes) {
+
 		if (user.sector && user.sector.length > 0) {
-			// const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
-			// if (commonSectors.length === 0) {
-			// 	throw new HttpException(
-			// 		this.helperService.formatReqMessagesString(
-			// 			"programme.cannotUnlinkNotRelatedProgrammes",
-			// 			[programme.programmeId]
-			// 		),
-			// 		HttpStatus.BAD_REQUEST
-			// 	);
-			// }
+			if (!user.sector.includes(programme.sector)) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.cannotUnlinkNotRelatedProgrammes",
+						[programme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
 			if (!programme.action || programme.action == null) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(

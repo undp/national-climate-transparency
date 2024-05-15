@@ -200,7 +200,7 @@ export class ActionService {
 
 	async getActionViewData(actionId: string) {
 
-		const queryBuilder = await this.actionRepo
+		const queryBuilder = this.actionRepo
 			.createQueryBuilder("action")
 			.where('action.actionId = :actionId', { actionId })
 			.leftJoinAndMapOne(
@@ -226,7 +226,7 @@ export class ActionService {
 	}
 
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
-		const queryBuilder = await this.actionRepo
+		const queryBuilder = this.actionRepo
 			.createQueryBuilder("action")
 			.where(
 				this.helperService.generateWhereSQL(

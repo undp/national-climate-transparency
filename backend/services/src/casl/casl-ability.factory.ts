@@ -25,8 +25,6 @@ type Subjects = InferSubjects<typeof EntitySubject> | "all";
 export type AppAbility = MongoAbility<[Action, Subjects]>;
 export const createAppAbility = createMongoAbility as CreateAbility<AppAbility>;
 
-const unAuthErrorMessage = "This action is unauthorised";
-
 @Injectable()
 export class CaslAbilityFactory {
 	createForUser(user: User) {
