@@ -299,7 +299,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               programmeId: programmeData.programmeId,
               programmeTitle: programmeData.title,
               instrTypes: programmeData.instrumentType,
-              sectorsAffected: programmeData.affectedSectors,
+              sector: programmeData.sector,
               subSectorsAffected: programmeData.affectedSubSector,
               nationalImplementor: programmeData.nationalImplementor,
             });
@@ -831,15 +831,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('sectorsAffectedHeader')}</label>}
-                    name="sectorsAffected"
+                    name="sector"
                   >
-                    <Select
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      mode="multiple"
-                      allowClear
-                      disabled
-                    ></Select>
+                    <Select size="large" style={{ fontSize: inputFontSize }} disabled></Select>
                   </Form.Item>
                 </Col>
                 <Col span={6}>

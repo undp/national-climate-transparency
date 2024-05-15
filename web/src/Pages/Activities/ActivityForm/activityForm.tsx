@@ -153,18 +153,18 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
         if (parentType === 'action') {
           tempMigratedData.description = response.data.description;
-          tempMigratedData.affSectors = response.data.migratedData?.sectorsAffected ?? [];
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
           tempMigratedData.startYear = response.data.startYear;
         } else if (parentType === 'programme') {
           tempMigratedData.description = response.data.description;
           tempMigratedData.recipient = response.data.recipientEntity;
-          tempMigratedData.affSectors = response.data.affectedSectors;
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
           tempMigratedData.affSubSectors = response.data.affectedSubSector;
           tempMigratedData.startYear = response.data.startYear;
         } else {
           tempMigratedData.description = response.data.description;
           tempMigratedData.recipient = response.data.recipientEntities;
-          tempMigratedData.affSectors = response.data.programme?.affectedSectors ?? [];
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
           tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
           tempMigratedData.startYear = response.data.startYear;
           tempMigratedData.type = response.data.type;
@@ -367,7 +367,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         parentDescription: activityMigratedData.description,
         supportType: activityMigratedData.type,
         recipient: activityMigratedData.recipient,
-        affSectors: activityMigratedData.affSectors,
+        sector: activityMigratedData.affSectors,
         affSubSectors: activityMigratedData.affSubSectors,
         startYear: activityMigratedData.startYear,
         endYear: activityMigratedData.endYear,
@@ -768,14 +768,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
-                    name="affSectors"
+                    name="sector"
                   >
-                    <Select
-                      mode="multiple"
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      disabled
-                    ></Select>
+                    <Select size="large" style={{ fontSize: inputFontSize }} disabled></Select>
                   </Form.Item>
                 </Col>
                 {(parentType === 'programme' || parentType === 'project') && (
