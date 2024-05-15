@@ -470,10 +470,10 @@ export class HelperService {
   }
 
 	public async refreshMaterializedViews(entityManager: EntityManager) {
+    await entityManager.query('REFRESH MATERIALIZED VIEW activity_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW project_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW programme_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW action_view_entity;');
-		
 	}
 
   
