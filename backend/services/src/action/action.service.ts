@@ -46,16 +46,14 @@ export class ActionService {
 		const action: ActionEntity = plainToClass(ActionEntity, actionDto);
 		const eventLog = [];
 
-		if (user.sector && user.sector.length > 0 && action.sector) {
-			if (!user.sector.includes(action.sector)) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"activity.cannotCreateNotRelatedAction",
-						[action.actionId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.cannotCreateNotRelatedAction",
+					[action.actionId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		action.actionId = 'A' + await this.counterService.incrementCount(CounterType.ACTION, 3);
@@ -278,16 +276,24 @@ export class ActionService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && currentAction.sector) {
-			if (!user.sector.includes(currentAction.sector)) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"activity.cannotUpdateNotRelatedAction",
-						[currentAction.actionId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentAction.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.permissionDeniedForSector",
+					[currentAction.actionId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, actionUpdate.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.permissionDeniedForSector",
+					[currentAction.actionId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		// Finding children to update their sector value
@@ -442,6 +448,16 @@ export class ActionService {
 					[validateDto.entityId]
 				),
 				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.permissionDeniedForSector",
+					[action.actionId]
+				),
+				HttpStatus.FORBIDDEN
 			);
 		}
 

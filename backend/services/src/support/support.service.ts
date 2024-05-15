@@ -46,16 +46,14 @@ export class SupportService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && activity.sector) {
-			if (!user.sector.includes(activity.sector)) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"support.cannotLinkToNotRelatedActivity",
-						[supportDto.activityId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.cannotLinkToNotRelatedActivity",
+					[supportDto.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		support.requiredAmountDomestic = support.requiredAmount * support.exchangeRate;
@@ -152,16 +150,14 @@ export class SupportService {
 		}
 		const eventLog = [];
 
-		if (user.sector && user.sector.length > 0 && currentSupport.sector) {
-			if (!user.sector.includes(currentSupport.sector)) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"support.cannotUpdateNotRelatedSupport",
-						[currentSupport.supportId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentSupport.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.cannotUpdateNotRelatedSupport",
+					[currentSupport.supportId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		const activity = await this.activityService.findActivityById(supportUpdateDto.activityId);
@@ -175,16 +171,14 @@ export class SupportService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && activity.sector) {
-			if (!user.sector.includes(activity.sector)) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"support.cannotLinkToNotRelatedActivity",
-						[supportUpdateDto.activityId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.cannotLinkToNotRelatedActivity",
+					[supportUpdateDto.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		this.addEventLogEntry(eventLog, LogEventType.SUPPORT_UPDATED, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, supportUpdateDto);
@@ -254,6 +248,16 @@ export class SupportService {
 					[validateDto.entityId]
 				),
 				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, support.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.permissionDeniedForSector",
+					[support.supportId]
+				),
+				HttpStatus.FORBIDDEN
 			);
 		}
 

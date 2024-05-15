@@ -97,6 +97,17 @@ export class ProgrammeService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
+
+			if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.cannotLinkToUnrelatedAction",
+						[action.actionId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+
 			programme.action = action;
 			programme.path = programmeDto.actionId;
 			programme.sector = action.sector;
@@ -237,16 +248,14 @@ export class ProgrammeService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && currentProgramme.sector) {
-			if (!user.sector.includes(currentProgramme.sector)) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.cannotUpdateNotRelatedProgramme",
-						[currentProgramme.programmeId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentProgramme.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.cannotUpdateNotRelatedProgramme",
+					[currentProgramme.programmeId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		if (currentProgramme.action) {
@@ -413,6 +422,16 @@ export class ProgrammeService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.cannotLinkToUnrelatedAction",
+					[updatedProgramme.programmeId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
 		
 		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, [updatedProgramme], actionId, user, em);
 
@@ -469,6 +488,16 @@ export class ProgrammeService {
 			);
 		}
 
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.cannotLinkToNotRelatedAction",
+					[action.actionId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
 		const programmes = await this.findAllProgrammeByIds(linkProgrammesDto.programmes);
 
 		if (!programmes || programmes.length <= 0) {
@@ -481,17 +510,6 @@ export class ProgrammeService {
 			);
 		}
 		for (const programme of programmes) {
-			if (user.sector && user.sector.length > 0) {
-				if (!user.sector.includes(action.sector)) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"programme.cannotLinkNotRelatedProgrammes",
-							[programme.programmeId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				}
-			}
 			if (programme.action) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -529,25 +547,25 @@ export class ProgrammeService {
 
 		const programme = programmes[0];
 
-		if (user.sector && user.sector.length > 0) {
-			if (!user.sector.includes(programme.sector)) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.cannotUnlinkNotRelatedProgrammes",
-						[programme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
-			if (!programme.action || programme.action == null) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.programmeIsNotLinked",
-						[programme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.cannotUnlinkNotRelatedProgrammes",
+					[programme.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!programme.action || programme.action == null) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeIsNotLinked",
+					[programme.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
 		}
 
 		const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
@@ -583,6 +601,16 @@ export class ProgrammeService {
 					[validateDto.entityId]
 				),
 				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.permissionDeniedForSector",
+					[programme.programmeId]
+				),
+				HttpStatus.FORBIDDEN
 			);
 		}
 

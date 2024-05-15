@@ -72,6 +72,17 @@ export class ProjectService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
+
+			if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.cannotLinkToUnrelatedProgramme",
+						[programme.programmeId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+
 			project.programme = programme;
 			project.path = `${programme.path}.${programme.programmeId}`;
 			project.sector = programme.sector;
@@ -239,16 +250,14 @@ export class ProjectService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && currentProject.sector) {
-			if (!user.sector.includes(currentProject.sector)) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"project.cannotUpdateNotRelatedProject",
-						[currentProject.projectId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentProject.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.cannotUpdateNotRelatedProject",
+					[currentProject.projectId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		if (projectUpdateDto.endYear < projectUpdateDto.startYear) {
@@ -270,6 +279,15 @@ export class ProjectService {
 						[projectUpdateDto.programmeId]
 					),
 					HttpStatus.BAD_REQUEST
+				);
+			}
+			if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.cannotLinkToNotRelatedProgramme",
+						[currentProject.projectId]
+					),
+					HttpStatus.FORBIDDEN
 				);
 			}
 		}
@@ -463,6 +481,16 @@ export class ProjectService {
 			);
 		}
 
+		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.cannotLinkToNotRelatedProgramme",
+					[programme.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
 		const projects = await this.findAllProjectsByIds(linkProjectsDto.projectIds);
 
 		if (!projects || projects.length <= 0) {
@@ -476,17 +504,6 @@ export class ProjectService {
 		}
 
 		for (const project of projects) {
-			if (user.sector && user.sector.length > 0) {
-				if (!user.sector.includes(programme.sector)) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"project.cannotLinkNotRelatedProject",
-							[programme.programmeId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				}
-			}
 			if (project.programme) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -497,6 +514,7 @@ export class ProjectService {
 				);
 			}
 		}
+
 		const proj = await this.linkUnlinkService.linkProjectsToProgramme(programme, projects, linkProjectsDto.programmeId, user, this.entityManager);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
@@ -532,18 +550,18 @@ export class ProjectService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
-			if (user.sector && user.sector.length > 0) {
-				if (!user.sector.includes(project.sector)) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"project.cannotUnlinkNotRelatedProject",
-							[project.projectId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				}
+
+			if (!this.helperService.doesUserHaveSectorPermission(user, project.sector)){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.cannotUnlinkNotRelatedProject",
+						[project.projectId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
 			}
 		}
+		
 		const achievementsToRemove = [];
 		for(const project of projects) {
 			const projectAchievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
@@ -616,6 +634,16 @@ export class ProjectService {
 					[validateDto.entityId]
 				),
 				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, project.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.permissionDeniedForSector",
+					[project.projectId]
+				),
+				HttpStatus.FORBIDDEN
 			);
 		}
 
