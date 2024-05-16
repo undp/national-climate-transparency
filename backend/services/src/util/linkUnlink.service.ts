@@ -149,51 +149,49 @@ export class LinkUnlinkService {
 	}
 
 	async updateActionChildrenSector(
-		children: ProgrammeEntity[],
+		children: {
+			haveChildren: boolean; 
+			programmeChildren: ProgrammeEntity[]; 
+			projectChildren: ProjectEntity[]; 
+			activityChildren: ActivityEntity[]},
 		newSector: Sector,
 		entityManager: EntityManager
 	) {
 		await entityManager
 			.transaction(async (em) => {
-				for (const programme of children) {
 
+				const programmes = []
+				for (const programme of children.programmeChildren) {
 					programme.sector = newSector;
-
-					const linkedProgramme = await em.save<ProgrammeEntity>(programme);
-
-					if (linkedProgramme) {
-
-						if (programme.activities && programme.activities.length > 0) {
-							const activities = [];
-							// update each activity's path that are directly linked to the programme
-							for (const activity of programme.activities) {
-								activity.sector = newSector;
-								activities.push(activity);
-							}
-							await em.save<ActivityEntity>(activities)
-						}
-						if (programme.projects && programme.projects.length > 0) {
-							const projects = [];
-							for (const project of programme.projects) {
-								// update project's path
-								project.sector = newSector;
-								projects.push(project);
-
-								// update each activity's path that are linked to the project
-								if (project.activities && project.activities.length > 0) {
-									const activities = [];
-									for (const activity of project.activities) {
-										activity.sector = newSector;
-										activities.push(activity);
-									}
-									await em.save<ActivityEntity>(activities)
-								}
-
-							}
-							await em.save<ProjectEntity>(projects)
-						}
-					}
+					programmes.push(programme)
 				}
+
+				await em.save<ProgrammeEntity>(programmes);
+
+				const projects = []
+				for (const project of children.projectChildren) {
+					project.sector = newSector;
+					projects.push(project)
+				}
+
+				await em.save<ProjectEntity>(projects);
+
+				const activities = []
+				for (const activity of children.activityChildren) {
+					activity.sector = newSector;
+					activities.push(activity)
+
+					const supports = []
+					for (const support of activity.support) {
+						support.sector = newSector;
+						supports.push(support)
+					}
+
+					await em.save<SupportEntity>(supports);
+				}
+
+				await em.save<ActivityEntity>(activities);
+				
 			});
 	}
 

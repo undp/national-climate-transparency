@@ -24,7 +24,8 @@ import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { ValidateDto } from "src/dtos/validate.dto";
-import { AchievementEntity } from "src/entities/achievement.entity";
+import { ProjectEntity } from "src/entities/project.entity";
+import { SupportEntity } from "src/entities/support.entity";
 
 @Injectable()
 export class ActionService {
@@ -32,6 +33,8 @@ export class ActionService {
 		@InjectEntityManager() private entityManager: EntityManager,
 		@InjectRepository(ActionEntity) private actionRepo: Repository<ActionEntity>,
 		@InjectRepository(ProgrammeEntity) private programmeRepo: Repository<ProgrammeEntity>,
+		@InjectRepository(ProjectEntity) private projectRepo: Repository<ProjectEntity>,
+		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
 		private counterService: CounterService,
 		private helperService: HelperService,
 		private fileUploadService: FileUploadService,
@@ -182,24 +185,28 @@ export class ActionService {
 	}
 
 	async findAllActionChildren(actionId: string) {
-		return await this.programmeRepo.createQueryBuilder('programme')
-			.leftJoinAndSelect('programme.projects', 'project')
-			.leftJoinAndMapMany(
-				"programme.activities",
-				ActivityEntity,
-				"programmeActivity", // Unique alias for programme activities
-				"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
-				{ programme: EntityType.PROGRAMME }
-			)
-			.leftJoinAndMapMany(
-				"project.activities",
-				ActivityEntity,
-				"projectActivity", // Unique alias for project activities
-				"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
-				{ project: EntityType.PROJECT }
-			)
-			.where('programme.actionId IN (:...actionIds)', { actionIds: [actionId] })
+
+		let haveChildren: boolean = false;
+
+		const programmeChildren: ProgrammeEntity[] = 
+			await this.programmeRepo.createQueryBuilder('programme')
+			.where('programme.actionId = :actionId', { actionId })
 			.getMany();
+
+		const projectChildren: ProjectEntity[] = 
+			await this.projectRepo.createQueryBuilder('project')
+			.where("subpath(project.path, 0, 1) = :actionId", { actionId })
+			.getMany();
+
+		const activityChildren: ActivityEntity[] = 
+			await this.activityRepo.createQueryBuilder('activity')
+			.leftJoinAndSelect('activity.support', 'support')
+			.where("subpath(activity.path, 0, 1) = :actionId", { actionId })
+			.getMany();
+
+		haveChildren = (programmeChildren.length > 0) || (projectChildren.length > 0) || (activityChildren.length > 0) ?  true : false;
+		
+		return {haveChildren: haveChildren, programmeChildren: programmeChildren, projectChildren: projectChildren, activityChildren: activityChildren};
 	}
 
 	async getActionViewData(actionId: string) {
@@ -399,8 +406,7 @@ export class ActionService {
 				const savedAction = await em.save<ActionEntity>(actionUpdate);
 				if (savedAction) {
 					// Update children sector
-					if (children.length > 0 && (actionUpdate.sector !== actionUpdate.sector)){
-						console.log(`Updating all the children of the Action ${actionUpdate.actionId}`);
+					if (children.haveChildren && (actionUpdate.sector !== currentAction.sector)){
 						await this.linkUnlinkService.updateActionChildrenSector(children, actionUpdate.sector, em);
 					}
 

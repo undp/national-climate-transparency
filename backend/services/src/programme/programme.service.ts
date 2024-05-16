@@ -264,12 +264,10 @@ export class ProgrammeService {
 			);
 		}
 
-		if (currentProgramme.action) {
-			programmeUpdate.action = currentProgramme.action;
-			programmeUpdate.path = currentProgramme.path;
-			programmeUpdate.sector = currentProgramme.sector;
-		}
-
+		programmeUpdate.action = currentProgramme.action;
+		programmeUpdate.path = currentProgramme.path;
+		programmeUpdate.sector = currentProgramme.sector;
+		
 		// Document update resolve
 
 		let documents = (currentProgramme.documents && currentProgramme.documents.length > 0) ? [...currentProgramme.documents] : [];

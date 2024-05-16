@@ -61,6 +61,8 @@ export class ProjectService {
 			);
 		}
 
+		project.path = "_._"
+
 		if (projectDto.programmeId) {
 			const programme = await this.programmeService.findProgrammeById(projectDto.programmeId);
 			if (!programme) {
@@ -119,8 +121,6 @@ export class ProjectService {
 			// Add event log entry after the loop completes
 			this.addEventLogEntry(eventLog, LogEventType.KPI_ADDED, EntityType.PROJECT, project.projectId, user.id, kpiList);
 		}
-
-		project.path = "";
 
 		let activities: any;
 		if (projectDto.linkedActivities) {
@@ -303,12 +303,10 @@ export class ProjectService {
 			}
 		}
 
-		if (currentProject.programme) {
-			projectUpdate.path = currentProject.path;
-			projectUpdate.programme = currentProject.programme;
-			projectUpdate.sector = currentProject.sector;
-		}
-
+		projectUpdate.path = currentProject.path;
+		projectUpdate.programme = currentProject.programme;
+		projectUpdate.sector = currentProject.sector;
+		
 		// add new documents
 		if (projectUpdateDto.newDocuments) {
 			const documents = [];

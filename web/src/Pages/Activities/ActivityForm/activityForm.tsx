@@ -221,9 +221,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               description: entityData.description,
               status: entityData.status,
               measure: entityData.measure,
-              nationalImplementingEntity: entityData.nationalImplementingEntity ?? [],
-              internationalImplementingEntity: entityData.internationalImplementingEntity ?? [],
-              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy ?? 'No',
+              nationalImplementingEntity: entityData.nationalImplementingEntity ?? undefined,
+              internationalImplementingEntity:
+                entityData.internationalImplementingEntity ?? undefined,
+              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy,
               meansOfImplementation: entityData.meansOfImplementation,
               technologyType: entityData.technologyType,
               etfDescription: entityData.etfDescription,
@@ -309,21 +310,35 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchSupportData = async () => {
       try {
-        const response: any = await post('national/supports/query', {});
-
         const tempSupportData: SupportData[] = [];
+
+        const payload = {
+          filterAnd: [
+            {
+              key: 'activityId',
+              operation: '=',
+              value: entId,
+            },
+          ],
+          sort: {
+            key: 'supportId',
+            order: 'ASC',
+          },
+        };
+
+        const response: any = await post('national/supports/query', payload);
 
         response.data.forEach((sup: any, index: number) => {
           tempSupportData.push({
             key: index.toString(),
             supportId: sup.supportId,
             financeNature: sup.financeNature,
-            direction: sup.financeDirection,
-            finInstrument: sup.finInstrument,
-            estimatedUSD: sup.estimatedUSD,
-            estimatedLC: sup.estimatedLCL,
-            recievedUSD: sup.receivedUSD,
-            recievedLC: sup.receivedLCL,
+            direction: sup.direction,
+            finInstrument: sup.nationalFinancialInstrument,
+            estimatedUSD: sup.requiredAmount,
+            estimatedLC: sup.requiredAmountDomestic,
+            recievedUSD: sup.receivedAmount,
+            recievedLC: sup.receivedAmountDomestic,
           });
         });
         setSupportData(tempSupportData);
