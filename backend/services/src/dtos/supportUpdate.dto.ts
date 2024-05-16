@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf } from "class-validator";
+import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { FinanceNature, FinancingStatus, IntFinInstrument, IntSource, IntSupChannel, NatFinInstrument, SupportDirection } from "src/enums/support.enum";
 import { IsTwoDecimalPoints } from "src/util/twoDecimalPointNumber.decorator";
 
@@ -37,6 +37,7 @@ export class SupportUpdateDto {
 	})
 	financeNature: FinanceNature;
 
+	@IsOptional()
 	@IsNotEmpty()
 	@IsEnum(IntSupChannel, {
 		each: true,
@@ -53,6 +54,7 @@ export class SupportUpdateDto {
 	@ApiProperty()
 	otherInternationalSupportChannel: string;
 
+	@IsOptional()
 	@IsNotEmpty()
 	@IsEnum(IntFinInstrument, {
 		each: true,
@@ -69,6 +71,7 @@ export class SupportUpdateDto {
 	@ApiProperty()
 	otherInternationalFinancialInstrument: string;
 
+	@IsOptional()
 	@IsNotEmpty()
 	@IsEnum(NatFinInstrument, {
 		each: true,
@@ -86,6 +89,7 @@ export class SupportUpdateDto {
 	@ApiPropertyOptional()
 	otherNationalFinancialInstrument: string;
 
+	@IsOptional()
 	@IsNotEmpty()
 	@IsEnum(FinancingStatus, {
 		each: true,
@@ -97,13 +101,19 @@ export class SupportUpdateDto {
 	})
 	financingStatus: FinancingStatus;
 
-	@ValidateIf((c) => c.internationalSource)
-	@IsNotEmpty()
-	@ApiPropertyOptional({ enum: IntSource })
-	@IsEnum(IntSource, {
-		message: "Invalid International Source. Supported following:" + Object.values(IntSource),
-	})
-	internationalSource: IntSource;
+	@IsArray()
+    @ArrayMinSize(1)
+    @MaxLength(100, { each: true })
+    @IsNotEmpty({ each: true })
+    @IsEnum(IntSource, {
+        each: true,
+        message: 'Invalid International Source. Supported followings:' + Object.values(IntSource)
+    })
+    @ApiProperty({
+      type: [String],
+      enum: Object.values(IntSource),
+    })
+    internationalSource: IntSource[];
 
 	@IsOptional()
 	@IsNotEmpty()

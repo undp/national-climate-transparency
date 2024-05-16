@@ -115,7 +115,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               nationalFinancialInstrument: entityData.nationalFinancialInstrument,
               otherNationalFinancialInstrument: entityData.otherNationalFinancialInstrument,
               financingStatus: entityData.financingStatus,
-              internationalSource: entityData.internationalSource,
+              internationalSource: entityData.internationalSource ?? undefined,
               nationalSource: entityData.nationalSource,
               requiredAmount: entityData.requiredAmount,
               receivedAmount: entityData.receivedAmount,
@@ -478,6 +478,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 >
                   <Select
                     size="large"
+                    mode="multiple"
                     style={{ fontSize: inputFontSize }}
                     allowClear
                     disabled={isView}
