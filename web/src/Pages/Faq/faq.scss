@@ -18,7 +18,6 @@
     .questions {
         color: #3A3541;
         opacity: 0.8;
-        margin-bottom: 25px;
         font-weight: bold;
         font-size: 14px;
         background-color: #3A3541;
@@ -40,9 +39,27 @@
         .answers {
             color: #3A3541;
             opacity: 0.8;
-            margin-bottom: 25px;
             font-weight: normal;
             font-size: 14px;
+            margin-left: 25px;
+        }
+    }
+
+    .documents {
+        display: flex;
+        justify-content: space-between;
+        width: 60%;
+        align-items: center;
+    }
+
+    .videos {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: center;
+
+        iframe{
+            cursor: pointer;
         }
     }
 

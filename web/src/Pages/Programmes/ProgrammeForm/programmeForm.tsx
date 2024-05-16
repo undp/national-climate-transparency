@@ -635,7 +635,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     >
                       {actionList.map((action) => (
                         <Option key={action.id} value={action.id}>
-                          {action.title}
+                          {action.id}
                         </Option>
                       ))}
                     </Select>
