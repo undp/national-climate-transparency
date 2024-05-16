@@ -101,7 +101,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Initialization Logic
 
   const availableSectors: string[] = [];
-  const userSectors = userInfoState?.userSectors?.split(',') ?? [];
+  const userSectors = userInfoState?.userSectors ?? [];
   const yearsList: number[] = [];
 
   for (let year = 2013; year <= 2050; year++) {
