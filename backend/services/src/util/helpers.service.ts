@@ -470,13 +470,17 @@ export class HelperService {
   }
 
 	public async refreshMaterializedViews(entityManager: EntityManager) {
+    await entityManager.query(`
+                              UPDATE support
+                              SET sector = activity.sector::VARCHAR
+                              FROM activity
+                              WHERE support."activityId" = activity."activityId";`);
     await entityManager.query('REFRESH MATERIALIZED VIEW activity_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW project_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW programme_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW action_view_entity;');
 	}
 
-  
   public getEmailTemplateMessage(template: string, data, isSubject: boolean) :string{
     if (template == undefined) {
         return template;

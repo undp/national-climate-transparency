@@ -166,6 +166,7 @@ export class ProgrammeService {
 			});
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
+
 		return new DataResponseMessageDto(
 			HttpStatus.CREATED,
 			this.helperService.formatReqMessagesString("programme.createProgrammeSuccess", []),
@@ -243,7 +244,7 @@ export class ProgrammeService {
 		const programmeUpdate: ProgrammeEntity = plainToClass(ProgrammeEntity, programmeUpdateDto);
 		const eventLog = [];
 
-		const currentProgramme = await this.findProgrammeWithLinkedActionByProgrammeId(programmeUpdateDto.programmeId);
+		const currentProgramme = await this.findProgrammeWithParentChildren(programmeUpdateDto.programmeId);
 		if (!currentProgramme) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -267,6 +268,8 @@ export class ProgrammeService {
 		programmeUpdate.action = currentProgramme.action;
 		programmeUpdate.path = currentProgramme.path;
 		programmeUpdate.sector = currentProgramme.sector;
+		programmeUpdate.projects = currentProgramme.projects;
+		programmeUpdate.activities = currentProgramme.activities;
 		
 		// Document update resolve
 
@@ -688,9 +691,24 @@ export class ProgrammeService {
 		})
 	}
 
-	async findProgrammeWithLinkedActionByProgrammeId(programmeId: string) {
+	async findProgrammeWithParentChildren(programmeId: string) {
 		return await this.programmeRepo.createQueryBuilder('programme')
 		.leftJoinAndSelect('programme.action', 'action')
+		.leftJoinAndSelect('programme.projects', 'project')
+		.leftJoinAndMapMany(
+			"programme.activities",
+			ActivityEntity,
+			"programmeActivity", // Unique alias for programme activities
+			"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
+			{ programme: EntityType.PROGRAMME }
+		)
+		.leftJoinAndMapMany(
+			"project.activities",
+			ActivityEntity,
+			"projectActivity", // Unique alias for project activities
+			"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
+			{ project: EntityType.PROJECT }
+		)
 		.where('programme.programmeId = :programmeId', { programmeId })
 		.getOne();
 	}

@@ -250,7 +250,8 @@ export class ProjectService {
 		const eventLog = [];
 		let programme;
 
-		const currentProject = await this.findProjectWithLinkedProgrammeByProjectId(projectUpdateDto.projectId);
+		const currentProject = await this.findProjectWithParentAndChildren(projectUpdateDto.projectId);
+		
 		if (!currentProject) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -306,6 +307,7 @@ export class ProjectService {
 		projectUpdate.path = currentProject.path;
 		projectUpdate.programme = currentProject.programme;
 		projectUpdate.sector = currentProject.sector;
+		projectUpdate.activities = currentProject.activities;
 		
 		// add new documents
 		if (projectUpdateDto.newDocuments) {
@@ -627,9 +629,22 @@ export class ProjectService {
 		})
 	}
 
-	async findProjectWithLinkedProgrammeByProjectId(projectId: string) {
+	async findProjectWithParentAndChildren(projectId: string) {
 		return await this.projectRepo.createQueryBuilder('project')
 			.leftJoinAndSelect('project.programme', 'programme')
+			.leftJoinAndMapMany(
+				"project.activities",
+				ActivityEntity,
+				"activity",
+				"activity.parentType = :project AND activity.parentId = project.projectId",
+				{ project: EntityType.PROJECT }
+			)
+			.leftJoinAndMapMany(
+				"activity.support",
+				SupportEntity, 
+				"support", 
+				"support.activityId = activity.activityId" 
+			)
 			.where('project.projectId = :projectId', { projectId })
 			.getOne();
 	}
