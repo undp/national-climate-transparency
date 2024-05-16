@@ -282,6 +282,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
+      } else {
+        form.setFieldsValue({
+          actionTitle: undefined,
+          natAnchor: undefined,
+        });
       }
     };
     fetchConnectedAction();
@@ -315,6 +320,17 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
+      } else {
+        form.setFieldsValue({
+          programmeId: undefined,
+          programmeTitle: undefined,
+          instrTypes: undefined,
+          sector: undefined,
+          subSectorsAffected: undefined,
+          nationalImplementor: undefined,
+        });
+
+        setProgrammeConnectedAction(undefined);
       }
     };
     fetchConnectedProgramme();

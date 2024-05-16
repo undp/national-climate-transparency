@@ -11,4 +11,5 @@ export type ActionSelectData = {
   id: string;
   title: string;
   instrumentType: string;
+  sector: string;
 };
