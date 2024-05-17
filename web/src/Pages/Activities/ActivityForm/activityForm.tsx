@@ -846,7 +846,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       >
                         {parentList.map((parent) => (
                           <Option key={parent.id} value={parent.id}>
-                            {parent.title}
+                            {parent.id}
                           </Option>
                         ))}
                       </Select>
