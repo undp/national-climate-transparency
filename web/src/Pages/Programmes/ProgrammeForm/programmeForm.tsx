@@ -7,7 +7,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
-import { Sector } from '../../../Enums/sector.enum';
 import { SubSector, NatImplementor } from '../../../Enums/shared.enum';
 import { ProgrammeStatus } from '../../../Enums/programme.enum';
 import { Layers } from 'react-bootstrap-icons';
@@ -25,10 +24,7 @@ import { Action } from '../../../Enums/action.enum';
 import { ProgrammeEntity } from '../../../Entities/programme';
 import { useAbilityContext } from '../../../Casl/Can';
 import { getProjectTableColumns } from '../../../Definitions/columns/projectColumns';
-// import { ActivityData } from '../../../Definitions/activityDefinitions';
-// import { SupportData } from '../../../Definitions/supportDefinitions';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
-import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -46,7 +42,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
   const ability = useAbilityContext();
-  const { userInfoState } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -105,18 +100,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Initialization Logic
 
-  const availableSectors: string[] = [];
-  const userSectors = userInfoState?.userSectors?.split(',') ?? [];
   const yearsList: number[] = [];
 
   for (let year = 2013; year <= 2050; year++) {
     yearsList.push(year);
-  }
-
-  if (userInfoState?.userRole === 'Root' || userInfoState?.userSectors === 'Admin') {
-    Object.values(Sector).map((sector) => availableSectors.push(sector));
-  } else {
-    userSectors.map((sector) => availableSectors.push(sector));
   }
 
   useEffect(() => {
@@ -131,6 +118,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           id: action.actionId,
           title: action.title,
           instrumentType: action.instrumentType,
+          sector: action.sector,
         });
       });
       setActionList(tempActionData);
@@ -174,7 +162,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               programmeStatus: entityData.programmeStatus,
               startYear: entityData.startYear,
               natAnchor: entityData.natAnchor,
-              affectedSectors: entityData.affectedSectors,
+              sector: entityData.sector,
               affectedSubSector: entityData.affectedSubSector,
               natImplementor: entityData.nationalImplementor,
               investment: entityData.investment,
@@ -630,6 +618,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                         form.setFieldsValue({
                           instrumentType: actionList.find((action) => action.id === value)
                             ?.instrumentType,
+                          sector: actionList.find((action) => action.id === value)?.sector,
                         });
                       }}
                     >
@@ -722,23 +711,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('sectorsAffTitle')}</label>}
-                    name="affectedSectors"
-                    rules={[validation.required]}
+                    name="sector"
                   >
                     <Select
                       size="large"
                       style={{ fontSize: inputFontSize }}
-                      mode="multiple"
-                      allowClear
-                      disabled={isView}
-                      showSearch
-                    >
-                      {availableSectors.map((sector) => (
-                        <Option key={sector} value={sector}>
-                          {sector}
-                        </Option>
-                      ))}
-                    </Select>
+                      disabled={true}
+                    ></Select>
                   </Form.Item>
                 </Col>
                 <Col span={6}>

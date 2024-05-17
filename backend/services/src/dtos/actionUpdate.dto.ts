@@ -5,6 +5,7 @@ import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
 import { KpiUpdateDto } from "./kpi.update.dto";
 import { KpiUnits } from "../enums/kpi.enum";
+import { Sector } from "src/enums/sector.enum";
 
 export class ActionUpdateDto {
 
@@ -27,6 +28,17 @@ export class ActionUpdateDto {
 	@IsString()
 	@ApiProperty()
 	objective: string;
+
+	@IsNotEmpty()
+	@IsEnum(Sector, {
+		each: true,
+		message: 'Invalid Affected Sector. Supported following types:' + Object.values(Sector)
+	})
+	@ApiProperty({
+		type: [String],
+		enum: Object.values(Sector),
+	})
+	sector: Sector;
 
 	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
@@ -93,10 +105,6 @@ export class ActionUpdateDto {
 	)
 	removedDocuments: string[];
 
-	// @IsOptional()
-	// @ApiPropertyOptional()
-	// linkedProgrammes: string[];
-
 	@IsOptional()
 	@ValidateNested()
 	@ApiPropertyOptional(
@@ -115,6 +123,5 @@ export class ActionUpdateDto {
 		}
 	)
 	kpis: KpiUpdateDto[];
-
 
 }

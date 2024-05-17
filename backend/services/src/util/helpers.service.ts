@@ -8,6 +8,8 @@ import { I18nService } from "nestjs-i18n";
 import { programmeStatusRequestDto } from "../dtos/programmeStatus.request.dto";
 import { EntityManager } from "typeorm";
 import { SubpathDto } from "../dtos/subpath.dto";
+import { User } from "../entities/user.entity";
+import { Sector } from "src/enums/sector.enum";
 
 @Injectable()
 export class HelperService {
@@ -447,7 +449,7 @@ export class HelperService {
           } ${value}`;
         } else if (operator == "$elemMatch") {
           return `'${mongoQuery["$elemMatch"]["$eq"]}' ${
-            isNot ? " <> ANY " : " =ANY "
+            isNot ? " <> ANY " : " = "
           }(${table ? table + "." : ""}"${key}")`;
         } else if (operator == "$exists") {
 					const value = mongoQuery["$exists"]
@@ -468,13 +470,17 @@ export class HelperService {
   }
 
 	public async refreshMaterializedViews(entityManager: EntityManager) {
+    await entityManager.query(`
+                              UPDATE support
+                              SET sector = activity.sector::VARCHAR
+                              FROM activity
+                              WHERE support."activityId" = activity."activityId";`);
+    await entityManager.query('REFRESH MATERIALIZED VIEW activity_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW project_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW programme_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW action_view_entity;');
-		
 	}
 
-  
   public getEmailTemplateMessage(template: string, data, isSubject: boolean) :string{
     if (template == undefined) {
         return template;
@@ -515,6 +521,16 @@ public formatTimestamp(timestamp: any) {
 public generateSubPathSQL(query: SubpathDto) {
   let whereSQL = `subpath(${query.ltree}, ${query.startLevel}, ${query.traverseDepth}) = '${query.match}'`;
   return whereSQL;
+}
+
+public doesUserHaveSectorPermission(user: User, sectorScope: Sector) {
+  let can: boolean = true;
+  if (user.sector && user.sector.length > 0 && sectorScope) {
+    if (!user.sector.includes(sectorScope)) {
+      can = false
+    }
+  }
+  return can;
 }
 
   // public async uploadCompanyLogoS3(companyId: number, companyLogo: string) {

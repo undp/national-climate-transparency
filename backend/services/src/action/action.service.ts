@@ -24,7 +24,8 @@ import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { ValidateDto } from "src/dtos/validate.dto";
-import { AchievementEntity } from "src/entities/achievement.entity";
+import { ProjectEntity } from "src/entities/project.entity";
+import { SupportEntity } from "src/entities/support.entity";
 
 @Injectable()
 export class ActionService {
@@ -32,6 +33,8 @@ export class ActionService {
 		@InjectEntityManager() private entityManager: EntityManager,
 		@InjectRepository(ActionEntity) private actionRepo: Repository<ActionEntity>,
 		@InjectRepository(ProgrammeEntity) private programmeRepo: Repository<ProgrammeEntity>,
+		@InjectRepository(ProjectEntity) private projectRepo: Repository<ProjectEntity>,
+		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
 		private counterService: CounterService,
 		private helperService: HelperService,
 		private fileUploadService: FileUploadService,
@@ -46,18 +49,27 @@ export class ActionService {
 		const action: ActionEntity = plainToClass(ActionEntity, actionDto);
 		const eventLog = [];
 
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.cannotCreateNotRelatedAction",
+					[action.actionId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
 		action.actionId = 'A' + await this.counterService.incrementCount(CounterType.ACTION, 3);
 
-		let programmes;
+		// Checking for programmes having a  parent
+		let programmes: ProgrammeEntity[];
 		if (actionDto.linkedProgrammes) {
 			programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
-
-			// check if programmes are already linked
 			for (const programme of programmes) {
 				if (programme.action) {
 					throw new HttpException(
 						this.helperService.formatReqMessagesString(
-							"programme.programmeAlreadyLinked",
+							"action.programmeAlreadyLinked",
 							[programme.programmeId]
 						),
 						HttpStatus.BAD_REQUEST
@@ -101,8 +113,9 @@ export class ActionService {
 				if (savedAction) {
 					// link programmes here
 					if (programmes && programmes.length > 0) {
-						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, action.actionId, null, user, em);
+						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, action.actionId, user, em);
 					}
+
 					if (actionDto.kpis) {
 						for (const kpi of kpiList) {
 							await em.save<KpiEntity>(kpi);
@@ -171,9 +184,34 @@ export class ActionService {
 			.getMany();
 	}
 
+	async findAllActionChildren(actionId: string) {
+
+		let haveChildren: boolean = false;
+
+		const programmeChildren: ProgrammeEntity[] = 
+			await this.programmeRepo.createQueryBuilder('programme')
+			.where('programme.actionId = :actionId', { actionId })
+			.getMany();
+
+		const projectChildren: ProjectEntity[] = 
+			await this.projectRepo.createQueryBuilder('project')
+			.where("subpath(project.path, 0, 1) = :actionId", { actionId })
+			.getMany();
+
+		const activityChildren: ActivityEntity[] = 
+			await this.activityRepo.createQueryBuilder('activity')
+			.leftJoinAndSelect('activity.support', 'support')
+			.where("subpath(activity.path, 0, 1) = :actionId", { actionId })
+			.getMany();
+
+		haveChildren = (programmeChildren.length > 0) || (projectChildren.length > 0) || (activityChildren.length > 0) ?  true : false;
+		
+		return {haveChildren: haveChildren, programmeChildren: programmeChildren, projectChildren: projectChildren, activityChildren: activityChildren};
+	}
+
 	async getActionViewData(actionId: string) {
 
-		const queryBuilder = await this.actionRepo
+		const queryBuilder = this.actionRepo
 			.createQueryBuilder("action")
 			.where('action.actionId = :actionId', { actionId })
 			.leftJoinAndMapOne(
@@ -199,7 +237,7 @@ export class ActionService {
 	}
 
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
-		const queryBuilder = await this.actionRepo
+		const queryBuilder = this.actionRepo
 			.createQueryBuilder("action")
 			.where(
 				this.helperService.generateWhereSQL(
@@ -251,18 +289,28 @@ export class ActionService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && currentAction.sectors && currentAction.sectors.length > 0) {
-			const commonSectors = currentAction.sectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"activity.cannotUpdateNotRelatedAction",
-						[currentAction.actionId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentAction.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.permissionDeniedForSector",
+					[currentAction.actionId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, actionUpdate.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.permissionDeniedForSector",
+					[currentAction.actionId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		// Finding children to update their sector value
+		const children = await this.findAllActionChildren(actionUpdateDto.actionId);
 
 		// add new documents
 		if (actionUpdateDto.newDocuments) {
@@ -304,8 +352,6 @@ export class ActionService {
 			actionUpdate.documents = actionUpdate.documents ? actionUpdate.documents : currentAction.documents
 			const updatedDocs = actionUpdate.documents.filter(item => !actionUpdateDto.removedDocuments.some(url => url === item.url));
 			actionUpdate.documents = (updatedDocs && updatedDocs.length > 0) ? updatedDocs : null;
-
-
 		}
 
 		const kpiList = [];
@@ -359,6 +405,11 @@ export class ActionService {
 			.transaction(async (em) => {
 				const savedAction = await em.save<ActionEntity>(actionUpdate);
 				if (savedAction) {
+					// Update children sector
+					if (children.haveChildren && (actionUpdate.sector !== currentAction.sector)){
+						await this.linkUnlinkService.updateActionChildrenSector(children, actionUpdate.sector, em);
+					}
+
 					// Save new KPIs
 					if (kpiList.length > 0) {
 						await Promise.all(kpiList.map(async kpi => {
@@ -409,6 +460,16 @@ export class ActionService {
 					[validateDto.entityId]
 				),
 				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.permissionDeniedForSector",
+					[action.actionId]
+				),
+				HttpStatus.FORBIDDEN
 			);
 		}
 

@@ -26,6 +26,8 @@ import { getProgrammeTableColumns } from '../../../Definitions/columns/programme
 import { useAbilityContext } from '../../../Casl/Can';
 import { ActionEntity } from '../../../Entities/action';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
+import { Sector } from '../../../Enums/sector.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -43,6 +45,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
   const ability = useAbilityContext();
+  const { userInfoState } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -97,10 +100,18 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Initialization Logic
 
+  const availableSectors: string[] = [];
+  const userSectors = userInfoState?.userSectors ?? [];
   const yearsList: number[] = [];
 
   for (let year = 2013; year <= 2050; year++) {
     yearsList.push(year);
+  }
+
+  if (userInfoState?.userRole === 'Root' || userInfoState?.userRole === 'Admin') {
+    Object.values(Sector).map((sector) => availableSectors.push(sector));
+  } else {
+    userSectors.map((sector) => availableSectors.push(sector));
   }
 
   useEffect(() => {
@@ -141,6 +152,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               title: entityData.title,
               description: entityData.description,
               objective: entityData.objective,
+              sector: entityData.sector,
               instrumentType: entityData.instrumentType,
               status: entityData.status,
               startYear: entityData.startYear,
@@ -169,7 +181,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               achievedReduction: entityData.migratedData?.achievedGHGReduction,
               expectedReduction: entityData.migratedData?.expectedGHGReduction,
               natImplementer: entityData.migratedData?.natImplementors ?? [],
-              sectorsAffected: entityData.migratedData?.sectorsAffected ?? [],
             });
           }
         } catch {
@@ -251,7 +262,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         type: actionMigratedData.type,
         ghgsAffected: actionMigratedData.ghgsAffected,
         natImplementor: actionMigratedData.natImplementer,
-        sectorsAffected: actionMigratedData.sectorsAffected,
         estimatedInvestment: actionMigratedData.estimatedInvestment,
         achievedReduct: actionMigratedData.achievedReduction,
         expectedReduct: actionMigratedData.expectedReduction,
@@ -274,7 +284,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const tempMigratedData: ActionMigratedData = {
       natImplementer: [],
-      sectorsAffected: [],
       estimatedInvestment: 0,
       type: [],
       achievedReduction: 0,
@@ -315,10 +324,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           tempMigratedData.natImplementer = joinTwoArrays(
             tempMigratedData.natImplementer,
             prg.natImplementor ?? []
-          );
-          tempMigratedData.sectorsAffected = joinTwoArrays(
-            tempMigratedData.sectorsAffected,
-            prg.affectedSectors ?? []
           );
 
           tempMigratedData.estimatedInvestment =
@@ -693,14 +698,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col span={12}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('ghgAffected')}</label>}
-                    name="ghgsAffected"
-                  >
-                    <Input className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
-                <Col span={6}>
-                  <Form.Item
                     label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
                     name="instrumentType"
                     rules={[validation.required]}
@@ -721,7 +718,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col span={12}>
                   <Form.Item
                     label={<label className="form-item-header">{t('actionStatusTitle')}</label>}
                     name="status"
@@ -760,14 +757,22 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('sectorsAffectedTitle')}</label>}
-                    name="sectorsAffected"
+                    name="sector"
+                    rules={[validation.required]}
                   >
                     <Select
                       size="large"
                       style={{ fontSize: inputFontSize }}
-                      mode="multiple"
-                      disabled={true}
-                    ></Select>
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {availableSectors.map((sector) => (
+                        <Option key={sector} value={sector}>
+                          {sector}
+                        </Option>
+                      ))}
+                    </Select>
                   </Form.Item>
                 </Col>
                 <Col span={6}>

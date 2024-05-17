@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf } from "class-validator";
-import { ProjectType } from "src/enums/project.enum";
+import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { FinanceNature, FinancingStatus, IntFinInstrument, IntSource, IntSupChannel, NatFinInstrument, SupportDirection } from "src/enums/support.enum";
 import { IsTwoDecimalPoints } from "src/util/twoDecimalPointNumber.decorator";
 
@@ -35,6 +34,7 @@ export class SupportDto {
 	})
 	financeNature: FinanceNature;
 
+	@IsOptional()
 	@IsNotEmpty()
 	@IsEnum(IntSupChannel, {
 		each: true,
@@ -51,6 +51,7 @@ export class SupportDto {
 	@ApiProperty()
 	otherInternationalSupportChannel: string;
 
+	@IsOptional()
 	@IsNotEmpty()
 	@IsEnum(IntFinInstrument, {
 		each: true,
@@ -67,6 +68,7 @@ export class SupportDto {
 	@ApiProperty()
 	otherInternationalFinancialInstrument: string;
 
+	@IsOptional()
 	@IsNotEmpty()
 	@IsEnum(NatFinInstrument, {
 		each: true,
@@ -84,6 +86,7 @@ export class SupportDto {
 	@ApiPropertyOptional()
 	otherNationalFinancialInstrument: string;
 
+	@IsOptional()
 	@IsNotEmpty()
 	@IsEnum(FinancingStatus, {
 		each: true,
@@ -95,13 +98,19 @@ export class SupportDto {
 	})
 	financingStatus: FinancingStatus;
 
-	@ValidateIf((c) => c.internationalSource)
-	@IsNotEmpty()
-	@ApiPropertyOptional({ enum: IntSource })
-	@IsEnum(IntSource, {
-		message: "Invalid International Source. Supported following:" + Object.values(IntSource),
-	})
-	internationalSource: IntSource;
+	@IsArray()
+    @ArrayMinSize(1)
+    @MaxLength(100, { each: true })
+    @IsNotEmpty({ each: true })
+    @IsEnum(IntSource, {
+        each: true,
+        message: 'Invalid International Source. Supported followings:' + Object.values(IntSource)
+    })
+    @ApiProperty({
+      type: [String],
+      enum: Object.values(IntSource),
+    })
+    internationalSource: IntSource[];
 
 	@IsOptional()
 	@IsNotEmpty()
@@ -119,12 +128,12 @@ export class SupportDto {
 	@IsNumber()
 	@ApiProperty()
 	@IsTwoDecimalPoints()
-  receivedAmount: number;
+  	receivedAmount: number;
 
 	@IsNotEmpty()
 	@IsNumber()
 	@ApiProperty()
-  exchangeRate: number;
+  	exchangeRate: number;
 
 
 }

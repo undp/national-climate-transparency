@@ -141,7 +141,7 @@ const activityList = () => {
             parentId: unstructuredData[i].parentId,
             title: unstructuredData[i].title,
             activityStatus: unstructuredData[i].status,
-            supportType: unstructuredData[i].migratedData?.types ?? [],
+            supportType: unstructuredData[i].migratedData?.type ?? '',
             recipientEntity: unstructuredData[i].migratedData?.recipientEntities ?? [],
             intImplementingEntity: unstructuredData[i].internationalImplementingEntity ?? [],
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
@@ -229,13 +229,7 @@ const activityList = () => {
       key: 'title',
       sorter: false,
     },
-    {
-      title: t('supportType'),
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: Item) => {
-        return <ScrollableList listToShow={record.supportType}></ScrollableList>;
-      },
-    },
+    { title: t('supportType'), dataIndex: 'supportType', key: 'supportType', sorter: false },
     {
       title: t('activityStatus'),
       dataIndex: 'activityStatus',
