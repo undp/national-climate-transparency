@@ -8,25 +8,28 @@ import { AnalyticsController } from "./analytics.api.controller";
 import { AnalyticsService } from "./analytics.api.service";
 import { AuthModule } from "../auth/auth.module";
 import { CaslModule } from "../casl/casl.module";
+import { ActivityEntity } from "src/entities/activity.entity";
+import { UtilModule } from "src/util/util.module";
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [configuration],
-      envFilePath: [`.env.${process.env.NODE_ENV}`, `.env`],
-    }),
-    TypeOrmModule.forRootAsync({
-      useClass: TypeOrmConfigService,
-      imports: undefined,
-    }),
-    TypeOrmModule.forFeature([
-      Organisation,
-    ]),
-    AuthModule,
-    CaslModule,
-  ],
-  controllers: [AnalyticsController],
-  providers: [Logger, AnalyticsService],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			load: [configuration],
+			envFilePath: [`.env.${process.env.NODE_ENV}`, `.env`],
+		}),
+		TypeOrmModule.forRootAsync({
+			useClass: TypeOrmConfigService,
+			imports: undefined,
+		}),
+		TypeOrmModule.forFeature([
+			ActivityEntity
+		]),
+		AuthModule,
+		CaslModule,
+		UtilModule
+	],
+	controllers: [AnalyticsController],
+	providers: [Logger, AnalyticsService],
 })
-export class AnalyticsAPIModule {}
+export class AnalyticsAPIModule { }

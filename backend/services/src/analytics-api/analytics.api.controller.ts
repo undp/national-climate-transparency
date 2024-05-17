@@ -2,6 +2,7 @@ import {
   Controller,
   UseGuards,
   Get,
+	Param,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { AnalyticsService } from "./analytics.api.service";
@@ -16,14 +17,38 @@ export class AnalyticsController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
-  @Get('/climateActionChart')
+  @Get('/actionsSummery')
   getClimateActionChart() {
     return this.analyticsService.getClimateActionChart();
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('/projectSummaryChart')
+  @Get('/projectSummary')
   getProjectSummaryChart() {
     return this.analyticsService.getProjectSummaryChart();
+  }
+
+	@UseGuards(JwtAuthGuard)
+  @Get('/supportSummary')
+  getSupportChart() {
+    return this.analyticsService.getActivitiesSupported();
+  }
+
+	@UseGuards(JwtAuthGuard)
+  @Get('/supportFinanceSummary')
+  getSupportFinanceChart() {
+    return this.analyticsService.getActivitiesFinance();
+  }
+
+	@UseGuards(JwtAuthGuard)
+  @Get('/ghgMitigationSummaryForYear/:year')
+  getGhgMitigationForYear(@Param('year') year: number) {
+    return this.analyticsService.getGhgMitigationForYear(year);
+  }
+
+	@UseGuards(JwtAuthGuard)
+  @Get('/getGhgMitigationSummary')
+  getGhgMitigationForRecentYear() {
+    return this.analyticsService.getGhgMitigationForRecentYear();
   }
 }
