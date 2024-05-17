@@ -22,29 +22,29 @@ export class SupportEntity {
   @Column({ type: "enum", enum: FinanceNature })
   financeNature: string;
 
-  @Column({ type: "enum", enum: IntSupChannel })
+  @Column({ type: "enum", enum: IntSupChannel, nullable: true })
   internationalSupportChannel: string;
 
 	@Column()
   otherInternationalSupportChannel: string;
 
-  @Column({ type: "enum", enum: IntFinInstrument })
+  @Column({ type: "enum", enum: IntFinInstrument, nullable: true })
   internationalFinancialInstrument: string;
 
 	@Column()
 	otherInternationalFinancialInstrument: string;
 
-  @Column({ type: "enum", enum: NatFinInstrument })
+  @Column({ type: "enum", enum: NatFinInstrument, nullable: true })
   nationalFinancialInstrument: string;
 
   @Column({ nullable: true })
   otherNationalFinancialInstrument: string;
 
-  @Column({ type: "enum", enum: FinancingStatus })
+  @Column({ type: "enum", enum: FinancingStatus, nullable: true })
   financingStatus: string;
 
-  @Column({ type: "enum", enum: IntSource,  nullable: true })
-  internationalSource: string;
+  @Column("varchar", { array: true, nullable: true })
+  internationalSource: IntSource[];
 
   @Column({ nullable: true })
   nationalSource: string;
@@ -64,8 +64,8 @@ export class SupportEntity {
   @Column()
   receivedAmountDomestic: number;
 
-	@Column("varchar", { array: true, nullable: true })
-  sectors: Sector[];
+  @Column({ nullable: true })
+  sector: Sector;
 
   @ManyToOne(() => ActivityEntity, (activity) => activity.support, {
     nullable: false,

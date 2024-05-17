@@ -46,8 +46,8 @@ export class ProjectEntity {
   @Column({ nullable: true })
   comment: string;
 
-	@Column("varchar", { array: true, nullable: true })
-  sectors: Sector[];
+	@Column({ type: "enum", enum: Sector, nullable: true })
+  sector: Sector;
 
   @Column({ type: "ltree" })
   path: string;

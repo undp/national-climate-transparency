@@ -282,6 +282,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
+      } else {
+        form.setFieldsValue({
+          actionTitle: undefined,
+          natAnchor: undefined,
+        });
       }
     };
     fetchConnectedAction();
@@ -299,7 +304,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               programmeId: programmeData.programmeId,
               programmeTitle: programmeData.title,
               instrTypes: programmeData.instrumentType,
-              sectorsAffected: programmeData.affectedSectors,
+              sector: programmeData.sector,
               subSectorsAffected: programmeData.affectedSubSector,
               nationalImplementor: programmeData.nationalImplementor,
             });
@@ -315,6 +320,17 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
+      } else {
+        form.setFieldsValue({
+          programmeId: undefined,
+          programmeTitle: undefined,
+          instrTypes: undefined,
+          sector: undefined,
+          subSectorsAffected: undefined,
+          nationalImplementor: undefined,
+        });
+
+        setProgrammeConnectedAction(undefined);
       }
     };
     fetchConnectedProgramme();
@@ -700,7 +716,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     >
                       {programmeList.map((program) => (
                         <Option key={program.id} value={program.id}>
-                          {program.title}
+                          {program.id}
                         </Option>
                       ))}
                     </Select>
@@ -831,15 +847,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('sectorsAffectedHeader')}</label>}
-                    name="sectorsAffected"
+                    name="sector"
                   >
-                    <Select
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      mode="multiple"
-                      allowClear
-                      disabled
-                    ></Select>
+                    <Select size="large" style={{ fontSize: inputFontSize }} disabled></Select>
                   </Form.Item>
                 </Col>
                 <Col span={6}>

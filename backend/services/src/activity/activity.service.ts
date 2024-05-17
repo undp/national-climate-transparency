@@ -58,25 +58,25 @@ export class ActivityService {
 		if (activityDto.parentId && activityDto.parentType) {
 			switch (activityDto.parentType) {
 				case EntityType.ACTION: {
-					const action = await this.isActionValid(activityDto.parentId);
+					const action = await this.isActionValid(activityDto.parentId, user);
 					activity.path = `${activityDto.parentId}._._`;
-					activity.sectors = action.sectors;
+					activity.sector = action.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.ACTION, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
 					break;
 				}
 				case EntityType.PROGRAMME: {
-					const programme = await this.isProgrammeValid(activityDto.parentId);
+					const programme = await this.isProgrammeValid(activityDto.parentId, user);
 					activity.path = programme.path ? `${programme.path}.${activityDto.parentId}._` : `_.${activityDto.parentId}._`;
-					activity.sectors = programme.affectedSectors;
+					activity.sector = programme.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROGRAMME, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
 					break;
 				}
 				case EntityType.PROJECT: {
-					const project = await this.isProjectValid(activityDto.parentId);
+					const project = await this.isProjectValid(activityDto.parentId, user);
 					activity.path = project.path ? `${project.path}.${activityDto.parentId}` : `_._.${activityDto.parentId}`;
-					activity.sectors = project.sectors;
+					activity.sector = project.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROJECT, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
 					break;
@@ -148,21 +148,18 @@ export class ActivityService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && currentActivity.sectors && currentActivity.sectors.length > 0) {
-			const commonSectors = currentActivity.sectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"activity.cannotUpdateNotRelatedActivity",
-						[currentActivity.activityId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentActivity.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.cannotUpdateNotRelatedActivity",
+					[currentActivity.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		let isActivityLinked = false;
-		let logEventType;
+		let logEventType: any;
 
 		if (currentActivity.parentType && currentActivity.parentId) {
 			isActivityLinked = true;
@@ -176,7 +173,7 @@ export class ActivityService {
 			this.addEventLogEntry(eventLog, logEventType, EntityType.ACTIVITY, activityUpdate.activityId, user.id, currentActivity.parentId);
 			activityUpdate.parentId = null;
 			activityUpdate.parentType = null;
-			activityUpdate.sectors = null;
+			activityUpdate.sector = null;
 			activityUpdate.path = '_._._';
 		}
 
@@ -186,67 +183,25 @@ export class ActivityService {
 			}
 			switch (activityUpdateDto.parentType) {
 				case EntityType.ACTION: {
-					const action = await this.isActionValid(activityUpdateDto.parentId);
-
-					if (user.sector && user.sector.length > 0 && action.sectors && action.sectors.length > 0) {
-						const commonSectors = action.sectors.filter(sector => user.sector.includes(sector));
-						if (commonSectors.length === 0) {
-							throw new HttpException(
-								this.helperService.formatReqMessagesString(
-									"activity.cannotLinkToNotRelatedAction",
-									[activityUpdate.parentId]
-								),
-								HttpStatus.FORBIDDEN
-							);
-						}
-					}
-
+					const action = await this.isActionValid(activityUpdateDto.parentId, user);
 					activityUpdate.path = `${activityUpdateDto.parentId}._._`;
-					activityUpdate.sectors = action.sectors;
+					activityUpdate.sector = action.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.ACTION, activityUpdateDto.parentId, user.id, activityUpdate.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto.parentId);
 					break;
 				}
 				case EntityType.PROGRAMME: {
-					const programme = await this.isProgrammeValid(activityUpdateDto.parentId);
-
-					if (user.sector && user.sector.length > 0) {
-						const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
-						if (commonSectors.length === 0) {
-							throw new HttpException(
-								this.helperService.formatReqMessagesString(
-									"activity.cannotLinkToNotRelatedProgramme",
-									[activityUpdate.parentId]
-								),
-								HttpStatus.FORBIDDEN
-							);
-						}
-					}
-
+					const programme = await this.isProgrammeValid(activityUpdateDto.parentId, user);
 					activityUpdate.path = programme.path ? `${programme.path}.${activityUpdateDto.parentId}._` : `_.${activityUpdateDto.parentId}._`;
-					activityUpdate.sectors = programme.affectedSectors;
+					activityUpdate.sector = programme.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROGRAMME, activityUpdateDto.parentId, user.id, activityUpdate.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto.parentId);
 					break;
 				}
 				case EntityType.PROJECT: {
-					const project = await this.isProjectValid(activityUpdateDto.parentId);
-
-					if (user.sector && user.sector.length > 0 && project.sectors && project.sectors.length > 0) {
-						const commonSectors = project.sectors.filter(sector => user.sector.includes(sector));
-						if (commonSectors.length === 0) {
-							throw new HttpException(
-								this.helperService.formatReqMessagesString(
-									"activity.cannotLinkToNotRelatedProject",
-									[activityUpdate.parentId]
-								),
-								HttpStatus.FORBIDDEN
-							);
-						}
-					}
-
+					const project = await this.isProjectValid(activityUpdateDto.parentId, user);
 					activityUpdate.path = project.path ? `${project.path}.${activityUpdateDto.parentId}` : `_._.${activityUpdateDto.parentId}`;
-					activityUpdate.sectors = project.sectors;
+					activityUpdate.sector = project.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, activityUpdateDto.parentId, user.id, activityUpdate.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROJECT, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto.parentId);
 					break;
@@ -383,7 +338,7 @@ export class ActivityService {
 	}
 
 	//MARK: isProjectValid
-	async isProjectValid(projectId: string) {
+	async isProjectValid(projectId: string, user: User) {
 		const project = await this.projectService.findProjectById(projectId);
 		if (!project) {
 			throw new HttpException(
@@ -394,11 +349,20 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
+		if (!this.helperService.doesUserHaveSectorPermission(user, project.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.cannotLinkToUnrelatedProject",
+					[project.projectId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
 		return project;
 	}
 
 	//MARK: isProgrammeValid
-	async isProgrammeValid(programmeId: string) {
+	async isProgrammeValid(programmeId: string, user: User) {
 		const programme = await this.programmeService.findProgrammeById(programmeId);
 		if (!programme) {
 			throw new HttpException(
@@ -409,11 +373,20 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
+		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.cannotLinkToUnrelatedProgramme",
+					[programme.programmeId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
 		return programme;
 	}
 
 	//MARK: isActionValid
-	async isActionValid(actionId: string) {
+	async isActionValid(actionId: string, user: User) {
 		const action = await this.actionService.getActionViewData(actionId);
 		if (!action) {
 			throw new HttpException(
@@ -422,6 +395,15 @@ export class ActivityService {
 					[actionId]
 				),
 				HttpStatus.BAD_REQUEST
+			);
+		}
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.cannotLinkToUnrelatedAction",
+					[action.actionId]
+				),
+				HttpStatus.FORBIDDEN
 			);
 		}
 		return action;
@@ -442,15 +424,15 @@ export class ActivityService {
 
 		switch (linkActivitiesDto.parentType) {
 			case EntityType.ACTION: {
-				parentEntity = await this.isActionValid(linkActivitiesDto.parentId);
+				parentEntity = await this.isActionValid(linkActivitiesDto.parentId, user);
 				break;
 			}
 			case EntityType.PROGRAMME: {
-				parentEntity = await this.isProgrammeValid(linkActivitiesDto.parentId);
+				parentEntity = await this.isProgrammeValid(linkActivitiesDto.parentId, user);
 				break;
 			}
 			case EntityType.PROJECT: {
-				parentEntity = await this.isProjectValid(linkActivitiesDto.parentId);
+				parentEntity = await this.isProjectValid(linkActivitiesDto.parentId, user);
 				break;
 			}
 		}
@@ -466,8 +448,6 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
-
-		// let achievementList: any[] = [];
 
 		for (const activity of activities) {
 			if (activity.parentId || activity.parentType) {
@@ -514,6 +494,7 @@ export class ActivityService {
 		}
 		const achievements = [];
 		for (const activity of activities) {
+
 			if (!activity.parentId && !activity.parentType) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -524,17 +505,14 @@ export class ActivityService {
 				);
 			}
 
-			if (user.sector && user.sector.length > 0) {
-				const commonSectors = activity.sectors.filter(sector => user.sector.includes(sector));
-				if (commonSectors.length === 0) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"activity.cannotUnlinkNotRelatedActivity",
-							[activity.activityId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				}
+			if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"activity.cannotUnlinkNotRelatedActivity",
+						[activity.activityId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
 			}
 
 			const activityAchievements = await this.kpiService.findAchievementsByActivityId(activity.activityId);
@@ -553,7 +531,7 @@ export class ActivityService {
 
 	//MARK: Activity Query
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
-		const queryBuilder = await this.activityRepo
+		const queryBuilder = this.activityRepo
 			.createQueryBuilder("activity")
 			.where(
 				this.helperService.generateWhereSQL(
@@ -579,7 +557,7 @@ export class ActivityService {
 
 		const final = [];
 		for (const activity of resp[0]) {
-			let migratedData;
+			let migratedData: any;
 			const activityResponseDto: ActivityResponseDto = plainToClass(ActivityResponseDto, activity);
 			if (activity.parentId && activity.parentType) {
 				migratedData = await this.getParentEntity(activity.parentType, activity.parentId)
@@ -608,7 +586,7 @@ export class ActivityService {
 			);
 		}
 
-		if (!this.checkSectorPermissions(activity.sectors, user.sector)) {
+		if (!this.checkSectorPermissions(activity.sector, user.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.userDoesNotHavePermission",
@@ -636,6 +614,16 @@ export class ActivityService {
 					[validateDto.entityId]
 				),
 				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.permissionDeniedForSector",
+					[activity.activityId]
+				),
+				HttpStatus.FORBIDDEN
 			);
 		}
 
@@ -766,7 +754,7 @@ export class ActivityService {
 			);
 		}
 
-		if (!this.checkSectorPermissions(activity.sectors, user.sector)) {
+		if (!this.checkSectorPermissions(activity.sector, user.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.userDoesNotHavePermission",
@@ -803,7 +791,7 @@ export class ActivityService {
 			);
 		}
 
-		if (!this.checkSectorPermissions(activity.sectors, user.sector)) {
+		if (!this.checkSectorPermissions(activity.sector, user.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.userDoesNotHavePermission",

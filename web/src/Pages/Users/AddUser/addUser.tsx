@@ -20,7 +20,7 @@ import ChangePasswordModel from '../../../Components/Models/changePasswordModel'
 import { Role } from '../../../Enums/role.enum';
 import { Sector } from '../../../Enums/sector.enum';
 import { Organisation } from '../../../Enums/organisation.enum';
-import { BankOutlined, ExperimentOutlined, StarOutlined } from '@ant-design/icons';
+import { BankOutlined, ExperimentOutlined, KeyOutlined, StarOutlined } from '@ant-design/icons';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -394,30 +394,43 @@ const AddUser = () => {
                     }
                     onChange={onChangeuserRole}
                   >
-                    <div className="administrator-radio-container">
-                      {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
-                      <Radio.Button className="administrator" value="Admin">
-                        <StarOutlined className="role-icons" />
-                        {t('addUser:administrator')}
-                      </Radio.Button>
-                      {/* </Tooltip> */}
-                    </div>
-                    <div className="government-radio-container">
-                      {/* <Tooltip placement="top" title={t('addUser:adminToolTip')}> */}
-                      <Radio.Button className="government" value="GovernmentUser">
-                        <BankOutlined className="role-icons" />
-                        {t('addUser:government')}
-                      </Radio.Button>
-                      {/* </Tooltip> */}
-                    </div>
-                    <div className="observer-radio-container">
-                      {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
-                      <Radio.Button className="observer" value="Observer">
-                        <ExperimentOutlined className="role-icons" />
-                        {t('addUser:observer')}
-                      </Radio.Button>
-                      {/* </Tooltip> */}
-                    </div>
+                    {state?.record?.role === Role.Root && isUpdate ? (
+                      <div className="root-radio-container">
+                        {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
+                        <Radio.Button className="root" value="Root">
+                          <KeyOutlined className="role-icons" />
+                          {t('addUser:root')}
+                        </Radio.Button>
+                        {/* </Tooltip> */}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="administrator-radio-container">
+                          {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
+                          <Radio.Button className="administrator" value="Admin">
+                            <StarOutlined className="role-icons" />
+                            {t('addUser:administrator')}
+                          </Radio.Button>
+                          {/* </Tooltip> */}
+                        </div>
+                        <div className="government-radio-container">
+                          {/* <Tooltip placement="top" title={t('addUser:adminToolTip')}> */}
+                          <Radio.Button className="government" value="GovernmentUser">
+                            <BankOutlined className="role-icons" />
+                            {t('addUser:government')}
+                          </Radio.Button>
+                          {/* </Tooltip> */}
+                        </div>
+                        <div className="observer-radio-container">
+                          {/* <Tooltip placement="top" title={t('addUser:viewerToolTip')}> */}
+                          <Radio.Button className="observer" value="Observer">
+                            <ExperimentOutlined className="role-icons" />
+                            {t('addUser:observer')}
+                          </Radio.Button>
+                          {/* </Tooltip> */}
+                        </div>
+                      </>
+                    )}
                   </Radio.Group>
                 </Form.Item>
 

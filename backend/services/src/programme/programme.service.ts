@@ -97,22 +97,34 @@ export class ProgrammeService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
+
+			if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.cannotLinkToUnrelatedAction",
+						[action.actionId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+
 			programme.action = action;
 			programme.path = programmeDto.actionId;
+			programme.sector = action.sector;
+
 			this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_LINKED, EntityType.ACTION, action.actionId, user.id, programme.programmeId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, action.actionId);
 		}
 
-		let projects;
+		// Checking for programmes having a  parent
+		let projects: ProjectEntity[];
 		if (programmeDto.linkedProjects) {
 			projects = await this.findAllProjectsByIds(programmeDto.linkedProjects);
-
-			// check if programmes are already linked
 			for (const project of projects) {
 				if (project.programme) {
 					throw new HttpException(
 						this.helperService.formatReqMessagesString(
-							"project.projectAlreadyLinked",
+							"programme.projectAlreadyLinked",
 							[project.projectId]
 						),
 						HttpStatus.BAD_REQUEST
@@ -154,6 +166,7 @@ export class ProgrammeService {
 			});
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
+
 		return new DataResponseMessageDto(
 			HttpStatus.CREATED,
 			this.helperService.formatReqMessagesString("programme.createProgrammeSuccess", []),
@@ -189,7 +202,7 @@ export class ProgrammeService {
 	}
 
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
-		const queryBuilder = await this.programmeRepo
+		const queryBuilder = this.programmeRepo
 			.createQueryBuilder("programme")
 			.where(
 				this.helperService.generateWhereSQL(
@@ -231,7 +244,7 @@ export class ProgrammeService {
 		const programmeUpdate: ProgrammeEntity = plainToClass(ProgrammeEntity, programmeUpdateDto);
 		const eventLog = [];
 
-		const currentProgramme = await this.findProgrammeWithLinkedActionByProgrammeId(programmeUpdateDto.programmeId);
+		const currentProgramme = await this.findProgrammeWithParentChildren(programmeUpdateDto.programmeId);
 		if (!currentProgramme) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -242,11 +255,22 @@ export class ProgrammeService {
 			);
 		}
 
-		if (currentProgramme.action) {
-			programmeUpdate.action = currentProgramme.action;
-			programmeUpdate.path = currentProgramme.path;
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentProgramme.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.cannotUpdateNotRelatedProgramme",
+					[currentProgramme.programmeId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
+		programmeUpdate.action = currentProgramme.action;
+		programmeUpdate.path = currentProgramme.path;
+		programmeUpdate.sector = currentProgramme.sector;
+		programmeUpdate.projects = currentProgramme.projects;
+		programmeUpdate.activities = currentProgramme.activities;
+		
 		// Document update resolve
 
 		let documents = (currentProgramme.documents && currentProgramme.documents.length > 0) ? [...currentProgramme.documents] : [];
@@ -384,7 +408,7 @@ export class ProgrammeService {
 		);
 	}
 
-	async linkUpdatedProgrammeToAction(actionId: string, updatedProgramme: ProgrammeEntity, user: User, em?: EntityManager) {
+	async linkUpdatedProgrammeToAction(actionId: string, updatedProgramme: ProgrammeEntity, user: User, em: EntityManager) {
 		const action = await this.actionService.findActionById(actionId);
 		if (!action) {
 			throw new HttpException(
@@ -396,19 +420,6 @@ export class ProgrammeService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0) {
-			const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.cannotLinkNotRelatedProgrammes",
-						[updatedProgramme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
-		}
-
 		if (updatedProgramme.action) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -418,9 +429,18 @@ export class ProgrammeService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.cannotLinkToUnrelatedAction",
+					[updatedProgramme.programmeId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
 		
-		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, [updatedProgramme], actionId, allLinkedProgrammes, user, em? em : this.entityManager);
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, [updatedProgramme], actionId, user, em);
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -431,29 +451,16 @@ export class ProgrammeService {
 
 	async unlinkUpdatedProgrammeFromAction(updatedProgramme: ProgrammeEntity, user: User, em?: EntityManager) {
 
-		if (user.sector && user.sector.length > 0) {
-			const commonSectors = updatedProgramme.affectedSectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.cannotUnlinkNotRelatedProgrammes",
-						[updatedProgramme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
-
-			if (!updatedProgramme.action) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.programmeIsNotLinked",
-						[updatedProgramme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
+		if (!updatedProgramme.action) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeIsNotLinked",
+					[updatedProgramme.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
 		}
-
+		
 		const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
 			updatedProgramme.action.actionId, 
 			EntityType.ACTION, 
@@ -461,11 +468,9 @@ export class ProgrammeService {
 			EntityType.PROGRAMME
 		);
 
-		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(updatedProgramme.action.actionId, updatedProgramme.programmeId)
 		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(
 			updatedProgramme, 
 			updatedProgramme.programmeId, 
-			allLinkedProgrammes, 
 			user, 
 			em? em : this.entityManager, 
 			achievementsToRemove
@@ -490,6 +495,16 @@ export class ProgrammeService {
 			);
 		}
 
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.cannotLinkToNotRelatedAction",
+					[action.actionId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
 		const programmes = await this.findAllProgrammeByIds(linkProgrammesDto.programmes);
 
 		if (!programmes || programmes.length <= 0) {
@@ -502,18 +517,6 @@ export class ProgrammeService {
 			);
 		}
 		for (const programme of programmes) {
-			if (user.sector && user.sector.length > 0) {
-				const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
-				if (commonSectors.length === 0) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"programme.cannotLinkNotRelatedProgrammes",
-							[programme.programmeId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				}
-			}
 			if (programme.action) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -524,8 +527,7 @@ export class ProgrammeService {
 				);
 			}
 		}
-		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(action.actionId, null)
-		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, allLinkedProgrammes, user, this.entityManager);
+		const prog = await this.linkUnlinkService.linkProgrammesToAction(action, programmes, linkProgrammesDto.actionId, user, this.entityManager);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 
@@ -551,28 +553,26 @@ export class ProgrammeService {
 		}
 
 		const programme = programmes[0];
-		// for (const programme of programmes) {
-		if (user.sector && user.sector.length > 0) {
-			const commonSectors = programme.affectedSectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.cannotUnlinkNotRelatedProgrammes",
-						[programme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
-			// }
-			if (!programme.action || programme.action == null) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"programme.programmeIsNotLinked",
-						[programme.programmeId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
+
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.cannotUnlinkNotRelatedProgrammes",
+					[programme.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!programme.action || programme.action == null) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeIsNotLinked",
+					[programme.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
 		}
 
 		const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
@@ -582,11 +582,9 @@ export class ProgrammeService {
 			EntityType.PROGRAMME
 		);
 
-		const allLinkedProgrammes = await this.findAllLinkedProgrammesToActionByActionId(programme.action.actionId, programme.programmeId)
 		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(
 			programme, 
 			unlinkProgrammesDto, 
-			allLinkedProgrammes, 
 			user, 
 			this.entityManager, 
 			achievementsToRemove
@@ -610,6 +608,16 @@ export class ProgrammeService {
 					[validateDto.entityId]
 				),
 				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.permissionDeniedForSector",
+					[programme.programmeId]
+				),
+				HttpStatus.FORBIDDEN
 			);
 		}
 
@@ -683,9 +691,24 @@ export class ProgrammeService {
 		})
 	}
 
-	async findProgrammeWithLinkedActionByProgrammeId(programmeId: string) {
+	async findProgrammeWithParentChildren(programmeId: string) {
 		return await this.programmeRepo.createQueryBuilder('programme')
 		.leftJoinAndSelect('programme.action', 'action')
+		.leftJoinAndSelect('programme.projects', 'project')
+		.leftJoinAndMapMany(
+			"programme.activities",
+			ActivityEntity,
+			"programmeActivity", // Unique alias for programme activities
+			"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
+			{ programme: EntityType.PROGRAMME }
+		)
+		.leftJoinAndMapMany(
+			"project.activities",
+			ActivityEntity,
+			"projectActivity", // Unique alias for project activities
+			"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
+			{ project: EntityType.PROJECT }
+		)
 		.where('programme.programmeId = :programmeId', { programmeId })
 		.getOne();
 	}
@@ -802,7 +825,7 @@ export class ProgrammeService {
 		programmeViewDto.description = programme.description;
 		programmeViewDto.objectives = programme.objective;
 		programmeViewDto.instrumentType = programme.action?.instrumentType;
-		programmeViewDto.affectedSectors = programme.affectedSectors;
+		programmeViewDto.sector = programme.sector;
 		programmeViewDto.affectedSubSector = programme.affectedSubSector;
 		programmeViewDto.programmeStatus = programme.programmeStatus;
 		programmeViewDto.recipientEntity = recipientEntity;

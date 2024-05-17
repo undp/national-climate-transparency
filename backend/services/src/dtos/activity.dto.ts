@@ -32,14 +32,6 @@ export class ActivityDto {
 	@ApiPropertyOptional()
 	parentId: string;
 
-	// @ValidateIf((c) => c.supportType)
-	// @IsNotEmpty()
-	// @ApiPropertyOptional({ enum: SupportType })
-	// @IsEnum(SupportType, {
-	// 	message: "Invalid type of support. Supported following types:" + Object.values(SupportType),
-	// })
-	// supportType: SupportType;
-
 	@ValidateIf((c) => c.measure)
 	@IsNotEmpty()
 	@ApiPropertyOptional({ enum: Measure })

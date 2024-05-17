@@ -190,18 +190,18 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
         if (parentType === 'action') {
           tempMigratedData.description = response.data.description;
-          tempMigratedData.affSectors = response.data.migratedData?.sectorsAffected ?? [];
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
           tempMigratedData.startYear = response.data.startYear;
         } else if (parentType === 'programme') {
           tempMigratedData.description = response.data.description;
           tempMigratedData.recipient = response.data.recipientEntity;
-          tempMigratedData.affSectors = response.data.affectedSectors;
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
           tempMigratedData.affSubSectors = response.data.affectedSubSector;
           tempMigratedData.startYear = response.data.startYear;
         } else {
           tempMigratedData.description = response.data.description;
           tempMigratedData.recipient = response.data.recipientEntities;
-          tempMigratedData.affSectors = response.data.programme?.affectedSectors ?? [];
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
           tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
           tempMigratedData.startYear = response.data.startYear;
           tempMigratedData.type = response.data.type;
@@ -258,9 +258,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               description: entityData.description,
               status: entityData.status,
               measure: entityData.measure,
-              nationalImplementingEntity: entityData.nationalImplementingEntity ?? [],
-              internationalImplementingEntity: entityData.internationalImplementingEntity ?? [],
-              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy ?? 'No',
+              nationalImplementingEntity: entityData.nationalImplementingEntity ?? undefined,
+              internationalImplementingEntity:
+                entityData.internationalImplementingEntity ?? undefined,
+              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy,
               meansOfImplementation: entityData.meansOfImplementation,
               technologyType: entityData.technologyType,
               etfDescription: entityData.etfDescription,
@@ -346,21 +347,35 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchSupportData = async () => {
       try {
-        const response: any = await post('national/supports/query', {});
-
         const tempSupportData: SupportData[] = [];
+
+        const payload = {
+          filterAnd: [
+            {
+              key: 'activityId',
+              operation: '=',
+              value: entId,
+            },
+          ],
+          sort: {
+            key: 'supportId',
+            order: 'ASC',
+          },
+        };
+
+        const response: any = await post('national/supports/query', payload);
 
         response.data.forEach((sup: any, index: number) => {
           tempSupportData.push({
             key: index.toString(),
             supportId: sup.supportId,
             financeNature: sup.financeNature,
-            direction: sup.financeDirection,
-            finInstrument: sup.finInstrument,
-            estimatedUSD: sup.estimatedUSD,
-            estimatedLC: sup.estimatedLCL,
-            recievedUSD: sup.receivedUSD,
-            recievedLC: sup.receivedLCL,
+            direction: sup.direction,
+            finInstrument: sup.nationalFinancialInstrument,
+            estimatedUSD: sup.requiredAmount,
+            estimatedLC: sup.requiredAmountDomestic,
+            recievedUSD: sup.receivedAmount,
+            recievedLC: sup.receivedAmountDomestic,
           });
         });
         setSupportData(tempSupportData);
@@ -453,7 +468,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         parentDescription: activityMigratedData.description,
         supportType: activityMigratedData.type,
         recipient: activityMigratedData.recipient,
-        affSectors: activityMigratedData.affSectors,
+        sector: activityMigratedData.affSectors,
         affSubSectors: activityMigratedData.affSubSectors,
         startYear: activityMigratedData.startYear,
         endYear: activityMigratedData.endYear,
@@ -846,7 +861,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       >
                         {parentList.map((parent) => (
                           <Option key={parent.id} value={parent.id}>
-                            {parent.title}
+                            {parent.id}
                           </Option>
                         ))}
                       </Select>
@@ -952,14 +967,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
-                    name="affSectors"
+                    name="sector"
                   >
-                    <Select
-                      mode="multiple"
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      disabled
-                    ></Select>
+                    <Select size="large" style={{ fontSize: inputFontSize }} disabled></Select>
                   </Form.Item>
                 </Col>
                 {(parentType === 'programme' || parentType === 'project') && (
@@ -1114,7 +1124,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('activityCommentsTitle')}</label>}
                     name="comment"
-                    rules={[validation.required]}
                   >
                     <TextArea rows={3} disabled={isView} />
                   </Form.Item>

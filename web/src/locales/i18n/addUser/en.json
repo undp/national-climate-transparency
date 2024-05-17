@@ -29,6 +29,7 @@
     "userRole": "User Role",
     "government": "Government",
     "administrator": "Administrator",
+    "root": "Super Admin",
     "observer": "Observer",
     "sectors" : "Sectors",
     "sector" : "Sector",

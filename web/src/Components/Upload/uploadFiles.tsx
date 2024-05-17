@@ -150,7 +150,13 @@ const UploadFileGrid: React.FC<Props> = ({
                 <Card className="file-card">
                   <div className="file-content">
                     <span>
-                      {isSingleColumn ? file.title.slice(0, 12) : file.title.slice(0, 20)}
+                      {isSingleColumn
+                        ? file.title.length > 12
+                          ? `${file.title.slice(0, 12)}...`
+                          : file.title
+                        : file.title.length > 20
+                        ? `${file.title.slice(0, 20)}...`
+                        : file.title}
                     </span>
                     {usedIn !== 'create' && (
                       <DownloadOutlined
@@ -194,7 +200,9 @@ const UploadFileGrid: React.FC<Props> = ({
                     <Tooltip placement="topLeft" title={file.name} showArrow={false}>
                       <Card className="file-card">
                         <div className="file-content">
-                          <span>{file.name.slice(0, 20)}</span>
+                          <span>
+                            {file.name.length > 20 ? `${file.name.slice(0, 20)}...` : file.name}
+                          </span>
                           <CloseCircleOutlined
                             className="close-icon"
                             onClick={() => handleUploadDelete(file.uid)}

@@ -46,22 +46,19 @@ export class SupportService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && activity.sectors && activity.sectors.length > 0) {
-			const commonSectors = activity.sectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"support.cannotLinkToNotRelatedActivity",
-						[supportDto.activityId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.cannotLinkToNotRelatedActivity",
+					[supportDto.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		support.requiredAmountDomestic = support.requiredAmount * support.exchangeRate;
 		support.receivedAmountDomestic = support.receivedAmount * support.exchangeRate;
-		support.sectors = activity.sectors;
+		support.sector = activity.sector;
 
 		support.activity = activity;
 		this.addEventLogEntry(eventLog, LogEventType.SUPPORT_CREATED, EntityType.SUPPORT, support.supportId, user.id, supportDto);
@@ -100,7 +97,7 @@ export class SupportService {
 
 	//MARK: Support Query
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
-		const queryBuilder = await this.supportRepo
+		const queryBuilder = this.supportRepo
 			.createQueryBuilder("support")
 			.where(
 				this.helperService.generateWhereSQL(
@@ -153,17 +150,14 @@ export class SupportService {
 		}
 		const eventLog = [];
 
-		if (user.sector && user.sector.length > 0 && currentSupport.sectors && currentSupport.sectors.length > 0) {
-			const commonSectors = currentSupport.sectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"support.cannotUpdateNotRelatedSupport",
-						[currentSupport.supportId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentSupport.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.cannotUpdateNotRelatedSupport",
+					[currentSupport.supportId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		const activity = await this.activityService.findActivityById(supportUpdateDto.activityId);
@@ -177,17 +171,14 @@ export class SupportService {
 			);
 		}
 
-		if (user.sector && user.sector.length > 0 && activity.sectors && activity.sectors.length > 0) {
-			const commonSectors = activity.sectors.filter(sector => user.sector.includes(sector));
-			if (commonSectors.length === 0) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"support.cannotLinkToNotRelatedActivity",
-						[supportUpdateDto.activityId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.cannotLinkToNotRelatedActivity",
+					[supportUpdateDto.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
 		}
 
 		this.addEventLogEntry(eventLog, LogEventType.SUPPORT_UPDATED, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, supportUpdateDto);
@@ -198,7 +189,7 @@ export class SupportService {
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTIVITY, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, activity.activityId);
 
 			currentSupport.activity = activity;
-			currentSupport.sectors = activity.sectors;
+			currentSupport.sector = activity.sector;
 		}
 
 		currentSupport.direction = supportUpdateDto.direction;
@@ -215,8 +206,8 @@ export class SupportService {
 		currentSupport.requiredAmount = supportUpdateDto.requiredAmount;
 		currentSupport.receivedAmount = supportUpdateDto.receivedAmount;
 		currentSupport.exchangeRate = supportUpdateDto.exchangeRate;
-		currentSupport.requiredAmountDomestic = currentSupport.requiredAmount * currentSupport.exchangeRate;
-		currentSupport.receivedAmountDomestic = currentSupport.receivedAmount * currentSupport.exchangeRate;
+		currentSupport.requiredAmountDomestic = currentSupport.requiredAmount / currentSupport.exchangeRate;
+		currentSupport.receivedAmountDomestic = currentSupport.receivedAmount / currentSupport.exchangeRate;
 
 		const sup = await this.entityManager
 			.transaction(async (em) => {
@@ -257,6 +248,16 @@ export class SupportService {
 					[validateDto.entityId]
 				),
 				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, support.sector)){
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.permissionDeniedForSector",
+					[support.supportId]
+				),
+				HttpStatus.FORBIDDEN
 			);
 		}
 

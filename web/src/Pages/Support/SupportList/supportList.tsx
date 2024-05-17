@@ -11,6 +11,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import StatusChip from '../../../Components/StatusChip/statusChip';
 import { actionMenuWithoutAttaching } from '../../../Components/Popups/tableAction';
 import { SupportEntity } from '../../../Entities/support';
+import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 
 interface Item {
   key: number;
@@ -22,7 +23,7 @@ interface Item {
   internationalFinancialInstrument: string;
   financingStatus: string;
   validationStatus: string;
-  internationalSource: string;
+  internationalSource: string[];
 }
 
 interface Filter {
@@ -133,7 +134,7 @@ const supportList = () => {
             internationalFinancialInstrument: unstructuredData[i].internationalFinancialInstrument,
             financingStatus: unstructuredData[i].financingStatus,
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
-            internationalSource: unstructuredData[i].internationalSource,
+            internationalSource: unstructuredData[i].internationalSource ?? [],
           });
         }
         setTableData(structuredData);
@@ -250,9 +251,12 @@ const supportList = () => {
     },
     {
       title: t('internationalSource'),
-      dataIndex: 'internationalSource',
-      key: 'internationalSource',
       sorter: false,
+      width: 80,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        return <ScrollableList listToShow={record.internationalSource}></ScrollableList>;
+      },
     },
     {
       title: '',
