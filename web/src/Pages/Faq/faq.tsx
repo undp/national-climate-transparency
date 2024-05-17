@@ -22,7 +22,7 @@ const faq = () => {
   ];
 
   return (
-    <div className="content-container">
+    <div className="content-container faq-container">
       <div className="title-bar">
         <div className="body-title">{t('faqMenu')}</div>
       </div>

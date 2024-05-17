@@ -28,12 +28,10 @@ const FAQDocuments: React.FC<Props> = ({ title, format, url }) => {
         return pdfsvg;
       case 'docx':
         return docsvg;
-      case 'txt':
-        return txtsvg;
       case 'xlsx':
         return xlsxsvg;
       default:
-        return null;
+        return txtsvg;
     }
   };
   const iconSrc = getIconByFormat();
