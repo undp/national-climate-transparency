@@ -11,9 +11,8 @@ import { GraphUpArrow } from 'react-bootstrap-icons';
 import './projectForm.scss';
 import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
 import { IntImplementor, Recipient } from '../../../Enums/shared.enum';
-import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
-import { NewKpiData } from '../../../Definitions/kpiDefinitions';
+import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeSelectData } from '../../../Definitions/programmeDefinitions';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
@@ -27,6 +26,8 @@ import { getSupportTableColumns } from '../../../Definitions/columns/supportColu
 import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 import { ProjectMigratedData } from '../../../Definitions/projectDefinitions';
+import { NewKpi } from '../../../Components/KPI/newKpi';
+import { ViewKpi } from '../../../Components/KPI/viewKpi';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -90,8 +91,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // KPI State
 
+  const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
+  const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
-  const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
 
   // Initialization Logic
 
@@ -431,25 +433,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     setActivityPageSize(10);
   }, [tempActivityIds]);
 
-  useEffect(() => {
-    console.log('Running Migration Update');
-
-    const migratedKpis = [];
-    for (let i = 0; i < 2; i++) {
-      const updatedValues = {
-        [`kpi_name_${i}`]: `Name_${i}`,
-        [`kpi_unit_${i}`]: `Unit_${i}`,
-        [`kpi_ach_${i}`]: 35,
-        [`kpi_exp_${i}`]: 55,
-      };
-
-      form.setFieldsValue(updatedValues);
-      migratedKpis.push(i);
-    }
-
-    setMigratedKpiList(migratedKpis);
-  }, [activityData]);
-
   // Attachment resolve before updating an already created programme
 
   const resolveAttachments = async () => {
@@ -622,6 +605,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       name: '',
       unit: '',
       creatorType: 'project',
+      achieved: undefined,
       expected: 0,
     };
     const updatedValues = {
@@ -632,28 +616,47 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     setNewKpiList((prevList) => [...prevList, newItem]);
   };
 
-  const removeKPI = (kpiIndex: number) => {
-    setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
-
+  const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
+    if (inWhich === 'created') {
+      setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
+    } else {
+      setCreatedKpiList(createdKpiList.filter((obj) => obj.id !== kpiIndex));
+    }
     const updatedValues = {
-      [`kpi_name_${kpiIndex}`]: '',
-      [`kpi_unit_${kpiIndex}`]: '',
-      [`kpi_exp_${kpiIndex}`]: '',
+      [`kpi_name_${kpiIndex}`]: undefined,
+      [`kpi_unit_${kpiIndex}`]: undefined,
+      [`kpi_exp_${kpiIndex}`]: undefined,
     };
-
     form.setFieldsValue(updatedValues);
   };
 
-  const updateKPI = (id: number, property: keyof NewKpiData, value: any): void => {
-    setNewKpiList((prevKpiList) => {
-      const updatedKpiList = prevKpiList.map((kpi) => {
-        if (kpi.index === id) {
-          return { ...kpi, [property]: value };
-        }
-        return kpi;
+  const updateKPI = (
+    id: number,
+    property: keyof NewKpiData,
+    value: any,
+    inWhich: 'created' | 'new'
+  ): void => {
+    if (inWhich === 'created') {
+      setNewKpiList((prevKpiList) => {
+        const updatedKpiList = prevKpiList.map((kpi) => {
+          if (kpi.index === id) {
+            return { ...kpi, [property]: value };
+          }
+          return kpi;
+        });
+        return updatedKpiList;
       });
-      return updatedKpiList;
-    });
+    } else {
+      setCreatedKpiList((prevKpiList) => {
+        const updatedKpiList = prevKpiList.map((kpi) => {
+          if (kpi.id === id) {
+            return { ...kpi, [property]: value };
+          }
+          return kpi;
+        });
+        return updatedKpiList;
+      });
+    }
   };
 
   // Detach Activity
@@ -1069,39 +1072,36 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-              {migratedKpiList.map((index: number) => (
-                <KpiGrid
-                  key={index}
-                  form={form}
-                  rules={[]}
-                  index={index}
-                  calledTo={'view'}
-                  gutterSize={gutterSize}
-                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                ></KpiGrid>
-              ))}
-              {newKpiList.map((kpi: any) => (
-                <KpiGrid
-                  key={kpi.index}
+              {method === 'view'
+                ? createdKpiList.map((createdKPI: CreatedKpiData, index: number) => (
+                    <ViewKpi
+                      key={index}
+                      index={index}
+                      headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                      kpi={createdKPI}
+                    ></ViewKpi>
+                  ))
+                : null}
+              {newKpiList.map((newKPI: NewKpiData) => (
+                <NewKpi
+                  key={newKPI.index}
                   form={form}
                   rules={[validation.required]}
-                  index={kpi.index}
-                  calledTo={'create'}
-                  gutterSize={gutterSize}
+                  index={newKPI.index}
                   headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                   updateKPI={updateKPI}
                   removeKPI={removeKPI}
-                ></KpiGrid>
+                ></NewKpi>
               ))}
               <Row justify={'start'}>
                 <Col span={2}>
                   {!isView && (
                     <Button
-                      icon={<PlusCircleOutlined />}
+                      icon={<PlusCircleOutlined style={{ color: '#3A3541' }} />}
                       className="create-kpi-button"
                       onClick={createKPI}
                     >
-                      {t('addKPI')}
+                      <span className="kpi-add-text">{t('addKPI')}</span>
                     </Button>
                   )}
                 </Col>

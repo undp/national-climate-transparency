@@ -6,7 +6,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './activityForm.scss';
-import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 import { ParentType } from '../../../Enums/parentType.enum';
 import TimelineTable from '../../../Components/Timeline/timeline';
 import {
@@ -28,6 +27,8 @@ import { ActivityEntity } from '../../../Entities/activity';
 import { useAbilityContext } from '../../../Casl/Can';
 import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
+import { CreatedKpiData } from '../../../Definitions/kpiDefinitions';
+import { ViewKpi } from '../../../Components/KPI/viewKpi';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -102,7 +103,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // KPI State
 
-  const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
+  const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
 
   // MTG Timeline State
 
@@ -476,23 +477,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       });
     }
   }, [activityMigratedData]);
-
-  useEffect(() => {
-    const migratedKpis = [];
-    for (let i = 0; i < 2; i++) {
-      const updatedValues = {
-        [`kpi_name_${i}`]: `Name_${i}`,
-        [`kpi_unit_${i}`]: `Unit_${i}`,
-        [`kpi_ach_${i}`]: 35,
-        [`kpi_exp_${i}`]: 55,
-      };
-
-      form.setFieldsValue(updatedValues);
-      migratedKpis.push(i);
-    }
-
-    setMigratedKpiList(migratedKpis);
-  }, [supportData]);
 
   // Form Submit
 
@@ -1152,17 +1136,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-              {migratedKpiList.map((index: number) => (
-                <KpiGrid
-                  key={index}
-                  form={form}
-                  rules={[validation.required]}
-                  index={index}
-                  calledTo={isView ? 'view' : 'add_ach'}
-                  gutterSize={gutterSize}
-                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                ></KpiGrid>
-              ))}
+              {method === 'view'
+                ? inheritedKpiList.map((createdKPI: CreatedKpiData, index: number) => (
+                    <ViewKpi
+                      key={index}
+                      index={index}
+                      headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                      kpi={createdKPI}
+                    ></ViewKpi>
+                  ))
+                : null}
             </div>
             {method !== 'create' && (
               <div className="form-section-card">
