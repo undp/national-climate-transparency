@@ -1114,7 +1114,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('activityCommentsTitle')}</label>}
                     name="comment"
-                    rules={[validation.required]}
                   >
                     <TextArea rows={3} disabled={isView} />
                   </Form.Item>
