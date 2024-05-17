@@ -7,7 +7,6 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
 import { LocalStrategy } from "./strategies/local.strategy";
 import { CaslModule } from "../casl/casl.module";
 import { ApiKeyStrategy } from "./strategies/apikey.strategy";
-// import { OrganisationModule } from "../organisation/organisation.module";
 import { UserModule } from "../user/user.module";
 import { UtilModule } from "../util/util.module";
 import { AsyncOperationsModule } from "../async-operations/async-operations.module";
@@ -30,7 +29,6 @@ import { PasswordReset } from "../entities/userPasswordResetToken.entity";
       imports: undefined,
     }),
     CaslModule,
-    // OrganisationModule,
     AsyncOperationsModule,
   ],
   providers: [
