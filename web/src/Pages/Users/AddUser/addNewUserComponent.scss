@@ -75,6 +75,23 @@
           // .ant-radio-group {
           //   justify-content: space-between;
           // }
+          .root-radio-container {
+            width: 30%;
+            .ant-radio-button-wrapper-checked:not(
+                .ant-radio-button-wrapper-disabled
+              ) {
+              color: $root-color !important;
+              border-color: $root-color !important;
+              box-shadow: none;
+            }
+
+            .anticon {
+              background: #eeeeee;
+              border-radius: 50px;
+              padding: 0.2rem;
+              color: $root-color;
+            }
+          }
           .administrator-radio-container {
             width: 30%;
             .ant-radio-button-wrapper-checked:not(
@@ -258,6 +275,13 @@
             width: 100%;
             .ant-radio-button-checked {
               background: $subrole-bg-color;
+            }
+          }
+          .root {
+            width: 100%;
+            .ant-radio-button-checked {
+              background: $root-bg-color;
+              color: $root-color;
             }
           }
           .administrator {

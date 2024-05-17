@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { ArrayMinSize, IsArray, IsEmail, IsEnum, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { ArrayMinSize, IsArray, IsEmail, IsEnum, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, MaxLength } from "class-validator";
 import { Role, SubRole } from "../casl/role.enum";
 import { UserState } from "src/enums/user.state.enum";
 import { Sector } from "src/enums/sector.enum";
@@ -20,6 +20,7 @@ export class UserUpdateDto {
 
     @IsString()
     @IsOptional()
+    @Matches(/^[+]\d{1,3}(?:\s?\d{1,15})+$/, { message: 'Invalid phone number format. Please provide a valid country code followed by a phone number.' })
     @ApiPropertyOptional()
     phoneNo: string;
 

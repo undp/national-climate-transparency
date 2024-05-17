@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max, ValidateNested } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max, ValidateNested, ValidateIf } from 'class-validator';
 import { ProjectStatus, ProjectType } from "../enums/project.enum";
 import { IntImplementor, Recipient } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
@@ -88,6 +88,7 @@ export class ProjectUpdateDto {
 	})
 	recipientEntities: Recipient[];
 
+	@ValidateIf((c) => c.internationalImplementingEntities)
 	@IsArray()
 	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
