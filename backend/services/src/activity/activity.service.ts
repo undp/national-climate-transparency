@@ -67,7 +67,7 @@ export class ActivityService {
 				}
 				case EntityType.PROGRAMME: {
 					const programme = await this.isProgrammeValid(activityDto.parentId, user);
-					activity.path = programme.path ? `${programme.path}.${activityDto.parentId}._` : `_.${activityDto.parentId}._`;
+					activity.path = programme.path && programme.path.trim() !== '' ? `${programme.path}.${activityDto.parentId}._` : `_.${activityDto.parentId}._`;
 					activity.sector = programme.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROGRAMME, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
@@ -75,7 +75,7 @@ export class ActivityService {
 				}
 				case EntityType.PROJECT: {
 					const project = await this.isProjectValid(activityDto.parentId, user);
-					activity.path = project.path ? `${project.path}.${activityDto.parentId}` : `_._.${activityDto.parentId}`;
+					activity.path = project.path && project.path.trim() !== '' ? `${project.path}.${activityDto.parentId}` : `_._.${activityDto.parentId}`;
 					activity.sector = project.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROJECT, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
@@ -99,7 +99,7 @@ export class ActivityService {
 		}
 
 		if (activityDto.mitigationTimeline) {
-			  this.payloadValidator.validateMitigationTimelinePayload(activityDto);
+			this.payloadValidator.validateMitigationTimelinePayload(activityDto);
 		}
 
 		const activ = await this.entityManager
@@ -148,7 +148,7 @@ export class ActivityService {
 			);
 		}
 
-		if (!this.helperService.doesUserHaveSectorPermission(user, currentActivity.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentActivity.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.cannotUpdateNotRelatedActivity",
@@ -192,7 +192,7 @@ export class ActivityService {
 				}
 				case EntityType.PROGRAMME: {
 					const programme = await this.isProgrammeValid(activityUpdateDto.parentId, user);
-					activityUpdate.path = programme.path ? `${programme.path}.${activityUpdateDto.parentId}._` : `_.${activityUpdateDto.parentId}._`;
+					activityUpdate.path = programme.path && programme.path.trim() !== '' ? `${programme.path}.${activityUpdateDto.parentId}._` : `_.${activityUpdateDto.parentId}._`;
 					activityUpdate.sector = programme.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROGRAMME, activityUpdateDto.parentId, user.id, activityUpdate.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto.parentId);
@@ -200,7 +200,7 @@ export class ActivityService {
 				}
 				case EntityType.PROJECT: {
 					const project = await this.isProjectValid(activityUpdateDto.parentId, user);
-					activityUpdate.path = project.path ? `${project.path}.${activityUpdateDto.parentId}` : `_._.${activityUpdateDto.parentId}`;
+					activityUpdate.path = project.path && project.path.trim() !== '' ? `${project.path}.${activityUpdateDto.parentId}` : `_._.${activityUpdateDto.parentId}`;
 					activityUpdate.sector = project.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, activityUpdateDto.parentId, user.id, activityUpdate.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROJECT, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto.parentId);
@@ -349,7 +349,7 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
-		if (!this.helperService.doesUserHaveSectorPermission(user, project.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, project.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.cannotLinkToUnrelatedProject",
@@ -373,7 +373,7 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
-		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.cannotLinkToUnrelatedProgramme",
@@ -397,7 +397,7 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
-		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.cannotLinkToUnrelatedAction",
@@ -505,7 +505,7 @@ export class ActivityService {
 				);
 			}
 
-			if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
+			if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"activity.cannotUnlinkNotRelatedActivity",
@@ -604,6 +604,28 @@ export class ActivityService {
 		return activityResponseDto;
 	}
 
+	//MARK: Get Activities of Parent
+	async getActivitiesOfParentByPath(parentType: EntityType, parentId: string, user: User) {
+		let entityLevel = EntityType.ACTION === parentType ? 0 : EntityType.PROGRAMME === parentType ? 1 : 2;
+		const queryBuilder = this.activityRepo
+			.createQueryBuilder()
+			.where(
+				this.helperService.generateSubPathSQL({
+					match: parentId,
+					ltree: 'path',
+					startLevel: entityLevel,
+					traverseDepth: 1,
+				}),
+			);
+
+		const query = queryBuilder.getQueryAndParameters();
+		console.log("Generated SQL Query:", query[0]);
+		console.log("Query Parameters:", query[1]);
+
+		const result = await queryBuilder.getMany();
+		return result;
+	}
+
 	//MARK: Validate Activity
 	async validateActivity(validateDto: ValidateDto, user: User) {
 		const activity = await this.findActivityById(validateDto.entityId);
@@ -617,7 +639,7 @@ export class ActivityService {
 			);
 		}
 
-		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.permissionDeniedForSector",
@@ -739,7 +761,7 @@ export class ActivityService {
 	}
 
 	//MARK: update mitigation timeline Data
-	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto ,user: User) {
+	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto, user: User) {
 		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto);
 		const { activityId, mitigationTimeline } = mitigationTimelineDto;
 		const activity = await this.findActivityById(activityId);
@@ -765,13 +787,13 @@ export class ActivityService {
 		}
 
 		await this.activityRepo
-      	.createQueryBuilder()
-      	.update(ActivityEntity)
-      	.set({ mitigationTimeline })
-      	.where('activityId = :activityId', { activityId })
-      	.execute();
+			.createQueryBuilder()
+			.update(ActivityEntity)
+			.set({ mitigationTimeline })
+			.where('activityId = :activityId', { activityId })
+			.execute();
 
-		  return new ResponseMessageDto(
+		return new ResponseMessageDto(
 			HttpStatus.OK,
 			this.helperService.formatReqMessagesString("activity.mitigationTimelineUpdate", []),
 		);

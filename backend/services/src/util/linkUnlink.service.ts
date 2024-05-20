@@ -308,13 +308,13 @@ export class LinkUnlinkService {
 							break;
 						}
 						case EntityType.PROGRAMME: {
-							activity.path = parentEntity.path ? `${parentEntity.path}.${linkActivitiesDto.parentId}._` : `_.${linkActivitiesDto.parentId}._`;
+							activity.path = parentEntity.path && parentEntity.path.trim() !== ''  ? `${parentEntity.path}.${linkActivitiesDto.parentId}._` : `_.${linkActivitiesDto.parentId}._`;
 							logEventType = LogEventType.LINKED_TO_PROGRAMME;
 							activity.sector = parentEntity?.sector;
 							break;
 						}
 						case EntityType.PROJECT: {
-							activity.path = parentEntity.path ? `${parentEntity.path}.${linkActivitiesDto.parentId}` : `_._.${linkActivitiesDto.parentId}`;
+							activity.path = parentEntity.path && parentEntity.path.trim() !== '' ? `${parentEntity.path}.${linkActivitiesDto.parentId}` : `_._.${linkActivitiesDto.parentId}`;
 							logEventType = LogEventType.LINKED_TO_PROJECT;
 							activity.sector = parentEntity?.sector;
 							break;
@@ -438,14 +438,14 @@ export class LinkUnlinkService {
 
 	addProgrammeToActivityPath(currentActivityPath: string, programmeId: string, currentProgrammePath: string) {
 		const parts = currentActivityPath.split(".");
-		parts[0] = currentProgrammePath ? currentProgrammePath : "_";
+		parts[0] = currentProgrammePath && currentProgrammePath.trim() !== '' ? currentProgrammePath : "_";
 		parts[1] = programmeId;
 		return [parts[0], parts[1], parts[2]].join(".");
 	}
 
 	addProgrammeToProjectPath(currentProjectPath: string, programmeId: string, currentProgrammePath: string) {
 		const parts = currentProjectPath.split(".");
-		parts[0] = currentProgrammePath ? currentProgrammePath : "_";
+		parts[0] = currentProgrammePath && currentProgrammePath.trim() !== '' ? currentProgrammePath : "_";
 		parts[1] = programmeId;
 		return [parts[0], parts[1]].join(".");
 	}

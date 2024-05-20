@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
-import { EntityType } from "../enums/shared.enum";
+import { EntityType, GHGS } from "../enums/shared.enum";
 import { AchievementEntity } from "./achievement.entity";
 import { SupportEntity } from "./support.entity";
 import {
@@ -55,6 +55,9 @@ export class ActivityEntity implements EntitySubject {
 
   @Column({nullable: true})
   etfDescription: string;
+
+	@Column("varchar", { array: true, nullable: true})
+  ghgsAffected: GHGS[];
 
 	@Column({type: 'double precision'})
   achievedGHGReduction: number;
