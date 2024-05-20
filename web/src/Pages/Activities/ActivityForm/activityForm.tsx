@@ -403,7 +403,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
-                achieved: kpi.achieved ?? 0,
+                achieved:
+                  kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
+                    ?.achieved ?? 0,
                 expected: kpi.expected,
               });
 
@@ -516,6 +518,22 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, [activityMigratedData]);
 
+  // KPI Achievement Resolve
+
+  const resolveKPIAchievements = async (activityId: string | undefined) => {
+    if (inheritedKpiList.length > 0 && activityId) {
+      inheritedKpiList.forEach(async (inheritedKpi) => {
+        if (inheritedKpi.achieved > 0) {
+          await post('national/kpis/achievements/add', {
+            kpiId: inheritedKpi.id,
+            activityId: activityId,
+            achieved: inheritedKpi.achieved,
+          });
+        }
+      });
+    }
+  };
+
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
@@ -604,9 +622,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
       if (method === 'create') {
         response = await post('national/activities/add', payload);
+
+        resolveKPIAchievements(response.data.activityId);
       } else if (method === 'update') {
         payload.activityId = entId;
         response = await put('national/activities/update', payload);
+
+        resolveKPIAchievements(entId);
       }
 
       if (response.status === 200 || response.status === 201) {
@@ -684,7 +706,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     setInheritedKpiList((prevKpiList) => {
       const updatedKpiList = prevKpiList.map((kpi) => {
         if (kpi.index === index) {
-          return { ...kpi, [property]: value };
+          return { ...kpi, [property]: parseFloat(value) };
         }
         return kpi;
       });
