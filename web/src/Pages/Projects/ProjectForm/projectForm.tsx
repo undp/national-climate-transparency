@@ -360,7 +360,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               subSectorsAffected: programmeData.affectedSubSector,
               nationalImplementor: programmeData.nationalImplementor,
             });
-
             setProgrammeConnectedAction(programmeData.actionId);
           }
         } catch {
@@ -723,6 +722,41 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
+  // Fetch Parent KPI
+
+  const fetchParentKPIData = async (parentId: string) => {
+    if (method === 'create') {
+      try {
+        const response: any = await get(`national/kpis/achieved/programme/${parentId}`);
+        if (response.status === 200 || response.status === 201) {
+          const tempInheritedKpiList: CreatedKpiData[] = [];
+          let tempKpiCounter = kpiCounter;
+          response.data.forEach((kpi: any) => {
+            tempInheritedKpiList.push({
+              index: tempKpiCounter,
+              id: kpi.kpiId,
+              name: kpi.name,
+              unit: kpi.kpiUnit,
+              achieved: kpi.achieved ?? 0,
+              expected: kpi.expected,
+            });
+
+            tempKpiCounter = tempKpiCounter + 1;
+          });
+          setKpiCounter(tempKpiCounter);
+          setInheritedKpiList(tempInheritedKpiList);
+        }
+      } catch {
+        message.open({
+          type: 'error',
+          content: t('kpiSearchFailed'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+    }
+  };
+
   // Detach Activity
 
   const detachActivity = async (actId: string) => {
@@ -779,6 +813,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       showSearch
                       onChange={(value: any) => {
                         setProjectConnectedProgramme(value);
+                        fetchParentKPIData(value);
                       }}
                     >
                       {programmeList.map((program) => (

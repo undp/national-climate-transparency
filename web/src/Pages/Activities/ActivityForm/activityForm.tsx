@@ -214,8 +214,43 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       }
       setActivityMigratedData(tempMigratedData);
     };
-
     fetchConnectedParent();
+
+    const fetchParentKPIData = async () => {
+      if (method === 'create' && parentType && connectedParentId) {
+        try {
+          const response: any = await get(
+            `national/kpis/entities/${parentType}/${connectedParentId}`
+          );
+          if (response.status === 200 || response.status === 201) {
+            const tempInheritedKpiList: CreatedKpiData[] = [];
+            let tempKpiCounter = kpiCounter;
+            response.data.forEach((kpi: any) => {
+              tempInheritedKpiList.push({
+                index: tempKpiCounter,
+                id: kpi.kpiId,
+                name: kpi.name,
+                unit: kpi.kpiUnit,
+                achieved: 0,
+                expected: kpi.expected,
+              });
+
+              tempKpiCounter = tempKpiCounter + 1;
+            });
+            setKpiCounter(tempKpiCounter);
+            setInheritedKpiList(tempInheritedKpiList);
+          }
+        } catch {
+          message.open({
+            type: 'error',
+            content: t('kpiSearchFailed'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchParentKPIData();
   }, [connectedParentId]);
 
   useEffect(() => {

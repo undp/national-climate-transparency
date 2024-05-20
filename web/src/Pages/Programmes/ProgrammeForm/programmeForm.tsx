@@ -638,6 +638,41 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
+  // Fetch Parent KPI
+
+  const fetchParentKPIData = async (parentId: string) => {
+    if (method === 'create') {
+      try {
+        const response: any = await get(`national/kpis/achieved/action/${parentId}`);
+        if (response.status === 200 || response.status === 201) {
+          const tempInheritedKpiList: CreatedKpiData[] = [];
+          let tempKpiCounter = kpiCounter;
+          response.data.forEach((kpi: any) => {
+            tempInheritedKpiList.push({
+              index: tempKpiCounter,
+              id: kpi.kpiId,
+              name: kpi.name,
+              unit: kpi.kpiUnit,
+              achieved: kpi.achieved ?? 0,
+              expected: kpi.expected,
+            });
+
+            tempKpiCounter = tempKpiCounter + 1;
+          });
+          setKpiCounter(tempKpiCounter);
+          setInheritedKpiList(tempInheritedKpiList);
+        }
+      } catch {
+        message.open({
+          type: 'error',
+          content: t('kpiSearchFailed'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+    }
+  };
+
   // Detach Programme
 
   const detachProject = async (prjId: string) => {
@@ -687,6 +722,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                             ?.instrumentType,
                           sector: actionList.find((action) => action.id === value)?.sector,
                         });
+                        fetchParentKPIData(value);
                       }}
                     >
                       {actionList.map((action) => (
