@@ -29,6 +29,7 @@ import { getSupportTableColumns } from '../../../Definitions/columns/supportColu
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 import { CreatedKpiData } from '../../../Definitions/kpiDefinitions';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
+import { EditKpi } from '../../../Components/KPI/editKpi';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -103,6 +104,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // KPI State
 
+  const [kpiCounter, setKpiCounter] = useState<number>(0);
   const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
 
   // MTG Timeline State
@@ -346,6 +348,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchData();
 
+    // Initially Loading the underlying Support data when not in create mode
+
     const fetchSupportData = async () => {
       try {
         const tempSupportData: SupportData[] = [];
@@ -385,6 +389,40 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchSupportData();
+
+    const fetchCreatedKPIData = async () => {
+      if (method !== 'create' && entId) {
+        try {
+          const response: any = await get(`national/kpis/entities/activity/${entId}`);
+          if (response.status === 200 || response.status === 201) {
+            const tempInheritedKpiList: CreatedKpiData[] = [];
+            let tempKpiCounter = kpiCounter;
+            response.data.forEach((kpi: any) => {
+              tempInheritedKpiList.push({
+                index: tempKpiCounter,
+                id: kpi.kpiId,
+                name: kpi.name,
+                unit: kpi.kpiUnit,
+                achieved: kpi.achieved ?? 0,
+                expected: kpi.expected,
+              });
+
+              tempKpiCounter = tempKpiCounter + 1;
+            });
+            setKpiCounter(tempKpiCounter);
+            setInheritedKpiList(tempInheritedKpiList);
+          }
+        } catch {
+          message.open({
+            type: 'error',
+            content: t('kpiSearchFailed'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchCreatedKPIData();
 
     // Get mtg timeline data
 
@@ -632,6 +670,26 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const deleteEntity = () => {
     console.log('Delete Clicked');
+  };
+
+  // Update KPI ACH Values
+
+  const updateKPI = (
+    index: number,
+    property: keyof CreatedKpiData,
+    value: any,
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    inWhich: 'created' | 'new'
+  ): void => {
+    setInheritedKpiList((prevKpiList) => {
+      const updatedKpiList = prevKpiList.map((kpi) => {
+        if (kpi.index === index) {
+          return { ...kpi, [property]: value };
+        }
+        return kpi;
+      });
+      return updatedKpiList;
+    });
   };
 
   // Column Definition
@@ -1136,16 +1194,28 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-              {method === 'view' &&
-                inheritedKpiList.map((createdKPI: CreatedKpiData, index: number) => (
-                  <ViewKpi
-                    key={index}
-                    index={index}
-                    inherited={false}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                    kpi={createdKPI}
-                  ></ViewKpi>
-                ))}
+              {method === 'view'
+                ? inheritedKpiList.map((createdKPI: CreatedKpiData, index: number) => (
+                    <ViewKpi
+                      key={index}
+                      index={index}
+                      inherited={false}
+                      headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                      kpi={createdKPI}
+                    ></ViewKpi>
+                  ))
+                : inheritedKpiList.map((createdKPI: CreatedKpiData) => (
+                    <EditKpi
+                      key={createdKPI.index}
+                      index={createdKPI.index}
+                      form={form}
+                      rules={[validation.required]}
+                      isFromActivity={true}
+                      headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                      kpi={createdKPI}
+                      updateKPI={updateKPI}
+                    ></EditKpi>
+                  ))}
             </div>
             {method !== 'create' && (
               <div className="form-section-card">

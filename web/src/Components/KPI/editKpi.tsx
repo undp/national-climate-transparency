@@ -10,6 +10,7 @@ interface Props {
   rules: any;
   kpi: CreatedKpiData;
   headerNames: string[];
+  isFromActivity: boolean;
   updateKPI?: (index: number, property: any, value: string, inWhich: 'created' | 'new') => void;
   removeKPI?: (kpiId: number, inWhich: 'created' | 'new') => void;
 }
@@ -23,6 +24,7 @@ export const EditKpi: React.FC<Props> = ({
   kpi,
   updateKPI,
   removeKPI,
+  isFromActivity,
 }) => {
   return (
     <Row key={index} gutter={30} className="kpi-grid">
@@ -32,7 +34,7 @@ export const EditKpi: React.FC<Props> = ({
             <Form.Item
               label={<label className="form-item-header">{headerNames[0]}</label>}
               name={`kpi_name_${index}`}
-              rules={rules}
+              rules={isFromActivity ? [] : rules}
               initialValue={kpi?.name}
             >
               <Input
@@ -42,6 +44,7 @@ export const EditKpi: React.FC<Props> = ({
                     updateKPI(index, 'name', e.target.value, 'created');
                   }
                 }}
+                disabled={isFromActivity}
               />
             </Form.Item>
           </Col>
@@ -49,7 +52,7 @@ export const EditKpi: React.FC<Props> = ({
             <Form.Item
               label={<label className="form-item-header">{headerNames[1]}</label>}
               name={`kpi_unit_${index}`}
-              rules={rules}
+              rules={isFromActivity ? [] : rules}
               initialValue={kpi?.unit}
             >
               <Select
@@ -60,6 +63,7 @@ export const EditKpi: React.FC<Props> = ({
                     updateKPI(index, 'unit', selectedValue, 'created');
                   }
                 }}
+                disabled={isFromActivity}
               >
                 {Object.values(KpiUnits).map((unit) => (
                   <Option key={unit} value={unit}>
@@ -73,20 +77,30 @@ export const EditKpi: React.FC<Props> = ({
       </Col>
       <Col span={12}>
         <Row gutter={15}>
-          <Col span={11}>
+          <Col span={isFromActivity ? 12 : 11}>
             <Form.Item
               label={<label className="form-item-header">{headerNames[2]}</label>}
               name={`kpi_ach_${index}`}
               initialValue={kpi?.achieved}
+              rules={isFromActivity ? rules : []}
             >
-              <Input type="number" className="form-input-box" disabled={true} />
+              <Input
+                type="number"
+                className="form-input-box"
+                onChange={(e) => {
+                  if (updateKPI) {
+                    updateKPI(index, 'achieved', e.target.value, 'created');
+                  }
+                }}
+                disabled={!isFromActivity}
+              />
             </Form.Item>
           </Col>
-          <Col span={11}>
+          <Col span={isFromActivity ? 12 : 11}>
             <Form.Item
               label={<label className="form-item-header">{headerNames[3]}</label>}
               name={`kpi_exp_${index}`}
-              rules={rules}
+              rules={isFromActivity ? [] : rules}
               initialValue={kpi?.expected}
             >
               <Input
@@ -97,21 +111,24 @@ export const EditKpi: React.FC<Props> = ({
                     updateKPI(index, 'expected', e.target.value, 'created');
                   }
                 }}
+                disabled={isFromActivity}
               />
             </Form.Item>
           </Col>
-          <Col span={2}>
-            <Card className="delete-card">
-              <DeleteOutlined
-                style={{ cursor: 'pointer', color: '#3A3541', opacity: 0.8 }}
-                onClick={() => {
-                  if (removeKPI) {
-                    removeKPI(index, 'created');
-                  }
-                }}
-              />
-            </Card>
-          </Col>
+          {!isFromActivity && (
+            <Col span={2}>
+              <Card className="delete-card">
+                <DeleteOutlined
+                  style={{ cursor: 'pointer', color: '#3A3541', opacity: 0.8 }}
+                  onClick={() => {
+                    if (removeKPI) {
+                      removeKPI(index, 'created');
+                    }
+                  }}
+                />
+              </Card>
+            </Col>
+          )}
         </Row>
       </Col>
     </Row>

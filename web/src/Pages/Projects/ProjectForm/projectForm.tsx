@@ -1163,6 +1163,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     index={createdKPI.index}
                     form={form}
                     rules={[validation.required]}
+                    isFromActivity={false}
                     headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                     kpi={createdKPI}
                     updateKPI={updateKPI}
