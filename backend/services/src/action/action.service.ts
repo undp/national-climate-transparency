@@ -102,7 +102,9 @@ export class ActionService {
 					// link programmes here
 					if (programmes && programmes.length > 0) {
 						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, action.actionId, null, user, em);
+						this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_LINKED, EntityType.ACTION, action.actionId, user.id, actionDto);
 					}
+					
 					if (actionDto.kpis) {
 						for (const kpi of kpiList) {
 							await em.save<KpiEntity>(kpi);

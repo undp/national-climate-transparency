@@ -70,6 +70,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
+  //MARK: TO DO
+  // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+
   // Spinner When Form Submit Occurs
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
@@ -114,7 +117,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const yearsList: number[] = [];
 
-  for (let year = 2023; year <= 2048; year++) {
+  for (let year = 2015; year <= 2050; year++) {
     yearsList.push(year);
   }
 
@@ -151,7 +154,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const mtgRowMapping = (row: { [year: string]: number }) => {
     const arr = [];
-    for (let year = 2023; year <= 2048; year++) {
+    for (let year = 2015; year <= 2050; year++) {
       const value = row[year.toString()] || 0;
       arr.push(value);
     }
@@ -340,6 +343,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
+        // setIsSaveButtonDisabled(true);
       }
     };
     fetchData();
@@ -387,9 +391,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 topic: value[1],
                 total: response.data.expected.total[mtgFieldMapping(value[1])],
               };
-              for (let year = 2023; year <= 2048; year++) {
+              for (let year = 2015; year <= 2050; year++) {
                 rowData[year.toString()] =
-                  response.data.expected[mtgFieldMapping(value[1])][year - 2023];
+                  response.data.expected[mtgFieldMapping(value[1])][year - 2015];
               }
               tempExpectedEntries.push(rowData);
             });
@@ -402,9 +406,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 topic: value[1],
                 total: response.data.actual.total[mtgFieldMapping(value[1])],
               };
-              for (let year = 2023; year <= 2048; year++) {
+              for (let year = 2015; year <= 2050; year++) {
                 rowData[year.toString()] =
-                  response.data.actual[mtgFieldMapping(value[1])][year - 2023];
+                  response.data.actual[mtgFieldMapping(value[1])][year - 2015];
               }
               tempActualEntries.push(rowData);
             });
@@ -425,7 +429,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       const tempExpectedEntries: ExpectedTimeline[] = [];
       Object.entries(ExpectedRows).forEach(([key, value]) => {
         const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-        for (let year = 2023; year <= 2048; year++) {
+        for (let year = 2015; year <= 2050; year++) {
           rowData[year.toString()] = 0;
         }
         tempExpectedEntries.push(rowData);
@@ -434,7 +438,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       const tempActualEntries: ActualTimeline[] = [];
       Object.entries(ActualRows).forEach(([key, value]) => {
         const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-        for (let year = 2023; year <= 2048; year++) {
+        for (let year = 2015; year <= 2050; year++) {
           rowData[year.toString()] = 0;
         }
         tempActualEntries.push(rowData);
@@ -572,6 +576,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         response = await put('national/activities/update', payload);
       }
 
+      const successMsg =
+        method === 'create' ? t('activityCreationSuccess') : t('activityUpdateSuccess');
+
       if (response.status === 200 || response.status === 201) {
         await new Promise((resolve) => {
           setTimeout(resolve, 500);
@@ -579,7 +586,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
         message.open({
           type: 'success',
-          content: t('activityCreationSuccess'),
+          content: successMsg,
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -649,7 +656,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const mtgCalculateArraySum = (row: any) => {
     let arrSum = 0;
-    for (let year = 2023; year <= 2048; year++) {
+    for (let year = 2015; year <= 2050; year++) {
       arrSum += row[year.toString()] || 0;
     }
     console.log(arrSum);
@@ -747,6 +754,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
+  // Save Button Enable when form value change
+
+  // const handleValuesChange = () => {
+  //   setIsSaveButtonDisabled(false);
+  // };
+
   return (
     <div className="content-container">
       <div className="title-bar">
@@ -754,7 +767,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       </div>
       {!waitingForBE ? (
         <div className="activity-form">
-          <Form form={form} onFinish={handleSubmit} layout="vertical">
+          <Form
+            form={form}
+            onFinish={handleSubmit}
+            layout="vertical"
+            // onValuesChange={handleValuesChange}
+          >
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
@@ -1295,7 +1313,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            {isView && (
+            {method !== 'create' && (
               <div className="form-section-timelinecard">
                 <div className="form-section-header">{t('updatesInfoTitle')}</div>
                 <UpdatesTimeline recordType={'activity'} recordId={entId} />
@@ -1386,7 +1404,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col span={2.5}>
                   <Form.Item>
-                    <Button type="primary" size="large" block htmlType="submit">
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      htmlType="submit"
+                      // disabled={isSaveButtonDisabled}
+                    >
                       {t('update')}
                     </Button>
                   </Form.Item>

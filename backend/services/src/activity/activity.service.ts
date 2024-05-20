@@ -53,6 +53,7 @@ export class ActivityService {
 		const eventLog = [];
 
 		activity.activityId = 'T' + await this.counterService.incrementCount(CounterType.ACTIVITY, 5);
+		this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_CREATED, EntityType.ACTIVITY, activity.activityId, user.id, activityDto);
 
 		activity.path = "_._._"
 		if (activityDto.parentId && activityDto.parentType) {
@@ -88,7 +89,6 @@ export class ActivityService {
 			activity.documents = await this.uploadDocuments(activityDto.documents);
 
 		}
-		this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_CREATED, EntityType.ACTIVITY, activity.activityId, user.id, activityDto);
 
 		if (activityDto.mitigationInfo && activityDto.mitigationInfo.methodologyDocuments) {
 			activity.mitigationInfo.methodologyDocuments = await this.uploadDocuments(activityDto.mitigationInfo.methodologyDocuments);
@@ -99,7 +99,7 @@ export class ActivityService {
 		}
 
 		if (activityDto.mitigationTimeline) {
-			  this.payloadValidator.validateMitigationTimelinePayload(activityDto);
+			this.payloadValidator.validateMitigationTimelinePayload(activityDto);
 		}
 
 		const activ = await this.entityManager
@@ -650,7 +650,7 @@ export class ActivityService {
 		}
 
 		activity.validated = true;
-		const eventLog = this.buildLogEntity(LogEventType.ACTION_VERIFIED, EntityType.ACTIVITY, activity.activityId, user.id, validateDto)
+		const eventLog = this.buildLogEntity(LogEventType.ACTIVITY_VERIFIED, EntityType.ACTIVITY, activity.activityId, user.id, validateDto)
 
 		const act = await this.entityManager
 			.transaction(async (em) => {
@@ -751,7 +751,7 @@ export class ActivityService {
 	}
 
 	//MARK: update mitigation timeline Data
-	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto ,user: User) {
+	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto, user: User) {
 		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto);
 		const { activityId, mitigationTimeline } = mitigationTimelineDto;
 		const activity = await this.findActivityById(activityId);
@@ -776,16 +776,40 @@ export class ActivityService {
 			);
 		}
 
-		await this.activityRepo
-      	.createQueryBuilder()
-      	.update(ActivityEntity)
-      	.set({ mitigationTimeline })
-      	.where('activityId = :activityId', { activityId })
-      	.execute();
+		const activ = await this.entityManager
+			.transaction(async (em) => {
+				await em
+					.createQueryBuilder()
+					.update(ActivityEntity)
+					.set({ mitigationTimeline })
+					.where('activityId = :activityId', { activityId })
+					.execute();
 
-		  return new ResponseMessageDto(
+				const logEntity =
+					this.buildLogEntity(
+						LogEventType.MTG_UPDATED,
+						EntityType.ACTIVITY,
+						activity.activityId,
+						user.id,
+						mitigationTimelineDto
+					);
+
+				await em.save<LogEntity>(logEntity);
+				return activity;
+			})
+			.catch((err: any) => {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"activity.mtgUpdateFailed",
+						[err]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			});
+
+		return new ResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString("activity.mitigationTimelineUpdate", []),
+			this.helperService.formatReqMessagesString("activity.mtgUpdateSuccess", []),
 		);
 	}
 
