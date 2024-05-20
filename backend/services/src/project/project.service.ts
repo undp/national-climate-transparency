@@ -61,7 +61,8 @@ export class ProjectService {
 			);
 		}
 
-		project.path = "_._"
+		project.path = "_._";
+		project.expectedTimeFrame = projectDto.endYear - projectDto.startYear;
 
 		if (projectDto.programmeId) {
 			const programme = await this.programmeService.findProgrammeById(projectDto.programmeId);
@@ -86,7 +87,7 @@ export class ProjectService {
 			}
 
 			project.programme = programme;
-			project.path = `${programme.path}.${programme.programmeId}`;
+			project.path = programme.path && programme.path.trim() !== '' ? `${programme.path}.${programme.programmeId}` : `_.${programme.programmeId}`;
 			project.sector = programme.sector;
 			this.addEventLogEntry(eventLog, LogEventType.PROJECT_LINKED, EntityType.PROGRAMME, programme.programmeId, user.id, project.projectId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, programme.programmeId);
@@ -308,6 +309,7 @@ export class ProjectService {
 		projectUpdate.programme = currentProject.programme;
 		projectUpdate.sector = currentProject.sector;
 		projectUpdate.activities = currentProject.activities;
+		projectUpdate.expectedTimeFrame = projectUpdateDto.endYear - projectUpdateDto.startYear;
 		
 		// add new documents
 		if (projectUpdateDto.newDocuments) {

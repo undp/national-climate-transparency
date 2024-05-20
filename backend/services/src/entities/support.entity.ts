@@ -55,13 +55,13 @@ export class SupportEntity {
   @Column({nullable: false, type: 'double precision' })
   receivedAmount: number;
 
-  @Column()
+  @Column({nullable: false, type: 'double precision' })
   exchangeRate: number;
 
-	@Column()
+	@Column({nullable: false, type: 'double precision' })
   requiredAmountDomestic: number;
 
-  @Column()
+  @Column({nullable: false, type: 'double precision' })
   receivedAmountDomestic: number;
 
   @Column({ nullable: true })
