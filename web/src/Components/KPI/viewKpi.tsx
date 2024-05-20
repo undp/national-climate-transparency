@@ -5,13 +5,14 @@ import { CreatedKpiData } from '../../Definitions/kpiDefinitions';
 
 interface Props {
   index: number;
+  inherited: boolean;
   headerNames: string[];
   kpi: CreatedKpiData;
 }
 
 const { Option } = Select;
 
-export const ViewKpi: React.FC<Props> = ({ index, headerNames, kpi }) => {
+export const ViewKpi: React.FC<Props> = ({ index, inherited, headerNames, kpi }) => {
   return (
     <Row key={index} gutter={30} className="kpi-grid">
       <Col span={12}>
@@ -22,7 +23,10 @@ export const ViewKpi: React.FC<Props> = ({ index, headerNames, kpi }) => {
               name={`kpi_name_${index}`}
               initialValue={kpi?.name}
             >
-              <Input className="form-input-box" disabled={true} />
+              <Input
+                className={inherited ? 'form-input-box-inherited' : 'form-input-box'}
+                disabled={true}
+              />
             </Form.Item>
           </Col>
           <Col span={12}>

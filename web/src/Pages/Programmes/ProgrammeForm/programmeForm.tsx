@@ -26,6 +26,7 @@ import { getProjectTableColumns } from '../../../Definitions/columns/projectColu
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { NewKpi } from '../../../Components/KPI/newKpi';
+import { EditKpi } from '../../../Components/KPI/editKpi';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -216,21 +217,34 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         try {
           const response: any = await get(`national/kpis/achieved/programme/${entId}`);
           if (response.status === 200 || response.status === 201) {
-            const tempKpiList: CreatedKpiData[] = [];
+            const tempCreatedKpiList: CreatedKpiData[] = [];
+            const tempInheritedKpiList: CreatedKpiData[] = [];
             let tempKpiCounter = kpiCounter;
             response.data.forEach((kpi: any) => {
-              tempKpiList.push({
-                index: tempKpiCounter,
-                id: kpi.kpiId,
-                name: kpi.name,
-                unit: kpi.kpiUnit,
-                achieved: kpi.achieved ?? 0,
-                expected: kpi.expected,
-              });
+              if (kpi.creatorId === entId) {
+                tempCreatedKpiList.push({
+                  index: tempKpiCounter,
+                  id: kpi.kpiId,
+                  name: kpi.name,
+                  unit: kpi.kpiUnit,
+                  achieved: kpi.achieved ?? 0,
+                  expected: kpi.expected,
+                });
+              } else {
+                tempInheritedKpiList.push({
+                  index: tempKpiCounter,
+                  id: kpi.kpiId,
+                  name: kpi.name,
+                  unit: kpi.kpiUnit,
+                  achieved: kpi.achieved ?? 0,
+                  expected: kpi.expected,
+                });
+              }
               tempKpiCounter = tempKpiCounter + 1;
             });
             setKpiCounter(tempKpiCounter);
-            setCreatedKpiList(tempKpiList);
+            setCreatedKpiList(tempCreatedKpiList);
+            setInheritedKpiList(tempInheritedKpiList);
           }
         } catch {
           message.open({
@@ -440,10 +454,30 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         });
       }
 
-      if (newKpiList.length > 0) {
+      if (method === 'create' && newKpiList.length > 0) {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
+            name: kpi.name,
+            kpiUnit: kpi.unit,
+            creatorType: 'programme',
+            expected: kpi.expected,
+          });
+        });
+      } else if (method === 'update' && (newKpiList.length > 0 || createdKpiList.length > 0)) {
+        payload.kpis = [];
+        newKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            name: kpi.name,
+            kpiUnit: kpi.unit,
+            creatorType: 'programme',
+            expected: kpi.expected,
+          });
+        });
+        createdKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            kpiId: kpi.id,
+            kpiUnit: kpi.unit,
             name: kpi.name,
             creatorType: 'programme',
             expected: kpi.expected,
@@ -962,16 +996,39 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-              {method === 'view'
-                ? createdKpiList.map((createdKPI: CreatedKpiData, index: number) => (
-                    <ViewKpi
-                      key={index}
-                      index={index}
-                      headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                      kpi={createdKPI}
-                    ></ViewKpi>
-                  ))
-                : null}
+              {inheritedKpiList.length > 0 &&
+                inheritedKpiList.map((createdKPI: CreatedKpiData) => (
+                  <ViewKpi
+                    key={createdKPI.index}
+                    index={createdKPI.index}
+                    inherited={true}
+                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    kpi={createdKPI}
+                  ></ViewKpi>
+                ))}
+              {method === 'view' &&
+                createdKpiList.map((createdKPI: CreatedKpiData) => (
+                  <ViewKpi
+                    key={createdKPI.index}
+                    index={createdKPI.index}
+                    inherited={false}
+                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    kpi={createdKPI}
+                  ></ViewKpi>
+                ))}
+              {method === 'update' &&
+                createdKpiList.map((createdKPI: CreatedKpiData) => (
+                  <EditKpi
+                    key={createdKPI.index}
+                    index={createdKPI.index}
+                    form={form}
+                    rules={[validation.required]}
+                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    kpi={createdKPI}
+                    updateKPI={updateKPI}
+                    removeKPI={removeKPI}
+                  ></EditKpi>
+                ))}
               {newKpiList.map((newKPI: NewKpiData) => (
                 <NewKpi
                   key={newKPI.index}

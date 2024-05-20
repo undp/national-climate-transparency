@@ -1141,6 +1141,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   <ViewKpi
                     key={index}
                     index={index}
+                    inherited={false}
                     headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                     kpi={createdKPI}
                   ></ViewKpi>
