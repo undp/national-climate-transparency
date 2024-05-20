@@ -29,6 +29,7 @@ import { useUserContext } from '../../../Context/UserInformationContext/userInfo
 import { Sector } from '../../../Enums/sector.enum';
 import { NewKpi } from '../../../Components/KPI/newKpi';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
+import { EditKpi } from '../../../Components/KPI/editKpi';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -96,8 +97,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // KPI State
 
+  const [kpiCounter, setKpiCounter] = useState<number>(0);
   const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
-  // const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
 
   // Initialization Logic
@@ -206,17 +207,19 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           const response: any = await get(`national/kpis/achieved/action/${entId}`);
           if (response.status === 200 || response.status === 201) {
             const tempKpiList: CreatedKpiData[] = [];
-
+            let tempKpiCounter = kpiCounter;
             response.data.forEach((kpi: any) => {
               tempKpiList.push({
-                id: kpi.id,
+                index: tempKpiCounter,
+                id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
                 achieved: kpi.achieved ?? 0,
                 expected: kpi.expected,
               });
+              tempKpiCounter = tempKpiCounter + 1;
             });
-
+            setKpiCounter(tempKpiCounter);
             setCreatedKpiList(tempKpiList);
           }
         } catch {
@@ -407,6 +410,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     setSupportData([]);
   }, [tempActivityIds]);
 
+  useEffect(() => {
+    console.log('Created', createdKpiList);
+    console.log('New', newKpiList);
+  }, [createdKpiList, newKpiList]);
+
   // Attachment resolve before updating an already created action
 
   const resolveAttachments = async () => {
@@ -459,13 +467,32 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         });
       }
 
-      if (newKpiList.length > 0) {
+      if (method === 'create' && newKpiList.length > 0) {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
             name: kpi.name,
             kpiUnit: kpi.unit,
-            creatorType: kpi.creatorType,
+            creatorType: 'action',
+            expected: kpi.expected,
+          });
+        });
+      } else if (method === 'update' && (newKpiList.length > 0 || createdKpiList.length > 0)) {
+        payload.kpis = [];
+        newKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            name: kpi.name,
+            kpiUnit: kpi.unit,
+            creatorType: 'action',
+            expected: kpi.expected,
+          });
+        });
+        createdKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            kpiId: kpi.id,
+            kpiUnit: kpi.unit,
+            name: kpi.name,
+            creatorType: 'action',
             expected: kpi.expected,
           });
         });
@@ -581,23 +608,22 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Add New KPI
 
   const createKPI = () => {
-    const kpiIndex = Math.floor(Date.now() / 1000);
     const newItem: NewKpiData = {
-      index: kpiIndex,
+      index: kpiCounter + 1,
       name: '',
       unit: '',
-      creatorType: 'action',
       achieved: undefined,
       expected: 0,
     };
+    setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
-    if (inWhich === 'created') {
+    if (inWhich === 'new') {
       setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
     } else {
-      setCreatedKpiList(createdKpiList.filter((obj) => obj.id !== kpiIndex));
+      setCreatedKpiList(createdKpiList.filter((obj) => obj.index !== kpiIndex));
     }
     const updatedValues = {
       [`kpi_name_${kpiIndex}`]: undefined,
@@ -608,15 +634,15 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   };
 
   const updateKPI = (
-    id: number,
+    index: number,
     property: keyof NewKpiData,
     value: any,
     inWhich: 'created' | 'new'
   ): void => {
-    if (inWhich === 'created') {
+    if (inWhich === 'new') {
       setNewKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
-          if (kpi.index === id) {
+          if (kpi.index === index) {
             return { ...kpi, [property]: value };
           }
           return kpi;
@@ -626,7 +652,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     } else {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
-          if (kpi.id === id) {
+          if (kpi.index === index) {
             return { ...kpi, [property]: value };
           }
           return kpi;
@@ -1034,16 +1060,28 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-              {method === 'view'
-                ? createdKpiList.map((createdKPI: CreatedKpiData, index: number) => (
-                    <ViewKpi
-                      key={index}
-                      index={index}
-                      headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                      kpi={createdKPI}
-                    ></ViewKpi>
-                  ))
-                : null}
+              {method === 'view' &&
+                createdKpiList.map((createdKPI: CreatedKpiData) => (
+                  <ViewKpi
+                    key={createdKPI.index}
+                    index={createdKPI.index}
+                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    kpi={createdKPI}
+                  ></ViewKpi>
+                ))}
+              {method === 'update' &&
+                createdKpiList.map((createdKPI: CreatedKpiData) => (
+                  <EditKpi
+                    key={createdKPI.index}
+                    index={createdKPI.index}
+                    form={form}
+                    rules={[validation.required]}
+                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    kpi={createdKPI}
+                    updateKPI={updateKPI}
+                    removeKPI={removeKPI}
+                  ></EditKpi>
+                ))}
               {newKpiList.map((newKPI: NewKpiData) => (
                 <NewKpi
                   key={newKPI.index}

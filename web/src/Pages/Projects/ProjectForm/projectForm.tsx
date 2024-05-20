@@ -91,6 +91,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // KPI State
 
+  const [kpiCounter, setKpiCounter] = useState<number>(0);
   const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
   const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
@@ -210,6 +211,41 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchData();
+
+    // Initially Loading the KPI data when not in create mode
+
+    const fetchCreatedKPIData = async () => {
+      if (method !== 'create' && entId) {
+        try {
+          const response: any = await get(`national/kpis/achieved/action/${entId}`);
+          if (response.status === 200 || response.status === 201) {
+            const tempKpiList: CreatedKpiData[] = [];
+            let tempKpiCounter = kpiCounter;
+            response.data.forEach((kpi: any) => {
+              tempKpiList.push({
+                index: tempKpiCounter,
+                id: kpi.kpiId,
+                name: kpi.name,
+                unit: kpi.kpiUnit,
+                achieved: kpi.achieved ?? 0,
+                expected: kpi.expected,
+              });
+              tempKpiCounter = tempKpiCounter + 1;
+            });
+            setKpiCounter(tempKpiCounter);
+            setCreatedKpiList(tempKpiList);
+          }
+        } catch {
+          message.open({
+            type: 'error',
+            content: t('kpiSearchFailed'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchCreatedKPIData();
 
     // Initially Loading the attached project data when not in create mode
 
@@ -492,7 +528,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
             name: kpi.name,
-            creatorType: kpi.creatorType,
+            creatorType: 'project',
             expected: kpi.expected,
           });
         });
@@ -599,28 +635,22 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   // Add New KPI
 
   const createKPI = () => {
-    const kpiIndex = Math.floor(Date.now() / 1000);
     const newItem: NewKpiData = {
-      index: kpiIndex,
+      index: kpiCounter + 1,
       name: '',
       unit: '',
-      creatorType: 'project',
       achieved: undefined,
       expected: 0,
     };
-    const updatedValues = {
-      [`kpi_ach_${kpiIndex}`]: 0,
-    };
-
-    form.setFieldsValue(updatedValues);
+    setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
-    if (inWhich === 'created') {
+    if (inWhich === 'new') {
       setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
     } else {
-      setCreatedKpiList(createdKpiList.filter((obj) => obj.id !== kpiIndex));
+      setCreatedKpiList(createdKpiList.filter((obj) => obj.index !== kpiIndex));
     }
     const updatedValues = {
       [`kpi_name_${kpiIndex}`]: undefined,
@@ -631,15 +661,15 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   };
 
   const updateKPI = (
-    id: number,
+    index: number,
     property: keyof NewKpiData,
     value: any,
     inWhich: 'created' | 'new'
   ): void => {
-    if (inWhich === 'created') {
+    if (inWhich === 'new') {
       setNewKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
-          if (kpi.index === id) {
+          if (kpi.index === index) {
             return { ...kpi, [property]: value };
           }
           return kpi;
@@ -649,7 +679,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     } else {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
-          if (kpi.id === id) {
+          if (kpi.index === index) {
             return { ...kpi, [property]: value };
           }
           return kpi;

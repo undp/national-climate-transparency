@@ -1136,16 +1136,15 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-              {method === 'view'
-                ? inheritedKpiList.map((createdKPI: CreatedKpiData, index: number) => (
-                    <ViewKpi
-                      key={index}
-                      index={index}
-                      headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                      kpi={createdKPI}
-                    ></ViewKpi>
-                  ))
-                : null}
+              {method === 'view' &&
+                inheritedKpiList.map((createdKPI: CreatedKpiData, index: number) => (
+                  <ViewKpi
+                    key={index}
+                    index={index}
+                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    kpi={createdKPI}
+                  ></ViewKpi>
+                ))}
             </div>
             {method !== 'create' && (
               <div className="form-section-card">

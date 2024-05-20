@@ -4,10 +4,10 @@ export type NewKpiData = {
   unit: string;
   achieved: undefined;
   expected: number;
-  creatorType: string;
 };
 
 export type CreatedKpiData = {
+  index: number;
   id: number;
   name: string;
   unit: string;

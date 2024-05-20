@@ -1,12 +1,14 @@
-import { DeleteOutlined } from '@ant-design/icons';
-import { Form, Input, Row, Col, Card, Select } from 'antd';
+import { Form, Input, Row, Col, Select, Card } from 'antd';
 import './kpiGrid.scss';
 import { KpiUnits } from '../../Enums/kpi.enum';
+import { CreatedKpiData } from '../../Definitions/kpiDefinitions';
+import { DeleteOutlined } from '@ant-design/icons';
 
 interface Props {
+  index: number;
   form: any;
   rules: any;
-  index: number;
+  kpi: CreatedKpiData;
   headerNames: string[];
   updateKPI?: (index: number, property: any, value: string, inWhich: 'created' | 'new') => void;
   removeKPI?: (kpiId: number, inWhich: 'created' | 'new') => void;
@@ -14,7 +16,14 @@ interface Props {
 
 const { Option } = Select;
 
-export const NewKpi: React.FC<Props> = ({ rules, index, headerNames, updateKPI, removeKPI }) => {
+export const EditKpi: React.FC<Props> = ({
+  rules,
+  index,
+  headerNames,
+  kpi,
+  updateKPI,
+  removeKPI,
+}) => {
   return (
     <Row key={index} gutter={30} className="kpi-grid">
       <Col span={12}>
@@ -24,12 +33,13 @@ export const NewKpi: React.FC<Props> = ({ rules, index, headerNames, updateKPI, 
               label={<label className="form-item-header">{headerNames[0]}</label>}
               name={`kpi_name_${index}`}
               rules={rules}
+              initialValue={kpi?.name}
             >
               <Input
                 className="form-input-box"
                 onChange={(e) => {
                   if (updateKPI) {
-                    updateKPI(index, 'name', e.target.value, 'new');
+                    updateKPI(index, 'name', e.target.value, 'created');
                   }
                 }}
               />
@@ -40,13 +50,14 @@ export const NewKpi: React.FC<Props> = ({ rules, index, headerNames, updateKPI, 
               label={<label className="form-item-header">{headerNames[1]}</label>}
               name={`kpi_unit_${index}`}
               rules={rules}
+              initialValue={kpi?.unit}
             >
               <Select
                 size="large"
                 className="form-unit-select"
                 onChange={(selectedValue) => {
                   if (updateKPI) {
-                    updateKPI(index, 'unit', selectedValue, 'new');
+                    updateKPI(index, 'unit', selectedValue, 'created');
                   }
                 }}
               >
@@ -66,6 +77,7 @@ export const NewKpi: React.FC<Props> = ({ rules, index, headerNames, updateKPI, 
             <Form.Item
               label={<label className="form-item-header">{headerNames[2]}</label>}
               name={`kpi_ach_${index}`}
+              initialValue={kpi?.achieved}
             >
               <Input type="number" className="form-input-box" disabled={true} />
             </Form.Item>
@@ -75,13 +87,14 @@ export const NewKpi: React.FC<Props> = ({ rules, index, headerNames, updateKPI, 
               label={<label className="form-item-header">{headerNames[3]}</label>}
               name={`kpi_exp_${index}`}
               rules={rules}
+              initialValue={kpi?.expected}
             >
               <Input
                 type="number"
                 className="form-input-box"
                 onChange={(e) => {
                   if (updateKPI) {
-                    updateKPI(index, 'expected', e.target.value, 'new');
+                    updateKPI(index, 'expected', e.target.value, 'created');
                   }
                 }}
               />
@@ -93,7 +106,7 @@ export const NewKpi: React.FC<Props> = ({ rules, index, headerNames, updateKPI, 
                 style={{ cursor: 'pointer', color: '#3A3541', opacity: 0.8 }}
                 onClick={() => {
                   if (removeKPI) {
-                    removeKPI(index, 'new');
+                    removeKPI(index, 'created');
                   }
                 }}
               />
