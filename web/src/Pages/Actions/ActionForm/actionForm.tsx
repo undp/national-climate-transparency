@@ -1068,6 +1068,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     inherited={false}
                     headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                     kpi={createdKPI}
+                    callingEntityId={entId}
                   ></ViewKpi>
                 ))}
               {method === 'update' &&

@@ -1144,6 +1144,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     inherited={true}
                     headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                     kpi={createdKPI}
+                    callingEntityId={entId}
                   ></ViewKpi>
                 ))}
               {method === 'view' &&
@@ -1154,6 +1155,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     inherited={false}
                     headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                     kpi={createdKPI}
+                    callingEntityId={entId}
                   ></ViewKpi>
                 ))}
               {method === 'update' &&
