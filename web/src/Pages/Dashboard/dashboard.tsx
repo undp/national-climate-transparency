@@ -2,8 +2,9 @@ import { Col, Row } from 'antd';
 import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Chart from 'react-apexcharts';
+import { PieChartData } from '../../Definitions/dashboard.definitions';
 
 const Dashboard = () => {
   const [openChartInfo, setOpenChartInfo] = useState<boolean>(false);
@@ -11,12 +12,41 @@ const Dashboard = () => {
     title: '',
     body: '',
   });
+  const [chartData, setChartData] = useState<PieChartData[]>([]);
 
-  const options: ApexCharts.ApexOptions = {
-    labels: ['Product A', 'Product B', 'Product C', 'Product D'],
-  };
+  useEffect(() => {
+    const tempChartData: PieChartData[] = [];
 
-  const series = [44, 55, 13, 43];
+    tempChartData.push({
+      chartTitle: 'Climate Action',
+      chartDescription: 'Climate Action Description',
+      categories: ['A', 'B', 'C'],
+      values: [50, 20, 80],
+    });
+
+    tempChartData.push({
+      chartTitle: 'Projects',
+      chartDescription: 'Climate Projects Description',
+      categories: ['A', 'B', 'C'],
+      values: [50, 80, 80],
+    });
+
+    tempChartData.push({
+      chartTitle: 'Climate Action',
+      chartDescription: 'Climate Action Description',
+      categories: ['A', 'B', 'C'],
+      values: [50, 20, 80],
+    });
+
+    tempChartData.push({
+      chartTitle: 'Projects',
+      chartDescription: 'Climate Projects Description',
+      categories: ['A', 'B', 'C'],
+      values: [50, 80, 80],
+    });
+    setChartData(tempChartData);
+  }, []);
+
   return (
     <div className="dashboard-page">
       <ChartInformation
@@ -25,36 +55,29 @@ const Dashboard = () => {
         content={chartContent}
       ></ChartInformation>
       <Row gutter={30}>
-        <Col className="gutter-row" span={12}>
-          <div className="chart-section-card">
-            <div className="chart-title">
-              {'Climate Actions'}
-              <InfoCircleOutlined
-                onClick={() => {
-                  setChartContent({ title: 'Climate Actions', body: 'Climate Actions' });
-                  setOpenChartInfo(true);
-                }}
-                style={{ marginLeft: '300px', marginBottom: '20px' }}
+        {chartData.map((chart: PieChartData, index: number) => (
+          <Col className="gutter-row" span={12}>
+            <div className="chart-section-card">
+              <div className="chart-title">
+                {chart.chartTitle}
+                <InfoCircleOutlined
+                  onClick={() => {
+                    setChartContent({ title: chart.chartTitle, body: chart.chartDescription });
+                    setOpenChartInfo(true);
+                  }}
+                  style={{ marginLeft: '300px', marginBottom: '20px' }}
+                />
+              </div>
+              <Chart
+                key={index}
+                type="donut"
+                options={{ labels: chart.categories }}
+                series={chart.values}
+                height={250}
               />
             </div>
-            <Chart id={1} type="donut" options={options} series={series} height={250} />
-          </div>
-        </Col>
-        <Col className="gutter-row" span={12}>
-          <div className="chart-section-card">
-            <div className="chart-title">
-              {'Projects'}
-              <InfoCircleOutlined
-                onClick={() => {
-                  setChartContent({ title: 'Projects', body: 'Projects' });
-                  setOpenChartInfo(true);
-                }}
-                style={{ marginLeft: '300px', marginBottom: '20px' }}
-              />
-              <Chart id={1} type="donut" options={options} series={series} height={250} />
-            </div>
-          </div>
-        </Col>
+          </Col>
+        ))}
       </Row>
     </div>
   );
