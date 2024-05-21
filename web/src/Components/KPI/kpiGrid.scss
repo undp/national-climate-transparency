@@ -12,6 +12,11 @@
     height: 40px;
   }
 
+  .form-unit-select {
+    font-size: 13px;
+    height: 40px;
+  }
+
   .delete-card {
     display: flex;
     justify-content: center;
@@ -23,6 +28,26 @@
     border-width: 1px;
     border-radius: 4px;
     border-color: '#d9d9d9';
+  }
+
+  .inherited-circle {
+    display: flex;
+    justify-content: center;
+    padding: 0px;
+    margin-top: 46px;
+    margin-left: 13px;
+    color: #9155fd;
+    border-color: #9155fd;
+  }
+
+  .self-owned-circle {
+    display: flex;
+    justify-content: center;
+    padding: 0px;
+    margin-top: 46px;
+    margin-left: 13px;
+    color: greenyellow;
+    border-color: greenyellow;
   }
 
 }
