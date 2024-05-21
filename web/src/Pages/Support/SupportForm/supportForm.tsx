@@ -570,7 +570,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('exchangeRateTitle')}</label>}
                   name="exchangeRate"
-                  rules={[validation.greaterThanZero]}
+                  rules={[validation.greaterThanZero, validation.required]}
                 >
                   <Input
                     type="number"
