@@ -26,20 +26,6 @@ export class ProgrammeDto {
     @IsString()
     @ApiProperty()
     objective: string;
-  
-    @IsArray()
-    @ArrayMinSize(1)
-    @MaxLength(100, { each: true })
-    @IsNotEmpty({ each: true })
-    @IsEnum(Sector, {
-        each: true,
-        message: 'Invalid Sector. Supported following sectors:' + Object.values(Sector)
-    })
-    @ApiProperty({
-      type: [String],
-      enum: Object.values(Sector),
-    })
-    affectedSectors: Sector[];
     
     @IsArray()
     @ArrayMinSize(1)
@@ -112,8 +98,6 @@ export class ProgrammeDto {
     @ApiPropertyOptional()
     @IsString()
     comments: string;
-  
-    // path: string;
 
     @IsOptional()
     @ApiPropertyOptional()

@@ -18,7 +18,7 @@ export class ProgrammeViewDto {
 
   instrumentType: string[];
 
-  affectedSectors: Sector[];
+  sector: Sector;
 
   affectedSubSector: SubSector[];
 

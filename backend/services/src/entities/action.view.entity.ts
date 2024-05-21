@@ -3,7 +3,6 @@ import { Index, ViewColumn, ViewEntity } from "typeorm"
 export const actionViewSQL = `
 SELECT 
     a."actionId" AS id,
-	CUSTOM_ARRAY_AGG(fullp.sector) FILTER (WHERE fullp.sector IS NOT NULL) AS "sectorsAffected",
     CUSTOM_ARRAY_AGG(fullp.nat_impl) FILTER (WHERE fullp.nat_impl IS NOT NULL) AS "natImplementors",
 	CUSTOM_ARRAY_AGG(fullp.types) FILTER (WHERE fullp.types IS NOT NULL) AS types,
     SUM(fullp."achievedGHGReduction") AS "achievedGHGReduction",
@@ -18,7 +17,6 @@ LEFT JOIN (
 		prg."programmeId",
 		prg."actionId",
 		prg."investment",
-		prg."affectedSectors" AS sector,
 		prg."natImplementor" AS nat_impl,
 		pve.types AS types,
 		pve."achievedGHGReduction",
@@ -59,9 +57,6 @@ export class ActionViewEntity {
     @Index()
     @ViewColumn()
     id: string
-
-    @ViewColumn()
-    sectorsAffected: string[];
 
     @ViewColumn()
     natImplementors: string[];

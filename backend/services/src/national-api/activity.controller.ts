@@ -22,6 +22,7 @@ import { mitigationTimelineDto } from "src/dtos/mitigationTimeline.dto";
 import { QueryDto } from "../dtos/query.dto";
 import { ActivityUpdateDto } from "src/dtos/activityUpdate.dto";
 import { ValidateDto } from "src/dtos/validate.dto";
+import { EntityType } from "src/enums/shared.enum";
 
 @ApiTags("Activities")
 @ApiBearerAuth()
@@ -90,6 +91,13 @@ export class ActivityController {
 	@Get('/:id')
 	getActivityViewData(@Param('id') id: string, @Request() req) {
 		return this.activityService.getActivityViewData(id, req.user);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ActivityEntity, true))
+	@Get('/parents/:parentType/:parentId')
+	getActivitiesOfParent(@Param('parentType') parentType: EntityType, @Param('parentId') parentId: string, @Request() req) {
+		return this.activityService.getActivitiesOfParentByPath(parentType, parentId, req.user);
 	}
 
 	@ApiBearerAuth('api_key')

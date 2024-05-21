@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { ArrayMinSize, IsArray, IsBoolean, IsEnum, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
 import { ActivityStatus, ImpleMeans, Measure, SupportType, TechnologyType } from "../enums/activity.enum";
-import { EntityType, IntImplementor, NatImplementor } from "../enums/shared.enum";
+import { EntityType, GHGS, IntImplementor, NatImplementor } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { Type } from "class-transformer";
 
@@ -31,14 +31,6 @@ export class ActivityDto {
 	@IsString()
 	@ApiPropertyOptional()
 	parentId: string;
-
-	// @ValidateIf((c) => c.supportType)
-	// @IsNotEmpty()
-	// @ApiPropertyOptional({ enum: SupportType })
-	// @IsEnum(SupportType, {
-	// 	message: "Invalid type of support. Supported following types:" + Object.values(SupportType),
-	// })
-	// supportType: SupportType;
 
 	@ValidateIf((c) => c.measure)
 	@IsNotEmpty()
@@ -127,6 +119,21 @@ export class ActivityDto {
 		}
 	)
 	documents: DocumentDto[];
+
+	@ValidateIf((c) => c.ghgsAffected)
+	@IsArray()
+	@ArrayMinSize(1)
+	@MaxLength(100, { each: true })
+	@IsNotEmpty({ each: true })
+	@IsEnum(GHGS, {
+		each: true,
+		message: "Invalid GHG. Supported following types:" + Object.values(GHGS),
+	})
+	@ApiPropertyOptional({
+		type: [String],
+		enum: Object.values(GHGS),
+	})
+	ghgsAffected: GHGS[];
 
 	@IsNumber()
 	@ApiProperty()
