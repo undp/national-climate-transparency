@@ -85,3 +85,11 @@ export const CustomFormatDate = (timestamp: number) => {
 
   return formattedTime;
 };
+
+export const DashboardTotalFormatter = (value: number, isCurrency: boolean) => {
+  return isCurrency ? `$ ${value}` : value.toString();
+};
+
+export const getArraySum = (values: number[]) => {
+  return values.reduce((acc, value) => acc + value, 0);
+};

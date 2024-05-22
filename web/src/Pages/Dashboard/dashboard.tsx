@@ -1,4 +1,4 @@
-import { Col, Row, Select, Tag, message } from 'antd';
+import { Col, Empty, Row, Select, Tag, message } from 'antd';
 import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
@@ -12,7 +12,7 @@ import {
 import LayoutTable from '../../Components/common/Table/layout.table';
 import { useTranslation } from 'react-i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { CustomFormatDate } from '../../Utils/utilServices';
+import { CustomFormatDate, DashboardTotalFormatter, getArraySum } from '../../Utils/utilServices';
 import { getActionTableColumns } from '../../Definitions/columns/actionColumns';
 
 const { Option } = Select;
@@ -219,6 +219,7 @@ const Dashboard = () => {
         chartDescription: t('actionChartDescription'),
         categories: actionChart.labels,
         values: actionChart.count,
+        total: getArraySum(actionChart.count),
         lastUpdatedTime: actionChart.updatedTime,
       });
     }
@@ -230,6 +231,7 @@ const Dashboard = () => {
         chartDescription: t('projectChartDescription'),
         categories: projectChart.labels,
         values: projectChart.count,
+        total: getArraySum(projectChart.count),
         lastUpdatedTime: projectChart.updatedTime,
       });
     }
@@ -241,6 +243,7 @@ const Dashboard = () => {
         chartDescription: t('supportChartDescription'),
         categories: supportChart.labels,
         values: supportChart.count,
+        total: getArraySum(supportChart.count),
         lastUpdatedTime: supportChart.updatedTime,
       });
     }
@@ -252,6 +255,7 @@ const Dashboard = () => {
         chartDescription: t('financeChartDescription'),
         categories: financeChart.labels,
         values: financeChart.count,
+        total: getArraySum(financeChart.count),
         lastUpdatedTime: financeChart.updatedTime,
       });
     }
@@ -263,6 +267,7 @@ const Dashboard = () => {
         chartDescription: t('mtgIndividualChartDescription'),
         categories: mitigationIndividualChart.labels,
         values: mitigationIndividualChart.count,
+        total: getArraySum(mitigationIndividualChart.count),
         lastUpdatedTime: mitigationIndividualChart.updatedTime,
       });
     }
@@ -274,6 +279,7 @@ const Dashboard = () => {
         chartDescription: t('mtgRecentChartDescription'),
         categories: mitigationRecentChart.labels,
         values: mitigationRecentChart.count,
+        total: getArraySum(mitigationRecentChart.count),
         lastUpdatedTime: mitigationRecentChart.updatedTime,
       });
     }
@@ -344,16 +350,51 @@ const Dashboard = () => {
                   </Col>
                 </Row>
               </div>
-              <Chart
-                key={index}
-                type="donut"
-                options={{ labels: chart.categories }}
-                series={chart.values}
-                height={250}
-              />
-              <div className="chart-update-time">
-                <Tag className="time-chip">{CustomFormatDate(chart.lastUpdatedTime)}</Tag>
-              </div>
+              {chart.total > 0 ? (
+                <>
+                  <Chart
+                    key={index}
+                    type="donut"
+                    options={{
+                      labels: chart.categories.map((category) =>
+                        category.length > 16 ? `${category.slice(0, 16)}...` : category
+                      ),
+                      dataLabels: {
+                        enabled: false,
+                      },
+                      tooltip: {
+                        enabled: false,
+                      },
+                      plotOptions: {
+                        pie: {
+                          donut: {
+                            labels: {
+                              show: true,
+                              total: {
+                                show: true,
+                                label: 'Total',
+                                formatter: () =>
+                                  DashboardTotalFormatter(chart.total, [4].includes(chart.chartId)),
+                              },
+                            },
+                          },
+                        },
+                      },
+                    }}
+                    series={chart.values}
+                    height={250}
+                  />
+                  <div className="chart-update-time">
+                    <Tag className="time-chip">{CustomFormatDate(chart.lastUpdatedTime)}</Tag>
+                  </div>
+                </>
+              ) : (
+                <Empty
+                  className="empty-chart"
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description={t('noChartDataAvailable')}
+                />
+              )}
             </div>
           </Col>
         ))}

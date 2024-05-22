@@ -28,4 +28,12 @@
             color: #16B1FF;
         }
     }
+
+    .empty-chart {
+        height: 259px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
 }
