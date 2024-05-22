@@ -25,6 +25,7 @@ import { FileHandlerModule } from "src/file-handler/filehandler.module";
 import { FileUploadService } from "./fileUpload.service";
 import { LinkUnlinkService } from "./linkUnlink.service";
 import { IsTwoDecimalPointsConstraint } from "./twoDecimalPointNumber.decorator";
+import { DataExportService } from "./dataExport.service";
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { IsTwoDecimalPointsConstraint } from "./twoDecimalPointNumber.decorator"
     FileUploadService,
 		LinkUnlinkService,
 		IsTwoDecimalPointsConstraint,
+		DataExportService,
   ],
   exports: [
     CounterService,
@@ -84,6 +86,7 @@ import { IsTwoDecimalPointsConstraint } from "./twoDecimalPointNumber.decorator"
     HttpUtilService,
     FileUploadService,
 		LinkUnlinkService,
+		DataExportService,
   ],
 })
 export class UtilModule {}
