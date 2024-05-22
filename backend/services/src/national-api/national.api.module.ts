@@ -28,6 +28,8 @@ import { SupportController } from './support.controller';
 import { SupportModule } from 'src/support/support.module';
 import { KpiModule } from 'src/kpi/kpi.module';
 import { KpiController } from './kpi.controller';
+import { ReportController } from './report.controller';
+import { ReportModule } from 'src/report/report.module';
 
 
 @Module({
@@ -51,7 +53,8 @@ import { KpiController } from './kpi.controller';
 		ActivityModule,
     LogModule,
 		SupportModule,
-		KpiModule
+		KpiModule,
+		ReportModule
   ],
   controllers: [ 
     NationalAPIController, 
@@ -64,7 +67,8 @@ import { KpiController } from './kpi.controller';
 		ActivityController,
     LogController,
 		SupportController,
-		KpiController
+		KpiController, 
+		ReportController
   ],
   providers: [
     NationalAPIService, 
