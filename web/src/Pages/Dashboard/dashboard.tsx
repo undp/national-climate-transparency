@@ -1,4 +1,4 @@
-import { Col, Row, Tag, message } from 'antd';
+import { Col, Row, Select, Tag, message } from 'antd';
 import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
@@ -30,6 +30,8 @@ interface ChartData {
   updatedTime: number;
 }
 
+const { Option } = Select;
+
 const Dashboard = () => {
   const { t } = useTranslation(['actionList', 'tableAction']);
   const { get, post, statServerUrl } = useConnection();
@@ -50,6 +52,9 @@ const Dashboard = () => {
   });
   const [chartData, setChartData] = useState<PieChartData[]>([]);
 
+  //
+  const [mtgYear, setMtgYear] = useState<number>(2015);
+
   // Individual Chart Data
 
   const [actionChart, setActionChart] = useState<ChartData>();
@@ -58,6 +63,12 @@ const Dashboard = () => {
   const [financeChart, setFinanceChart] = useState<ChartData>();
   const [mitigationRecentChart, setMitigationRecentChart] = useState<ChartData>();
   const [mitigationIndividualChart, setMitigationIndividualChart] = useState<ChartData>();
+
+  const yearsList: number[] = [];
+
+  for (let year = 2015; year <= 2050; year++) {
+    yearsList.push(year);
+  }
 
   const getAllData = async () => {
     setLoading(true);
@@ -138,6 +149,29 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    const getIndividualMitigationChartData = async () => {
+      if (mtgYear) {
+        const response: any = await get(
+          `stats/analytics/ghgMitigationSummaryForYear/${mtgYear}`,
+          undefined,
+          statServerUrl
+        );
+        const mitigationIndividualChartData = response.data;
+        setMitigationIndividualChart({
+          labels: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
+            sector === null ? 'No Sector Attached' : sector
+          ),
+          count: mitigationIndividualChartData.stats.totals.map((count: string) =>
+            parseInt(count, 10)
+          ),
+          updatedTime: mitigationIndividualChartData.lastUpdate,
+        });
+      }
+    };
+    getIndividualMitigationChartData();
+  }, [mtgYear]);
+
+  useEffect(() => {
     const getClimateActionChartData = async () => {
       const response: any = await get('stats/analytics/actionsSummery', undefined, statServerUrl);
       const actionChartData = response.data;
@@ -191,25 +225,6 @@ const Dashboard = () => {
     };
     getFinanceChartData();
 
-    const getIndividualMitigationChartData = async () => {
-      const response: any = await get(
-        'stats/analytics/ghgMitigationSummaryForYear/2023',
-        undefined,
-        statServerUrl
-      );
-      const mitigationIndividualChartData = response.data;
-      setMitigationIndividualChart({
-        labels: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
-          sector === null ? 'No Sector Attached' : sector
-        ),
-        count: mitigationIndividualChartData.stats.totals.map((count: string) =>
-          parseInt(count, 10)
-        ),
-        updatedTime: mitigationIndividualChartData.lastUpdate,
-      });
-    };
-    getIndividualMitigationChartData();
-
     const getRecentMitigationChartData = async () => {
       const response: any = await get(
         'stats/analytics/getGhgMitigationSummary',
@@ -237,6 +252,7 @@ const Dashboard = () => {
 
     if (actionChart) {
       tempChartData.push({
+        chartId: 1,
         chartTitle: 'Climate Action',
         chartDescription: 'Climate Action Description',
         categories: actionChart.labels,
@@ -247,6 +263,7 @@ const Dashboard = () => {
 
     if (projectChart) {
       tempChartData.push({
+        chartId: 2,
         chartTitle: 'Projects',
         chartDescription: 'Climate Projects Description',
         categories: projectChart.labels,
@@ -257,6 +274,7 @@ const Dashboard = () => {
 
     if (supportChart) {
       tempChartData.push({
+        chartId: 3,
         chartTitle: 'Activities Supported',
         chartDescription: 'Activities Supported Description',
         categories: supportChart.labels,
@@ -267,6 +285,7 @@ const Dashboard = () => {
 
     if (financeChart) {
       tempChartData.push({
+        chartId: 4,
         chartTitle: 'Financing for Activities',
         chartDescription: 'Financing for Activities Description',
         categories: financeChart.labels,
@@ -277,7 +296,8 @@ const Dashboard = () => {
 
     if (mitigationIndividualChart) {
       tempChartData.push({
-        chartTitle: 'GHG Mitigation (tCO2e) Year',
+        chartId: 5,
+        chartTitle: 'GHG Mitigation (tCO2e)',
         chartDescription: 'GHG Mitigation (tCO2e) Year Description',
         categories: mitigationIndividualChart.labels,
         values: mitigationIndividualChart.count,
@@ -287,6 +307,7 @@ const Dashboard = () => {
 
     if (mitigationRecentChart) {
       tempChartData.push({
+        chartId: 6,
         chartTitle: 'GHG Mitigation (tCO2e) Most Recent Year',
         chartDescription: 'GHG Mitigation (tCO2e) Most Recent Year Description',
         categories: mitigationRecentChart.labels,
@@ -371,14 +392,37 @@ const Dashboard = () => {
           <Col className="gutter-row" span={12}>
             <div className="chart-section-card">
               <div className="chart-title">
-                {chart.chartTitle}
-                <InfoCircleOutlined
-                  onClick={() => {
-                    setChartContent({ title: chart.chartTitle, body: chart.chartDescription });
-                    setOpenChartInfo(true);
-                  }}
-                  style={{ marginLeft: '300px', marginBottom: '20px' }}
-                />
+                <Row gutter={30}>
+                  <Col span={17}>{chart.chartTitle}</Col>
+                  <Col span={5} style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    {chart.chartId === 5 && (
+                      <Select
+                        size="small"
+                        style={{ fontSize: '13px' }}
+                        defaultValue={mtgYear}
+                        showSearch
+                        onChange={(value) => {
+                          setMtgYear(value);
+                        }}
+                      >
+                        {yearsList.map((year) => (
+                          <Option key={year} value={year}>
+                            {year}
+                          </Option>
+                        ))}
+                      </Select>
+                    )}
+                  </Col>
+                  <Col span={2}>
+                    <InfoCircleOutlined
+                      onClick={() => {
+                        setChartContent({ title: chart.chartTitle, body: chart.chartDescription });
+                        setOpenChartInfo(true);
+                      }}
+                      // style={{ marginLeft: '300px', marginBottom: '20px' }}
+                    />
+                  </Col>
+                </Row>
               </div>
               <Chart
                 key={index}
