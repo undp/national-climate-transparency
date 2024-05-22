@@ -25,7 +25,7 @@ interface Item {
 
 const Dashboard = () => {
   const { t } = useTranslation(['actionList', 'tableAction']);
-  const { post } = useConnection();
+  const { get, post, statServerUrl } = useConnection();
 
   const [loading, setLoading] = useState<boolean>(false);
   // Table Data State
@@ -42,6 +42,7 @@ const Dashboard = () => {
     body: '',
   });
   const [chartData, setChartData] = useState<PieChartData[]>([]);
+  const [actionChart, setActionChart] = useState<{ labels: string[]; count: number[] }>();
 
   const getAllData = async () => {
     setLoading(true);
@@ -122,14 +123,30 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    const getClimateActionChartData = async () => {
+      const response: any = await get('stats/analytics/actionsSummery', undefined, statServerUrl);
+      const actionChartData = response.data.stats;
+      setActionChart({
+        labels: actionChartData.sectors,
+        count: actionChartData.counts.map((count: string) => parseInt(count, 10)),
+      });
+    };
+    getClimateActionChartData();
+
+    getAllData();
+  }, []);
+
+  useEffect(() => {
     const tempChartData: PieChartData[] = [];
 
-    tempChartData.push({
-      chartTitle: 'Climate Action',
-      chartDescription: 'Climate Action Description',
-      categories: ['A', 'B', 'C'],
-      values: [50, 20, 80],
-    });
+    if (actionChart) {
+      tempChartData.push({
+        chartTitle: 'Climate Action',
+        chartDescription: 'Climate Action Description',
+        categories: actionChart?.labels,
+        values: actionChart?.count,
+      });
+    }
 
     tempChartData.push({
       chartTitle: 'Projects',
@@ -152,9 +169,7 @@ const Dashboard = () => {
       values: [50, 80, 80],
     });
     setChartData(tempChartData);
-
-    getAllData();
-  }, []);
+  }, [actionChart]);
 
   // Action List Table Columns
 
