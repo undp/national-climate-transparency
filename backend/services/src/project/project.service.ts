@@ -50,6 +50,7 @@ export class ProjectService {
 		const eventLog = [];
 
 		project.projectId = 'J' + await this.counterService.incrementCount(CounterType.PROJECT, 3);
+		this.addEventLogEntry(eventLog, LogEventType.PROJECT_CREATED, EntityType.PROJECT, project.projectId, user.id, projectDto);
 
 		if (projectDto.endYear < projectDto.startYear) {
 			throw new HttpException(
@@ -107,8 +108,6 @@ export class ProjectService {
 			project.documents = documents;
 
 		}
-		this.addEventLogEntry(eventLog, LogEventType.PROJECT_CREATED, EntityType.PROJECT, project.projectId, user.id, projectDto);
-
 
 		const kpiList = [];
 		if (projectDto.kpis) {
@@ -143,6 +142,12 @@ export class ProjectService {
 			.transaction(async (em) => {
 				const savedProject = await em.save<ProjectEntity>(project);
 				if (savedProject) {
+					// linking activities and updating paths of projects and activities
+					if (activities && activities.length > 0) {
+						await this.linkUnlinkService.linkActivitiesToParent(savedProject, activities, {parentType: EntityType.PROJECT, parentId: savedProject.projectId, activityIds: activities}, user, em);
+						this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, project.projectId, user.id, projectDto);
+					}
+					
 					if (projectDto.kpis) {
 						for (const kpi of kpiList) {
 							await em.save<KpiEntity>(kpi);
@@ -151,11 +156,6 @@ export class ProjectService {
 
 					for (const event of eventLog) {
 						await em.save<LogEntity>(event);
-					}
-
-					// linking activities and updating paths of projects and activities
-					if (activities && activities.length > 0) {
-						await this.linkUnlinkService.linkActivitiesToParent(savedProject, activities, {parentType: EntityType.PROJECT, parentId: savedProject.projectId, activityIds: activities}, user, em);
 					}
 				}
 				return savedProject;

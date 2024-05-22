@@ -54,6 +54,7 @@ export class ProgrammeService {
 		const eventLog = [];
 
 		programme.programmeId = 'P' + await this.counterService.incrementCount(CounterType.PROGRAMME, 3);
+		this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_CREATED, EntityType.PROGRAMME, programme.programmeId, user.id, programmeDto);
 
 		// upload the documents and create the doc array here
 		if (programmeDto.documents) {
@@ -69,7 +70,6 @@ export class ProgrammeService {
 			programme.documents = documents;
 
 		}
-		this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_CREATED, EntityType.PROGRAMME, programme.programmeId, user.id, programmeDto);
 
 		const kpiList = [];
 		if (programmeDto.kpis) {
@@ -137,6 +137,12 @@ export class ProgrammeService {
 			.transaction(async (em) => {
 				const savedProgramme = await em.save<ProgrammeEntity>(programme);
 				if (savedProgramme) {
+					// linking projects and updating paths of projects and activities
+					if (projects && projects.length > 0) {
+						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
+						this.addEventLogEntry(eventLog, LogEventType.PROJECT_LINKED, EntityType.PROGRAMME, programme.programmeId, user.id, programmeDto);
+					}
+					
 					if (programmeDto.kpis) {
 						for (const kpi of kpiList) {
 							await em.save<KpiEntity>(kpi);
@@ -147,10 +153,6 @@ export class ProgrammeService {
 						await em.save<LogEntity>(event);
 					}
 
-					// linking projects and updating paths of projects and activities
-					if (projects && projects.length > 0) {
-						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
-					}
 				}
 				return savedProgramme;
 			})

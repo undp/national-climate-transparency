@@ -47,6 +47,7 @@ const UpdatesTimeline: React.FC<UpdateProps> = ({ recordType, recordId }) => {
       case '5':
       case '8':
       case '12':
+      case '22':
         return (
           <span className="step-icon created-step">
             <Icon.CaretRight />
@@ -58,6 +59,8 @@ const UpdatesTimeline: React.FC<UpdateProps> = ({ recordType, recordId }) => {
       case '10':
       case '13':
       case '14':
+      case '23':
+      case '24':
         return (
           <span className="step-icon link-step">
             <Icon.Link45deg />
@@ -65,6 +68,8 @@ const UpdatesTimeline: React.FC<UpdateProps> = ({ recordType, recordId }) => {
         );
       case '7': //Unlinked steps
       case '11':
+      case '15':
+      case '27':
         return (
           <span className="step-icon unlink-step">
             <Icon.Link45deg />
@@ -74,6 +79,16 @@ const UpdatesTimeline: React.FC<UpdateProps> = ({ recordType, recordId }) => {
         return (
           <span className="step-icon addkpi-step">
             <Icon.PlusLg />
+          </span>
+        );
+      case '18': //Validated steps
+      case '19':
+      case '21':
+      case '25':
+      case '28':
+        return (
+          <span className="step-icon verify-step">
+            <Icon.CheckAll />
           </span>
         );
       default:

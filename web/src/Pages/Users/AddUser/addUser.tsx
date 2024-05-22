@@ -50,6 +50,7 @@ const AddUser = () => {
   const [countries, setCountries] = useState<[]>([]);
   const [isCountryListLoading, setIsCountryListLoading] = useState(false);
   const [role, setRole] = useState(state?.record?.role);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
   const getCountryList = async () => {
     setIsCountryListLoading(true);
@@ -208,7 +209,12 @@ const AddUser = () => {
   useEffect(() => {
     getCountryList();
     setIsUpdate(state?.record ? true : false);
+    if (isUpdate) setIsSaveButtonDisabled(true);
   }, []);
+
+  const handleValuesChange = () => {
+    setIsSaveButtonDisabled(false);
+  };
 
   return (
     <div className="add-user-main-container">
@@ -234,6 +240,7 @@ const AddUser = () => {
           form={formOne}
           requiredMark={true}
           onFinish={onSubmitData}
+          onValuesChange={handleValuesChange}
         >
           <Row className="row" gutter={[16, 16]}>
             <Col xl={12} md={24}>
@@ -535,6 +542,10 @@ const AddUser = () => {
                       mode="multiple"
                       allowClear
                       showSearch
+                      disabled={
+                        isUpdate &&
+                        !ability.can(Action.Update, plainToClass(User, state?.record), 'sector')
+                      }
                     >
                       {Object.values(Sector).map((instrument) => (
                         <Select.Option key={instrument} value={instrument}>
@@ -550,7 +561,12 @@ const AddUser = () => {
           <div className="actions">
             <Form.Item>
               <div className="create-user-btn-container">
-                <Button type="primary" htmlType="submit" loading={loading}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  disabled={isSaveButtonDisabled}
+                >
                   {isUpdate ? t('addUser:update') : t('addUser:submit')}
                 </Button>
               </div>

@@ -17,7 +17,8 @@ export class LogService {
         const eventTypes = [
             LogEventType.LINKED_TO_ACTION,
             LogEventType.LINKED_TO_PROGRAMME,
-            LogEventType.LINKED_TO_PROJECT
+            LogEventType.LINKED_TO_PROJECT,
+            LogEventType.LINKED_TO_ACTIVITY
         ];
 
         const queryBuilder = await this.logRepo
@@ -44,7 +45,6 @@ export class LogService {
             .orderBy('log.createdTime', 'DESC')
             .addOrderBy('log.logId', 'DESC');
         const result = await queryBuilder.getRawMany();
-        console.log(result);
         return result;
     }
 }

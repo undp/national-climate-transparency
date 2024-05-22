@@ -50,6 +50,11 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
 
+  // Form General State
+
+  //MARK:TO DO
+  // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+
   // Field Disabling state
 
   const [isInternational, setIsInternational] = useState<boolean>(false);
@@ -136,6 +141,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
+        // setIsSaveButtonDisabled(true);
       }
     };
     fetchData();
@@ -242,13 +248,24 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     }
   };
 
+  // Save Button Enable when form value change
+
+  // const handleValuesChange = () => {
+  //   setIsSaveButtonDisabled(false);
+  // };
+
   return (
     <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
       <div className="support-form">
-        <Form form={form} onFinish={handleSubmit} layout="vertical">
+        <Form
+          form={form}
+          onFinish={handleSubmit}
+          layout="vertical"
+          // onValuesChange={handleValuesChange}
+        >
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
             {method !== 'create' && entId && (
@@ -673,7 +690,13 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
               <Col span={2.5}>
                 <Form.Item>
-                  <Button type="primary" size="large" block htmlType="submit">
+                  <Button
+                    type="primary"
+                    size="large"
+                    block
+                    htmlType="submit"
+                    // disabled={isSaveButtonDisabled}
+                  >
                     {t('update')}
                   </Button>
                 </Form.Item>

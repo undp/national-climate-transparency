@@ -67,6 +67,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
+  //MARK: TO DO
+  // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+
   // Spinner When Form Submit Occurs
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
@@ -195,6 +198,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
+        // setIsSaveButtonDisabled(true);
       }
     };
     fetchData();
@@ -695,6 +699,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     setSupportPageSize(pagination.pageSize);
   };
 
+  // Save Button Enable when form value change
+
+  // const handleValuesChange = () => {
+  //   setIsSaveButtonDisabled(false);
+  // };
+
   return (
     <div className="content-container">
       <div className="title-bar">
@@ -702,7 +712,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       </div>
       {!waitingForBE ? (
         <div className="action-form">
-          <Form form={form} onFinish={handleSubmit} layout="vertical">
+          <Form
+            form={form}
+            onFinish={handleSubmit}
+            layout="vertical"
+            // onValuesChange={handleValuesChange}
+          >
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
@@ -1110,7 +1125,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            {isView && (
+            {method !== 'create' && (
               <div className="form-section-timelinecard">
                 <div className="form-section-header">{t('updatesInfoTitle')}</div>
                 <UpdatesTimeline recordType={'action'} recordId={entId} />
@@ -1201,7 +1216,13 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col span={2.5}>
                   <Form.Item>
-                    <Button type="primary" size="large" block htmlType="submit">
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      htmlType="submit"
+                      // disabled={isSaveButtonDisabled}
+                    >
                       {t('update')}
                     </Button>
                   </Form.Item>

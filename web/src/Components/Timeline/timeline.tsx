@@ -76,7 +76,7 @@ const TimelineTable: React.FC<Props> = ({
     },
   ];
 
-  for (let year = 2023; year <= 2048; year++) {
+  for (let year = 2015; year <= 2050; year++) {
     expectedTableColumns.push({
       title: year.toString(),
       dataIndex: year.toString(),

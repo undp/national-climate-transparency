@@ -66,7 +66,9 @@ export class LinkUnlinkService {
 							}
 							await em.save<ProjectEntity>(projects)
 						}
-						await em.save<LogEntity>(
+
+						const logs = [];
+						logs.push(
 							this.buildLogEntity(
 								LogEventType.LINKED_TO_ACTION,
 								EntityType.PROGRAMME,
@@ -74,7 +76,17 @@ export class LinkUnlinkService {
 								user.id,
 								payload
 							)
-						);
+						)
+						logs.push(
+							this.buildLogEntity(
+								LogEventType.PROGRAMME_LINKED,
+								EntityType.ACTION,
+								action.actionId,
+								user.id,
+								payload
+							)
+						)
+						await em.save<LogEntity>(logs);
 					}
 				}
 			});
@@ -225,7 +237,8 @@ export class LinkUnlinkService {
 							await em.save<ActivityEntity>(activities);
 						}
 
-						await em.save<LogEntity>(
+						const logs = [];
+						logs.push(
 							this.buildLogEntity(
 								LogEventType.LINKED_TO_PROGRAMME,
 								EntityType.PROJECT,
@@ -233,16 +246,26 @@ export class LinkUnlinkService {
 								user.id,
 								payload
 							)
-						);
+						)
+						logs.push(
+							this.buildLogEntity(
+								LogEventType.PROJECT_LINKED,
+								EntityType.PROGRAMME,
+								programme.programmeId,
+								user.id,
+								payload
+							)
+						)
+						await em.save<LogEntity>(logs);
 					}
 				}
 			});
 	}
 
 	async unlinkProjectsFromProgramme(
-		projects: ProjectEntity[], 
-		payload: any, 
-		user: User, 
+		projects: ProjectEntity[],
+		payload: any,
+		user: User,
 		entityManager: EntityManager,
 		achievementsToRemove: AchievementEntity[]
 	) {
@@ -274,7 +297,7 @@ export class LinkUnlinkService {
 							await em.save<ActivityEntity>(activities);
 						}
 						await this.deleteAchievements(achievementsToRemove, em);
-						
+
 						await em.save<LogEntity>(
 							this.buildLogEntity(
 								LogEventType.UNLINKED_FROM_PROGRAMME,
@@ -300,22 +323,26 @@ export class LinkUnlinkService {
 			.transaction(async (em) => {
 				for (const activity of activities) {
 					let logEventType;
+					let entityType;
 					switch (linkActivitiesDto.parentType) {
 						case EntityType.ACTION: {
 							activity.path = `${linkActivitiesDto.parentId}._._`;
 							logEventType = LogEventType.LINKED_TO_ACTION;
+							entityType  = EntityType.ACTION;
 							activity.sector = parentEntity?.sector;
 							break;
 						}
 						case EntityType.PROGRAMME: {
 							activity.path = parentEntity.path && parentEntity.path.trim() !== ''  ? `${parentEntity.path}.${linkActivitiesDto.parentId}._` : `_.${linkActivitiesDto.parentId}._`;
 							logEventType = LogEventType.LINKED_TO_PROGRAMME;
+							entityType  = EntityType.PROGRAMME;
 							activity.sector = parentEntity?.sector;
 							break;
 						}
 						case EntityType.PROJECT: {
 							activity.path = parentEntity.path && parentEntity.path.trim() !== '' ? `${parentEntity.path}.${linkActivitiesDto.parentId}` : `_._.${linkActivitiesDto.parentId}`;
 							logEventType = LogEventType.LINKED_TO_PROJECT;
+							entityType  = EntityType.PROJECT;
 							activity.sector = parentEntity?.sector;
 							break;
 						}
@@ -335,7 +362,8 @@ export class LinkUnlinkService {
 						}
 
 						await em.save<SupportEntity>(supports);
-						await em.save<LogEntity>(
+						const logs =[];
+						logs.push(
 							this.buildLogEntity(
 								logEventType,
 								EntityType.ACTIVITY,
@@ -343,7 +371,17 @@ export class LinkUnlinkService {
 								user.id,
 								linkActivitiesDto.parentId
 							)
-						);
+						)
+						logs.push(
+							this.buildLogEntity(
+								LogEventType.ACTIVITY_LINKED,
+								entityType,
+								linkActivitiesDto.parentId,
+								user.id,
+								linkActivitiesDto.parentId
+							)
+						)
+						await em.save<LogEntity>(logs);
 					}
 				}
 			});
@@ -354,7 +392,7 @@ export class LinkUnlinkService {
 		unlinkActivitiesDto: UnlinkActivitiesDto,
 		user: User,
 		entityManager: EntityManager,
-		achievementsToRemove: AchievementEntity[] 
+		achievementsToRemove: AchievementEntity[]
 	) {
 		const act = await entityManager
 			.transaction(async (em) => {
@@ -408,21 +446,21 @@ export class LinkUnlinkService {
 
 	// Adding here to avoid circular dependencies
 	async deleteAchievements(achievements: any[], em: EntityManager) {
-    const queryBuilder = em.createQueryBuilder()
-        .delete()
-        .from(AchievementEntity);
+		const queryBuilder = em.createQueryBuilder()
+			.delete()
+			.from(AchievementEntity);
 
-    for (const achievement of achievements) {
-        queryBuilder.orWhere('"kpiId" = :kpiId AND "activityId" = :activityId', { kpiId: achievement.kpiId, activityId: achievement.activityId });
-    }
+		for (const achievement of achievements) {
+			queryBuilder.orWhere('"kpiId" = :kpiId AND "activityId" = :activityId', { kpiId: achievement.kpiId, activityId: achievement.activityId });
+		}
 
 		const query = queryBuilder.getQueryAndParameters();
 		console.log("Generated SQL Query:", query[0]);
 		console.log("Query Parameters:", query[1]);
 
-    const result = await queryBuilder.execute();
-    return result;
-}
+		const result = await queryBuilder.execute();
+		return result;
+	}
 
 	addActionToActivityPath(currentActivityPath: string, actionId: string) {
 		const parts = currentActivityPath.split(".");
