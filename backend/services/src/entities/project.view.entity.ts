@@ -4,6 +4,7 @@ export const projectViewSQL = `
 SELECT 
     prj."projectId" AS id,
     ARRAY_AGG(DISTINCT fullact."techTypes") AS "technologyTypes",
+		CUSTOM_ARRAY_AGG(fullact."ghgsAffected") FILTER (WHERE fullact."ghgsAffected" IS NOT NULL) AS "ghgsAffected",
     ARRAY_AGG(DISTINCT fullact."meansOfImplementation") AS "meansOfImplementation",
     SUM(fullact."requiredAmount") AS "estimatedAmount",
     SUM(fullact."receivedAmount") AS "receivedAmount",
@@ -18,6 +19,7 @@ LEFT JOIN (
         act."activityId",
         act."parentId" AS "projectId",
         act."technologyType" AS "techTypes",
+				act."ghgsAffected" AS "ghgsAffected",
         act."meansOfImplementation" AS "meansOfImplementation",
         act."achievedGHGReduction" AS "achievedGHGReduction",
         act."expectedGHGReduction" AS "expectedGHGReduction",
@@ -44,41 +46,41 @@ GROUP BY
     prj."projectId";`
 
 @ViewEntity({
-    name: 'project_view_entity',
-    materialized: true,
-    expression: projectViewSQL,
-    synchronize: false,
+	name: 'project_view_entity',
+	materialized: true,
+	expression: projectViewSQL,
+	synchronize: false,
 })
 export class ProjectViewEntity {
-    @Index()
-    @ViewColumn()
-    id: string;
+	@Index()
+	@ViewColumn()
+	id: string;
 
-    // From Activity
+	// From Activity
 
-    @ViewColumn()
-    meansOfImplementation: string[]
+	@ViewColumn()
+	meansOfImplementation: string[]
 
-    @ViewColumn()
-    technologyTypes: string[]
+	@ViewColumn()
+	technologyTypes: string[]
 
-    @ViewColumn()
-    achievedGHGReduction: number;
-  
-    @ViewColumn()
-    expectedGHGReduction: number;
+	@ViewColumn()
+	achievedGHGReduction: number;
 
-    // From Support
+	@ViewColumn()
+	expectedGHGReduction: number;
 
-    @ViewColumn()
-    estimatedAmount: number
+	// From Support
 
-    @ViewColumn()
-    receivedAmount: number
+	@ViewColumn()
+	estimatedAmount: number
 
-		@ViewColumn()
-    estimatedAmountDomestic: number
+	@ViewColumn()
+	receivedAmount: number
 
-    @ViewColumn()
-    receivedAmountDomestic: number
+	@ViewColumn()
+	estimatedAmountDomestic: number
+
+	@ViewColumn()
+	receivedAmountDomestic: number
 }

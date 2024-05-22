@@ -479,6 +479,7 @@ export class HelperService {
 		await entityManager.query('REFRESH MATERIALIZED VIEW project_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW programme_view_entity;');
 		await entityManager.query('REFRESH MATERIALIZED VIEW action_view_entity;');
+		await entityManager.query('REFRESH MATERIALIZED VIEW report_five_view_entity;');
 	}
 
   public getEmailTemplateMessage(template: string, data, isSubject: boolean) :string{
