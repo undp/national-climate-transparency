@@ -4,31 +4,16 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
 import { useEffect, useState } from 'react';
 import Chart from 'react-apexcharts';
-import { PieChartData } from '../../Definitions/dashboard.definitions';
+import {
+  ChartData,
+  DashboardActionItem,
+  PieChartData,
+} from '../../Definitions/dashboard.definitions';
 import LayoutTable from '../../Components/common/Table/layout.table';
-import ScrollableList from '../../Components/ScrollableList/scrollableList';
 import { useTranslation } from 'react-i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { CustomFormatDate } from '../../Utils/utilServices';
-
-interface Item {
-  key: number;
-  actionId: number;
-  title: string;
-  actionType: string;
-  affectedSectors: string[];
-  financeNeeded: number;
-  financeReceived: number;
-  status: string;
-  validationStatus: string;
-  nationalImplementingEntity: string[];
-}
-
-interface ChartData {
-  labels: string[];
-  count: number[];
-  updatedTime: number;
-}
+import { getActionTableColumns } from '../../Definitions/columns/actionTable';
 
 const { Option } = Select;
 
@@ -39,20 +24,18 @@ const Dashboard = () => {
   const [loading, setLoading] = useState<boolean>(false);
   // Table Data State
 
-  const [tableData, setTableData] = useState<Item[]>([]);
+  const [tableData, setTableData] = useState<DashboardActionItem[]>([]);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [totalRowCount, setTotalRowRowCount] = useState<number>();
 
   // Chart State
   const [openChartInfo, setOpenChartInfo] = useState<boolean>(false);
-  const [chartContent, setChartContent] = useState<{ title: string; body: string }>({
-    title: '',
-    body: '',
-  });
+  const [chartContent, setChartContent] = useState<{ title: string; body: string }>();
   const [chartData, setChartData] = useState<PieChartData[]>([]);
 
-  //
+  // Year State for the GHG MYG Chart 5
+
   const [mtgYear, setMtgYear] = useState<number>(2015);
 
   // Individual Chart Data
@@ -64,11 +47,15 @@ const Dashboard = () => {
   const [mitigationRecentChart, setMitigationRecentChart] = useState<ChartData>();
   const [mitigationIndividualChart, setMitigationIndividualChart] = useState<ChartData>();
 
+  // Year List to be shown in the Year Selector in Chart 5
+
   const yearsList: number[] = [];
 
   for (let year = 2015; year <= 2050; year++) {
     yearsList.push(year);
   }
+
+  // BE Call to fetch Action Data
 
   const getAllData = async () => {
     setLoading(true);
@@ -118,14 +105,13 @@ const Dashboard = () => {
       const response: any = await post('national/actions/query', payload);
       if (response) {
         const unstructuredData: any[] = response.data;
-        const structuredData: Item[] = [];
+        const structuredData: DashboardActionItem[] = [];
         for (let i = 0; i < unstructuredData.length; i++) {
           structuredData.push({
             key: i,
             actionId: unstructuredData[i].actionId,
             title: unstructuredData[i].title,
             status: unstructuredData[i].status,
-            validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             actionType: unstructuredData[i].migratedData[0]?.types ?? [],
             affectedSectors: unstructuredData[i].sector,
             nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? [],
@@ -147,6 +133,8 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
+  // Data Fetching for GHG MTG Selected Year
 
   useEffect(() => {
     const getIndividualMitigationChartData = async () => {
@@ -170,6 +158,8 @@ const Dashboard = () => {
     };
     getIndividualMitigationChartData();
   }, [mtgYear]);
+
+  // Data Fetching at the Initial Loading
 
   useEffect(() => {
     const getClimateActionChartData = async () => {
@@ -246,6 +236,8 @@ const Dashboard = () => {
 
     getAllData();
   }, []);
+
+  // Updating the Chart Rendering Array when data fetching completes
 
   useEffect(() => {
     const tempChartData: PieChartData[] = [];
@@ -328,48 +320,7 @@ const Dashboard = () => {
 
   // Action List Table Columns
 
-  const columns = [
-    { title: t('actionId'), width: 100, dataIndex: 'actionId', key: 'actionId', sorter: false },
-    { title: t('titleOfAction'), width: 120, dataIndex: 'title', key: 'title', sorter: false },
-    {
-      title: t('actionType'),
-      width: 100,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: any) => {
-        return <ScrollableList listToShow={record.actionType}></ScrollableList>;
-      },
-    },
-    {
-      title: t('sectorAffected'),
-      width: 120,
-      dataIndex: 'affectedSectors',
-      key: 'affectedSectors',
-      sorter: false,
-    },
-    { title: t('actionStatus'), width: 120, dataIndex: 'status', key: 'status', sorter: false },
-    {
-      title: t('nationalImplementingEntity'),
-      width: 180,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: any) => {
-        return <ScrollableList listToShow={record.nationalImplementingEntity}></ScrollableList>;
-      },
-    },
-    {
-      title: t('financeNeeded'),
-      width: 120,
-      dataIndex: 'financeNeeded',
-      key: 'financeNeeded',
-      sorter: false,
-    },
-    {
-      title: t('financeReceived'),
-      width: 130,
-      dataIndex: 'financeReceived',
-      key: 'financeReceived',
-      sorter: false,
-    },
-  ];
+  const columns = getActionTableColumns(t);
 
   // Handling Table Pagination and Sorting Changes
 
@@ -419,7 +370,6 @@ const Dashboard = () => {
                         setChartContent({ title: chart.chartTitle, body: chart.chartDescription });
                         setOpenChartInfo(true);
                       }}
-                      // style={{ marginLeft: '300px', marginBottom: '20px' }}
                     />
                   </Col>
                 </Row>

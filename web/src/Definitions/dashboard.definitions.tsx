@@ -6,3 +6,21 @@ export type PieChartData = {
   chartDescription: string;
   lastUpdatedTime: number;
 };
+
+export type DashboardActionItem = {
+  key: number;
+  actionId: number;
+  title: string;
+  actionType: string;
+  affectedSectors: string[];
+  financeNeeded: number;
+  financeReceived: number;
+  status: string;
+  nationalImplementingEntity: string[];
+};
+
+export type ChartData = {
+  labels: string[];
+  count: number[];
+  updatedTime: number;
+};
