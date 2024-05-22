@@ -18,10 +18,13 @@ import { getActionTableColumns } from '../../Definitions/columns/actionColumns';
 const { Option } = Select;
 
 const Dashboard = () => {
+  // Context Information
+
   const { t } = useTranslation(['dashboard', 'actionList']);
   const { get, post, statServerUrl } = useConnection();
 
   const [loading, setLoading] = useState<boolean>(false);
+
   // Table Data State
 
   const [tableData, setTableData] = useState<DashboardActionItem[]>([]);
@@ -307,7 +310,7 @@ const Dashboard = () => {
       ></ChartInformation>
       <Row gutter={30}>
         {chartData.map((chart: PieChartData, index: number) => (
-          <Col className="gutter-row" span={12}>
+          <Col key={index} className="gutter-row" span={12}>
             <div className="chart-section-card">
               <div className="chart-title">
                 <Row gutter={30}>
