@@ -43,6 +43,7 @@ const Dashboard = () => {
   });
   const [chartData, setChartData] = useState<PieChartData[]>([]);
   const [actionChart, setActionChart] = useState<{ labels: string[]; count: number[] }>();
+  const [projectChart, setProjectChart] = useState<{ labels: string[]; count: number[] }>();
 
   const getAllData = async () => {
     setLoading(true);
@@ -133,6 +134,18 @@ const Dashboard = () => {
     };
     getClimateActionChartData();
 
+    const getProjectChartData = async () => {
+      const response: any = await get('stats/analytics/projectSummary', undefined, statServerUrl);
+      const actionChartData = response.data.stats;
+      setProjectChart({
+        labels: actionChartData.sectors.map((sector: string) =>
+          sector === null ? 'No Sector Attached' : sector
+        ),
+        count: actionChartData.counts.map((count: string) => parseInt(count, 10)),
+      });
+    };
+    getProjectChartData();
+
     getAllData();
   }, []);
 
@@ -148,12 +161,14 @@ const Dashboard = () => {
       });
     }
 
-    tempChartData.push({
-      chartTitle: 'Projects',
-      chartDescription: 'Climate Projects Description',
-      categories: ['A', 'B', 'C'],
-      values: [50, 80, 80],
-    });
+    if (projectChart) {
+      tempChartData.push({
+        chartTitle: 'Projects',
+        chartDescription: 'Climate Projects Description',
+        categories: projectChart.labels,
+        values: projectChart.count,
+      });
+    }
 
     tempChartData.push({
       chartTitle: 'Climate Action',
@@ -169,7 +184,7 @@ const Dashboard = () => {
       values: [50, 80, 80],
     });
     setChartData(tempChartData);
-  }, [actionChart]);
+  }, [actionChart, projectChart]);
 
   // Action List Table Columns
 
