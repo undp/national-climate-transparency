@@ -1,10 +1,11 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import configuration from '../configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from '../typeorm.config.service';
 import { ReportFiveViewEntity } from 'src/entities/report.five.view.entity';
 import { ReportService } from './report.service';
+import { UtilModule } from 'src/util/util.module';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { ReportService } from './report.service';
 		TypeOrmModule.forFeature([
 			ReportFiveViewEntity
 		]),
+		UtilModule
 	],
 	providers: [
 		ReportService

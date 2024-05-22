@@ -56,8 +56,8 @@ export class SupportService {
 			);
 		}
 
-		support.requiredAmountDomestic = support.requiredAmount * support.exchangeRate;
-		support.receivedAmountDomestic = support.receivedAmount * support.exchangeRate;
+		support.requiredAmountDomestic = support.requiredAmount / support.exchangeRate;
+		support.receivedAmountDomestic = support.receivedAmount / support.exchangeRate;
 		support.sector = activity.sector;
 
 		support.activity = activity;
