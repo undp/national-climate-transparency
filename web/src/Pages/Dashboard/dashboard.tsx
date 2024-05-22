@@ -13,12 +13,12 @@ import LayoutTable from '../../Components/common/Table/layout.table';
 import { useTranslation } from 'react-i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { CustomFormatDate } from '../../Utils/utilServices';
-import { getActionTableColumns } from '../../Definitions/columns/actionTable';
+import { getActionTableColumns } from '../../Definitions/columns/actionColumns';
 
 const { Option } = Select;
 
 const Dashboard = () => {
-  const { t } = useTranslation(['actionList', 'tableAction']);
+  const { t } = useTranslation(['dashboard', 'actionList']);
   const { get, post, statServerUrl } = useConnection();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -68,39 +68,6 @@ const Dashboard = () => {
         key: 'actionId',
         order: 'DESC',
       };
-
-      // Adding Filter Conditions
-
-      // if (appliedFilterValue.statusFilter !== 'All') {
-      //   payload.filterAnd = [];
-      //   payload.filterAnd.push({
-      //     key: 'status',
-      //     operation: '=',
-      //     value: appliedFilterValue.statusFilter,
-      //   });
-      // }
-
-      // if (appliedFilterValue.validationFilter !== 'All') {
-      //   if (!payload.hasOwnProperty('filterAnd')) {
-      //     payload.filterAnd = [];
-      //   }
-      //   payload.filterAnd.push({
-      //     key: 'validated',
-      //     operation: '=',
-      //     value: appliedFilterValue.validationFilter === 'Validated' ? true : false,
-      //   });
-      // }
-
-      // if (searchValue !== '') {
-      //   if (!payload.hasOwnProperty('filterAnd')) {
-      //     payload.filterAnd = [];
-      //   }
-      //   payload.filterAnd.push({
-      //     key: appliedFilterValue.searchBy,
-      //     operation: 'LIKE',
-      //     value: `%${searchValue}%`,
-      //   });
-      // }
 
       const response: any = await post('national/actions/query', payload);
       if (response) {
@@ -245,8 +212,8 @@ const Dashboard = () => {
     if (actionChart) {
       tempChartData.push({
         chartId: 1,
-        chartTitle: 'Climate Action',
-        chartDescription: 'Climate Action Description',
+        chartTitle: t('actionChartTitle'),
+        chartDescription: t('actionChartDescription'),
         categories: actionChart.labels,
         values: actionChart.count,
         lastUpdatedTime: actionChart.updatedTime,
@@ -256,8 +223,8 @@ const Dashboard = () => {
     if (projectChart) {
       tempChartData.push({
         chartId: 2,
-        chartTitle: 'Projects',
-        chartDescription: 'Climate Projects Description',
+        chartTitle: t('projectChartTitle'),
+        chartDescription: t('projectChartDescription'),
         categories: projectChart.labels,
         values: projectChart.count,
         lastUpdatedTime: projectChart.updatedTime,
@@ -267,8 +234,8 @@ const Dashboard = () => {
     if (supportChart) {
       tempChartData.push({
         chartId: 3,
-        chartTitle: 'Activities Supported',
-        chartDescription: 'Activities Supported Description',
+        chartTitle: t('supportChartTitle'),
+        chartDescription: t('supportChartDescription'),
         categories: supportChart.labels,
         values: supportChart.count,
         lastUpdatedTime: supportChart.updatedTime,
@@ -278,8 +245,8 @@ const Dashboard = () => {
     if (financeChart) {
       tempChartData.push({
         chartId: 4,
-        chartTitle: 'Financing for Activities',
-        chartDescription: 'Financing for Activities Description',
+        chartTitle: t('financeChartTitle'),
+        chartDescription: t('financeChartDescription'),
         categories: financeChart.labels,
         values: financeChart.count,
         lastUpdatedTime: financeChart.updatedTime,
@@ -289,8 +256,8 @@ const Dashboard = () => {
     if (mitigationIndividualChart) {
       tempChartData.push({
         chartId: 5,
-        chartTitle: 'GHG Mitigation (tCO2e)',
-        chartDescription: 'GHG Mitigation (tCO2e) Year Description',
+        chartTitle: t('mtgIndividualChartTitle'),
+        chartDescription: t('mtgIndividualChartDescription'),
         categories: mitigationIndividualChart.labels,
         values: mitigationIndividualChart.count,
         lastUpdatedTime: mitigationIndividualChart.updatedTime,
@@ -300,8 +267,8 @@ const Dashboard = () => {
     if (mitigationRecentChart) {
       tempChartData.push({
         chartId: 6,
-        chartTitle: 'GHG Mitigation (tCO2e) Most Recent Year',
-        chartDescription: 'GHG Mitigation (tCO2e) Most Recent Year Description',
+        chartTitle: t('mtgRecentChartTitle'),
+        chartDescription: t('mtgRecentChartDescription'),
         categories: mitigationRecentChart.labels,
         values: mitigationRecentChart.count,
         lastUpdatedTime: mitigationRecentChart.updatedTime,
