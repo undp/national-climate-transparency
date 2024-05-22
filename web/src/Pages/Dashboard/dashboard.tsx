@@ -56,7 +56,7 @@ const Dashboard = () => {
   const [projectChart, setProjectChart] = useState<ChartData>();
   const [supportChart, setSupportChart] = useState<ChartData>();
   const [financeChart, setFinanceChart] = useState<ChartData>();
-  const [mitigationFullChart, setMitigationFullChart] = useState<ChartData>();
+  const [mitigationRecentChart, setMitigationRecentChart] = useState<ChartData>();
   const [mitigationIndividualChart, setMitigationIndividualChart] = useState<ChartData>();
 
   const getAllData = async () => {
@@ -191,6 +191,44 @@ const Dashboard = () => {
     };
     getFinanceChartData();
 
+    const getIndividualMitigationChartData = async () => {
+      const response: any = await get(
+        'stats/analytics/ghgMitigationSummaryForYear/2023',
+        undefined,
+        statServerUrl
+      );
+      const mitigationIndividualChartData = response.data;
+      setMitigationIndividualChart({
+        labels: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
+          sector === null ? 'No Sector Attached' : sector
+        ),
+        count: mitigationIndividualChartData.stats.totals.map((count: string) =>
+          parseInt(count, 10)
+        ),
+        updatedTime: mitigationIndividualChartData.lastUpdate,
+      });
+    };
+    getIndividualMitigationChartData();
+
+    const getRecentMitigationChartData = async () => {
+      const response: any = await get(
+        'stats/analytics/getGhgMitigationSummary',
+        undefined,
+        statServerUrl
+      );
+      const mitigationIndividualChartData = response.data;
+      setMitigationRecentChart({
+        labels: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
+          sector === null ? 'No Sector Attached' : sector
+        ),
+        count: mitigationIndividualChartData.stats.totals.map((count: string) =>
+          parseInt(count, 10)
+        ),
+        updatedTime: mitigationIndividualChartData.lastUpdate,
+      });
+    };
+    getRecentMitigationChartData();
+
     getAllData();
   }, []);
 
@@ -237,6 +275,26 @@ const Dashboard = () => {
       });
     }
 
+    if (mitigationIndividualChart) {
+      tempChartData.push({
+        chartTitle: 'GHG Mitigation (tCO2e) Year',
+        chartDescription: 'GHG Mitigation (tCO2e) Year Description',
+        categories: mitigationIndividualChart.labels,
+        values: mitigationIndividualChart.count,
+        lastUpdatedTime: mitigationIndividualChart.updatedTime,
+      });
+    }
+
+    if (mitigationRecentChart) {
+      tempChartData.push({
+        chartTitle: 'GHG Mitigation (tCO2e) Most Recent Year',
+        chartDescription: 'GHG Mitigation (tCO2e) Most Recent Year Description',
+        categories: mitigationRecentChart.labels,
+        values: mitigationRecentChart.count,
+        lastUpdatedTime: mitigationRecentChart.updatedTime,
+      });
+    }
+
     setChartData(tempChartData);
   }, [
     actionChart,
@@ -244,7 +302,7 @@ const Dashboard = () => {
     supportChart,
     financeChart,
     mitigationIndividualChart,
-    mitigationFullChart,
+    mitigationRecentChart,
   ]);
 
   // Action List Table Columns
