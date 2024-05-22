@@ -78,6 +78,7 @@ export const NewKpi: React.FC<Props> = ({ rules, index, headerNames, updateKPI, 
             >
               <Input
                 type="number"
+                min={0}
                 className="form-input-box"
                 onChange={(e) => {
                   if (updateKPI) {

@@ -1044,7 +1044,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     name="expectedTimeFrame"
                     rules={[validation.required]}
                   >
-                    <Input type="number" className="form-input-box" disabled={isView} />
+                    <Input type="number" min={0} className="form-input-box" disabled={isView} />
                   </Form.Item>
                 </Col>
                 <Col span={6}>

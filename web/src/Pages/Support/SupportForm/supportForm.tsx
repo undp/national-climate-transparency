@@ -16,6 +16,9 @@ import {
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { getFormTitle } from '../../../Utils/utilServices';
+import { Action } from '../../../Enums/action.enum';
+import { SupportEntity } from '../../../Entities/support';
+import { useAbilityContext } from '../../../Casl/Can';
 
 const { Option } = Select;
 
@@ -40,6 +43,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const navigate = useNavigate();
   const { post, put } = useConnection();
+  const ability = useAbilityContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -510,6 +514,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 >
                   <Input
                     type="number"
+                    min={0}
                     className="form-input-box"
                     onChange={(event) => {
                       const value = parseFloat(event.target.value);
@@ -540,6 +545,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 >
                   <Input
                     type="number"
+                    min={0}
                     className="form-input-box"
                     onChange={(event) => {
                       const value = parseFloat(event.target.value);
@@ -574,6 +580,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 >
                   <Input
                     type="number"
+                    min={0}
                     className="form-input-box"
                     onChange={(event) => {
                       const value = parseFloat(event.target.value);
@@ -627,21 +634,23 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('back')}
                 </Button>
               </Col>
-              <Col span={2.5}>
-                <Form.Item>
-                  <Button
-                    disabled={isValidated}
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={() => {
-                      validateEntity();
-                    }}
-                  >
-                    {t('validate')}
-                  </Button>
-                </Form.Item>
-              </Col>
+              {ability.can(Action.Validate, SupportEntity) && (
+                <Col span={2.5}>
+                  <Form.Item>
+                    <Button
+                      disabled={isValidated}
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => {
+                        validateEntity();
+                      }}
+                    >
+                      {t('validate')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
           )}
           {method === 'update' && (
