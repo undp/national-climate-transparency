@@ -3,6 +3,7 @@ import { actionViewSQL } from "../entities/action.view.entity"
 import { programmeViewSQL } from "../entities/programme.view.entity"
 import { projectViewSQL } from "../entities/project.view.entity"
 import { activityViewSQL } from "../entities/activity.view.entity"
+import { reportFiveViewSQL } from "../entities/report.five.view.entity"
 
 const array_merge_fn = `
 CREATE OR REPLACE FUNCTION custom_array_merge(character varying[], character varying[])
@@ -41,6 +42,7 @@ export class Views1711370952119 implements MigrationInterface {
         await queryRunner.query("CREATE MATERIALIZED VIEW project_view_entity AS" + "\n" + projectViewSQL)
         await queryRunner.query("CREATE MATERIALIZED VIEW programme_view_entity AS" + "\n" + programmeViewSQL)
         await queryRunner.query("CREATE MATERIALIZED VIEW action_view_entity AS" + "\n" + actionViewSQL)
+        await queryRunner.query("CREATE MATERIALIZED VIEW report_five_view_entity AS" + "\n" + reportFiveViewSQL)
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
