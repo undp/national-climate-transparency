@@ -24,6 +24,12 @@ interface Item {
   nationalImplementingEntity: string[];
 }
 
+interface ChartData {
+  labels: string[];
+  count: number[];
+  updatedTime: number;
+}
+
 const Dashboard = () => {
   const { t } = useTranslation(['actionList', 'tableAction']);
   const { get, post, statServerUrl } = useConnection();
@@ -43,16 +49,15 @@ const Dashboard = () => {
     body: '',
   });
   const [chartData, setChartData] = useState<PieChartData[]>([]);
-  const [actionChart, setActionChart] = useState<{
-    labels: string[];
-    count: number[];
-    updatedTime: number;
-  }>();
-  const [projectChart, setProjectChart] = useState<{
-    labels: string[];
-    count: number[];
-    updatedTime: number;
-  }>();
+
+  // Individual Chart Data
+
+  const [actionChart, setActionChart] = useState<ChartData>();
+  const [projectChart, setProjectChart] = useState<ChartData>();
+  const [supportChart, setSupportChart] = useState<ChartData>();
+  const [financeChart, setFinanceChart] = useState<ChartData>();
+  const [mitigationFullChart, setMitigationFullChart] = useState<ChartData>();
+  const [mitigationIndividualChart, setMitigationIndividualChart] = useState<ChartData>();
 
   const getAllData = async () => {
     setLoading(true);
@@ -146,16 +151,45 @@ const Dashboard = () => {
 
     const getProjectChartData = async () => {
       const response: any = await get('stats/analytics/projectSummary', undefined, statServerUrl);
-      const actionChartData = response.data;
+      const projectChartData = response.data;
       setProjectChart({
-        labels: actionChartData.stats.sectors.map((sector: string) =>
+        labels: projectChartData.stats.sectors.map((sector: string) =>
           sector === null ? 'No Sector Attached' : sector
         ),
-        count: actionChartData.stats.counts.map((count: string) => parseInt(count, 10)),
-        updatedTime: actionChartData.lastUpdate,
+        count: projectChartData.stats.counts.map((count: string) => parseInt(count, 10)),
+        updatedTime: projectChartData.lastUpdate,
       });
     };
     getProjectChartData();
+
+    const getSupportChartData = async () => {
+      const response: any = await get('stats/analytics/supportSummary', undefined, statServerUrl);
+      const supportChartData = response.data;
+      setSupportChart({
+        labels: ['Support Received', 'Support Needed'],
+        count: [
+          supportChartData.stats.supportReceivedActivities,
+          supportChartData.stats.supportNeededActivities,
+        ],
+        updatedTime: supportChartData.lastUpdate,
+      });
+    };
+    getSupportChartData();
+
+    const getFinanceChartData = async () => {
+      const response: any = await get(
+        'stats/analytics/supportFinanceSummary',
+        undefined,
+        statServerUrl
+      );
+      const supportChartData = response.data;
+      setFinanceChart({
+        labels: ['Support Received', 'Support Needed'],
+        count: [supportChartData.stats.supportReceived, supportChartData.stats.supportNeeded],
+        updatedTime: supportChartData.lastUpdate,
+      });
+    };
+    getFinanceChartData();
 
     getAllData();
   }, []);
@@ -182,8 +216,36 @@ const Dashboard = () => {
         lastUpdatedTime: projectChart.updatedTime,
       });
     }
+
+    if (supportChart) {
+      tempChartData.push({
+        chartTitle: 'Activities Supported',
+        chartDescription: 'Activities Supported Description',
+        categories: supportChart.labels,
+        values: supportChart.count,
+        lastUpdatedTime: supportChart.updatedTime,
+      });
+    }
+
+    if (financeChart) {
+      tempChartData.push({
+        chartTitle: 'Financing for Activities',
+        chartDescription: 'Financing for Activities Description',
+        categories: financeChart.labels,
+        values: financeChart.count,
+        lastUpdatedTime: financeChart.updatedTime,
+      });
+    }
+
     setChartData(tempChartData);
-  }, [actionChart, projectChart]);
+  }, [
+    actionChart,
+    projectChart,
+    supportChart,
+    financeChart,
+    mitigationIndividualChart,
+    mitigationFullChart,
+  ]);
 
   // Action List Table Columns
 
