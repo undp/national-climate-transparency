@@ -69,10 +69,10 @@ export class ProjectUpdateDto {
 	@ApiProperty()
 	endYear: number;
 
-	@IsOptional()
-	@IsNumber()
-	@ApiPropertyOptional()
-	expectedTimeFrame: number;
+	// @IsOptional()
+	// @IsNumber()
+	// @ApiPropertyOptional()
+	// expectedTimeFrame: number;
 
 	@IsArray()
 	@ArrayMinSize(1)

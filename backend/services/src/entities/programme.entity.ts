@@ -29,8 +29,8 @@ export class ProgrammeEntity {
   @Column()
   objective: string;
 
-  @Column("varchar", { array: true, nullable: false })
-  affectedSectors: Sector[];
+	@Column({ type: "enum", enum: Sector, nullable: true })
+  sector: Sector;
 
   @Column("varchar", { array: true, nullable: false })
   affectedSubSector: SubSector[];

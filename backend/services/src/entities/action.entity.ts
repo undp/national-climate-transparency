@@ -34,8 +34,8 @@ export class ActionEntity {
   @Column({ type: 'jsonb', nullable: true })
   documents: any;
 
-	@Column("varchar", { array: true, nullable: true })
-  sectors: Sector[];
+	@Column({ type: "enum", enum: Sector, nullable: false })
+  sector: Sector;
 
   @OneToMany(() => ProgrammeEntity, (programmeEntity) => programmeEntity.action)
   programmes?: ProgrammeEntity[];

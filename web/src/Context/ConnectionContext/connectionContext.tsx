@@ -86,9 +86,13 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
             }
           })
           .catch((e: any) => {
+            console.log(e);
             if (e.response) {
               if (e.response.status) {
-                if (e.response.data.message === 'jwt expired') {
+                if (
+                  e.response.data.message === 'jwt expired' ||
+                  e.response.data.message === 'user deactivated'
+                ) {
                   localStorage.removeItem('token');
                   window.location.reload();
                 }

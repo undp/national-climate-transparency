@@ -38,7 +38,7 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
       : process.env.STORYBOOK_COMPANY_STATE
       ? parseInt(process.env.STORYBOOK_COMPANY_STATE)
       : 0,
-    userSectors: localStorage.getItem('userSectors') ?? '',
+    userSectors: localStorage.getItem('userSectors')?.split(',') ?? [],
   };
   const [userInfoState, setUserInfoState] = useState<UserProps>(initialUserProps);
 

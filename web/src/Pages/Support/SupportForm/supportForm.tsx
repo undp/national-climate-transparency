@@ -55,6 +55,12 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   //MARK:TO DO
   // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
+  // Field Disabling state
+
+  const [isInternational, setIsInternational] = useState<boolean>(false);
+  const [isNational, setIsNational] = useState<boolean>(false);
+  const [isReceived, setIsReceived] = useState<boolean>(false);
+
   // Currency Conversion
 
   const [exchangeRate, setExchangeRate] = useState<number>();
@@ -114,7 +120,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               nationalFinancialInstrument: entityData.nationalFinancialInstrument,
               otherNationalFinancialInstrument: entityData.otherNationalFinancialInstrument,
               financingStatus: entityData.financingStatus,
-              internationalSource: entityData.internationalSource,
+              internationalSource: entityData.internationalSource ?? undefined,
               nationalSource: entityData.nationalSource,
               requiredAmount: entityData.requiredAmount,
               receivedAmount: entityData.receivedAmount,
@@ -299,6 +305,13 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     allowClear
                     disabled={isView}
                     showSearch
+                    onChange={(direction) => {
+                      if (direction === 'Received') {
+                        setIsReceived(true);
+                      } else {
+                        setIsReceived(false);
+                      }
+                    }}
                   >
                     {Object.values(SupportDirection).map((support) => (
                       <Option key={support} value={support}>
@@ -322,6 +335,18 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     allowClear
                     disabled={isView}
                     showSearch
+                    onChange={(nature) => {
+                      if (nature === 'International') {
+                        setIsInternational(true);
+                        setIsNational(false);
+                      } else if (nature === 'National') {
+                        setIsInternational(false);
+                        setIsNational(true);
+                      } else {
+                        setIsInternational(false);
+                        setIsNational(false);
+                      }
+                    }}
                   >
                     {Object.values(FinanceNature).map((nature) => (
                       <Option key={nature} value={nature}>
@@ -335,13 +360,13 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('intSupportChannelTitle')}</label>}
                   name="internationalSupportChannel"
-                  rules={[validation.required]}
+                  rules={[{ required: !isView && isInternational, message: 'Required Field' }]}
                 >
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
                     allowClear
-                    disabled={isView}
+                    disabled={isView || !isInternational}
                     showSearch
                   >
                     {Object.values(IntSupChannel).map((channel) => (
@@ -369,13 +394,13 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     <label className="form-item-header">{t('intFinancialInstrumentTitle')}</label>
                   }
                   name="internationalFinancialInstrument"
-                  rules={[validation.required]}
+                  rules={[{ required: !isView && isInternational, message: 'Required Field' }]}
                 >
                   <Select
                     size="large"
                     style={{ fontSize: inputFontSize }}
                     allowClear
-                    disabled={isView}
+                    disabled={isView || !isInternational}
                     showSearch
                   >
                     {Object.values(IntFinInstrument).map((instrument) => (
@@ -407,13 +432,13 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
                   }
                   name="nationalFinancialInstrument"
-                  rules={[validation.required]}
+                  rules={[{ required: !isView && isNational, message: 'Required Field' }]}
                 >
                   <Select
                     size="large"
                     style={{ fontSize: inputFontSize }}
                     allowClear
-                    disabled={isView}
+                    disabled={isView || !isNational}
                     showSearch
                   >
                     {Object.values(NatFinInstrument).map((instrument) => (
@@ -442,13 +467,13 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 <Form.Item
                   label={<label className="form-item-header">{t('financeStatus')}</label>}
                   name="financingStatus"
-                  rules={[validation.required]}
+                  rules={[{ required: !isView && isReceived, message: 'Required Field' }]}
                 >
                   <Select
                     size="large"
                     style={{ fontSize: inputFontSize }}
                     allowClear
-                    disabled={isView}
+                    disabled={isView || !isReceived}
                     showSearch
                   >
                     {Object.values(FinancingStatus).map((status) => (
@@ -470,6 +495,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 >
                   <Select
                     size="large"
+                    mode="multiple"
                     style={{ fontSize: inputFontSize }}
                     allowClear
                     disabled={isView}

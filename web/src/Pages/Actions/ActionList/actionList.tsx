@@ -185,7 +185,7 @@ const actionList = () => {
             status: unstructuredData[i].status,
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             actionType: unstructuredData[i].migratedData[0]?.types ?? [],
-            affectedSectors: unstructuredData[i].migratedData[0]?.sectorsAffected ?? [],
+            affectedSectors: unstructuredData[i].sector,
             nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? [],
             financeNeeded: unstructuredData[i].migratedData[0]?.financeNeeded ?? 0,
             financeReceived: unstructuredData[i].migratedData[0]?.financeReceived ?? 0,
@@ -321,11 +321,10 @@ const actionList = () => {
     },
     {
       title: t('sectorAffected'),
-      width: 100,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: any) => {
-        return <ScrollableList listToShow={record.affectedSectors}></ScrollableList>;
-      },
+      width: 120,
+      dataIndex: 'affectedSectors',
+      key: 'affectedSectors',
+      sorter: false,
     },
     {
       title: t('financeNeeded'),

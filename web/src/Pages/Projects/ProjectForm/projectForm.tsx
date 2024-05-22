@@ -11,9 +11,8 @@ import { GraphUpArrow } from 'react-bootstrap-icons';
 import './projectForm.scss';
 import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
 import { IntImplementor, Recipient } from '../../../Enums/shared.enum';
-import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
-import { NewKpiData } from '../../../Definitions/kpiDefinitions';
+import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeSelectData } from '../../../Definitions/programmeDefinitions';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
@@ -27,6 +26,9 @@ import { getSupportTableColumns } from '../../../Definitions/columns/supportColu
 import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 import { ProjectMigratedData } from '../../../Definitions/projectDefinitions';
+import { NewKpi } from '../../../Components/KPI/newKpi';
+import { ViewKpi } from '../../../Components/KPI/viewKpi';
+import { EditKpi } from '../../../Components/KPI/editKpi';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -93,8 +95,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // KPI State
 
+  const [kpiCounter, setKpiCounter] = useState<number>(0);
+  const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
+  const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
-  const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
 
   // Initialization Logic
 
@@ -213,6 +217,54 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchData();
 
+    // Initially Loading the KPI data when not in create mode
+
+    const fetchCreatedKPIData = async () => {
+      if (method !== 'create' && entId) {
+        try {
+          const response: any = await get(`national/kpis/achieved/project/${entId}`);
+          if (response.status === 200 || response.status === 201) {
+            const tempCreatedKpiList: CreatedKpiData[] = [];
+            const tempInheritedKpiList: CreatedKpiData[] = [];
+            let tempKpiCounter = kpiCounter;
+            response.data.forEach((kpi: any) => {
+              if (kpi.creatorId === entId) {
+                tempCreatedKpiList.push({
+                  index: tempKpiCounter,
+                  id: kpi.kpiId,
+                  name: kpi.name,
+                  unit: kpi.kpiUnit,
+                  achieved: kpi.achieved ?? 0,
+                  expected: kpi.expected,
+                });
+              } else {
+                tempInheritedKpiList.push({
+                  index: tempKpiCounter,
+                  id: kpi.kpiId,
+                  name: kpi.name,
+                  unit: kpi.kpiUnit,
+                  achieved: kpi.achieved ?? 0,
+                  expected: kpi.expected,
+                });
+              }
+              tempKpiCounter = tempKpiCounter + 1;
+            });
+            setKpiCounter(tempKpiCounter);
+            setCreatedKpiList(tempCreatedKpiList);
+            setInheritedKpiList(tempInheritedKpiList);
+          }
+        } catch {
+          message.open({
+            type: 'error',
+            content: t('kpiSearchFailed'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchCreatedKPIData();
+
     // Initially Loading the attached project data when not in create mode
 
     const fetchConnectedActivityIds = async () => {
@@ -286,6 +338,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
+      } else {
+        form.setFieldsValue({
+          actionTitle: undefined,
+          natAnchor: undefined,
+        });
       }
     };
     fetchConnectedAction();
@@ -303,11 +360,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               programmeId: programmeData.programmeId,
               programmeTitle: programmeData.title,
               instrTypes: programmeData.instrumentType,
-              sectorsAffected: programmeData.affectedSectors,
+              sector: programmeData.sector,
               subSectorsAffected: programmeData.affectedSubSector,
               nationalImplementor: programmeData.nationalImplementor,
             });
-
             setProgrammeConnectedAction(programmeData.actionId);
           }
         } catch {
@@ -319,6 +375,17 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
+      } else {
+        form.setFieldsValue({
+          programmeId: undefined,
+          programmeTitle: undefined,
+          instrTypes: undefined,
+          sector: undefined,
+          subSectorsAffected: undefined,
+          nationalImplementor: undefined,
+        });
+
+        setProgrammeConnectedAction(undefined);
       }
     };
     fetchConnectedProgramme();
@@ -419,25 +486,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     setActivityPageSize(10);
   }, [tempActivityIds]);
 
-  useEffect(() => {
-    console.log('Running Migration Update');
-
-    const migratedKpis = [];
-    for (let i = 0; i < 2; i++) {
-      const updatedValues = {
-        [`kpi_name_${i}`]: `Name_${i}`,
-        [`kpi_unit_${i}`]: `Unit_${i}`,
-        [`kpi_ach_${i}`]: 35,
-        [`kpi_exp_${i}`]: 55,
-      };
-
-      form.setFieldsValue(updatedValues);
-      migratedKpis.push(i);
-    }
-
-    setMigratedKpiList(migratedKpis);
-  }, [activityData]);
-
   // Attachment resolve before updating an already created programme
 
   const resolveAttachments = async () => {
@@ -492,12 +540,32 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         });
       }
 
-      if (newKpiList.length > 0) {
+      if (method === 'create' && newKpiList.length > 0) {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
             name: kpi.name,
-            creatorType: kpi.creatorType,
+            kpiUnit: kpi.unit,
+            creatorType: 'project',
+            expected: kpi.expected,
+          });
+        });
+      } else if (method === 'update' && (newKpiList.length > 0 || createdKpiList.length > 0)) {
+        payload.kpis = [];
+        newKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            name: kpi.name,
+            kpiUnit: kpi.unit,
+            creatorType: 'project',
+            expected: kpi.expected,
+          });
+        });
+        createdKpiList.forEach((kpi) => {
+          payload.kpis.push({
+            kpiId: kpi.id,
+            kpiUnit: kpi.unit,
+            name: kpi.name,
+            creatorType: 'project',
             expected: kpi.expected,
           });
         });
@@ -604,44 +672,93 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   // Add New KPI
 
   const createKPI = () => {
-    const kpiIndex = Math.floor(Date.now() / 1000);
     const newItem: NewKpiData = {
-      index: kpiIndex,
+      index: kpiCounter + 1,
       name: '',
       unit: '',
-      creatorType: 'project',
+      achieved: undefined,
       expected: 0,
     };
-    const updatedValues = {
-      [`kpi_ach_${kpiIndex}`]: 0,
-    };
-
-    form.setFieldsValue(updatedValues);
+    setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
   };
 
-  const removeKPI = (kpiIndex: number) => {
-    setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
-
+  const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
+    if (inWhich === 'new') {
+      setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
+    } else {
+      setCreatedKpiList(createdKpiList.filter((obj) => obj.index !== kpiIndex));
+    }
     const updatedValues = {
-      [`kpi_name_${kpiIndex}`]: '',
-      [`kpi_unit_${kpiIndex}`]: '',
-      [`kpi_exp_${kpiIndex}`]: '',
+      [`kpi_name_${kpiIndex}`]: undefined,
+      [`kpi_unit_${kpiIndex}`]: undefined,
+      [`kpi_exp_${kpiIndex}`]: undefined,
     };
-
     form.setFieldsValue(updatedValues);
   };
 
-  const updateKPI = (id: number, property: keyof NewKpiData, value: any): void => {
-    setNewKpiList((prevKpiList) => {
-      const updatedKpiList = prevKpiList.map((kpi) => {
-        if (kpi.index === id) {
-          return { ...kpi, [property]: value };
-        }
-        return kpi;
+  const updateKPI = (
+    index: number,
+    property: keyof NewKpiData,
+    value: any,
+    inWhich: 'created' | 'new'
+  ): void => {
+    if (inWhich === 'new') {
+      setNewKpiList((prevKpiList) => {
+        const updatedKpiList = prevKpiList.map((kpi) => {
+          if (kpi.index === index) {
+            return { ...kpi, [property]: value };
+          }
+          return kpi;
+        });
+        return updatedKpiList;
       });
-      return updatedKpiList;
-    });
+    } else {
+      setCreatedKpiList((prevKpiList) => {
+        const updatedKpiList = prevKpiList.map((kpi) => {
+          if (kpi.index === index) {
+            return { ...kpi, [property]: value };
+          }
+          return kpi;
+        });
+        return updatedKpiList;
+      });
+    }
+  };
+
+  // Fetch Parent KPI
+
+  const fetchParentKPIData = async (parentId: string) => {
+    if (method === 'create') {
+      try {
+        const response: any = await get(`national/kpis/achieved/programme/${parentId}`);
+        if (response.status === 200 || response.status === 201) {
+          const tempInheritedKpiList: CreatedKpiData[] = [];
+          let tempKpiCounter = kpiCounter;
+          response.data.forEach((kpi: any) => {
+            tempInheritedKpiList.push({
+              index: tempKpiCounter,
+              id: kpi.kpiId,
+              name: kpi.name,
+              unit: kpi.kpiUnit,
+              achieved: kpi.achieved ?? 0,
+              expected: kpi.expected,
+            });
+
+            tempKpiCounter = tempKpiCounter + 1;
+          });
+          setKpiCounter(tempKpiCounter);
+          setInheritedKpiList(tempInheritedKpiList);
+        }
+      } catch {
+        message.open({
+          type: 'error',
+          content: t('kpiSearchFailed'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+    }
   };
 
   // Detach Activity
@@ -711,6 +828,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       showSearch
                       onChange={(value: any) => {
                         setProjectConnectedProgramme(value);
+                        fetchParentKPIData(value);
                       }}
                     >
                       {programmeList.map((program) => (
@@ -846,15 +964,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('sectorsAffectedHeader')}</label>}
-                    name="sectorsAffected"
+                    name="sector"
                   >
-                    <Select
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      mode="multiple"
-                      allowClear
-                      disabled
-                    ></Select>
+                    <Select size="large" style={{ fontSize: inputFontSize }} disabled></Select>
                   </Form.Item>
                 </Col>
                 <Col span={6}>
@@ -1074,39 +1186,62 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-              {migratedKpiList.map((index: number) => (
-                <KpiGrid
-                  key={index}
-                  form={form}
-                  rules={[]}
-                  index={index}
-                  calledTo={'view'}
-                  gutterSize={gutterSize}
-                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                ></KpiGrid>
-              ))}
-              {newKpiList.map((kpi: any) => (
-                <KpiGrid
-                  key={kpi.index}
+              {inheritedKpiList.length > 0 &&
+                inheritedKpiList.map((createdKPI: CreatedKpiData) => (
+                  <ViewKpi
+                    key={createdKPI.index}
+                    index={createdKPI.index}
+                    inherited={true}
+                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    kpi={createdKPI}
+                    callingEntityId={entId}
+                  ></ViewKpi>
+                ))}
+              {method === 'view' &&
+                createdKpiList.map((createdKPI: CreatedKpiData) => (
+                  <ViewKpi
+                    key={createdKPI.index}
+                    index={createdKPI.index}
+                    inherited={false}
+                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    kpi={createdKPI}
+                    callingEntityId={entId}
+                  ></ViewKpi>
+                ))}
+              {method === 'update' &&
+                createdKpiList.map((createdKPI: CreatedKpiData) => (
+                  <EditKpi
+                    key={createdKPI.index}
+                    index={createdKPI.index}
+                    form={form}
+                    rules={[validation.required]}
+                    isFromActivity={false}
+                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    kpi={createdKPI}
+                    updateKPI={updateKPI}
+                    removeKPI={removeKPI}
+                  ></EditKpi>
+                ))}
+              {newKpiList.map((newKPI: NewKpiData) => (
+                <NewKpi
+                  key={newKPI.index}
                   form={form}
                   rules={[validation.required]}
-                  index={kpi.index}
-                  calledTo={'create'}
-                  gutterSize={gutterSize}
+                  index={newKPI.index}
                   headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                   updateKPI={updateKPI}
                   removeKPI={removeKPI}
-                ></KpiGrid>
+                ></NewKpi>
               ))}
               <Row justify={'start'}>
                 <Col span={2}>
                   {!isView && (
                     <Button
-                      icon={<PlusCircleOutlined />}
+                      icon={<PlusCircleOutlined style={{ color: '#3A3541' }} />}
                       className="create-kpi-button"
                       onClick={createKPI}
                     >
-                      {t('addKPI')}
+                      <span className="kpi-add-text">{t('addKPI')}</span>
                     </Button>
                   )}
                 </Col>

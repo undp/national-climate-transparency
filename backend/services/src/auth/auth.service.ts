@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-// import { OrganisationService } from "../organisation/organisation.service";
 import { instanceToPlain } from "class-transformer";
 import { CaslAbilityFactory } from "../casl/casl-ability.factory";
 import { UserService } from "../user/user.service";
@@ -20,7 +19,6 @@ import { UserState } from "../enums/user.state.enum";
 export class AuthService {
   constructor(
     private readonly userService: UserService,
-    // private readonly companyService: OrganisationService,
     private readonly jwtService: JwtService,
     private configService: ConfigService,
     private helperService: HelperService,
@@ -56,9 +54,6 @@ export class AuthService {
   }
 
   async login(user: any) {
-    // const organisationDetails = await this.companyService.findByCompanyId(
-    //   user.organisationId
-    // );
     const payload = new JWTPayload(
       user.organisation,
       user.name,
@@ -66,9 +61,7 @@ export class AuthService {
       user.role,
 			user.subRole,
 			user.sector,
-      // user.organisationId,
-      // user.organisationType,
-      // parseInt(organisationDetails.state)
+      user.email,
     );
     const ability = this.caslAbilityFactory.createForUser(user);
     return {

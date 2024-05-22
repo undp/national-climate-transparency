@@ -222,6 +222,7 @@ export class UserService {
 				"name",
 				"state",
 				"sector",
+				"state",
 			],
 			where: {
 				email: username,

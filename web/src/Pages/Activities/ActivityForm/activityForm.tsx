@@ -6,7 +6,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './activityForm.scss';
-import { KpiGrid } from '../../../Components/KPI/kpiGrid';
 import { ParentType } from '../../../Enums/parentType.enum';
 import TimelineTable from '../../../Components/Timeline/timeline';
 import {
@@ -28,6 +27,9 @@ import { ActivityEntity } from '../../../Entities/activity';
 import { useAbilityContext } from '../../../Casl/Can';
 import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
+import { CreatedKpiData } from '../../../Definitions/kpiDefinitions';
+import { ViewKpi } from '../../../Components/KPI/viewKpi';
+import { EditKpi } from '../../../Components/KPI/editKpi';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -105,7 +107,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // KPI State
 
-  const [migratedKpiList, setMigratedKpiList] = useState<number[]>([]);
+  const [kpiCounter, setKpiCounter] = useState<number>(0);
+  const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
 
   // MTG Timeline State
 
@@ -193,18 +196,18 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
         if (parentType === 'action') {
           tempMigratedData.description = response.data.description;
-          tempMigratedData.affSectors = response.data.migratedData?.sectorsAffected ?? [];
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
           tempMigratedData.startYear = response.data.startYear;
         } else if (parentType === 'programme') {
           tempMigratedData.description = response.data.description;
           tempMigratedData.recipient = response.data.recipientEntity;
-          tempMigratedData.affSectors = response.data.affectedSectors;
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
           tempMigratedData.affSubSectors = response.data.affectedSubSector;
           tempMigratedData.startYear = response.data.startYear;
         } else {
           tempMigratedData.description = response.data.description;
           tempMigratedData.recipient = response.data.recipientEntities;
-          tempMigratedData.affSectors = response.data.programme?.affectedSectors ?? [];
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
           tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
           tempMigratedData.startYear = response.data.startYear;
           tempMigratedData.type = response.data.type;
@@ -214,8 +217,43 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       }
       setActivityMigratedData(tempMigratedData);
     };
-
     fetchConnectedParent();
+
+    const fetchParentKPIData = async () => {
+      if (method === 'create' && parentType && connectedParentId) {
+        try {
+          const response: any = await get(
+            `national/kpis/entities/${parentType}/${connectedParentId}`
+          );
+          if (response.status === 200 || response.status === 201) {
+            const tempInheritedKpiList: CreatedKpiData[] = [];
+            let tempKpiCounter = kpiCounter;
+            response.data.forEach((kpi: any) => {
+              tempInheritedKpiList.push({
+                index: tempKpiCounter,
+                id: kpi.kpiId,
+                name: kpi.name,
+                unit: kpi.kpiUnit,
+                achieved: 0,
+                expected: kpi.expected,
+              });
+
+              tempKpiCounter = tempKpiCounter + 1;
+            });
+            setKpiCounter(tempKpiCounter);
+            setInheritedKpiList(tempInheritedKpiList);
+          }
+        } catch {
+          message.open({
+            type: 'error',
+            content: t('kpiSearchFailed'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchParentKPIData();
   }, [connectedParentId]);
 
   useEffect(() => {
@@ -261,9 +299,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               description: entityData.description,
               status: entityData.status,
               measure: entityData.measure,
-              nationalImplementingEntity: entityData.nationalImplementingEntity ?? [],
-              internationalImplementingEntity: entityData.internationalImplementingEntity ?? [],
-              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy ?? 'No',
+              nationalImplementingEntity: entityData.nationalImplementingEntity ?? undefined,
+              internationalImplementingEntity:
+                entityData.internationalImplementingEntity ?? undefined,
+              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy,
               meansOfImplementation: entityData.meansOfImplementation,
               technologyType: entityData.technologyType,
               etfDescription: entityData.etfDescription,
@@ -348,23 +387,39 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchData();
 
+    // Initially Loading the underlying Support data when not in create mode
+
     const fetchSupportData = async () => {
       try {
-        const response: any = await post('national/supports/query', {});
-
         const tempSupportData: SupportData[] = [];
+
+        const payload = {
+          filterAnd: [
+            {
+              key: 'activityId',
+              operation: '=',
+              value: entId,
+            },
+          ],
+          sort: {
+            key: 'supportId',
+            order: 'ASC',
+          },
+        };
+
+        const response: any = await post('national/supports/query', payload);
 
         response.data.forEach((sup: any, index: number) => {
           tempSupportData.push({
             key: index.toString(),
             supportId: sup.supportId,
             financeNature: sup.financeNature,
-            direction: sup.financeDirection,
-            finInstrument: sup.finInstrument,
-            estimatedUSD: sup.estimatedUSD,
-            estimatedLC: sup.estimatedLCL,
-            recievedUSD: sup.receivedUSD,
-            recievedLC: sup.receivedLCL,
+            direction: sup.direction,
+            finInstrument: sup.nationalFinancialInstrument,
+            estimatedUSD: sup.requiredAmount,
+            estimatedLC: sup.requiredAmountDomestic,
+            recievedUSD: sup.receivedAmount,
+            recievedLC: sup.receivedAmountDomestic,
           });
         });
         setSupportData(tempSupportData);
@@ -373,6 +428,42 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchSupportData();
+
+    const fetchCreatedKPIData = async () => {
+      if (method !== 'create' && entId) {
+        try {
+          const response: any = await get(`national/kpis/entities/activity/${entId}`);
+          if (response.status === 200 || response.status === 201) {
+            const tempInheritedKpiList: CreatedKpiData[] = [];
+            let tempKpiCounter = kpiCounter;
+            response.data.forEach((kpi: any) => {
+              tempInheritedKpiList.push({
+                index: tempKpiCounter,
+                id: kpi.kpiId,
+                name: kpi.name,
+                unit: kpi.kpiUnit,
+                achieved:
+                  kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
+                    ?.achieved ?? 0,
+                expected: kpi.expected,
+              });
+
+              tempKpiCounter = tempKpiCounter + 1;
+            });
+            setKpiCounter(tempKpiCounter);
+            setInheritedKpiList(tempInheritedKpiList);
+          }
+        } catch {
+          message.open({
+            type: 'error',
+            content: t('kpiSearchFailed'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      }
+    };
+    fetchCreatedKPIData();
 
     // Get mtg timeline data
 
@@ -457,7 +548,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         parentDescription: activityMigratedData.description,
         supportType: activityMigratedData.type,
         recipient: activityMigratedData.recipient,
-        affSectors: activityMigratedData.affSectors,
+        sector: activityMigratedData.affSectors,
         affSubSectors: activityMigratedData.affSubSectors,
         startYear: activityMigratedData.startYear,
         endYear: activityMigratedData.endYear,
@@ -466,22 +557,21 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, [activityMigratedData]);
 
-  useEffect(() => {
-    const migratedKpis = [];
-    for (let i = 0; i < 2; i++) {
-      const updatedValues = {
-        [`kpi_name_${i}`]: `Name_${i}`,
-        [`kpi_unit_${i}`]: `Unit_${i}`,
-        [`kpi_ach_${i}`]: 35,
-        [`kpi_exp_${i}`]: 55,
-      };
+  // KPI Achievement Resolve
 
-      form.setFieldsValue(updatedValues);
-      migratedKpis.push(i);
+  const resolveKPIAchievements = async (activityId: string | undefined) => {
+    if (inheritedKpiList.length > 0 && activityId) {
+      inheritedKpiList.forEach(async (inheritedKpi) => {
+        if (inheritedKpi.achieved > 0) {
+          await post('national/kpis/achievements/add', {
+            kpiId: inheritedKpi.id,
+            activityId: activityId,
+            achieved: inheritedKpi.achieved,
+          });
+        }
+      });
     }
-
-    setMigratedKpiList(migratedKpis);
-  }, [supportData]);
+  };
 
   // Form Submit
 
@@ -571,9 +661,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
       if (method === 'create') {
         response = await post('national/activities/add', payload);
+
+        resolveKPIAchievements(response.data.activityId);
       } else if (method === 'update') {
         payload.activityId = entId;
         response = await put('national/activities/update', payload);
+
+        resolveKPIAchievements(entId);
       }
 
       const successMsg =
@@ -640,6 +734,26 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const deleteEntity = () => {
     console.log('Delete Clicked');
+  };
+
+  // Update KPI ACH Values
+
+  const updateKPI = (
+    index: number,
+    property: keyof CreatedKpiData,
+    value: any,
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    inWhich: 'created' | 'new'
+  ): void => {
+    setInheritedKpiList((prevKpiList) => {
+      const updatedKpiList = prevKpiList.map((kpi) => {
+        if (kpi.index === index) {
+          return { ...kpi, [property]: parseFloat(value) };
+        }
+        return kpi;
+      });
+      return updatedKpiList;
+    });
   };
 
   // Column Definition
@@ -970,14 +1084,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={6}>
                   <Form.Item
                     label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
-                    name="affSectors"
+                    name="sector"
                   >
-                    <Select
-                      mode="multiple"
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      disabled
-                    ></Select>
+                    <Select size="large" style={{ fontSize: inputFontSize }} disabled></Select>
                   </Form.Item>
                 </Col>
                 {(parentType === 'programme' || parentType === 'project') && (
@@ -1160,17 +1269,29 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
-              {migratedKpiList.map((index: number) => (
-                <KpiGrid
-                  key={index}
-                  form={form}
-                  rules={[validation.required]}
-                  index={index}
-                  calledTo={isView ? 'view' : 'add_ach'}
-                  gutterSize={gutterSize}
-                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                ></KpiGrid>
-              ))}
+              {method === 'view'
+                ? inheritedKpiList.map((createdKPI: CreatedKpiData, index: number) => (
+                    <ViewKpi
+                      key={index}
+                      index={index}
+                      inherited={false}
+                      headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                      kpi={createdKPI}
+                      callingEntityId={entId}
+                    ></ViewKpi>
+                  ))
+                : inheritedKpiList.map((createdKPI: CreatedKpiData) => (
+                    <EditKpi
+                      key={createdKPI.index}
+                      index={createdKPI.index}
+                      form={form}
+                      rules={[validation.required]}
+                      isFromActivity={true}
+                      headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                      kpi={createdKPI}
+                      updateKPI={updateKPI}
+                    ></EditKpi>
+                  ))}
             </div>
             {method !== 'create' && (
               <div className="form-section-card">
