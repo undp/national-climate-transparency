@@ -150,3 +150,8 @@ export enum SubSector {
   MULTI_SUB_SEC = "Multi-Subsector",
   NA = "Not Applicable",
 }
+
+export enum ExportFileType {
+	XLSX = "xlsx",
+	CSV = "csv"
+}
