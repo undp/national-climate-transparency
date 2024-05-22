@@ -1,4 +1,4 @@
-import { Col, Row, message } from 'antd';
+import { Col, Row, Tag, message } from 'antd';
 import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
@@ -9,6 +9,7 @@ import LayoutTable from '../../Components/common/Table/layout.table';
 import ScrollableList from '../../Components/ScrollableList/scrollableList';
 import { useTranslation } from 'react-i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
+import { CustomFormatDate } from '../../Utils/utilServices';
 
 interface Item {
   key: number;
@@ -42,8 +43,16 @@ const Dashboard = () => {
     body: '',
   });
   const [chartData, setChartData] = useState<PieChartData[]>([]);
-  const [actionChart, setActionChart] = useState<{ labels: string[]; count: number[] }>();
-  const [projectChart, setProjectChart] = useState<{ labels: string[]; count: number[] }>();
+  const [actionChart, setActionChart] = useState<{
+    labels: string[];
+    count: number[];
+    updatedTime: number;
+  }>();
+  const [projectChart, setProjectChart] = useState<{
+    labels: string[];
+    count: number[];
+    updatedTime: number;
+  }>();
 
   const getAllData = async () => {
     setLoading(true);
@@ -126,22 +135,24 @@ const Dashboard = () => {
   useEffect(() => {
     const getClimateActionChartData = async () => {
       const response: any = await get('stats/analytics/actionsSummery', undefined, statServerUrl);
-      const actionChartData = response.data.stats;
+      const actionChartData = response.data;
       setActionChart({
-        labels: actionChartData.sectors,
-        count: actionChartData.counts.map((count: string) => parseInt(count, 10)),
+        labels: actionChartData.stats.sectors,
+        count: actionChartData.stats.counts.map((count: string) => parseInt(count, 10)),
+        updatedTime: actionChartData.lastUpdate,
       });
     };
     getClimateActionChartData();
 
     const getProjectChartData = async () => {
       const response: any = await get('stats/analytics/projectSummary', undefined, statServerUrl);
-      const actionChartData = response.data.stats;
+      const actionChartData = response.data;
       setProjectChart({
-        labels: actionChartData.sectors.map((sector: string) =>
+        labels: actionChartData.stats.sectors.map((sector: string) =>
           sector === null ? 'No Sector Attached' : sector
         ),
-        count: actionChartData.counts.map((count: string) => parseInt(count, 10)),
+        count: actionChartData.stats.counts.map((count: string) => parseInt(count, 10)),
+        updatedTime: actionChartData.lastUpdate,
       });
     };
     getProjectChartData();
@@ -156,8 +167,9 @@ const Dashboard = () => {
       tempChartData.push({
         chartTitle: 'Climate Action',
         chartDescription: 'Climate Action Description',
-        categories: actionChart?.labels,
-        values: actionChart?.count,
+        categories: actionChart.labels,
+        values: actionChart.count,
+        lastUpdatedTime: actionChart.updatedTime,
       });
     }
 
@@ -167,22 +179,9 @@ const Dashboard = () => {
         chartDescription: 'Climate Projects Description',
         categories: projectChart.labels,
         values: projectChart.count,
+        lastUpdatedTime: projectChart.updatedTime,
       });
     }
-
-    tempChartData.push({
-      chartTitle: 'Climate Action',
-      chartDescription: 'Climate Action Description',
-      categories: ['A', 'B', 'C'],
-      values: [50, 20, 80],
-    });
-
-    tempChartData.push({
-      chartTitle: 'Projects',
-      chartDescription: 'Climate Projects Description',
-      categories: ['A', 'B', 'C'],
-      values: [50, 80, 80],
-    });
     setChartData(tempChartData);
   }, [actionChart, projectChart]);
 
@@ -268,6 +267,9 @@ const Dashboard = () => {
                 series={chart.values}
                 height={250}
               />
+              <div className="chart-update-time">
+                <Tag className="time-chip">{CustomFormatDate(chart.lastUpdatedTime)}</Tag>
+              </div>
             </div>
           </Col>
         ))}

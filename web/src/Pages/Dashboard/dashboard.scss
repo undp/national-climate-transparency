@@ -16,4 +16,15 @@
         padding: 30px;
         margin-bottom: 20px;
     }
+
+    .chart-update-time {
+        margin-top: 20px;
+        .time-chip {
+            align-content: center;
+            height: 28px;
+            border-width: 0;
+            background-color: #e3f3fb;
+            color: #16B1FF;
+        }
+    }
 }

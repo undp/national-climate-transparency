@@ -3,4 +3,5 @@ export type PieChartData = {
   values: number[];
   chartTitle: string;
   chartDescription: string;
+  lastUpdatedTime: number;
 };
