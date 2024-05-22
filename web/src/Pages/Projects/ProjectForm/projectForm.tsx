@@ -97,6 +97,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
 
+  // Expected Time Frame
+
+  const [startYear, setStartYear] = useState<number>();
+  const [endYear, setEndYear] = useState<number>();
+
   // Initialization Logic
 
   const yearsList: number[] = [];
@@ -482,6 +487,20 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     setActivityPageSize(10);
   }, [tempActivityIds]);
 
+  // Expected Time Frame Calculation
+
+  useEffect(() => {
+    if (startYear && endYear && endYear >= startYear) {
+      form.setFieldsValue({
+        expectedTimeFrame: endYear - startYear,
+      });
+    } else {
+      form.setFieldsValue({
+        expectedTimeFrame: undefined,
+      });
+    }
+  }, [startYear, endYear]);
+
   // Attachment resolve before updating an already created programme
 
   const resolveAttachments = async () => {
@@ -574,7 +593,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         });
       }
 
-      payload.expectedTimeFrame = parseFloat(payload.expectedTimeFrame);
       payload.startYear = parseInt(payload.startYear);
       payload.endYear = parseInt(payload.endYear);
 
@@ -994,6 +1012,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       allowClear
                       disabled={isView}
                       showSearch
+                      onChange={(value) => {
+                        setStartYear(value);
+                      }}
                     >
                       {yearsList.map((year) => (
                         <Option key={year} value={year}>
@@ -1027,6 +1048,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       allowClear
                       disabled={isView}
                       showSearch
+                      onChange={(value) => {
+                        setEndYear(value);
+                      }}
                     >
                       {yearsList.map((year) => (
                         <Option key={year} value={year}>
@@ -1042,9 +1066,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('timeFrameHeader')}</label>}
                     name="expectedTimeFrame"
-                    rules={[validation.required]}
                   >
-                    <Input type="number" min={0} className="form-input-box" disabled={isView} />
+                    <Input type="number" className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
                 <Col span={6}>
