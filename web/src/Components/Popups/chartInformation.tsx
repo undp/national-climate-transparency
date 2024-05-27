@@ -1,4 +1,5 @@
 import { Modal } from 'antd';
+import './chartInformation.scss';
 
 interface Props {
   open: boolean;
@@ -13,12 +14,10 @@ const ChartInformation: React.FC<Props> = ({ open, setOpen, content }) => {
 
   return (
     <Modal open={open} onCancel={attachCancel} footer={false}>
-      <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '30px', fontSize: '15px' }}>
+      <div className="chart-info-title">
         <strong>{content?.title}</strong>
       </div>
-      <div style={{ color: '#3A3541', opacity: 0.8, marginTop: '30px', fontSize: '15px' }}>
-        {content?.body}
-      </div>
+      <div className="chart-info-body">{content?.body}</div>
     </Modal>
   );
 };
