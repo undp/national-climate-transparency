@@ -78,6 +78,12 @@ export class PayloadValidator {
       if (array.length !== arraySize) {
         throw new HttpException(`${property} data should be an array with exactly ${arraySize} elements`, HttpStatus.BAD_REQUEST);
       }
+
+      array.forEach((value, index) => {
+        if (!Number.isInteger(value) || value < 0) {
+          throw new HttpException(`Mitigation timeline ${property} array should contain only positive integers. Invalid value at index ${index}: ${value}`, HttpStatus.BAD_REQUEST);
+        }
+      });
     }
   }
 
@@ -88,6 +94,10 @@ export class PayloadValidator {
 
       if (value === undefined || value === null) {
         throw new HttpException(`Mitigation timeline ${property} total value is missing`, HttpStatus.BAD_REQUEST);
+      }
+
+      if (!Number.isInteger(value) || value < 0) {
+        throw new HttpException(`Mitigation timeline ${property} total value should be a positive integer. Invalid value: ${value}`, HttpStatus.BAD_REQUEST);
       }
     }
   }

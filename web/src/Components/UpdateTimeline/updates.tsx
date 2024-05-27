@@ -100,31 +100,29 @@ const UpdatesTimeline: React.FC<UpdateProps> = ({ recordType, recordId }) => {
     }
   };
 
+  const stepsItems = historyData.map((item: any, index: number) => ({
+    key: index,
+    title: (
+      <span>
+        <strong>{item.user_name} </strong> {t(item.eventType)}{' '}
+        {item.logData && ` - ${item.logData}`}
+        <span className="date">
+          {' - '}
+          {`${CustomFormatDate(Number(item.createdTime))}`}
+        </span>
+      </span>
+    ),
+    icon: getClassByEventType(item.eventType),
+    status: 'process',
+  }));
+
   return (
     <div className="info-view">
       <div className="content">
         {loadingHistory ? (
           <Skeleton />
         ) : (
-          <Steps direction="vertical" current={0}>
-            {historyData.map((item: any, index: number) => (
-              <Steps.Step
-                key={index}
-                title={
-                  <span>
-                    <strong>{item.user_name} </strong> {t(item.eventType)}{' '}
-                    {item.logData && ` - ${item.logData}`}
-                    <span className="date">
-                      {' - '}
-                      {`${CustomFormatDate(Number(item.createdTime))}`}
-                    </span>
-                  </span>
-                }
-                icon={getClassByEventType(item.eventType)}
-                status="process"
-              />
-            ))}
-          </Steps>
+          <Steps direction="vertical" current={0} items={stepsItems} />
         )}
       </div>
     </div>
