@@ -177,7 +177,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               comments: entityData.comments,
             });
 
+            // Setting validation status
+
             setIsValidated(entityData.validated ?? false);
+
+            if (entityData.validated && method === 'update') {
+              navigate(`/programmes/view/${entId}`);
+            }
 
             if (entityData.documents?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];

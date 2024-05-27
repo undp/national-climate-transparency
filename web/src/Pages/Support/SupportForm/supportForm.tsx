@@ -135,7 +135,14 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             setAmountNeeded(entityData.requiredAmount ?? undefined);
             setAmountReceived(entityData.receivedAmount ?? undefined);
             setExchangeRate(entityData.exchangeRate ?? undefined);
+
+            // Setting validation status
+
             setIsValidated(entityData.validated ?? false);
+
+            if (entityData.validated && method === 'update') {
+              navigate(`/support/view/${entId}`);
+            }
           }
         } catch {
           navigate('/support');
