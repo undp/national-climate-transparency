@@ -320,7 +320,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   useEffect(() => {
     const payload = {
       page: 1,
-      size: tempProgramIds.length + 1,
+      size: tempProgramIds.length,
       filterOr: [] as any[],
       sort: {
         key: 'programmeId',
