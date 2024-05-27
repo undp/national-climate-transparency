@@ -110,7 +110,11 @@ const AddUser = () => {
   const onUpdateUser = async () => {
     setLoading(true);
     const formOneValues = formOne.getFieldsValue();
-    formOneValues.phoneNo = formatPhoneNumberIntl(formOneValues.phoneNo);
+    if (formOneValues.phoneNo && formOneValues.phoneNo.length > 4) {
+      formOneValues.phoneNo = formatPhoneNumberIntl(formOneValues.phoneNo);
+    } else {
+      formOneValues.phoneNo = undefined;
+    }
     try {
       const values: any = {
         id: state?.record?.id,
@@ -127,7 +131,6 @@ const AddUser = () => {
       if (ability.can(Action.Update, plainToClass(User, state?.record), 'email'))
         values.email = formOneValues?.email;
 
-      console.log('form one values   -- > ', values, state.record);
       const response = await put('national/users/update', values);
       if (response.status === 200 || response.status === 201) {
         message.open({

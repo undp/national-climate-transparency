@@ -156,3 +156,8 @@ export enum TypeOfMitigation {
   SOLAR = 'Solar',
   EE_HOUSEHOLDS = 'EEHouseholds',
 }
+
+export enum ExportFileType {
+  XLSX = 'xlsx',
+  CSV = 'csv',
+}

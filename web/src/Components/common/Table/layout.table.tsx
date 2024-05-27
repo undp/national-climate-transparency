@@ -7,6 +7,7 @@ interface Props {
   pagination: TablePaginationConfig; // Define the type of pagination
   handleTableChange: (pagination: TablePaginationConfig, filters: any, sorter: any) => void;
   emptyMessage: string;
+  handleHorizontalOverflow?: boolean;
 }
 
 const LayoutTable: React.FC<Props> = ({
@@ -16,6 +17,7 @@ const LayoutTable: React.FC<Props> = ({
   pagination,
   handleTableChange,
   emptyMessage,
+  handleHorizontalOverflow,
 }) => {
   return (
     <div style={{ overflowX: 'auto' }}>
@@ -26,6 +28,7 @@ const LayoutTable: React.FC<Props> = ({
         loading={loading}
         pagination={pagination}
         onChange={handleTableChange}
+        scroll={handleHorizontalOverflow ? { x: 1500 } : undefined}
         locale={{
           emptyText: (
             <Empty
