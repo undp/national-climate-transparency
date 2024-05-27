@@ -77,6 +77,16 @@ export class ProjectService {
 				);
 			}
 
+			if (programme.validated) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"common.cannotLinkedToValidated",
+						[EntityType.PROGRAMME , programme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
 			if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -263,6 +273,16 @@ export class ProjectService {
 			);
 		}
 
+		if (currentProject.validated) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.cannotEditValidated",
+					[projectUpdateDto.projectId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
 		if (!this.helperService.doesUserHaveSectorPermission(user, currentProject.sector)){
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -294,6 +314,17 @@ export class ProjectService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
+
+			if (programme.validated) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"common.cannotLinkedToValidated",
+						[EntityType.PROGRAMME , programme.programmeId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
 			if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -494,6 +525,16 @@ export class ProjectService {
 			);
 		}
 
+		if (programme.validated) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"common.cannotLinkedToValidated",
+					[EntityType.PROGRAMME , programme.programmeId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
 		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -559,6 +600,16 @@ export class ProjectService {
 					this.helperService.formatReqMessagesString(
 						"project.projectIsNotLinked",
 						[project.projectId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			if (project.programme.validated) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"common.cannotUnlinkedFromValidated",
+						[EntityType.PROGRAMME , project.programme.programmeId]
 					),
 					HttpStatus.BAD_REQUEST
 				);
