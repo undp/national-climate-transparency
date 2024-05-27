@@ -375,6 +375,7 @@ const actionList = () => {
               ability,
               ActionEntity,
               record.actionId,
+              record.validationStatus ?? 'pending',
               getAttachedProgrammeIds,
               setOpenAttaching,
               setSelectedActionId,

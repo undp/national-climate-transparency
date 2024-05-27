@@ -283,6 +283,7 @@ const activityList = () => {
               ability,
               ActivityEntity,
               record.activityId,
+              record.validationStatus ?? 'pending',
               navigate,
               t
             )}

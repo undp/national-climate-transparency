@@ -363,6 +363,7 @@ const programmeList = () => {
               ability,
               ProgrammeEntity,
               record.programmeId,
+              record.validationStatus ?? 'pending',
               getAttachedProjectIds,
               setOpenAttaching,
               setSelectedProgrammeId,
