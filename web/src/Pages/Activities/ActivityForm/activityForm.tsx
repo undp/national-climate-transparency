@@ -257,10 +257,25 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     fetchParentKPIData();
   }, [connectedParentId]);
 
+  // Loading Non Validated Entities that can be parent on Parent Type select
+
   useEffect(() => {
-    const fetchAvailableParents = async () => {
+    const fetchNonValidatedParents = async () => {
       if (parentType === 'action' || parentType === 'programme' || parentType === 'project') {
-        const response: any = await post(`national/${parentType}s/query`, {});
+        const payload = {
+          filterAnd: [
+            {
+              key: 'validated',
+              operation: '=',
+              value: false,
+            },
+          ],
+          sort: {
+            key: `${parentType}Id`,
+            order: 'ASC',
+          },
+        };
+        const response: any = await post(`national/${parentType}s/query`, payload);
 
         const tempParentData: ParentData[] = [];
         response.data.forEach((parent: any) => {
@@ -277,7 +292,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         setParentList(tempParentData);
       }
     };
-    fetchAvailableParents();
+    fetchNonValidatedParents();
   }, [parentType]);
 
   // Initializing Section

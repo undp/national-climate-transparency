@@ -351,7 +351,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         const tempPRGData: ProgrammeData[] = [];
 
         response.data.forEach((prg: any, index: number) => {
-          console.log(prg.programmeId);
           tempPRGData.push({
             key: index.toString(),
             programmeId: prg.programmeId,

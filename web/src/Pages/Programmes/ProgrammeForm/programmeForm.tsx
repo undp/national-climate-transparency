@@ -115,10 +115,23 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // Initially Loading Free Actions that can be parent
+    // Initially Loading Non Validated Actions that can be parent
 
-    const fetchFreeActions = async () => {
-      const response: any = await post('national/actions/query', {});
+    const fetchNonValidatedActions = async () => {
+      const payload = {
+        filterAnd: [
+          {
+            key: 'validated',
+            operation: '=',
+            value: false,
+          },
+        ],
+        sort: {
+          key: 'actionId',
+          order: 'ASC',
+        },
+      };
+      const response: any = await post('national/actions/query', payload);
 
       const tempActionData: ActionSelectData[] = [];
       response.data.forEach((action: any) => {
@@ -131,8 +144,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       });
       setActionList(tempActionData);
     };
-
-    fetchFreeActions();
+    fetchNonValidatedActions();
 
     // Initially Loading Free Projects that can be attached
 

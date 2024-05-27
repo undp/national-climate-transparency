@@ -115,10 +115,23 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // Initially Loading Free Actions that can be parent
+    // Initially Loading Non validated programmes that can be parent
 
-    const fetchAllProgrammes = async () => {
-      const response: any = await post('national/programmes/query', {});
+    const fetchNonValidatedProgrammes = async () => {
+      const payload = {
+        filterAnd: [
+          {
+            key: 'validated',
+            operation: '=',
+            value: false,
+          },
+        ],
+        sort: {
+          key: 'programmeId',
+          order: 'ASC',
+        },
+      };
+      const response: any = await post('national/programmes/query', payload);
 
       const tempProgrammeData: ProgrammeSelectData[] = [];
       response.data.forEach((prg: any) => {
@@ -129,7 +142,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       });
       setProgrammeList(tempProgrammeData);
     };
-    fetchAllProgrammes();
+    fetchNonValidatedProgrammes();
 
     // Initially Loading Free Activities that can be attached
 
