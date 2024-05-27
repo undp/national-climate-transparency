@@ -1,6 +1,6 @@
 export type ActionMigratedData = {
   type: string[];
-  ghgsAffected: string;
+  ghgsAffected: string[];
   natImplementer: string[];
   estimatedInvestment: number;
   achievedReduction: number;

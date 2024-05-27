@@ -202,7 +202,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               type: entityData.types ?? [],
               intImplementor: entityData.interNationalImplementor ?? [],
               recipientEntity: entityData.recipientEntity ?? [],
-              ghgsAffected: entityData.ghgsAffected,
+              ghgsAffected: entityData.ghgsAffected ?? [],
               achievedReduct: entityData.achievedGHGReduction,
               expectedReduct: entityData.expectedGHGReduction,
             });
@@ -353,7 +353,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       type: [],
       intImplementor: [],
       recipientEntity: [],
-      ghgsAffected: '',
+      ghgsAffected: [],
       achievedReduct: 0,
       expectedReduct: 0,
     };
@@ -390,6 +390,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           tempMigratedData.recipientEntity = joinTwoArrays(
             tempMigratedData.recipientEntity,
             prj.recipientEntities ?? []
+          );
+
+          tempMigratedData.ghgsAffected = joinTwoArrays(
+            tempMigratedData.ghgsAffected,
+            prj.migratedData[0]?.ghgsAffected ?? []
           );
 
           const prgGHGAchievement = prj.migratedData[0]?.achievedGHGReduction ?? 0;
@@ -1031,7 +1036,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('ghgAffected')}</label>}
                     name="ghgsAffected"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>

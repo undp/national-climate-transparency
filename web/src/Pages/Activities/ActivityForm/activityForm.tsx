@@ -15,7 +15,7 @@ import {
   ExpectedTimeline,
 } from '../../../Definitions/mtgTimeline.definition';
 import { ActivityStatus, ImplMeans, Measure, TechnologyType } from '../../../Enums/activity.enum';
-import { IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
+import { GHGS, IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
@@ -308,6 +308,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               technologyType: entityData.technologyType ?? undefined,
               etfDescription: entityData.etfDescription ?? undefined,
               comment: entityData.comment ?? undefined,
+              ghgsAffected: entityData.ghgsAffected ?? undefined,
               achievedGHGReduction: entityData.achievedGHGReduction,
               expectedGHGReduction: entityData.expectedGHGReduction,
             });
@@ -1258,6 +1259,30 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
               <div className="form-section-header">{t('mitigationInfoTitle')}</div>
               <div className="form-section-sub-header">{t('emissionInfoTitle')}</div>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                    name="ghgsAffected"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      mode="multiple"
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(GHGS).map((ghg) => (
+                        <Option key={ghg} value={ghg}>
+                          {ghg}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
               <Row gutter={gutterSize}>
                 <Col span={12}>
                   <Form.Item

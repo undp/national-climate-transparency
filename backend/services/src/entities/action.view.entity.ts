@@ -105,8 +105,6 @@ export class ActionViewEntity {
 	@ViewColumn()
 	financeReceived: number
 
-	// No Clue to location
-
-	// @ViewColumn()
-	// ghgsAffected: string[]
+	@ViewColumn()
+	ghgsAffected: string[]
 }

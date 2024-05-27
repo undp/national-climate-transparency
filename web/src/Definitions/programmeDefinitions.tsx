@@ -13,7 +13,7 @@ export type ProgrammeMigratedData = {
   type: string[];
   intImplementor: string[];
   recipientEntity: string[];
-  ghgsAffected: string;
+  ghgsAffected: string[];
   achievedReduct: number;
   expectedReduct: number;
 };

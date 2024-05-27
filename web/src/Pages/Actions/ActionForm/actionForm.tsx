@@ -320,7 +320,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   useEffect(() => {
     const payload = {
       page: 1,
-      size: tempProgramIds.length,
+      size: tempProgramIds.length + 1,
       filterOr: [] as any[],
       sort: {
         key: 'programmeId',
@@ -334,7 +334,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       type: [],
       achievedReduction: 0,
       expectedReduction: 0,
-      ghgsAffected: '',
+      ghgsAffected: [],
     };
 
     const fetchAttachmentData = async () => {
@@ -351,6 +351,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         const tempPRGData: ProgrammeData[] = [];
 
         response.data.forEach((prg: any, index: number) => {
+          console.log(prg.programmeId);
           tempPRGData.push({
             key: index.toString(),
             programmeId: prg.programmeId,
@@ -361,6 +362,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             subSectorsAffected: prg.affectedSubSector ?? [],
             estimatedInvestment: prg.investment,
           });
+
+          tempMigratedData.ghgsAffected = joinTwoArrays(
+            tempMigratedData.ghgsAffected,
+            prg.migratedData[0]?.ghgsAffected ?? []
+          );
 
           tempMigratedData.type = joinTwoArrays(
             tempMigratedData.type,
@@ -1055,7 +1061,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('ghgAffected')}</label>}
                     name="ghgsAffected"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>
