@@ -23,5 +23,6 @@
     "updateActivitySuccess": "Activity updated successfully",
     "activityAlreadyValidated": "The activity with id {} is already validated",
     "verifyActivitySuccess": "Activity verified successfully",
-    "activityVerificationFailed": "Activity verification failed due to {}"
+    "activityVerificationFailed": "Activity verification failed due to {}",
+    "cannotEditValidated": "The activity with id {} is validated and cannot be edited"
 }

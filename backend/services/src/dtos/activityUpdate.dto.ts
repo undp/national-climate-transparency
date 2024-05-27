@@ -52,7 +52,6 @@ export class ActivityUpdateDto {
 	@ValidateIf((c) => c.nationalImplementingEntity)
 	@IsOptional()
 	@IsArray()
-	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
 	@IsNotEmpty({ each: true })
 	@IsEnum(NatImplementor, {
@@ -68,7 +67,6 @@ export class ActivityUpdateDto {
 	@ValidateIf((c) => c.internationalImplementingEntity)
 	@IsOptional()
 	@IsArray()
-	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
 	@IsNotEmpty({ each: true })
 	@IsEnum(IntImplementor, {

@@ -11,5 +11,6 @@
     "actionNotFound": "An action with id {} is not found",
     "actionAlreadyValidated": "The action with id {} is already validated",
     "verifyActionSuccess": "Action verified successfully",
-    "actionVerificationFailed": "Action verification failed due to {}"
+    "actionVerificationFailed": "Action verification failed due to {}",
+    "cannotEditValidated": "The action with id {} is validated and cannot be edited"
 }

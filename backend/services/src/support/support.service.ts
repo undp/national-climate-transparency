@@ -46,6 +46,16 @@ export class SupportService {
 			);
 		}
 
+		if (activity.validated) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"common.cannotLinkedToValidated",
+					[EntityType.ACTIVITY , activity.activityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
 		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -148,6 +158,16 @@ export class SupportService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
+
+		if (currentSupport.validated) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.cannotEditValidated",
+					[supportUpdateDto.supportId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
 		const eventLog = [];
 
 		if (!this.helperService.doesUserHaveSectorPermission(user, currentSupport.sector)){
@@ -184,6 +204,17 @@ export class SupportService {
 		this.addEventLogEntry(eventLog, LogEventType.SUPPORT_UPDATED, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, supportUpdateDto);
 
 		if (supportUpdateDto.activityId != currentSupport.activity.activityId) {
+
+			if (currentSupport.activity.validated) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"common.cannotUnlinkedFromValidated",
+						[EntityType.ACTIVITY , activity.activityId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+			
 			this.addEventLogEntry(eventLog, LogEventType.UNLINKED_FROM_ACTIVITY, EntityType.SUPPORT, currentSupport.supportId, user.id, currentSupport.activity.activityId);
 			this.addEventLogEntry(eventLog, LogEventType.SUPPORT_LINKED, EntityType.ACTIVITY, activity.activityId, user.id, supportUpdateDto.supportId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTIVITY, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, activity.activityId);
@@ -199,9 +230,9 @@ export class SupportService {
 		currentSupport.internationalFinancialInstrument = supportUpdateDto.internationalFinancialInstrument;
 		currentSupport.otherInternationalFinancialInstrument = supportUpdateDto.otherInternationalFinancialInstrument;
 		currentSupport.nationalFinancialInstrument = supportUpdateDto.nationalFinancialInstrument;
-		if (supportUpdateDto.otherNationalFinancialInstrument) currentSupport.otherNationalFinancialInstrument = supportUpdateDto.otherNationalFinancialInstrument;
+		currentSupport.otherNationalFinancialInstrument = supportUpdateDto.otherNationalFinancialInstrument;
 		currentSupport.financingStatus = supportUpdateDto.financingStatus;
-		if (supportUpdateDto.internationalSource) currentSupport.internationalSource = supportUpdateDto.internationalSource;
+		currentSupport.internationalSource = supportUpdateDto.internationalSource;
 		currentSupport.nationalSource = supportUpdateDto.nationalSource;
 		currentSupport.requiredAmount = supportUpdateDto.requiredAmount;
 		currentSupport.receivedAmount = supportUpdateDto.receivedAmount;
