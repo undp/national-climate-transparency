@@ -167,8 +167,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               endYear: entityData.endYear,
               expectedTimeFrame: entityData.expectedTimeFrame,
               recipientEntities: entityData.recipientEntities,
-              internationalImplementingEntities: entityData.internationalImplementingEntities,
-              comment: entityData.comment,
+              internationalImplementingEntities:
+                entityData.internationalImplementingEntities ?? undefined,
+              comment: entityData.comment ?? undefined,
             });
 
             setIsValidated(entityData.validated ?? false);
