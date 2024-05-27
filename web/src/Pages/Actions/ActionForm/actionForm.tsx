@@ -375,15 +375,15 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           tempMigratedData.estimatedInvestment =
             tempMigratedData.estimatedInvestment + prg.investment ?? 0;
 
-          const prgGHGAchievement = prg.migratedData[0]?.achievedGHGReduction;
-          const prgGHGExpected = prg.migratedData[0]?.expectedGHGReduction;
+          const prgGHGAchievement = prg.migratedData[0]?.achievedGHGReduction ?? 0;
+          const prgGHGExpected = prg.migratedData[0]?.expectedGHGReduction ?? 0;
 
           tempMigratedData.achievedReduction =
-            tempMigratedData.achievedReduction + prgGHGAchievement !== null ? prgGHGAchievement : 0;
+            tempMigratedData.achievedReduction + prgGHGAchievement;
 
-          tempMigratedData.expectedReduction =
-            tempMigratedData.expectedReduction + prgGHGExpected !== null ? prgGHGExpected : 0;
+          tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + prgGHGExpected;
         });
+
         setProgramData(tempPRGData);
         setActionMigratedData(tempMigratedData);
       } else {

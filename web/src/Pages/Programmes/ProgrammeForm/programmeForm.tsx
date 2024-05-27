@@ -174,7 +174,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               affectedSubSector: entityData.affectedSubSector,
               natImplementor: entityData.nationalImplementor,
               investment: entityData.investment,
-              comments: entityData.comments,
+              comments: entityData.comments ?? undefined,
             });
 
             // Setting validation status
@@ -392,14 +392,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             prj.recipientEntities ?? []
           );
 
-          const prgGHGAchievement = prj.migratedData[0]?.achievedGHGReduction;
-          const prgGHGExpected = prj.migratedData[0]?.expectedGHGReduction;
+          const prgGHGAchievement = prj.migratedData[0]?.achievedGHGReduction ?? 0;
+          const prgGHGExpected = prj.migratedData[0]?.expectedGHGReduction ?? 0;
 
-          tempMigratedData.achievedReduct =
-            tempMigratedData.achievedReduct + prgGHGAchievement !== null ? prgGHGAchievement : 0;
+          tempMigratedData.achievedReduct = tempMigratedData.achievedReduct + prgGHGAchievement;
 
-          tempMigratedData.expectedReduct =
-            tempMigratedData.expectedReduct + prgGHGExpected !== null ? prgGHGExpected : 0;
+          tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + prgGHGExpected;
         });
         setProjectData(tempPRJData);
         setProgrammeMigratedData(tempMigratedData);

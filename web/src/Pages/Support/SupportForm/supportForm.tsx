@@ -123,10 +123,11 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               otherInternationalFinancialInstrument:
                 entityData.otherInternationalFinancialInstrument,
               nationalFinancialInstrument: entityData.nationalFinancialInstrument,
-              otherNationalFinancialInstrument: entityData.otherNationalFinancialInstrument,
+              otherNationalFinancialInstrument:
+                entityData.otherNationalFinancialInstrument ?? undefined,
               financingStatus: entityData.financingStatus,
               internationalSource: entityData.internationalSource ?? undefined,
-              nationalSource: entityData.nationalSource,
+              nationalSource: entityData.nationalSource ?? undefined,
               requiredAmount: entityData.requiredAmount,
               receivedAmount: entityData.receivedAmount,
               exchangeRate: entityData.exchangeRate,

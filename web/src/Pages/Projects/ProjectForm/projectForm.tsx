@@ -162,7 +162,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               type: entityData.type,
               title: entityData.title,
               description: entityData.description,
-              additionalProjectNumber: entityData.additionalProjectNumber,
+              additionalProjectNumber: entityData.additionalProjectNumber ?? undefined,
               projectStatus: entityData.projectStatus,
               startYear: entityData.startYear,
               endYear: entityData.endYear,

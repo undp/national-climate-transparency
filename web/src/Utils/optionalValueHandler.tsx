@@ -47,9 +47,13 @@ export const processOptionalFields = (
 
   for (const key in payload) {
     if (optionalFields.includes(key)) {
-      if (payload[key] === '' || payload[key].length === 0) {
-        console.log('Optional Field Detected in', calledIn, key, payload[key]);
-        // payload[key] = null;
+      try {
+        if (payload[key] && (payload[key] === '' || payload[key].length === 0)) {
+          console.log('Optional Field Detected in', calledIn, key, payload[key]);
+          // payload[key] = null;
+        }
+      } catch {
+        console.log('Optional Field Detection Failed in', calledIn, key, payload[key]);
       }
     }
   }
