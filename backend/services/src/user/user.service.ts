@@ -90,6 +90,18 @@ export class UserService {
 		}
 	}
 
+	private validateSectorUpdate(newSector: Sector[], currentSector: Sector[], requestingUser: User) {
+		if (![Role.Admin, Role.Root].includes(requestingUser.role)) {
+			const sectorChange = newSector.filter(sector => !currentSector.includes(sector));
+			if (newSector.length !== currentSector.length || sectorChange.length > 0){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.cannotUpdateSector", []),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+		}
+	}
+
 	async create(
 		userDto: UserDto,
 
@@ -281,6 +293,8 @@ export class UserService {
 		}
 
 		this.validateRoleAndSubRole(user.role, userDto.subRole);
+
+		this.validateSectorUpdate(userDto.sector, user.sector, requestingUser);
 
 		let isStateUpdate: boolean;
 
