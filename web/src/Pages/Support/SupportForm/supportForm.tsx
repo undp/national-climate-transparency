@@ -160,6 +160,24 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     });
   }, [exchangeRate, amountNeeded, amountReceived]);
 
+  // Form Field Clearing on conditions of finance nature
+
+  useEffect(() => {
+    form.setFieldsValue({
+      internationalSupportChannel: undefined,
+      internationalFinancialInstrument: undefined,
+      nationalFinancialInstrument: undefined,
+    });
+  }, [isInternational, isNational]);
+
+  // Form Field Clearing on conditions of finance direction
+
+  useEffect(() => {
+    form.setFieldsValue({
+      financingStatus: undefined,
+    });
+  }, [isReceived]);
+
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
