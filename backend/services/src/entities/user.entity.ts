@@ -29,8 +29,8 @@ export class User  implements EntitySubject{
 			enum: SubRole,
 			array: false,
 			nullable: true
-	})
-	subRole: SubRole;
+    })
+    subRole: SubRole;
 
     @Column()
     name: string;
@@ -46,7 +46,7 @@ export class User  implements EntitySubject{
 			enum: Organisation,
 			array: false,
 			nullable: true
-	})
+	  })
     organisation: Organisation;
 
     @Column({nullable: true, select: false})
@@ -63,6 +63,6 @@ export class User  implements EntitySubject{
         enum: UserState,
         array: false,
         default: UserState.ACTIVE,
-      })
-      state: UserState;
+    })
+    state: UserState;
 }

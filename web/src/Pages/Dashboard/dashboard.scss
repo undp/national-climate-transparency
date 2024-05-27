@@ -1,0 +1,39 @@
+.dashboard-page {
+
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-bottom: 30px;
+
+    .chart-title {
+        font-weight: 500;
+        color: #615d67;
+        margin-bottom: 20px;
+    }    
+
+    .chart-section-card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        width: 100%;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .chart-update-time {
+        margin-top: 20px;
+        .time-chip {
+            align-content: center;
+            height: 28px;
+            border-width: 0;
+            background-color: #e3f3fb;
+            color: #16B1FF;
+        }
+    }
+
+    .empty-chart {
+        height: 259px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}
