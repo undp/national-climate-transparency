@@ -29,6 +29,7 @@ import { ProjectMigratedData } from '../../../Definitions/projectDefinitions';
 import { NewKpi } from '../../../Components/KPI/newKpi';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
+import { processOptionalFields } from '../../../Utils/optionalValueHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -607,7 +608,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         response = await post('national/projects/add', payload);
       } else if (method === 'update') {
         payload.projectId = entId;
-        response = await put('national/projects/update', payload);
+        response = await put('national/projects/update', processOptionalFields(payload, 'project'));
 
         resolveAttachments();
       }

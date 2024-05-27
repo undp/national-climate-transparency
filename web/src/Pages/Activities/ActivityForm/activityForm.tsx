@@ -30,6 +30,7 @@ import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 import { CreatedKpiData } from '../../../Definitions/kpiDefinitions';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
+import { processOptionalFields } from '../../../Utils/optionalValueHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -390,41 +391,43 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     // Initially Loading the underlying Support data when not in create mode
 
     const fetchSupportData = async () => {
-      try {
-        const tempSupportData: SupportData[] = [];
+      if (method !== 'create') {
+        try {
+          const tempSupportData: SupportData[] = [];
 
-        const payload = {
-          filterAnd: [
-            {
-              key: 'activityId',
-              operation: '=',
-              value: entId,
+          const payload = {
+            filterAnd: [
+              {
+                key: 'activityId',
+                operation: '=',
+                value: entId,
+              },
+            ],
+            sort: {
+              key: 'supportId',
+              order: 'ASC',
             },
-          ],
-          sort: {
-            key: 'supportId',
-            order: 'ASC',
-          },
-        };
+          };
 
-        const response: any = await post('national/supports/query', payload);
+          const response: any = await post('national/supports/query', payload);
 
-        response.data.forEach((sup: any, index: number) => {
-          tempSupportData.push({
-            key: index.toString(),
-            supportId: sup.supportId,
-            financeNature: sup.financeNature,
-            direction: sup.direction,
-            finInstrument: sup.nationalFinancialInstrument,
-            estimatedUSD: sup.requiredAmount,
-            estimatedLC: sup.requiredAmountDomestic,
-            recievedUSD: sup.receivedAmount,
-            recievedLC: sup.receivedAmountDomestic,
+          response.data.forEach((sup: any, index: number) => {
+            tempSupportData.push({
+              key: index.toString(),
+              supportId: sup.supportId,
+              financeNature: sup.financeNature,
+              direction: sup.direction,
+              finInstrument: sup.nationalFinancialInstrument,
+              estimatedUSD: sup.requiredAmount,
+              estimatedLC: sup.requiredAmountDomestic,
+              recievedUSD: sup.receivedAmount,
+              recievedLC: sup.receivedAmountDomestic,
+            });
           });
-        });
-        setSupportData(tempSupportData);
-      } catch {
-        setSupportData([]);
+          setSupportData(tempSupportData);
+        } catch {
+          setSupportData([]);
+        }
       }
     };
     fetchSupportData();
@@ -665,7 +668,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         resolveKPIAchievements(response.data.activityId);
       } else if (method === 'update') {
         payload.activityId = entId;
-        response = await put('national/activities/update', payload);
+        response = await put(
+          'national/activities/update',
+          processOptionalFields(payload, 'activity')
+        );
 
         resolveKPIAchievements(entId);
       }

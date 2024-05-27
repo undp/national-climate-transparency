@@ -27,6 +27,7 @@ import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { NewKpi } from '../../../Components/KPI/newKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
+import { processOptionalFields } from '../../../Utils/optionalValueHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -504,7 +505,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         response = await post('national/programmes/add', payload);
       } else if (method === 'update') {
         payload.programmeId = entId;
-        response = await put('national/programmes/update', payload);
+        response = await put(
+          'national/programmes/update',
+          processOptionalFields(payload, 'programme')
+        );
 
         resolveAttachments();
       }

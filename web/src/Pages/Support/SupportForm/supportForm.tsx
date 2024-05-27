@@ -19,6 +19,7 @@ import { getFormTitle } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { SupportEntity } from '../../../Entities/support';
 import { useAbilityContext } from '../../../Casl/Can';
+import { processOptionalFields } from '../../../Utils/optionalValueHandler';
 
 const { Option } = Select;
 
@@ -192,7 +193,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
         response = await post('national/supports/add', payload);
       } else if (method === 'update') {
         payload.supportId = entId;
-        response = await put('national/supports/update', payload);
+        response = await put('national/supports/update', processOptionalFields(payload, 'support'));
       }
 
       const successMsg =
