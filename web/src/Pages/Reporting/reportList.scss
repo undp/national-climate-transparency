@@ -1,0 +1,30 @@
+.report-table5 {
+  .content-card {
+    border-radius: 10px;
+    width: 100%;
+
+    .action-bar {
+      padding: 10px;
+
+      .title {
+        padding-top: 6px;
+        color: #3a3541CC;
+      }
+
+      .subTitle {
+        font-weight: 500;
+        color: #3a3541CC;
+      }
+
+      button {
+        width: fit-content;
+      }
+    }
+  }
+
+  .table-actions-section {
+    width: 100%;
+    margin-bottom: 0rem;
+  }
+
+}

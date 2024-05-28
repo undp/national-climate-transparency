@@ -90,7 +90,6 @@ export class ProjectUpdateDto {
 
 	@ValidateIf((c) => c.internationalImplementingEntities)
 	@IsArray()
-	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
 	@IsNotEmpty({ each: true })
 	@IsEnum(IntImplementor, {

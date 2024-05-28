@@ -1,0 +1,22 @@
+{
+    "actionId": "Action ID",
+    "programmeId": "Programme ID",
+    "projectId": "Project ID",
+    "titleOfAction": "Title of Action",
+    "titleOfProgramme": "Title of Programme",
+    "titleOfProject": "Title of Project",
+    "description": "Description",
+    "objective": "Objectives",
+    "instrumentType": "Type of Instrument",
+    "status": "Status",
+    "sector": "Sector Affected",
+    "ghgsAffected": "GHG Affected",
+    "startYear": "Start Year",
+    "implementingEntities": "Implementing Entities",
+    "achievedGHGReduction": "GHG reduces (achieved ktCO2e)",
+    "expectedGHGReduction": "GHG reduces (expected ktCO2e)",
+    "exportAsExcel": "Export As Excel",
+    "exportAsCsv": "Export As CSV",
+    "title": "5/CMA.3 - Annex II - Table 5",
+    "subTitle": "Mitigation Policies and Measures, Actions and Plans, including those with mitigation co-benefits resulting from adaption actions and economic diversification plans, related to implementing and achieving a nationally determined contribution under Article 4"
+}

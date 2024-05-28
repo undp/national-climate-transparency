@@ -103,7 +103,6 @@ export class SupportUpdateDto {
 
 	@ValidateIf((c) => c.internationalSource)
 	@IsArray()
-	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
 	@IsNotEmpty({ each: true })
 	@IsEnum(IntSource, {
