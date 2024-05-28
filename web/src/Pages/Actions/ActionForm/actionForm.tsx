@@ -487,18 +487,16 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     fetchActivityAttachmentData();
 
     // Setting Pagination
-    setCurrentPage(1);
-    setPageSize(10);
-  }, [tempProgramIds]);
+    setActivityCurrentPage(1);
+    setActivityPageSize(10);
 
-  useEffect(() => {
-    console.log('Created', createdKpiList);
-    console.log('New', newKpiList);
-  }, [createdKpiList, newKpiList]);
+    setSupportCurrentPage(1);
+    setSupportPageSize(10);
+  }, [tempActivityIds]);
 
   // Attachment resolve before updating an already created action
 
-  const resolveAttachments = async () => {
+  const resolveProgrammeAttachments = async () => {
     const toAttach = tempProgramIds.filter((prg) => !attachedProgramIds.includes(prg));
     const toDetach = attachedProgramIds.filter((prg) => !tempProgramIds.includes(prg));
 
@@ -510,6 +508,23 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     if (toAttach.length > 0) {
       await post('national/programmes/link', { actionId: entId, programmes: toAttach });
+    }
+  };
+
+  const resolveActivityAttachments = async () => {
+    const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
+    const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
+
+    if (toDetach.length > 0) {
+      await post('national/activities/unlink', { activityIds: toDetach });
+    }
+
+    if (toAttach.length > 0) {
+      await post('national/activities/link', {
+        parentId: entId,
+        parentType: 'action',
+        activityIds: toAttach,
+      });
     }
   };
 
@@ -594,7 +609,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         payload.actionId = entId;
         response = await put('national/actions/update', payload);
 
-        resolveAttachments();
+        resolveProgrammeAttachments();
+        resolveActivityAttachments();
       }
 
       const successMsg =
@@ -683,7 +699,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Activity
 
   const detachActivity = async (actId: string) => {
-    console.log(actId);
+    const filteredIds = tempActivityIds.filter((id) => id !== actId);
+    setTempActivityIds(filteredIds);
   };
 
   // Add New KPI
