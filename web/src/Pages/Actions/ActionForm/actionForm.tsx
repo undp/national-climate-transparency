@@ -511,7 +511,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  const resolveActivityAttachments = async () => {
+  const resolveActivityAttachments = async (parentId: string) => {
     const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
     const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
 
@@ -521,7 +521,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     if (toAttach.length > 0) {
       await post('national/activities/link', {
-        parentId: entId,
+        parentId: parentId,
         parentType: 'action',
         activityIds: toAttach,
       });
@@ -605,18 +605,22 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
       if (method === 'create') {
         response = await post('national/actions/add', payload);
-      } else if (method === 'update') {
+      } else if (entId && method === 'update') {
         payload.actionId = entId;
         response = await put('national/actions/update', payload);
-
-        resolveProgrammeAttachments();
-        resolveActivityAttachments();
       }
 
       const successMsg =
         method === 'create' ? t('actionCreationSuccess') : t('actionUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
+        if (method === 'create') {
+          resolveActivityAttachments(response.data.actionId);
+        } else if (entId && method === 'update') {
+          resolveProgrammeAttachments();
+          resolveActivityAttachments(entId);
+        }
+
         await new Promise((resolve) => {
           setTimeout(resolve, 500);
         });

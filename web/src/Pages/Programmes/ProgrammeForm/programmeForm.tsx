@@ -550,7 +550,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  const resolveActivityAttachments = async () => {
+  const resolveActivityAttachments = async (parentId: string) => {
     const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
     const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
 
@@ -560,7 +560,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     if (toAttach.length > 0) {
       await post('national/activities/link', {
-        parentId: entId,
+        parentId: parentId,
         parentType: 'programme',
         activityIds: toAttach,
       });
@@ -646,21 +646,25 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
       if (method === 'create') {
         response = await post('national/programmes/add', payload);
-      } else if (method === 'update') {
+      } else if (entId && method === 'update') {
         payload.programmeId = entId;
         response = await put(
           'national/programmes/update',
           processOptionalFields(payload, 'programme')
         );
-
-        resolveProjectAttachments();
-        resolveActivityAttachments();
       }
 
       const successMsg =
         method === 'create' ? t('programmeCreationSuccess') : t('programmeUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
+        if (method === 'create') {
+          resolveActivityAttachments(response.data.programmeId);
+        } else if (entId && method === 'update') {
+          resolveProjectAttachments();
+          resolveActivityAttachments(entId);
+        }
+
         await new Promise((resolve) => {
           setTimeout(resolve, 500);
         });

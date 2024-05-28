@@ -636,6 +636,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         method === 'create' ? t('projectCreationSuccess') : t('projectUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
+        if (method === 'update') {
+          resolveAttachments();
+        }
+
         await new Promise((resolve) => {
           setTimeout(resolve, 500);
         });
