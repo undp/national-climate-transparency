@@ -7,6 +7,9 @@ export type ActivityData = {
   startYear: number | string;
   endYear: number | string;
   natImplementor: string[];
+  ghgsAffected?: string[];
+  achievedReduction?: number;
+  estimatedReduction?: number;
 };
 
 export type ParentData = {

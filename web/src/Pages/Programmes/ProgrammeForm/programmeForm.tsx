@@ -371,22 +371,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, [programmeMigratedData]);
 
-  // Fetching Project data and calculating migrated fields when attachment changes
+  // Fetching Project data
 
   useEffect(() => {
     const payload = {
       page: 1,
       size: tempProjectIds.length,
       filterOr: [] as any[],
-    };
-
-    const tempMigratedData: ProgrammeMigratedData = {
-      type: [],
-      intImplementor: [],
-      recipientEntity: [],
-      ghgsAffected: [],
-      achievedReduct: 0,
-      expectedReduct: 0,
     };
 
     const fetchData = async () => {
@@ -407,39 +398,17 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             key: index.toString(),
             projectId: prj.projectId,
             projectName: prj.title,
+            type: prj.type,
+            internationalImplementingEntities: prj.internationalImplementingEntities ?? [],
+            recipientEntities: prj.recipientEntities ?? [],
+            ghgsAffected: prj.migratedData[0]?.ghgsAffected ?? [],
+            achievedReduction: prj.migratedData[0]?.achievedGHGReduction ?? 0,
+            estimatedReduction: prj.migratedData[0]?.expectedGHGReduction ?? 0,
           });
-
-          if (!tempMigratedData.type.includes(prj.type)) {
-            tempMigratedData.type.push(prj.type);
-          }
-
-          tempMigratedData.intImplementor = joinTwoArrays(
-            tempMigratedData.intImplementor,
-            prj.internationalImplementingEntities ?? []
-          );
-
-          tempMigratedData.recipientEntity = joinTwoArrays(
-            tempMigratedData.recipientEntity,
-            prj.recipientEntities ?? []
-          );
-
-          tempMigratedData.ghgsAffected = joinTwoArrays(
-            tempMigratedData.ghgsAffected,
-            prj.migratedData[0]?.ghgsAffected ?? []
-          );
-
-          const prgGHGAchievement = prj.migratedData[0]?.achievedGHGReduction ?? 0;
-          const prgGHGExpected = prj.migratedData[0]?.expectedGHGReduction ?? 0;
-
-          tempMigratedData.achievedReduct = tempMigratedData.achievedReduct + prgGHGAchievement;
-
-          tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + prgGHGExpected;
         });
         setProjectData(tempPRJData);
-        setProgrammeMigratedData(tempMigratedData);
       } else {
         setProjectData([]);
-        setProgrammeMigratedData(tempMigratedData);
       }
     };
     fetchData();
@@ -498,6 +467,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             startYear: 'NA',
             endYear: 'NA',
             natImplementor: act.nationalImplementingEntity ?? [],
+            ghgsAffected: act.ghgsAffected ?? [],
+            achievedReduction: act.achievedGHGReduction ?? 0,
+            estimatedReduction: act.expectedGHGReduction ?? 0,
           });
         });
 
@@ -534,6 +506,63 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     setSupportCurrentPage(1);
     setSupportPageSize(10);
   }, [tempActivityIds]);
+
+  // Calculating migrated fields when attachment changes
+
+  useEffect(() => {
+    const tempMigratedData: ProgrammeMigratedData = {
+      type: [],
+      intImplementor: [],
+      recipientEntity: [],
+      ghgsAffected: [],
+      achievedReduct: 0,
+      expectedReduct: 0,
+    };
+
+    projectData.forEach((prj: ProjectData) => {
+      if (!tempMigratedData.type.includes(prj.type)) {
+        tempMigratedData.type.push(prj.type);
+      }
+
+      tempMigratedData.intImplementor = joinTwoArrays(
+        tempMigratedData.intImplementor,
+        prj.internationalImplementingEntities ?? []
+      );
+
+      tempMigratedData.recipientEntity = joinTwoArrays(
+        tempMigratedData.recipientEntity,
+        prj.recipientEntities ?? []
+      );
+
+      tempMigratedData.ghgsAffected = joinTwoArrays(
+        tempMigratedData.ghgsAffected,
+        prj.ghgsAffected ?? []
+      );
+
+      const prgGHGAchievement = prj.achievedReduction ?? 0;
+      const prgGHGExpected = prj.estimatedReduction ?? 0;
+
+      tempMigratedData.achievedReduct = tempMigratedData.achievedReduct + prgGHGAchievement;
+
+      tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + prgGHGExpected;
+    });
+
+    activityData.forEach((act: ActivityData) => {
+      tempMigratedData.ghgsAffected = joinTwoArrays(
+        tempMigratedData.ghgsAffected,
+        act.ghgsAffected ?? []
+      );
+
+      const actGHGAchievement = act.achievedReduction ?? 0;
+      const actGHGExpected = act.estimatedReduction ?? 0;
+
+      tempMigratedData.achievedReduct = tempMigratedData.achievedReduct + actGHGAchievement;
+
+      tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + actGHGExpected;
+    });
+
+    setProgrammeMigratedData(tempMigratedData);
+  }, [projectData, activityData]);
 
   // Attachment resolve before updating an already created programme
 
