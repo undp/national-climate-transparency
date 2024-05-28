@@ -49,7 +49,7 @@ export class ActionService {
 		const action: ActionEntity = plainToClass(ActionEntity, actionDto);
 		const eventLog = [];
 
-		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.cannotCreateNotRelatedAction",
@@ -116,7 +116,7 @@ export class ActionService {
 						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, action.actionId, user, em);
 						this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_LINKED, EntityType.ACTION, action.actionId, user.id, actionDto);
 					}
-					
+
 					if (actionDto.kpis) {
 						for (const kpi of kpiList) {
 							await em.save<KpiEntity>(kpi);
@@ -189,25 +189,25 @@ export class ActionService {
 
 		let haveChildren: boolean = false;
 
-		const programmeChildren: ProgrammeEntity[] = 
+		const programmeChildren: ProgrammeEntity[] =
 			await this.programmeRepo.createQueryBuilder('programme')
-			.where('programme.actionId = :actionId', { actionId })
-			.getMany();
+				.where('programme.actionId = :actionId', { actionId })
+				.getMany();
 
-		const projectChildren: ProjectEntity[] = 
+		const projectChildren: ProjectEntity[] =
 			await this.projectRepo.createQueryBuilder('project')
-			.where("subpath(project.path, 0, 1) = :actionId", { actionId })
-			.getMany();
+				.where("subpath(project.path, 0, 1) = :actionId", { actionId })
+				.getMany();
 
-		const activityChildren: ActivityEntity[] = 
+		const activityChildren: ActivityEntity[] =
 			await this.activityRepo.createQueryBuilder('activity')
-			.leftJoinAndSelect('activity.support', 'support')
-			.where("subpath(activity.path, 0, 1) = :actionId", { actionId })
-			.getMany();
+				.leftJoinAndSelect('activity.support', 'support')
+				.where("subpath(activity.path, 0, 1) = :actionId", { actionId })
+				.getMany();
 
-		haveChildren = (programmeChildren.length > 0) || (projectChildren.length > 0) || (activityChildren.length > 0) ?  true : false;
-		
-		return {haveChildren: haveChildren, programmeChildren: programmeChildren, projectChildren: projectChildren, activityChildren: activityChildren};
+		haveChildren = (programmeChildren.length > 0) || (projectChildren.length > 0) || (activityChildren.length > 0) ? true : false;
+
+		return { haveChildren: haveChildren, programmeChildren: programmeChildren, projectChildren: projectChildren, activityChildren: activityChildren };
 	}
 
 	async getActionViewData(actionId: string) {
@@ -238,8 +238,10 @@ export class ActionService {
 	}
 
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
-		const queryBuilder = this.actionRepo
+		// Subquery to get distinct action IDs
+		const subQuery = this.actionRepo
 			.createQueryBuilder("action")
+			.select("action.actionId")
 			.where(
 				this.helperService.generateWhereSQL(
 					query,
@@ -250,6 +252,20 @@ export class ActionService {
 					'"action"'
 				)
 			)
+			.orderBy(
+				query?.sort?.key ? `"action"."${query?.sort?.key}"` : `"action"."actionId"`,
+				query?.sort?.order ? query?.sort?.order : "DESC"
+			);
+
+		if (query.size && query.page) {
+			subQuery.offset(query.size * query.page - query.size)
+				.limit(query.size);
+		}
+
+		// Main query to join with the subquery
+		const queryBuilder = this.actionRepo
+			.createQueryBuilder("action")
+			.where(`action.actionId IN (${subQuery.getQuery()})`)
 			.leftJoinAndSelect('action.programmes', 'programme')
 			.leftJoinAndMapMany(
 				"action.migratedData",
@@ -262,16 +278,12 @@ export class ActionService {
 				query?.sort?.order ? query?.sort?.order : "DESC"
 			);
 
-		if (query.size && query.page) {
-			queryBuilder.offset(query.size * query.page - query.size)
-				.limit(query.size);
-		}
-
 		const resp = await queryBuilder.getManyAndCount();
+		const totalCount = await subQuery.getCount();
 
 		return new DataListResponseDto(
 			resp.length > 0 ? resp[0] : undefined,
-			resp.length > 1 ? resp[1] : undefined
+			totalCount
 		);
 	}
 
@@ -300,7 +312,7 @@ export class ActionService {
 			);
 		}
 
-		if (!this.helperService.doesUserHaveSectorPermission(user, currentAction.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentAction.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"action.permissionDeniedForSector",
@@ -310,7 +322,7 @@ export class ActionService {
 			);
 		}
 
-		if (!this.helperService.doesUserHaveSectorPermission(user, actionUpdate.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, actionUpdate.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"action.permissionDeniedForSector",
@@ -417,7 +429,7 @@ export class ActionService {
 				const savedAction = await em.save<ActionEntity>(actionUpdate);
 				if (savedAction) {
 					// Update children sector
-					if (children.haveChildren && (actionUpdate.sector !== currentAction.sector)){
+					if (children.haveChildren && (actionUpdate.sector !== currentAction.sector)) {
 						await this.linkUnlinkService.updateActionChildrenSector(children, actionUpdate.sector, em);
 					}
 
@@ -474,7 +486,7 @@ export class ActionService {
 			);
 		}
 
-		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"action.permissionDeniedForSector",

@@ -191,18 +191,40 @@ export class ProjectService {
 	}
 
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
+		// Subquery to get distinct project IDs
+		const subQuery = this.projectRepo
+		.createQueryBuilder("project")
+		.where(
+			this.helperService.generateWhereSQL(
+				query,
+				this.helperService.parseMongoQueryToSQLWithTable(
+					'"project"',
+					abilityCondition
+				),
+				'"project"'
+			)
+		)
+		.orderBy(
+			query?.sort?.key ? `"project"."${query?.sort?.key}"` : `"project"."projectId"`,
+			query?.sort?.order ? query?.sort?.order : "DESC"
+		);
+
+    if (query.size && query.page) {
+        subQuery.offset(query.size * query.page - query.size)
+            .limit(query.size);
+    }
+
+    const projectIds = await subQuery.getRawMany();
+    const projectIdsArray = projectIds.map(item => item.project_projectId);
+
+    if (projectIdsArray.length === 0) {
+        return new DataListResponseDto([], 0);
+    }
+
+		// Main query to join with the subquery
 		const queryBuilder = this.projectRepo
 			.createQueryBuilder("project")
-			.where(
-				this.helperService.generateWhereSQL(
-					query,
-					this.helperService.parseMongoQueryToSQLWithTable(
-						'"project"',
-						abilityCondition
-					),
-					'"project"'
-				)
-			)
+			.where("project.projectId IN (:...projectIds)", { projectIds: projectIdsArray })
 			.leftJoinAndSelect("project.programme", "programme")
 			.leftJoinAndMapMany(
 				"project.migratedData",
@@ -215,16 +237,12 @@ export class ProjectService {
 				query?.sort?.order ? query?.sort?.order : "DESC"
 			);
 
-		if (query.size && query.page) {
-			queryBuilder.offset(query.size * query.page - query.size)
-				.limit(query.size);
-		}
-
 		const resp = await queryBuilder.getManyAndCount();
+		const totalCount = await subQuery.getCount();
 
 		return new DataListResponseDto(
 			resp.length > 0 ? resp[0] : undefined,
-			resp.length > 1 ? resp[1] : undefined
+			totalCount
 		);
 	}
 
