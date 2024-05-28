@@ -7,6 +7,11 @@ export type ProgrammeData = {
   status: string;
   subSectorsAffected: string;
   estimatedInvestment: number;
+  ghgsAffected: string[];
+  types: string[];
+  natImplementer: string[];
+  achievedReduction: number;
+  estimatedReduction: number;
 };
 
 export type ProgrammeMigratedData = {

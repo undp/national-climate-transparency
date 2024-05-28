@@ -333,15 +333,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       },
     };
 
-    const tempMigratedData: ActionMigratedData = {
-      natImplementer: [],
-      estimatedInvestment: 0,
-      type: [],
-      achievedReduction: 0,
-      expectedReduction: 0,
-      ghgsAffected: [],
-    };
-
     const fetchAttachmentData = async () => {
       if (tempProgramIds.length > 0) {
         tempProgramIds.forEach((progId) => {
@@ -365,40 +356,17 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             status: prg.programmeStatus,
             subSectorsAffected: prg.affectedSubSector ?? [],
             estimatedInvestment: prg.investment,
+            ghgsAffected: prg.migratedData[0]?.ghgsAffected ?? [],
+            types: prg.migratedData[0]?.types ?? [],
+            natImplementer: prg.natImplementor ?? [],
+            achievedReduction: prg.migratedData[0]?.achievedGHGReduction ?? 0,
+            estimatedReduction: prg.migratedData[0]?.expectedGHGReduction ?? 0,
           });
-
-          tempMigratedData.ghgsAffected = joinTwoArrays(
-            tempMigratedData.ghgsAffected,
-            prg.migratedData[0]?.ghgsAffected ?? []
-          );
-
-          tempMigratedData.type = joinTwoArrays(
-            tempMigratedData.type,
-            prg.migratedData[0]?.types ?? []
-          );
-
-          tempMigratedData.natImplementer = joinTwoArrays(
-            tempMigratedData.natImplementer,
-            prg.natImplementor ?? []
-          );
-
-          tempMigratedData.estimatedInvestment =
-            tempMigratedData.estimatedInvestment + prg.investment ?? 0;
-
-          const prgGHGAchievement = prg.migratedData[0]?.achievedGHGReduction ?? 0;
-          const prgGHGExpected = prg.migratedData[0]?.expectedGHGReduction ?? 0;
-
-          tempMigratedData.achievedReduction =
-            tempMigratedData.achievedReduction + prgGHGAchievement;
-
-          tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + prgGHGExpected;
         });
 
         setProgramData(tempPRGData);
-        setActionMigratedData(tempMigratedData);
       } else {
         setProgramData([]);
-        setActionMigratedData(tempMigratedData);
       }
     };
     fetchAttachmentData();
@@ -457,6 +425,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             startYear: 'NA',
             endYear: 'NA',
             natImplementor: act.nationalImplementingEntity ?? [],
+            ghgsAffected: act.ghgsAffected ?? [],
+            achievedReduction: act.achievedGHGReduction ?? 0,
+            estimatedReduction: act.expectedGHGReduction ?? 0,
           });
         });
 
@@ -493,6 +464,57 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     setSupportCurrentPage(1);
     setSupportPageSize(10);
   }, [tempActivityIds]);
+
+  // Calculating migrated fields when attachment changes
+
+  useEffect(() => {
+    const tempMigratedData: ActionMigratedData = {
+      natImplementer: [],
+      estimatedInvestment: 0,
+      type: [],
+      achievedReduction: 0,
+      expectedReduction: 0,
+      ghgsAffected: [],
+    };
+
+    programData.forEach((prg: ProgrammeData) => {
+      tempMigratedData.ghgsAffected = joinTwoArrays(
+        tempMigratedData.ghgsAffected,
+        prg.ghgsAffected ?? []
+      );
+
+      tempMigratedData.type = joinTwoArrays(tempMigratedData.type, prg.types ?? []);
+
+      tempMigratedData.natImplementer = joinTwoArrays(
+        tempMigratedData.natImplementer,
+        prg.natImplementer ?? []
+      );
+
+      tempMigratedData.estimatedInvestment =
+        tempMigratedData.estimatedInvestment + prg.estimatedInvestment ?? 0;
+
+      const prgGHGAchievement = prg.achievedReduction ?? 0;
+      const prgGHGExpected = prg.estimatedReduction ?? 0;
+
+      tempMigratedData.achievedReduction = tempMigratedData.achievedReduction + prgGHGAchievement;
+      tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + prgGHGExpected;
+    });
+
+    activityData.forEach((act: ActivityData) => {
+      tempMigratedData.ghgsAffected = joinTwoArrays(
+        tempMigratedData.ghgsAffected,
+        act.ghgsAffected ?? []
+      );
+
+      const actGHGAchievement = act.achievedReduction ?? 0;
+      const actGHGExpected = act.estimatedReduction ?? 0;
+
+      tempMigratedData.achievedReduction = tempMigratedData.achievedReduction + actGHGAchievement;
+      tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + actGHGExpected;
+    });
+
+    setActionMigratedData(tempMigratedData);
+  }, [programData, activityData]);
 
   // Attachment resolve before updating an already created action
 
