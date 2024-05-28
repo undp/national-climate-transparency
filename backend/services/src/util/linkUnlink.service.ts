@@ -146,7 +146,9 @@ export class LinkUnlinkService {
 						await em.save<ProjectEntity>(projects)
 						await em.save<ActivityEntity>(activities)
 					}
-					await this.deleteAchievements(achievementsToRemove, em);
+					if (achievementsToRemove.length > 0) {
+						await this.deleteAchievements(achievementsToRemove, em);
+					}
 					await em.save<LogEntity>(
 						this.buildLogEntity(
 							LogEventType.UNLINKED_FROM_ACTION,

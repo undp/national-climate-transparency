@@ -109,10 +109,13 @@ export class KpiService {
 		switch (unlinkingEntityType) {
 			case EntityType.ACTION:
 				entityLevel = 0;
+				break;
 			case EntityType.PROGRAMME:
 				entityLevel = 1;
+				break;
 			case EntityType.PROJECT:
 				entityLevel = 2;
+				break;
 
 		}
 
@@ -341,6 +344,19 @@ export class KpiService {
 
 	async findAchievementsByActivityId(activityId: string) {
 		return await this.achievementRepo.findBy({activityId})
+	}
+
+	async findAchievementsByKpiIds(kpiIds: number[]) {
+		if (!kpiIds || kpiIds.length === 0) {
+			return [];
+		}
+
+		const achievements = await this.achievementRepo
+			.createQueryBuilder('achievement')
+			.where('achievement.kpiId IN (:...kpiIds)', { kpiIds })
+			.getMany();
+
+		return achievements;
 	}
 
 	// async findAllActivitiesInTree(rootNodeId: string, rootNodeType: EntityType) {
