@@ -27,6 +27,7 @@ import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { ValidateDto } from "../dtos/validate.dto";
 import { SupportEntity } from "../entities/support.entity";
+import { AchievementEntity } from "src/entities/achievement.entity";
 
 @Injectable()
 export class ProjectService {
@@ -154,19 +155,14 @@ export class ProjectService {
 				if (savedProject) {
 					// linking activities and updating paths of projects and activities
 					if (activities && activities.length > 0) {
-						await this.linkUnlinkService.linkActivitiesToParent(savedProject, activities, {parentType: EntityType.PROJECT, parentId: savedProject.projectId, activityIds: activities}, user, em);
+						await this.linkUnlinkService.linkActivitiesToParent(savedProject, activities, { parentType: EntityType.PROJECT, parentId: savedProject.projectId, activityIds: activities }, user, em);
 						this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, project.projectId, user.id, projectDto);
 					}
-					
-					if (projectDto.kpis) {
-						for (const kpi of kpiList) {
-							await em.save<KpiEntity>(kpi);
-						}
-					}
 
-					for (const event of eventLog) {
-						await em.save<LogEntity>(event);
+					if (projectDto.kpis) {
+						await em.save<KpiEntity>(kpiList);
 					}
+					await em.save<LogEntity>(eventLog);
 				}
 				return savedProject;
 			})
@@ -410,6 +406,7 @@ export class ProjectService {
 
 		const kpiList = [];
 		const kpisToRemove = [];
+		const achievementsToRemove = [];
 		let kpisUpdated = false;
 
 		if (projectUpdateDto.kpis && projectUpdateDto.kpis.length > 0) {
@@ -437,11 +434,21 @@ export class ProjectService {
 					kpi.creatorType = kpiToUpdate.creatorType;
 					kpi.name = kpiToUpdate.name;
 					kpi.expected = kpiToUpdate.expected;
+					kpi.kpiUnit = kpiToUpdate.kpiUnit;
 					kpiList.push(kpi);
 					kpisUpdated = true;
 				} else {
 					kpisToRemove.push(currentKpi);
 					kpisUpdated = true;
+				}
+			}
+
+			if (kpisToRemove.length > 0) {
+				const kpiIdsToRemove = kpisToRemove.map(kpi => kpi.kpiId);
+				const achievements = await this.kpiService.findAchievementsByKpiIds(kpiIdsToRemove);
+
+				if (achievements && achievements.length > 0) {
+					achievementsToRemove.push(...achievements);
 				}
 			}
 
@@ -482,21 +489,16 @@ export class ProjectService {
 
 					// Save new KPIs
 					if (kpiList.length > 0) {
-						await Promise.all(kpiList.map(async kpi => {
-							await em.save<KpiEntity>(kpi);
-						}));
+						await em.save<KpiEntity>(kpiList);
 					}
 					// Remove KPIs
 					if (kpisToRemove.length > 0) {
-						await Promise.all(kpisToRemove.map(async kpi => {
-							await em.remove<KpiEntity>(kpi);
-						}));
+						await em.remove<AchievementEntity>(achievementsToRemove);
+						await em.remove<KpiEntity>(kpisToRemove);
 					}
 					// Save event logs
 					if (eventLog.length > 0) {
-						await Promise.all(eventLog.map(async event => {
-							await em.save<LogEntity>(event);
-						}));
+						await em.save<LogEntity>(eventLog);
 					}
 				}
 				return savedProject;
