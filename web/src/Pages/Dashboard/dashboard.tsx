@@ -1,4 +1,4 @@
-import { Col, Empty, Row, Select, Tag, message } from 'antd';
+import { Col, Empty, Row, Select, Spin, Tag, message } from 'antd';
 import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
@@ -24,6 +24,7 @@ const Dashboard = () => {
   const { get, post, statServerUrl } = useConnection();
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [chartLoading, setChartLoading] = useState<boolean>(false);
 
   // Table Data State
 
@@ -132,6 +133,8 @@ const Dashboard = () => {
   // Data Fetching at the Initial Loading
 
   useEffect(() => {
+    setChartLoading(true);
+
     const getClimateActionChartData = async () => {
       const response: any = await get('stats/analytics/actionsSummery', undefined, statServerUrl);
       const actionChartData = response.data;
@@ -203,6 +206,8 @@ const Dashboard = () => {
       });
     };
     getRecentMitigationChartData();
+
+    setChartLoading(false);
 
     getAllData();
   }, []);
@@ -309,96 +314,110 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-page">
-      <ChartInformation
-        open={openChartInfo}
-        setOpen={setOpenChartInfo}
-        content={chartContent}
-      ></ChartInformation>
-      <Row gutter={30}>
-        {chartData.map((chart: PieChartData, index: number) => (
-          <Col key={index} className="gutter-row" span={12}>
-            <div className="chart-section-card">
-              <div className="chart-title">
-                <Row gutter={30}>
-                  <Col span={17}>{chart.chartTitle}</Col>
-                  <Col span={5} style={{ display: 'flex', alignItems: 'flex-end' }}>
-                    {chart.chartId === 5 && (
-                      <Select
-                        size="small"
-                        style={{ fontSize: '13px' }}
-                        defaultValue={mtgYear}
-                        showSearch
-                        onChange={(value) => {
-                          setMtgYear(value);
-                        }}
-                      >
-                        {yearsList.map((year) => (
-                          <Option key={year} value={year}>
-                            {year}
-                          </Option>
-                        ))}
-                      </Select>
-                    )}
-                  </Col>
-                  <Col span={2}>
-                    <InfoCircleOutlined
-                      onClick={() => {
-                        setChartContent({ title: chart.chartTitle, body: chart.chartDescription });
-                        setOpenChartInfo(true);
-                      }}
-                    />
-                  </Col>
-                </Row>
-              </div>
-              {chart.total > 0 ? (
-                <>
-                  <Chart
-                    key={index}
-                    type="donut"
-                    options={{
-                      labels: chart.categories.map((category) =>
-                        category.length > 16 ? `${category.slice(0, 16)}...` : category
-                      ),
-                      dataLabels: {
-                        enabled: false,
-                      },
-                      tooltip: {
-                        enabled: false,
-                      },
-                      plotOptions: {
-                        pie: {
-                          donut: {
-                            labels: {
-                              show: true,
-                              total: {
-                                show: true,
-                                label: 'Total',
-                                formatter: () =>
-                                  DashboardTotalFormatter(chart.total, [4].includes(chart.chartId)),
+      {!chartLoading ? (
+        <div>
+          <ChartInformation
+            open={openChartInfo}
+            setOpen={setOpenChartInfo}
+            content={chartContent}
+          ></ChartInformation>
+          <Row gutter={30}>
+            {chartData.map((chart: PieChartData, index: number) => (
+              <Col key={index} className="gutter-row" span={12}>
+                <div className="chart-section-card">
+                  <div className="chart-title">
+                    <Row gutter={30}>
+                      <Col span={17}>{chart.chartTitle}</Col>
+                      <Col span={5} style={{ display: 'flex', alignItems: 'flex-end' }}>
+                        {chart.chartId === 5 && (
+                          <Select
+                            size="small"
+                            style={{ fontSize: '13px' }}
+                            defaultValue={mtgYear}
+                            showSearch
+                            onChange={(value) => {
+                              setMtgYear(value);
+                            }}
+                          >
+                            {yearsList.map((year) => (
+                              <Option key={year} value={year}>
+                                {year}
+                              </Option>
+                            ))}
+                          </Select>
+                        )}
+                      </Col>
+                      <Col span={2}>
+                        <InfoCircleOutlined
+                          onClick={() => {
+                            setChartContent({
+                              title: chart.chartTitle,
+                              body: chart.chartDescription,
+                            });
+                            setOpenChartInfo(true);
+                          }}
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                  {chart.total > 0 ? (
+                    <>
+                      <Chart
+                        key={index}
+                        type="donut"
+                        options={{
+                          labels: chart.categories.map((category) =>
+                            category.length > 16 ? `${category.slice(0, 16)}...` : category
+                          ),
+                          dataLabels: {
+                            enabled: false,
+                          },
+                          tooltip: {
+                            enabled: false,
+                          },
+                          plotOptions: {
+                            pie: {
+                              donut: {
+                                labels: {
+                                  show: true,
+                                  total: {
+                                    show: true,
+                                    label: 'Total',
+                                    formatter: () =>
+                                      DashboardTotalFormatter(
+                                        chart.total,
+                                        [4].includes(chart.chartId)
+                                      ),
+                                  },
+                                },
                               },
                             },
                           },
-                        },
-                      },
-                    }}
-                    series={chart.values}
-                    height={250}
-                  />
-                  <div className="chart-update-time">
-                    <Tag className="time-chip">{CustomFormatDate(chart.lastUpdatedTime)}</Tag>
-                  </div>
-                </>
-              ) : (
-                <Empty
-                  className="empty-chart"
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  description={t('noChartDataAvailable')}
-                />
-              )}
-            </div>
-          </Col>
-        ))}
-      </Row>
+                        }}
+                        series={chart.values}
+                        height={250}
+                      />
+                      <div className="chart-update-time">
+                        <Tag className="time-chip">{CustomFormatDate(chart.lastUpdatedTime)}</Tag>
+                      </div>
+                    </>
+                  ) : (
+                    <Empty
+                      className="empty-chart"
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={t('noChartDataAvailable')}
+                    />
+                  )}
+                </div>
+              </Col>
+            ))}
+          </Row>{' '}
+        </div>
+      ) : (
+        <div className="loading-charts-spinner">
+          <Spin size="large" />
+        </div>
+      )}
       <Row gutter={30}>
         <Col span={24}>
           <LayoutTable
