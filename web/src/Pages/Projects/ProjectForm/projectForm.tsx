@@ -1340,7 +1340,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={6} style={{ paddingTop: '6px' }}>
+                <Col span={20} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
                 <Col span={4}>

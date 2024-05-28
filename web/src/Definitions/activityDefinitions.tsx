@@ -4,9 +4,9 @@ export type ActivityData = {
   title: string;
   reductionMeasures: string;
   status: string;
-  startYear: number;
-  endYear: number;
-  natImplementor: string;
+  startYear: number | string;
+  endYear: number | string;
+  natImplementor: string[];
 };
 
 export type ParentData = {

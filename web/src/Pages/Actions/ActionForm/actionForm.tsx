@@ -121,9 +121,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // Initially Loading Free Programmes that can be attached
+    // Initially Loading Free Programmes and Activities that can be attached
 
-    const fetchFreeProgrammes = async () => {
+    const fetchFreeChildren = async () => {
       if (method !== 'view') {
         const prgResponse: any = await get('national/programmes/link/eligible');
 
@@ -142,7 +142,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         setAllActivityIdList(freeActivityIds);
       }
     };
-    fetchFreeProgrammes();
+    fetchFreeChildren();
 
     // Initially Loading the underlying action data when not in create mode
 
@@ -276,23 +276,28 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     const fetchConnectedActivityIds = async () => {
       if (method !== 'create') {
         const connectedActivityIds: string[] = [];
-        // const payload = {
-        //   filterAnd: [
-        //     {
-        //       key: 'actionId',
-        //       operation: '=',
-        //       value: entId,
-        //     },
-        //   ],
-        //   sort: {
-        //     key: 'activityId',
-        //     order: 'ASC',
-        //   },
-        // };
-        // const response: any = await post('national/activities/query', payload);
-        // response.data.forEach((act: any) => {
-        //   connectedActivityIds.push(act.activityId);
-        // });
+        const payload = {
+          filterAnd: [
+            {
+              key: 'parentId',
+              operation: '=',
+              value: entId,
+            },
+            {
+              key: 'parentType',
+              operation: '=',
+              value: 'action',
+            },
+          ],
+          sort: {
+            key: 'activityId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/activities/query', payload);
+        response.data.forEach((act: any) => {
+          connectedActivityIds.push(act.activityId);
+        });
         setAttachedActivityIds(connectedActivityIds);
         setTempActivityIds(connectedActivityIds);
       }
@@ -403,25 +408,88 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     setPageSize(10);
   }, [tempProgramIds]);
 
-  useEffect(() => {
-    const tempActivityData: ActivityData[] = [];
-    tempActivityIds.forEach((actId) => {
-      tempActivityData.push({
-        key: actId,
-        activityId: actId,
-        title: 'Title',
-        reductionMeasures: 'With Measures',
-        status: 'Planned',
-        startYear: 2014,
-        endYear: 2016,
-        natImplementor: 'Department of Energy',
-      });
-    });
-    setActivityData(tempActivityData);
+  // Fetching Activity data and calculating migrated fields when attachment changes
 
-    // Get the Support Data for each attached Activity
-    setSupportData([]);
-  }, [tempActivityIds]);
+  useEffect(() => {
+    const activityPayload = {
+      filterOr: [] as any[],
+      sort: {
+        key: 'activityId',
+        order: 'ASC',
+      },
+    };
+
+    const supportPayload = {
+      filterOr: [] as any[],
+      sort: {
+        key: 'supportId',
+        order: 'ASC',
+      },
+    };
+
+    const fetchActivityAttachmentData = async () => {
+      if (tempActivityIds.length > 0) {
+        tempActivityIds.forEach((activityId) => {
+          activityPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activityId,
+          });
+          supportPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activityId,
+          });
+        });
+        const activityResponse: any = await post('national/activities/query', activityPayload);
+        const supportResponse: any = await post('national/supports/query', supportPayload);
+
+        const tempActivityData: ActivityData[] = [];
+        const tempSupportData: SupportData[] = [];
+
+        activityResponse.data.forEach((act: any, index: number) => {
+          tempActivityData.push({
+            key: index.toString(),
+            activityId: act.activityId,
+            title: act.title,
+            reductionMeasures: act.measure,
+            status: act.status,
+            startYear: 'NA',
+            endYear: 'NA',
+            natImplementor: act.nationalImplementingEntity ?? [],
+          });
+        });
+
+        supportResponse.data.forEach((sup: any, index: number) => {
+          tempSupportData.push({
+            key: index.toString(),
+            supportId: sup.supportId,
+            financeNature: sup.financeNature,
+            direction: sup.direction,
+            finInstrument:
+              sup.financeNature === 'International'
+                ? sup.internationalFinancialInstrument
+                : sup.nationalFinancialInstrument,
+            estimatedUSD: sup.requiredAmount,
+            estimatedLC: sup.requiredAmountDomestic,
+            recievedUSD: sup.receivedAmount,
+            recievedLC: sup.receivedAmountDomestic,
+          });
+        });
+
+        setActivityData(tempActivityData);
+        setSupportData(tempSupportData);
+      } else {
+        setActivityData([]);
+        setSupportData([]);
+      }
+    };
+    fetchActivityAttachmentData();
+
+    // Setting Pagination
+    setCurrentPage(1);
+    setPageSize(10);
+  }, [tempProgramIds]);
 
   useEffect(() => {
     console.log('Created', createdKpiList);
@@ -928,7 +996,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={6} style={{ paddingTop: '6px' }}>
+                <Col span={20} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('programInfoTitle')}</div>
                 </Col>
                 <Col span={4}>
@@ -977,7 +1045,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={6} style={{ paddingTop: '6px' }}>
+                <Col span={20} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
                 <Col span={4}>
@@ -1025,7 +1093,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={6}>
+                <Col span={20}>
                   <div className="form-section-header">{t('supportInfoTitle')}</div>
                 </Col>
               </Row>
