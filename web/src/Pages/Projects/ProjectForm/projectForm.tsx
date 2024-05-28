@@ -29,6 +29,7 @@ import { ProjectMigratedData } from '../../../Definitions/projectDefinitions';
 import { NewKpi } from '../../../Components/KPI/newKpi';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
+import { processOptionalFields } from '../../../Utils/optionalValueHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -114,10 +115,23 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // Initially Loading Free Actions that can be parent
+    // Initially Loading Non validated programmes that can be parent
 
-    const fetchAllProgrammes = async () => {
-      const response: any = await post('national/programmes/query', {});
+    const fetchNonValidatedProgrammes = async () => {
+      const payload = {
+        filterAnd: [
+          {
+            key: 'validated',
+            operation: '=',
+            value: false,
+          },
+        ],
+        sort: {
+          key: 'programmeId',
+          order: 'ASC',
+        },
+      };
+      const response: any = await post('national/programmes/query', payload);
 
       const tempProgrammeData: ProgrammeSelectData[] = [];
       response.data.forEach((prg: any) => {
@@ -128,7 +142,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       });
       setProgrammeList(tempProgrammeData);
     };
-    fetchAllProgrammes();
+    fetchNonValidatedProgrammes();
 
     // Initially Loading Free Activities that can be attached
 
@@ -161,17 +175,24 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               type: entityData.type,
               title: entityData.title,
               description: entityData.description,
-              additionalProjectNumber: entityData.additionalProjectNumber,
+              additionalProjectNumber: entityData.additionalProjectNumber ?? undefined,
               projectStatus: entityData.projectStatus,
               startYear: entityData.startYear,
               endYear: entityData.endYear,
               expectedTimeFrame: entityData.expectedTimeFrame,
               recipientEntities: entityData.recipientEntities,
-              internationalImplementingEntities: entityData.internationalImplementingEntities,
-              comment: entityData.comment,
+              internationalImplementingEntities:
+                entityData.internationalImplementingEntities ?? undefined,
+              comment: entityData.comment ?? undefined,
             });
 
+            // Setting validation status
+
             setIsValidated(entityData.validated ?? false);
+
+            if (entityData.validated && method === 'update') {
+              navigate(`/projects/view/${entId}`);
+            }
 
             if (entityData.documents?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
@@ -606,7 +627,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         response = await post('national/projects/add', payload);
       } else if (method === 'update') {
         payload.projectId = entId;
-        response = await put('national/projects/update', payload);
+        response = await put('national/projects/update', processOptionalFields(payload, 'project'));
 
         resolveAttachments();
       }

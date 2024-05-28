@@ -79,8 +79,6 @@ export class ProgrammeViewEntity {
 	@ViewColumn()
 	expectedGHGReduction: number;
 
-	// No Clue of Location
-
-	// @ViewColumn()
-	// ghgsAffected: string[]
+	@ViewColumn()
+	ghgsAffected: string[]
 }

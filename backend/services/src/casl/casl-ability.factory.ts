@@ -156,7 +156,7 @@ export class CaslAbilityFactory {
 				can(Action.Create, ActionEntity);
 				can(Action.Update, ActionEntity);
 				can(Action.Delete, ActionEntity);
-				cannot(Action.Validate, ActionEntity);
+				can(Action.Validate, ActionEntity);
 
 				
 				// ----------------------------- Programme ------------------------------
@@ -175,7 +175,7 @@ export class CaslAbilityFactory {
 				can(Action.Create, ProgrammeEntity);
 				can(Action.Update, ProgrammeEntity);
 				can(Action.Delete, ProgrammeEntity);
-				cannot(Action.Validate, ProgrammeEntity);
+				can(Action.Validate, ProgrammeEntity);
 
 				// ----------------------------- Project ------------------------------
 
@@ -192,7 +192,7 @@ export class CaslAbilityFactory {
 				can(Action.Create, ProjectEntity);
 				can(Action.Update, ProjectEntity);
 				can(Action.Delete, ProjectEntity);
-				cannot(Action.Validate, ProjectEntity);
+				can(Action.Validate, ProjectEntity);
 				
 				// ----------------------------- Activity ------------------------------
 
@@ -209,7 +209,7 @@ export class CaslAbilityFactory {
 				can(Action.Create, ActivityEntity);
 				can(Action.Update, ActivityEntity);
 				can(Action.Delete, ActivityEntity);
-				cannot(Action.Validate, ActivityEntity);
+				can(Action.Validate, ActivityEntity);
 
 				// ----------------------------- Support ------------------------------
 
@@ -226,7 +226,7 @@ export class CaslAbilityFactory {
 				can(Action.Create, SupportEntity);
 				can(Action.Update, SupportEntity);
 				can(Action.Delete, SupportEntity);
-				cannot(Action.Validate, SupportEntity);
+				can(Action.Validate, SupportEntity);
 
 				// ----------------------------- KPI ------------------------------
 				can(Action.Read, KpiEntity);

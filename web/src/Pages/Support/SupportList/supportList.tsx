@@ -275,6 +275,7 @@ const supportList = () => {
               ability,
               SupportEntity,
               record.supportId,
+              record.validationStatus ?? 'pending',
               navigate,
               t
             )}

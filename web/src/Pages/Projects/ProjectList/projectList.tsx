@@ -376,6 +376,7 @@ const projectList = () => {
               ability,
               ProjectEntity,
               record.projectId,
+              record.validationStatus ?? 'pending',
               getAttachedActivityIds,
               setOpenAttaching,
               setSelectedProjectId,

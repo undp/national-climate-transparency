@@ -167,6 +167,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
             setIsValidated(entityData.validated ?? false);
 
+            if (entityData.validated && method === 'update') {
+              navigate(`/actions/view/${entId}`);
+            }
+
             if (entityData.documents?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
               entityData.documents.forEach((document: any) => {
@@ -330,7 +334,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       type: [],
       achievedReduction: 0,
       expectedReduction: 0,
-      ghgsAffected: '',
+      ghgsAffected: [],
     };
 
     const fetchAttachmentData = async () => {
@@ -358,6 +362,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             estimatedInvestment: prg.investment,
           });
 
+          tempMigratedData.ghgsAffected = joinTwoArrays(
+            tempMigratedData.ghgsAffected,
+            prg.migratedData[0]?.ghgsAffected ?? []
+          );
+
           tempMigratedData.type = joinTwoArrays(
             tempMigratedData.type,
             prg.migratedData[0]?.types ?? []
@@ -371,15 +380,15 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           tempMigratedData.estimatedInvestment =
             tempMigratedData.estimatedInvestment + prg.investment ?? 0;
 
-          const prgGHGAchievement = prg.migratedData[0]?.achievedGHGReduction;
-          const prgGHGExpected = prg.migratedData[0]?.expectedGHGReduction;
+          const prgGHGAchievement = prg.migratedData[0]?.achievedGHGReduction ?? 0;
+          const prgGHGExpected = prg.migratedData[0]?.expectedGHGReduction ?? 0;
 
           tempMigratedData.achievedReduction =
-            tempMigratedData.achievedReduction + prgGHGAchievement !== null ? prgGHGAchievement : 0;
+            tempMigratedData.achievedReduction + prgGHGAchievement;
 
-          tempMigratedData.expectedReduction =
-            tempMigratedData.expectedReduction + prgGHGExpected !== null ? prgGHGExpected : 0;
+          tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + prgGHGExpected;
         });
+
         setProgramData(tempPRGData);
         setActionMigratedData(tempMigratedData);
       } else {
@@ -1051,7 +1060,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('ghgAffected')}</label>}
                     name="ghgsAffected"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>

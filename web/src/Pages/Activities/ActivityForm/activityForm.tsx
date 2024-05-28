@@ -15,7 +15,7 @@ import {
   ExpectedTimeline,
 } from '../../../Definitions/mtgTimeline.definition';
 import { ActivityStatus, ImplMeans, Measure, TechnologyType } from '../../../Enums/activity.enum';
-import { IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
+import { GHGS, IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
@@ -30,6 +30,7 @@ import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 import { CreatedKpiData } from '../../../Definitions/kpiDefinitions';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
+import { processOptionalFields } from '../../../Utils/optionalValueHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -256,10 +257,25 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     fetchParentKPIData();
   }, [connectedParentId]);
 
+  // Loading Non Validated Entities that can be parent on Parent Type select
+
   useEffect(() => {
-    const fetchAvailableParents = async () => {
+    const fetchNonValidatedParents = async () => {
       if (parentType === 'action' || parentType === 'programme' || parentType === 'project') {
-        const response: any = await post(`national/${parentType}s/query`, {});
+        const payload = {
+          filterAnd: [
+            {
+              key: 'validated',
+              operation: '=',
+              value: false,
+            },
+          ],
+          sort: {
+            key: `${parentType}Id`,
+            order: 'ASC',
+          },
+        };
+        const response: any = await post(`national/${parentType}s/query`, payload);
 
         const tempParentData: ParentData[] = [];
         response.data.forEach((parent: any) => {
@@ -276,7 +292,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         setParentList(tempParentData);
       }
     };
-    fetchAvailableParents();
+    fetchNonValidatedParents();
   }, [parentType]);
 
   // Initializing Section
@@ -298,15 +314,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               title: entityData.title,
               description: entityData.description,
               status: entityData.status,
-              measure: entityData.measure,
+              measure: entityData.measure ?? undefined,
               nationalImplementingEntity: entityData.nationalImplementingEntity ?? undefined,
               internationalImplementingEntity:
                 entityData.internationalImplementingEntity ?? undefined,
-              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy,
-              meansOfImplementation: entityData.meansOfImplementation,
-              technologyType: entityData.technologyType,
-              etfDescription: entityData.etfDescription,
-              comment: entityData.comment,
+              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy ?? undefined,
+              meansOfImplementation: entityData.meansOfImplementation ?? undefined,
+              technologyType: entityData.technologyType ?? undefined,
+              etfDescription: entityData.etfDescription ?? undefined,
+              comment: entityData.comment ?? undefined,
+              ghgsAffected: entityData.ghgsAffected ?? undefined,
               achievedGHGReduction: entityData.achievedGHGReduction,
               expectedGHGReduction: entityData.expectedGHGReduction,
             });
@@ -334,6 +351,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             // Setting validation status
 
             setIsValidated(entityData.validated ?? false);
+
+            if (entityData.validated && method === 'update') {
+              navigate(`/activities/view/${entId}`);
+            }
 
             // Setting up uploaded files
 
@@ -390,41 +411,43 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     // Initially Loading the underlying Support data when not in create mode
 
     const fetchSupportData = async () => {
-      try {
-        const tempSupportData: SupportData[] = [];
+      if (method !== 'create') {
+        try {
+          const tempSupportData: SupportData[] = [];
 
-        const payload = {
-          filterAnd: [
-            {
-              key: 'activityId',
-              operation: '=',
-              value: entId,
+          const payload = {
+            filterAnd: [
+              {
+                key: 'activityId',
+                operation: '=',
+                value: entId,
+              },
+            ],
+            sort: {
+              key: 'supportId',
+              order: 'ASC',
             },
-          ],
-          sort: {
-            key: 'supportId',
-            order: 'ASC',
-          },
-        };
+          };
 
-        const response: any = await post('national/supports/query', payload);
+          const response: any = await post('national/supports/query', payload);
 
-        response.data.forEach((sup: any, index: number) => {
-          tempSupportData.push({
-            key: index.toString(),
-            supportId: sup.supportId,
-            financeNature: sup.financeNature,
-            direction: sup.direction,
-            finInstrument: sup.nationalFinancialInstrument,
-            estimatedUSD: sup.requiredAmount,
-            estimatedLC: sup.requiredAmountDomestic,
-            recievedUSD: sup.receivedAmount,
-            recievedLC: sup.receivedAmountDomestic,
+          response.data.forEach((sup: any, index: number) => {
+            tempSupportData.push({
+              key: index.toString(),
+              supportId: sup.supportId,
+              financeNature: sup.financeNature,
+              direction: sup.direction,
+              finInstrument: sup.nationalFinancialInstrument,
+              estimatedUSD: sup.requiredAmount,
+              estimatedLC: sup.requiredAmountDomestic,
+              recievedUSD: sup.receivedAmount,
+              recievedLC: sup.receivedAmountDomestic,
+            });
           });
-        });
-        setSupportData(tempSupportData);
-      } catch {
-        setSupportData([]);
+          setSupportData(tempSupportData);
+        } catch {
+          setSupportData([]);
+        }
       }
     };
     fetchSupportData();
@@ -665,7 +688,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         resolveKPIAchievements(response.data.activityId);
       } else if (method === 'update') {
         payload.activityId = entId;
-        response = await put('national/activities/update', payload);
+        response = await put(
+          'national/activities/update',
+          processOptionalFields(payload, 'activity')
+        );
 
         resolveKPIAchievements(entId);
       }
@@ -1248,6 +1274,30 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
               <div className="form-section-header">{t('mitigationInfoTitle')}</div>
               <div className="form-section-sub-header">{t('emissionInfoTitle')}</div>
+              <Row gutter={gutterSize}>
+                <Col span={12}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                    name="ghgsAffected"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size="large"
+                      mode="multiple"
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(GHGS).map((ghg) => (
+                        <Option key={ghg} value={ghg}>
+                          {ghg}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
               <Row gutter={gutterSize}>
                 <Col span={12}>
                   <Form.Item

@@ -27,6 +27,7 @@ import UpdatesTimeline from '../../../Components/UpdateTimeline/updates';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { NewKpi } from '../../../Components/KPI/newKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
+import { processOptionalFields } from '../../../Utils/optionalValueHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -114,10 +115,23 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // Initially Loading Free Actions that can be parent
+    // Initially Loading Non Validated Actions that can be parent
 
-    const fetchFreeActions = async () => {
-      const response: any = await post('national/actions/query', {});
+    const fetchNonValidatedActions = async () => {
+      const payload = {
+        filterAnd: [
+          {
+            key: 'validated',
+            operation: '=',
+            value: false,
+          },
+        ],
+        sort: {
+          key: 'actionId',
+          order: 'ASC',
+        },
+      };
+      const response: any = await post('national/actions/query', payload);
 
       const tempActionData: ActionSelectData[] = [];
       response.data.forEach((action: any) => {
@@ -130,8 +144,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       });
       setActionList(tempActionData);
     };
-
-    fetchFreeActions();
+    fetchNonValidatedActions();
 
     // Initially Loading Free Projects that can be attached
 
@@ -173,10 +186,16 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               affectedSubSector: entityData.affectedSubSector,
               natImplementor: entityData.nationalImplementor,
               investment: entityData.investment,
-              comments: entityData.comments,
+              comments: entityData.comments ?? undefined,
             });
 
+            // Setting validation status
+
             setIsValidated(entityData.validated ?? false);
+
+            if (entityData.validated && method === 'update') {
+              navigate(`/programmes/view/${entId}`);
+            }
 
             if (entityData.documents?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
@@ -195,7 +214,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               type: entityData.types ?? [],
               intImplementor: entityData.interNationalImplementor ?? [],
               recipientEntity: entityData.recipientEntity ?? [],
-              ghgsAffected: entityData.ghgsAffected,
+              ghgsAffected: entityData.ghgsAffected ?? [],
               achievedReduct: entityData.achievedGHGReduction,
               expectedReduct: entityData.expectedGHGReduction,
             });
@@ -346,7 +365,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       type: [],
       intImplementor: [],
       recipientEntity: [],
-      ghgsAffected: '',
+      ghgsAffected: [],
       achievedReduct: 0,
       expectedReduct: 0,
     };
@@ -385,14 +404,17 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             prj.recipientEntities ?? []
           );
 
-          const prgGHGAchievement = prj.migratedData[0]?.achievedGHGReduction;
-          const prgGHGExpected = prj.migratedData[0]?.expectedGHGReduction;
+          tempMigratedData.ghgsAffected = joinTwoArrays(
+            tempMigratedData.ghgsAffected,
+            prj.migratedData[0]?.ghgsAffected ?? []
+          );
 
-          tempMigratedData.achievedReduct =
-            tempMigratedData.achievedReduct + prgGHGAchievement !== null ? prgGHGAchievement : 0;
+          const prgGHGAchievement = prj.migratedData[0]?.achievedGHGReduction ?? 0;
+          const prgGHGExpected = prj.migratedData[0]?.expectedGHGReduction ?? 0;
 
-          tempMigratedData.expectedReduct =
-            tempMigratedData.expectedReduct + prgGHGExpected !== null ? prgGHGExpected : 0;
+          tempMigratedData.achievedReduct = tempMigratedData.achievedReduct + prgGHGAchievement;
+
+          tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + prgGHGExpected;
         });
         setProjectData(tempPRJData);
         setProgrammeMigratedData(tempMigratedData);
@@ -504,7 +526,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         response = await post('national/programmes/add', payload);
       } else if (method === 'update') {
         payload.programmeId = entId;
-        response = await put('national/programmes/update', payload);
+        response = await put(
+          'national/programmes/update',
+          processOptionalFields(payload, 'programme')
+        );
 
         resolveAttachments();
       }
@@ -1023,7 +1048,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     label={<label className="form-item-header">{t('ghgAffected')}</label>}
                     name="ghgsAffected"
                   >
-                    <Input className="form-input-box" disabled />
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      disabled={true}
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>

@@ -64,6 +64,9 @@ export class ProjectViewEntity {
 	@ViewColumn()
 	technologyTypes: string[]
 
+    @ViewColumn()
+	ghgsAffected: string[]
+
 	@ViewColumn()
 	achievedGHGReduction: number;
 

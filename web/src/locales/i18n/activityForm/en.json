@@ -60,6 +60,7 @@
     "mtgComments": "Comments on the Project",
     "mtgDocUploadOne": "Mitigation Methodology Documentation",
     "mtgDocUploadTwo": "Mitigation Results Documentation",
-    "mitigationTimelineTitle" : "Mitigation Timeline"
+    "mitigationTimelineTitle" : "Mitigation Timeline",
+    "ghgAffected": "GHG(s) Affected"
   }
   

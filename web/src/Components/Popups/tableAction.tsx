@@ -17,21 +17,26 @@ export const actionMenuWithAttaching = (
   ability: any,
   entity: ActionEntity | ProgrammeEntity | ProjectEntity,
   recordId: string,
+  validationStatus: 'pending' | 'validated',
   getAttachedEntityIds: (recordId: string) => void,
   setOpenAttaching: React.Dispatch<React.SetStateAction<boolean>>,
   setSelectedEntityId: React.Dispatch<React.SetStateAction<string | undefined>>,
   navigate: any,
   t: any
 ) => {
+  const isValidated: boolean = validationStatus === 'validated' ? true : false;
+  const viewText = ability.can(Action.Validate, entity)
+    ? isValidated
+      ? t('tableAction:View')
+      : t('tableAction:View/Validate')
+    : t('tableAction:View');
   return (
     <List
       className="action-menu"
       size="small"
       dataSource={[
         {
-          text: ability.can(Action.Validate, entity)
-            ? t('tableAction:View/Validate')
-            : t('tableAction:View'),
+          text: viewText,
           icon: <InfoCircleOutlined style={{ color: '#9155FD' }} />,
           isDisabled: false,
           click: () => {
@@ -43,7 +48,7 @@ export const actionMenuWithAttaching = (
         {
           text: t(`tableAction:${calledIn}Attach`),
           icon: <PlusOutlined style={{ color: '#9155FD' }} />,
-          isDisabled: !ability.can(Action.Update, entity),
+          isDisabled: !ability.can(Action.Update, entity) || isValidated,
           click: () => {
             {
               setOpenAttaching(true);
@@ -55,7 +60,7 @@ export const actionMenuWithAttaching = (
         {
           text: t(`tableAction:${calledIn}Edit`),
           icon: <EditOutlined style={{ color: '#9155FD' }} />,
-          isDisabled: !ability.can(Action.Update, entity),
+          isDisabled: !ability.can(Action.Update, entity) || isValidated,
           click: () => {
             {
               navigate(`/${calledIn}s/edit/${recordId}`);
@@ -80,18 +85,23 @@ export const actionMenuWithoutAttaching = (
   ability: any,
   entity: ActivityEntity | SupportEntity,
   recordId: string,
+  validationStatus: 'pending' | 'validated',
   navigate: any,
   t: any
 ) => {
+  const isValidated: boolean = validationStatus === 'validated' ? true : false;
+  const viewText = ability.can(Action.Validate, entity)
+    ? isValidated
+      ? t('tableAction:View')
+      : t('tableAction:View/Validate')
+    : t('tableAction:View');
   return (
     <List
       className="action-menu"
       size="small"
       dataSource={[
         {
-          text: ability.can(Action.Validate, entity)
-            ? t('tableAction:View/Validate')
-            : t('tableAction:View'),
+          text: viewText,
           icon: <InfoCircleOutlined style={{ color: '#9155FD' }} />,
           isDisabled: false,
           click: () => {
@@ -103,7 +113,7 @@ export const actionMenuWithoutAttaching = (
         {
           text: t(`tableAction:${calledIn}Edit`),
           icon: <EditOutlined style={{ color: '#9155FD' }} />,
-          isDisabled: !ability.can(Action.Update, entity),
+          isDisabled: !ability.can(Action.Update, entity) || isValidated,
           click: () => {
             {
               navigate(`/${calledIn}/edit/${recordId}`);

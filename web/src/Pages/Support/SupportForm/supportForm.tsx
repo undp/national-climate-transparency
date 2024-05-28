@@ -19,6 +19,7 @@ import { getFormTitle } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { SupportEntity } from '../../../Entities/support';
 import { useAbilityContext } from '../../../Casl/Can';
+import { processOptionalFields } from '../../../Utils/optionalValueHandler';
 
 const { Option } = Select;
 
@@ -75,6 +76,21 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const [parentList, setParentList] = useState<ParentData[]>([]);
 
+  // Function to set conditional field rendering
+
+  const renderNatureBasedFields = (financeNature: string) => {
+    if (financeNature === 'International') {
+      setIsInternational(true);
+      setIsNational(false);
+    } else if (financeNature === 'National') {
+      setIsInternational(false);
+      setIsNational(true);
+    } else {
+      setIsInternational(false);
+      setIsNational(false);
+    }
+  };
+
   // Initialization Logic
 
   useEffect(() => {
@@ -122,10 +138,11 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               otherInternationalFinancialInstrument:
                 entityData.otherInternationalFinancialInstrument,
               nationalFinancialInstrument: entityData.nationalFinancialInstrument,
-              otherNationalFinancialInstrument: entityData.otherNationalFinancialInstrument,
+              otherNationalFinancialInstrument:
+                entityData.otherNationalFinancialInstrument ?? undefined,
               financingStatus: entityData.financingStatus,
               internationalSource: entityData.internationalSource ?? undefined,
-              nationalSource: entityData.nationalSource,
+              nationalSource: entityData.nationalSource ?? undefined,
               requiredAmount: entityData.requiredAmount,
               receivedAmount: entityData.receivedAmount,
               exchangeRate: entityData.exchangeRate,
@@ -134,7 +151,22 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             setAmountNeeded(entityData.requiredAmount ?? undefined);
             setAmountReceived(entityData.receivedAmount ?? undefined);
             setExchangeRate(entityData.exchangeRate ?? undefined);
+
+            // Setting the field rendering conditions
+
+            renderNatureBasedFields(entityData.financeNature);
+
+            if (entityData.direction === 'Received') {
+              setIsReceived(true);
+            }
+
+            // Setting validation status
+
             setIsValidated(entityData.validated ?? false);
+
+            if (entityData.validated && method === 'update') {
+              navigate(`/support/view/${entId}`);
+            }
           }
         } catch {
           navigate('/support');
@@ -174,7 +206,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
         response = await post('national/supports/add', payload);
       } else if (method === 'update') {
         payload.supportId = entId;
-        response = await put('national/supports/update', payload);
+        response = await put('national/supports/update', processOptionalFields(payload, 'support'));
       }
 
       const successMsg =
@@ -285,7 +317,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView}
                     showSearch
                   >
@@ -306,10 +337,12 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView}
                     showSearch
                     onChange={(direction) => {
+                      form.setFieldsValue({
+                        financingStatus: undefined,
+                      });
                       if (direction === 'Received') {
                         setIsReceived(true);
                       } else {
@@ -336,20 +369,15 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView}
                     showSearch
                     onChange={(nature) => {
-                      if (nature === 'International') {
-                        setIsInternational(true);
-                        setIsNational(false);
-                      } else if (nature === 'National') {
-                        setIsInternational(false);
-                        setIsNational(true);
-                      } else {
-                        setIsInternational(false);
-                        setIsNational(false);
-                      }
+                      form.setFieldsValue({
+                        internationalSupportChannel: undefined,
+                        internationalFinancialInstrument: undefined,
+                        nationalFinancialInstrument: undefined,
+                      });
+                      renderNatureBasedFields(nature);
                     }}
                   >
                     {Object.values(FinanceNature).map((nature) => (
@@ -369,7 +397,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView || !isInternational}
                     showSearch
                   >
@@ -403,7 +430,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size="large"
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView || !isInternational}
                     showSearch
                   >
@@ -441,7 +467,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size="large"
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView || !isNational}
                     showSearch
                   >
@@ -476,7 +501,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size="large"
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView || !isReceived}
                     showSearch
                   >
