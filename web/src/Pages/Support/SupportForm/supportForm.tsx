@@ -95,8 +95,21 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   useEffect(() => {
     // Fetching All Activities which can be the parent
-    const fetchAllActivities = async () => {
-      const response: any = await post('national/activities/query', {});
+    const fetchNonValidatedActivities = async () => {
+      const payload = {
+        filterAnd: [
+          {
+            key: 'validated',
+            operation: '=',
+            value: false,
+          },
+        ],
+        sort: {
+          key: 'activityId',
+          order: 'ASC',
+        },
+      };
+      const response: any = await post('national/activities/query', payload);
       const tempActivityData: ParentData[] = [];
       response.data.forEach((activity: any) => {
         tempActivityData.push({
@@ -106,7 +119,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       });
       setParentList(tempActivityData);
     };
-    fetchAllActivities();
+    fetchNonValidatedActivities();
 
     // Initially Loading the underlying support data when not in create mode
 
