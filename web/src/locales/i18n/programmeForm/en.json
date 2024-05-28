@@ -37,6 +37,7 @@
     "attach": "Attach",
     "detach": "Detach",
     "attachProjects": "Attach Projects",
+    "attachActivity": "Attach Activities",
     "projectList": "Project List",
     "addKPI": "Add KPI",
     "programmeCreationSuccess": "Programme Added Successfully",
@@ -48,6 +49,10 @@
     "validate": "Validate",
     "back": "Back",
     "delete": "Delete",
-    "update": "Save"
+    "update": "Save",
+    "activityInfoTitle": "List of Direct Linked Activities under the Programme",
+    "supportInfoTitle": "List of Direct Linked Supports under the Programme",
+    "noActivityMessage": "No Activities Attached",
+    "noSupportMessage": "No Supports Attached"
   }
   
