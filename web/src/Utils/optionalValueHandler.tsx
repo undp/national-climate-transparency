@@ -21,6 +21,10 @@ const supportFormOptionals = [
   'otherNationalFinancialInstrument',
   'internationalSource',
   'nationalSource',
+  'financingStatus',
+  'nationalFinancialInstrument',
+  'internationalFinancialInstrument',
+  'internationalSupportChannel',
 ];
 
 export const processOptionalFields = (
@@ -45,18 +49,19 @@ export const processOptionalFields = (
       break;
   }
 
-  for (const key in payload) {
-    if (optionalFields.includes(key)) {
-      try {
-        if (payload[key] && (payload[key] === '' || payload[key].length === 0)) {
-          console.log('Optional Field Detected in', calledIn, key, payload[key]);
-          // payload[key] = null;
-        }
-      } catch {
-        console.log('Optional Field Detection Failed in', calledIn, key, payload[key]);
+  const transformedPayload = { ...payload };
+
+  for (const key of optionalFields) {
+    if (transformedPayload.hasOwnProperty(key)) {
+      if (typeof transformedPayload[key] === 'string' && transformedPayload[key] === '') {
+        transformedPayload[key] = null;
+      } else if (transformedPayload[key] instanceof Array && transformedPayload[key].length === 0) {
+        transformedPayload[key] = null;
+      } else if (typeof transformedPayload[key] === 'undefined') {
+        transformedPayload[key] = null;
       }
     }
   }
 
-  return payload;
+  return transformedPayload;
 };

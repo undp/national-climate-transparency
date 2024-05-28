@@ -76,6 +76,21 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const [parentList, setParentList] = useState<ParentData[]>([]);
 
+  // Function to set conditional field rendering
+
+  const renderNatureBasedFields = (financeNature: string) => {
+    if (financeNature === 'International') {
+      setIsInternational(true);
+      setIsNational(false);
+    } else if (financeNature === 'National') {
+      setIsInternational(false);
+      setIsNational(true);
+    } else {
+      setIsInternational(false);
+      setIsNational(false);
+    }
+  };
+
   // Initialization Logic
 
   useEffect(() => {
@@ -137,6 +152,14 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             setAmountReceived(entityData.receivedAmount ?? undefined);
             setExchangeRate(entityData.exchangeRate ?? undefined);
 
+            // Setting the field rendering conditions
+
+            renderNatureBasedFields(entityData.financeNature);
+
+            if (entityData.direction === 'Received') {
+              setIsReceived(true);
+            }
+
             // Setting validation status
 
             setIsValidated(entityData.validated ?? false);
@@ -168,24 +191,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       receivedLocal: updatedReceived > 0 ? parseFloat(updatedReceived.toFixed(3)) : null,
     });
   }, [exchangeRate, amountNeeded, amountReceived]);
-
-  // Form Field Clearing on conditions of finance nature
-
-  useEffect(() => {
-    form.setFieldsValue({
-      internationalSupportChannel: undefined,
-      internationalFinancialInstrument: undefined,
-      nationalFinancialInstrument: undefined,
-    });
-  }, [isInternational, isNational]);
-
-  // Form Field Clearing on conditions of finance direction
-
-  useEffect(() => {
-    form.setFieldsValue({
-      financingStatus: undefined,
-    });
-  }, [isReceived]);
 
   // Form Submit
 
@@ -312,7 +317,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView}
                     showSearch
                   >
@@ -333,10 +337,12 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView}
                     showSearch
                     onChange={(direction) => {
+                      form.setFieldsValue({
+                        financingStatus: undefined,
+                      });
                       if (direction === 'Received') {
                         setIsReceived(true);
                       } else {
@@ -363,20 +369,15 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView}
                     showSearch
                     onChange={(nature) => {
-                      if (nature === 'International') {
-                        setIsInternational(true);
-                        setIsNational(false);
-                      } else if (nature === 'National') {
-                        setIsInternational(false);
-                        setIsNational(true);
-                      } else {
-                        setIsInternational(false);
-                        setIsNational(false);
-                      }
+                      form.setFieldsValue({
+                        internationalSupportChannel: undefined,
+                        internationalFinancialInstrument: undefined,
+                        nationalFinancialInstrument: undefined,
+                      });
+                      renderNatureBasedFields(nature);
                     }}
                   >
                     {Object.values(FinanceNature).map((nature) => (
@@ -396,7 +397,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView || !isInternational}
                     showSearch
                   >
@@ -430,7 +430,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size="large"
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView || !isInternational}
                     showSearch
                   >
@@ -468,7 +467,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size="large"
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView || !isNational}
                     showSearch
                   >
@@ -503,7 +501,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Select
                     size="large"
                     style={{ fontSize: inputFontSize }}
-                    allowClear
                     disabled={isView || !isReceived}
                     showSearch
                   >
