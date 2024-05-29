@@ -367,7 +367,7 @@ const Dashboard = () => {
                         type="donut"
                         options={{
                           labels: chart.categories.map((category) =>
-                            category.length > 25 ? `${category.slice(0, 25)}...` : category
+                            category.length > 20 ? `${category.slice(0, 20)}...` : category
                           ),
                           dataLabels: {
                             enabled: false,
