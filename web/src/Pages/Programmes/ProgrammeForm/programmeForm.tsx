@@ -259,6 +259,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               if (kpi.creatorId === entId) {
                 tempCreatedKpiList.push({
                   index: tempKpiCounter,
+                  creator: entId,
                   id: kpi.kpiId,
                   name: kpi.name,
                   unit: kpi.kpiUnit,
@@ -268,6 +269,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               } else {
                 tempInheritedKpiList.push({
                   index: tempKpiCounter,
+                  creator: kpi.creatorId,
                   id: kpi.kpiId,
                   name: kpi.name,
                   unit: kpi.kpiUnit,
@@ -837,6 +839,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           response.data.forEach((kpi: any) => {
             tempInheritedKpiList.push({
               index: tempKpiCounter,
+              creator: kpi.creatorId,
               id: kpi.kpiId,
               name: kpi.name,
               unit: kpi.kpiUnit,
@@ -1355,6 +1358,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                     kpi={createdKPI}
                     callingEntityId={entId}
+                    ownerEntityId={createdKPI.creator}
                   ></ViewKpi>
                 ))}
               {method === 'view' &&
@@ -1366,6 +1370,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                     kpi={createdKPI}
                     callingEntityId={entId}
+                    ownerEntityId={createdKPI.creator}
                   ></ViewKpi>
                 ))}
               {method === 'update' &&

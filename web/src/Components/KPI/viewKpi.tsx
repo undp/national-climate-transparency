@@ -2,7 +2,7 @@ import { Form, Input, Row, Col, Select, Tooltip } from 'antd';
 import './kpiGrid.scss';
 import { KpiUnits } from '../../Enums/kpi.enum';
 import { CreatedKpiData } from '../../Definitions/kpiDefinitions';
-import { CircleFill } from 'react-bootstrap-icons';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 interface Props {
   index: number;
@@ -10,6 +10,7 @@ interface Props {
   headerNames: string[];
   kpi: CreatedKpiData;
   callingEntityId: string | undefined;
+  ownerEntityId: string | undefined;
 }
 
 const { Option } = Select;
@@ -20,6 +21,7 @@ export const ViewKpi: React.FC<Props> = ({
   headerNames,
   kpi,
   callingEntityId,
+  ownerEntityId,
 }) => {
   return (
     <Row key={index} gutter={30} className="kpi-grid">
@@ -52,7 +54,7 @@ export const ViewKpi: React.FC<Props> = ({
         </Row>
       </Col>
       <Col span={12}>
-        <Row gutter={30}>
+        <Row gutter={15}>
           <Col span={11}>
             <Form.Item
               label={<label className="form-item-header">{headerNames[2]}</label>}
@@ -71,13 +73,13 @@ export const ViewKpi: React.FC<Props> = ({
               <Input type="number" className="form-input-box" disabled={true} />
             </Form.Item>
           </Col>
-          <Col span={2} style={{ padding: 0 }}>
+          <Col span={2}>
             <Tooltip
               placement="topLeft"
-              title={inherited ? 'Inherited from a Parent' : `Owned by ${callingEntityId}`}
+              title={inherited ? `Inherited from ${ownerEntityId}` : `Owned by ${callingEntityId}`}
               showArrow={false}
             >
-              <CircleFill
+              <InfoCircleOutlined
                 className={inherited ? 'inherited-circle' : 'self-owned-circle'}
                 size={10}
               />
