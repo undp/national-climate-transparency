@@ -584,15 +584,18 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const resolveKPIAchievements = async (activityId: string | undefined) => {
     if (inheritedKpiList.length > 0 && activityId) {
+      const achievements: { kpiId: number; activityId: string; achieved: number }[] = [];
       inheritedKpiList.forEach(async (inheritedKpi) => {
         if (inheritedKpi.achieved > 0) {
-          await post('national/kpis/achievements/add', {
+          achievements.push({
             kpiId: inheritedKpi.id,
             activityId: activityId,
             achieved: inheritedKpi.achieved,
           });
         }
       });
+
+      await post('national/kpis/achievements/add', { achievements: achievements });
     }
   };
 

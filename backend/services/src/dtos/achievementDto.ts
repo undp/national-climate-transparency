@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { ApiProperty, getSchemaPath } from "@nestjs/swagger";
+import { ArrayMinSize, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class AchievementDto {
 	
@@ -17,4 +17,22 @@ export class AchievementDto {
   @IsNumber()
   @ApiProperty()
 	achieved: number;
+}
+
+export class AchievementDtoList {
+
+	@ArrayMinSize(1)
+	@IsNotEmpty({ each: true })
+	@ApiProperty({
+		type: "array",
+		example: [{
+			kpiId: "1",
+			activityId: "T00001",
+			achieved: 100
+	}],
+		items: {
+			$ref: getSchemaPath(AchievementDto),
+		},
+	})
+	achievements: AchievementDto[]
 }

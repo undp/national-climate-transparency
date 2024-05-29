@@ -14,7 +14,7 @@ import { Action } from "../casl/action.enum";
 import { PoliciesGuardEx } from "../casl/policy.guard";
 import { KpiService } from "src/kpi/kpi.service";
 import { EntityType } from "src/enums/shared.enum";
-import { AchievementDto } from "src/dtos/achievementDto";
+import { AchievementDto, AchievementDtoList } from "src/dtos/achievementDto";
 import { KpiEntity } from "src/entities/kpi.entity";
 
 @ApiTags("Kpis")
@@ -43,8 +43,8 @@ export class KpiController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Create, KpiEntity))
 	@Post("achievements/add")
-	addAchievement(@Body() achievementDto: AchievementDto, @Request() req) {
-		return this.kpiService.createAchievements(achievementDto, req.user);
+	addAchievement(@Body() achievementDtoList: AchievementDtoList, @Request() req) {
+		return this.kpiService.createAchievements(achievementDtoList, req.user);
 	}
 
 }
