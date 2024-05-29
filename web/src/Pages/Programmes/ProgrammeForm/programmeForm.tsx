@@ -1338,7 +1338,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              {(method === 'create' ||
+                method === 'update' ||
+                (method === 'view' &&
+                  (inheritedKpiList.length > 0 || createdKpiList.length > 0))) && (
+                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              )}
               {inheritedKpiList.length > 0 &&
                 inheritedKpiList.map((createdKPI: CreatedKpiData) => (
                   <ViewKpi

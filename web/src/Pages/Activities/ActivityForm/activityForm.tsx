@@ -1318,7 +1318,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              {(method === 'create' ||
+                method === 'update' ||
+                (method === 'view' && inheritedKpiList.length > 0)) && (
+                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              )}
               {method === 'view'
                 ? inheritedKpiList.map((createdKPI: CreatedKpiData, index: number) => (
                     <ViewKpi

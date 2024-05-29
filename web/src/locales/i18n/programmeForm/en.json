@@ -53,6 +53,7 @@
     "activityInfoTitle": "List of Direct Linked Activities under the Programme",
     "supportInfoTitle": "List of Direct Linked Supports under the Programme",
     "noActivityMessage": "No Activities Attached",
-    "noSupportMessage": "No Supports Attached"
+    "noSupportMessage": "No Supports Attached",
+    "activityList": "Activity List"
   }
   

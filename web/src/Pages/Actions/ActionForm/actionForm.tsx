@@ -1199,7 +1199,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              {(method === 'create' ||
+                method === 'update' ||
+                (method === 'view' && createdKpiList.length > 0)) && (
+                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              )}
               {method === 'view' &&
                 createdKpiList.map((createdKPI: CreatedKpiData) => (
                   <ViewKpi
