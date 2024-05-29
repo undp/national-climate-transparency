@@ -506,7 +506,7 @@ const UserManagement = () => {
       title: 'Filter by User Role',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('filterByUserRole')}</div>
+          <div className="filter-title">{t('user:filterByRole')}</div>
           <Radio.Group
             onChange={(e) => {
               updatedTempFilters('roleFilter', e?.target?.value);

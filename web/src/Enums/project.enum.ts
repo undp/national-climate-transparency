@@ -1,8 +1,8 @@
 export enum ProjectType {
   MITIGATION = 'Mitigation',
-  ADAPTION = 'Adaption',
-  CROSSCUT = 'Cross-cutting',
-  ENABLING = 'Enabling',
+  // ADAPTION = 'Adaption',
+  // CROSSCUT = 'Cross-cutting',
+  // ENABLING = 'Enabling',
 }
 
 export enum ProjectStatus {

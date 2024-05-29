@@ -51,8 +51,32 @@ const reportList = () => {
 
       const response: any = await post('national/reports/tableFive/query', payload);
       if (response) {
-        const data: Item[] = response.response.data.data;
-        setTableData(data);
+        const tempReportFiveData: Item[] = [];
+
+        response.data.forEach((entry: any, index: number) => {
+          tempReportFiveData.push({
+            key: index,
+            source: entry.source,
+            actionId: entry.actionId,
+            programmeId: entry.programmeId,
+            projectId: entry.projectId,
+            titleOfAction: entry.titleOfAction,
+            titleOfProgramme: entry.titleOfProgramme,
+            titleOfProject: entry.titleOfProject,
+            description: entry.description,
+            objective: entry.objective,
+            instrumentType: entry.instrumentType,
+            status: entry.status,
+            sector: entry.sector,
+            ghgsAffected: entry.ghgsAffected ?? [],
+            startYear: entry.startYear,
+            implementingEntities: entry.implementingEntities ?? [],
+            achievedGHGReduction: entry.achievedGHGReduction,
+            expectedGHGReduction: entry.expectedGHGReduction,
+          });
+        });
+
+        setTableData(tempReportFiveData);
         setTotalRowRowCount(response.response.data.total);
         setLoading(false);
       }

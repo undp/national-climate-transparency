@@ -636,6 +636,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         method === 'create' ? t('projectCreationSuccess') : t('projectUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
+        if (method === 'update') {
+          resolveAttachments();
+        }
+
         await new Promise((resolve) => {
           setTimeout(resolve, 500);
         });
@@ -1229,7 +1233,12 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              {(method === 'create' ||
+                method === 'update' ||
+                (method === 'view' &&
+                  (inheritedKpiList.length > 0 || createdKpiList.length > 0))) && (
+                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              )}
               {inheritedKpiList.length > 0 &&
                 inheritedKpiList.map((createdKPI: CreatedKpiData) => (
                   <ViewKpi
@@ -1340,7 +1349,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={6} style={{ paddingTop: '6px' }}>
+                <Col span={20} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
                 <Col span={4}>

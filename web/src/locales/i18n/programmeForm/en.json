@@ -13,12 +13,12 @@
     "progObjectivesTitle": "Programme Objectives",
     "instrTypeTitle": "Type of Instrument (s)",
     "progStatusTitle": "Programme Status ",
-    "sectorsAffTitle": "Sector(s) Affected",
+    "sectorsAffTitle": "Sector Affected",
     "subSectorsAffTitle": "Sub Sector (s) Affected",
     "startYearTitle": "Start Year",
     "intImplementorTitle": "International Implementing Entity (s)",
     "recipientEntityTitle": "Recipient Entity (s)",
-    "natImplementorTitle": "National Implementing Entity(s)",
+    "natImplementorTitle": "National Implementing Entity (s)",
     "investmentNeedsTitle": "Estimated Investment Needs (USD)",
     "documents": "Documents",
     "programmeCommentsTitle": "Comments on the Programme",
@@ -37,6 +37,7 @@
     "attach": "Attach",
     "detach": "Detach",
     "attachProjects": "Attach Projects",
+    "attachActivity": "Attach Activities",
     "projectList": "Project List",
     "addKPI": "Add KPI",
     "programmeCreationSuccess": "Programme Added Successfully",
@@ -48,6 +49,11 @@
     "validate": "Validate",
     "back": "Back",
     "delete": "Delete",
-    "update": "Save"
+    "update": "Save",
+    "activityInfoTitle": "List of Direct Linked Activities under the Programme",
+    "supportInfoTitle": "List of Direct Linked Supports under the Programme",
+    "noActivityMessage": "No Activities Attached",
+    "noSupportMessage": "No Supports Attached",
+    "activityList": "Activity List"
   }
   

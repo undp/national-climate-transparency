@@ -1318,13 +1318,15 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              {inheritedKpiList.length > 0 && (
+                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              )}
               {method === 'view'
                 ? inheritedKpiList.map((createdKPI: CreatedKpiData, index: number) => (
                     <ViewKpi
                       key={index}
                       index={index}
-                      inherited={false}
+                      inherited={true}
                       headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                       kpi={createdKPI}
                       callingEntityId={entId}
@@ -1375,7 +1377,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               </div>
             )}
             <div className="form-section-card">
-              <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+              <div className="form-section-header">{t('mtgInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col span={12}>
                   <Form.Item

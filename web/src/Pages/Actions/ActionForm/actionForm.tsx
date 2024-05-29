@@ -121,9 +121,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // Initially Loading Free Programmes that can be attached
+    // Initially Loading Free Programmes and Activities that can be attached
 
-    const fetchFreeProgrammes = async () => {
+    const fetchFreeChildren = async () => {
       if (method !== 'view') {
         const prgResponse: any = await get('national/programmes/link/eligible');
 
@@ -142,7 +142,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         setAllActivityIdList(freeActivityIds);
       }
     };
-    fetchFreeProgrammes();
+    fetchFreeChildren();
 
     // Initially Loading the underlying action data when not in create mode
 
@@ -276,23 +276,28 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     const fetchConnectedActivityIds = async () => {
       if (method !== 'create') {
         const connectedActivityIds: string[] = [];
-        // const payload = {
-        //   filterAnd: [
-        //     {
-        //       key: 'actionId',
-        //       operation: '=',
-        //       value: entId,
-        //     },
-        //   ],
-        //   sort: {
-        //     key: 'activityId',
-        //     order: 'ASC',
-        //   },
-        // };
-        // const response: any = await post('national/activities/query', payload);
-        // response.data.forEach((act: any) => {
-        //   connectedActivityIds.push(act.activityId);
-        // });
+        const payload = {
+          filterAnd: [
+            {
+              key: 'parentId',
+              operation: '=',
+              value: entId,
+            },
+            {
+              key: 'parentType',
+              operation: '=',
+              value: 'action',
+            },
+          ],
+          sort: {
+            key: 'activityId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/activities/query', payload);
+        response.data.forEach((act: any) => {
+          connectedActivityIds.push(act.activityId);
+        });
         setAttachedActivityIds(connectedActivityIds);
         setTempActivityIds(connectedActivityIds);
       }
@@ -328,15 +333,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       },
     };
 
-    const tempMigratedData: ActionMigratedData = {
-      natImplementer: [],
-      estimatedInvestment: 0,
-      type: [],
-      achievedReduction: 0,
-      expectedReduction: 0,
-      ghgsAffected: [],
-    };
-
     const fetchAttachmentData = async () => {
       if (tempProgramIds.length > 0) {
         tempProgramIds.forEach((progId) => {
@@ -360,40 +356,17 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             status: prg.programmeStatus,
             subSectorsAffected: prg.affectedSubSector ?? [],
             estimatedInvestment: prg.investment,
+            ghgsAffected: prg.migratedData[0]?.ghgsAffected ?? [],
+            types: prg.migratedData[0]?.types ?? [],
+            natImplementer: prg.natImplementor ?? [],
+            achievedReduction: prg.migratedData[0]?.achievedGHGReduction ?? 0,
+            estimatedReduction: prg.migratedData[0]?.expectedGHGReduction ?? 0,
           });
-
-          tempMigratedData.ghgsAffected = joinTwoArrays(
-            tempMigratedData.ghgsAffected,
-            prg.migratedData[0]?.ghgsAffected ?? []
-          );
-
-          tempMigratedData.type = joinTwoArrays(
-            tempMigratedData.type,
-            prg.migratedData[0]?.types ?? []
-          );
-
-          tempMigratedData.natImplementer = joinTwoArrays(
-            tempMigratedData.natImplementer,
-            prg.natImplementor ?? []
-          );
-
-          tempMigratedData.estimatedInvestment =
-            tempMigratedData.estimatedInvestment + prg.investment ?? 0;
-
-          const prgGHGAchievement = prg.migratedData[0]?.achievedGHGReduction ?? 0;
-          const prgGHGExpected = prg.migratedData[0]?.expectedGHGReduction ?? 0;
-
-          tempMigratedData.achievedReduction =
-            tempMigratedData.achievedReduction + prgGHGAchievement;
-
-          tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + prgGHGExpected;
         });
 
         setProgramData(tempPRGData);
-        setActionMigratedData(tempMigratedData);
       } else {
         setProgramData([]);
-        setActionMigratedData(tempMigratedData);
       }
     };
     fetchAttachmentData();
@@ -403,34 +376,149 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     setPageSize(10);
   }, [tempProgramIds]);
 
-  useEffect(() => {
-    const tempActivityData: ActivityData[] = [];
-    tempActivityIds.forEach((actId) => {
-      tempActivityData.push({
-        key: actId,
-        activityId: actId,
-        title: 'Title',
-        reductionMeasures: 'With Measures',
-        status: 'Planned',
-        startYear: 2014,
-        endYear: 2016,
-        natImplementor: 'Department of Energy',
-      });
-    });
-    setActivityData(tempActivityData);
+  // Fetching Activity data and calculating migrated fields when attachment changes
 
-    // Get the Support Data for each attached Activity
-    setSupportData([]);
+  useEffect(() => {
+    const activityPayload = {
+      filterOr: [] as any[],
+      sort: {
+        key: 'activityId',
+        order: 'ASC',
+      },
+    };
+
+    const supportPayload = {
+      filterOr: [] as any[],
+      sort: {
+        key: 'supportId',
+        order: 'ASC',
+      },
+    };
+
+    const fetchActivityAttachmentData = async () => {
+      if (tempActivityIds.length > 0) {
+        tempActivityIds.forEach((activityId) => {
+          activityPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activityId,
+          });
+          supportPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activityId,
+          });
+        });
+        const activityResponse: any = await post('national/activities/query', activityPayload);
+        const supportResponse: any = await post('national/supports/query', supportPayload);
+
+        const tempActivityData: ActivityData[] = [];
+        const tempSupportData: SupportData[] = [];
+
+        activityResponse.data.forEach((act: any, index: number) => {
+          tempActivityData.push({
+            key: index.toString(),
+            activityId: act.activityId,
+            title: act.title,
+            reductionMeasures: act.measure,
+            status: act.status,
+            startYear: 'NA',
+            endYear: 'NA',
+            natImplementor: act.nationalImplementingEntity ?? [],
+            ghgsAffected: act.ghgsAffected ?? [],
+            achievedReduction: act.achievedGHGReduction ?? 0,
+            estimatedReduction: act.expectedGHGReduction ?? 0,
+          });
+        });
+
+        supportResponse.data.forEach((sup: any, index: number) => {
+          tempSupportData.push({
+            key: index.toString(),
+            supportId: sup.supportId,
+            financeNature: sup.financeNature,
+            direction: sup.direction,
+            finInstrument:
+              sup.financeNature === 'International'
+                ? sup.internationalFinancialInstrument
+                : sup.nationalFinancialInstrument,
+            estimatedUSD: sup.requiredAmount,
+            estimatedLC: sup.requiredAmountDomestic,
+            recievedUSD: sup.receivedAmount,
+            recievedLC: sup.receivedAmountDomestic,
+          });
+        });
+
+        setActivityData(tempActivityData);
+        setSupportData(tempSupportData);
+      } else {
+        setActivityData([]);
+        setSupportData([]);
+      }
+    };
+    fetchActivityAttachmentData();
+
+    // Setting Pagination
+    setActivityCurrentPage(1);
+    setActivityPageSize(10);
+
+    setSupportCurrentPage(1);
+    setSupportPageSize(10);
   }, [tempActivityIds]);
 
+  // Calculating migrated fields when attachment changes
+
   useEffect(() => {
-    console.log('Created', createdKpiList);
-    console.log('New', newKpiList);
-  }, [createdKpiList, newKpiList]);
+    const tempMigratedData: ActionMigratedData = {
+      natImplementer: [],
+      estimatedInvestment: 0,
+      type: [],
+      achievedReduction: 0,
+      expectedReduction: 0,
+      ghgsAffected: [],
+    };
+
+    programData.forEach((prg: ProgrammeData) => {
+      tempMigratedData.ghgsAffected = joinTwoArrays(
+        tempMigratedData.ghgsAffected,
+        prg.ghgsAffected ?? []
+      );
+
+      tempMigratedData.type = joinTwoArrays(tempMigratedData.type, prg.types ?? []);
+
+      tempMigratedData.natImplementer = joinTwoArrays(
+        tempMigratedData.natImplementer,
+        prg.natImplementer ?? []
+      );
+
+      tempMigratedData.estimatedInvestment =
+        tempMigratedData.estimatedInvestment + prg.estimatedInvestment ?? 0;
+
+      const prgGHGAchievement = prg.achievedReduction ?? 0;
+      const prgGHGExpected = prg.estimatedReduction ?? 0;
+
+      tempMigratedData.achievedReduction = tempMigratedData.achievedReduction + prgGHGAchievement;
+      tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + prgGHGExpected;
+    });
+
+    activityData.forEach((act: ActivityData) => {
+      tempMigratedData.ghgsAffected = joinTwoArrays(
+        tempMigratedData.ghgsAffected,
+        act.ghgsAffected ?? []
+      );
+
+      const actGHGAchievement = act.achievedReduction ?? 0;
+      const actGHGExpected = act.estimatedReduction ?? 0;
+
+      tempMigratedData.achievedReduction = tempMigratedData.achievedReduction + actGHGAchievement;
+      tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + actGHGExpected;
+    });
+
+    setActionMigratedData(tempMigratedData);
+  }, [programData, activityData]);
 
   // Attachment resolve before updating an already created action
 
-  const resolveAttachments = async () => {
+  const resolveProgrammeAttachments = async () => {
     const toAttach = tempProgramIds.filter((prg) => !attachedProgramIds.includes(prg));
     const toDetach = attachedProgramIds.filter((prg) => !tempProgramIds.includes(prg));
 
@@ -442,6 +530,23 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     if (toAttach.length > 0) {
       await post('national/programmes/link', { actionId: entId, programmes: toAttach });
+    }
+  };
+
+  const resolveActivityAttachments = async (parentId: string) => {
+    const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
+    const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
+
+    if (toDetach.length > 0) {
+      await post('national/activities/unlink', { activityIds: toDetach });
+    }
+
+    if (toAttach.length > 0) {
+      await post('national/activities/link', {
+        parentId: parentId,
+        parentType: 'action',
+        activityIds: toAttach,
+      });
     }
   };
 
@@ -522,17 +627,22 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
       if (method === 'create') {
         response = await post('national/actions/add', payload);
-      } else if (method === 'update') {
+      } else if (entId && method === 'update') {
         payload.actionId = entId;
         response = await put('national/actions/update', payload);
-
-        resolveAttachments();
       }
 
       const successMsg =
         method === 'create' ? t('actionCreationSuccess') : t('actionUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
+        if (method === 'create') {
+          resolveActivityAttachments(response.data.actionId);
+        } else if (entId && method === 'update') {
+          resolveProgrammeAttachments();
+          resolveActivityAttachments(entId);
+        }
+
         await new Promise((resolve) => {
           setTimeout(resolve, 500);
         });
@@ -615,7 +725,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Activity
 
   const detachActivity = async (actId: string) => {
-    console.log(actId);
+    const filteredIds = tempActivityIds.filter((id) => id !== actId);
+    setTempActivityIds(filteredIds);
   };
 
   // Add New KPI
@@ -928,7 +1039,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={6} style={{ paddingTop: '6px' }}>
+                <Col span={20} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('programInfoTitle')}</div>
                 </Col>
                 <Col span={4}>
@@ -977,7 +1088,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={6} style={{ paddingTop: '6px' }}>
+                <Col span={20} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
                 <Col span={4}>
@@ -1025,7 +1136,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={6}>
+                <Col span={20}>
                   <div className="form-section-header">{t('supportInfoTitle')}</div>
                 </Col>
               </Row>
@@ -1088,7 +1199,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              {(method === 'create' ||
+                method === 'update' ||
+                (method === 'view' && createdKpiList.length > 0)) && (
+                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              )}
               {method === 'view' &&
                 createdKpiList.map((createdKPI: CreatedKpiData) => (
                   <ViewKpi

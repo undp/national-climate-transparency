@@ -9,7 +9,7 @@ import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { SubSector, NatImplementor } from '../../../Enums/shared.enum';
 import { ProgrammeStatus } from '../../../Enums/programme.enum';
-import { Layers } from 'react-bootstrap-icons';
+import { GraphUpArrow, Layers } from 'react-bootstrap-icons';
 import './programmeForm.scss';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
@@ -28,6 +28,10 @@ import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { NewKpi } from '../../../Components/KPI/newKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
 import { processOptionalFields } from '../../../Utils/optionalValueHandler';
+import { ActivityData } from '../../../Definitions/activityDefinitions';
+import { SupportData } from '../../../Definitions/supportDefinitions';
+import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
+import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -87,17 +91,17 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Activity Attachment state
 
-  // const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
-  // const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
-  // const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
+  const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
+  const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
+  const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
 
-  // const [activityData, setActivityData] = useState<ActivityData[]>([]);
-  // const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
-  // const [activityPageSize, setActivityPageSize] = useState<number>(10);
+  const [activityData, setActivityData] = useState<ActivityData[]>([]);
+  const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
+  const [activityPageSize, setActivityPageSize] = useState<number>(10);
 
-  // const [supportData, setSupportData] = useState<SupportData[]>([]);
-  // const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
-  // const [supportPageSize, setSupportPageSize] = useState<number>(10);
+  const [supportData, setSupportData] = useState<SupportData[]>([]);
+  const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
+  const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
   // KPI State
 
@@ -146,9 +150,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchNonValidatedActions();
 
-    // Initially Loading Free Projects that can be attached
+    // Initially Loading Free Projects and Activities that can be attached
 
-    const fetchFreeProjects = async () => {
+    const fetchFreeChildren = async () => {
       if (method !== 'view') {
         const response: any = await get('national/projects/link/eligible');
 
@@ -157,9 +161,17 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           freeProjectIds.push(prj.projectId);
         });
         setAllProjectIdList(freeProjectIds);
+
+        const actResponse: any = await get('national/activities/link/eligible');
+
+        const freeActivityIds: string[] = [];
+        actResponse.data.forEach((act: any) => {
+          freeActivityIds.push(act.activityId);
+        });
+        setAllActivityIdList(freeActivityIds);
       }
     };
-    fetchFreeProjects();
+    fetchFreeChildren();
 
     // Initially Loading the underlying programme data when not in create mode
 
@@ -310,31 +322,38 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchConnectedProjectIds();
 
-    // const fetchConnectedActivityIds = async () => {
-    //   if (method !== 'create') {
-    //     const connectedActivityIds: string[] = [];
-    //     const payload = {
-    //       filterAnd: [
-    //         {
-    //           key: 'actionId',
-    //           operation: '=',
-    //           value: entId,
-    //         },
-    //       ],
-    //       sort: {
-    //         key: 'activityId',
-    //         order: 'ASC',
-    //       },
-    //     };
-    //     const response: any = await post('national/activities/query', payload);
-    //     response.data.forEach((act: any) => {
-    //       connectedActivityIds.push(act.activityId);
-    //     });
-    //     setAttachedActivityIds(connectedActivityIds);
-    //     setTempActivityIds(connectedActivityIds);
-    //   }
-    // };
-    // fetchConnectedActivityIds();
+    // Initially Loading the attached activity data when not in create mode
+
+    const fetchConnectedActivityIds = async () => {
+      if (method !== 'create') {
+        const connectedActivityIds: string[] = [];
+        const payload = {
+          filterAnd: [
+            {
+              key: 'parentId',
+              operation: '=',
+              value: entId,
+            },
+            {
+              key: 'parentType',
+              operation: '=',
+              value: 'programme',
+            },
+          ],
+          sort: {
+            key: 'activityId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/activities/query', payload);
+        response.data.forEach((act: any) => {
+          connectedActivityIds.push(act.activityId);
+        });
+        setAttachedActivityIds(connectedActivityIds);
+        setTempActivityIds(connectedActivityIds);
+      }
+    };
+    fetchConnectedActivityIds();
   }, []);
 
   // Populating Form Migrated Fields, when migration data changes
@@ -352,22 +371,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, [programmeMigratedData]);
 
-  // Fetching Project data and calculating migrated fields when attachment changes
+  // Fetching Project data
 
   useEffect(() => {
     const payload = {
       page: 1,
       size: tempProjectIds.length,
       filterOr: [] as any[],
-    };
-
-    const tempMigratedData: ProgrammeMigratedData = {
-      type: [],
-      intImplementor: [],
-      recipientEntity: [],
-      ghgsAffected: [],
-      achievedReduct: 0,
-      expectedReduct: 0,
     };
 
     const fetchData = async () => {
@@ -388,39 +398,17 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             key: index.toString(),
             projectId: prj.projectId,
             projectName: prj.title,
+            type: prj.type,
+            internationalImplementingEntities: prj.internationalImplementingEntities ?? [],
+            recipientEntities: prj.recipientEntities ?? [],
+            ghgsAffected: prj.migratedData[0]?.ghgsAffected ?? [],
+            achievedReduction: prj.migratedData[0]?.achievedGHGReduction ?? 0,
+            estimatedReduction: prj.migratedData[0]?.expectedGHGReduction ?? 0,
           });
-
-          if (!tempMigratedData.type.includes(prj.type)) {
-            tempMigratedData.type.push(prj.type);
-          }
-
-          tempMigratedData.intImplementor = joinTwoArrays(
-            tempMigratedData.intImplementor,
-            prj.internationalImplementingEntities ?? []
-          );
-
-          tempMigratedData.recipientEntity = joinTwoArrays(
-            tempMigratedData.recipientEntity,
-            prj.recipientEntities ?? []
-          );
-
-          tempMigratedData.ghgsAffected = joinTwoArrays(
-            tempMigratedData.ghgsAffected,
-            prj.migratedData[0]?.ghgsAffected ?? []
-          );
-
-          const prgGHGAchievement = prj.migratedData[0]?.achievedGHGReduction ?? 0;
-          const prgGHGExpected = prj.migratedData[0]?.expectedGHGReduction ?? 0;
-
-          tempMigratedData.achievedReduct = tempMigratedData.achievedReduct + prgGHGAchievement;
-
-          tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + prgGHGExpected;
         });
         setProjectData(tempPRJData);
-        setProgrammeMigratedData(tempMigratedData);
       } else {
         setProjectData([]);
-        setProgrammeMigratedData(tempMigratedData);
       }
     };
     fetchData();
@@ -430,9 +418,155 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     setPageSize(10);
   }, [tempProjectIds]);
 
+  // Fetching Activity data and calculating migrated fields when attachment changes
+
+  useEffect(() => {
+    const activityPayload = {
+      filterOr: [] as any[],
+      sort: {
+        key: 'activityId',
+        order: 'ASC',
+      },
+    };
+
+    const supportPayload = {
+      filterOr: [] as any[],
+      sort: {
+        key: 'supportId',
+        order: 'ASC',
+      },
+    };
+
+    const fetchActivityAttachmentData = async () => {
+      if (tempActivityIds.length > 0) {
+        tempActivityIds.forEach((activityId) => {
+          activityPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activityId,
+          });
+          supportPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activityId,
+          });
+        });
+        const activityResponse: any = await post('national/activities/query', activityPayload);
+        const supportResponse: any = await post('national/supports/query', supportPayload);
+
+        const tempActivityData: ActivityData[] = [];
+        const tempSupportData: SupportData[] = [];
+
+        activityResponse.data.forEach((act: any, index: number) => {
+          tempActivityData.push({
+            key: index.toString(),
+            activityId: act.activityId,
+            title: act.title,
+            reductionMeasures: act.measure,
+            status: act.status,
+            startYear: 'NA',
+            endYear: 'NA',
+            natImplementor: act.nationalImplementingEntity ?? [],
+            ghgsAffected: act.ghgsAffected ?? [],
+            achievedReduction: act.achievedGHGReduction ?? 0,
+            estimatedReduction: act.expectedGHGReduction ?? 0,
+          });
+        });
+
+        supportResponse.data.forEach((sup: any, index: number) => {
+          tempSupportData.push({
+            key: index.toString(),
+            supportId: sup.supportId,
+            financeNature: sup.financeNature,
+            direction: sup.direction,
+            finInstrument:
+              sup.financeNature === 'International'
+                ? sup.internationalFinancialInstrument
+                : sup.nationalFinancialInstrument,
+            estimatedUSD: sup.requiredAmount,
+            estimatedLC: sup.requiredAmountDomestic,
+            recievedUSD: sup.receivedAmount,
+            recievedLC: sup.receivedAmountDomestic,
+          });
+        });
+
+        setActivityData(tempActivityData);
+        setSupportData(tempSupportData);
+      } else {
+        setActivityData([]);
+        setSupportData([]);
+      }
+    };
+    fetchActivityAttachmentData();
+
+    // Setting Pagination
+    setActivityCurrentPage(1);
+    setActivityPageSize(10);
+
+    setSupportCurrentPage(1);
+    setSupportPageSize(10);
+  }, [tempActivityIds]);
+
+  // Calculating migrated fields when attachment changes
+
+  useEffect(() => {
+    const tempMigratedData: ProgrammeMigratedData = {
+      type: [],
+      intImplementor: [],
+      recipientEntity: [],
+      ghgsAffected: [],
+      achievedReduct: 0,
+      expectedReduct: 0,
+    };
+
+    projectData.forEach((prj: ProjectData) => {
+      if (!tempMigratedData.type.includes(prj.type)) {
+        tempMigratedData.type.push(prj.type);
+      }
+
+      tempMigratedData.intImplementor = joinTwoArrays(
+        tempMigratedData.intImplementor,
+        prj.internationalImplementingEntities ?? []
+      );
+
+      tempMigratedData.recipientEntity = joinTwoArrays(
+        tempMigratedData.recipientEntity,
+        prj.recipientEntities ?? []
+      );
+
+      tempMigratedData.ghgsAffected = joinTwoArrays(
+        tempMigratedData.ghgsAffected,
+        prj.ghgsAffected ?? []
+      );
+
+      const prgGHGAchievement = prj.achievedReduction ?? 0;
+      const prgGHGExpected = prj.estimatedReduction ?? 0;
+
+      tempMigratedData.achievedReduct = tempMigratedData.achievedReduct + prgGHGAchievement;
+
+      tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + prgGHGExpected;
+    });
+
+    activityData.forEach((act: ActivityData) => {
+      tempMigratedData.ghgsAffected = joinTwoArrays(
+        tempMigratedData.ghgsAffected,
+        act.ghgsAffected ?? []
+      );
+
+      const actGHGAchievement = act.achievedReduction ?? 0;
+      const actGHGExpected = act.estimatedReduction ?? 0;
+
+      tempMigratedData.achievedReduct = tempMigratedData.achievedReduct + actGHGAchievement;
+
+      tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + actGHGExpected;
+    });
+
+    setProgrammeMigratedData(tempMigratedData);
+  }, [projectData, activityData]);
+
   // Attachment resolve before updating an already created programme
 
-  const resolveAttachments = async () => {
+  const resolveProjectAttachments = async () => {
     const toAttach = tempProjectIds.filter((prj) => !attachedProjectIds.includes(prj));
     const toDetach = attachedProjectIds.filter((prj) => !tempProjectIds.includes(prj));
 
@@ -442,6 +576,23 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     if (toAttach.length > 0) {
       await post('national/projects/link', { programmeId: entId, projectIds: toAttach });
+    }
+  };
+
+  const resolveActivityAttachments = async (parentId: string) => {
+    const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
+    const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
+
+    if (toDetach.length > 0) {
+      await post('national/activities/unlink', { activityIds: toDetach });
+    }
+
+    if (toAttach.length > 0) {
+      await post('national/activities/link', {
+        parentId: parentId,
+        parentType: 'programme',
+        activityIds: toAttach,
+      });
     }
   };
 
@@ -524,20 +675,25 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
       if (method === 'create') {
         response = await post('national/programmes/add', payload);
-      } else if (method === 'update') {
+      } else if (entId && method === 'update') {
         payload.programmeId = entId;
         response = await put(
           'national/programmes/update',
           processOptionalFields(payload, 'programme')
         );
-
-        resolveAttachments();
       }
 
       const successMsg =
         method === 'create' ? t('programmeCreationSuccess') : t('programmeUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
+        if (method === 'create') {
+          resolveActivityAttachments(response.data.programmeId);
+        } else if (entId && method === 'update') {
+          resolveProjectAttachments();
+          resolveActivityAttachments(entId);
+        }
+
         await new Promise((resolve) => {
           setTimeout(resolve, 500);
         });
@@ -709,15 +865,44 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     setTempProjectIds(filteredIds);
   };
 
+  // Detach Activity
+
+  const detachActivity = async (actId: string) => {
+    const filteredIds = tempActivityIds.filter((id) => id !== actId);
+    setTempActivityIds(filteredIds);
+  };
+
   // Column Definition
 
   const projTableColumns = getProjectTableColumns(isView, detachProject);
+
+  // Activity Column Definition
+
+  const activityTableColumns = getActivityTableColumns(isView, detachActivity);
+
+  // Support Column Definition
+
+  const supportTableColumns = getSupportTableColumns();
 
   // Table Behaviour
 
   const handleTableChange = (pagination: any) => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
+  };
+
+  // Activity Table Behaviour
+
+  const handleActivityTableChange = (pagination: any) => {
+    setActivityCurrentPage(pagination.current);
+    setActivityPageSize(pagination.pageSize);
+  };
+
+  // Support Table Behaviour
+
+  const handleSupportTableChange = (pagination: any) => {
+    setSupportCurrentPage(pagination.current);
+    setSupportPageSize(pagination.pageSize);
   };
 
   // Save Button Enable when form value change
@@ -1041,6 +1226,83 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             </div>
             <div className="form-section-card">
+              <Row>
+                <Col span={20} style={{ paddingTop: '6px' }}>
+                  <div className="form-section-header">{t('activityInfoTitle')}</div>
+                </Col>
+                <Col span={4}>
+                  <AttachEntity
+                    isDisabled={isView}
+                    content={{
+                      buttonName: t('attachActivity'),
+                      attach: t('attach'),
+                      contentTitle: t('attachActivity'),
+                      listTitle: t('activityList'),
+                      cancel: t('cancel'),
+                    }}
+                    options={allActivityIds}
+                    alreadyAttached={attachedActivityIds}
+                    currentAttachments={tempActivityIds}
+                    setCurrentAttachments={setTempActivityIds}
+                    icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
+                  ></AttachEntity>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <div style={{ overflowX: 'auto' }}>
+                    <LayoutTable
+                      tableData={activityData}
+                      columns={activityTableColumns}
+                      loading={false}
+                      pagination={{
+                        current: activityCurrentPage,
+                        pageSize: activityPageSize,
+                        total: activityData.length,
+                        showQuickJumper: true,
+                        pageSizeOptions: ['10', '20', '30'],
+                        showSizeChanger: true,
+                        style: { textAlign: 'center' },
+                        locale: { page: '' },
+                        position: ['bottomRight'],
+                      }}
+                      handleTableChange={handleActivityTableChange}
+                      emptyMessage={t('noActivityMessage')}
+                    />{' '}
+                  </div>
+                </Col>
+              </Row>
+            </div>
+            <div className="form-section-card">
+              <Row>
+                <Col span={20}>
+                  <div className="form-section-header">{t('supportInfoTitle')}</div>
+                </Col>
+              </Row>
+              <Row>
+                <Col span={24}>
+                  <LayoutTable
+                    tableData={supportData}
+                    columns={supportTableColumns}
+                    loading={false}
+                    pagination={{
+                      current: supportCurrentPage,
+                      pageSize: supportPageSize,
+                      total: supportData.length,
+                      showQuickJumper: true,
+                      pageSizeOptions: ['10', '20', '30'],
+                      showSizeChanger: true,
+                      style: { textAlign: 'center' },
+                      locale: { page: '' },
+                      position: ['bottomRight'],
+                    }}
+                    handleTableChange={handleSupportTableChange}
+                    emptyMessage={t('noSupportMessage')}
+                  />
+                </Col>
+              </Row>
+            </div>
+            <div className="form-section-card">
               <div className="form-section-header">{t('mitigationInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col span={12}>
@@ -1076,7 +1338,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              {(method === 'create' ||
+                method === 'update' ||
+                (method === 'view' &&
+                  (inheritedKpiList.length > 0 || createdKpiList.length > 0))) && (
+                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+              )}
               {inheritedKpiList.length > 0 &&
                 inheritedKpiList.map((createdKPI: CreatedKpiData) => (
                   <ViewKpi
