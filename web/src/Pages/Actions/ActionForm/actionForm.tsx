@@ -595,7 +595,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             expected: kpi.expected,
           });
         });
-      } else if (method === 'update' && (newKpiList.length > 0 || createdKpiList.length > 0)) {
+      } else if (method === 'update') {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
