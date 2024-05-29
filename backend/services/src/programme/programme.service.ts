@@ -346,10 +346,10 @@ export class ProgrammeService {
 		const kpisToRemove = [];
 		const achievementsToRemove = [];
 		let kpisUpdated = false;
+		const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programmeUpdate.programmeId);
 
 		if (programmeUpdateDto.kpis && programmeUpdateDto.kpis.length > 0) {
-			const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programmeUpdate.programmeId);
-
+			
 			const addedKpis = programmeUpdateDto.kpis.filter(kpi => !kpi.kpiId);
 
 			if (addedKpis && addedKpis.length > 0) {
@@ -379,15 +379,20 @@ export class ProgrammeService {
 					kpisToRemove.push(currentKpi);
 					kpisUpdated = true;
 				}
+			}
+		}
 
-				if (kpisToRemove.length > 0) {
-					const kpiIdsToRemove = kpisToRemove.map(kpi => kpi.kpiId);
-					const achievements = await this.kpiService.findAchievementsByKpiIds(kpiIdsToRemove);
-	
-					if (achievements && achievements.length > 0) {
-						achievementsToRemove.push(...achievements);
-					}
-				}
+		if (programmeUpdateDto.kpis && programmeUpdateDto.kpis.length <= 0) {
+			kpisToRemove.push(...currentKpis);
+			kpisUpdated = true;
+		}
+
+		if (kpisToRemove.length > 0) {
+			const kpiIdsToRemove = kpisToRemove.map(kpi => kpi.kpiId);
+			const achievements = await this.kpiService.findAchievementsByKpiIds(kpiIdsToRemove);
+
+			if (achievements && achievements.length > 0) {
+				achievementsToRemove.push(...achievements);
 			}
 		}
 

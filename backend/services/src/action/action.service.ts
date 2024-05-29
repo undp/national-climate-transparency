@@ -23,10 +23,9 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
-import { ValidateDto } from "src/dtos/validate.dto";
-import { ProjectEntity } from "src/entities/project.entity";
-import { SupportEntity } from "src/entities/support.entity";
-import { AchievementEntity } from "src/entities/achievement.entity";
+import { ValidateDto } from "../dtos/validate.dto";
+import { ProjectEntity } from "../entities/project.entity";
+import { AchievementEntity } from "../entities/achievement.entity";
 
 @Injectable()
 export class ActionService {
@@ -378,9 +377,10 @@ export class ActionService {
 		const achievementsToRemove = [];
 		let kpisUpdated = false;
 
-		if (actionUpdateDto.kpis && actionUpdateDto.kpis.length > 0) {
-			const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, actionUpdate.actionId);
+		const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, actionUpdate.actionId);
 
+		if (actionUpdateDto.kpis && actionUpdateDto.kpis.length > 0) {
+			
 			const addedKpis = actionUpdateDto.kpis.filter(kpi => !kpi.kpiId);
 
 			if (addedKpis && addedKpis.length > 0) {
@@ -411,14 +411,19 @@ export class ActionService {
 					kpisUpdated = true;
 				}
 			}
+		}
 
-			if (kpisToRemove.length > 0) {
-				const kpiIdsToRemove = kpisToRemove.map(kpi => kpi.kpiId);
-				const achievements = await this.kpiService.findAchievementsByKpiIds(kpiIdsToRemove);
+		if (actionUpdateDto.kpis && actionUpdateDto.kpis.length <= 0) {
+			kpisToRemove.push(...currentKpis);
+			kpisUpdated = true;
+		}
 
-				if (achievements && achievements.length > 0) {
-					achievementsToRemove.push(...achievements);
-				}
+		if (kpisToRemove.length > 0) {
+			const kpiIdsToRemove = kpisToRemove.map(kpi => kpi.kpiId);
+			const achievements = await this.kpiService.findAchievementsByKpiIds(kpiIdsToRemove);
+
+			if (achievements && achievements.length > 0) {
+				achievementsToRemove.push(...achievements);
 			}
 		}
 

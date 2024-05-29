@@ -9,7 +9,7 @@ import {
   IntSource,
 } from "../enums/support.enum";
 import { ActivityEntity } from "./activity.entity";
-import { Sector } from "src/enums/sector.enum";
+import { Sector } from "../enums/sector.enum";
 
 @Entity("support")
 export class SupportEntity {

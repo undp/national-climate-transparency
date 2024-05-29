@@ -349,7 +349,7 @@ describe('ActivityService', () => {
 			const programme = new ProgrammeEntity();
 			programme.programmeId = "P001";
 			programme.path = "A001";
-			programme.affectedSectors = [Sector.Forestry];
+			programme.sector = Sector.Forestry;
 
 			const activityUpdateDto = new ActivityUpdateDto();
 			activityUpdateDto.title = "test updated";
@@ -397,7 +397,7 @@ describe('ActivityService', () => {
 				methodologyDocuments: [currentMitigationMethodologyDoc, currentMitigationMethodologyDocToRemove],
 				resultDocuments: [currentMitigationResultDoc, currentMitigationResultDocToRemove]
 			}
-			activity.sectors = [Sector.Energy];
+			activity.sector = Sector.Energy;
 			activity.path = "_._.J001";
 
 			const activityUpdated = {
@@ -571,7 +571,7 @@ describe('ActivityService', () => {
 				mitigationMethodologyDescription: "test",
 				comments: "test mitigation comments",
 			}
-			activity.sectors = [Sector.Energy];
+			activity.sector = Sector.Energy;
 			activity.path = "_._.J001";
 
 			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
@@ -643,7 +643,7 @@ describe('ActivityService', () => {
 				mitigationMethodologyDescription: "test",
 				comments: "test mitigation comments",
 			}
-			activity.sectors = [Sector.Energy];
+			activity.sector = Sector.Energy;
 			activity.path = "_._.J001";
 
 			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
@@ -678,7 +678,7 @@ describe('ActivityService', () => {
 
 			const project = new ProjectEntity();
 			project.projectId = "J002";
-			project.sectors = [Sector.LandUse];
+			project.sector = Sector.LandUse;
 
 			const activityUpdateDto = new ActivityUpdateDto();
 			activityUpdateDto.activityId = "T0001"
@@ -720,7 +720,7 @@ describe('ActivityService', () => {
 				mitigationMethodologyDescription: "test",
 				comments: "test mitigation comments",
 			}
-			activity.sectors = [Sector.Energy];
+			activity.sector = Sector.Energy;
 			activity.path = "_._.J001";
 
 			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
@@ -863,19 +863,19 @@ describe('ActivityService', () => {
 
 			const programme = new ProgrammeEntity();
 			programme.programmeId = "P1";
-			programme.affectedSectors = [Sector.Agriculture];
+			programme.sector = Sector.Agriculture;
 
 			const activity1 = new ActivityEntity();
 			activity1.activityId = '1';
-			activity1.sectors = [Sector.Industry];
+			activity1.sector = Sector.Industry;
 
 			const activity2 = new ActivityEntity();
 			activity2.activityId = '2';
-			activity2.sectors = [Sector.Agriculture];
+			activity2.sector = Sector.Agriculture;
 
 			const activity3 = new ActivityEntity();
 			activity3.activityId = '3';
-			activity3.sectors = [Sector.Industry];
+			activity3.sector = Sector.Industry;
 
 			jest.spyOn(service, 'findAllActivitiesByIds').mockResolvedValue([activity1, activity2, activity3]);
 
@@ -899,23 +899,23 @@ describe('ActivityService', () => {
 
 			const programme = new ProgrammeEntity();
 			programme.programmeId = "P1";
-			programme.affectedSectors = [Sector.Agriculture];
+			programme.sector = Sector.Agriculture;
 
 			const activity1 = new ActivityEntity();
 			activity1.activityId = '1';
-			activity1.sectors = [Sector.Industry];
+			activity1.sector = Sector.Industry;
 			activity1.parentId = "P1";
 			activity1.parentType = EntityType.PROGRAMME;
 
 			const activity2 = new ActivityEntity();
 			activity2.activityId = '2';
-			activity2.sectors = [Sector.Agriculture];
+			activity2.sector = Sector.Agriculture;
 			activity2.parentId = "P1";
 			activity2.parentType = EntityType.PROGRAMME;
 
 			const activity3 = new ActivityEntity();
 			activity3.activityId = '3';
-			activity3.sectors = [Sector.Industry];
+			activity3.sector = Sector.Industry;
 			activity3.parentId = "P1";
 			activity3.parentType = EntityType.PROGRAMME;
 
@@ -959,23 +959,23 @@ describe('ActivityService', () => {
 
 			const programme = new ProgrammeEntity();
 			programme.programmeId = "P1";
-			programme.affectedSectors = [Sector.Agriculture];
+			programme.sector = Sector.Agriculture;
 
 			const activity1 = new ActivityEntity();
 			activity1.activityId = '1';
-			activity1.sectors = [Sector.Industry];
+			activity1.sector = Sector.Industry;
 			activity1.parentId = "P1";
 			activity1.parentType = EntityType.PROGRAMME;
 
 			const activity2 = new ActivityEntity();
 			activity2.activityId = '2';
-			activity2.sectors = [Sector.Agriculture];
+			activity2.sector = Sector.Agriculture;
 			activity2.parentId = "P1";
 			activity2.parentType = EntityType.PROGRAMME;
 
 			const activity3 = new ActivityEntity();
 			activity3.activityId = '3';
-			activity3.sectors = [Sector.Industry];
+			activity3.sector = Sector.Industry;
 			activity3.parentId = "P1";
 			activity3.parentType = EntityType.PROGRAMME;
 

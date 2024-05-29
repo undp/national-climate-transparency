@@ -409,9 +409,10 @@ export class ProjectService {
 		const achievementsToRemove = [];
 		let kpisUpdated = false;
 
-		if (projectUpdateDto.kpis && projectUpdateDto.kpis.length > 0) {
-			const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, projectUpdate.projectId);
+		const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, projectUpdate.projectId);
 
+		if (projectUpdateDto.kpis && projectUpdateDto.kpis.length > 0) {
+			
 			const addedKpis = projectUpdateDto.kpis.filter(kpi => !kpi.kpiId);
 
 			if (addedKpis && addedKpis.length > 0) {
@@ -442,16 +443,20 @@ export class ProjectService {
 					kpisUpdated = true;
 				}
 			}
+		}
 
-			if (kpisToRemove.length > 0) {
-				const kpiIdsToRemove = kpisToRemove.map(kpi => kpi.kpiId);
-				const achievements = await this.kpiService.findAchievementsByKpiIds(kpiIdsToRemove);
+		if (projectUpdateDto.kpis && projectUpdateDto.kpis.length <= 0) {
+			kpisToRemove.push(...currentKpis);
+			kpisUpdated = true;
+		}
 
-				if (achievements && achievements.length > 0) {
-					achievementsToRemove.push(...achievements);
-				}
+		if (kpisToRemove.length > 0) {
+			const kpiIdsToRemove = kpisToRemove.map(kpi => kpi.kpiId);
+			const achievements = await this.kpiService.findAchievementsByKpiIds(kpiIdsToRemove);
+
+			if (achievements && achievements.length > 0) {
+				achievementsToRemove.push(...achievements);
 			}
-
 		}
 
 		this.addEventLogEntry(eventLog, LogEventType.PROJECT_UPDATED, EntityType.PROJECT, projectUpdate.projectId, user.id, projectUpdateDto);
