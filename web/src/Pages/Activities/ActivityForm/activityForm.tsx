@@ -1375,7 +1375,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               </div>
             )}
             <div className="form-section-card">
-              <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+              <div className="form-section-header">{t('mtgInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col span={12}>
                   <Form.Item
