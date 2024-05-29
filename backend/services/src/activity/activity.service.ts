@@ -18,7 +18,6 @@ import { FileUploadService } from "../util/fileUpload.service";
 import { HelperService } from "../util/helpers.service";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { EntityManager, Repository } from "typeorm";
-import { ProjectEntity } from "src/entities/project.entity";
 import { mitigationTimelineDto } from "../dtos/mitigationTimeline.dto";
 import { ResponseMessageDto } from "../dtos/response.message";
 import { LinkActivitiesDto } from "../dtos/link.activities.dto";
@@ -26,10 +25,9 @@ import { UnlinkActivitiesDto } from "../dtos/unlink.activities.dto";
 import { DataListResponseDto } from "../dtos/data.list.response";
 import { ActivityResponseDto } from "../dtos/activity.response.dto";
 import { ActivityUpdateDto } from "../dtos/activityUpdate.dto";
-import { ValidateDto } from "src/dtos/validate.dto";
-import { KpiService } from "src/kpi/kpi.service";
+import { ValidateDto } from "../dtos/validate.dto";
+import { KpiService } from "../kpi/kpi.service";
 import { PayloadValidator } from "../validation/payload.validator";
-import { Sector } from "src/enums/sector.enum";
 
 @Injectable()
 export class ActivityService {

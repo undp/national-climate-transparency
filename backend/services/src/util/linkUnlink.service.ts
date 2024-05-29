@@ -7,11 +7,11 @@ import { ProjectEntity } from "../entities/project.entity";
 import { User } from "../entities/user.entity";
 import { LogEventType, EntityType } from "../enums/shared.enum";
 import { EntityManager } from "typeorm";
-import { LinkActivitiesDto } from "src/dtos/link.activities.dto";
-import { UnlinkActivitiesDto } from "src/dtos/unlink.activities.dto";
-import { Sector } from "src/enums/sector.enum";
-import { SupportEntity } from "src/entities/support.entity";
-import { AchievementEntity } from "src/entities/achievement.entity";
+import { LinkActivitiesDto } from "../dtos/link.activities.dto";
+import { UnlinkActivitiesDto } from "../dtos/unlink.activities.dto";
+import { Sector } from "../enums/sector.enum";
+import { SupportEntity } from "../entities/support.entity";
+import { AchievementEntity } from "../entities/achievement.entity";
 
 @Injectable()
 export class LinkUnlinkService {

@@ -2,17 +2,17 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
 import { KpiEntity } from "../entities/kpi.entity";
 import { EntityManager, Repository } from "typeorm";
-import { EntityType } from "src/enums/shared.enum";
-import { ActivityEntity } from "src/entities/activity.entity";
-import { HelperService } from "src/util/helpers.service";
-import { AchievementEntity } from "src/entities/achievement.entity";
-import { ActionEntity } from "src/entities/action.entity";
-import { ProgrammeEntity } from "src/entities/programme.entity";
-import { ProjectEntity } from "src/entities/project.entity";
-import { AchievementDto, AchievementDtoList } from "src/dtos/achievementDto";
-import { User } from "src/entities/user.entity";
+import { EntityType } from "../enums/shared.enum";
+import { ActivityEntity } from "../entities/activity.entity";
+import { HelperService } from "../util/helpers.service";
+import { AchievementEntity } from "../entities/achievement.entity";
+import { ActionEntity } from "../entities/action.entity";
+import { ProgrammeEntity } from "../entities/programme.entity";
+import { ProjectEntity } from "../entities/project.entity";
+import { AchievementDtoList } from "../dtos/achievementDto";
+import { User } from "../entities/user.entity";
 import { plainToClass } from "class-transformer";
-import { DataResponseMessageDto } from "src/dtos/data.response.message";
+import { DataResponseMessageDto } from "../dtos/data.response.message";
 
 @Injectable()
 export class KpiService {

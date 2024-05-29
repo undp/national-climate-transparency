@@ -154,7 +154,6 @@ describe('ProjectService', () => {
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.expectedTimeFrame = 25;
 
 		const projectEntity = new ProjectEntity();
 		projectEntity.projectId = "J001";
@@ -207,7 +206,6 @@ describe('ProjectService', () => {
 		projectDto.programmeId = "002"
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.expectedTimeFrame = 25;
 
 		const projectEntity = new ProjectEntity();
 		projectEntity.projectId = "J001";
@@ -219,7 +217,7 @@ describe('ProjectService', () => {
 		projectEntity.endYear = 2030;
 		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectEntity.expectedTimeFrame = 25;
+		projectEntity.expectedTimeFrame = 5;
 		projectEntity.path = "";
 
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
@@ -287,7 +285,6 @@ describe('ProjectService', () => {
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.expectedTimeFrame = 25;
 		projectDto.kpis = [kpiDto1, kpiDto2];
 		projectDto.documents = [documentDto];
 		projectDto.programmeId = "P001";
@@ -391,7 +388,7 @@ describe('ProjectService', () => {
 
 		const programme = new ProgrammeEntity();
 		programme.programmeId = "P1";
-		programme.affectedSectors = [Sector.Agriculture];
+		programme.sector = Sector.Agriculture;
 		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
 
 		const project1 = new ProjectEntity();
@@ -443,7 +440,7 @@ describe('ProjectService', () => {
 
 		const programme = new ProgrammeEntity();
 		programme.programmeId = "P1";
-		programme.affectedSectors = [Sector.Agriculture];
+		programme.sector = Sector.Agriculture;
 		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
 
 		const project1 = new ProjectEntity();
@@ -504,7 +501,6 @@ describe('ProjectService', () => {
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.expectedTimeFrame = 25;
 
 		const projectEntity = new ProjectEntity();
 		projectEntity.projectId = "J001";
@@ -520,7 +516,7 @@ describe('ProjectService', () => {
 		projectEntity.path = "";
 
 		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
-		jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
+		// jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
 
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
@@ -560,7 +556,6 @@ describe('ProjectService', () => {
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.expectedTimeFrame = 25;
 		projectDto.programmeId = "P001"
 
 		const projectEntity = new ProjectEntity();
@@ -578,11 +573,11 @@ describe('ProjectService', () => {
 
 		const programme = new ProgrammeEntity();
 		programme.programmeId = "P001";
-		programme.affectedSectors = [Sector.Agriculture];
+		programme.sector = Sector.Agriculture;
 		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
 
 		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
-		jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
+		// jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
 
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
@@ -613,7 +608,7 @@ describe('ProjectService', () => {
 
 		const programme = new ProgrammeEntity();
 		programme.programmeId = "P001";
-		programme.affectedSectors = [Sector.Agriculture];
+		programme.sector = Sector.Agriculture;
 
 		const projectDto = new ProjectUpdateDto();
 		projectDto.projectId = "J001";
@@ -625,7 +620,6 @@ describe('ProjectService', () => {
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.expectedTimeFrame = 25;
 
 		const projectEntity = new ProjectEntity();
 		projectEntity.projectId = "J001";
@@ -644,7 +638,7 @@ describe('ProjectService', () => {
 		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
 
 		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
-		jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
+		// jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -673,11 +667,11 @@ describe('ProjectService', () => {
 
 		const programme = new ProgrammeEntity();
 		programme.programmeId = "P001";
-		programme.affectedSectors = [Sector.Agriculture];
+		programme.sector = Sector.Agriculture;
 
 		const newProgramme = new ProgrammeEntity();
 		newProgramme.programmeId = "P001";
-		newProgramme.affectedSectors = [Sector.Agriculture];
+		newProgramme.sector = Sector.Agriculture;
 
 		const projectDto = new ProjectUpdateDto();
 		projectDto.projectId = "J001";
@@ -689,7 +683,6 @@ describe('ProjectService', () => {
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectDto.expectedTimeFrame = 25;
 
 		const projectEntity = new ProjectEntity();
 		projectEntity.projectId = "J001";
@@ -708,7 +701,7 @@ describe('ProjectService', () => {
 		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
 
 		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
-		jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
+		// jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {

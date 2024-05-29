@@ -3,7 +3,7 @@ import { InstrumentType } from "../enums/action.enum";
 import { ActionStatus } from "../enums/action.enum";
 import { NatAnchor } from "../enums/action.enum";
 import { ProgrammeEntity } from "./programme.entity";
-import { Sector } from "src/enums/sector.enum";
+import { Sector } from "../enums/sector.enum";
 
 @Entity("action")
 export class ActionEntity {
