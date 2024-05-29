@@ -2,7 +2,7 @@ import { Form, Input, Row, Col, Select, Tooltip } from 'antd';
 import './kpiGrid.scss';
 import { KpiUnits } from '../../Enums/kpi.enum';
 import { CreatedKpiData } from '../../Definitions/kpiDefinitions';
-import { InfoCircleOutlined } from '@ant-design/icons';
+import { UserOutlined, UserSwitchOutlined } from '@ant-design/icons';
 
 interface Props {
   index: number;
@@ -79,10 +79,11 @@ export const ViewKpi: React.FC<Props> = ({
               title={inherited ? `Inherited from ${ownerEntityId}` : `Owned by ${callingEntityId}`}
               showArrow={false}
             >
-              <InfoCircleOutlined
-                className={inherited ? 'inherited-circle' : 'self-owned-circle'}
-                size={10}
-              />
+              {inherited ? (
+                <UserSwitchOutlined className="inherited-kpi" />
+              ) : (
+                <UserOutlined className="self-owned-kpi" />
+              )}
             </Tooltip>
           </Col>
         </Row>
