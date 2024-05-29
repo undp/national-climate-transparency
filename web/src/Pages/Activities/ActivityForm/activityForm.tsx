@@ -221,7 +221,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     fetchConnectedParent();
 
     const fetchParentKPIData = async () => {
-      if (method === 'create' && parentType && connectedParentId) {
+      if (typeof connectedParentId === 'undefined') {
+        setInheritedKpiList([]);
+      } else if (method !== 'view' && parentType && connectedParentId) {
         try {
           const response: any = await get(
             `national/kpis/entities/${parentType}/${connectedParentId}`

@@ -772,7 +772,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   // Fetch Parent KPI
 
   const fetchParentKPIData = async (parentId: string) => {
-    if (method === 'create') {
+    if (typeof parentId === 'undefined') {
+      setInheritedKpiList([]);
+    } else if (method !== 'view') {
       try {
         const response: any = await get(`national/kpis/achieved/programme/${parentId}`);
         if (response.status === 200 || response.status === 201) {
