@@ -29,6 +29,7 @@ import { ActivityUpdateDto } from "../dtos/activityUpdate.dto";
 import { ValidateDto } from "src/dtos/validate.dto";
 import { KpiService } from "src/kpi/kpi.service";
 import { PayloadValidator } from "../validation/payload.validator";
+import { Sector } from "src/enums/sector.enum";
 
 @Injectable()
 export class ActivityService {
@@ -688,7 +689,7 @@ export class ActivityService {
 			);
 		}
 
-		if (!this.checkSectorPermissions(activity.sector, user.sector)) {
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.userDoesNotHavePermission",
@@ -819,17 +820,6 @@ export class ActivityService {
 		}
 	}
 
-	checkSectorPermissions(activitySectors: any, userSectors: any) {
-		let canAccess = true;
-		if (userSectors && userSectors.length > 0 && activitySectors && activitySectors.length > 0) {
-			const commonSectors = activitySectors.filter(sector => userSectors.includes(sector));
-			if (commonSectors.length === 0) {
-				canAccess = false;
-			}
-		}
-		return canAccess;
-	}
-
 	private addEventLogEntry = (
 		eventLog: any[],
 		eventType: LogEventType,
@@ -878,7 +868,7 @@ export class ActivityService {
 			);
 		}
 
-		if (!this.checkSectorPermissions(activity.sector, user.sector)) {
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.userDoesNotHavePermission",
@@ -939,7 +929,7 @@ export class ActivityService {
 			);
 		}
 
-		if (!this.checkSectorPermissions(activity.sector, user.sector)) {
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"activity.userDoesNotHavePermission",

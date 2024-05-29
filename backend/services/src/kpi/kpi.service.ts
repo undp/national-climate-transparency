@@ -238,6 +238,10 @@ export class KpiService {
 			);
 		}
 
+		if (entityType == EntityType.ACTIVITY && !entity.parentId) {
+			return [];
+		}
+
 		const queryBuilder = this.kpiRepo.createQueryBuilder('kpi');
 
 		if (entityType == EntityType.ACTION) {
