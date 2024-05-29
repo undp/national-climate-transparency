@@ -9,7 +9,7 @@ import { AchievementEntity } from "src/entities/achievement.entity";
 import { ActionEntity } from "src/entities/action.entity";
 import { ProgrammeEntity } from "src/entities/programme.entity";
 import { ProjectEntity } from "src/entities/project.entity";
-import { AchievementDto } from "src/dtos/achievementDto";
+import { AchievementDto, AchievementDtoList } from "src/dtos/achievementDto";
 import { User } from "src/entities/user.entity";
 import { plainToClass } from "class-transformer";
 import { DataResponseMessageDto } from "src/dtos/data.response.message";
@@ -35,48 +35,55 @@ export class KpiService {
 	}
 
 	//MARK: Create Achievements
-	async createAchievements(achievementDto: AchievementDto, user: User) {
-		const achievement: AchievementEntity = plainToClass(AchievementEntity, achievementDto);
+	async createAchievements(achievementDtoList: AchievementDtoList, user: User) {
+		const achievements = [];
 
-		const activity = await this.findActivityById(achievementDto.activityId);
-		if (!activity) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"kpi.activityNotFound",
-					[achievementDto.activityId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
+		for(const achievementDto of achievementDtoList.achievements) {
+			const achievement: AchievementEntity = plainToClass(AchievementEntity, achievementDto);
+
+			const activity = await this.findActivityById(achievementDto.activityId);
+			if (!activity) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"kpi.activityNotFound",
+						[achievementDto.activityId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+	
+			const kpi = await this.findKpiById(achievementDto.kpiId);
+			if (!kpi) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"kpi.kpiNotFound",
+						[achievementDto.kpiId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+	
+			achievement.kpi = kpi;
+			achievement.activity = activity;
+	
+			const activityKpis = await this.getKpisForEntity(activity.activityId, EntityType.ACTIVITY);
+	
+			if (!activityKpis.some(kpi => kpi.kpiId === achievementDto.kpiId)) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"kpi.kpiNotLinkedToActivity",
+						[achievementDto.kpiId, achievementDto.activityId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			achievements.push(achievement);
 		}
 
-		const kpi = await this.findKpiById(achievementDto.kpiId);
-		if (!kpi) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"kpi.kpiNotFound",
-					[achievementDto.kpiId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
-
-		achievement.kpi = kpi;
-		achievement.activity = activity;
-
-		const activityKpis = await this.getKpisForEntity(activity.activityId, EntityType.ACTIVITY);
-
-		if (!activityKpis.some(kpi => kpi.kpiId === achievementDto.kpiId)) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"kpi.kpiNotLinkedToActivity",
-					[achievementDto.kpiId, achievementDto.activityId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
 
 		const achive = await this.entityManager.transaction(async (em) => {
-			return await em.save<AchievementEntity>(achievement);
+			return await em.save<AchievementEntity>(achievements);
 		})
 			.catch((err: any) => {
 				console.log(err);
