@@ -221,7 +221,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     fetchConnectedParent();
 
     const fetchParentKPIData = async () => {
-      if (method === 'create' && parentType && connectedParentId) {
+      if (typeof connectedParentId === 'undefined') {
+        setInheritedKpiList([]);
+      } else if (method !== 'view' && parentType && connectedParentId) {
         try {
           const response: any = await get(
             `national/kpis/entities/${parentType}/${connectedParentId}`
@@ -232,6 +234,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             response.data.forEach((kpi: any) => {
               tempInheritedKpiList.push({
                 index: tempKpiCounter,
+                creator: kpi.creatorId,
                 id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
@@ -462,6 +465,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             response.data.forEach((kpi: any) => {
               tempInheritedKpiList.push({
                 index: tempKpiCounter,
+                creator: kpi.creatorId,
                 id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
@@ -1333,6 +1337,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                       kpi={createdKPI}
                       callingEntityId={entId}
+                      ownerEntityId={createdKPI.creator}
                     ></ViewKpi>
                   ))
                 : inheritedKpiList.map((createdKPI: CreatedKpiData) => (

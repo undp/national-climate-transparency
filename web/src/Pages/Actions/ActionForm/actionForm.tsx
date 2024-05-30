@@ -219,6 +219,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             response.data.forEach((kpi: any) => {
               tempKpiList.push({
                 index: tempKpiCounter,
+                creator: entId,
                 id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
@@ -595,7 +596,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             expected: kpi.expected,
           });
         });
-      } else if (method === 'update' && (newKpiList.length > 0 || createdKpiList.length > 0)) {
+      } else if (method === 'update') {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
@@ -1213,6 +1214,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                     kpi={createdKPI}
                     callingEntityId={entId}
+                    ownerEntityId={entId}
                   ></ViewKpi>
                 ))}
               {method === 'update' &&

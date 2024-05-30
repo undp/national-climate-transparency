@@ -30,24 +30,20 @@
     border-color: '#d9d9d9';
   }
 
-  .inherited-circle {
+  .inherited-kpi {
     display: flex;
     justify-content: center;
     padding: 0px;
-    margin-top: 46px;
-    margin-left: 13px;
-    color: #9155fd;
-    border-color: #9155fd;
+    margin-top: 44px;
+    color: #615d67;
   }
 
-  .self-owned-circle {
+  .self-owned-kpi {
     display: flex;
     justify-content: center;
     padding: 0px;
-    margin-top: 46px;
-    margin-left: 13px;
-    color: greenyellow;
-    border-color: greenyellow;
+    margin-top: 44px;
+    color: #615d67;
   }
 
 }

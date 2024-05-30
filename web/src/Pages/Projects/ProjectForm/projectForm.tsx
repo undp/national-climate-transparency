@@ -257,6 +257,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               if (kpi.creatorId === entId) {
                 tempCreatedKpiList.push({
                   index: tempKpiCounter,
+                  creator: entId,
                   id: kpi.kpiId,
                   name: kpi.name,
                   unit: kpi.kpiUnit,
@@ -266,6 +267,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               } else {
                 tempInheritedKpiList.push({
                   index: tempKpiCounter,
+                  creator: kpi.creatorId,
                   id: kpi.kpiId,
                   name: kpi.name,
                   unit: kpi.kpiUnit,
@@ -590,7 +592,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             expected: kpi.expected,
           });
         });
-      } else if (method === 'update' && (newKpiList.length > 0 || createdKpiList.length > 0)) {
+      } else if (method === 'update') {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
@@ -772,7 +774,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   // Fetch Parent KPI
 
   const fetchParentKPIData = async (parentId: string) => {
-    if (method === 'create') {
+    if (typeof parentId === 'undefined') {
+      setInheritedKpiList([]);
+    } else if (method !== 'view') {
       try {
         const response: any = await get(`national/kpis/achieved/programme/${parentId}`);
         if (response.status === 200 || response.status === 201) {
@@ -781,6 +785,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
           response.data.forEach((kpi: any) => {
             tempInheritedKpiList.push({
               index: tempKpiCounter,
+              creator: kpi.creatorId,
               id: kpi.kpiId,
               name: kpi.name,
               unit: kpi.kpiUnit,
@@ -1248,6 +1253,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                     kpi={createdKPI}
                     callingEntityId={entId}
+                    ownerEntityId={createdKPI.creator}
                   ></ViewKpi>
                 ))}
               {method === 'view' &&
@@ -1259,6 +1265,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
                     kpi={createdKPI}
                     callingEntityId={entId}
+                    ownerEntityId={createdKPI.creator}
                   ></ViewKpi>
                 ))}
               {method === 'update' &&

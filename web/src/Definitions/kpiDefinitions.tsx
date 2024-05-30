@@ -8,6 +8,7 @@ export type NewKpiData = {
 
 export type CreatedKpiData = {
   index: number;
+  creator: string;
   id: number;
   name: string;
   unit: string;

@@ -367,7 +367,7 @@ const Dashboard = () => {
                         type="donut"
                         options={{
                           labels: chart.categories.map((category) =>
-                            category.length > 16 ? `${category.slice(0, 16)}...` : category
+                            category.length > 20 ? `${category.slice(0, 20)}...` : category
                           ),
                           dataLabels: {
                             enabled: false,
@@ -393,9 +393,13 @@ const Dashboard = () => {
                               },
                             },
                           },
+                          legend: {
+                            position: 'right',
+                            floating: false,
+                          },
                         }}
                         series={chart.values}
-                        height={250}
+                        width={450}
                       />
                       <div className="chart-update-time">
                         <Tag className="time-chip">{CustomFormatDate(chart.lastUpdatedTime)}</Tag>
