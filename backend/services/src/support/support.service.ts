@@ -50,13 +50,13 @@ export class SupportService {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"common.cannotLinkedToValidated",
-					[EntityType.ACTIVITY , activity.activityId]
+					[EntityType.ACTIVITY, activity.activityId]
 				),
 				HttpStatus.BAD_REQUEST
 			);
 		}
 
-		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"support.cannotLinkToNotRelatedActivity",
@@ -79,9 +79,7 @@ export class SupportService {
 			.transaction(async (em) => {
 				const savedSupport = await em.save<SupportEntity>(support);
 				if (savedSupport) {
-					for (const event of eventLog) {
-						await em.save<LogEntity>(event);
-					}
+					await em.save<LogEntity>(eventLog);
 				}
 				return savedSupport;
 			})
@@ -141,9 +139,9 @@ export class SupportService {
 	//MARK: Find Support by Id
 	async findSupportById(supportId: string) {
 		return await this.supportRepo.createQueryBuilder('support')
-		.leftJoinAndSelect('support.activity', 'activity')
-		.where('support.supportId = :supportId', { supportId })
-		.getOne();
+			.leftJoinAndSelect('support.activity', 'activity')
+			.where('support.supportId = :supportId', { supportId })
+			.getOne();
 	}
 
 	//MARK: Update Support
@@ -170,7 +168,7 @@ export class SupportService {
 		}
 		const eventLog = [];
 
-		if (!this.helperService.doesUserHaveSectorPermission(user, currentSupport.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, currentSupport.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"support.cannotUpdateNotRelatedSupport",
@@ -191,7 +189,7 @@ export class SupportService {
 			);
 		}
 
-		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"support.cannotLinkToNotRelatedActivity",
@@ -209,12 +207,12 @@ export class SupportService {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"common.cannotUnlinkedFromValidated",
-						[EntityType.ACTIVITY , activity.activityId]
+						[EntityType.ACTIVITY, activity.activityId]
 					),
 					HttpStatus.BAD_REQUEST
 				);
 			}
-			
+
 			this.addEventLogEntry(eventLog, LogEventType.UNLINKED_FROM_ACTIVITY, EntityType.SUPPORT, currentSupport.supportId, user.id, currentSupport.activity.activityId);
 			this.addEventLogEntry(eventLog, LogEventType.SUPPORT_LINKED, EntityType.ACTIVITY, activity.activityId, user.id, supportUpdateDto.supportId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTIVITY, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, activity.activityId);
@@ -282,7 +280,7 @@ export class SupportService {
 			);
 		}
 
-		if (!this.helperService.doesUserHaveSectorPermission(user, support.sector)){
+		if (!this.helperService.doesUserHaveSectorPermission(user, support.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"support.permissionDeniedForSector",

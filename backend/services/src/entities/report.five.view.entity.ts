@@ -27,7 +27,7 @@ prj.description, objective, ARRAY[]::text[] as "instrumentType", "projectStatus"
 prj."startYear" , "internationalImplementingEntities" as "implementingEntities", 
 prve."achievedGHGReduction", prve."expectedGHGReduction"
 	FROM project prj 
-join programme pro on pro."programmeId" = prj."programmeId"
+left join programme pro on pro."programmeId" = prj."programmeId"
 join project_view_entity prve on prve.id = prj."projectId"
 	WHERE prj.validated = true
 ) proj;`

@@ -12,6 +12,8 @@ import { ActivityStatus, Measure } from "../enums/activity.enum";
 import { SupportDto } from "../dtos/support.dto";
 import { FinanceNature, FinancingStatus, IntFinInstrument, IntSource, IntSupChannel, SupportDirection } from "../enums/support.enum";
 import { Sector } from "../enums/sector.enum";
+import { HttpStatus } from "@nestjs/common";
+import { DataResponseMessageDto } from "../dtos/data.response.message";
 
 describe('SupportService', () => {
 	let service: SupportService;
@@ -106,11 +108,9 @@ describe('SupportService', () => {
 			supportDto.receivedAmount = 100;
 			supportDto.exchangeRate = 200;
 
-
 			jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
 			jest.spyOn(activityServiceMock, 'findActivityById').mockResolvedValueOnce(activity);
 			jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
-			// jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("action.createActionSuccess");
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -123,7 +123,11 @@ describe('SupportService', () => {
 
 			const result = await service.createSupport(supportDto, user);
 
+			expect(result).toEqual(expect.any(DataResponseMessageDto));
+			expect(result.statusCode).toEqual(HttpStatus.CREATED);
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("support.createSupportSuccess", []);
 			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+			expect(activityServiceMock.findActivityById).toHaveBeenCalledTimes(1)
 			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 		});
 
