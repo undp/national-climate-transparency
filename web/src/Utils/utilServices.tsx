@@ -87,7 +87,7 @@ export const CustomFormatDate = (timestamp: number) => {
 };
 
 export const DashboardTotalFormatter = (value: number, isCurrency: boolean) => {
-  return isCurrency ? `$ ${value}` : value.toString();
+  return isCurrency ? `$ ${Math.round(value)}` : value.toString();
 };
 
 export const getArraySum = (values: number[]) => {

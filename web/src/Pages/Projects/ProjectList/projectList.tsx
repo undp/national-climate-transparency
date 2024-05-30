@@ -183,7 +183,7 @@ const projectList = () => {
             intImplementingEntity: unstructuredData[i].internationalImplementingEntities ?? [],
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             natImplementingEntity: unstructuredData[i].programme?.natImplementor ?? [],
-            estimatedInvestment: unstructuredData[i].programme?.investment,
+            estimatedInvestment: Math.round(unstructuredData[i].programme?.investment ?? 0),
           });
         }
         setTableData(structuredData);
