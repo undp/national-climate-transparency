@@ -1312,7 +1312,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     name="achievedGHGReduction"
                     rules={[validation.required]}
                   >
-                    <Input type="number" min={0} className="form-input-box" disabled={isView} />
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      className="form-input-box"
+                      disabled={isView}
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -1321,7 +1327,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     name="expectedGHGReduction"
                     rules={[validation.required]}
                   >
-                    <Input type="number" min={0} className="form-input-box" disabled={isView} />
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      className="form-input-box"
+                      disabled={isView}
+                    />
                   </Form.Item>
                 </Col>
               </Row>

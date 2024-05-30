@@ -1154,7 +1154,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     name="investment"
                     rules={[validation.required]}
                   >
-                    <Input className="form-input-box" min={0} type="number" disabled={isView} />
+                    <Input
+                      className="form-input-box"
+                      min={0}
+                      step={0.01}
+                      type="number"
+                      disabled={isView}
+                    />
                   </Form.Item>
                 </Col>
               </Row>
