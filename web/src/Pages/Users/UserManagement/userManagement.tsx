@@ -88,6 +88,13 @@ const UserManagement = () => {
   const { userInfoState } = useUserContext();
   const { post, put } = useConnection();
 
+  if (
+    userInfoState?.userRole === Role.GovernmentUser ||
+    userInfoState?.userRole === Role.Observer
+  ) {
+    navigate('/dashboard');
+  }
+
   // Users List Page State
 
   const [loading, setLoading] = useState<boolean>(false);

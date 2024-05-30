@@ -30,6 +30,7 @@ import { Sector } from '../../../Enums/sector.enum';
 import { NewKpi } from '../../../Components/KPI/newKpi';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
+import { Role } from '../../../Enums/role.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -114,7 +115,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     yearsList.push(year);
   }
 
-  if (userInfoState?.userRole === 'Root' || userInfoState?.userRole === 'Admin') {
+  if (userInfoState?.userRole === Role.Root || userInfoState?.userRole === Role.Admin) {
     Object.values(Sector).map((sector) => availableSectors.push(sector));
   } else {
     userSectors.map((sector) => availableSectors.push(sector));

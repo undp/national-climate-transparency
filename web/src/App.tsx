@@ -121,34 +121,6 @@ const App = () => {
                   <Route path="/faqs" element={<CustomLayout selectedKey="faqs" />}>
                     <Route index element={<Faq />} />
                   </Route>
-
-                  {/* <Route
-                    path="/investmentManagement"
-                    element={<CustomLayout selectedKey="investmentManagement/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<InvestmentManagement />} />
-                    <Route path="addInvestment" element={<AddInvestmentComponent />} />
-                  </Route>
-                  <Route
-                    path="/supportManagement"
-                    element={<CustomLayout selectedKey="supportManagement/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<SupportManagement />} />
-                    <Route path="addSupport" element={<AddSupportComponent />} />
-                  </Route>
-                  <Route
-                    path="/ndcManagement"
-                    element={<CustomLayout selectedKey="ndcManagement/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<NdcActionManagement />} />
-                    <Route path="view" element={<NdcActionView />} />
-                  </Route>
-                  <Route
-                    path="/ndcDetails"
-                    element={<CustomLayout selectedKey="ndcDetails/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<NdcDetails />} />
-                  </Route> */}
                   <Route
                     path="/companyManagement"
                     element={<CustomLayout selectedKey="companyManagement/viewAll" />}
@@ -177,17 +149,6 @@ const App = () => {
                   >
                     <Route path="view" element={<CompanyProfile />} />
                   </Route>
-                  {/* <Route path="/reports" element={<CustomLayout selectedKey="reports" />}>
-                    <Route index element={<ReportSection />} />
-                  </Route> */}
-                  {/* <Route
-                      path="/userManagement"
-                      element={<CustomLayout selectedKey="userManagement" />}
-                    >
-                      <Route index element={<UserManagement />} />
-                      <Route path="addUser" element={<AddUser />} />
-                      <Route path="updateUser" element={<UpdateUser />} />
-                    </Route> */}
                 </Route>
                 <Route path="/*" element={<Navigate to="/" replace />} />
               </Routes>
