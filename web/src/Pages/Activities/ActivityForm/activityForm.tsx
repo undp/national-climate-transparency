@@ -599,7 +599,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       });
 
-      await post('national/kpis/achievements/add', { achievements: achievements });
+      if (achievements.length > 0) {
+        await post('national/kpis/achievements/add', { achievements: achievements });
+      }
     }
   };
 

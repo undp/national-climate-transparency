@@ -10,6 +10,8 @@ export type ActivityData = {
   ghgsAffected?: string[];
   achievedReduction?: number;
   estimatedReduction?: number;
+  technologyType?: string;
+  meansOfImplementation?: string;
 };
 
 export type ParentData = {

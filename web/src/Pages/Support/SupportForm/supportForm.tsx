@@ -200,8 +200,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     const updatedNeeded = (amountNeeded ?? 0) / (exchangeRate ?? 0);
     const updatedReceived = (amountReceived ?? 0) / (exchangeRate ?? 0);
     form.setFieldsValue({
-      neededLocal: updatedNeeded > 0 ? parseFloat(updatedNeeded.toFixed(3)) : null,
-      receivedLocal: updatedReceived > 0 ? parseFloat(updatedReceived.toFixed(3)) : null,
+      neededLocal: updatedNeeded > 0 ? parseFloat(updatedNeeded.toFixed(2)) : null,
+      receivedLocal: updatedReceived > 0 ? parseFloat(updatedReceived.toFixed(2)) : null,
     });
   }, [exchangeRate, amountNeeded, amountReceived]);
 

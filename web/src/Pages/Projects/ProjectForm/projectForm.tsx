@@ -186,6 +186,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               comment: entityData.comment ?? undefined,
             });
 
+            // Setting Year Fields
+
+            setStartYear(entityData.startYear);
+            setEndYear(entityData.endYear);
+
             // Setting validation status
 
             setIsValidated(entityData.validated ?? false);
@@ -318,9 +323,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         });
         setAttachedActivityIds(connectedActivityIds);
         setTempActivityIds(connectedActivityIds);
-
-        // Resolve Support Loading
-        setSupportData([]);
       }
     };
     fetchConnectedActivityIds();
@@ -343,6 +345,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       });
     }
   }, [projectMigratedData]);
+
+  // Fetching Action data for parent change
 
   useEffect(() => {
     const fetchConnectedAction = async () => {
@@ -375,6 +379,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchConnectedAction();
   }, [programmeConnectedAction]);
+
+  // Fetching Programme data for parent change
 
   useEffect(() => {
     const fetchConnectedProgramme = async () => {
@@ -419,15 +425,100 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     fetchConnectedProgramme();
   }, [projectConnectedProgramme]);
 
-  // Fetching Project data and calculating migrated fields when attachment changes
+  // Fetching Activity data and Support Data when Attachment changes
 
   useEffect(() => {
-    const payload = {
-      page: 1,
-      size: tempActivityIds.length,
+    const activityPayload = {
       filterOr: [] as any[],
+      sort: {
+        key: 'activityId',
+        order: 'ASC',
+      },
     };
 
+    const supportPayload = {
+      filterOr: [] as any[],
+      sort: {
+        key: 'supportId',
+        order: 'ASC',
+      },
+    };
+
+    const fetchActivityAttachmentData = async () => {
+      if (tempActivityIds.length > 0) {
+        tempActivityIds.forEach((activityId) => {
+          activityPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activityId,
+          });
+          supportPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activityId,
+          });
+        });
+        const activityResponse: any = await post('national/activities/query', activityPayload);
+        const supportResponse: any = await post('national/supports/query', supportPayload);
+
+        const tempActivityData: ActivityData[] = [];
+        const tempSupportData: SupportData[] = [];
+
+        activityResponse.data.forEach((act: any, index: number) => {
+          tempActivityData.push({
+            key: index.toString(),
+            activityId: act.activityId,
+            title: act.title,
+            reductionMeasures: act.measure,
+            status: act.status,
+            startYear: act.migratedData?.startYear,
+            endYear: act.migratedData?.endYear,
+            natImplementor: act.nationalImplementingEntity ?? [],
+            ghgsAffected: act.ghgsAffected ?? [],
+            achievedReduction: act.achievedGHGReduction ?? 0,
+            estimatedReduction: act.expectedGHGReduction ?? 0,
+            technologyType: act.technologyType,
+            meansOfImplementation: act.meansOfImplementation,
+          });
+        });
+
+        supportResponse.data.forEach((sup: any, index: number) => {
+          tempSupportData.push({
+            key: index.toString(),
+            supportId: sup.supportId,
+            financeNature: sup.financeNature,
+            direction: sup.direction,
+            finInstrument:
+              sup.financeNature === 'International'
+                ? sup.internationalFinancialInstrument
+                : sup.nationalFinancialInstrument,
+            estimatedUSD: sup.requiredAmount,
+            estimatedLC: sup.requiredAmountDomestic,
+            recievedUSD: sup.receivedAmount,
+            recievedLC: sup.receivedAmountDomestic,
+          });
+        });
+
+        setActivityData(tempActivityData);
+        setSupportData(tempSupportData);
+      } else {
+        setActivityData([]);
+        setSupportData([]);
+      }
+    };
+    fetchActivityAttachmentData();
+
+    // Setting Pagination
+    setActivityCurrentPage(1);
+    setActivityPageSize(10);
+
+    setSupportCurrentPage(1);
+    setSupportPageSize(10);
+  }, [tempActivityIds]);
+
+  // Calculating migrated fields when attachment changes
+
+  useEffect(() => {
     const tempMigratedData: ProjectMigratedData = {
       techDevContribution: 'No',
       capBuildObjectives: 'No',
@@ -442,77 +533,47 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const meansOfImplementation: string[] = [];
 
-    const fetchData = async () => {
-      if (tempActivityIds.length > 0) {
-        tempActivityIds.forEach((actId) => {
-          payload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: actId,
-          });
-        });
-        const response: any = await post('national/activities/query', payload);
-
-        const tempActivityData: ActivityData[] = [];
-
-        response.data.forEach((act: any, index: number) => {
-          tempActivityData.push({
-            key: index.toString(),
-            activityId: act.activityId,
-            title: act.title,
-            reductionMeasures: act.measure,
-            status: act.status,
-            startYear: act.migratedData?.startYear,
-            endYear: act.migratedData?.endYear,
-            natImplementor: act.nationalImplementingEntity ?? [],
-          });
-
-          if (act.technologyType && !tempMigratedData.techType.includes(act.technologyType)) {
-            tempMigratedData.techType.push(act.technologyType);
-          }
-
-          if (
-            act.meansOfImplementation &&
-            !meansOfImplementation.includes(act.meansOfImplementation)
-          ) {
-            meansOfImplementation.push(act.meansOfImplementation);
-          }
-
-          const activityGHGAchievement =
-            act.achievedGHGReduction !== null ? act.achievedGHGReduction : 0;
-          const activityGHGExpected =
-            act.expectedGHGReduction !== null ? act.expectedGHGReduction : 0;
-
-          tempMigratedData.achievedGHGReduction =
-            tempMigratedData.achievedGHGReduction + activityGHGAchievement;
-
-          tempMigratedData.expectedGHGReduction =
-            tempMigratedData.expectedGHGReduction + activityGHGExpected;
-        });
-
-        console.log(meansOfImplementation);
-
-        if (meansOfImplementation.includes('Technology Development & Transfer')) {
-          tempMigratedData.techDevContribution = 'Yes';
-        }
-
-        if (meansOfImplementation.includes('Capacity Building')) {
-          tempMigratedData.capBuildObjectives = 'Yes';
-        }
-
-        setActivityData(tempActivityData);
-        setProjectMigratedData(tempMigratedData);
-      } else {
-        setActivityData([]);
-        setProjectMigratedData(tempMigratedData);
+    activityData.forEach((act: ActivityData) => {
+      if (act.technologyType && !tempMigratedData.techType.includes(act.technologyType)) {
+        tempMigratedData.techType.push(act.technologyType);
       }
-    };
-    fetchData();
 
-    // Setting Pagination
-    setActivityCurrentPage(1);
-    setActivityPageSize(10);
-  }, [tempActivityIds]);
+      if (act.meansOfImplementation && !meansOfImplementation.includes(act.meansOfImplementation)) {
+        meansOfImplementation.push(act.meansOfImplementation);
+      }
+
+      const activityGHGAchievement = act.achievedReduction ?? 0;
+      const activityGHGExpected = act.estimatedReduction ?? 0;
+
+      tempMigratedData.achievedGHGReduction =
+        tempMigratedData.achievedGHGReduction + activityGHGAchievement;
+
+      tempMigratedData.expectedGHGReduction =
+        tempMigratedData.expectedGHGReduction + activityGHGExpected;
+    });
+
+    if (meansOfImplementation.includes('Technology Development & Transfer')) {
+      tempMigratedData.techDevContribution = 'Yes';
+    }
+
+    if (meansOfImplementation.includes('Capacity Building')) {
+      tempMigratedData.capBuildObjectives = 'Yes';
+    }
+
+    supportData.forEach((sup: SupportData) => {
+      const receivedUSD = sup.recievedUSD ?? 0;
+      const neededUSD = sup.estimatedUSD ?? 0;
+      const receivedLCL = sup.recievedLC ?? 0;
+      const neededLCL = sup.estimatedLC ?? 0;
+
+      tempMigratedData.receivedUSD = tempMigratedData.receivedUSD + receivedUSD;
+      tempMigratedData.neededUSD = tempMigratedData.neededUSD + neededUSD;
+      tempMigratedData.receivedLCL = tempMigratedData.receivedLCL + receivedLCL;
+      tempMigratedData.neededLCL = tempMigratedData.neededLCL + neededLCL;
+    });
+
+    setProjectMigratedData(tempMigratedData);
+  }, [activityData, supportData]);
 
   // Expected Time Frame Calculation
 
@@ -1414,7 +1475,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row>
                 <Col span={24}>
                   <LayoutTable
-                    tableData={supportData}
+                    tableData={supportData.slice(
+                      (supportCurrentPage - 1) * supportPageSize,
+                      (supportCurrentPage - 1) * supportPageSize + supportPageSize
+                    )}
                     columns={supportTableColumns}
                     loading={false}
                     pagination={{
@@ -1422,7 +1486,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       pageSize: supportPageSize,
                       total: supportData.length,
                       showQuickJumper: true,
-                      pageSizeOptions: ['10', '20', '30'],
+                      pageSizeOptions: ['1', '10', '20', '30'],
                       showSizeChanger: true,
                       style: { textAlign: 'center' },
                       locale: { page: '' },
