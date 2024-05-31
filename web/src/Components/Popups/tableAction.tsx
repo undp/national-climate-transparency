@@ -6,7 +6,7 @@ import { ProjectEntity } from '../../Entities/project';
 import { ActivityEntity } from '../../Entities/activity';
 import { SupportEntity } from '../../Entities/support';
 import {
-  CloseCircleOutlined,
+  DisconnectOutlined,
   EditOutlined,
   InfoCircleOutlined,
   PlusOutlined,
@@ -141,7 +141,7 @@ export const detachMenu = (recordId: string, t: any, detachEntity: (recordId: st
       dataSource={[
         {
           text: t('detach'),
-          icon: <CloseCircleOutlined style={{ color: 'red' }} />,
+          icon: <DisconnectOutlined style={{ color: 'red' }} />,
           click: () => {
             {
               detachEntity(recordId);

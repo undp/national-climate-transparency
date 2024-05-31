@@ -36,6 +36,7 @@ const ConfirmPopup: React.FC<Props> = ({
 
   return (
     <Modal
+      zIndex={1050}
       open={open}
       onCancel={attachCancel}
       footer={[

@@ -103,7 +103,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Popup Visibility
 
   const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
-  const [detachingEntity, setDetachingEntity] = useState<string>();
+  const [detachingEntityId, setDetachingEntityId] = useState<string>();
+  const [detachingEntityType, setDetachingEntityType] = useState<'programme' | 'activity'>();
 
   // KPI State
 
@@ -726,24 +727,26 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Programme
 
   const detachProgramme = async (prgId: string) => {
-    setDetachingEntity(prgId);
+    setDetachingEntityId(prgId);
+    setDetachingEntityType('programme');
     setOpenDetachPopup(true);
   };
 
   // Detach Activity
 
   const detachActivity = async (actId: string) => {
-    setDetachingEntity(actId);
+    setDetachingEntityId(actId);
+    setDetachingEntityType('activity');
     setOpenDetachPopup(true);
   };
 
   // Handle Detachment
 
   const detachEntity = async (entityId: string) => {
-    if (entityId[0] === 'P') {
+    if (detachingEntityType === 'programme') {
       const filteredIds = tempProgramIds.filter((id) => id !== entityId);
       setTempProgramIds(filteredIds);
-    } else if (entityId[0] === 'T') {
+    } else if (detachingEntityType === 'activity') {
       const filteredIds = tempActivityIds.filter((id) => id !== entityId);
       setTempActivityIds(filteredIds);
     }
@@ -856,7 +859,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           cancelTitle: t('detachPopup:cancelTitle'),
           actionTitle: t('detachPopup:actionTitle'),
         }}
-        actionRef={detachingEntity}
+        actionRef={detachingEntityId}
         doAction={detachEntity}
         open={openDetachPopup}
         setOpen={setOpenDetachPopup}
