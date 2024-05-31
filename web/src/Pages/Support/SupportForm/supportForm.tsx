@@ -655,7 +655,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             </Row>
           </div>
           {method === 'create' && (
-            <Row gutter={20} justify={'end'}>
+            <Row className="sticky-footer" gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
                   type="default"
@@ -678,7 +678,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             </Row>
           )}
           {method === 'view' && (
-            <Row gutter={20} justify={'end'}>
+            <Row className="sticky-footer" gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
                   type="default"
@@ -711,7 +711,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             </Row>
           )}
           {method === 'update' && (
-            <Row gutter={20} justify={'end'}>
+            <Row className="sticky-footer" gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
                   type="default"
