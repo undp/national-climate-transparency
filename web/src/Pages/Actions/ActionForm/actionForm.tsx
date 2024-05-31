@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
 import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { AppstoreOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { InstrumentType, ActionStatus, NatAnchor, Action } from '../../../Enums/action.enum';
@@ -31,6 +31,7 @@ import { NewKpi } from '../../../Components/KPI/newKpi';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
 import { Role } from '../../../Enums/role.enum';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -40,7 +41,7 @@ const inputFontSize = '13px';
 
 const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['actionForm']);
+  const { t } = useTranslation(['actionForm', 'detachPopup']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Action', method);
@@ -98,6 +99,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportData, setSupportData] = useState<SupportData[]>([]);
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
   const [supportPageSize, setSupportPageSize] = useState<number>(10);
+
+  // Detach Popup Visibility
+
+  const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  const [detachingEntity, setDetachingEntity] = useState<string>();
 
   // KPI State
 
@@ -720,15 +726,27 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Programme
 
   const detachProgramme = async (prgId: string) => {
-    const filteredIds = tempProgramIds.filter((id) => id !== prgId);
-    setTempProgramIds(filteredIds);
+    setDetachingEntity(prgId);
+    setOpenDetachPopup(true);
   };
 
   // Detach Activity
 
   const detachActivity = async (actId: string) => {
-    const filteredIds = tempActivityIds.filter((id) => id !== actId);
-    setTempActivityIds(filteredIds);
+    setDetachingEntity(actId);
+    setOpenDetachPopup(true);
+  };
+
+  // Handle Detachment
+
+  const detachEntity = async (entityId: string) => {
+    if (entityId[0] === 'P') {
+      const filteredIds = tempProgramIds.filter((id) => id !== entityId);
+      setTempProgramIds(filteredIds);
+    } else if (entityId[0] === 'T') {
+      const filteredIds = tempActivityIds.filter((id) => id !== entityId);
+      setTempActivityIds(filteredIds);
+    }
   };
 
   // Add New KPI
@@ -829,6 +847,20 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   return (
     <div className="content-container">
+      <ConfirmPopup
+        icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: t('detachPopup:primaryMsg'),
+          secondaryMsg: t('detachPopup:secondaryMsg'),
+          cancelTitle: t('detachPopup:cancelTitle'),
+          actionTitle: t('detachPopup:actionTitle'),
+        }}
+        actionRef={detachingEntity}
+        doAction={detachEntity}
+        open={openDetachPopup}
+        setOpen={setOpenDetachPopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
