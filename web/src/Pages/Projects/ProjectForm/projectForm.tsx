@@ -924,7 +924,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
-          primaryMsg: t('detachPopup:primaryMsg'),
+          primaryMsg: `${t('detachPopup:primaryMsg')} Activity ${detachingEntityId}`,
           secondaryMsg: t('detachPopup:secondaryMsg'),
           cancelTitle: t('detachPopup:cancelTitle'),
           actionTitle: t('detachPopup:actionTitle'),

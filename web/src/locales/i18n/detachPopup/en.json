@@ -1,5 +1,5 @@
 {
-    "primaryMsg": "Are you sure you want to detach",
+    "primaryMsg": "Do you want to Detach",
     "secondaryMsg": "You can’t undo this action",
     "cancelTitle": "cancel",
     "actionTitle": "detach"

@@ -104,7 +104,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
   const [detachingEntityId, setDetachingEntityId] = useState<string>();
-  const [detachingEntityType, setDetachingEntityType] = useState<'programme' | 'activity'>();
+  const [detachingEntityType, setDetachingEntityType] = useState<'Programme' | 'Activity'>();
 
   // KPI State
 
@@ -728,7 +728,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const detachProgramme = async (prgId: string) => {
     setDetachingEntityId(prgId);
-    setDetachingEntityType('programme');
+    setDetachingEntityType('Programme');
     setOpenDetachPopup(true);
   };
 
@@ -736,17 +736,17 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const detachActivity = async (actId: string) => {
     setDetachingEntityId(actId);
-    setDetachingEntityType('activity');
+    setDetachingEntityType('Activity');
     setOpenDetachPopup(true);
   };
 
   // Handle Detachment
 
   const detachEntity = async (entityId: string) => {
-    if (detachingEntityType === 'programme') {
+    if (detachingEntityType === 'Programme') {
       const filteredIds = tempProgramIds.filter((id) => id !== entityId);
       setTempProgramIds(filteredIds);
-    } else if (detachingEntityType === 'activity') {
+    } else if (detachingEntityType === 'Activity') {
       const filteredIds = tempActivityIds.filter((id) => id !== entityId);
       setTempActivityIds(filteredIds);
     }
@@ -854,7 +854,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
-          primaryMsg: t('detachPopup:primaryMsg'),
+          primaryMsg: `${t('detachPopup:primaryMsg')} ${detachingEntityType} ${detachingEntityId}`,
           secondaryMsg: t('detachPopup:secondaryMsg'),
           cancelTitle: t('detachPopup:cancelTitle'),
           actionTitle: t('detachPopup:actionTitle'),
