@@ -84,7 +84,6 @@ const LayoutSider = (props: LayoutSiderProps) => {
         <div className="layout-sider-menu-container">
           <Menu
             theme="light"
-            //defaultSelectedKeys={[selectedKey ?? 'dashboard']}
             selectedKeys={[selectedKey ? selectedKey : 'dashboard']}
             mode="inline"
             onClick={onClick}

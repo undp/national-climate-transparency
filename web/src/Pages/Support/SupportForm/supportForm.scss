@@ -38,14 +38,10 @@ body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless)
   }
 
   .sticky-footer {
-    position: fixed;
-    bottom: 0;
-    left: 270px;
     height: 60px;
-    width: 81%;
     background-color: #f4f5fa;
     padding: 15px 2px;
-    display: flex;
-    justify-content: flex-end;
+    position: sticky;
+    bottom: 0;
   }
 }
