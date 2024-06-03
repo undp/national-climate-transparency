@@ -51,8 +51,9 @@ GROUP BY
 	expression: projectViewSQL,
 	synchronize: false,
 })
+@Index("idx_project_view_entity_id")
 export class ProjectViewEntity {
-	@Index()
+
 	@ViewColumn()
 	id: string;
 

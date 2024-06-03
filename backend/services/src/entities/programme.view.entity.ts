@@ -59,8 +59,9 @@ GROUP BY
 	expression: programmeViewSQL,
 	synchronize: false,
 })
+@Index("idx_programme_view_entity_id")
 export class ProgrammeViewEntity {
-	@Index()
+
 	@ViewColumn()
 	id: string;
 

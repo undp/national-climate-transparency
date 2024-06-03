@@ -921,6 +921,7 @@ export class ProgrammeService {
 		programmeViewDto.investment = programme.investment;
 		programmeViewDto.documents = programme.documents;
 		programmeViewDto.comments = programme.comments;
+		programmeViewDto.validated = programme.validated;
 
 		return programmeViewDto;
 

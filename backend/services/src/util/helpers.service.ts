@@ -475,11 +475,11 @@ export class HelperService {
                               SET sector = activity.sector::VARCHAR
                               FROM activity
                               WHERE support."activityId" = activity."activityId";`);
-    await entityManager.query('REFRESH MATERIALIZED VIEW activity_view_entity;');
-		await entityManager.query('REFRESH MATERIALIZED VIEW project_view_entity;');
-		await entityManager.query('REFRESH MATERIALIZED VIEW programme_view_entity;');
-		await entityManager.query('REFRESH MATERIALIZED VIEW action_view_entity;');
-		await entityManager.query('REFRESH MATERIALIZED VIEW report_five_view_entity;');
+    await entityManager.query('REFRESH MATERIALIZED VIEW CONCURRENTLY activity_view_entity;');
+		await entityManager.query('REFRESH MATERIALIZED VIEW CONCURRENTLY project_view_entity;');
+		await entityManager.query('REFRESH MATERIALIZED VIEW CONCURRENTLY programme_view_entity;');
+		await entityManager.query('REFRESH MATERIALIZED VIEW CONCURRENTLY action_view_entity;');
+		await entityManager.query('REFRESH MATERIALIZED VIEW CONCURRENTLY report_five_view_entity;');
 	}
 
   public getEmailTemplateMessage(template: string, data, isSubject: boolean) :string{
