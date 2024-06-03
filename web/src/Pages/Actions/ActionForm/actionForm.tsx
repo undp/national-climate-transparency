@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
 import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { AppstoreOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { InstrumentType, ActionStatus, NatAnchor, Action } from '../../../Enums/action.enum';
@@ -30,6 +30,8 @@ import { Sector } from '../../../Enums/sector.enum';
 import { NewKpi } from '../../../Components/KPI/newKpi';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
+import { Role } from '../../../Enums/role.enum';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -39,7 +41,7 @@ const inputFontSize = '13px';
 
 const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['actionForm']);
+  const { t } = useTranslation(['actionForm', 'detachPopup']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Action', method);
@@ -98,6 +100,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
   const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
+  // Detach Popup Visibility
+
+  const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  const [detachingEntityId, setDetachingEntityId] = useState<string>();
+  const [detachingEntityType, setDetachingEntityType] = useState<'Programme' | 'Activity'>();
+
   // KPI State
 
   const [kpiCounter, setKpiCounter] = useState<number>(0);
@@ -114,7 +122,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     yearsList.push(year);
   }
 
-  if (userInfoState?.userRole === 'Root' || userInfoState?.userRole === 'Admin') {
+  if (userInfoState?.userRole === Role.Root || userInfoState?.userRole === Role.Admin) {
     Object.values(Sector).map((sector) => availableSectors.push(sector));
   } else {
     userSectors.map((sector) => availableSectors.push(sector));
@@ -719,15 +727,29 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Programme
 
   const detachProgramme = async (prgId: string) => {
-    const filteredIds = tempProgramIds.filter((id) => id !== prgId);
-    setTempProgramIds(filteredIds);
+    setDetachingEntityId(prgId);
+    setDetachingEntityType('Programme');
+    setOpenDetachPopup(true);
   };
 
   // Detach Activity
 
   const detachActivity = async (actId: string) => {
-    const filteredIds = tempActivityIds.filter((id) => id !== actId);
-    setTempActivityIds(filteredIds);
+    setDetachingEntityId(actId);
+    setDetachingEntityType('Activity');
+    setOpenDetachPopup(true);
+  };
+
+  // Handle Detachment
+
+  const detachEntity = async (entityId: string) => {
+    if (detachingEntityType === 'Programme') {
+      const filteredIds = tempProgramIds.filter((id) => id !== entityId);
+      setTempProgramIds(filteredIds);
+    } else if (detachingEntityType === 'Activity') {
+      const filteredIds = tempActivityIds.filter((id) => id !== entityId);
+      setTempActivityIds(filteredIds);
+    }
   };
 
   // Add New KPI
@@ -828,6 +850,20 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   return (
     <div className="content-container">
+      <ConfirmPopup
+        icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('detachPopup:primaryMsg')} ${detachingEntityType} ${detachingEntityId}`,
+          secondaryMsg: t('detachPopup:secondaryMsg'),
+          cancelTitle: t('detachPopup:cancelTitle'),
+          actionTitle: t('detachPopup:actionTitle'),
+        }}
+        actionRef={detachingEntityId}
+        doAction={detachEntity}
+        open={openDetachPopup}
+        setOpen={setOpenDetachPopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -1263,7 +1299,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               </div>
             )}
             {method === 'create' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"
@@ -1286,7 +1322,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             )}
             {method === 'view' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"
@@ -1319,7 +1355,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             )}
             {method === 'update' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"

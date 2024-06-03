@@ -25,7 +25,7 @@ const ConfirmPopup: React.FC<Props> = ({
   open,
   setOpen,
 }) => {
-  const attachProject = () => {
+  const executeAction = () => {
     doAction(actionRef);
     setOpen(false);
   };
@@ -36,13 +36,14 @@ const ConfirmPopup: React.FC<Props> = ({
 
   return (
     <Modal
+      zIndex={1050}
       open={open}
       onCancel={attachCancel}
       footer={[
         <Button key={'cancelButton'} onClick={attachCancel}>
           {content.cancelTitle}
         </Button>,
-        <Button key={'attachButton'} type="primary" onClick={attachProject} danger={isDanger}>
+        <Button key={'attachButton'} type="primary" onClick={executeAction} danger={isDanger}>
           {content.actionTitle}
         </Button>,
       ]}

@@ -36,4 +36,12 @@ body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless)
     font-size: 13px;
     height: 40px;
   }
+
+  .sticky-footer {
+    height: 60px;
+    background-color: #f4f5fa;
+    padding: 15px 2px;
+    position: sticky;
+    bottom: 0;
+  }
 }

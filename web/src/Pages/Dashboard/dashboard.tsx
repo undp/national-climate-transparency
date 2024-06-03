@@ -86,8 +86,8 @@ const Dashboard = () => {
             actionType: unstructuredData[i].migratedData[0]?.types ?? [],
             affectedSectors: unstructuredData[i].sector,
             nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? [],
-            financeNeeded: unstructuredData[i].migratedData[0]?.financeNeeded ?? 0,
-            financeReceived: unstructuredData[i].migratedData[0]?.financeReceived ?? 0,
+            financeNeeded: Math.round(unstructuredData[i].migratedData[0]?.financeNeeded ?? 0),
+            financeReceived: Math.round(unstructuredData[i].migratedData[0]?.financeReceived ?? 0),
           });
         }
         setTableData(structuredData);

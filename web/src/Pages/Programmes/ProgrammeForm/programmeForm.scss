@@ -42,6 +42,13 @@ body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless)
     .kpi-add-text {
       color: #3A3541;
     }
-    
+  }
+
+  .sticky-footer {
+    height: 60px;
+    background-color: #f4f5fa;
+    padding: 15px 2px;
+    position: sticky;
+    bottom: 0;
   }
 }

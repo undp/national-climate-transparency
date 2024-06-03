@@ -200,8 +200,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     const updatedNeeded = (amountNeeded ?? 0) / (exchangeRate ?? 0);
     const updatedReceived = (amountReceived ?? 0) / (exchangeRate ?? 0);
     form.setFieldsValue({
-      neededLocal: updatedNeeded > 0 ? parseFloat(updatedNeeded.toFixed(3)) : null,
-      receivedLocal: updatedReceived > 0 ? parseFloat(updatedReceived.toFixed(3)) : null,
+      neededLocal: updatedNeeded > 0 ? parseFloat(updatedNeeded.toFixed(2)) : null,
+      receivedLocal: updatedReceived > 0 ? parseFloat(updatedReceived.toFixed(2)) : null,
     });
   }, [exchangeRate, amountNeeded, amountReceived]);
 
@@ -569,6 +569,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Input
                     type="number"
                     min={0}
+                    step={0.01}
                     className="form-input-box"
                     onChange={(event) => {
                       const value = parseFloat(event.target.value);
@@ -600,6 +601,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Input
                     type="number"
                     min={0}
+                    step={0.01}
                     className="form-input-box"
                     onChange={(event) => {
                       const value = parseFloat(event.target.value);
@@ -635,6 +637,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Input
                     type="number"
                     min={0}
+                    step={0.01}
                     className="form-input-box"
                     onChange={(event) => {
                       const value = parseFloat(event.target.value);
@@ -652,7 +655,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             </Row>
           </div>
           {method === 'create' && (
-            <Row gutter={20} justify={'end'}>
+            <Row className="sticky-footer" gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
                   type="default"
@@ -675,7 +678,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             </Row>
           )}
           {method === 'view' && (
-            <Row gutter={20} justify={'end'}>
+            <Row className="sticky-footer" gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
                   type="default"
@@ -708,7 +711,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             </Row>
           )}
           {method === 'update' && (
-            <Row gutter={20} justify={'end'}>
+            <Row className="sticky-footer" gutter={20} justify={'end'}>
               <Col span={2}>
                 <Button
                   type="default"

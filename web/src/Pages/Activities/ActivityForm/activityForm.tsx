@@ -599,7 +599,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       });
 
-      await post('national/kpis/achievements/add', { achievements: achievements });
+      if (achievements.length > 0) {
+        await post('national/kpis/achievements/add', { achievements: achievements });
+      }
     }
   };
 
@@ -1312,7 +1314,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     name="achievedGHGReduction"
                     rules={[validation.required]}
                   >
-                    <Input type="number" min={0} className="form-input-box" disabled={isView} />
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      className="form-input-box"
+                      disabled={isView}
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -1321,7 +1329,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     name="expectedGHGReduction"
                     rules={[validation.required]}
                   >
-                    <Input type="number" min={0} className="form-input-box" disabled={isView} />
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      className="form-input-box"
+                      disabled={isView}
+                    />
                   </Form.Item>
                 </Col>
               </Row>
@@ -1501,7 +1515,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               </div>
             )}
             {method === 'create' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"
@@ -1524,7 +1538,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             )}
             {method === 'view' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"
@@ -1557,7 +1571,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             )}
             {method === 'update' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"

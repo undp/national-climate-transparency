@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -30,6 +30,7 @@ import { NewKpi } from '../../../Components/KPI/newKpi';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
 import { processOptionalFields } from '../../../Utils/optionalValueHandler';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -39,7 +40,7 @@ const inputFontSize = '13px';
 
 const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['projectForm', 'tableAction']);
+  const { t } = useTranslation(['projectForm', 'tableAction', 'detachPopup']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Project', method);
@@ -87,6 +88,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
   const [activityPageSize, setActivityPageSize] = useState<number>(10);
+
+  // Detach Popup Visibility
+
+  const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  const [detachingEntityId, setDetachingEntityId] = useState<string>();
 
   // Supports state
 
@@ -185,6 +191,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 entityData.internationalImplementingEntities ?? undefined,
               comment: entityData.comment ?? undefined,
             });
+
+            // Setting Year Fields
+
+            setStartYear(entityData.startYear);
+            setEndYear(entityData.endYear);
 
             // Setting validation status
 
@@ -318,9 +329,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         });
         setAttachedActivityIds(connectedActivityIds);
         setTempActivityIds(connectedActivityIds);
-
-        // Resolve Support Loading
-        setSupportData([]);
       }
     };
     fetchConnectedActivityIds();
@@ -343,6 +351,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       });
     }
   }, [projectMigratedData]);
+
+  // Fetching Action data for parent change
 
   useEffect(() => {
     const fetchConnectedAction = async () => {
@@ -375,6 +385,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchConnectedAction();
   }, [programmeConnectedAction]);
+
+  // Fetching Programme data for parent change
 
   useEffect(() => {
     const fetchConnectedProgramme = async () => {
@@ -419,15 +431,100 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     fetchConnectedProgramme();
   }, [projectConnectedProgramme]);
 
-  // Fetching Project data and calculating migrated fields when attachment changes
+  // Fetching Activity data and Support Data when Attachment changes
 
   useEffect(() => {
-    const payload = {
-      page: 1,
-      size: tempActivityIds.length,
+    const activityPayload = {
       filterOr: [] as any[],
+      sort: {
+        key: 'activityId',
+        order: 'ASC',
+      },
     };
 
+    const supportPayload = {
+      filterOr: [] as any[],
+      sort: {
+        key: 'supportId',
+        order: 'ASC',
+      },
+    };
+
+    const fetchActivityAttachmentData = async () => {
+      if (tempActivityIds.length > 0) {
+        tempActivityIds.forEach((activityId) => {
+          activityPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activityId,
+          });
+          supportPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activityId,
+          });
+        });
+        const activityResponse: any = await post('national/activities/query', activityPayload);
+        const supportResponse: any = await post('national/supports/query', supportPayload);
+
+        const tempActivityData: ActivityData[] = [];
+        const tempSupportData: SupportData[] = [];
+
+        activityResponse.data.forEach((act: any, index: number) => {
+          tempActivityData.push({
+            key: index.toString(),
+            activityId: act.activityId,
+            title: act.title,
+            reductionMeasures: act.measure,
+            status: act.status,
+            startYear: act.migratedData?.startYear,
+            endYear: act.migratedData?.endYear,
+            natImplementor: act.nationalImplementingEntity ?? [],
+            ghgsAffected: act.ghgsAffected ?? [],
+            achievedReduction: act.achievedGHGReduction ?? 0,
+            estimatedReduction: act.expectedGHGReduction ?? 0,
+            technologyType: act.technologyType,
+            meansOfImplementation: act.meansOfImplementation,
+          });
+        });
+
+        supportResponse.data.forEach((sup: any, index: number) => {
+          tempSupportData.push({
+            key: index.toString(),
+            supportId: sup.supportId,
+            financeNature: sup.financeNature,
+            direction: sup.direction,
+            finInstrument:
+              sup.financeNature === 'International'
+                ? sup.internationalFinancialInstrument
+                : sup.nationalFinancialInstrument,
+            estimatedUSD: sup.requiredAmount,
+            estimatedLC: sup.requiredAmountDomestic,
+            recievedUSD: sup.receivedAmount,
+            recievedLC: sup.receivedAmountDomestic,
+          });
+        });
+
+        setActivityData(tempActivityData);
+        setSupportData(tempSupportData);
+      } else {
+        setActivityData([]);
+        setSupportData([]);
+      }
+    };
+    fetchActivityAttachmentData();
+
+    // Setting Pagination
+    setActivityCurrentPage(1);
+    setActivityPageSize(10);
+
+    setSupportCurrentPage(1);
+    setSupportPageSize(10);
+  }, [tempActivityIds]);
+
+  // Calculating migrated fields when attachment changes
+
+  useEffect(() => {
     const tempMigratedData: ProjectMigratedData = {
       techDevContribution: 'No',
       capBuildObjectives: 'No',
@@ -442,77 +539,47 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const meansOfImplementation: string[] = [];
 
-    const fetchData = async () => {
-      if (tempActivityIds.length > 0) {
-        tempActivityIds.forEach((actId) => {
-          payload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: actId,
-          });
-        });
-        const response: any = await post('national/activities/query', payload);
-
-        const tempActivityData: ActivityData[] = [];
-
-        response.data.forEach((act: any, index: number) => {
-          tempActivityData.push({
-            key: index.toString(),
-            activityId: act.activityId,
-            title: act.title,
-            reductionMeasures: act.measure,
-            status: act.status,
-            startYear: act.migratedData?.startYear,
-            endYear: act.migratedData?.endYear,
-            natImplementor: act.nationalImplementingEntity ?? [],
-          });
-
-          if (act.technologyType && !tempMigratedData.techType.includes(act.technologyType)) {
-            tempMigratedData.techType.push(act.technologyType);
-          }
-
-          if (
-            act.meansOfImplementation &&
-            !meansOfImplementation.includes(act.meansOfImplementation)
-          ) {
-            meansOfImplementation.push(act.meansOfImplementation);
-          }
-
-          const activityGHGAchievement =
-            act.achievedGHGReduction !== null ? act.achievedGHGReduction : 0;
-          const activityGHGExpected =
-            act.expectedGHGReduction !== null ? act.expectedGHGReduction : 0;
-
-          tempMigratedData.achievedGHGReduction =
-            tempMigratedData.achievedGHGReduction + activityGHGAchievement;
-
-          tempMigratedData.expectedGHGReduction =
-            tempMigratedData.expectedGHGReduction + activityGHGExpected;
-        });
-
-        console.log(meansOfImplementation);
-
-        if (meansOfImplementation.includes('Technology Development & Transfer')) {
-          tempMigratedData.techDevContribution = 'Yes';
-        }
-
-        if (meansOfImplementation.includes('Capacity Building')) {
-          tempMigratedData.capBuildObjectives = 'Yes';
-        }
-
-        setActivityData(tempActivityData);
-        setProjectMigratedData(tempMigratedData);
-      } else {
-        setActivityData([]);
-        setProjectMigratedData(tempMigratedData);
+    activityData.forEach((act: ActivityData) => {
+      if (act.technologyType && !tempMigratedData.techType.includes(act.technologyType)) {
+        tempMigratedData.techType.push(act.technologyType);
       }
-    };
-    fetchData();
 
-    // Setting Pagination
-    setActivityCurrentPage(1);
-    setActivityPageSize(10);
-  }, [tempActivityIds]);
+      if (act.meansOfImplementation && !meansOfImplementation.includes(act.meansOfImplementation)) {
+        meansOfImplementation.push(act.meansOfImplementation);
+      }
+
+      const activityGHGAchievement = act.achievedReduction ?? 0;
+      const activityGHGExpected = act.estimatedReduction ?? 0;
+
+      tempMigratedData.achievedGHGReduction =
+        tempMigratedData.achievedGHGReduction + activityGHGAchievement;
+
+      tempMigratedData.expectedGHGReduction =
+        tempMigratedData.expectedGHGReduction + activityGHGExpected;
+    });
+
+    if (meansOfImplementation.includes('Technology Development & Transfer')) {
+      tempMigratedData.techDevContribution = 'Yes';
+    }
+
+    if (meansOfImplementation.includes('Capacity Building')) {
+      tempMigratedData.capBuildObjectives = 'Yes';
+    }
+
+    supportData.forEach((sup: SupportData) => {
+      const receivedUSD = sup.recievedUSD ?? 0;
+      const neededUSD = sup.estimatedUSD ?? 0;
+      const receivedLCL = sup.recievedLC ?? 0;
+      const neededLCL = sup.estimatedLC ?? 0;
+
+      tempMigratedData.receivedUSD = tempMigratedData.receivedUSD + receivedUSD;
+      tempMigratedData.neededUSD = tempMigratedData.neededUSD + neededUSD;
+      tempMigratedData.receivedLCL = tempMigratedData.receivedLCL + receivedLCL;
+      tempMigratedData.neededLCL = tempMigratedData.neededLCL + neededLCL;
+    });
+
+    setProjectMigratedData(tempMigratedData);
+  }, [activityData, supportData]);
 
   // Expected Time Frame Calculation
 
@@ -812,7 +879,14 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Activity
 
   const detachActivity = async (actId: string) => {
-    const filteredIds = tempActivityIds.filter((id) => id !== actId);
+    setDetachingEntityId(actId);
+    setOpenDetachPopup(true);
+  };
+
+  // Handle Detachment
+
+  const detachEntity = async (entityId: string) => {
+    const filteredIds = tempActivityIds.filter((id) => id !== entityId);
     setTempActivityIds(filteredIds);
   };
 
@@ -846,6 +920,20 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   return (
     <div className="content-container">
+      <ConfirmPopup
+        icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('detachPopup:primaryMsg')} Activity ${detachingEntityId}`,
+          secondaryMsg: t('detachPopup:secondaryMsg'),
+          cancelTitle: t('detachPopup:cancelTitle'),
+          actionTitle: t('detachPopup:actionTitle'),
+        }}
+        actionRef={detachingEntityId}
+        doAction={detachEntity}
+        open={openDetachPopup}
+        setOpen={setOpenDetachPopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -1414,7 +1502,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row>
                 <Col span={24}>
                   <LayoutTable
-                    tableData={supportData}
+                    tableData={supportData.slice(
+                      (supportCurrentPage - 1) * supportPageSize,
+                      (supportCurrentPage - 1) * supportPageSize + supportPageSize
+                    )}
                     columns={supportTableColumns}
                     loading={false}
                     pagination={{
@@ -1422,7 +1513,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       pageSize: supportPageSize,
                       total: supportData.length,
                       showQuickJumper: true,
-                      pageSizeOptions: ['10', '20', '30'],
+                      pageSizeOptions: ['1', '10', '20', '30'],
                       showSizeChanger: true,
                       style: { textAlign: 'center' },
                       locale: { page: '' },
@@ -1441,7 +1532,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               </div>
             )}
             {method === 'create' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"
@@ -1464,7 +1555,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             )}
             {method === 'view' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"
@@ -1497,7 +1588,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             )}
             {method === 'update' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"

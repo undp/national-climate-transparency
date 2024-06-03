@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -32,6 +32,7 @@ import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
 import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -41,7 +42,7 @@ const inputFontSize = '13px';
 
 const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['programmeForm']);
+  const { t } = useTranslation(['programmeForm', 'detachPopup']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Programme', method);
@@ -102,6 +103,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportData, setSupportData] = useState<SupportData[]>([]);
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
   const [supportPageSize, setSupportPageSize] = useState<number>(10);
+
+  // Detach Popup Visibility
+
+  const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  const [detachingEntityId, setDetachingEntityId] = useState<string>();
+  const [detachingEntityType, setDetachingEntityType] = useState<'Project' | 'Activity'>();
 
   // KPI State
 
@@ -866,15 +873,29 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Programme
 
   const detachProject = async (prjId: string) => {
-    const filteredIds = tempProjectIds.filter((id) => id !== prjId);
-    setTempProjectIds(filteredIds);
+    setDetachingEntityId(prjId);
+    setDetachingEntityType('Project');
+    setOpenDetachPopup(true);
   };
 
   // Detach Activity
 
   const detachActivity = async (actId: string) => {
-    const filteredIds = tempActivityIds.filter((id) => id !== actId);
-    setTempActivityIds(filteredIds);
+    setDetachingEntityId(actId);
+    setDetachingEntityType('Activity');
+    setOpenDetachPopup(true);
+  };
+
+  // Handle Detachment
+
+  const detachEntity = async (entityId: string) => {
+    if (detachingEntityType === 'Project') {
+      const filteredIds = tempProjectIds.filter((id) => id !== entityId);
+      setTempProjectIds(filteredIds);
+    } else if (detachingEntityType === 'Activity') {
+      const filteredIds = tempActivityIds.filter((id) => id !== entityId);
+      setTempActivityIds(filteredIds);
+    }
   };
 
   // Column Definition
@@ -918,6 +939,20 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   return (
     <div className="content-container">
+      <ConfirmPopup
+        icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('detachPopup:primaryMsg')} ${detachingEntityType} ${detachingEntityId}`,
+          secondaryMsg: t('detachPopup:secondaryMsg'),
+          cancelTitle: t('detachPopup:cancelTitle'),
+          actionTitle: t('detachPopup:actionTitle'),
+        }}
+        actionRef={detachingEntityId}
+        doAction={detachEntity}
+        open={openDetachPopup}
+        setOpen={setOpenDetachPopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -1154,7 +1189,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     name="investment"
                     rules={[validation.required]}
                   >
-                    <Input className="form-input-box" min={0} type="number" disabled={isView} />
+                    <Input
+                      className="form-input-box"
+                      min={0}
+                      step={0.01}
+                      type="number"
+                      disabled={isView}
+                    />
                   </Form.Item>
                 </Col>
               </Row>
@@ -1181,7 +1222,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <Row gutter={gutterSize}>
+              <Row>
                 <Col span={12}>
                   <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
                     {t('projectListTitle')}
@@ -1208,8 +1249,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     emptyMessage={t('noProjectsMessage')}
                   />
                 </Col>
+                <Col span={8}></Col>
                 <Col
-                  span={5}
+                  span={4}
                   style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
                 >
                   <AttachEntity
@@ -1419,7 +1461,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               </div>
             )}
             {method === 'create' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"
@@ -1442,7 +1484,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             )}
             {method === 'view' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"
@@ -1475,7 +1517,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             )}
             {method === 'update' && (
-              <Row gutter={20} justify={'end'}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col span={2}>
                   <Button
                     type="default"
