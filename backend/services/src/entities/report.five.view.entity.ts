@@ -38,6 +38,7 @@ join project_view_entity prve on prve.id = prj."projectId"
 	expression: reportFiveViewSQL,
 	synchronize: false,
 })
+@Index("idx_report_five_view_entity_id")
 export class ReportFiveViewEntity {
 
 	@ViewColumn()

@@ -46,15 +46,15 @@ export class SupportService {
 			);
 		}
 
-		if (activity.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"common.cannotLinkedToValidated",
-					[EntityType.ACTIVITY, activity.activityId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
+		// if (activity.validated) {
+		// 	throw new HttpException(
+		// 		this.helperService.formatReqMessagesString(
+		// 			"common.cannotLinkedToValidated",
+		// 			[EntityType.ACTIVITY, activity.activityId]
+		// 		),
+		// 		HttpStatus.BAD_REQUEST
+		// 	);
+		// }
 
 		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)) {
 			throw new HttpException(
@@ -157,15 +157,15 @@ export class SupportService {
 			);
 		}
 
-		if (currentSupport.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"support.cannotEditValidated",
-					[supportUpdateDto.supportId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
+		// if (currentSupport.validated) {
+		// 	throw new HttpException(
+		// 		this.helperService.formatReqMessagesString(
+		// 			"support.cannotEditValidated",
+		// 			[supportUpdateDto.supportId]
+		// 		),
+		// 		HttpStatus.BAD_REQUEST
+		// 	);
+		// }
 		const eventLog = [];
 
 		if (!this.helperService.doesUserHaveSectorPermission(user, currentSupport.sector)) {
@@ -203,15 +203,15 @@ export class SupportService {
 
 		if (supportUpdateDto.activityId != currentSupport.activity.activityId) {
 
-			if (currentSupport.activity.validated) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"common.cannotUnlinkedFromValidated",
-						[EntityType.ACTIVITY, activity.activityId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
+			// if (currentSupport.activity.validated) {
+			// 	throw new HttpException(
+			// 		this.helperService.formatReqMessagesString(
+			// 			"common.cannotUnlinkedFromValidated",
+			// 			[EntityType.ACTIVITY, activity.activityId]
+			// 		),
+			// 		HttpStatus.BAD_REQUEST
+			// 	);
+			// }
 
 			this.addEventLogEntry(eventLog, LogEventType.UNLINKED_FROM_ACTIVITY, EntityType.SUPPORT, currentSupport.supportId, user.id, currentSupport.activity.activityId);
 			this.addEventLogEntry(eventLog, LogEventType.SUPPORT_LINKED, EntityType.ACTIVITY, activity.activityId, user.id, supportUpdateDto.supportId);

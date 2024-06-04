@@ -25,8 +25,8 @@ LEFT JOIN (
     expression: activityViewSQL,
     synchronize: false,
 })
+@Index("idx_activity_view_entity_id")
 export class ActivityViewEntity {
-    @Index()
     @ViewColumn()
     id: number
 

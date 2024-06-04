@@ -7,6 +7,11 @@
   "kpiNotFound": "Kpi with id {} is not found",
   "kpiNotLinkedToActivity": "Kpi {} is not related to activity {}",
   "achievementCreationFailed": "Kpi achieved data save failed",
-  "createAchievementSuccess": "Kpi achieved data saved"
-
+  "createAchievementSuccess": "Kpi achieved data saved",
+  "creatorTypeCannotBeNull": "KPI creatorType field cannot be null or empty",
+  "kpiUnitCannotBeNull": "KPI unit field cannot be null or empty",
+  "expectedCannotBeNull": "KPI expected field cannot be null or empty",
+  "kpiNameCannotBeNull": "KPI name field cannot be null or empty",
+  "expectCanHaveOnlyTwoDecimals": "KPI expected value must be a number with at most two decimal points",
+  "achievedCanHaveOnlyTwoDecimals": "KPI achieved value must be a number with at most two decimal points"
 }
