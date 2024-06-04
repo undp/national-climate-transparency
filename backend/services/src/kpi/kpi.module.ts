@@ -11,6 +11,7 @@ import { AchievementEntity } from '../entities/achievement.entity';
 import { ActionEntity } from '../entities/action.entity';
 import { ProgrammeEntity } from '../entities/programme.entity';
 import { ProjectEntity } from '../entities/project.entity';
+import { ValidationModule } from '../validation/validation.module';
 
 @Module({
 	imports: [
@@ -31,7 +32,8 @@ import { ProjectEntity } from '../entities/project.entity';
 			ProgrammeEntity,
 			ProjectEntity
 		]),
-		UtilModule
+		UtilModule,
+		ValidationModule
 	],
 	providers: [
 		KpiService

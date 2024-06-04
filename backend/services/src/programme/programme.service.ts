@@ -98,15 +98,15 @@ export class ProgrammeService {
 				);
 			}
 
-			if (action.validated) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"common.cannotLinkedToValidated",
-						[EntityType.ACTION, programmeDto.actionId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
+			// if (action.validated) {
+			// 	throw new HttpException(
+			// 		this.helperService.formatReqMessagesString(
+			// 			"common.cannotLinkedToValidated",
+			// 			[EntityType.ACTION, programmeDto.actionId]
+			// 		),
+			// 		HttpStatus.BAD_REQUEST
+			// 	);
+			// }
 
 			if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
 				throw new HttpException(
@@ -280,15 +280,15 @@ export class ProgrammeService {
 			);
 		}
 
-		if (currentProgramme.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"programme.cannotEditValidated",
-					[programmeUpdateDto.programmeId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
+		// if (currentProgramme.validated) {
+		// 	throw new HttpException(
+		// 		this.helperService.formatReqMessagesString(
+		// 			"programme.cannotEditValidated",
+		// 			[programmeUpdateDto.programmeId]
+		// 		),
+		// 		HttpStatus.BAD_REQUEST
+		// 	);
+		// }
 
 		if (!this.helperService.doesUserHaveSectorPermission(user, currentProgramme.sector)) {
 			throw new HttpException(
@@ -466,15 +466,15 @@ export class ProgrammeService {
 			);
 		}
 
-		if (action.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"common.cannotLinkedToValidated",
-					[EntityType.ACTION, actionId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
+		// if (action.validated) {
+		// 	throw new HttpException(
+		// 		this.helperService.formatReqMessagesString(
+		// 			"common.cannotLinkedToValidated",
+		// 			[EntityType.ACTION, actionId]
+		// 		),
+		// 		HttpStatus.BAD_REQUEST
+		// 	);
+		// }
 
 		if (updatedProgramme.action) {
 			throw new HttpException(
@@ -517,15 +517,15 @@ export class ProgrammeService {
 			);
 		}
 
-		if (updatedProgramme.action.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"common.cannotUnlinkedFromValidated",
-					[EntityType.ACTION, updatedProgramme.action.actionId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
+		// if (updatedProgramme.action.validated) {
+		// 	throw new HttpException(
+		// 		this.helperService.formatReqMessagesString(
+		// 			"common.cannotUnlinkedFromValidated",
+		// 			[EntityType.ACTION, updatedProgramme.action.actionId]
+		// 		),
+		// 		HttpStatus.BAD_REQUEST
+		// 	);
+		// }
 
 		const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
 			updatedProgramme.action.actionId,
@@ -561,15 +561,15 @@ export class ProgrammeService {
 			);
 		}
 
-		if (action.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"common.cannotLinkedToValidated",
-					[EntityType.ACTION, linkProgrammesDto.actionId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
+		// if (action.validated) {
+		// 	throw new HttpException(
+		// 		this.helperService.formatReqMessagesString(
+		// 			"common.cannotLinkedToValidated",
+		// 			[EntityType.ACTION, linkProgrammesDto.actionId]
+		// 		),
+		// 		HttpStatus.BAD_REQUEST
+		// 	);
+		// }
 
 		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
 			throw new HttpException(
@@ -651,15 +651,15 @@ export class ProgrammeService {
 			);
 		}
 
-		if (programme.action.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"common.cannotUnlinkedFromValidated",
-					[EntityType.ACTION, programme.action.actionId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
+		// if (programme.action.validated) {
+		// 	throw new HttpException(
+		// 		this.helperService.formatReqMessagesString(
+		// 			"common.cannotUnlinkedFromValidated",
+		// 			[EntityType.ACTION, programme.action.actionId]
+		// 		),
+		// 		HttpStatus.BAD_REQUEST
+		// 	);
+		// }
 
 		const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
 			programme.action.actionId,

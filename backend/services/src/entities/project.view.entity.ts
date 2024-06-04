@@ -3,9 +3,9 @@ import { Index, ViewColumn, ViewEntity } from "typeorm"
 export const projectViewSQL = `
 SELECT 
     prj."projectId" AS id,
-    ARRAY_AGG(DISTINCT fullact."techTypes") AS "technologyTypes",
+    ARRAY_AGG(DISTINCT fullact."techTypes") FILTER (WHERE fullact."techTypes" IS NOT NULL) AS "technologyTypes",
 		CUSTOM_ARRAY_AGG(fullact."ghgsAffected") FILTER (WHERE fullact."ghgsAffected" IS NOT NULL) AS "ghgsAffected",
-    ARRAY_AGG(DISTINCT fullact."meansOfImplementation") AS "meansOfImplementation",
+		ARRAY_AGG(DISTINCT fullact."meansOfImplementation") FILTER (WHERE fullact."meansOfImplementation" IS NOT NULL) AS "meansOfImplementation",
     SUM(fullact."requiredAmount") AS "estimatedAmount",
     SUM(fullact."receivedAmount") AS "receivedAmount",
     SUM(fullact."requiredAmountDomestic") AS "estimatedAmountDomestic",
@@ -19,7 +19,7 @@ LEFT JOIN (
         act."activityId",
         act."parentId" AS "projectId",
         act."technologyType" AS "techTypes",
-				act."ghgsAffected" AS "ghgsAffected",
+		act."ghgsAffected" AS "ghgsAffected",
         act."meansOfImplementation" AS "meansOfImplementation",
         act."achievedGHGReduction" AS "achievedGHGReduction",
         act."expectedGHGReduction" AS "expectedGHGReduction",

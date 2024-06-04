@@ -500,6 +500,10 @@ export class HelperService {
       return template;
 }
 
+public roundToTwoDecimals(value: number): number {
+	return parseFloat(value.toFixed(2));
+}
+
 public formatTimestamp(timestamp: any) {
   if (timestamp) {
     const parsedTimestamp = Number(timestamp);
