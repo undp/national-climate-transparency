@@ -440,7 +440,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               supportId: sup.supportId,
               financeNature: sup.financeNature,
               direction: sup.direction,
-              finInstrument: sup.nationalFinancialInstrument,
+              finInstrument:
+                sup.financeNature === 'International'
+                  ? sup.internationalFinancialInstrument
+                  : sup.nationalFinancialInstrument,
               estimatedUSD: getRounded(sup.requiredAmount ?? 0),
               estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
               recievedUSD: getRounded(sup.receivedAmount ?? 0),
