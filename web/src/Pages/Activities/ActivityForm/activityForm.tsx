@@ -110,6 +110,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [kpiCounter, setKpiCounter] = useState<number>(0);
   const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
+  const [shouldFetchParentKpi, setShouldFetchParentKpi] = useState<boolean>(false);
 
   // MTG Timeline State
 
@@ -127,6 +128,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const handleParentIdSelect = (id: string) => {
     setConnectedParentId(id);
+    setShouldFetchParentKpi(true);
+  };
+
+  const handleParentTypeSelect = (value: string) => {
+    setParentType(value);
+    setConnectedParentId(undefined);
+    form.setFieldsValue({
+      parentId: '',
+      parentDescription: '',
+    });
   };
 
   // MTG timeline Fields Mapping
@@ -166,15 +177,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   };
 
   // Tracking Parent selection
-
-  const handleSelectChange = (value: string) => {
-    setParentType(value);
-    setConnectedParentId(undefined);
-    form.setFieldsValue({
-      parentId: '',
-      parentDescription: '',
-    });
-  };
 
   useEffect(() => {
     const fetchConnectedParent = async () => {
@@ -223,7 +225,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     const fetchParentKPIData = async () => {
       if (typeof connectedParentId === 'undefined') {
         setInheritedKpiList([]);
-      } else if (method !== 'view' && parentType && connectedParentId) {
+      } else if (method !== 'view' && parentType && connectedParentId && shouldFetchParentKpi) {
         try {
           const response: any = await get(
             `national/kpis/entities/${parentType}/${connectedParentId}`
@@ -962,7 +964,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       allowClear
                       disabled={isView}
                       showSearch
-                      onChange={handleSelectChange}
+                      onChange={handleParentTypeSelect}
                     >
                       {Object.values(ParentType).map((parent) => (
                         <Option key={parent} value={parent}>
@@ -1346,26 +1348,26 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
               )}
               {method === 'view'
-                ? inheritedKpiList.map((createdKPI: CreatedKpiData, index: number) => (
+                ? inheritedKpiList.map((inheritedKPI: CreatedKpiData, index: number) => (
                     <ViewKpi
                       key={index}
                       index={index}
                       inherited={true}
                       headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                      kpi={createdKPI}
+                      kpi={inheritedKPI}
                       callingEntityId={entId}
-                      ownerEntityId={createdKPI.creator}
+                      ownerEntityId={inheritedKPI.creator}
                     ></ViewKpi>
                   ))
-                : inheritedKpiList.map((createdKPI: CreatedKpiData) => (
+                : inheritedKpiList.map((inheritedKPI: CreatedKpiData) => (
                     <EditKpi
-                      key={createdKPI.index}
-                      index={createdKPI.index}
+                      key={inheritedKPI.index}
+                      index={inheritedKPI.index}
                       form={form}
                       rules={[validation.required]}
                       isFromActivity={true}
                       headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                      kpi={createdKPI}
+                      kpi={inheritedKPI}
                       updateKPI={updateKPI}
                     ></EditKpi>
                   ))}
