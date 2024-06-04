@@ -73,8 +73,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
-  //MARK: TO DO
-  // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
   // Spinner When Form Submit Occurs
 
@@ -408,7 +407,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
-        // setIsSaveButtonDisabled(true);
+        setIsSaveButtonDisabled(true);
       }
     };
     fetchData();
@@ -910,9 +909,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Save Button Enable when form value change
 
-  // const handleValuesChange = () => {
-  //   setIsSaveButtonDisabled(false);
-  // };
+  const handleValuesChange = () => {
+    setIsSaveButtonDisabled(false);
+  };
 
   return (
     <div className="content-container">
@@ -925,7 +924,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             form={form}
             onFinish={handleSubmit}
             layout="vertical"
-            // onValuesChange={handleValuesChange}
+            onValuesChange={handleValuesChange}
           >
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
@@ -1609,7 +1608,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       size="large"
                       block
                       htmlType="submit"
-                      // disabled={isSaveButtonDisabled}
+                      disabled={isSaveButtonDisabled}
                     >
                       {t('update')}
                     </Button>

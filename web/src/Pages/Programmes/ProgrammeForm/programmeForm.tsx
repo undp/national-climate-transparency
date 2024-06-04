@@ -73,8 +73,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
-  //MARK: TO DO
-  // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
   // Spinner When Form Submit Occurs
 
@@ -247,7 +246,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
-        // setIsSaveButtonDisabled(true);
+        setIsSaveButtonDisabled(true);
       }
     };
     fetchData();
@@ -892,9 +891,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     if (detachingEntityType === 'Project') {
       const filteredIds = tempProjectIds.filter((id) => id !== entityId);
       setTempProjectIds(filteredIds);
+      setIsSaveButtonDisabled(false);
     } else if (detachingEntityType === 'Activity') {
       const filteredIds = tempActivityIds.filter((id) => id !== entityId);
       setTempActivityIds(filteredIds);
+      setIsSaveButtonDisabled(false);
     }
   };
 
@@ -933,9 +934,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Save Button Enable when form value change
 
-  // const handleValuesChange = () => {
-  //   setIsSaveButtonDisabled(false);
-  // };
+  const handleValuesChange = () => {
+    setIsSaveButtonDisabled(false);
+  };
 
   return (
     <div className="content-container">
@@ -962,7 +963,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             form={form}
             onFinish={handleSubmit}
             layout="vertical"
-            // onValuesChange={handleValuesChange}
+            onValuesChange={handleValuesChange}
           >
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
@@ -1267,6 +1268,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     alreadyAttached={attachedProjectIds}
                     currentAttachments={tempProjectIds}
                     setCurrentAttachments={setTempProjectIds}
+                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     icon={<Layers style={{ fontSize: '120px' }} />}
                   ></AttachEntity>
                 </Col>
@@ -1291,6 +1293,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     alreadyAttached={attachedActivityIds}
                     currentAttachments={tempActivityIds}
                     setCurrentAttachments={setTempActivityIds}
+                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
                   ></AttachEntity>
                 </Col>
@@ -1550,7 +1553,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       size="large"
                       block
                       htmlType="submit"
-                      // disabled={isSaveButtonDisabled}
+                      disabled={isSaveButtonDisabled}
                     >
                       {t('update')}
                     </Button>

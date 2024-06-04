@@ -15,6 +15,7 @@ interface Props {
   alreadyAttached: string[];
   currentAttachments: string[];
   setCurrentAttachments: React.Dispatch<React.SetStateAction<string[]>>;
+  setIsSaveButtonDisabled: React.Dispatch<React.SetStateAction<boolean>>;
   icon: React.ReactNode;
 }
 
@@ -25,6 +26,7 @@ const AttachEntity: React.FC<Props> = ({
   alreadyAttached,
   currentAttachments,
   setCurrentAttachments,
+  setIsSaveButtonDisabled,
   icon,
 }) => {
   const [open, setOpen] = useState(false);
@@ -71,6 +73,7 @@ const AttachEntity: React.FC<Props> = ({
   const attachProject = () => {
     setOpen(false);
     setCurrentAttachments(pendingAttachments);
+    setIsSaveButtonDisabled(false);
   };
 
   const attachCancel = () => {

@@ -57,8 +57,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   // Form General State
 
-  //MARK:TO DO
-  // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
   // Field Disabling state
 
@@ -190,7 +189,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
-        // setIsSaveButtonDisabled(true);
+        setIsSaveButtonDisabled(true);
       }
     };
     fetchData();
@@ -299,9 +298,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   // Save Button Enable when form value change
 
-  // const handleValuesChange = () => {
-  //   setIsSaveButtonDisabled(false);
-  // };
+  const handleValuesChange = () => {
+    setIsSaveButtonDisabled(false);
+  };
 
   return (
     <div className="content-container">
@@ -313,7 +312,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           form={form}
           onFinish={handleSubmit}
           layout="vertical"
-          // onValuesChange={handleValuesChange}
+          onValuesChange={handleValuesChange}
         >
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
@@ -744,7 +743,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     size="large"
                     block
                     htmlType="submit"
-                    // disabled={isSaveButtonDisabled}
+                    disabled={isSaveButtonDisabled}
                   >
                     {t('update')}
                   </Button>
