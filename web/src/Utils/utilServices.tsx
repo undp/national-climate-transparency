@@ -93,3 +93,11 @@ export const DashboardTotalFormatter = (value: number, isCurrency: boolean) => {
 export const getArraySum = (values: number[]) => {
   return values.reduce((acc, value) => acc + value, 0);
 };
+
+export const getRounded = (num: number) => {
+  if (Number.isInteger(num)) {
+    return num;
+  } else {
+    return parseFloat(num.toFixed(2));
+  }
+};

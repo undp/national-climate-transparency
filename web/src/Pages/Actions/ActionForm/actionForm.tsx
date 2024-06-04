@@ -14,7 +14,7 @@ import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
-import { getFormTitle, joinTwoArrays } from '../../../Utils/utilServices';
+import { getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { GraphUpArrow } from 'react-bootstrap-icons';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
@@ -450,10 +450,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               sup.financeNature === 'International'
                 ? sup.internationalFinancialInstrument
                 : sup.nationalFinancialInstrument,
-            estimatedUSD: sup.requiredAmount,
-            estimatedLC: sup.requiredAmountDomestic,
-            recievedUSD: sup.receivedAmount,
-            recievedLC: sup.receivedAmountDomestic,
+            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+            recievedUSD: getRounded(sup.receivedAmount ?? 0),
+            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
           });
         });
 

@@ -17,7 +17,7 @@ import { ActionSelectData } from '../../../Definitions/actionDefinitions';
 import { ProjectData } from '../../../Definitions/projectDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle, joinTwoArrays } from '../../../Utils/utilServices';
+import { getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
 import { ProgrammeMigratedData } from '../../../Definitions/programmeDefinitions';
 import { Action } from '../../../Enums/action.enum';
 import { ProgrammeEntity } from '../../../Entities/programme';
@@ -492,10 +492,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               sup.financeNature === 'International'
                 ? sup.internationalFinancialInstrument
                 : sup.nationalFinancialInstrument,
-            estimatedUSD: sup.requiredAmount,
-            estimatedLC: sup.requiredAmountDomestic,
-            recievedUSD: sup.receivedAmount,
-            recievedLC: sup.receivedAmountDomestic,
+            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+            recievedUSD: getRounded(sup.receivedAmount ?? 0),
+            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
           });
         });
 

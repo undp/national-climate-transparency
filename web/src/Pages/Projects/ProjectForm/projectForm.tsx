@@ -18,7 +18,7 @@ import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle } from '../../../Utils/utilServices';
+import { getFormTitle, getRounded } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ProjectEntity } from '../../../Entities/project';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -498,10 +498,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               sup.financeNature === 'International'
                 ? sup.internationalFinancialInstrument
                 : sup.nationalFinancialInstrument,
-            estimatedUSD: sup.requiredAmount,
-            estimatedLC: sup.requiredAmountDomestic,
-            recievedUSD: sup.receivedAmount,
-            recievedLC: sup.receivedAmountDomestic,
+            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+            recievedUSD: getRounded(sup.receivedAmount ?? 0),
+            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
           });
         });
 
