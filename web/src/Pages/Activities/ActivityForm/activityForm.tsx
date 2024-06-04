@@ -1484,7 +1484,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={3} style={{ paddingTop: '6px', marginRight: '10px' }}>
                   <div className="form-section-header">{t('mitigationTimelineTitle')}</div>
                 </Col>
-                <Col span={2.5}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   {method === 'update' && (
                     <Button
                       type="primary"
@@ -1520,7 +1520,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'create' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1532,7 +1532,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col span={2}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1543,7 +1543,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'view' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1556,7 +1556,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ActivityEntity) && (
-                  <Col span={2.5}>
+                  <Col md={{ span: 5 }} xl={{ span: 2 }}>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1576,7 +1576,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'update' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1588,7 +1588,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1601,7 +1601,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col span={2.5}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button
                       type="primary"

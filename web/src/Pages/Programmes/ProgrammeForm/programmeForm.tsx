@@ -1250,9 +1250,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     emptyMessage={t('noProjectsMessage')}
                   />
                 </Col>
-                <Col span={8}></Col>
+                <Col md={{ span: 3 }} xl={{ span: 8 }}></Col>
                 <Col
-                  span={4}
+                  md={{ span: 9 }}
+                  xl={{ span: 4 }}
                   style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
                 >
                   <AttachEntity
@@ -1276,10 +1277,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={20} style={{ paddingTop: '6px' }}>
+                <Col md={{ span: 15 }} xl={{ span: 20 }} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col span={4}>
+                <Col md={{ span: 9 }} xl={{ span: 4 }}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1465,7 +1466,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'create' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1477,7 +1478,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col span={2}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1488,7 +1489,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'view' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1501,7 +1502,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ProgrammeEntity) && (
-                  <Col span={2.5}>
+                  <Col md={{ span: 5 }} xl={{ span: 2 }}>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1521,7 +1522,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'update' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1533,7 +1534,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1546,7 +1547,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col span={2.5}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button
                       type="primary"

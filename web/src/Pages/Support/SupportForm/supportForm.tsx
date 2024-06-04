@@ -655,7 +655,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           </div>
           {method === 'create' && (
             <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col span={2}>
+              <Col md={{ span: 5 }} xl={{ span: 2 }}>
                 <Button
                   type="default"
                   size="large"
@@ -667,7 +667,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('cancel')}
                 </Button>
               </Col>
-              <Col span={2}>
+              <Col md={{ span: 4 }} xl={{ span: 2 }}>
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
                     {t('add')}
@@ -678,7 +678,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           )}
           {method === 'view' && (
             <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col span={2}>
+              <Col md={{ span: 4 }} xl={{ span: 2 }}>
                 <Button
                   type="default"
                   size="large"
@@ -691,7 +691,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 </Button>
               </Col>
               {ability.can(Action.Validate, SupportEntity) && (
-                <Col span={2.5}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button
                       disabled={isValidated}
@@ -711,7 +711,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           )}
           {method === 'update' && (
             <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col span={2}>
+              <Col md={{ span: 5 }} xl={{ span: 2 }}>
                 <Button
                   type="default"
                   size="large"
@@ -723,7 +723,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('cancel')}
                 </Button>
               </Col>
-              <Col span={2}>
+              <Col md={{ span: 5 }} xl={{ span: 2 }}>
                 <Button
                   type="default"
                   size="large"
@@ -736,7 +736,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('delete')}
                 </Button>
               </Col>
-              <Col span={2.5}>
+              <Col md={{ span: 4 }} xl={{ span: 2 }}>
                 <Form.Item>
                   <Button
                     type="primary"
