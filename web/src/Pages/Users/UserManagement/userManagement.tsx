@@ -433,6 +433,8 @@ const UserManagement = () => {
             organisation: availableUsers[i].organisation,
             status: availableUsers[i].state,
             role: availableUsers[i].role,
+            subRole: availableUsers[i].subRole,
+            sector: availableUsers[i].sector,
           });
         }
         setTableData(tempUsers);

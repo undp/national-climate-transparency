@@ -7,4 +7,6 @@ export interface UserData {
   organisation: string;
   status: number;
   role: string;
+  subRole: string;
+  sector: string[];
 }
