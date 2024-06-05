@@ -40,9 +40,19 @@ const PieChart: React.FC<Props> = ({ chart, t }) => {
                   donut: {
                     labels: {
                       show: true,
+                      name: {
+                        show: true,
+                        formatter: (name) => (name.length > 12 ? `${name.slice(0, 12)}...` : name),
+                      },
+                      value: {
+                        show: true,
+                        formatter: (value) => (chart.chartId === 4 ? `$ ${value}` : value),
+                      },
                       total: {
                         show: true,
                         label: 'Total',
+                        color: '#373d3f',
+                        fontWeight: 500,
                         formatter: () =>
                           DashboardTotalFormatter(total, chart.chartId === 4 ? true : false),
                       },
