@@ -21,12 +21,12 @@
 
     "supportIdTitle": "Support ID",
     "financeNatureTitle": "International or National Finance",
-    "directionTitle": "Needed/Received",
-    "finInstrumentTitle": "Financial Instrument",
-    "neededUSDHeader": "Estimated Amount Needed (USD)",
-    "neededLCLHeader": "Estimated Amount Needed (XXX)",
+    "directionTitle": "Support Needed or Received",
+    "finInstrumentTitle": "International or National Financial Instrument",
+    "neededUSDHeader": "Amount Needed (USD)",
+    "neededLCLHeader": "Amount Needed (Domestic)",
     "recievedUSDHeader": "Amount Received (USD)",
-    "recievedLCLHeader":"Amount Received (XXX)",
+    "recievedLCLHeader":"Amount Received (Domestic)",
     
     "detach": "Detach"
 }
