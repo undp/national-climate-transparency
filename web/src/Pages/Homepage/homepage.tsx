@@ -4,24 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import sliderLogo from '../../Assets/Images/mrvlogo.svg';
-import undpLogo from '../../Assets/Images/undp1.svg';
-import EBRD from '../../Assets/Images/EBRD.webp';
-import EBRDff from '../../Assets/Images/EBRD.png';
-import UNFCCC from '../../Assets/Images/UNFCCC.webp';
-import UNFCCCff from '../../Assets/Images/UNFCCC.png';
-import IETA from '../../Assets/Images/IETA.webp';
-import IETAff from '../../Assets/Images/IETA.png';
-import ESA from '../../Assets/Images/ESA.webp';
-import ESAff from '../../Assets/Images/ESA.png';
-import WBANK from '../../Assets/Images/WBANK.webp';
-import WBANKff from '../../Assets/Images/WBANK.png';
-import forestfall from '../../Assets/Images/forestnew.png';
-import resources from '../../Assets/Images/resources.webp';
-import resourcesfall from '../../Assets/Images/resources.png';
 import LayoutFooter from '../../Components/Footer/layout.footer';
 import './homepage.scss';
-import { BarChart, Gem, Calculator } from 'react-bootstrap-icons';
-import { ImgWithFallback } from '../../Components/common/ImgWithFallback/ImgWithFallback';
 
 const Homepage = () => {
   const { t } = useTranslation(['common', 'homepage']);
@@ -35,10 +19,6 @@ const Homepage = () => {
       setVisible(true);
     }
   };
-
-  // const handleLanguageChange = (lang: string) => {
-  //   i18n.changeLanguage(lang);
-  // };
 
   const handleClickScroll = () => {
     const element = document.getElementById('scrollhome');
@@ -112,7 +92,7 @@ const Homepage = () => {
           </div>
         </Col>
       </Row>
-      <Row gutter={[8, 8]}>
+      {/* <Row gutter={[8, 8]}>
         <Col md={24} lg={24} flex="auto">
           <div className="homepage-content-containerwhite">
             <div id="scrollhome" className="title">
@@ -275,8 +255,8 @@ const Homepage = () => {
             </div>
           </div>
         </Col>
-      </Row>
-      <Row gutter={[8, 8]}>
+      </Row> */}
+      {/* <Row gutter={[8, 8]}>
         <Col md={24} lg={24} flex="auto">
           <div className="homepage-image-content-container">
             <Row>
@@ -300,13 +280,12 @@ const Homepage = () => {
                   mediaType="image/webp"
                   alt="forestry"
                 />
-                {/* <img className="image" src={forest} alt="forest" /> */}
               </Col>
             </Row>
           </div>
         </Col>
-      </Row>
-      <Row gutter={[8, 8]}>
+      </Row> */}
+      {/* <Row gutter={[8, 8]}>
         <Col md={24} lg={24} flex="auto">
           <div className="homepage-resources-content-container">
             <Row>
@@ -318,7 +297,6 @@ const Homepage = () => {
                   mediaType="image/webp"
                   alt="resources"
                 />
-                {/* <img className="image" src={resources} alt="resources" /> */}
               </Col>
               <Col md={12} lg={12}>
                 <div className="title">{t('homepage:resource')}</div>
@@ -333,7 +311,7 @@ const Homepage = () => {
             </Row>
           </div>
         </Col>
-      </Row>
+      </Row> */}
       <LayoutFooter />
     </div>
   );
