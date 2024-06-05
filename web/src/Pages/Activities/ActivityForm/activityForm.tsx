@@ -21,7 +21,7 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle } from '../../../Utils/utilServices';
+import { getFormTitle, getRounded } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ActivityEntity } from '../../../Entities/activity';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -73,8 +73,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
-  //MARK: TO DO
-  // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
   // Spinner When Form Submit Occurs
 
@@ -110,6 +109,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [kpiCounter, setKpiCounter] = useState<number>(0);
   const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
+  const [shouldFetchParentKpi, setShouldFetchParentKpi] = useState<boolean>(false);
 
   // MTG Timeline State
 
@@ -127,6 +127,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const handleParentIdSelect = (id: string) => {
     setConnectedParentId(id);
+    setShouldFetchParentKpi(true);
+  };
+
+  const handleParentTypeSelect = (value: string) => {
+    setParentType(value);
+    setConnectedParentId(undefined);
+    form.setFieldsValue({
+      parentId: '',
+      parentDescription: '',
+    });
   };
 
   // MTG timeline Fields Mapping
@@ -166,15 +176,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   };
 
   // Tracking Parent selection
-
-  const handleSelectChange = (value: string) => {
-    setParentType(value);
-    setConnectedParentId(undefined);
-    form.setFieldsValue({
-      parentId: '',
-      parentDescription: '',
-    });
-  };
 
   useEffect(() => {
     const fetchConnectedParent = async () => {
@@ -223,7 +224,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     const fetchParentKPIData = async () => {
       if (typeof connectedParentId === 'undefined') {
         setInheritedKpiList([]);
-      } else if (method !== 'view' && parentType && connectedParentId) {
+      } else if (method !== 'view' && parentType && connectedParentId && shouldFetchParentKpi) {
         try {
           const response: any = await get(
             `national/kpis/entities/${parentType}/${connectedParentId}`
@@ -406,7 +407,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
-        // setIsSaveButtonDisabled(true);
+        setIsSaveButtonDisabled(true);
       }
     };
     fetchData();
@@ -440,11 +441,14 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               supportId: sup.supportId,
               financeNature: sup.financeNature,
               direction: sup.direction,
-              finInstrument: sup.nationalFinancialInstrument,
-              estimatedUSD: sup.requiredAmount,
-              estimatedLC: sup.requiredAmountDomestic,
-              recievedUSD: sup.receivedAmount,
-              recievedLC: sup.receivedAmountDomestic,
+              finInstrument:
+                sup.financeNature === 'International'
+                  ? sup.internationalFinancialInstrument
+                  : sup.nationalFinancialInstrument,
+              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+              recievedUSD: getRounded(sup.receivedAmount ?? 0),
+              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
             });
           });
           setSupportData(tempSupportData);
@@ -905,9 +909,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Save Button Enable when form value change
 
-  // const handleValuesChange = () => {
-  //   setIsSaveButtonDisabled(false);
-  // };
+  const handleValuesChange = () => {
+    setIsSaveButtonDisabled(false);
+  };
 
   return (
     <div className="content-container">
@@ -920,7 +924,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             form={form}
             onFinish={handleSubmit}
             layout="vertical"
-            // onValuesChange={handleValuesChange}
+            onValuesChange={handleValuesChange}
           >
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
@@ -959,7 +963,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       allowClear
                       disabled={isView}
                       showSearch
-                      onChange={handleSelectChange}
+                      onChange={handleParentTypeSelect}
                     >
                       {Object.values(ParentType).map((parent) => (
                         <Option key={parent} value={parent}>
@@ -1343,26 +1347,26 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
               )}
               {method === 'view'
-                ? inheritedKpiList.map((createdKPI: CreatedKpiData, index: number) => (
+                ? inheritedKpiList.map((inheritedKPI: CreatedKpiData, index: number) => (
                     <ViewKpi
                       key={index}
                       index={index}
                       inherited={true}
                       headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                      kpi={createdKPI}
+                      kpi={inheritedKPI}
                       callingEntityId={entId}
-                      ownerEntityId={createdKPI.creator}
+                      ownerEntityId={inheritedKPI.creator}
                     ></ViewKpi>
                   ))
-                : inheritedKpiList.map((createdKPI: CreatedKpiData) => (
+                : inheritedKpiList.map((inheritedKPI: CreatedKpiData) => (
                     <EditKpi
-                      key={createdKPI.index}
-                      index={createdKPI.index}
+                      key={inheritedKPI.index}
+                      index={inheritedKPI.index}
                       form={form}
                       rules={[validation.required]}
                       isFromActivity={true}
                       headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
-                      kpi={createdKPI}
+                      kpi={inheritedKPI}
                       updateKPI={updateKPI}
                     ></EditKpi>
                   ))}
@@ -1480,7 +1484,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col span={3} style={{ paddingTop: '6px', marginRight: '10px' }}>
                   <div className="form-section-header">{t('mitigationTimelineTitle')}</div>
                 </Col>
-                <Col span={2.5}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   {method === 'update' && (
                     <Button
                       type="primary"
@@ -1516,7 +1520,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'create' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1528,7 +1532,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col span={2}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1539,7 +1543,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'view' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1552,7 +1556,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ActivityEntity) && (
-                  <Col span={2.5}>
+                  <Col md={{ span: 5 }} xl={{ span: 2 }}>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1572,7 +1576,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'update' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1584,7 +1588,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1597,14 +1601,14 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col span={2.5}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button
                       type="primary"
                       size="large"
                       block
                       htmlType="submit"
-                      // disabled={isSaveButtonDisabled}
+                      disabled={isSaveButtonDisabled}
                     >
                       {t('update')}
                     </Button>

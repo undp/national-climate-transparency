@@ -18,7 +18,7 @@ export enum IntSupChannel {
 export enum IntFinInstrument {
   GRANT = "Grant",
   CONCES_LOAN = "Concessional Loan",
-  NON_CONCES_LOAN = "Non-concessional loan",
+  NON_CONCES_LOAN = "Non-concessional Loan",
   EQUITY = "Equity",
   GUARANTEE = "Guarantee",
   INSURANCE = "Insurance",

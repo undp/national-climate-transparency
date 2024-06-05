@@ -17,7 +17,7 @@ import { ActionSelectData } from '../../../Definitions/actionDefinitions';
 import { ProjectData } from '../../../Definitions/projectDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle, joinTwoArrays } from '../../../Utils/utilServices';
+import { getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
 import { ProgrammeMigratedData } from '../../../Definitions/programmeDefinitions';
 import { Action } from '../../../Enums/action.enum';
 import { ProgrammeEntity } from '../../../Entities/programme';
@@ -73,8 +73,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
-  //MARK: TO DO
-  // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
   // Spinner When Form Submit Occurs
 
@@ -247,7 +246,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
-        // setIsSaveButtonDisabled(true);
+        setIsSaveButtonDisabled(true);
       }
     };
     fetchData();
@@ -492,10 +491,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               sup.financeNature === 'International'
                 ? sup.internationalFinancialInstrument
                 : sup.nationalFinancialInstrument,
-            estimatedUSD: sup.requiredAmount,
-            estimatedLC: sup.requiredAmountDomestic,
-            recievedUSD: sup.receivedAmount,
-            recievedLC: sup.receivedAmountDomestic,
+            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+            recievedUSD: getRounded(sup.receivedAmount ?? 0),
+            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
           });
         });
 
@@ -892,9 +891,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     if (detachingEntityType === 'Project') {
       const filteredIds = tempProjectIds.filter((id) => id !== entityId);
       setTempProjectIds(filteredIds);
+      setIsSaveButtonDisabled(false);
     } else if (detachingEntityType === 'Activity') {
       const filteredIds = tempActivityIds.filter((id) => id !== entityId);
       setTempActivityIds(filteredIds);
+      setIsSaveButtonDisabled(false);
     }
   };
 
@@ -933,9 +934,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Save Button Enable when form value change
 
-  // const handleValuesChange = () => {
-  //   setIsSaveButtonDisabled(false);
-  // };
+  const handleValuesChange = () => {
+    setIsSaveButtonDisabled(false);
+  };
 
   return (
     <div className="content-container">
@@ -962,7 +963,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             form={form}
             onFinish={handleSubmit}
             layout="vertical"
-            // onValuesChange={handleValuesChange}
+            onValuesChange={handleValuesChange}
           >
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
@@ -1249,9 +1250,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     emptyMessage={t('noProjectsMessage')}
                   />
                 </Col>
-                <Col span={8}></Col>
+                <Col md={{ span: 3 }} xl={{ span: 8 }}></Col>
                 <Col
-                  span={4}
+                  md={{ span: 9 }}
+                  xl={{ span: 4 }}
                   style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
                 >
                   <AttachEntity
@@ -1267,6 +1269,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     alreadyAttached={attachedProjectIds}
                     currentAttachments={tempProjectIds}
                     setCurrentAttachments={setTempProjectIds}
+                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     icon={<Layers style={{ fontSize: '120px' }} />}
                   ></AttachEntity>
                 </Col>
@@ -1274,10 +1277,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={20} style={{ paddingTop: '6px' }}>
+                <Col md={{ span: 15 }} xl={{ span: 20 }} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col span={4}>
+                <Col md={{ span: 9 }} xl={{ span: 4 }}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1291,6 +1294,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     alreadyAttached={attachedActivityIds}
                     currentAttachments={tempActivityIds}
                     setCurrentAttachments={setTempActivityIds}
+                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
                   ></AttachEntity>
                 </Col>
@@ -1462,7 +1466,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'create' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1474,7 +1478,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col span={2}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1485,7 +1489,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'view' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1498,7 +1502,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ProgrammeEntity) && (
-                  <Col span={2.5}>
+                  <Col md={{ span: 5 }} xl={{ span: 2 }}>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1518,7 +1522,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'update' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1530,7 +1534,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1543,14 +1547,14 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col span={2.5}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button
                       type="primary"
                       size="large"
                       block
                       htmlType="submit"
-                      // disabled={isSaveButtonDisabled}
+                      disabled={isSaveButtonDisabled}
                     >
                       {t('update')}
                     </Button>

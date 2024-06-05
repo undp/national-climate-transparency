@@ -208,9 +208,11 @@ const Dashboard = () => {
     getRecentMitigationChartData();
 
     setChartLoading(false);
-
-    getAllData();
   }, []);
+
+  useEffect(() => {
+    getAllData();
+  }, [currentPage, pageSize]);
 
   // Updating the Chart Rendering Array when data fetching completes
 
@@ -422,28 +424,30 @@ const Dashboard = () => {
           <Spin size="large" />
         </div>
       )}
-      <Row gutter={30}>
-        <Col span={24}>
-          <LayoutTable
-            tableData={tableData}
-            columns={columns}
-            loading={loading}
-            pagination={{
-              total: totalRowCount,
-              current: currentPage,
-              pageSize: pageSize,
-              showQuickJumper: true,
-              pageSizeOptions: ['10', '20', '30'],
-              showSizeChanger: true,
-              style: { textAlign: 'center' },
-              locale: { page: '' },
-              position: ['bottomRight'],
-            }}
-            handleTableChange={handleTableChange}
-            emptyMessage="No Actions Available"
-          />
-        </Col>
-      </Row>
+      <div className="content-card">
+        <Row gutter={30}>
+          <Col span={24}>
+            <LayoutTable
+              tableData={tableData}
+              columns={columns}
+              loading={loading}
+              pagination={{
+                total: totalRowCount,
+                current: currentPage,
+                pageSize: pageSize,
+                showQuickJumper: true,
+                pageSizeOptions: ['10', '20', '30'],
+                showSizeChanger: true,
+                style: { textAlign: 'center' },
+                locale: { page: '' },
+                position: ['bottomRight'],
+              }}
+              handleTableChange={handleTableChange}
+              emptyMessage="No Actions Available"
+            />
+          </Col>
+        </Row>
+      </div>
     </div>
   );
 };
