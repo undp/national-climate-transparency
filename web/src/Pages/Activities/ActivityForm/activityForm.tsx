@@ -812,7 +812,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     for (let year = 2015; year <= 2050; year++) {
       arrSum += row[year.toString()] || 0;
     }
-    console.log(arrSum);
     return arrSum;
   };
 

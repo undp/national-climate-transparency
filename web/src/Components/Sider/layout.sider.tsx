@@ -52,7 +52,6 @@ const LayoutSider = (props: LayoutSiderProps) => {
   }
 
   const onClick: MenuProps['onClick'] = (e) => {
-    console.log('click', e);
     navigate('/' + e.key);
   };
 

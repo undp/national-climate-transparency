@@ -86,7 +86,6 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
             }
           })
           .catch((e: any) => {
-            console.log(e);
             if (e.response) {
               if (e.response.status) {
                 if (

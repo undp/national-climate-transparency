@@ -62,7 +62,6 @@ const CompanyProfile = () => {
     try {
       setIsLoading(true);
       const response = await get('national/Users/profile');
-      console.log(response.data);
       if (response.data) {
         setUserDetails(response.data.user);
         setIsLoading(false);
