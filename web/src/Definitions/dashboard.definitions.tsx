@@ -4,7 +4,6 @@ export type PieChartData = {
   values: number[];
   chartTitle: string;
   chartDescription: string;
-  total: number;
   lastUpdatedTime: number;
 };
 
@@ -18,10 +17,4 @@ export type DashboardActionItem = {
   financeReceived: number;
   status: string;
   nationalImplementingEntity: string[];
-};
-
-export type ChartData = {
-  labels: string[];
-  count: number[];
-  updatedTime: number;
 };

@@ -1,19 +1,15 @@
-import { Col, Empty, Row, Select, Spin, Tag, message } from 'antd';
+import { Col, Row, Select, Spin, message } from 'antd';
 import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
 import { useEffect, useState } from 'react';
-import Chart from 'react-apexcharts';
-import {
-  ChartData,
-  DashboardActionItem,
-  PieChartData,
-} from '../../Definitions/dashboard.definitions';
+import { DashboardActionItem, PieChartData } from '../../Definitions/dashboard.definitions';
 import LayoutTable from '../../Components/common/Table/layout.table';
 import { useTranslation } from 'react-i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { CustomFormatDate, DashboardTotalFormatter, getArraySum } from '../../Utils/utilServices';
+
 import { getActionTableColumns } from '../../Definitions/columns/actionColumns';
+import PieChart from '../../Components/Charts/PieChart/pieChart';
 
 const { Option } = Select;
 
@@ -36,7 +32,6 @@ const Dashboard = () => {
   // Chart State
   const [openChartInfo, setOpenChartInfo] = useState<boolean>(false);
   const [chartContent, setChartContent] = useState<{ title: string; body: string }>();
-  const [chartData, setChartData] = useState<PieChartData[]>([]);
 
   // Year State for the GHG MYG Chart 5
 
@@ -44,12 +39,12 @@ const Dashboard = () => {
 
   // Individual Chart Data
 
-  const [actionChart, setActionChart] = useState<ChartData>();
-  const [projectChart, setProjectChart] = useState<ChartData>();
-  const [supportChart, setSupportChart] = useState<ChartData>();
-  const [financeChart, setFinanceChart] = useState<ChartData>();
-  const [mitigationRecentChart, setMitigationRecentChart] = useState<ChartData>();
-  const [mitigationIndividualChart, setMitigationIndividualChart] = useState<ChartData>();
+  const [actionChart, setActionChart] = useState<PieChartData>();
+  const [projectChart, setProjectChart] = useState<PieChartData>();
+  const [supportChart, setSupportChart] = useState<PieChartData>();
+  const [financeChart, setFinanceChart] = useState<PieChartData>();
+  const [mitigationRecentChart, setMitigationRecentChart] = useState<PieChartData>();
+  const [mitigationIndividualChart, setMitigationIndividualChart] = useState<PieChartData>();
 
   // Year List to be shown in the Year Selector in Chart 5
 
@@ -117,13 +112,16 @@ const Dashboard = () => {
         );
         const mitigationIndividualChartData = response.data;
         setMitigationIndividualChart({
-          labels: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
+          chartId: 5,
+          chartTitle: t('mtgIndividualChartTitle'),
+          chartDescription: t('mtgIndividualChartDescription'),
+          categories: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
             sector === null ? 'No Sector Attached' : sector
           ),
-          count: mitigationIndividualChartData.stats.totals.map((count: string) =>
+          values: mitigationIndividualChartData.stats.totals.map((count: string) =>
             parseInt(count, 10)
           ),
-          updatedTime: mitigationIndividualChartData.lastUpdate,
+          lastUpdatedTime: mitigationIndividualChartData.lastUpdate,
         });
       }
     };
@@ -139,9 +137,12 @@ const Dashboard = () => {
       const response: any = await get('stats/analytics/actionsSummery', undefined, statServerUrl);
       const actionChartData = response.data;
       setActionChart({
-        labels: actionChartData.stats.sectors,
-        count: actionChartData.stats.counts.map((count: string) => parseInt(count, 10)),
-        updatedTime: actionChartData.lastUpdate,
+        chartId: 1,
+        chartTitle: t('actionChartTitle'),
+        chartDescription: t('actionChartDescription'),
+        categories: actionChartData.stats.sectors,
+        values: actionChartData.stats.counts.map((count: string) => parseInt(count, 10)),
+        lastUpdatedTime: actionChartData.lastUpdate,
       });
     };
     getClimateActionChartData();
@@ -150,11 +151,14 @@ const Dashboard = () => {
       const response: any = await get('stats/analytics/projectSummary', undefined, statServerUrl);
       const projectChartData = response.data;
       setProjectChart({
-        labels: projectChartData.stats.sectors.map((sector: string) =>
+        chartId: 2,
+        chartTitle: t('projectChartTitle'),
+        chartDescription: t('projectChartDescription'),
+        categories: projectChartData.stats.sectors.map((sector: string) =>
           sector === null ? 'No Sector Attached' : sector
         ),
-        count: projectChartData.stats.counts.map((count: string) => parseInt(count, 10)),
-        updatedTime: projectChartData.lastUpdate,
+        values: projectChartData.stats.counts.map((count: string) => parseInt(count, 10)),
+        lastUpdatedTime: projectChartData.lastUpdate,
       });
     };
     getProjectChartData();
@@ -163,12 +167,15 @@ const Dashboard = () => {
       const response: any = await get('stats/analytics/supportSummary', undefined, statServerUrl);
       const supportChartData = response.data;
       setSupportChart({
-        labels: ['Support Received', 'Support Needed'],
-        count: [
+        chartId: 3,
+        chartTitle: t('supportChartTitle'),
+        chartDescription: t('supportChartDescription'),
+        categories: ['Support Received', 'Support Needed'],
+        values: [
           supportChartData.stats.supportReceivedActivities,
           supportChartData.stats.supportNeededActivities,
         ],
-        updatedTime: supportChartData.lastUpdate,
+        lastUpdatedTime: supportChartData.lastUpdate,
       });
     };
     getSupportChartData();
@@ -179,11 +186,14 @@ const Dashboard = () => {
         undefined,
         statServerUrl
       );
-      const supportChartData = response.data;
+      const financeChartData = response.data;
       setFinanceChart({
-        labels: ['Support Received', 'Support Needed'],
-        count: [supportChartData.stats.supportReceived, supportChartData.stats.supportNeeded],
-        updatedTime: supportChartData.lastUpdate,
+        chartId: 4,
+        chartTitle: t('financeChartTitle'),
+        chartDescription: t('financeChartDescription'),
+        categories: ['Support Received', 'Support Needed'],
+        values: [financeChartData.stats.supportReceived, financeChartData.stats.supportNeeded],
+        lastUpdatedTime: financeChartData.lastUpdate,
       });
     };
     getFinanceChartData();
@@ -196,13 +206,16 @@ const Dashboard = () => {
       );
       const mitigationIndividualChartData = response.data;
       setMitigationRecentChart({
-        labels: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
+        chartId: 6,
+        chartTitle: t('mtgRecentChartTitle'),
+        chartDescription: t('mtgRecentChartDescription'),
+        categories: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
           sector === null ? 'No Sector Attached' : sector
         ),
-        count: mitigationIndividualChartData.stats.totals.map((count: string) =>
+        values: mitigationIndividualChartData.stats.totals.map((count: string) =>
           parseInt(count, 10)
         ),
-        updatedTime: mitigationIndividualChartData.lastUpdate,
+        lastUpdatedTime: mitigationIndividualChartData.lastUpdate,
       });
     };
     getRecentMitigationChartData();
@@ -213,93 +226,6 @@ const Dashboard = () => {
   useEffect(() => {
     getAllData();
   }, [currentPage, pageSize]);
-
-  // Updating the Chart Rendering Array when data fetching completes
-
-  useEffect(() => {
-    const tempChartData: PieChartData[] = [];
-
-    if (actionChart) {
-      tempChartData.push({
-        chartId: 1,
-        chartTitle: t('actionChartTitle'),
-        chartDescription: t('actionChartDescription'),
-        categories: actionChart.labels,
-        values: actionChart.count,
-        total: getArraySum(actionChart.count),
-        lastUpdatedTime: actionChart.updatedTime,
-      });
-    }
-
-    if (projectChart) {
-      tempChartData.push({
-        chartId: 2,
-        chartTitle: t('projectChartTitle'),
-        chartDescription: t('projectChartDescription'),
-        categories: projectChart.labels,
-        values: projectChart.count,
-        total: getArraySum(projectChart.count),
-        lastUpdatedTime: projectChart.updatedTime,
-      });
-    }
-
-    if (supportChart) {
-      tempChartData.push({
-        chartId: 3,
-        chartTitle: t('supportChartTitle'),
-        chartDescription: t('supportChartDescription'),
-        categories: supportChart.labels,
-        values: supportChart.count,
-        total: getArraySum(supportChart.count),
-        lastUpdatedTime: supportChart.updatedTime,
-      });
-    }
-
-    if (financeChart) {
-      tempChartData.push({
-        chartId: 4,
-        chartTitle: t('financeChartTitle'),
-        chartDescription: t('financeChartDescription'),
-        categories: financeChart.labels,
-        values: financeChart.count,
-        total: getArraySum(financeChart.count),
-        lastUpdatedTime: financeChart.updatedTime,
-      });
-    }
-
-    if (mitigationIndividualChart) {
-      tempChartData.push({
-        chartId: 5,
-        chartTitle: t('mtgIndividualChartTitle'),
-        chartDescription: t('mtgIndividualChartDescription'),
-        categories: mitigationIndividualChart.labels,
-        values: mitigationIndividualChart.count,
-        total: getArraySum(mitigationIndividualChart.count),
-        lastUpdatedTime: mitigationIndividualChart.updatedTime,
-      });
-    }
-
-    if (mitigationRecentChart) {
-      tempChartData.push({
-        chartId: 6,
-        chartTitle: t('mtgRecentChartTitle'),
-        chartDescription: t('mtgRecentChartDescription'),
-        categories: mitigationRecentChart.labels,
-        values: mitigationRecentChart.count,
-        total: getArraySum(mitigationRecentChart.count),
-        lastUpdatedTime: mitigationRecentChart.updatedTime,
-      });
-    }
-
-    setChartData(tempChartData);
-  }, [
-    actionChart,
-    projectChart,
-    supportChart,
-    financeChart,
-    mitigationIndividualChart,
-    mitigationRecentChart,
-  ]);
 
   // Action List Table Columns
 
@@ -324,37 +250,18 @@ const Dashboard = () => {
             content={chartContent}
           ></ChartInformation>
           <Row gutter={30}>
-            {chartData.map((chart: PieChartData, index: number) => (
-              <Col key={index} className="gutter-row" span={12}>
+            {actionChart && (
+              <Col key={'chart_1'} className="gutter-row" span={12}>
                 <div className="chart-section-card">
                   <div className="chart-title">
                     <Row gutter={30}>
-                      <Col span={17}>{chart.chartTitle}</Col>
-                      <Col span={5} style={{ display: 'flex', alignItems: 'flex-end' }}>
-                        {chart.chartId === 5 && (
-                          <Select
-                            size="small"
-                            style={{ fontSize: '13px' }}
-                            defaultValue={mtgYear}
-                            showSearch
-                            onChange={(value) => {
-                              setMtgYear(value);
-                            }}
-                          >
-                            {yearsList.map((year) => (
-                              <Option key={year} value={year}>
-                                {year}
-                              </Option>
-                            ))}
-                          </Select>
-                        )}
-                      </Col>
+                      <Col span={22}>{actionChart.chartTitle}</Col>
                       <Col span={2}>
                         <InfoCircleOutlined
                           onClick={() => {
                             setChartContent({
-                              title: chart.chartTitle,
-                              body: chart.chartDescription,
+                              title: actionChart.chartTitle,
+                              body: actionChart.chartDescription,
                             });
                             setOpenChartInfo(true);
                           }}
@@ -362,62 +269,143 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  {chart.total > 0 ? (
-                    <>
-                      <Chart
-                        key={index}
-                        type="donut"
-                        options={{
-                          labels: chart.categories.map((category) =>
-                            category.length > 20 ? `${category.slice(0, 20)}...` : category
-                          ),
-                          dataLabels: {
-                            enabled: false,
-                          },
-                          tooltip: {
-                            enabled: false,
-                          },
-                          plotOptions: {
-                            pie: {
-                              donut: {
-                                labels: {
-                                  show: true,
-                                  total: {
-                                    show: true,
-                                    label: 'Total',
-                                    formatter: () =>
-                                      DashboardTotalFormatter(
-                                        chart.total,
-                                        [4].includes(chart.chartId)
-                                      ),
-                                  },
-                                },
-                              },
-                            },
-                          },
-                          legend: {
-                            position: 'right',
-                            floating: false,
-                          },
-                        }}
-                        series={chart.values}
-                        width={450}
-                      />
-                      <div className="chart-update-time">
-                        <Tag className="time-chip">{CustomFormatDate(chart.lastUpdatedTime)}</Tag>
-                      </div>
-                    </>
-                  ) : (
-                    <Empty
-                      className="empty-chart"
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      description={t('noChartDataAvailable')}
-                    />
-                  )}
+                  <PieChart chart={actionChart} t={t}></PieChart>
                 </div>
               </Col>
-            ))}
-          </Row>{' '}
+            )}
+            {projectChart && (
+              <Col key={'chart_2'} className="gutter-row" span={12}>
+                <div className="chart-section-card">
+                  <div className="chart-title">
+                    <Row gutter={30}>
+                      <Col span={22}>{projectChart.chartTitle}</Col>
+                      <Col span={2}>
+                        <InfoCircleOutlined
+                          onClick={() => {
+                            setChartContent({
+                              title: projectChart.chartTitle,
+                              body: projectChart.chartDescription,
+                            });
+                            setOpenChartInfo(true);
+                          }}
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                  <PieChart chart={projectChart} t={t}></PieChart>
+                </div>
+              </Col>
+            )}
+            {supportChart && (
+              <Col key={'chart_3'} className="gutter-row" span={12}>
+                <div className="chart-section-card">
+                  <div className="chart-title">
+                    <Row gutter={30}>
+                      <Col span={22}>{supportChart.chartTitle}</Col>
+                      <Col span={2}>
+                        <InfoCircleOutlined
+                          onClick={() => {
+                            setChartContent({
+                              title: supportChart.chartTitle,
+                              body: supportChart.chartDescription,
+                            });
+                            setOpenChartInfo(true);
+                          }}
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                  <PieChart chart={supportChart} t={t}></PieChart>
+                </div>
+              </Col>
+            )}
+            {financeChart && (
+              <Col key={'chart_4'} className="gutter-row" span={12}>
+                <div className="chart-section-card">
+                  <div className="chart-title">
+                    <Row gutter={30}>
+                      <Col span={22}>{financeChart.chartTitle}</Col>
+                      <Col span={2}>
+                        <InfoCircleOutlined
+                          onClick={() => {
+                            setChartContent({
+                              title: financeChart.chartTitle,
+                              body: financeChart.chartDescription,
+                            });
+                            setOpenChartInfo(true);
+                          }}
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                  <PieChart chart={financeChart} t={t}></PieChart>
+                </div>
+              </Col>
+            )}
+            {mitigationIndividualChart && (
+              <Col key={'chart_5'} className="gutter-row" span={12}>
+                <div className="chart-section-card">
+                  <div className="chart-title">
+                    <Row gutter={30}>
+                      <Col span={17}>{mitigationIndividualChart.chartTitle}</Col>
+                      <Col span={5} style={{ display: 'flex', alignItems: 'flex-end' }}>
+                        <Select
+                          size="small"
+                          style={{ fontSize: '13px' }}
+                          defaultValue={mtgYear}
+                          showSearch
+                          onChange={(value) => {
+                            setMtgYear(value);
+                          }}
+                        >
+                          {yearsList.map((year) => (
+                            <Option key={year} value={year}>
+                              {year}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Col>
+                      <Col span={2}>
+                        <InfoCircleOutlined
+                          onClick={() => {
+                            setChartContent({
+                              title: mitigationIndividualChart.chartTitle,
+                              body: mitigationIndividualChart.chartDescription,
+                            });
+                            setOpenChartInfo(true);
+                          }}
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                  <PieChart chart={mitigationIndividualChart} t={t}></PieChart>
+                </div>
+              </Col>
+            )}
+            {mitigationRecentChart && (
+              <Col key={'chart_6'} className="gutter-row" span={12}>
+                <div className="chart-section-card">
+                  <div className="chart-title">
+                    <Row gutter={30}>
+                      <Col span={22}>{mitigationRecentChart.chartTitle}</Col>
+                      <Col span={2}>
+                        <InfoCircleOutlined
+                          onClick={() => {
+                            setChartContent({
+                              title: mitigationRecentChart.chartTitle,
+                              body: mitigationRecentChart.chartDescription,
+                            });
+                            setOpenChartInfo(true);
+                          }}
+                        />
+                      </Col>
+                    </Row>
+                  </div>
+                  <PieChart chart={mitigationRecentChart} t={t}></PieChart>
+                </div>
+              </Col>
+            )}
+          </Row>
         </div>
       ) : (
         <div className="loading-charts-spinner">
