@@ -50,8 +50,9 @@ const UserActionConfirmationModel: FC<UserActionProps> = (props: UserActionProps
           label={t('userProfile:remarks')}
           name="remarks"
           required={actionInfo.type === 'danger'}
+          initialValue={comment}
         >
-          <TextArea defaultValue={comment} rows={2} onChange={(v) => setComment(v.target.value)} />
+          <TextArea rows={2} onChange={(v) => setComment(v.target.value)} />
         </Form.Item>
 
         {errorMsg ? <Alert className="mg-top-1" message={errorMsg} type="error" showIcon /> : ''}
