@@ -443,7 +443,7 @@ const supportList = () => {
                   trigger={['click']}
                   open={filterVisible}
                   menu={{ items }}
-                  overlayStyle={{ width: '240px' }}
+                  overlayStyle={{ width: '310px' }}
                 >
                   <FilterOutlined
                     style={{

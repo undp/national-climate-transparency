@@ -430,8 +430,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             title: act.title,
             reductionMeasures: act.measure,
             status: act.status,
-            startYear: 'NA',
-            endYear: 'NA',
             natImplementor: act.nationalImplementingEntity ?? [],
             ghgsAffected: act.ghgsAffected ?? [],
             achievedReduction: act.achievedGHGReduction ?? 0,

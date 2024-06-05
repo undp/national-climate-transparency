@@ -476,8 +476,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             title: act.title,
             reductionMeasures: act.measure,
             status: act.status,
-            startYear: act.migratedData?.startYear,
-            endYear: act.migratedData?.endYear,
             natImplementor: act.nationalImplementingEntity ?? [],
             ghgsAffected: act.ghgsAffected ?? [],
             achievedReduction: act.achievedGHGReduction ?? 0,
