@@ -5,7 +5,7 @@ import {
   DashboardTotalFormatter,
   getArraySum,
 } from '../../../Utils/utilServices';
-import { PieChartData } from '../../../Definitions/dashboard.definitions';
+import { PieChartData, chartColorMappings } from '../../../Definitions/dashboard.definitions';
 
 interface Props {
   chart: PieChartData;
@@ -14,6 +14,12 @@ interface Props {
 
 const PieChart: React.FC<Props> = ({ chart, t }) => {
   const total = getArraySum(chart.values);
+  const chartColorMapping: string[] = [1, 2, 5, 6].includes(chart.chartId)
+    ? chartColorMappings.sectors
+    : chart.chartId === 5
+    ? chartColorMappings.support
+    : chartColorMappings.finance;
+
   return (
     <div className="status-chip">
       {total > 0 ? (
@@ -22,6 +28,7 @@ const PieChart: React.FC<Props> = ({ chart, t }) => {
             type="donut"
             options={{
               labels: chart.categories,
+              colors: chartColorMapping,
               dataLabels: {
                 enabled: false,
               },
