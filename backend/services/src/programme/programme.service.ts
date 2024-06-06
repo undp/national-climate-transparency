@@ -306,14 +306,34 @@ export class ProgrammeService {
 		programmeUpdate.projects = currentProgramme.projects;
 		programmeUpdate.activities = currentProgramme.activities;
 
-		// Document update resolve
+		// add new documents
+		if (programmeUpdateDto.newDocuments) {
+			const documents = [];
+			for (const documentItem of programmeUpdateDto.newDocuments) {
+				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.PROGRAMME);
+				const docEntity = new DocumentEntityDto();
+				docEntity.title = documentItem.title;
+				docEntity.url = response;
+				docEntity.createdTime = new Date().getTime();
+				documents.push(docEntity)
+			};
 
-		let documents = (currentProgramme.documents && currentProgramme.documents.length > 0) ? [...currentProgramme.documents] : [];
+			if (currentProgramme.documents) {
+				programmeUpdate.documents = programmeUpdate.documents ? [...programmeUpdate.documents, ...currentProgramme.documents] : [...currentProgramme.documents];
+			} else if (programmeUpdate.documents) {
+				programmeUpdate.documents = [...programmeUpdate.documents];
+			}
 
+			if (documents) {
+				programmeUpdate.documents = programmeUpdate.documents ? [...programmeUpdate.documents, ...documents] : [...documents];
+			}
+
+		}
+
+		// remove documents
 		if (programmeUpdateDto.removedDocuments && programmeUpdateDto.removedDocuments.length > 0) {
-			if (documents.length > 0) {
-				documents = documents.filter(obj => !programmeUpdateDto.removedDocuments.includes(obj.url));
-			} else {
+
+			if (!currentProgramme.documents || currentProgramme.documents.length < 0) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"programme.noDocumentsFound",
@@ -323,21 +343,14 @@ export class ProgrammeService {
 				);
 			}
 
-		}
+			programmeUpdate.documents = programmeUpdate.documents ? programmeUpdate.documents : currentProgramme.documents
+			const updatedDocs = programmeUpdate.documents.filter(
+				item => !programmeUpdateDto.removedDocuments.some(
+					url => url === item.url
+				)
+			);
+			programmeUpdate.documents = (updatedDocs && updatedDocs.length > 0) ? updatedDocs : null;
 
-		if (programmeUpdateDto.newDocuments) {
-			for (const documentItem of programmeUpdateDto.newDocuments) {
-				const response = await this.fileUploadService.uploadDocument(documentItem.data, documentItem.title, EntityType.PROGRAMME);
-				const docEntity = new DocumentEntityDto();
-				docEntity.title = documentItem.title;
-				docEntity.url = response;
-				docEntity.createdTime = new Date().getTime();
-				documents.push(docEntity)
-			};
-		}
-
-		if (documents.length > 0) {
-			programmeUpdate.documents = documents;
 		}
 
 		// KPI Update resolve
