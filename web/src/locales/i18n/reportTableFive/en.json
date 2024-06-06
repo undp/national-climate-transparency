@@ -5,7 +5,7 @@
     "instrumentType": "Type of Instrument",
     "status": "Status",
     "sector": "Sector Affected",
-    "ghgsAffected": "GHG Affected",
+    "ghgsAffected": "Gases Affected",
     "startYear": "Start Year",
     "implementingEntities": "Implementing Entities",
     "achievedGHGReduction": "GHG reduces (achieved ktCO2e)",
