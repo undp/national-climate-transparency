@@ -225,7 +225,6 @@ export const handler: Handler = async (event) => {
     user.email = event["rootEmail"];
     user.name = "Root";
     user.role = Role.Root;
-    user.phoneNo = "-";
     // user.organisationId = gov.organisationId;
 		// user.organisation = Organisation.Government
     user.country = event["systemCountryCode"];

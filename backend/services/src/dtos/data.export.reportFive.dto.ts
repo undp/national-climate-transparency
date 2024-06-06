@@ -3,11 +3,11 @@ import { DataExportDto } from "./data.export.dto";
 export class DataExportReportFiveDto extends DataExportDto {
 	source;
 	actionId;
-	programmeId;
-	projectId;
+	// programmeId;
+	// projectId;
 	titleOfAction;
-	titleOfProgramme;
-	titleOfProject;
+	// titleOfProgramme;
+	// titleOfProject;
 	description;
 	objective;
 	instrumentType;

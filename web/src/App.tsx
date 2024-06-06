@@ -9,8 +9,6 @@ import CustomLayout from './Components/Layout/layout';
 import AddUser from './Pages/Users/AddUser/addUser';
 import UserManagement from './Pages/Users/UserManagement/userManagement';
 import Dashboard from './Pages/Dashboard/dashboard';
-import AddNewCompany from './Pages/Company/AddCompany/addNewCompany';
-import CompanyManagement from './Pages/Company/CompanyManagement/companyManagement';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Homepage from './Pages/Homepage/homepage';
 import PrivacyPolicy from './Pages/PrivacyPolicy/privacyPolicy';
@@ -19,7 +17,6 @@ import CookiePolicy from './Pages/CookiePolicy/cookiePolicy';
 import TermsOfUse from './Pages/TermsofUse/termsofUse';
 import CarbonHelp from './Pages/Help/help';
 import UserProfile from './Pages/Users/UserProfile/UserProfile';
-import CompanyProfile from './Pages/Company/CompanyProfile/companyProfile';
 import { AbilityContext } from './Casl/Can';
 import { defineAbility, updateUserAbility } from './Casl/ability';
 import { useTranslation } from 'react-i18next';
@@ -122,14 +119,6 @@ const App = () => {
                     <Route index element={<Faq />} />
                   </Route>
                   <Route
-                    path="/companyManagement"
-                    element={<CustomLayout selectedKey="companyManagement/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<CompanyManagement />} />
-                    <Route path="addCompany" element={<AddNewCompany />} />
-                    <Route path="updateCompany" element={<AddNewCompany />} />
-                  </Route>
-                  <Route
                     path="/userManagement"
                     element={<CustomLayout selectedKey="userManagement/viewAll" />}
                   >
@@ -142,12 +131,6 @@ const App = () => {
                     element={<CustomLayout selectedKey="userManagement/viewAll" />}
                   >
                     <Route path="view" element={<UserProfile />} />
-                  </Route>
-                  <Route
-                    path="/companyProfile"
-                    element={<CustomLayout selectedKey="companyManagement/viewAll" />}
-                  >
-                    <Route path="view" element={<CompanyProfile />} />
                   </Route>
                 </Route>
                 <Route path="/*" element={<Navigate to="/" replace />} />

@@ -1,6 +1,6 @@
 import { Index, ViewColumn, ViewEntity } from "typeorm"
 
-export const reportFiveViewSQL = `
+export const reportFiveViewSQLOld = `
 SELECT 'action' AS source, * FROM (
 	SELECT "actionId", NULL as "programmeId", NULL as "projectId", title as "titleOfAction", NULL as "titleOfProgramme", NULL as "titleOfProject",
 description, objective, "instrumentType", status::text, sector::text, ave."ghgsAffected", "startYear" , ARRAY[]::text[] as "implementingEntities", 
@@ -30,7 +30,17 @@ prve."achievedGHGReduction", prve."expectedGHGReduction"
 left join programme pro on pro."programmeId" = prj."programmeId"
 join project_view_entity prve on prve.id = prj."projectId"
 	WHERE prj.validated = true
-) proj;`
+) proj
+;`
+
+export const reportFiveViewSQL = `
+SELECT 'action' AS source, * FROM (
+	SELECT "actionId", title as "titleOfAction",
+description, objective, "instrumentType", status::text, sector::text, ave."ghgsAffected", "startYear" , ARRAY[]::text[] as "implementingEntities", 
+ave."achievedGHGReduction", ave."expectedGHGReduction"
+	FROM action act join action_view_entity ave on ave.id = act."actionId"
+	WHERE validated = true
+) act;`
 
 @ViewEntity({
 	name: 'report_five_view_entity',
@@ -47,20 +57,20 @@ export class ReportFiveViewEntity {
 	@ViewColumn()
 	actionId: string;
 
-	@ViewColumn()
-	programmeId: string;
+	// @ViewColumn()
+	// programmeId: string;
 
-	@ViewColumn()
-	projectId: string;
+	// @ViewColumn()
+	// projectId: string;
 
 	@ViewColumn()
 	titleOfAction: string;
 
-	@ViewColumn()
-	titleOfProgramme: string;
+	// @ViewColumn()
+	// titleOfProgramme: string;
 
-	@ViewColumn()
-	titleOfProject: string;
+	// @ViewColumn()
+	// titleOfProject: string;
 
 	@ViewColumn()
 	description: string;

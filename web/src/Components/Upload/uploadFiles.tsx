@@ -67,7 +67,6 @@ const UploadFileGrid: React.FC<Props> = ({
     });
 
   const beforeUpload = async (file: RcFile): Promise<boolean> => {
-    console.log(file);
     if (!AcceptedMimeTypes.includes(file.type)) {
       message.open({
         type: 'error',

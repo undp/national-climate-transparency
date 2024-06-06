@@ -39,12 +39,12 @@ export class ReportService {
     const resp = await this.reportFiveViewRepo
       .createQueryBuilder("reportFive")
       .select([
-        "reportFive.actionId",
-        "reportFive.programmeId",
-        "reportFive.projectId",
+        // "reportFive.actionId",
+        // "reportFive.programmeId",
+        // "reportFive.projectId",
         "reportFive.titleOfAction",
-        "reportFive.titleOfProgramme",
-        "reportFive.titleOfProject",
+        // "reportFive.titleOfProgramme",
+        // "reportFive.titleOfProject",
         "reportFive.description",
         "reportFive.objective",
         "reportFive.instrumentType",

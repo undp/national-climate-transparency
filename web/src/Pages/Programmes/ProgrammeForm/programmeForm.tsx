@@ -472,8 +472,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             title: act.title,
             reductionMeasures: act.measure,
             status: act.status,
-            startYear: 'NA',
-            endYear: 'NA',
             natImplementor: act.nationalImplementingEntity ?? [],
             ghgsAffected: act.ghgsAffected ?? [],
             achievedReduction: act.achievedGHGReduction ?? 0,
@@ -812,7 +810,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       setNewKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
-            return { ...kpi, [property]: value };
+            return { ...kpi, [property]: property === 'expected' ? parseFloat(value) : value };
           }
           return kpi;
         });
@@ -822,7 +820,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
-            return { ...kpi, [property]: value };
+            return {
+              ...kpi,
+              [property]: property === 'expected' ? parseFloat(value) : value,
+            };
           }
           return kpi;
         });
@@ -1225,9 +1226,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
               <Row>
                 <Col span={12}>
-                  <div style={{ color: '#3A3541', opacity: 0.8, margin: '8px 0' }}>
-                    {t('projectListTitle')}
-                  </div>
+                  <div className="form-section-header">{t('projectListTitle')}</div>
                   <LayoutTable
                     tableData={projectData.slice(
                       (currentPage - 1) * pageSize,

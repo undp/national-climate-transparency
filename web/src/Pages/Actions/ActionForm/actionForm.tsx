@@ -430,8 +430,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             title: act.title,
             reductionMeasures: act.measure,
             status: act.status,
-            startYear: 'NA',
-            endYear: 'NA',
             natImplementor: act.nationalImplementingEntity ?? [],
             ghgsAffected: act.ghgsAffected ?? [],
             achievedReduction: act.achievedGHGReduction ?? 0,
@@ -791,7 +789,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       setNewKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
-            return { ...kpi, [property]: value };
+            return { ...kpi, [property]: property === 'expected' ? parseFloat(value) : value };
           }
           return kpi;
         });
@@ -801,7 +799,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
-            return { ...kpi, [property]: value };
+            return {
+              ...kpi,
+              [property]: property === 'expected' ? parseFloat(value) : value,
+            };
           }
           return kpi;
         });

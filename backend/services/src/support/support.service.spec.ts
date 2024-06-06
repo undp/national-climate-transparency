@@ -14,6 +14,7 @@ import { FinanceNature, FinancingStatus, IntFinInstrument, IntSource, IntSupChan
 import { Sector } from "../enums/sector.enum";
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { DataResponseMessageDto } from "../dtos/data.response.message";
+import { ValidateDto } from "../dtos/validate.dto";
 
 describe('SupportService', () => {
 	let service: SupportService;
@@ -94,13 +95,10 @@ describe('SupportService', () => {
 			supportDto.activityId = "T00003";
 			supportDto.direction = SupportDirection.RECEIVED;
 			supportDto.financeNature = FinanceNature.INTERNATIONAL;
-			// supportDto.financeNature = "National";
 			supportDto.internationalSupportChannel = IntSupChannel.MULTILATERAL;
 			supportDto.otherInternationalSupportChannel = "TEST";
 			supportDto.internationalFinancialInstrument = IntFinInstrument.GRANT;
 			supportDto.otherInternationalFinancialInstrument = "TEST";
-			// supportDto.nationalFinancialInstrument = "Equity";
-			// supportDto.otherNationalFinancialInstrument = "Test";
 			supportDto.financingStatus = FinancingStatus.COMMITTED;
 			supportDto.internationalSource = [IntSource.AFC];
 			supportDto.nationalSource = "ASD";
@@ -140,13 +138,10 @@ describe('SupportService', () => {
 			supportDto.activityId = "T00003";
 			supportDto.direction = SupportDirection.RECEIVED;
 			supportDto.financeNature = FinanceNature.INTERNATIONAL;
-			// supportDto.financeNature = "National";
 			supportDto.internationalSupportChannel = IntSupChannel.MULTILATERAL;
 			supportDto.otherInternationalSupportChannel = "TEST";
 			supportDto.internationalFinancialInstrument = IntFinInstrument.GRANT;
 			supportDto.otherInternationalFinancialInstrument = "TEST";
-			// supportDto.nationalFinancialInstrument = "Equity";
-			// supportDto.otherNationalFinancialInstrument = "Test";
 			supportDto.financingStatus = FinancingStatus.COMMITTED;
 			supportDto.internationalSource = [IntSource.AFC];
 			supportDto.nationalSource = "ASD";
@@ -196,13 +191,10 @@ describe('SupportService', () => {
 			supportDto.activityId = "T00003";
 			supportDto.direction = SupportDirection.RECEIVED;
 			supportDto.financeNature = FinanceNature.INTERNATIONAL;
-			// supportDto.financeNature = "National";
 			supportDto.internationalSupportChannel = IntSupChannel.MULTILATERAL;
 			supportDto.otherInternationalSupportChannel = "TEST";
 			supportDto.internationalFinancialInstrument = IntFinInstrument.GRANT;
 			supportDto.otherInternationalFinancialInstrument = "TEST";
-			// supportDto.nationalFinancialInstrument = "Equity";
-			// supportDto.otherNationalFinancialInstrument = "Test";
 			supportDto.financingStatus = FinancingStatus.COMMITTED;
 			supportDto.internationalSource = [IntSource.AFC];
 			supportDto.nationalSource = "ASD";
@@ -256,13 +248,10 @@ describe('SupportService', () => {
 			supportDto.activityId = "T00003";
 			supportDto.direction = SupportDirection.RECEIVED;
 			supportDto.financeNature = FinanceNature.INTERNATIONAL;
-			// supportDto.financeNature = "National";
 			supportDto.internationalSupportChannel = IntSupChannel.MULTILATERAL;
 			supportDto.otherInternationalSupportChannel = "TEST";
 			supportDto.internationalFinancialInstrument = IntFinInstrument.GRANT;
 			supportDto.otherInternationalFinancialInstrument = "TEST";
-			// supportDto.nationalFinancialInstrument = "Equity";
-			// supportDto.otherNationalFinancialInstrument = "Test";
 			supportDto.financingStatus = FinancingStatus.COMMITTED;
 			supportDto.internationalSource = [IntSource.AFC];
 			supportDto.nationalSource = "ASD";
@@ -271,8 +260,6 @@ describe('SupportService', () => {
 			supportDto.exchangeRate = 200;
 
 			jest.spyOn(service, 'findSupportById').mockResolvedValueOnce(null);
-			// jest.spyOn(activityServiceMock, 'findActivityById').mockResolvedValueOnce(activity);
-			// jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(false);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -428,6 +415,144 @@ describe('SupportService', () => {
 			}
 
 			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("support.activityNotFound", ["T00003"]);
+			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(0);
+			expect(service.findSupportById).toHaveBeenCalledTimes(1)
+			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
+		});
+
+		it('should update the support correctly', async () => {
+			const user = new User();
+			user.id = 2;
+			user.sector = [Sector.Energy];
+
+			const activity = new ActivityEntity();
+			activity.activityId = "T00003";
+			activity.title = "test";
+			activity.description = "test description";
+			activity.status = ActivityStatus.PLANNED;
+			activity.measure = Measure.WITHOUT_MEASURES;
+
+			const supportDto = new SupportDto();
+			supportDto.supportId = "S00001";
+			supportDto.activityId = "T00003";
+			supportDto.direction = SupportDirection.RECEIVED;
+			supportDto.financeNature = FinanceNature.INTERNATIONAL;
+			supportDto.internationalSupportChannel = IntSupChannel.MULTILATERAL;
+			supportDto.otherInternationalSupportChannel = "TEST";
+			supportDto.internationalFinancialInstrument = IntFinInstrument.GRANT;
+			supportDto.otherInternationalFinancialInstrument = "TEST";
+			supportDto.financingStatus = FinancingStatus.COMMITTED;
+			supportDto.internationalSource = [IntSource.AFC];
+			supportDto.nationalSource = "ASD";
+			supportDto.requiredAmount = 100;
+			supportDto.receivedAmount = 100;
+			supportDto.exchangeRate = 200;
+
+			const support = new SupportEntity();
+			support.supportId = "S00001";
+			support.activity = activity;
+			support.direction = SupportDirection.NEEDED;
+			support.financeNature = FinanceNature.INTERNATIONAL;
+			support.internationalSupportChannel = IntSupChannel.BILATERAL;
+			support.otherInternationalSupportChannel = "TEST";
+			support.internationalFinancialInstrument = IntFinInstrument.GRANT;
+			support.otherInternationalFinancialInstrument = "TEST";
+			support.financingStatus = FinancingStatus.COMMITTED;
+			support.internationalSource = [IntSource.AFC];
+			support.nationalSource = "ASD";
+			support.requiredAmount = 100;
+			support.receivedAmount = 100;
+			support.exchangeRate = 200;
+
+			jest.spyOn(service, 'findSupportById').mockResolvedValueOnce(support);
+			jest.spyOn(activityServiceMock, 'findActivityById').mockResolvedValueOnce(activity);
+			jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(new SupportEntity()),
+				};
+				const savedSupport = await callback(emMock);
+				expect(emMock.save).toHaveBeenCalledTimes(2);
+				return savedSupport;
+			});
+
+
+			const result = await service.updateSupport(supportDto, user);
+			expect(result.statusCode).toEqual(HttpStatus.OK);
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("support.updateSupportSuccess", []);
+			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+			expect(service.findSupportById).toHaveBeenCalledTimes(1)
+			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+		});
+
+	})
+
+	describe('validateSupport', () => {
+		it('should validate the support', async () => {
+			const user = new User();
+			user.id = 2;
+			user.sector = [Sector.Energy];
+
+			const validateDto = new ValidateDto();
+			validateDto.entityId = "S00001";
+
+			const support = new SupportEntity();
+			support.validated = false;
+
+			jest.spyOn(service, 'findSupportById').mockResolvedValueOnce(support);
+			// jest.spyOn(activityServiceMock, 'findActivityById').mockResolvedValueOnce(activity);
+			jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(new SupportEntity()),
+				};
+				const savedSupport = await callback(emMock);
+				expect(emMock.save).toHaveBeenCalledTimes(2);
+				return savedSupport;
+			});
+
+
+			const result = await service.validateSupport(validateDto, user);
+			expect(result.statusCode).toEqual(HttpStatus.OK);
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("support.verifySupportSuccess", []);
+			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
+			expect(service.findSupportById).toHaveBeenCalledTimes(1)
+			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+		});
+
+		it('trying to validate an already validated support', async () => {
+			const user = new User();
+			user.id = 2;
+			user.sector = [Sector.Energy];
+
+			const validateDto = new ValidateDto();
+			validateDto.entityId = "S00001";
+
+			const support = new SupportEntity();
+			support.validated = true;
+
+			jest.spyOn(service, 'findSupportById').mockResolvedValueOnce(support);
+			// jest.spyOn(activityServiceMock, 'findActivityById').mockResolvedValueOnce(activity);
+			jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(new SupportEntity()),
+				};
+				const savedSupport = await callback(emMock);
+				expect(emMock.save).toHaveBeenCalledTimes(0);
+				return savedSupport;
+			});
+
+			try {
+				await service.validateSupport(validateDto, user);
+			} catch (error) {
+				expect(error).toBeInstanceOf(HttpException);
+				expect(error.status).toBe(HttpStatus.BAD_REQUEST);
+			}
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("support.supportAlreadyValidated", ["S00001"]);
 			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(0);
 			expect(service.findSupportById).toHaveBeenCalledTimes(1)
 			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);

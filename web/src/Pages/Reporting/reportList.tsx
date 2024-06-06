@@ -5,44 +5,24 @@ import './reportList.scss';
 import { DownloadOutlined } from '@ant-design/icons';
 import LayoutTable from '../../Components/common/Table/layout.table';
 import { useTranslation } from 'react-i18next';
-import ScrollableList from '../../Components/ScrollableList/scrollableList';
 import { ExportFileType } from '../../Enums/shared.enum';
-
-interface Item {
-  key: number;
-  source: 'action' | 'programme' | 'project';
-  actionId: string;
-  programmeId: string;
-  projectId: string;
-  titleOfAction: string;
-  titleOfProgramme: string;
-  titleOfProject: string;
-  description: string;
-  objective: string;
-  instrumentType: string[];
-  status: string;
-  sector: string;
-  ghgsAffected: string;
-  startYear: number;
-  implementingEntities: string[];
-  achievedGHGReduction: number;
-  expectedGHGReduction: number;
-}
+import { ReportFiveRecord } from '../../Definitions/reportDefinitions';
+import { getReportFiveColumns } from '../../Definitions/columns/reportColumns';
 
 const reportList = () => {
   const { post } = useConnection();
-  const { t } = useTranslation(['reportTableFive', 'tableAction']);
+  const { t } = useTranslation(['reportTableFive']);
 
   // General Page State
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Table Data State
+  // Report Five State
 
+  const [reportFiveData, setReportFiveData] = useState<ReportFiveRecord[]>([]);
+  const [reportFiveTotal, setReportFiveTotal] = useState<number>();
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<any>(1);
-  const [tableData, setTableData] = useState<Item[]>([]);
-  const [totalRowCount, setTotalRowRowCount] = useState<number>();
 
   const getTableFiveData = async () => {
     setLoading(true);
@@ -51,21 +31,16 @@ const reportList = () => {
 
       const response: any = await post('national/reports/tableFive/query', payload);
       if (response) {
-        const tempReportFiveData: Item[] = [];
+        const tempReportFiveData: ReportFiveRecord[] = [];
 
         response.data.forEach((entry: any, index: number) => {
           tempReportFiveData.push({
             key: index,
             source: entry.source,
-            actionId: entry.actionId,
-            programmeId: entry.programmeId,
-            projectId: entry.projectId,
             titleOfAction: entry.titleOfAction,
-            titleOfProgramme: entry.titleOfProgramme,
-            titleOfProject: entry.titleOfProject,
             description: entry.description,
             objective: entry.objective,
-            instrumentType: entry.instrumentType,
+            instrumentType: entry.instrumentType ?? [],
             status: entry.status,
             sector: entry.sector,
             ghgsAffected: entry.ghgsAffected ?? [],
@@ -76,8 +51,8 @@ const reportList = () => {
           });
         });
 
-        setTableData(tempReportFiveData);
-        setTotalRowRowCount(response.response.data.total);
+        setReportFiveData(tempReportFiveData);
+        setReportFiveTotal(response.data.total);
         setLoading(false);
       }
     } catch (error: any) {
@@ -103,10 +78,10 @@ const reportList = () => {
 
   //Export Report Data
 
-  const downloadReportData = async (exportfileType: string) => {
+  const downloadReportData = async (exportFileType: string) => {
     setLoading(true);
     try {
-      const payload: any = { fileType: exportfileType };
+      const payload: any = { fileType: exportFileType };
       const response: any = await post('national/reports/tableFive/export', payload);
       if (response && response.data) {
         const url = response.data.url;
@@ -131,56 +106,7 @@ const reportList = () => {
     }
   };
 
-  const columns = [
-    { title: t('actionId'), dataIndex: 'actionId', key: 'actionId' },
-    { title: t('programmeId'), dataIndex: 'programmeId', key: 'programmeId' },
-    { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
-    {
-      title: t('titleOfAction'),
-      dataIndex: 'titleOfAction',
-      key: 'titleOfAction',
-    },
-    {
-      title: t('titleOfProgramme'),
-      dataIndex: 'titleOfProgramme',
-      key: 'titleOfProgramme',
-    },
-    {
-      title: t('titleOfProject'),
-      dataIndex: 'titleOfProject',
-      key: 'titleOfProject',
-    },
-    { title: t('description'), dataIndex: 'description', key: 'description' },
-    { title: t('objective'), dataIndex: 'objective', key: 'objective' },
-    {
-      title: t('instrumentType'),
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: Item) => {
-        return <ScrollableList listToShow={record.instrumentType}></ScrollableList>;
-      },
-    },
-    { title: t('status'), dataIndex: 'status', key: 'status' },
-    { title: t('sector'), dataIndex: 'sector', key: 'sector' },
-    { title: t('ghgsAffected'), dataIndex: 'ghgsAffected', key: 'ghgsAffected' },
-    { title: t('startYear'), dataIndex: 'startYear', key: 'startYear' },
-    {
-      title: t('implementingEntities'),
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: Item) => {
-        return <ScrollableList listToShow={record.implementingEntities}></ScrollableList>;
-      },
-    },
-    {
-      title: t('achievedGHGReduction'),
-      dataIndex: 'achievedGHGReduction',
-      key: 'achievedGHGReduction',
-    },
-    {
-      title: t('expectedGHGReduction'),
-      dataIndex: 'expectedGHGReduction',
-      key: 'expectedGHGReduction',
-    },
-  ];
+  const reportFiveColumns = getReportFiveColumns(t);
 
   return (
     <div className="content-container report-table5">
@@ -232,11 +158,11 @@ const reportList = () => {
         <Row>
           <Col span={24}>
             <LayoutTable
-              tableData={tableData}
-              columns={columns}
+              tableData={reportFiveData}
+              columns={reportFiveColumns}
               loading={loading}
               pagination={{
-                total: totalRowCount,
+                total: reportFiveTotal,
                 current: currentPage,
                 pageSize: pageSize,
                 showQuickJumper: true,

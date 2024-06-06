@@ -278,7 +278,6 @@ const actionList = () => {
       setTempFilterValue(updatedFilters);
     } else if (filterSection === 'search') {
       updatedFilters.searchBy = newValue;
-      console.log(updatedFilters);
       setTempFilterValue(updatedFilters);
     }
   };

@@ -10,7 +10,7 @@ import LanguageSelection from '../../../Components/LanguageSelection/languageSel
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './userProfileComponent.scss';
 
-const CompanyProfile = () => {
+const UserProfile = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation(['userProfile', 'companyDetails']);
 
@@ -62,7 +62,6 @@ const CompanyProfile = () => {
     try {
       setIsLoading(true);
       const response = await get('national/Users/profile');
-      console.log(response.data);
       if (response.data) {
         setUserDetails(response.data.user);
         setIsLoading(false);
@@ -209,4 +208,4 @@ const CompanyProfile = () => {
   );
 };
 
-export default CompanyProfile;
+export default UserProfile;
