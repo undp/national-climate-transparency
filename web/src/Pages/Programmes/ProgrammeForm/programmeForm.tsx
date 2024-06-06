@@ -37,6 +37,8 @@ import {
   attachButtonBps,
   attachTableHeaderBps,
   attachTableSeparatorBps,
+  halfColumnBps,
+  quarterColumnBps,
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
 
@@ -990,7 +992,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 <EntityIdCard calledIn="Programme" entId={entId}></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('selectActionHeader')}</label>}
                     name="actionId"
@@ -1018,7 +1020,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('typesHeader')}</label>}
                     name="type"
@@ -1031,7 +1033,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('progTitleHeader')}</label>}
                     name="title"
@@ -1042,7 +1044,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('progDescTitle')}</label>}
                     name="description"
@@ -1051,7 +1053,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     <TextArea maxLength={250} rows={3} disabled={isView} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('progObjectivesTitle')}</label>}
                     name="objective"
@@ -1062,7 +1064,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
                     name="instrumentType"
@@ -1075,7 +1077,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('progStatusTitle')}</label>}
                     name="programmeStatus"
@@ -1096,7 +1098,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('sectorsAffTitle')}</label>}
                     name="sector"
@@ -1108,7 +1110,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('subSectorsAffTitle')}</label>}
                     name="affectedSubSector"
@@ -1132,7 +1134,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('startYearTitle')}</label>}
                     name="startYear"
@@ -1153,7 +1155,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
                     name="intImplementor"
@@ -1166,7 +1168,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('recipientEntityTitle')}</label>}
                     name="recipientEntity"
@@ -1181,7 +1183,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
                     name="natImplementor"
@@ -1203,7 +1205,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item<number>
                     label={<label className="form-item-header">{t('investmentNeedsTitle')}</label>}
                     name="investment"
@@ -1373,7 +1375,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('mitigationInfoTitle')}</div>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('ghgAffected')}</label>}
                     name="ghgsAffected"
@@ -1389,7 +1391,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
               <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('achieved')}</label>}
                     name="achievedReduct"
@@ -1397,7 +1399,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('expected')}</label>}
                     name="expectedReduct"
