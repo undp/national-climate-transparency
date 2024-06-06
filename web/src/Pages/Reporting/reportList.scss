@@ -4,11 +4,14 @@
     width: 100%;
 
     .action-bar {
-      padding: 10px;
+      padding-top: 10px;
+      padding-bottom: 10px;
 
       .title {
         padding-top: 6px;
-        color: #3a3541CC;
+        color: #3A3541;
+        opacity: 0.8;
+        font-weight: bold;
       }
 
       .subTitle {

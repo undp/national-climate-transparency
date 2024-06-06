@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
-import { SubSector, NatImplementor } from '../../../Enums/shared.enum';
+import { SubSector, NatImplementor, KPIAction } from '../../../Enums/shared.enum';
 import { ProgrammeStatus } from '../../../Enums/programme.enum';
 import { GraphUpArrow, Layers } from 'react-bootstrap-icons';
 import './programmeForm.scss';
@@ -115,6 +115,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
   const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
+  const [handleKPI, setHandleKPI] = useState<boolean>(false);
 
   // Initialization Logic
 
@@ -271,6 +272,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   unit: kpi.kpiUnit,
                   achieved: kpi.achieved ?? 0,
                   expected: kpi.expected,
+                  kpiAction: KPIAction.NONE,
                 });
               } else {
                 tempInheritedKpiList.push({
@@ -281,6 +283,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   unit: kpi.kpiUnit,
                   achieved: kpi.achieved ?? 0,
                   expected: kpi.expected,
+                  kpiAction: KPIAction.NONE,
                 });
               }
               tempKpiCounter = tempKpiCounter + 1;
@@ -288,6 +291,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             setKpiCounter(tempKpiCounter);
             setCreatedKpiList(tempCreatedKpiList);
             setInheritedKpiList(tempInheritedKpiList);
+
+            if (tempCreatedKpiList.length > 0 || tempInheritedKpiList.length > 0) {
+              setHandleKPI(true);
+            }
           }
         } catch {
           message.open({
@@ -647,7 +654,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             expected: kpi.expected,
           });
         });
-      } else if (method === 'update') {
+      } else if (method === 'update' && handleKPI) {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
@@ -655,6 +662,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             kpiUnit: kpi.unit,
             creatorType: 'programme',
             expected: kpi.expected,
+            kpiAction: KPIAction.CREATED,
           });
         });
         createdKpiList.forEach((kpi) => {
@@ -664,6 +672,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             name: kpi.name,
             creatorType: 'programme',
             expected: kpi.expected,
+            kpiAction: kpi.kpiAction,
           });
         });
       }
@@ -784,6 +793,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
+    setHandleKPI(true);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
@@ -820,6 +830,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
+            kpi.kpiAction = KPIAction.UPDATED;
             return {
               ...kpi,
               [property]: property === 'expected' ? parseFloat(value) : value,
@@ -852,6 +863,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               unit: kpi.kpiUnit,
               achieved: kpi.achieved ?? 0,
               expected: kpi.expected,
+              kpiAction: KPIAction.NONE,
             });
 
             tempKpiCounter = tempKpiCounter + 1;
@@ -1211,6 +1223,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 setUploadedFiles={setUploadedFiles}
                 removedFiles={filesToRemove}
                 setRemovedFiles={setFilesToRemove}
+                setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
               <Row gutter={gutterSize}>
                 <Col span={24}>

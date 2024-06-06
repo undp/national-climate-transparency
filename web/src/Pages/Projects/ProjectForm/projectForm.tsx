@@ -10,7 +10,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import { GraphUpArrow } from 'react-bootstrap-icons';
 import './projectForm.scss';
 import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
-import { IntImplementor, Recipient } from '../../../Enums/shared.enum';
+import { IntImplementor, KPIAction, Recipient } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeSelectData } from '../../../Definitions/programmeDefinitions';
@@ -105,6 +105,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
   const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
+  const [handleKPI, setHandleKPI] = useState<boolean>(false);
 
   // Expected Time Frame
 
@@ -273,6 +274,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   unit: kpi.kpiUnit,
                   achieved: kpi.achieved ?? 0,
                   expected: kpi.expected,
+                  kpiAction: KPIAction.NONE,
                 });
               } else {
                 tempInheritedKpiList.push({
@@ -283,6 +285,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   unit: kpi.kpiUnit,
                   achieved: kpi.achieved ?? 0,
                   expected: kpi.expected,
+                  kpiAction: KPIAction.NONE,
                 });
               }
               tempKpiCounter = tempKpiCounter + 1;
@@ -290,6 +293,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             setKpiCounter(tempKpiCounter);
             setCreatedKpiList(tempCreatedKpiList);
             setInheritedKpiList(tempInheritedKpiList);
+
+            if (tempCreatedKpiList.length > 0 || tempInheritedKpiList.length > 0) {
+              setHandleKPI(true);
+            }
           }
         } catch {
           message.open({
@@ -656,7 +663,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             expected: kpi.expected,
           });
         });
-      } else if (method === 'update') {
+      } else if (method === 'update' && handleKPI) {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
@@ -664,6 +671,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             kpiUnit: kpi.unit,
             creatorType: 'project',
             expected: kpi.expected,
+            kpiAction: KPIAction.CREATED,
           });
         });
         createdKpiList.forEach((kpi) => {
@@ -673,6 +681,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             name: kpi.name,
             creatorType: 'project',
             expected: kpi.expected,
+            kpiAction: kpi.kpiAction,
           });
         });
       }
@@ -790,6 +799,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
+    setHandleKPI(true);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
@@ -826,6 +836,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
+            kpi.kpiAction = KPIAction.UPDATED;
             return {
               ...kpi,
               [property]: property === 'expected' ? parseFloat(value) : value,
@@ -858,6 +869,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               unit: kpi.kpiUnit,
               achieved: kpi.achieved ?? 0,
               expected: kpi.expected,
+              kpiAction: KPIAction.NONE,
             });
 
             tempKpiCounter = tempKpiCounter + 1;
@@ -1306,6 +1318,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 setUploadedFiles={setUploadedFiles}
                 removedFiles={filesToRemove}
                 setRemovedFiles={setFilesToRemove}
+                setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
               <div className="form-section-header">{t('mitigationInfoTitle')}</div>
               <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>

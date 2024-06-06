@@ -110,14 +110,17 @@ const reportList = () => {
 
   return (
     <div className="content-container report-table5">
+      <div className="title-bar">
+        <div className="body-title">{t('viewTitle')}</div>
+      </div>
       <div className="content-card">
         <Row className="table-actions-section">
-          <Col md={5} xs={24}>
+          <Col span={16}>
             <div className="action-bar">
               <div className="title">{t('title')}</div>
             </div>
           </Col>
-          <Col md={4} xs={24}>
+          <Col span={4}>
             <div className="action-bar">
               <Button
                 type="primary"
@@ -132,7 +135,7 @@ const reportList = () => {
               </Button>
             </div>
           </Col>
-          <Col md={4} xs={24}>
+          <Col span={4}>
             <div className="action-bar">
               <Button
                 type="primary"
@@ -149,7 +152,7 @@ const reportList = () => {
           </Col>
         </Row>
         <Row>
-          <Col xs={24}>
+          <Col span={24}>
             <div className="action-bar">
               <div className="subTitle">{t('subTitle')}</div>
             </div>

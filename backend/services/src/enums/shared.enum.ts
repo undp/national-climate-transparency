@@ -156,3 +156,9 @@ export enum ExportFileType {
 	XLSX = "xlsx",
 	CSV = "csv"
 }
+
+export enum KPIAction {
+  NONE = 'None',
+  CREATED = 'Created',
+  UPDATED = 'Updated',
+}

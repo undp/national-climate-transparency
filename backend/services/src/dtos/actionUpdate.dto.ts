@@ -5,7 +5,8 @@ import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
 import { KpiUpdateDto } from "./kpi.update.dto";
 import { KpiUnits } from "../enums/kpi.enum";
-import { Sector } from "src/enums/sector.enum";
+import { Sector } from "../enums/sector.enum";
+import { KPIAction } from "src/enums/shared.enum";
 
 export class ActionUpdateDto {
 
@@ -115,7 +116,8 @@ export class ActionUpdateDto {
 				kpiUnit: KpiUnits.GWp_INSTALLED,
 				name: "KPI 1",
 				creatorType: "action",
-				expected: 100
+				expected: 100,
+				KPIAction: KPIAction.CREATED,       // To check KPI is Updated or not for Update Timeline
 		}],
 			items: {
 				$ref: getSchemaPath(KpiUpdateDto),

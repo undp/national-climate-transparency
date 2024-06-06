@@ -25,6 +25,8 @@ export class LinkUnlinkService {
 	) {
 		await entityManager
 			.transaction(async (em) => {
+				const logs = [];
+
 				for (const programme of programmes) {
 					programme.action = action;
 					programme.path = action.actionId;
@@ -67,7 +69,6 @@ export class LinkUnlinkService {
 							await em.save<ProjectEntity>(projects)
 						}
 
-						const logs = [];
 						logs.push(
 							this.buildLogEntity(
 								LogEventType.LINKED_TO_ACTION,
@@ -77,18 +78,18 @@ export class LinkUnlinkService {
 								payload
 							)
 						)
-						logs.push(
-							this.buildLogEntity(
-								LogEventType.PROGRAMME_LINKED,
-								EntityType.ACTION,
-								action.actionId,
-								user.id,
-								payload
-							)
-						)
-						await em.save<LogEntity>(logs);
 					}
 				}
+				logs.push(
+					this.buildLogEntity(
+						LogEventType.PROGRAMME_LINKED,
+						EntityType.ACTION,
+						action.actionId,
+						user.id,
+						payload
+					)
+				)
+				await em.save<LogEntity>(logs);
 			});
 	}
 
@@ -164,10 +165,11 @@ export class LinkUnlinkService {
 
 	async updateActionChildrenSector(
 		children: {
-			haveChildren: boolean; 
-			programmeChildren: ProgrammeEntity[]; 
-			projectChildren: ProjectEntity[]; 
-			activityChildren: ActivityEntity[]},
+			haveChildren: boolean;
+			programmeChildren: ProgrammeEntity[];
+			projectChildren: ProjectEntity[];
+			activityChildren: ActivityEntity[]
+		},
 		newSector: Sector,
 		entityManager: EntityManager
 	) {
@@ -205,13 +207,14 @@ export class LinkUnlinkService {
 				}
 
 				await em.save<ActivityEntity>(activities);
-				
+
 			});
 	}
 
 	async linkProjectsToProgramme(programme: ProgrammeEntity, projects: ProjectEntity[], payload: any, user: User, entityManager: EntityManager) {
 		await entityManager
 			.transaction(async (em) => {
+				const logs = [];
 
 				for (const project of projects) {
 					project.programme = programme;
@@ -239,7 +242,6 @@ export class LinkUnlinkService {
 							await em.save<ActivityEntity>(activities);
 						}
 
-						const logs = [];
 						logs.push(
 							this.buildLogEntity(
 								LogEventType.LINKED_TO_PROGRAMME,
@@ -249,18 +251,18 @@ export class LinkUnlinkService {
 								payload
 							)
 						)
-						logs.push(
-							this.buildLogEntity(
-								LogEventType.PROJECT_LINKED,
-								EntityType.PROGRAMME,
-								programme.programmeId,
-								user.id,
-								payload
-							)
-						)
-						await em.save<LogEntity>(logs);
 					}
 				}
+				logs.push(
+					this.buildLogEntity(
+						LogEventType.PROJECT_LINKED,
+						EntityType.PROGRAMME,
+						programme.programmeId,
+						user.id,
+						payload
+					)
+				)
+				await em.save<LogEntity>(logs);
 			});
 	}
 
@@ -323,28 +325,31 @@ export class LinkUnlinkService {
 	) {
 		const act = await entityManager
 			.transaction(async (em) => {
+				const logs = [];
+				let entityType;
+
 				for (const activity of activities) {
 					let logEventType;
-					let entityType;
+
 					switch (linkActivitiesDto.parentType) {
 						case EntityType.ACTION: {
 							activity.path = `${linkActivitiesDto.parentId}._._`;
 							logEventType = LogEventType.LINKED_TO_ACTION;
-							entityType  = EntityType.ACTION;
+							entityType = EntityType.ACTION;
 							activity.sector = parentEntity?.sector;
 							break;
 						}
 						case EntityType.PROGRAMME: {
-							activity.path = parentEntity.path && parentEntity.path.trim() !== ''  ? `${parentEntity.path}.${linkActivitiesDto.parentId}._` : `_.${linkActivitiesDto.parentId}._`;
+							activity.path = parentEntity.path && parentEntity.path.trim() !== '' ? `${parentEntity.path}.${linkActivitiesDto.parentId}._` : `_.${linkActivitiesDto.parentId}._`;
 							logEventType = LogEventType.LINKED_TO_PROGRAMME;
-							entityType  = EntityType.PROGRAMME;
+							entityType = EntityType.PROGRAMME;
 							activity.sector = parentEntity?.sector;
 							break;
 						}
 						case EntityType.PROJECT: {
 							activity.path = parentEntity.path && parentEntity.path.trim() !== '' ? `${parentEntity.path}.${linkActivitiesDto.parentId}` : `_._.${linkActivitiesDto.parentId}`;
 							logEventType = LogEventType.LINKED_TO_PROJECT;
-							entityType  = EntityType.PROJECT;
+							entityType = EntityType.PROJECT;
 							activity.sector = parentEntity?.sector;
 							break;
 						}
@@ -364,7 +369,7 @@ export class LinkUnlinkService {
 						}
 
 						await em.save<SupportEntity>(supports);
-						const logs =[];
+
 						logs.push(
 							this.buildLogEntity(
 								logEventType,
@@ -374,18 +379,18 @@ export class LinkUnlinkService {
 								linkActivitiesDto.parentId
 							)
 						)
-						logs.push(
-							this.buildLogEntity(
-								LogEventType.ACTIVITY_LINKED,
-								entityType,
-								linkActivitiesDto.parentId,
-								user.id,
-								linkActivitiesDto.parentId
-							)
-						)
-						await em.save<LogEntity>(logs);
 					}
 				}
+				logs.push(
+					this.buildLogEntity(
+						LogEventType.ACTIVITY_LINKED,
+						entityType,
+						linkActivitiesDto.parentId,
+						user.id,
+						linkActivitiesDto.parentId
+					)
+				)
+				await em.save<LogEntity>(logs);
 			});
 	}
 
