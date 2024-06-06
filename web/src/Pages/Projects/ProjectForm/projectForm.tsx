@@ -1224,7 +1224,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
                 <Col {...quarterColumnBps}>
-                  <Form.Item<number>
+                  <Form.Item
                     label={<label className="form-item-header">{t('natImplementorHeader')}</label>}
                     name="nationalImplementor"
                   >
@@ -1238,7 +1238,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
                 <Col {...halfColumnBps}>
-                  <Form.Item<number>
+                  <Form.Item
                     label={<label className="form-item-header">{t('techTypeHeader')}</label>}
                     name="techType"
                   >
@@ -1276,7 +1276,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
                 <Col {...halfColumnBps}>
-                  <Form.Item<number>
+                  <Form.Item
                     label={<label className="form-item-header">{t('intImplementorHeader')}</label>}
                     name="internationalImplementingEntities"
                   >
@@ -1299,7 +1299,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
-                  <Form.Item<number>
+                  <Form.Item
                     label={<label className="form-item-header">{t('techDevHeader')}</label>}
                     name="techDevContribution"
                   >
@@ -1307,7 +1307,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
                 <Col {...halfColumnBps}>
-                  <Form.Item<number>
+                  <Form.Item
                     label={<label className="form-item-header">{t('capBuildHeader')}</label>}
                     name="capBuildObjectives"
                   >
