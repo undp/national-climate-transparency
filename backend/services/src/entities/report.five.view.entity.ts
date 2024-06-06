@@ -36,7 +36,7 @@ join project_view_entity prve on prve.id = prj."projectId"
 export const reportFiveViewSQL = `
 SELECT 'action' AS source, * FROM (
 	SELECT "actionId", title as "titleOfAction",
-description, objective, "instrumentType", status::text, sector::text, ave."ghgsAffected", "startYear" , ARRAY[]::text[] as "implementingEntities", 
+description, objective, "instrumentType", status::text, sector::text, ave."ghgsAffected", "startYear" , ave."natImplementors" as "implementingEntities", 
 ave."achievedGHGReduction", ave."expectedGHGReduction"
 	FROM action act join action_view_entity ave on ave.id = act."actionId"
 	WHERE validated = true
