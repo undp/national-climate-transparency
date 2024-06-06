@@ -1096,11 +1096,18 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   md={{ span: 14 }}
                   lg={{ span: 17 }}
                   xl={{ span: 19 }}
+                  xxl={{ span: 20 }}
                   style={{ paddingTop: '6px' }}
                 >
                   <div className="form-section-header">{t('programInfoTitle')}</div>
                 </Col>
-                <Col sm={{ span: 12 }} md={{ span: 10 }} lg={{ span: 7 }} xl={{ span: 5 }}>
+                <Col
+                  sm={{ span: 12 }}
+                  md={{ span: 10 }}
+                  lg={{ span: 7 }}
+                  xl={{ span: 5 }}
+                  xxl={{ span: 4 }}
+                >
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1152,11 +1159,18 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   md={{ span: 14 }}
                   lg={{ span: 17 }}
                   xl={{ span: 19 }}
+                  xxl={{ span: 20 }}
                   style={{ paddingTop: '6px' }}
                 >
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col sm={{ span: 12 }} md={{ span: 10 }} lg={{ span: 7 }} xl={{ span: 5 }}>
+                <Col
+                  sm={{ span: 12 }}
+                  md={{ span: 10 }}
+                  lg={{ span: 7 }}
+                  xl={{ span: 5 }}
+                  xxl={{ span: 4 }}
+                >
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1329,7 +1343,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'create' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1341,7 +1355,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col md={{ span: 5 }} lg={{ span: 3 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1365,7 +1379,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ActionEntity) && (
-                  <Col md={{ span: 5 }} xl={{ span: 3 }}>
+                  <Col md={{ span: 5 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1385,7 +1399,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'update' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }}>
+                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1397,7 +1411,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }}>
+                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1410,7 +1424,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }}>
+                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
                   <Form.Item>
                     <Button
                       type="primary"
