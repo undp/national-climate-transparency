@@ -816,7 +816,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       setNewKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
-            return { ...kpi, [property]: value };
+            return { ...kpi, [property]: property === 'expected' ? parseFloat(value) : value };
           }
           return kpi;
         });
@@ -826,7 +826,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
-            return { ...kpi, [property]: value };
+            return {
+              ...kpi,
+              [property]: property === 'expected' ? parseFloat(value) : value,
+            };
           }
           return kpi;
         });
