@@ -31,6 +31,14 @@ import { CreatedKpiData } from '../../../Definitions/kpiDefinitions';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
 import { processOptionalFields } from '../../../Utils/optionalValueHandler';
+import {
+  halfColumnBps,
+  mtgHalfColumnBps,
+  mtgSaveButtonBps,
+  mtgTableHeaderBps,
+  quarterColumnBps,
+  shortButtonBps,
+} from '../../../Definitions/breakpoints/breakpoints';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -933,7 +941,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 <EntityIdCard calledIn="Activity" entId={entId}></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('activityTitle')}</label>}
                     name="title"
@@ -942,7 +950,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input className="form-input-box" disabled={isView} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('activityDescTitle')}</label>}
                     name="description"
@@ -953,7 +961,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('parentTypeTitle')}</label>}
                     name="parentType"
@@ -974,7 +982,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('activityStatusTitle')}</label>}
                     name="status"
@@ -998,7 +1006,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
               {parentType ? (
                 <Row gutter={gutterSize}>
-                  <Col span={12}>
+                  <Col {...halfColumnBps}>
                     <Form.Item
                       label={
                         <label className="form-item-header">
@@ -1024,7 +1032,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       </Select>
                     </Form.Item>
                   </Col>
-                  <Col span={12}>
+                  <Col {...halfColumnBps}>
                     <Form.Item
                       label={
                         <label className="form-item-header">
@@ -1039,7 +1047,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Row>
               ) : null}
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
                     name="nationalImplementingEntity"
@@ -1060,7 +1068,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
                     name="internationalImplementingEntity"
@@ -1083,7 +1091,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('measuresTitle')}</label>}
                     name="measure"
@@ -1104,7 +1112,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
                 {parentType === 'project' && (
-                  <Col span={12}>
+                  <Col {...halfColumnBps}>
                     <Form.Item
                       label={<label className="form-item-header">{t('supportTypeTitle')}</label>}
                       name="supportType"
@@ -1121,7 +1129,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 )}
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('affSectorsTitle')}</label>}
                     name="sector"
@@ -1130,7 +1138,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
                 {(parentType === 'programme' || parentType === 'project') && (
-                  <Col span={6}>
+                  <Col {...quarterColumnBps}>
                     <Form.Item
                       label={<label className="form-item-header">{t('affSubSectorsTitle')}</label>}
                       name="affSubSectors"
@@ -1144,7 +1152,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Form.Item>
                   </Col>
                 )}
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('startYearTitle')}</label>}
                     name="startYear"
@@ -1153,7 +1161,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
                 {parentType === 'project' && (
-                  <Col span={6}>
+                  <Col {...quarterColumnBps}>
                     <Form.Item
                       label={<label className="form-item-header">{t('endYearTitle')}</label>}
                       name="endYear"
@@ -1165,7 +1173,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
               <Row gutter={gutterSize}>
                 {(parentType === 'programme' || parentType === 'project') && (
-                  <Col span={12}>
+                  <Col {...halfColumnBps}>
                     <Form.Item
                       label={
                         <label className="form-item-header">{t('recipientEntityTitle')}</label>
@@ -1182,7 +1190,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Col>
                 )}
                 {parentType === 'project' && (
-                  <Col span={12}>
+                  <Col {...halfColumnBps}>
                     <Form.Item
                       label={<label className="form-item-header">{t('timeFrameTitle')}</label>}
                       name="expectedTimeFrame"
@@ -1193,7 +1201,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 )}
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('anchoredTitle')}</label>}
                     name="anchoredInNationalStrategy"
@@ -1214,7 +1222,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('implMeansTitle')}</label>}
                     name="meansOfImplementation"
@@ -1236,7 +1244,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('techTypeTitle')}</label>}
                     name="technologyType"
@@ -1256,7 +1264,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('additionalInfoTitle')}</label>}
                     name="etfDescription"
@@ -1290,7 +1298,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               <div className="form-section-header">{t('mitigationInfoTitle')}</div>
               <div className="form-section-sub-header">{t('emissionInfoTitle')}</div>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('ghgAffected')}</label>}
                     name="ghgsAffected"
@@ -1314,7 +1322,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('achieved')}</label>}
                     name="achievedGHGReduction"
@@ -1329,7 +1337,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('expected')}</label>}
                     name="expectedGHGReduction"
@@ -1407,7 +1415,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('mtgInfoTitle')}</div>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...mtgHalfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('mtgMethodName')}</label>}
                     name="mtgMethodName"
@@ -1415,7 +1423,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input className="form-input-box" disabled={isView} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...mtgHalfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('mtgDocUploadOne')}</label>}
                   >
@@ -1434,7 +1442,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...mtgHalfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('mtgDescTitle')}</label>}
                     name="mtgMethodDesc"
@@ -1442,7 +1450,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     <TextArea rows={3} disabled={isView} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...mtgHalfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('mtgDocUploadTwo')}</label>}
                   >
@@ -1461,7 +1469,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...mtgHalfColumnBps}>
                   <Form.Item
                     label={
                       <label className="form-item-header">{t('mtgCalculateEntityTitle')}</label>
@@ -1485,10 +1493,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={3} style={{ paddingTop: '6px', marginRight: '10px' }}>
+                <Col {...mtgTableHeaderBps} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('mitigationTimelineTitle')}</div>
                 </Col>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col {...mtgSaveButtonBps}>
                   {method === 'update' && (
                     <Button
                       type="primary"
@@ -1524,7 +1532,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'create' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1536,7 +1544,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1547,7 +1555,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'view' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1560,7 +1568,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ActivityEntity) && (
-                  <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                  <Col>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1580,7 +1588,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'update' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1592,7 +1600,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1605,7 +1613,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button
                       type="primary"

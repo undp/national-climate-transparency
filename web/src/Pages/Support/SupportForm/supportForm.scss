@@ -10,6 +10,9 @@ body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless)
   .form-item-header {
     color: #3a3541;
     opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .form-item-header-small {

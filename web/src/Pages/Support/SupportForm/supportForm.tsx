@@ -20,6 +20,11 @@ import { Action } from '../../../Enums/action.enum';
 import { SupportEntity } from '../../../Entities/support';
 import { useAbilityContext } from '../../../Casl/Can';
 import { processOptionalFields } from '../../../Utils/optionalValueHandler';
+import {
+  halfColumnBps,
+  quarterColumnBps,
+  shortButtonBps,
+} from '../../../Definitions/breakpoints/breakpoints';
 
 const { Option } = Select;
 
@@ -320,7 +325,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               <EntityIdCard calledIn="Support" entId={entId}></EntityIdCard>
             )}
             <Row gutter={gutterSize}>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('selectActivityTitle')}</label>}
                   name="activityId"
@@ -340,7 +345,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   </Select>
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('supportDirectionTitle')}</label>}
                   name="direction"
@@ -372,7 +377,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
             <Row gutter={gutterSize}>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('financeNatureTitle')}</label>}
                   name="financeNature"
@@ -400,7 +405,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   </Select>
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('intSupportChannelTitle')}</label>}
                   name="internationalSupportChannel"
@@ -422,7 +427,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
             <Row gutter={gutterSize}>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('otherIntSupportChannel')}</label>}
                   name="otherInternationalSupportChannel"
@@ -431,7 +436,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Input className="form-input-box" disabled={isView} />
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={
                     <label className="form-item-header">{t('intFinancialInstrumentTitle')}</label>
@@ -455,7 +460,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
             <Row gutter={gutterSize}>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={
                     <label className="form-item-header">
@@ -468,7 +473,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Input className="form-input-box" disabled={isView} />
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={
                     <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
@@ -492,7 +497,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
             <Row gutter={gutterSize}>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={
                     <label className="form-item-header">
@@ -504,7 +509,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Input className="form-input-box" disabled={isView} />
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('financeStatus')}</label>}
                   name="financingStatus"
@@ -526,7 +531,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
             <Row gutter={gutterSize}>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={
                     <label className="form-item-header">{t('internationalSourceTitle')}</label>
@@ -549,7 +554,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   </Select>
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('nationalSourceTitle')}</label>}
                   name="nationalSource"
@@ -559,7 +564,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
             <Row gutter={gutterSize}>
-              <Col span={6}>
+              <Col {...quarterColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('neededUSDTitle')}</label>}
                   name="requiredAmount"
@@ -583,7 +588,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   />
                 </Form.Item>
               </Col>
-              <Col span={6}>
+              <Col {...quarterColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header-small">{t('neededLocalTitle')}</label>}
                   name="neededLocal"
@@ -591,7 +596,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Input type="number" className="form-input-box" disabled />
                 </Form.Item>
               </Col>
-              <Col span={6}>
+              <Col {...quarterColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('receivedUSDTitle')}</label>}
                   name="receivedAmount"
@@ -615,7 +620,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   />
                 </Form.Item>
               </Col>
-              <Col span={6}>
+              <Col {...quarterColumnBps}>
                 <Form.Item
                   label={
                     <label className="form-item-header-small">{t('receivedLocalTitle')}</label>
@@ -627,7 +632,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
             <Row gutter={gutterSize}>
-              <Col span={12}>
+              <Col {...halfColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('exchangeRateTitle')}</label>}
                   name="exchangeRate"
@@ -655,7 +660,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           </div>
           {method === 'create' && (
             <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col md={{ span: 5 }} xl={{ span: 2 }}>
+              <Col>
                 <Button
                   type="default"
                   size="large"
@@ -667,7 +672,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('cancel')}
                 </Button>
               </Col>
-              <Col md={{ span: 4 }} xl={{ span: 2 }}>
+              <Col {...shortButtonBps}>
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
                     {t('add')}
@@ -678,7 +683,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           )}
           {method === 'view' && (
             <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col md={{ span: 4 }} xl={{ span: 2 }}>
+              <Col>
                 <Button
                   type="default"
                   size="large"
@@ -691,7 +696,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 </Button>
               </Col>
               {ability.can(Action.Validate, SupportEntity) && (
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col>
                   <Form.Item>
                     <Button
                       disabled={isValidated}
@@ -711,7 +716,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           )}
           {method === 'update' && (
             <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col md={{ span: 5 }} xl={{ span: 2 }}>
+              <Col>
                 <Button
                   type="default"
                   size="large"
@@ -723,7 +728,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('cancel')}
                 </Button>
               </Col>
-              <Col md={{ span: 5 }} xl={{ span: 2 }}>
+              <Col>
                 <Button
                   type="default"
                   size="large"
@@ -736,7 +741,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('delete')}
                 </Button>
               </Col>
-              <Col md={{ span: 4 }} xl={{ span: 2 }}>
+              <Col {...shortButtonBps}>
                 <Form.Item>
                   <Button
                     type="primary"
