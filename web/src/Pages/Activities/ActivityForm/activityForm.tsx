@@ -15,7 +15,7 @@ import {
   ExpectedTimeline,
 } from '../../../Definitions/mtgTimeline.definition';
 import { ActivityStatus, ImplMeans, Measure, TechnologyType } from '../../../Enums/activity.enum';
-import { GHGS, IntImplementor, NatImplementor } from '../../../Enums/shared.enum';
+import { GHGS, IntImplementor, KPIAction, NatImplementor } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
@@ -240,6 +240,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 unit: kpi.kpiUnit,
                 achieved: 0,
                 expected: kpi.expected,
+                kpiAction: KPIAction.NONE,
               });
 
               tempKpiCounter = tempKpiCounter + 1;
@@ -473,6 +474,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
                     ?.achieved ?? 0,
                 expected: kpi.expected,
+                kpiAction: KPIAction.NONE,
               });
 
               tempKpiCounter = tempKpiCounter + 1;

@@ -30,6 +30,7 @@ import { Sector } from '../../../Enums/sector.enum';
 import { NewKpi } from '../../../Components/KPI/newKpi';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
+import { KPIAction } from '../../../Enums/shared.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -103,6 +104,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [kpiCounter, setKpiCounter] = useState<number>(0);
   const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
+  const [handleKPI, setHandleKPI] = useState<boolean>(false);
+  // const [kpiAction, setKpiAction] = useState<KPIAction>(KPIAction.NONE);
 
   // Initialization Logic
 
@@ -225,11 +228,16 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 unit: kpi.kpiUnit,
                 achieved: kpi.achieved ?? 0,
                 expected: kpi.expected,
+                kpiAction: KPIAction.NONE,
               });
               tempKpiCounter = tempKpiCounter + 1;
             });
             setKpiCounter(tempKpiCounter);
             setCreatedKpiList(tempKpiList);
+
+            if (tempKpiList.length > 0) {
+              setHandleKPI(true);
+            }
           }
         } catch {
           message.open({
@@ -596,7 +604,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             expected: kpi.expected,
           });
         });
-      } else if (method === 'update') {
+      } else if (method === 'update' && handleKPI) {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
@@ -604,6 +612,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             kpiUnit: kpi.unit,
             creatorType: 'action',
             expected: kpi.expected,
+            kpiAction: KPIAction.CREATED,
           });
         });
         createdKpiList.forEach((kpi) => {
@@ -613,6 +622,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             name: kpi.name,
             creatorType: 'action',
             expected: kpi.expected,
+            kpiAction: kpi.kpiAction,
           });
         });
       }
@@ -742,6 +752,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
+    setHandleKPI(true);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
@@ -778,6 +789,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
+            kpi.kpiAction = KPIAction.UPDATED;
             return { ...kpi, [property]: value };
           }
           return kpi;

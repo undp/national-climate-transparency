@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { EntityType } from "../enums/shared.enum";
 import { KpiUnits } from "../enums/kpi.enum";
+import { KPIAction } from "../enums/shared.enum";
 
 export class KpiUpdateDto {
 
@@ -38,4 +39,11 @@ export class KpiUpdateDto {
     @IsNumber()
     @ApiProperty()
     expected: number;
+
+		@IsNotEmpty()
+    @ApiProperty({ enum: KPIAction })
+    @IsEnum(KPIAction, {
+        message: "Invalid KPI Action. Supported following creator types:" + Object.values(KPIAction),
+    })
+    kpiAction: string;            // To check KPI is Updated or not for Update Timeline
 }

@@ -10,7 +10,7 @@ import { ProgrammeEntity } from "../entities/programme.entity";
 import { CounterType } from "../enums/counter.type.enum";
 import { FileUploadService } from "../util/fileUpload.service";
 import { DocumentEntityDto } from "../dtos/document.entity.dto";
-import { EntityType, IntImplementor, LogEventType, Recipient } from "../enums/shared.enum";
+import { EntityType, IntImplementor, KPIAction, LogEventType, Recipient } from "../enums/shared.enum";
 import { LogEntity } from "../entities/log.entity";
 import { KpiEntity } from "../entities/kpi.entity";
 import { PayloadValidator } from "../validation/payload.validator";
@@ -150,7 +150,6 @@ export class ProgrammeService {
 					// linking projects and updating paths of projects and activities
 					if (projects && projects.length > 0) {
 						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
-						this.addEventLogEntry(eventLog, LogEventType.PROJECT_LINKED, EntityType.PROGRAMME, programme.programmeId, user.id, programmeDto);
 					}
 
 					if (programmeDto.kpis) {
@@ -345,7 +344,6 @@ export class ProgrammeService {
 		const kpiList = [];
 		const kpisToRemove = [];
 		const achievementsToRemove = [];
-		let kpisUpdated = false;
 		const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programmeUpdate.programmeId);
 
 		if (programmeUpdateDto.kpis && programmeUpdateDto.kpis.length > 0) {
@@ -360,7 +358,6 @@ export class ProgrammeService {
 					kpi.creatorId = programmeUpdateDto.programmeId;
 					kpiList.push(kpi);
 				}
-				kpisUpdated = true;
 			}
 
 			for (const currentKpi of currentKpis) {
@@ -374,17 +371,14 @@ export class ProgrammeService {
 					kpi.expected = kpiToUpdate.expected;
 					kpi.kpiUnit = kpiToUpdate.kpiUnit;
 					kpiList.push(kpi);
-					kpisUpdated = true;
 				} else {
 					kpisToRemove.push(currentKpi);
-					kpisUpdated = true;
 				}
 			}
 		}
 
 		if (programmeUpdateDto.kpis && programmeUpdateDto.kpis.length <= 0) {
 			kpisToRemove.push(...currentKpis);
-			kpisUpdated = true;
 		}
 
 		if (kpisToRemove.length > 0) {
@@ -398,9 +392,14 @@ export class ProgrammeService {
 
 		this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_UPDATED, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, programmeUpdateDto);
 
-		if (kpisUpdated) {
+		if (programmeUpdateDto.kpis && programmeUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.UPDATED)) {
 			// Add event log entry after the loop completes
 			this.addEventLogEntry(eventLog, LogEventType.KPI_UPDATED, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, kpiList);
+		}
+
+		if (programmeUpdateDto.kpis && programmeUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.CREATED)) {
+			// Add event log entry after the loop completes
+			this.addEventLogEntry(eventLog, LogEventType.KPI_ADDED, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, kpiList);
 		}
 
 		const prg = await this.entityManager
@@ -710,7 +709,7 @@ export class ProgrammeService {
 		if (programme.validated) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
-					"project.projectAlreadyValidated",
+					"programme.programmeAlreadyValidated",
 					[validateDto.entityId]
 				),
 				HttpStatus.BAD_REQUEST

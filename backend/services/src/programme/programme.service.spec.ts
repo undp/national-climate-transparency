@@ -31,6 +31,7 @@ import { DocumentEntityDto } from "../dtos/document.entity.dto";
 import { KpiEntity } from "../entities/kpi.entity";
 import { KpiUpdateDto } from "../dtos/kpi.update.dto";
 import { ProgrammeViewEntity } from "../entities/programme.view.entity";
+import { ValidateDto } from "../dtos/validate.dto";
 
 describe('ProgrammeService', () => {
 	let service: ProgrammeService;
@@ -69,6 +70,7 @@ describe('ProgrammeService', () => {
 			parseMongoQueryToSQLWithTable: jest.fn(),
 			generateWhereSQL: jest.fn(),
 			refreshMaterializedViews: jest.fn(),
+			doesUserHaveSectorPermission: jest.fn(),
 		};
 		fileUploadServiceMock = {
 			uploadDocument: jest.fn().mockResolvedValue('http://test.com/documents/action_documents/test.csv'),
@@ -85,7 +87,8 @@ describe('ProgrammeService', () => {
 		}
 
 		kpiServiceMock = {
-			findKpisByCreatorTypeAndCreatorId: jest.fn(),
+			getKpisByCreatorTypeAndCreatorId: jest.fn(),
+			getAchievementsOfParentEntity: jest.fn(),
 		};
 
 		programmeRepositoryMock = {
@@ -179,7 +182,6 @@ describe('ProgrammeService', () => {
 		programmeDto.title = "test";
 		programmeDto.description = "test description";
 		programmeDto.objective = "test objective";
-		programmeDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeDto.startYear = 2024;
 		programmeDto.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -190,7 +192,6 @@ describe('ProgrammeService', () => {
 		programmeEntity.title = "test";
 		programmeEntity.description = "test description";
 		programmeEntity.objective = "test objective";
-		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeEntity.startYear = 2024;
 		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -202,9 +203,6 @@ describe('ProgrammeService', () => {
 			"title": "test",
 			"description": "test description",
 			"objective": "test objective",
-			"affectedSectors": [
-				"Agriculture", "Cross-cutting"
-			],
 			"affectedSubSector": [
 				"Agriculture", "Agroforestry"
 			],
@@ -248,7 +246,6 @@ describe('ProgrammeService', () => {
 		programmeDto.title = "test";
 		programmeDto.description = "test description";
 		programmeDto.objective = "test objective";
-		programmeDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeDto.startYear = 2024;
 		programmeDto.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -260,7 +257,6 @@ describe('ProgrammeService', () => {
 		programmeEntity.title = "test";
 		programmeEntity.description = "test description";
 		programmeEntity.objective = "test objective";
-		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeEntity.startYear = 2024;
 		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -272,9 +268,6 @@ describe('ProgrammeService', () => {
 			"title": "test",
 			"description": "test description",
 			"objective": "test objective",
-			"affectedSectors": [
-				"Agriculture", "Cross-cutting"
-			],
 			"affectedSubSector": [
 				"Agriculture", "Agroforestry"
 			],
@@ -292,6 +285,7 @@ describe('ProgrammeService', () => {
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce("2");
 		jest.spyOn(actionServiceMock, 'findActionById').mockResolvedValueOnce(new ActionEntity());
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -321,7 +315,6 @@ describe('ProgrammeService', () => {
 		programmeDto.title = "test";
 		programmeDto.description = "test description";
 		programmeDto.objective = "test objective";
-		programmeDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeDto.startYear = 2024;
 		programmeDto.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -333,7 +326,6 @@ describe('ProgrammeService', () => {
 		programmeEntity.title = "test";
 		programmeEntity.description = "test description";
 		programmeEntity.objective = "test objective";
-		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeEntity.startYear = 2024;
 		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -345,9 +337,6 @@ describe('ProgrammeService', () => {
 			"title": "test",
 			"description": "test description",
 			"objective": "test objective",
-			"affectedSectors": [
-				"Agriculture", "Cross-cutting"
-			],
 			"affectedSubSector": [
 				"Agriculture", "Agroforestry"
 			],
@@ -411,7 +400,6 @@ describe('ProgrammeService', () => {
 		programmeDto.title = "test";
 		programmeDto.description = "test description";
 		programmeDto.objective = "test objective";
-		programmeDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeDto.startYear = 2024;
 		programmeDto.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -425,7 +413,6 @@ describe('ProgrammeService', () => {
 		programmeEntity.title = "test";
 		programmeEntity.description = "test description";
 		programmeEntity.objective = "test objective";
-		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeEntity.startYear = 2024;
 		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -437,9 +424,6 @@ describe('ProgrammeService', () => {
 			"title": "test",
 			"description": "test description",
 			"objective": "test objective",
-			"affectedSectors": [
-				"Agriculture", "Cross-cutting"
-			],
 			"affectedSubSector": [
 				"Agriculture", "Agroforestry"
 			],
@@ -477,6 +461,7 @@ describe('ProgrammeService', () => {
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce("2");
 		jest.spyOn(actionServiceMock, 'findActionById').mockResolvedValueOnce(new ActionEntity());
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -498,6 +483,48 @@ describe('ProgrammeService', () => {
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 	});
 
+	it('should throw an exception if user does not have sector permission', async () => {
+		const user = new User();
+		user.id = 1;
+
+		const programmeDto = new ProgrammeDto();
+		programmeDto.actionId = "A001";
+
+		const action = new ActionEntity();
+		action.actionId = "A001";
+		action.sector = Sector.Agriculture;
+
+		jest.spyOn(actionServiceMock, 'findActionById').mockResolvedValueOnce(action);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(false);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("programme.cannotLinkToUnrelatedAction");
+
+		await expect(service.createProgramme(programmeDto, user)).rejects.toThrow(HttpException);
+
+		expect(actionServiceMock.findActionById).toHaveBeenCalledWith('A001');
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('programme.cannotLinkToUnrelatedAction', ['A001']);
+	});
+
+	it('should throw error if any linked project is already associated with another programme', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const programmeDto = new ProgrammeDto();
+		programmeDto.linkedProjects = ['1'];
+
+		const project = new ProjectEntity();
+		project.projectId = '1';
+		project.programme = { id: 'P001' } as unknown as ProgrammeEntity;
+
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
+		jest.spyOn(service, 'findAllProjectsByIds').mockResolvedValueOnce([project]);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("programme.projectAlreadyLinked");
+
+		await expect(service.createProgramme(programmeDto, user)).rejects.toThrow(HttpException);
+
+		expect(service.findAllProjectsByIds).toHaveBeenCalledWith(programmeDto.linkedProjects);
+	});
+
 	it('should link programmes to action', async () => {
 		const linkProgrammesDto: LinkProgrammesDto = { actionId: '1', programmes: ['1', '2', '3'] };
 		const user = new User();
@@ -509,19 +536,17 @@ describe('ProgrammeService', () => {
 		const programme1 = new ProgrammeEntity();
 		programme1.programmeId = '1';
 		programme1.action = null;
-		programme1.affectedSectors = [Sector.Agriculture];
 
 		const programme2 = new ProgrammeEntity();
 		programme2.programmeId = '2';
 		programme2.action = null;
-		programme2.affectedSectors = [Sector.Agriculture];
 
 		const programme3 = new ProgrammeEntity();
 		programme3.programmeId = '3';
 		programme3.action = null;
-		programme3.affectedSectors = [Sector.Agriculture];
 
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -562,18 +587,18 @@ describe('ProgrammeService', () => {
 		const programme1 = new ProgrammeEntity();
 		programme1.programmeId = '1';
 		programme1.action = action;
-		programme1.path = "path1"
-		programme1.affectedSectors = [Sector.Agriculture];
+		programme1.path = "path1";
+		programme1.sector = Sector.Agriculture;
 
 		const programme2 = new ProgrammeEntity();
 		programme2.programmeId = '2';
 		programme2.action = null;
-		programme2.affectedSectors = [Sector.Agriculture];
+		programme1.sector = Sector.Agriculture;
 
 		const programme3 = new ProgrammeEntity();
 		programme3.programmeId = '3';
 		programme3.action = null;
-		programme3.affectedSectors = [Sector.Agriculture];
+		programme1.sector = Sector.Agriculture;
 
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
 
@@ -594,8 +619,8 @@ describe('ProgrammeService', () => {
 		}
 
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
-			'programme.programmeAlreadyLinked',
-			["1"],
+			'programme.cannotLinkToNotRelatedAction',
+			[],
 		);
 		expect(entityManagerMock.transaction).toBeCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
@@ -610,9 +635,9 @@ describe('ProgrammeService', () => {
 		programme1.programmeId = '1';
 		programme1.action = new ActionEntity();
 		programme1.path = 'path1';
-		programme1.affectedSectors = [Sector.Agriculture];
 
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1]);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -641,12 +666,12 @@ describe('ProgrammeService', () => {
 		const unlinkProgrammesDto: UnlinkProgrammesDto = { programme: '1' };
 		const user = new User();
 		user.sector = [Sector.Agriculture]
-		
+
 		const programme1 = new ProgrammeEntity();
 		programme1.programmeId = '1';
 		programme1.action = null;
 		programme1.path = '';
-		programme1.affectedSectors = [Sector.Agriculture];
+		programme1.sector = Sector.Agriculture;
 
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1]);
 
@@ -668,7 +693,7 @@ describe('ProgrammeService', () => {
 		}
 
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
-			'programme.programmeIsNotLinked',
+			'programme.cannotUnlinkNotRelatedProgrammes',
 			["1"],
 		);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
@@ -685,19 +710,20 @@ describe('ProgrammeService', () => {
 		const programme1 = new ProgrammeEntity();
 		programme1.programmeId = '1';
 		programme1.action = null;
-		programme1.affectedSectors = [Sector.Agriculture];
+		programme1.sector = Sector.Agriculture;
 
 		const programme2 = new ProgrammeEntity();
 		programme2.programmeId = '2';
 		programme2.action = null;
-		programme2.affectedSectors = [Sector.Industry];
+		programme2.sector = Sector.Agriculture;
 
 		const programme3 = new ProgrammeEntity();
 		programme3.programmeId = '3';
 		programme3.action = null;
-		programme3.affectedSectors = [Sector.Agriculture];
+		programme3.sector = Sector.Agriculture;
 
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("programme.cannotLinkToNotRelatedAction");
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -716,8 +742,8 @@ describe('ProgrammeService', () => {
 		}
 
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith(
-			'programme.cannotLinkNotRelatedProgrammes',
-			["2"],
+			'programme.cannotLinkToNotRelatedAction',
+			[],
 		);
 		expect(entityManagerMock.transaction).toBeCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
@@ -732,7 +758,6 @@ describe('ProgrammeService', () => {
 		programme1.programmeId = '1';
 		programme1.action = new ActionEntity();;
 		programme1.path = 'path1';
-		programme1.affectedSectors = [Sector.CrossCutting];
 
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1]);
 
@@ -766,19 +791,18 @@ describe('ProgrammeService', () => {
 
 		const project1 = new ProjectEntity();
 		project1.type = ProjectType.MITIGATION;
-		project1.recipientEntities = [ Recipient.MIN_EDU ];
-		project1.internationalImplementingEntities = [ IntImplementor.EBRD ];
+		project1.recipientEntities = [Recipient.MIN_EDU];
+		project1.internationalImplementingEntities = [IntImplementor.EBRD];
 
 		const project2 = new ProjectEntity();
 		project2.type = ProjectType.MITIGATION;
 		project2.recipientEntities = [Recipient.MIN_FISH];
-		project2.internationalImplementingEntities = [ IntImplementor.GIZ ];
+		project2.internationalImplementingEntities = [IntImplementor.GIZ];
 
 		const programmeEntity = new ProgrammeEntity();
 		programmeEntity.title = "test";
 		programmeEntity.description = "test description";
 		programmeEntity.objective = "test objective";
-		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeEntity.startYear = 2024;
 		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -815,7 +839,6 @@ describe('ProgrammeService', () => {
 		programmeEntity.title = "test";
 		programmeEntity.description = "test description";
 		programmeEntity.objective = "test objective";
-		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeEntity.startYear = 2024;
 		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -970,14 +993,14 @@ describe('ProgrammeService', () => {
 		programmeUpdateDto.title = "test";
 		programmeUpdateDto.description = "test description";
 		programmeUpdateDto.objective = "test objective";
-		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeUpdateDto.startYear = 2024;
 		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
 		programmeUpdateDto.investment = 1000;
 		programmeUpdateDto.comments = "test comment"
 
-		jest.spyOn(service, 'findProgrammeWithLinkedActionByProgrammeId').mockResolvedValueOnce(new ProgrammeEntity());
+		jest.spyOn(service, 'findProgrammeWithParentChildren').mockResolvedValueOnce(new ProgrammeEntity());
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -994,7 +1017,7 @@ describe('ProgrammeService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
@@ -1007,7 +1030,6 @@ describe('ProgrammeService', () => {
 		programmeUpdateDto.title = "test";
 		programmeUpdateDto.description = "test description";
 		programmeUpdateDto.objective = "test objective";
-		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeUpdateDto.startYear = 2024;
 		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -1019,7 +1041,6 @@ describe('ProgrammeService', () => {
 		programmeUpdateEntity.title = "test";
 		programmeUpdateEntity.description = "test description";
 		programmeUpdateEntity.objective = "test objective";
-		programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeUpdateEntity.startYear = 2024;
 		programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -1035,7 +1056,6 @@ describe('ProgrammeService', () => {
 		programmeEntity.title = "test";
 		programmeEntity.description = "test description";
 		programmeEntity.objective = "test objective";
-		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeEntity.startYear = 2020;
 		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -1044,7 +1064,8 @@ describe('ProgrammeService', () => {
 		programmeEntity.documents = [documentDto];
 
 
-		jest.spyOn(service, 'findProgrammeWithLinkedActionByProgrammeId').mockResolvedValueOnce(programmeEntity);
+		jest.spyOn(service, 'findProgrammeWithParentChildren').mockResolvedValueOnce(programmeEntity);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -1061,7 +1082,7 @@ describe('ProgrammeService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
@@ -1082,7 +1103,6 @@ describe('ProgrammeService', () => {
 		programmeUpdateDto.title = "test";
 		programmeUpdateDto.description = "test description";
 		programmeUpdateDto.objective = "test objective";
-		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeUpdateDto.startYear = 2024;
 		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -1094,7 +1114,6 @@ describe('ProgrammeService', () => {
 		programmeUpdateEntity.title = "test";
 		programmeUpdateEntity.description = "test description";
 		programmeUpdateEntity.objective = "test objective";
-		programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeUpdateEntity.startYear = 2024;
 		programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -1107,7 +1126,6 @@ describe('ProgrammeService', () => {
 		programmeEntity.title = "test";
 		programmeEntity.description = "test description";
 		programmeEntity.objective = "test objective";
-		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeEntity.startYear = 2020;
 		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -1115,7 +1133,8 @@ describe('ProgrammeService', () => {
 		programmeEntity.comments = "test comment"
 		programmeEntity.documents = [documentDto];
 
-		jest.spyOn(service, 'findProgrammeWithLinkedActionByProgrammeId').mockResolvedValueOnce(programmeEntity);
+		jest.spyOn(service, 'findProgrammeWithParentChildren').mockResolvedValueOnce(programmeEntity);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -1132,7 +1151,7 @@ describe('ProgrammeService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
-		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
@@ -1162,7 +1181,6 @@ describe('ProgrammeService', () => {
 		programmeUpdateDto.title = "test";
 		programmeUpdateDto.description = "test description";
 		programmeUpdateDto.objective = "test objective";
-		programmeUpdateDto.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeUpdateDto.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeUpdateDto.startYear = 2024;
 		programmeUpdateDto.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -1174,7 +1192,6 @@ describe('ProgrammeService', () => {
 		programmeUpdateEntity.title = "test";
 		programmeUpdateEntity.description = "test description";
 		programmeUpdateEntity.objective = "test objective";
-		programmeUpdateEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeUpdateEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeUpdateEntity.startYear = 2024;
 		programmeUpdateEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -1185,7 +1202,6 @@ describe('ProgrammeService', () => {
 		programmeEntity.title = "test";
 		programmeEntity.description = "test description";
 		programmeEntity.objective = "test objective";
-		programmeEntity.affectedSectors = [Sector.Agriculture, Sector.CrossCutting];
 		programmeEntity.affectedSubSector = [SubSector.AGRICULTURE, SubSector.AGR_FORESTRY];
 		programmeEntity.startYear = 2020;
 		programmeEntity.natImplementor = [NatImplementor.AGRI_DEPT];
@@ -1193,8 +1209,9 @@ describe('ProgrammeService', () => {
 		programmeEntity.comments = "test comment"
 
 
-		jest.spyOn(service, 'findProgrammeWithLinkedActionByProgrammeId').mockResolvedValueOnce(programmeEntity);
-		jest.spyOn(kpiServiceMock, 'findKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2])
+		jest.spyOn(service, 'findProgrammeWithParentChildren').mockResolvedValueOnce(programmeEntity);
+		jest.spyOn(kpiServiceMock, 'getKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2]);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -1212,8 +1229,29 @@ describe('ProgrammeService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(kpiServiceMock.findKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
+
+	it('should throw an exception if programme is already validated', async () => {
+		const user = new User();
+		user.id = 2;
+	
+		const validateDto = new ValidateDto();
+		validateDto.entityId = 'P001';
+	
+		const programme = new ProgrammeEntity();
+		programme.programmeId = 'P001';
+		programme.sector = Sector.Forestry;
+		programme.validated = true;
+	
+		jest.spyOn(service, 'findProgrammeById').mockResolvedValueOnce(programme);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockReturnValueOnce('programme.programmeAlreadyValidated');
+	
+		await expect(service.validateProgramme(validateDto, user)).rejects.toThrow(HttpException);
+	
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('programme.programmeAlreadyValidated', ['P001']);
+	  })
 })

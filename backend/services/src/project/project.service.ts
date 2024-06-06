@@ -9,7 +9,7 @@ import { LogEntity } from "../entities/log.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { User } from "../entities/user.entity";
 import { CounterType } from "../enums/counter.type.enum";
-import { EntityType, LogEventType } from "../enums/shared.enum";
+import { EntityType, KPIAction, LogEventType } from "../enums/shared.enum";
 import { ProgrammeService } from "../programme/programme.service";
 import { CounterService } from "../util/counter.service";
 import { FileUploadService } from "../util/fileUpload.service";
@@ -156,7 +156,6 @@ export class ProjectService {
 					// linking activities and updating paths of projects and activities
 					if (activities && activities.length > 0) {
 						await this.linkUnlinkService.linkActivitiesToParent(savedProject, activities, { parentType: EntityType.PROJECT, parentId: savedProject.projectId, activityIds: activities }, user, em);
-						this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, project.projectId, user.id, projectDto);
 					}
 
 					if (projectDto.kpis) {
@@ -407,7 +406,6 @@ export class ProjectService {
 		const kpiList = [];
 		const kpisToRemove = [];
 		const achievementsToRemove = [];
-		let kpisUpdated = false;
 
 		const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, projectUpdate.projectId);
 
@@ -423,7 +421,6 @@ export class ProjectService {
 					kpi.creatorId = projectUpdateDto.projectId;
 					kpiList.push(kpi);
 				}
-				kpisUpdated = true;
 			}
 
 			for (const currentKpi of currentKpis) {
@@ -437,17 +434,14 @@ export class ProjectService {
 					kpi.expected = kpiToUpdate.expected;
 					kpi.kpiUnit = kpiToUpdate.kpiUnit;
 					kpiList.push(kpi);
-					kpisUpdated = true;
 				} else {
 					kpisToRemove.push(currentKpi);
-					kpisUpdated = true;
 				}
 			}
 		}
 
 		if (projectUpdateDto.kpis && projectUpdateDto.kpis.length <= 0) {
 			kpisToRemove.push(...currentKpis);
-			kpisUpdated = true;
 		}
 
 		if (kpisToRemove.length > 0) {
@@ -461,9 +455,14 @@ export class ProjectService {
 
 		this.addEventLogEntry(eventLog, LogEventType.PROJECT_UPDATED, EntityType.PROJECT, projectUpdate.projectId, user.id, projectUpdateDto);
 
-		if (kpisUpdated) {
+		if (projectUpdateDto.kpis && projectUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.UPDATED)) {
 			// Add event log entry after the loop completes
 			this.addEventLogEntry(eventLog, LogEventType.KPI_UPDATED, EntityType.PROJECT, projectUpdate.projectId, user.id, kpiList);
+		}
+
+		if (projectUpdateDto.kpis && projectUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.CREATED)) {
+			// Add event log entry after the loop completes
+			this.addEventLogEntry(eventLog, LogEventType.KPI_ADDED, EntityType.PROJECT, projectUpdate.projectId, user.id, kpiList);
 		}
 
 		const proj = await this.entityManager

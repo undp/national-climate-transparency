@@ -23,9 +23,11 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
+import { AchievementEntity } from "../entities/achievement.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { ProjectEntity } from "../entities/project.entity";
-import { AchievementEntity } from "../entities/achievement.entity";
+import { SupportEntity } from "../entities/support.entity";
+import { KPIAction } from "../enums/shared.enum";
 
 @Injectable()
 export class ActionService {
@@ -114,7 +116,6 @@ export class ActionService {
 					// link programmes here
 					if (programmes && programmes.length > 0) {
 						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, action.actionId, user, em);
-						this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_LINKED, EntityType.ACTION, action.actionId, user.id, actionDto);
 					}
 
 					if (actionDto.kpis) {
@@ -375,7 +376,6 @@ export class ActionService {
 		const kpiList = [];
 		const kpisToRemove = [];
 		const achievementsToRemove = [];
-		let kpisUpdated = false;
 
 		const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, actionUpdate.actionId);
 
@@ -391,7 +391,6 @@ export class ActionService {
 					kpi.creatorId = actionUpdateDto.actionId;
 					kpiList.push(kpi);
 				}
-				kpisUpdated = true;
 			}
 
 			for (const currentKpi of currentKpis) {
@@ -405,17 +404,14 @@ export class ActionService {
 					kpi.expected = kpiToUpdate.expected;
 					kpi.kpiUnit = kpiToUpdate.kpiUnit;
 					kpiList.push(kpi);
-					kpisUpdated = true;
 				} else {
 					kpisToRemove.push(currentKpi);
-					kpisUpdated = true;
 				}
 			}
 		}
 
 		if (actionUpdateDto.kpis && actionUpdateDto.kpis.length <= 0) {
 			kpisToRemove.push(...currentKpis);
-			kpisUpdated = true;
 		}
 
 		if (kpisToRemove.length > 0) {
@@ -429,9 +425,14 @@ export class ActionService {
 
 		this.addEventLogEntry(eventLog, LogEventType.ACTION_UPDATED, EntityType.ACTION, actionUpdate.actionId, user.id, actionUpdateDto);
 
-		if (kpisUpdated) {
+		if (actionUpdateDto.kpis && actionUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.UPDATED)) {
 			// Add event log entry after the loop completes
 			this.addEventLogEntry(eventLog, LogEventType.KPI_UPDATED, EntityType.ACTION, actionUpdateDto.actionId, user.id, kpiList);
+		}
+
+		if (actionUpdateDto.kpis && actionUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.CREATED)) {
+			// Add event log entry after the loop completes
+			this.addEventLogEntry(eventLog, LogEventType.KPI_ADDED, EntityType.ACTION, actionUpdateDto.actionId, user.id, kpiList);
 		}
 
 		const act = await this.entityManager

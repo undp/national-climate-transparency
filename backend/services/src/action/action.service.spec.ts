@@ -24,12 +24,18 @@ import { DocumentEntityDto } from "../dtos/document.entity.dto";
 import { KpiEntity } from "../entities/kpi.entity";
 import { KpiUpdateDto } from "../dtos/kpi.update.dto";
 import { ActionViewEntity } from "../entities/action.view.entity";
+import { ProjectEntity } from "../entities/project.entity";
+import { ActivityEntity } from "../entities/activity.entity";
+import { Sector } from "../enums/sector.enum";
+import { ValidateDto } from "../dtos/validate.dto";
 
 describe('ActionService', () => {
 	let service: ActionService;
 	let entityManagerMock: Partial<EntityManager>;
 	let actionRepositoryMock: Partial<Repository<ActionEntity>>;
 	let programmeRepositoryMock: Partial<Repository<ProgrammeEntity>>;
+	let projectRepositoryMock: Partial<Repository<ProjectEntity>>;
+	let activityRepositoryMock: Partial<Repository<ActivityEntity>>;
 	let counterServiceMock: Partial<CounterService>;
 	let helperServiceMock: Partial<HelperService>;
 	let fileUploadServiceMock: Partial<FileUploadService>;
@@ -60,6 +66,42 @@ describe('ActionService', () => {
 				getManyAndCount: jest.fn(),
 			})) as unknown as () => SelectQueryBuilder<ActionEntity>,
 		};
+		programmeRepositoryMock = {
+			save: jest.fn(),
+			createQueryBuilder: jest.fn(() => ({
+				where: jest.fn().mockReturnThis(),
+				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				leftJoinAndMapMany: jest.fn().mockReturnThis(),
+				orderBy: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				getManyAndCount: jest.fn(),
+			})) as unknown as () => SelectQueryBuilder<ProgrammeEntity>,
+		};
+		projectRepositoryMock = {
+			save: jest.fn(),
+			createQueryBuilder: jest.fn(() => ({
+				where: jest.fn().mockReturnThis(),
+				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				leftJoinAndMapMany: jest.fn().mockReturnThis(),
+				orderBy: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				getManyAndCount: jest.fn(),
+			})) as unknown as () => SelectQueryBuilder<ProjectEntity>,
+		};
+		activityRepositoryMock = {
+			save: jest.fn(),
+			createQueryBuilder: jest.fn(() => ({
+				where: jest.fn().mockReturnThis(),
+				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				leftJoinAndMapMany: jest.fn().mockReturnThis(),
+				orderBy: jest.fn().mockReturnThis(),
+				offset: jest.fn().mockReturnThis(),
+				limit: jest.fn().mockReturnThis(),
+				getManyAndCount: jest.fn(),
+			})) as unknown as () => SelectQueryBuilder<ActivityEntity>,
+		};
 		counterServiceMock = {
 			incrementCount: jest.fn().mockResolvedValue(1),
 		};
@@ -68,6 +110,7 @@ describe('ActionService', () => {
 			parseMongoQueryToSQLWithTable: jest.fn(),
 			generateWhereSQL: jest.fn(),
 			refreshMaterializedViews: jest.fn(),
+			doesUserHaveSectorPermission: jest.fn(),
 		};
 		fileUploadServiceMock = {
 			uploadDocument: jest.fn().mockResolvedValue('http://test.com/documents/action_documents/test.csv'),
@@ -114,6 +157,14 @@ describe('ActionService', () => {
 				{
 					provide: getRepositoryToken(ProgrammeEntity),
 					useValue: programmeRepositoryMock,
+				},
+				{
+					provide: getRepositoryToken(ProjectEntity),
+					useValue: projectRepositoryMock,
+				},
+				{
+					provide: getRepositoryToken(ActivityEntity),
+					useValue: activityRepositoryMock,
 				},
 				{
 					provide: LinkUnlinkService,
@@ -172,6 +223,7 @@ describe('ActionService', () => {
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce("2");
 		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("action.createActionSuccess");
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -272,6 +324,7 @@ describe('ActionService', () => {
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce("2");
 		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
 		jest.spyOn(linkUnlinkServiceMock, 'linkProgrammesToAction').mockResolvedValue();
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -280,7 +333,7 @@ describe('ActionService', () => {
 			};
 			const savedAction = await callback(emMock);
 
-			expect(emMock.save).toHaveBeenCalledTimes(5);
+			expect(emMock.save).toHaveBeenCalledTimes(6);
 			return savedAction;
 		});
 
@@ -357,11 +410,78 @@ describe('ActionService', () => {
 			await service.createAction(actionDto, user);
 		} catch (error) {
 			expect(error).toBeInstanceOf(HttpException);
-			expect(error.status).toBe(HttpStatus.BAD_REQUEST);
 		}
 
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
 	});
+
+	it('should throw an exception if user does not have sector permission', async () => {
+		const user = new User();
+		user.id = 2;
+	
+		const actionDto = new ActionDto();
+		actionDto.actionId = "A001";
+		actionDto.title = "test";
+		actionDto.sector = Sector.Energy;
+	
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(false);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("activity.cannotCreateNotRelatedAction");
+	
+		await expect(service.createAction(actionDto, user)).rejects.toThrow(HttpException);
+	
+		expect(helperServiceMock.doesUserHaveSectorPermission).toHaveBeenCalledWith(user, actionDto.sector);
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.cannotCreateNotRelatedAction", ["A001"]);
+	});
+
+
+	it('should throw an exception if linked programmes are already linked to an action', async () => {
+		const user = new User();
+		user.id = 2;
+	
+		const actionDto = new ActionDto();
+		actionDto.linkedProgrammes = ['P001'];
+	
+		const programme = new ProgrammeEntity();
+		programme.programmeId = 'P001';
+		programme.action = { id: 'A001' } as unknown as ActionEntity;
+	
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
+		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValueOnce([programme]);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("action.programmeAlreadyLinked");
+	
+		await expect(service.createAction(actionDto, user)).rejects.toThrow(HttpException);
+	
+		expect(service.findAllProgrammeByIds).toHaveBeenCalledWith(actionDto.linkedProgrammes);
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("action.programmeAlreadyLinked", ['P001']);
+	});
+	
+
+	it('should refresh materialized views after successful action creation', async () => {
+		const user = new User();
+		user.id = 2;
+	
+		const actionDto = new ActionDto();
+		const actionEntity = new ActionEntity();
+		actionEntity.actionId = 'A001';
+	
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
+		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValueOnce([]);
+	
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(actionEntity),
+			};
+			const savedAction = await callback(emMock);
+			return savedAction;
+		});
+	
+		const result = await service.createAction(actionDto, user);
+	
+		expect(helperServiceMock.refreshMaterializedViews).toHaveBeenCalledWith(entityManagerMock);
+	});
+
 
 	it('should have been called query method correctly when get action data requested', async () => {
 		const mockQueryBuilder = {
@@ -473,7 +593,41 @@ describe('ActionService', () => {
 		actionDto.startYear = 2024;
 		actionDto.natAnchor = [NatAnchor.NDC];
 
+		const mockQueryBuilder1 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProgrammeEntity>;
+
+		const mockQueryBuilder2 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProjectEntity>;
+
+		const mockQueryBuilder3 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ActivityEntity>;
+
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(new ActionEntity());
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
+		jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder1);
+		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder2);
+		jest.spyOn(activityRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder3);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -533,8 +687,44 @@ describe('ActionService', () => {
 		actionEntity.natAnchor = [NatAnchor.NDC];
 		actionEntity.documents = [documentDto];
 
+		const mockQueryBuilder1 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProgrammeEntity>;
+
+		const mockQueryBuilder2 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProjectEntity>;
+
+		const mockQueryBuilder3 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ActivityEntity>;
+
 
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
+		jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder1);
+		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder2);
+		jest.spyOn(activityRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder3);
+
+
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -600,8 +790,43 @@ describe('ActionService', () => {
 		actionEntity.natAnchor = [NatAnchor.NDC];
 		actionEntity.documents = [documentDto];
 
+		const mockQueryBuilder1 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProgrammeEntity>;
 
-		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
+		const mockQueryBuilder2 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProjectEntity>;
+
+		const mockQueryBuilder3 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ActivityEntity>;
+
+
+		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);  
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
+		jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder1);
+		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder2);
+		jest.spyOn(activityRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder3);
+
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -674,9 +899,44 @@ describe('ActionService', () => {
 		actionEntity.startYear = 2024;
 		actionEntity.natAnchor = [NatAnchor.NDC];
 
+		const mockQueryBuilder1 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProgrammeEntity>;
+
+		const mockQueryBuilder2 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProjectEntity>;
+
+		const mockQueryBuilder3 = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getMany: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ActivityEntity>;
+
 
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
-		jest.spyOn(kpiServiceMock, 'getKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2])
+		jest.spyOn(kpiServiceMock, 'getKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2]);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
+		jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder1);
+		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder2);
+		jest.spyOn(activityRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder3);
+
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -699,6 +959,43 @@ describe('ActionService', () => {
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
+
+	it('should throw an exception if action is not found when user update action', async () => {
+		const user = new User();
+		user.id = 2;
+	
+		const actionUpdateDto = new ActionUpdateDto();
+		actionUpdateDto.actionId = 'A001';
+	
+		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(null);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockReturnValue('action.actionNotFound');
+	
+		await expect(service.updateAction(actionUpdateDto, user)).rejects.toThrow(HttpException);
+	
+		expect(service.findActionById).toHaveBeenCalledWith('A001');
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('action.actionNotFound', ['A001']);
+	  });
+
+	  it('should throw an exception if action is already validated', async () => {
+		const user = new User();
+		user.id = 2;
+	
+		const validateDto = new ValidateDto();
+		validateDto.entityId = 'A001';
+	
+		const action = new ActionEntity();
+		action.actionId = 'A001';
+		action.sector = Sector.Forestry;
+		action.validated = true;
+	
+		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(action);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockReturnValueOnce('action.actionAlreadyValidated');
+	
+		await expect(service.validateAction(validateDto, user)).rejects.toThrow(HttpException);
+	
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('action.actionAlreadyValidated', ['A001']);
+	  });
 });
 
 

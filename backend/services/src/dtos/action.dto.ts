@@ -4,7 +4,7 @@ import { ActionStatus, InstrumentType, NatAnchor } from "../enums/action.enum";
 import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
 import { KpiUnits } from "../enums/kpi.enum";
-import { Sector } from "src/enums/sector.enum";
+import { Sector } from "../enums/sector.enum";
 
 export class ActionDto {
 
