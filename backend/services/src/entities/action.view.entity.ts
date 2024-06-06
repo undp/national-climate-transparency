@@ -75,8 +75,8 @@ GROUP BY
 	expression: actionViewSQL,
 	synchronize: false
 })
+@Index("idx_action_view_entity_id")
 export class ActionViewEntity {
-	@Index()
 	@ViewColumn()
 	id: string
 

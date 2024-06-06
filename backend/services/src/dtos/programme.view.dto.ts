@@ -38,4 +38,6 @@ export class ProgrammeViewDto {
 
   comments: string;
 
+	validated: boolean;
+
 }

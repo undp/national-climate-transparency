@@ -1,5 +1,6 @@
 import { ApiProperty, getSchemaPath } from "@nestjs/swagger";
 import { ArrayMinSize, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsTwoDecimalPoints } from "src/util/twoDecimalPointNumber.decorator";
 
 export class AchievementDto {
 	
@@ -13,6 +14,7 @@ export class AchievementDto {
   @ApiProperty()
 	activityId: string;
 
+	@IsTwoDecimalPoints()
 	@IsNotEmpty()
   @IsNumber()
   @ApiProperty()

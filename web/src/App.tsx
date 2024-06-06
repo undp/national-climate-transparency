@@ -9,8 +9,6 @@ import CustomLayout from './Components/Layout/layout';
 import AddUser from './Pages/Users/AddUser/addUser';
 import UserManagement from './Pages/Users/UserManagement/userManagement';
 import Dashboard from './Pages/Dashboard/dashboard';
-import AddNewCompany from './Pages/Company/AddCompany/addNewCompany';
-import CompanyManagement from './Pages/Company/CompanyManagement/companyManagement';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Homepage from './Pages/Homepage/homepage';
 import PrivacyPolicy from './Pages/PrivacyPolicy/privacyPolicy';
@@ -19,7 +17,6 @@ import CookiePolicy from './Pages/CookiePolicy/cookiePolicy';
 import TermsOfUse from './Pages/TermsofUse/termsofUse';
 import CarbonHelp from './Pages/Help/help';
 import UserProfile from './Pages/Users/UserProfile/UserProfile';
-import CompanyProfile from './Pages/Company/CompanyProfile/companyProfile';
 import { AbilityContext } from './Casl/Can';
 import { defineAbility, updateUserAbility } from './Casl/ability';
 import { useTranslation } from 'react-i18next';
@@ -121,42 +118,6 @@ const App = () => {
                   <Route path="/faqs" element={<CustomLayout selectedKey="faqs" />}>
                     <Route index element={<Faq />} />
                   </Route>
-
-                  {/* <Route
-                    path="/investmentManagement"
-                    element={<CustomLayout selectedKey="investmentManagement/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<InvestmentManagement />} />
-                    <Route path="addInvestment" element={<AddInvestmentComponent />} />
-                  </Route>
-                  <Route
-                    path="/supportManagement"
-                    element={<CustomLayout selectedKey="supportManagement/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<SupportManagement />} />
-                    <Route path="addSupport" element={<AddSupportComponent />} />
-                  </Route>
-                  <Route
-                    path="/ndcManagement"
-                    element={<CustomLayout selectedKey="ndcManagement/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<NdcActionManagement />} />
-                    <Route path="view" element={<NdcActionView />} />
-                  </Route>
-                  <Route
-                    path="/ndcDetails"
-                    element={<CustomLayout selectedKey="ndcDetails/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<NdcDetails />} />
-                  </Route> */}
-                  <Route
-                    path="/companyManagement"
-                    element={<CustomLayout selectedKey="companyManagement/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<CompanyManagement />} />
-                    <Route path="addCompany" element={<AddNewCompany />} />
-                    <Route path="updateCompany" element={<AddNewCompany />} />
-                  </Route>
                   <Route
                     path="/userManagement"
                     element={<CustomLayout selectedKey="userManagement/viewAll" />}
@@ -171,23 +132,6 @@ const App = () => {
                   >
                     <Route path="view" element={<UserProfile />} />
                   </Route>
-                  <Route
-                    path="/companyProfile"
-                    element={<CustomLayout selectedKey="companyManagement/viewAll" />}
-                  >
-                    <Route path="view" element={<CompanyProfile />} />
-                  </Route>
-                  {/* <Route path="/reports" element={<CustomLayout selectedKey="reports" />}>
-                    <Route index element={<ReportSection />} />
-                  </Route> */}
-                  {/* <Route
-                      path="/userManagement"
-                      element={<CustomLayout selectedKey="userManagement" />}
-                    >
-                      <Route index element={<UserManagement />} />
-                      <Route path="addUser" element={<AddUser />} />
-                      <Route path="updateUser" element={<UpdateUser />} />
-                    </Route> */}
                 </Route>
                 <Route path="/*" element={<Navigate to="/" replace />} />
               </Routes>

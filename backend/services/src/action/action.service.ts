@@ -298,15 +298,15 @@ export class ActionService {
 			);
 		}
 
-		if (currentAction.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"action.cannotEditValidated",
-					[actionUpdateDto.actionId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
+		// if (currentAction.validated) {
+		// 	throw new HttpException(
+		// 		this.helperService.formatReqMessagesString(
+		// 			"action.cannotEditValidated",
+		// 			[actionUpdateDto.actionId]
+		// 		),
+		// 		HttpStatus.BAD_REQUEST
+		// 	);
+		// }
 
 		if (!this.helperService.doesUserHaveSectorPermission(user, currentAction.sector)) {
 			throw new HttpException(

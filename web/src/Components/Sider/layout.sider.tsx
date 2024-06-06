@@ -8,6 +8,8 @@ import { AppstoreOutlined, DashboardOutlined, UserOutlined } from '@ant-design/i
 import { ClipboardMinus, Coin, GraphUpArrow, Headset, Layers } from 'react-bootstrap-icons';
 import { LayoutSiderProps } from '../../Definitions/props/layout.sider.definitions';
 import { useTranslation } from 'react-i18next';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { Role } from '../../Enums/role.enum';
 
 const { Sider } = Layout;
 
@@ -31,6 +33,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
   const { selectedKey } = props;
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const { userInfoState } = useUserContext();
   const { t } = useTranslation(['nav']);
 
   const items: MenuItem[] = [
@@ -42,11 +45,13 @@ const LayoutSider = (props: LayoutSiderProps) => {
     getItem(t('nav:support'), 'support', <Coin />),
     getItem(t('nav:reporting'), 'reportings', <ClipboardMinus />),
     getItem(t('nav:faq'), 'faqs', <Headset />),
-    getItem(t('nav:users'), 'userManagement/viewAll', <UserOutlined />),
   ];
 
+  if (userInfoState?.userRole === Role.Root || userInfoState?.userRole === Role.Admin) {
+    items.push(getItem(t('nav:users'), 'userManagement/viewAll', <UserOutlined />));
+  }
+
   const onClick: MenuProps['onClick'] = (e) => {
-    console.log('click', e);
     navigate('/' + e.key);
   };
 
@@ -78,7 +83,6 @@ const LayoutSider = (props: LayoutSiderProps) => {
         <div className="layout-sider-menu-container">
           <Menu
             theme="light"
-            //defaultSelectedKeys={[selectedKey ?? 'dashboard']}
             selectedKeys={[selectedKey ? selectedKey : 'dashboard']}
             mode="inline"
             onClick={onClick}

@@ -15,11 +15,9 @@ export const getActivityTableColumns = (
     { title: t('titleTitle'), dataIndex: 'title', key: 'title' },
     { title: t('redMeasuresTitle'), dataIndex: 'reductionMeasures', key: 'reductionMeasures' },
     { title: t('statusTitle'), dataIndex: 'status', key: 'status' },
-    { title: t('startYearHeader'), dataIndex: 'startYear', key: 'startYear' },
-    { title: t('endYearHeader'), dataIndex: 'endYear', key: 'endYear' },
     {
       title: t('natImplementorTitle'),
-      width: 100,
+      width: 250,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
         return <ScrollableList listToShow={record.natImplementor}></ScrollableList>;

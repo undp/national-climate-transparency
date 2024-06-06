@@ -44,7 +44,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import { useTranslation } from 'react-i18next';
 import UserActionConfirmationModel from '../../../Components/Models/userActionConfirmationModel';
 import { useEffect, useState } from 'react';
-import { UserTableDataType } from '../../../Definitions/userManagement.definitions';
+import { UserData } from '../../../Definitions/userManagement.definitions';
 import { plainToClass } from 'class-transformer';
 import { Action } from '../../../Enums/action.enum';
 import { User } from '../../../Entities/user';
@@ -88,6 +88,13 @@ const UserManagement = () => {
   const { userInfoState } = useUserContext();
   const { post, put } = useConnection();
 
+  if (
+    userInfoState?.userRole === Role.GovernmentUser ||
+    userInfoState?.userRole === Role.Observer
+  ) {
+    navigate('/dashboard');
+  }
+
   // Users List Page State
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -100,7 +107,7 @@ const UserManagement = () => {
 
   // Table Data State
 
-  const [tableData, setTableData] = useState<UserTableDataType[]>([]);
+  const [tableData, setTableData] = useState<UserData[]>([]);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [totalRowCount, setTotalRowRowCount] = useState<number>();
@@ -140,7 +147,7 @@ const UserManagement = () => {
     }
   });
 
-  const getRoleComponent = (item: UserTableDataType) => {
+  const getRoleComponent = (item: UserData) => {
     const role = item?.role;
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
@@ -168,12 +175,12 @@ const UserManagement = () => {
     );
   };
 
-  const changeUserStatus = async (record: UserTableDataType, remarks: string) => {
+  const changeUserStatus = async (updatedUserRecord: UserData, remarks: string) => {
     setLoading(true);
     try {
       const response = await put('national/users/update', {
-        id: record.id,
-        state: record.state,
+        id: updatedUserRecord.id,
+        state: updatedUserRecord.status,
         remarks,
       });
       if (response.status === 200) {
@@ -196,12 +203,12 @@ const UserManagement = () => {
   };
 
   const deactivateUser = (remarks: string) => {
-    userStatusChangeModalRecord.state = UserState.SUSPENDED;
+    userStatusChangeModalRecord.status = UserState.SUSPENDED;
     changeUserStatus(userStatusChangeModalRecord, remarks);
   };
 
   const activateUser = (remarks: string) => {
-    userStatusChangeModalRecord.state = UserState.ACTIVE;
+    userStatusChangeModalRecord.status = UserState.ACTIVE;
     changeUserStatus(userStatusChangeModalRecord, remarks);
   };
 
@@ -210,7 +217,7 @@ const UserManagement = () => {
     setOpenActivationConfirmationModal(false);
   };
 
-  const actionMenu = (record: UserTableDataType) => {
+  const actionMenu = (record: UserData) => {
     const data = [
       {
         text: 'Edit',
@@ -224,7 +231,7 @@ const UserManagement = () => {
 
     if (
       // eslint-disable-next-line eqeqeq
-      record.state == 1 &&
+      record.status == 1 &&
       (record.role === Role.GovernmentUser || record.role === Role.Observer)
     ) {
       data.push({
@@ -247,7 +254,7 @@ const UserManagement = () => {
       // eslint-disable-next-line eqeqeq
     } else if (
       // eslint-disable-next-line eqeqeq
-      record.state == 0 &&
+      record.status == 0 &&
       (record.role === Role.GovernmentUser || record.role === Role.Observer)
     ) {
       data.push({
@@ -321,7 +328,7 @@ const UserManagement = () => {
       title: t('user:company'),
       dataIndex: 'organisation',
       key: UserManagementColumns.organisation,
-      render: (item: any, itemObj: UserTableDataType) => {
+      render: (item: any, itemObj: UserData) => {
         if (itemObj.role === 'Admin' || itemObj.role === 'Root') {
           return `Government of ${process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}`;
         } else {
@@ -332,7 +339,7 @@ const UserManagement = () => {
     },
     {
       title: t('user:status'),
-      dataIndex: 'state',
+      dataIndex: 'status',
       key: UserManagementColumns.status,
       align: 'left' as const,
       render: (item: any) => {
@@ -346,7 +353,7 @@ const UserManagement = () => {
       sorter: true,
       align: 'left' as const,
       // eslint-disable-next-line no-unused-vars
-      render: (item: any, itemObj: UserTableDataType) => {
+      render: (item: any, itemObj: UserData) => {
         return getRoleComponent(itemObj);
       },
     },
@@ -356,11 +363,11 @@ const UserManagement = () => {
       width: 6,
       align: 'right' as const,
       // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: UserTableDataType) => {
+      render: (_: any, record: UserData) => {
         return (
           ability.can(Action.Update, plainToClass(User, record)) &&
           // eslint-disable-next-line eqeqeq
-          record.id != userInfoState?.id && (
+          record.id.toString() != userInfoState?.id && (
             <Popover placement="bottomRight" content={actionMenu(record)} trigger="click">
               <EllipsisOutlined
                 rotate={90}
@@ -414,7 +421,23 @@ const UserManagement = () => {
         const availableUsers = response.data.filter(
           (user: any) => user.companyRole !== CompanyRole.API
         );
-        setTableData(availableUsers);
+
+        const tempUsers: UserData[] = [];
+        for (let i = 0; i < availableUsers.length; i++) {
+          tempUsers.push({
+            key: i,
+            id: availableUsers[i].id,
+            name: availableUsers[i].name,
+            email: availableUsers[i].email,
+            phoneNo: availableUsers[i].phoneNo,
+            organisation: availableUsers[i].organisation,
+            status: availableUsers[i].state,
+            role: availableUsers[i].role,
+            subRole: availableUsers[i].subRole,
+            sector: availableUsers[i].sector,
+          });
+        }
+        setTableData(tempUsers);
         setTotalRowRowCount(response.response.data.total);
       }
       setLoading(false);

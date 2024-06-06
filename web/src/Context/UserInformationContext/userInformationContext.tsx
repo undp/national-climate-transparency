@@ -17,6 +17,7 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
   const { token } = useConnection();
 
   const [isTokenExpired, setIsTokenExpired] = useState<boolean>(false);
+
   const initialUserProps: UserProps = {
     id: localStorage.getItem('userId')
       ? (localStorage.getItem('userId') as string)
@@ -40,6 +41,7 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
       : 0,
     userSectors: localStorage.getItem('userSectors')?.split(',') ?? [],
   };
+
   const [userInfoState, setUserInfoState] = useState<UserProps>(initialUserProps);
 
   const setUserInfo = (value: UserProps) => {
@@ -78,7 +80,9 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
         tokenVal = localStorage.getItem('token');
         if (tokenVal === '') {
           if (history.length !== 1) {
-            setIsTokenExpired(true);
+            setTimeout(() => {
+              setIsTokenExpired(true);
+            }, 0);
           }
         }
       }

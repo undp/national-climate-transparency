@@ -13,6 +13,7 @@ import { AchievementDtoList } from "../dtos/achievementDto";
 import { User } from "../entities/user.entity";
 import { plainToClass } from "class-transformer";
 import { DataResponseMessageDto } from "../dtos/data.response.message";
+import { PayloadValidator } from "../validation/payload.validator";
 
 @Injectable()
 export class KpiService {
@@ -25,6 +26,7 @@ export class KpiService {
 		@InjectRepository(ProgrammeEntity) private programmeRepo: Repository<ProgrammeEntity>,
 		@InjectRepository(ProjectEntity) private projectRepo: Repository<ProjectEntity>,
 		private helperService: HelperService,
+		private payloadValidator: PayloadValidator
 	) { }
 
 	//MARK: Find KPIs by creator type and id
@@ -47,6 +49,16 @@ export class KpiService {
 					this.helperService.formatReqMessagesString(
 						"kpi.activityNotFound",
 						[achievementDto.activityId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			if (!this.payloadValidator.validateKpiValues(achievement.achieved)) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"kpi.achievedCanHaveOnlyTwoDecimals",
+						[]
 					),
 					HttpStatus.BAD_REQUEST
 				);

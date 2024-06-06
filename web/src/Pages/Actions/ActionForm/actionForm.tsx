@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
 import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { AppstoreOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { InstrumentType, ActionStatus, NatAnchor, Action } from '../../../Enums/action.enum';
@@ -14,7 +14,7 @@ import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
-import { getFormTitle, joinTwoArrays } from '../../../Utils/utilServices';
+import { getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { GraphUpArrow } from 'react-bootstrap-icons';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
@@ -31,6 +31,8 @@ import { NewKpi } from '../../../Components/KPI/newKpi';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
 import { KPIAction } from '../../../Enums/shared.enum';
+import { Role } from '../../../Enums/role.enum';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -40,7 +42,7 @@ const inputFontSize = '13px';
 
 const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['actionForm']);
+  const { t } = useTranslation(['actionForm', 'detachPopup']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Action', method);
@@ -68,8 +70,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
-  //MARK: TO DO
-  // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
   // Spinner When Form Submit Occurs
 
@@ -99,6 +100,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
   const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
+  // Detach Popup Visibility
+
+  const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  const [detachingEntityId, setDetachingEntityId] = useState<string>();
+  const [detachingEntityType, setDetachingEntityType] = useState<'Programme' | 'Activity'>();
+
   // KPI State
 
   const [kpiCounter, setKpiCounter] = useState<number>(0);
@@ -117,7 +124,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     yearsList.push(year);
   }
 
-  if (userInfoState?.userRole === 'Root' || userInfoState?.userRole === 'Admin') {
+  if (userInfoState?.userRole === Role.Root || userInfoState?.userRole === Role.Admin) {
     Object.values(Sector).map((sector) => availableSectors.push(sector));
   } else {
     userSectors.map((sector) => availableSectors.push(sector));
@@ -205,7 +212,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
-        // setIsSaveButtonDisabled(true);
+        setIsSaveButtonDisabled(true);
       }
     };
     fetchData();
@@ -431,8 +438,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             title: act.title,
             reductionMeasures: act.measure,
             status: act.status,
-            startYear: 'NA',
-            endYear: 'NA',
             natImplementor: act.nationalImplementingEntity ?? [],
             ghgsAffected: act.ghgsAffected ?? [],
             achievedReduction: act.achievedGHGReduction ?? 0,
@@ -450,10 +455,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               sup.financeNature === 'International'
                 ? sup.internationalFinancialInstrument
                 : sup.nationalFinancialInstrument,
-            estimatedUSD: sup.requiredAmount,
-            estimatedLC: sup.requiredAmountDomestic,
-            recievedUSD: sup.receivedAmount,
-            recievedLC: sup.receivedAmountDomestic,
+            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+            recievedUSD: getRounded(sup.receivedAmount ?? 0),
+            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
           });
         });
 
@@ -729,15 +734,31 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Programme
 
   const detachProgramme = async (prgId: string) => {
-    const filteredIds = tempProgramIds.filter((id) => id !== prgId);
-    setTempProgramIds(filteredIds);
+    setDetachingEntityId(prgId);
+    setDetachingEntityType('Programme');
+    setOpenDetachPopup(true);
   };
 
   // Detach Activity
 
   const detachActivity = async (actId: string) => {
-    const filteredIds = tempActivityIds.filter((id) => id !== actId);
-    setTempActivityIds(filteredIds);
+    setDetachingEntityId(actId);
+    setDetachingEntityType('Activity');
+    setOpenDetachPopup(true);
+  };
+
+  // Handle Detachment
+
+  const detachEntity = async (entityId: string) => {
+    if (detachingEntityType === 'Programme') {
+      const filteredIds = tempProgramIds.filter((id) => id !== entityId);
+      setTempProgramIds(filteredIds);
+      setIsSaveButtonDisabled(false);
+    } else if (detachingEntityType === 'Activity') {
+      const filteredIds = tempActivityIds.filter((id) => id !== entityId);
+      setTempActivityIds(filteredIds);
+      setIsSaveButtonDisabled(false);
+    }
   };
 
   // Add New KPI
@@ -779,7 +800,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       setNewKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
-            return { ...kpi, [property]: value };
+            return { ...kpi, [property]: property === 'expected' ? parseFloat(value) : value };
           }
           return kpi;
         });
@@ -789,8 +810,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
-            kpi.kpiAction = KPIAction.UPDATED;
-            return { ...kpi, [property]: value };
+            return {
+              ...kpi,
+              [property]: property === 'expected' ? parseFloat(value) : value,
+            };
           }
           return kpi;
         });
@@ -834,12 +857,26 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Save Button Enable when form value change
 
-  // const handleValuesChange = () => {
-  //   setIsSaveButtonDisabled(false);
-  // };
+  const handleValuesChange = () => {
+    setIsSaveButtonDisabled(false);
+  };
 
   return (
     <div className="content-container">
+      <ConfirmPopup
+        icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('detachPopup:primaryMsg')} ${detachingEntityType} ${detachingEntityId}`,
+          secondaryMsg: t('detachPopup:secondaryMsg'),
+          cancelTitle: t('detachPopup:cancelTitle'),
+          actionTitle: t('detachPopup:actionTitle'),
+        }}
+        actionRef={detachingEntityId}
+        doAction={detachEntity}
+        open={openDetachPopup}
+        setOpen={setOpenDetachPopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -849,7 +886,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             form={form}
             onFinish={handleSubmit}
             layout="vertical"
-            // onValuesChange={handleValuesChange}
+            onValuesChange={handleValuesChange}
           >
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
@@ -1052,10 +1089,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={20} style={{ paddingTop: '6px' }}>
+                <Col md={{ span: 14 }} xl={{ span: 20 }} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('programInfoTitle')}</div>
                 </Col>
-                <Col span={4}>
+                <Col md={{ span: 10 }} xl={{ span: 4 }}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1069,6 +1106,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     alreadyAttached={attachedProgramIds}
                     currentAttachments={tempProgramIds}
                     setCurrentAttachments={setTempProgramIds}
+                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
                   ></AttachEntity>
                 </Col>
@@ -1101,10 +1139,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col span={20} style={{ paddingTop: '6px' }}>
+                <Col md={{ span: 15 }} xl={{ span: 20 }} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col span={4}>
+                <Col md={{ span: 9 }} xl={{ span: 4 }}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1118,6 +1156,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     alreadyAttached={attachedActivityIds}
                     currentAttachments={tempActivityIds}
                     setCurrentAttachments={setTempActivityIds}
+                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
                   ></AttachEntity>
                 </Col>
@@ -1275,8 +1314,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               </div>
             )}
             {method === 'create' && (
-              <Row gutter={20} justify={'end'}>
-                <Col span={2}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1288,7 +1327,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1298,8 +1337,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             )}
             {method === 'view' && (
-              <Row gutter={20} justify={'end'}>
-                <Col span={2}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1312,7 +1351,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ActionEntity) && (
-                  <Col span={2.5}>
+                  <Col md={{ span: 5 }} xl={{ span: 2 }}>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1331,8 +1370,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             )}
             {method === 'update' && (
-              <Row gutter={20} justify={'end'}>
-                <Col span={2}>
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1344,7 +1383,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col span={2}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Button
                     type="default"
                     size="large"
@@ -1357,14 +1396,14 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col span={2.5}>
+                <Col md={{ span: 4 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button
                       type="primary"
                       size="large"
                       block
                       htmlType="submit"
-                      // disabled={isSaveButtonDisabled}
+                      disabled={isSaveButtonDisabled}
                     >
                       {t('update')}
                     </Button>

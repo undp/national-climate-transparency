@@ -4,12 +4,12 @@ export type ActivityData = {
   title: string;
   reductionMeasures: string;
   status: string;
-  startYear: number | string;
-  endYear: number | string;
   natImplementor: string[];
   ghgsAffected?: string[];
   achievedReduction?: number;
   estimatedReduction?: number;
+  technologyType?: string;
+  meansOfImplementation?: string;
 };
 
 export type ParentData = {

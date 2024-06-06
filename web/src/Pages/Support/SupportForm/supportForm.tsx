@@ -57,8 +57,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   // Form General State
 
-  //MARK:TO DO
-  // const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
   // Field Disabling state
 
@@ -190,7 +189,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
         }
-        // setIsSaveButtonDisabled(true);
+        setIsSaveButtonDisabled(true);
       }
     };
     fetchData();
@@ -200,8 +199,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     const updatedNeeded = (amountNeeded ?? 0) / (exchangeRate ?? 0);
     const updatedReceived = (amountReceived ?? 0) / (exchangeRate ?? 0);
     form.setFieldsValue({
-      neededLocal: updatedNeeded > 0 ? parseFloat(updatedNeeded.toFixed(3)) : null,
-      receivedLocal: updatedReceived > 0 ? parseFloat(updatedReceived.toFixed(3)) : null,
+      neededLocal: updatedNeeded > 0 ? parseFloat(updatedNeeded.toFixed(2)) : null,
+      receivedLocal: updatedReceived > 0 ? parseFloat(updatedReceived.toFixed(2)) : null,
     });
   }, [exchangeRate, amountNeeded, amountReceived]);
 
@@ -299,9 +298,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   // Save Button Enable when form value change
 
-  // const handleValuesChange = () => {
-  //   setIsSaveButtonDisabled(false);
-  // };
+  const handleValuesChange = () => {
+    setIsSaveButtonDisabled(false);
+  };
 
   return (
     <div className="content-container">
@@ -313,7 +312,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           form={form}
           onFinish={handleSubmit}
           layout="vertical"
-          // onValuesChange={handleValuesChange}
+          onValuesChange={handleValuesChange}
         >
           <div className="form-section-card">
             <div className="form-section-header">{t('generalInfoTitle')}</div>
@@ -569,6 +568,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Input
                     type="number"
                     min={0}
+                    step={0.01}
                     className="form-input-box"
                     onChange={(event) => {
                       const value = parseFloat(event.target.value);
@@ -600,6 +600,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Input
                     type="number"
                     min={0}
+                    step={0.01}
                     className="form-input-box"
                     onChange={(event) => {
                       const value = parseFloat(event.target.value);
@@ -635,6 +636,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   <Input
                     type="number"
                     min={0}
+                    step={0.01}
                     className="form-input-box"
                     onChange={(event) => {
                       const value = parseFloat(event.target.value);
@@ -652,8 +654,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             </Row>
           </div>
           {method === 'create' && (
-            <Row gutter={20} justify={'end'}>
-              <Col span={2}>
+            <Row className="sticky-footer" gutter={20} justify={'end'}>
+              <Col md={{ span: 5 }} xl={{ span: 2 }}>
                 <Button
                   type="default"
                   size="large"
@@ -665,7 +667,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('cancel')}
                 </Button>
               </Col>
-              <Col span={2}>
+              <Col md={{ span: 4 }} xl={{ span: 2 }}>
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
                     {t('add')}
@@ -675,8 +677,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             </Row>
           )}
           {method === 'view' && (
-            <Row gutter={20} justify={'end'}>
-              <Col span={2}>
+            <Row className="sticky-footer" gutter={20} justify={'end'}>
+              <Col md={{ span: 4 }} xl={{ span: 2 }}>
                 <Button
                   type="default"
                   size="large"
@@ -689,7 +691,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 </Button>
               </Col>
               {ability.can(Action.Validate, SupportEntity) && (
-                <Col span={2.5}>
+                <Col md={{ span: 5 }} xl={{ span: 2 }}>
                   <Form.Item>
                     <Button
                       disabled={isValidated}
@@ -708,8 +710,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             </Row>
           )}
           {method === 'update' && (
-            <Row gutter={20} justify={'end'}>
-              <Col span={2}>
+            <Row className="sticky-footer" gutter={20} justify={'end'}>
+              <Col md={{ span: 5 }} xl={{ span: 2 }}>
                 <Button
                   type="default"
                   size="large"
@@ -721,7 +723,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('cancel')}
                 </Button>
               </Col>
-              <Col span={2}>
+              <Col md={{ span: 5 }} xl={{ span: 2 }}>
                 <Button
                   type="default"
                   size="large"
@@ -734,14 +736,14 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('delete')}
                 </Button>
               </Col>
-              <Col span={2.5}>
+              <Col md={{ span: 4 }} xl={{ span: 2 }}>
                 <Form.Item>
                   <Button
                     type="primary"
                     size="large"
                     block
                     htmlType="submit"
-                    // disabled={isSaveButtonDisabled}
+                    disabled={isSaveButtonDisabled}
                   >
                     {t('update')}
                   </Button>

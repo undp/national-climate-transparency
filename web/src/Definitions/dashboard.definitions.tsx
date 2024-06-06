@@ -1,10 +1,9 @@
 export type PieChartData = {
-  chartId: number;
+  chartId: 1 | 2 | 3 | 4 | 5 | 6;
   categories: string[];
   values: number[];
   chartTitle: string;
   chartDescription: string;
-  total: number;
   lastUpdatedTime: number;
 };
 
@@ -20,8 +19,19 @@ export type DashboardActionItem = {
   nationalImplementingEntity: string[];
 };
 
-export type ChartData = {
-  labels: string[];
-  count: number[];
-  updatedTime: number;
+export const chartColorMappings = {
+  sectors: [
+    '#16B1FF',
+    '#0468B1',
+    '#FF9FDE',
+    '#7FEABF',
+    '#FFD086',
+    '#C1867B',
+    '#FF8183',
+    '#B7A4FE',
+    '#D8D8D8',
+    '#B44DD3',
+  ],
+  finance: ['#FF8183', '#16B1FF'],
+  support: ['#FF8183', '#16B1FF'],
 };

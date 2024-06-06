@@ -60,15 +60,15 @@ export class ActivityService {
 				case EntityType.ACTION: {
 					const action = await this.isActionValid(activityDto.parentId, user);
 					
-					if (action.validated) {
-						throw new HttpException(
-							this.helperService.formatReqMessagesString(
-								"common.cannotLinkedToValidated",
-								[EntityType.ACTION , action.actionId]
-							),
-							HttpStatus.BAD_REQUEST
-						);
-					}
+					// if (action.validated) {
+					// 	throw new HttpException(
+					// 		this.helperService.formatReqMessagesString(
+					// 			"common.cannotLinkedToValidated",
+					// 			[EntityType.ACTION , action.actionId]
+					// 		),
+					// 		HttpStatus.BAD_REQUEST
+					// 	);
+					// }
 
 					activity.path = `${activityDto.parentId}._._`;
 					activity.sector = action.sector;
@@ -79,15 +79,15 @@ export class ActivityService {
 				case EntityType.PROGRAMME: {
 					const programme = await this.isProgrammeValid(activityDto.parentId, user);
 
-					if (programme.validated) {
-						throw new HttpException(
-							this.helperService.formatReqMessagesString(
-								"common.cannotLinkedToValidated",
-								[EntityType.PROGRAMME , programme.programmeId]
-							),
-							HttpStatus.BAD_REQUEST
-						);
-					}
+					// if (programme.validated) {
+					// 	throw new HttpException(
+					// 		this.helperService.formatReqMessagesString(
+					// 			"common.cannotLinkedToValidated",
+					// 			[EntityType.PROGRAMME , programme.programmeId]
+					// 		),
+					// 		HttpStatus.BAD_REQUEST
+					// 	);
+					// }
 
 					activity.path = programme.path && programme.path.trim() !== '' ? `${programme.path}.${activityDto.parentId}._` : `_.${activityDto.parentId}._`;
 					activity.sector = programme.sector;
@@ -98,15 +98,15 @@ export class ActivityService {
 				case EntityType.PROJECT: {
 					const project = await this.isProjectValid(activityDto.parentId, user);
 
-					if (project.validated) {
-						throw new HttpException(
-							this.helperService.formatReqMessagesString(
-								"common.cannotLinkedToValidated",
-								[EntityType.PROJECT , project.projectId]
-							),
-							HttpStatus.BAD_REQUEST
-						);
-					}
+					// if (project.validated) {
+					// 	throw new HttpException(
+					// 		this.helperService.formatReqMessagesString(
+					// 			"common.cannotLinkedToValidated",
+					// 			[EntityType.PROJECT , project.projectId]
+					// 		),
+					// 		HttpStatus.BAD_REQUEST
+					// 	);
+					// }
 
 					activity.path = project.path && project.path.trim() !== '' ? `${project.path}.${activityDto.parentId}` : `_._.${activityDto.parentId}`;
 					activity.sector = project.sector;
@@ -180,15 +180,15 @@ export class ActivityService {
 			);
 		}
 
-		if (currentActivity.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"activity.cannotEditValidated",
-					[activityUpdate.activityId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
+		// if (currentActivity.validated) {
+		// 	throw new HttpException(
+		// 		this.helperService.formatReqMessagesString(
+		// 			"activity.cannotEditValidated",
+		// 			[activityUpdate.activityId]
+		// 		),
+		// 		HttpStatus.BAD_REQUEST
+		// 	);
+		// }
 
 		if (!this.helperService.doesUserHaveSectorPermission(user, currentActivity.sector)) {
 			throw new HttpException(
@@ -212,31 +212,31 @@ export class ActivityService {
 		activityUpdate.path = currentActivity.path;
 
 		if (isActivityLinked && (!activityUpdateDto.parentType || !activityUpdateDto.parentId)) {
-			let parent;
-			switch (currentActivity.parentType) {
-				case EntityType.ACTION: {
-					parent = await this.isActionValid(currentActivity.parentId, user);
-					break;
-				}
-				case EntityType.PROGRAMME: {
-					parent = await this.isProgrammeValid(currentActivity.parentId, user);
-					break;
-				}
-				case EntityType.PROJECT: {
-					parent = await this.isProjectValid(currentActivity.parentId, user);
-					break;
-				}
-			}
+			// let parent;
+			// switch (currentActivity.parentType) {
+			// 	case EntityType.ACTION: {
+			// 		parent = await this.isActionValid(currentActivity.parentId, user);
+			// 		break;
+			// 	}
+			// 	case EntityType.PROGRAMME: {
+			// 		parent = await this.isProgrammeValid(currentActivity.parentId, user);
+			// 		break;
+			// 	}
+			// 	case EntityType.PROJECT: {
+			// 		parent = await this.isProjectValid(currentActivity.parentId, user);
+			// 		break;
+			// 	}
+			// }
 
-			if (parent && parent.validated) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"common.cannotUnlinkedFromValidated",
-						[currentActivity.parentType , currentActivity.parentId]
-					),
-					HttpStatus.BAD_REQUEST
-				);
-			}
+			// if (parent && parent.validated) {
+			// 	throw new HttpException(
+			// 		this.helperService.formatReqMessagesString(
+			// 			"common.cannotUnlinkedFromValidated",
+			// 			[currentActivity.parentType , currentActivity.parentId]
+			// 		),
+			// 		HttpStatus.BAD_REQUEST
+			// 	);
+			// }
 
 			this.addEventLogEntry(eventLog, logEventType, EntityType.ACTIVITY, activityUpdate.activityId, user.id, currentActivity.parentId);
 			activityUpdate.parentId = null;
@@ -253,15 +253,15 @@ export class ActivityService {
 				case EntityType.ACTION: {
 					const action = await this.isActionValid(activityUpdateDto.parentId, user);
 
-					if (action.validated) {
-						throw new HttpException(
-							this.helperService.formatReqMessagesString(
-								"common.cannotLinkedToValidated",
-								[EntityType.ACTION , action.actionId]
-							),
-							HttpStatus.BAD_REQUEST
-						);
-					}
+					// if (action.validated) {
+					// 	throw new HttpException(
+					// 		this.helperService.formatReqMessagesString(
+					// 			"common.cannotLinkedToValidated",
+					// 			[EntityType.ACTION , action.actionId]
+					// 		),
+					// 		HttpStatus.BAD_REQUEST
+					// 	);
+					// }
 
 					activityUpdate.path = `${activityUpdateDto.parentId}._._`;
 					activityUpdate.sector = action.sector;
@@ -272,15 +272,15 @@ export class ActivityService {
 				case EntityType.PROGRAMME: {
 					const programme = await this.isProgrammeValid(activityUpdateDto.parentId, user);
 
-					if (programme.validated) {
-						throw new HttpException(
-							this.helperService.formatReqMessagesString(
-								"common.cannotLinkedToValidated",
-								[EntityType.PROGRAMME , programme.programmeId]
-							),
-							HttpStatus.BAD_REQUEST
-						);
-					}
+					// if (programme.validated) {
+					// 	throw new HttpException(
+					// 		this.helperService.formatReqMessagesString(
+					// 			"common.cannotLinkedToValidated",
+					// 			[EntityType.PROGRAMME , programme.programmeId]
+					// 		),
+					// 		HttpStatus.BAD_REQUEST
+					// 	);
+					// }
 
 					activityUpdate.path = programme.path && programme.path.trim() !== '' ? `${programme.path}.${activityUpdateDto.parentId}._` : `_.${activityUpdateDto.parentId}._`;
 					activityUpdate.sector = programme.sector;
@@ -291,15 +291,15 @@ export class ActivityService {
 				case EntityType.PROJECT: {
 					const project = await this.isProjectValid(activityUpdateDto.parentId, user);
 
-					if (project.validated) {
-						throw new HttpException(
-							this.helperService.formatReqMessagesString(
-								"common.cannotLinkedToValidated",
-								[EntityType.PROJECT , project.projectId]
-							),
-							HttpStatus.BAD_REQUEST
-						);
-					}
+					// if (project.validated) {
+					// 	throw new HttpException(
+					// 		this.helperService.formatReqMessagesString(
+					// 			"common.cannotLinkedToValidated",
+					// 			[EntityType.PROJECT , project.projectId]
+					// 		),
+					// 		HttpStatus.BAD_REQUEST
+					// 	);
+					// }
 
 					activityUpdate.path = project.path && project.path.trim() !== '' ? `${project.path}.${activityUpdateDto.parentId}` : `_._.${activityUpdateDto.parentId}`;
 					activityUpdate.sector = project.sector;

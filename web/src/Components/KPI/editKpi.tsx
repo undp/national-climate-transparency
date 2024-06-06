@@ -87,6 +87,7 @@ export const EditKpi: React.FC<Props> = ({
               <Input
                 type="number"
                 min={0}
+                step={0.01}
                 className="form-input-box"
                 onChange={(e) => {
                   if (updateKPI) {
@@ -107,6 +108,7 @@ export const EditKpi: React.FC<Props> = ({
               <Input
                 type="number"
                 min={0}
+                step={0.01}
                 className="form-input-box"
                 onChange={(e) => {
                   if (updateKPI) {
