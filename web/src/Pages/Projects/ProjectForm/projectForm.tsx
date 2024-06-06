@@ -31,6 +31,11 @@ import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
 import { processOptionalFields } from '../../../Utils/optionalValueHandler';
 import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
+import {
+  attachButtonBps,
+  attachTableHeaderBps,
+  shortButtonBps,
+} from '../../../Definitions/breakpoints/breakpoints';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -1458,23 +1463,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col
-                  sm={{ span: 12 }}
-                  md={{ span: 14 }}
-                  lg={{ span: 17 }}
-                  xl={{ span: 19 }}
-                  xxl={{ span: 20 }}
-                  style={{ paddingTop: '6px' }}
-                >
+                <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col
-                  sm={{ span: 12 }}
-                  md={{ span: 10 }}
-                  lg={{ span: 7 }}
-                  xl={{ span: 5 }}
-                  xxl={{ span: 4 }}
-                >
+                <Col {...attachButtonBps}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1561,7 +1553,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'create' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1573,7 +1565,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1584,7 +1576,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'view' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1597,7 +1589,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ProjectEntity) && (
-                  <Col md={{ span: 5 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                  <Col>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1617,7 +1609,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'update' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1629,7 +1621,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1642,7 +1634,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button
                       type="primary"

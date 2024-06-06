@@ -20,6 +20,7 @@ import { Action } from '../../../Enums/action.enum';
 import { SupportEntity } from '../../../Entities/support';
 import { useAbilityContext } from '../../../Casl/Can';
 import { processOptionalFields } from '../../../Utils/optionalValueHandler';
+import { shortButtonBps } from '../../../Definitions/breakpoints/breakpoints';
 
 const { Option } = Select;
 
@@ -655,7 +656,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           </div>
           {method === 'create' && (
             <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+              <Col>
                 <Button
                   type="default"
                   size="large"
@@ -667,7 +668,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('cancel')}
                 </Button>
               </Col>
-              <Col md={{ span: 4 }} xl={{ span: 2 }}>
+              <Col {...shortButtonBps}>
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
                     {t('add')}
@@ -678,7 +679,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           )}
           {method === 'view' && (
             <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col md={{ span: 4 }} xl={{ span: 2 }}>
+              <Col>
                 <Button
                   type="default"
                   size="large"
@@ -691,7 +692,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 </Button>
               </Col>
               {ability.can(Action.Validate, SupportEntity) && (
-                <Col md={{ span: 5 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                <Col>
                   <Form.Item>
                     <Button
                       disabled={isValidated}
@@ -711,7 +712,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           )}
           {method === 'update' && (
             <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+              <Col>
                 <Button
                   type="default"
                   size="large"
@@ -723,7 +724,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('cancel')}
                 </Button>
               </Col>
-              <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+              <Col>
                 <Button
                   type="default"
                   size="large"
@@ -736,7 +737,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('delete')}
                 </Button>
               </Col>
-              <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+              <Col {...shortButtonBps}>
                 <Form.Item>
                   <Button
                     type="primary"

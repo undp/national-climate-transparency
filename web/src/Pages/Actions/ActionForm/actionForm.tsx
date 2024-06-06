@@ -33,6 +33,11 @@ import { EditKpi } from '../../../Components/KPI/editKpi';
 import { KPIAction } from '../../../Enums/shared.enum';
 import { Role } from '../../../Enums/role.enum';
 import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
+import {
+  attachButtonBps,
+  attachTableHeaderBps,
+  shortButtonBps,
+} from '../../../Definitions/breakpoints/breakpoints';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -1091,23 +1096,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col
-                  sm={{ span: 12 }}
-                  md={{ span: 14 }}
-                  lg={{ span: 17 }}
-                  xl={{ span: 19 }}
-                  xxl={{ span: 20 }}
-                  style={{ paddingTop: '6px' }}
-                >
+                <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('programInfoTitle')}</div>
                 </Col>
-                <Col
-                  sm={{ span: 12 }}
-                  md={{ span: 10 }}
-                  lg={{ span: 7 }}
-                  xl={{ span: 5 }}
-                  xxl={{ span: 4 }}
-                >
+                <Col {...attachButtonBps}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1154,23 +1146,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col
-                  sm={{ span: 12 }}
-                  md={{ span: 14 }}
-                  lg={{ span: 17 }}
-                  xl={{ span: 19 }}
-                  xxl={{ span: 20 }}
-                  style={{ paddingTop: '6px' }}
-                >
+                <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col
-                  sm={{ span: 12 }}
-                  md={{ span: 10 }}
-                  lg={{ span: 7 }}
-                  xl={{ span: 5 }}
-                  xxl={{ span: 4 }}
-                >
+                <Col {...attachButtonBps}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1343,7 +1322,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'create' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1355,7 +1334,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} lg={{ span: 3 }} xl={{ span: 2 }}>
+                <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1366,7 +1345,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'view' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1379,7 +1358,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ActionEntity) && (
-                  <Col md={{ span: 5 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                  <Col>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1399,7 +1378,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'update' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1411,7 +1390,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1424,7 +1403,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} lg={{ span: 4 }} xl={{ span: 3 }} xxl={{ span: 2 }}>
+                <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button
                       type="primary"
