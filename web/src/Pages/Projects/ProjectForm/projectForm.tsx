@@ -1318,6 +1318,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 setUploadedFiles={setUploadedFiles}
                 removedFiles={filesToRemove}
                 setRemovedFiles={setFilesToRemove}
+                setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
               <div className="form-section-header">{t('mitigationInfoTitle')}</div>
               <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>

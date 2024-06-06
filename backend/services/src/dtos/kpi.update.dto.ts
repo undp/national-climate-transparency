@@ -43,7 +43,7 @@ export class KpiUpdateDto {
 		@IsNotEmpty()
     @ApiProperty({ enum: KPIAction })
     @IsEnum(KPIAction, {
-        message: "Invalid KPI Action. Supported following creator types:" + Object.values(KPIAction),
+        message: "Invalid KPI Action. Supported following KPI Actions:" + Object.values(KPIAction),
     })
     kpiAction: string;            // To check KPI is Updated or not for Update Timeline
 }

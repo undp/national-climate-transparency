@@ -1223,6 +1223,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 setUploadedFiles={setUploadedFiles}
                 removedFiles={filesToRemove}
                 setRemovedFiles={setFilesToRemove}
+                setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
               <Row gutter={gutterSize}>
                 <Col span={24}>

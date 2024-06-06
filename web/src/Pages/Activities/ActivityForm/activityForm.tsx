@@ -1275,6 +1275,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 setUploadedFiles={setUploadedFiles}
                 removedFiles={filesToRemove}
                 setRemovedFiles={setFilesToRemove}
+                setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
               <Row gutter={gutterSize}>
                 <Col span={24}>
@@ -1427,6 +1428,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       setUploadedFiles={setUploadedMthFiles}
                       removedFiles={mthFilesToRemove}
                       setRemovedFiles={setMthFilesToRemove}
+                      setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     ></UploadFileGrid>
                   </Form.Item>
                 </Col>
@@ -1453,6 +1455,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       setUploadedFiles={setUploadedRstFiles}
                       removedFiles={rstFilesToRemove}
                       setRemovedFiles={setRstFilesToRemove}
+                      setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     ></UploadFileGrid>
                   </Form.Item>
                 </Col>
