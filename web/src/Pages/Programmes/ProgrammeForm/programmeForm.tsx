@@ -830,6 +830,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
+            kpi.kpiAction = KPIAction.UPDATED;
             return {
               ...kpi,
               [property]: property === 'expected' ? parseFloat(value) : value,
