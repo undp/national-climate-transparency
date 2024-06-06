@@ -1,10 +1,5 @@
 {
-    "actionId": "Action ID",
-    "programmeId": "Programme ID",
-    "projectId": "Project ID",
-    "titleOfAction": "Title of Action",
-    "titleOfProgramme": "Title of Programme",
-    "titleOfProject": "Title of Project",
+    "titleOfAction": "Name of Action",
     "description": "Description",
     "objective": "Objectives",
     "instrumentType": "Type of Instrument",
