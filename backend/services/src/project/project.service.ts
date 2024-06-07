@@ -153,6 +153,7 @@ export class ProjectService {
 			.transaction(async (em) => {
 				const savedProject = await em.save<ProjectEntity>(project);
 				if (savedProject) {
+					await em.save<LogEntity>(eventLog);
 					// linking activities and updating paths of projects and activities
 					if (activities && activities.length > 0) {
 						await this.linkUnlinkService.linkActivitiesToParent(savedProject, activities, { parentType: EntityType.PROJECT, parentId: savedProject.projectId, activityIds: activities }, user, em);
@@ -161,7 +162,6 @@ export class ProjectService {
 					if (projectDto.kpis) {
 						await em.save<KpiEntity>(kpiList);
 					}
-					await em.save<LogEntity>(eventLog);
 				}
 				return savedProject;
 			})

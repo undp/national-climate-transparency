@@ -147,6 +147,7 @@ export class ProgrammeService {
 			.transaction(async (em) => {
 				const savedProgramme = await em.save<ProgrammeEntity>(programme);
 				if (savedProgramme) {
+					await em.save<LogEntity>(eventLog);
 					// linking projects and updating paths of projects and activities
 					if (projects && projects.length > 0) {
 						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
@@ -155,7 +156,6 @@ export class ProgrammeService {
 					if (programmeDto.kpis) {
 						await em.save<KpiEntity>(kpiList);
 					}
-					await em.save<LogEntity>(eventLog);
 				}
 				return savedProgramme;
 			})
