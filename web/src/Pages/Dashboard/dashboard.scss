@@ -16,6 +16,8 @@
         width: 100%;
         padding: 30px;
         margin-bottom: 30px;
+        white-space: nowrap;
+        overflow: auto;
     }
 
     .chart-update-time {
@@ -29,8 +31,24 @@
         }
     }
 
+    .empty-chart-xxl {
+        height: 322px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .empty-chart-xl {
+        height: 242px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
     .empty-chart {
-        height: 259px;
+        height: 200px;
         display: flex;
         flex-direction: column;
         justify-content: center;

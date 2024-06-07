@@ -73,6 +73,7 @@ export class AuthService {
       company: user.organisation,
       ability: JSON.stringify(ability),
 			sector: user.sector,
+      userState: user.state,
     };
   }
 
