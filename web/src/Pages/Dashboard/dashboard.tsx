@@ -1,4 +1,4 @@
-import { Col, Row, Select, Spin, message } from 'antd';
+import { Col, Grid, Row, Select, Spin, message } from 'antd';
 import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
@@ -10,13 +10,16 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 
 import { getActionTableColumns } from '../../Definitions/columns/actionColumns';
 import PieChart from '../../Components/Charts/PieChart/pieChart';
+import { dashboardHalfColumnBps } from '../../Definitions/breakpoints/breakpoints';
 
 const { Option } = Select;
+const { useBreakpoint } = Grid;
 
 const Dashboard = () => {
   // Context Information
 
   const { t } = useTranslation(['dashboard', 'actionList']);
+  const screens = useBreakpoint();
   const { get, post, statServerUrl } = useConnection();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -39,6 +42,7 @@ const Dashboard = () => {
 
   // Individual Chart Data
 
+  const [chartWidth, setChartWidth] = useState<number>(450);
   const [actionChart, setActionChart] = useState<PieChartData>();
   const [projectChart, setProjectChart] = useState<PieChartData>();
   const [supportChart, setSupportChart] = useState<PieChartData>();
@@ -53,6 +57,20 @@ const Dashboard = () => {
   for (let year = 2015; year <= 2050; year++) {
     yearsList.push(year);
   }
+
+  // Setting the chart Width
+
+  useEffect(() => {
+    if (screens.xxl) {
+      setChartWidth(560);
+    } else if (screens.xl) {
+      setChartWidth(480);
+    } else if (screens.lg) {
+      setChartWidth(550);
+    } else {
+      setChartWidth(450);
+    }
+  }, [screens]);
 
   // BE Call to fetch Action Data
 
@@ -251,7 +269,7 @@ const Dashboard = () => {
           ></ChartInformation>
           <Row gutter={30}>
             {actionChart && (
-              <Col key={'chart_1'} className="gutter-row" span={12}>
+              <Col key={'chart_1'} className="gutter-row" {...dashboardHalfColumnBps}>
                 <div className="chart-section-card">
                   <div className="chart-title">
                     <Row gutter={30}>
@@ -269,12 +287,12 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={actionChart} t={t}></PieChart>
+                  <PieChart chart={actionChart} t={t} chartWidth={chartWidth}></PieChart>
                 </div>
               </Col>
             )}
             {projectChart && (
-              <Col key={'chart_2'} className="gutter-row" span={12}>
+              <Col key={'chart_2'} className="gutter-row" {...dashboardHalfColumnBps}>
                 <div className="chart-section-card">
                   <div className="chart-title">
                     <Row gutter={30}>
@@ -292,12 +310,12 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={projectChart} t={t}></PieChart>
+                  <PieChart chart={projectChart} t={t} chartWidth={chartWidth}></PieChart>
                 </div>
               </Col>
             )}
             {supportChart && (
-              <Col key={'chart_3'} className="gutter-row" span={12}>
+              <Col key={'chart_3'} className="gutter-row" {...dashboardHalfColumnBps}>
                 <div className="chart-section-card">
                   <div className="chart-title">
                     <Row gutter={30}>
@@ -315,12 +333,12 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={supportChart} t={t}></PieChart>
+                  <PieChart chart={supportChart} t={t} chartWidth={chartWidth}></PieChart>
                 </div>
               </Col>
             )}
             {financeChart && (
-              <Col key={'chart_4'} className="gutter-row" span={12}>
+              <Col key={'chart_4'} className="gutter-row" {...dashboardHalfColumnBps}>
                 <div className="chart-section-card">
                   <div className="chart-title">
                     <Row gutter={30}>
@@ -338,12 +356,12 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={financeChart} t={t}></PieChart>
+                  <PieChart chart={financeChart} t={t} chartWidth={chartWidth}></PieChart>
                 </div>
               </Col>
             )}
             {mitigationIndividualChart && (
-              <Col key={'chart_5'} className="gutter-row" span={12}>
+              <Col key={'chart_5'} className="gutter-row" {...dashboardHalfColumnBps}>
                 <div className="chart-section-card">
                   <div className="chart-title">
                     <Row gutter={30}>
@@ -378,12 +396,16 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={mitigationIndividualChart} t={t}></PieChart>
+                  <PieChart
+                    chart={mitigationIndividualChart}
+                    t={t}
+                    chartWidth={chartWidth}
+                  ></PieChart>
                 </div>
               </Col>
             )}
             {mitigationRecentChart && (
-              <Col key={'chart_6'} className="gutter-row" span={12}>
+              <Col key={'chart_6'} className="gutter-row" {...dashboardHalfColumnBps}>
                 <div className="chart-section-card">
                   <div className="chart-title">
                     <Row gutter={30}>
@@ -401,7 +423,7 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={mitigationRecentChart} t={t}></PieChart>
+                  <PieChart chart={mitigationRecentChart} t={t} chartWidth={chartWidth}></PieChart>
                 </div>
               </Col>
             )}

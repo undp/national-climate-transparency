@@ -52,6 +52,13 @@ export const mtgHalfColumnBps = {
   xl: { span: 12 },
 };
 
+export const dashboardHalfColumnBps = {
+  sm: { span: 24 },
+  md: { span: 24 },
+  lg: { span: 24 },
+  xl: { span: 12 },
+};
+
 export const quarterColumnBps = {
   sm: { span: 24 },
   md: { span: 24 },
