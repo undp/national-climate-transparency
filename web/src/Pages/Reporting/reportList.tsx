@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { Button, Col, Row, message } from 'antd';
+import { Button, Col, Row } from 'antd';
 import './reportList.scss';
 import { DownloadOutlined } from '@ant-design/icons';
 import LayoutTable from '../../Components/common/Table/layout.table';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { ExportFileType } from '../../Enums/shared.enum';
 import { ReportFiveRecord } from '../../Definitions/reportDefinitions';
 import { getReportFiveColumns } from '../../Definitions/columns/reportColumns';
+import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 
 const reportList = () => {
   const { post } = useConnection();
@@ -56,12 +57,7 @@ const reportList = () => {
         setLoading(false);
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setLoading(false);
     }
   };
@@ -95,13 +91,7 @@ const reportList = () => {
       }
       setLoading(false);
     } catch (error: any) {
-      console.log('Error in exporting report data', error);
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setLoading(false);
     }
   };

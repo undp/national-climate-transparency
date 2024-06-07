@@ -1,11 +1,12 @@
 import './updates.scss';
-import { Skeleton, Steps, message } from 'antd';
+import { Skeleton, Steps } from 'antd';
 import { useEffect, useState } from 'react';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useTranslation } from 'react-i18next';
 import * as Icon from 'react-bootstrap-icons';
 import { CustomFormatDate } from '../../Utils/utilServices';
 import { UpdateProps } from '../../Definitions/InterfacesAndType/updatesInterface';
+import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 
 const UpdatesTimeline: React.FC<UpdateProps> = ({ recordType, recordId }) => {
   const { post } = useConnection();
@@ -26,12 +27,7 @@ const UpdatesTimeline: React.FC<UpdateProps> = ({ recordType, recordId }) => {
         setHistoryData(response.data);
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
     } finally {
       setLoadingHistory(false);
     }

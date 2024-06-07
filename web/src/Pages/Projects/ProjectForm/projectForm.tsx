@@ -38,6 +38,7 @@ import {
   quarterColumnBps,
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -247,14 +248,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               expectedGHGReduction: entityData.migratedData?.expectedGHGReduction ?? 0,
             });
           }
-        } catch {
+        } catch (error: any) {
           navigate('/projects');
-          message.open({
-            type: 'error',
-            content: t('noSuchEntity'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -305,13 +301,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               setHandleKPI(true);
             }
           }
-        } catch {
-          message.open({
-            type: 'error',
-            content: t('kpiSearchFailed'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+        } catch (error: any) {
+          displayErrorMessage(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -380,14 +371,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               natAnchor: actionData.natAnchor,
             });
           }
-        } catch {
+        } catch (error: any) {
           navigate('/projects');
-          message.open({
-            type: 'error',
-            content: t('actionNotFound'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+          displayErrorMessage(error, t('actionNotFound'));
         }
       } else {
         form.setFieldsValue({
@@ -419,14 +405,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             });
             setProgrammeConnectedAction(programmeData.actionId);
           }
-        } catch {
+        } catch (error: any) {
           navigate('/projects');
-          message.open({
-            type: 'error',
-            content: t('programmeNotFound'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+          displayErrorMessage(error, t('programmeNotFound'));
         }
       } else {
         form.setFieldsValue({
@@ -741,12 +722,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         navigate('/projects');
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: `${error.message}`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
 
       await new Promise((resolve) => {
         setTimeout(resolve, 500);
@@ -778,13 +754,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
           navigate('/projects');
         }
       }
-    } catch {
-      message.open({
-        type: 'error',
-        content: `${entId} Validation Failed`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+    } catch (error: any) {
+      displayErrorMessage(error, `${entId} Validation Failed`);
     }
   };
 
@@ -884,13 +855,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
           setKpiCounter(tempKpiCounter);
           setInheritedKpiList(tempInheritedKpiList);
         }
-      } catch {
-        message.open({
-          type: 'error',
-          content: t('kpiSearchFailed'),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
+      } catch (error: any) {
+        displayErrorMessage(error, t('kpiSearchFailed'));
       }
     }
   };

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import '../../../Styles/app.scss';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { Action } from '../../../Enums/action.enum';
-import { Button, Col, Row, Input, Dropdown, Popover, message, Radio, Space, MenuProps } from 'antd';
+import { Button, Col, Row, Input, Dropdown, Popover, Radio, Space, MenuProps } from 'antd';
 import { EllipsisOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 import { actionMenuWithoutAttaching } from '../../../Components/Popups/tableAction';
 import { SupportEntity } from '../../../Entities/support';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 interface Item {
   key: number;
@@ -142,12 +143,7 @@ const supportList = () => {
         setLoading(false);
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setLoading(false);
     }
   };

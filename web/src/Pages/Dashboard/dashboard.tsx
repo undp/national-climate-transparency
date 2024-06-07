@@ -1,4 +1,4 @@
-import { Col, Grid, Row, Select, Spin, message } from 'antd';
+import { Col, Grid, Row, Select, Spin } from 'antd';
 import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
@@ -11,6 +11,7 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import { getActionTableColumns } from '../../Definitions/columns/actionColumns';
 import PieChart from '../../Components/Charts/PieChart/pieChart';
 import { dashboardHalfColumnBps } from '../../Definitions/breakpoints/breakpoints';
+import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 
 const { Option } = Select;
 const { useBreakpoint } = Grid;
@@ -108,12 +109,7 @@ const Dashboard = () => {
         setLoading(false);
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setLoading(false);
     }
   };

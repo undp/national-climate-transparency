@@ -55,6 +55,7 @@ import '../../../Styles/common.table.scss';
 import { UserState } from '../../../Enums/user.state.enum';
 import { Role } from '../../../Enums/role.enum';
 import LayoutTable from '../../../Components/common/Table/layout.table';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 interface Filter {
   searchBy: string;
@@ -445,12 +446,7 @@ const UserManagement = () => {
       }
       setLoading(false);
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setLoading(false);
     }
   };

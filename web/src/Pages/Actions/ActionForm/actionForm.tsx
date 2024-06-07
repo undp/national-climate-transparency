@@ -40,6 +40,7 @@ import {
   quarterColumnBps,
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -210,14 +211,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               natImplementer: entityData.migratedData?.natImplementors ?? [],
             });
           }
-        } catch {
+        } catch (error: any) {
           navigate('/actions');
-          message.open({
-            type: 'error',
-            content: t('noSuchEntity'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -253,13 +249,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               setHandleKPI(true);
             }
           }
-        } catch {
-          message.open({
-            type: 'error',
-            content: t('kpiSearchFailed'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+        } catch (error: any) {
+          displayErrorMessage(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -685,12 +676,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         navigate('/actions');
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: `${error.message}`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
 
       await new Promise((resolve) => {
         setTimeout(resolve, 500);
@@ -722,13 +708,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           navigate('/actions');
         }
       }
-    } catch {
-      message.open({
-        type: 'error',
-        content: `${entId} Validation Failed`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+    } catch (error: any) {
+      displayErrorMessage(error, `${entId} Validation Failed`);
     }
   };
 

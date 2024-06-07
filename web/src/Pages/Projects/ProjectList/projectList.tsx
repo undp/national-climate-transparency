@@ -16,6 +16,7 @@ import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { GraphUpArrow } from 'react-bootstrap-icons';
 import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
 import { ProjectEntity } from '../../../Entities/project';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 interface Item {
   key: number;
@@ -191,12 +192,7 @@ const projectList = () => {
         setLoading(false);
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setLoading(false);
     }
   };

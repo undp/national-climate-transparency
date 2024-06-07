@@ -19,13 +19,14 @@ const PieChart: React.FC<Props> = ({ chart, t, chartWidth }) => {
 
   // Pie Chart General State
 
-  const [totalCount, setTotalCount] = useState<number>(10);
+  const [total, setTotal] = useState<number>(0);
   const [chartColorMapping, setChartColorMapping] = useState<string[]>([]);
 
   // Setting the Total value
 
   useEffect(() => {
-    setTotalCount(getArraySum(chart.values));
+    const arraySum = getArraySum(chart.values);
+    setTotal(arraySum);
   }, [chart.values]);
 
   // Setting the Color Mapping
@@ -42,7 +43,7 @@ const PieChart: React.FC<Props> = ({ chart, t, chartWidth }) => {
 
   return (
     <div>
-      {totalCount > 0 ? (
+      {total > 0 ? (
         <>
           <Chart
             type="donut"
@@ -66,15 +67,22 @@ const PieChart: React.FC<Props> = ({ chart, t, chartWidth }) => {
                       },
                       value: {
                         show: true,
-                        formatter: (value) => (chart.chartId === 4 ? `$ ${value}` : value),
+                        formatter: (value) =>
+                          chart.chartId === 4 ? `$ ${Math.round(parseFloat(value))}` : value,
                       },
                       total: {
                         show: true,
                         label: 'Total',
                         color: '#373d3f',
                         fontWeight: 500,
-                        formatter: () =>
-                          DashboardTotalFormatter(totalCount, chart.chartId === 4 ? true : false),
+                        formatter: function (w) {
+                          return DashboardTotalFormatter(
+                            w.globals.seriesTotals.reduce((a: number, b: number) => {
+                              return a + b;
+                            }, 0),
+                            chart.chartId === 4 ? true : false
+                          );
+                        },
                       },
                     },
                   },

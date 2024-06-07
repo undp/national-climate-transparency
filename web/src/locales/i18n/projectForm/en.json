@@ -61,5 +61,6 @@
     "noSupportMessage": "No Supports Connected",
     "noActivityMessage": "No Activities Connected",
     "update": "Save",
-    "delete": "Delete"
+    "delete": "Delete",
+    "kpiSearchFailed": "Searching for KPIs Failed"
   }
