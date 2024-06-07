@@ -8,14 +8,14 @@
     "titleOfAction": "Name of Action",
     "titleOfProgramme": "Title of Programme",
     "titleOfProject": "Title of Project",
-    "description": "Short Description or Objectives",
+    "description": "Description",
     "objective": "Objectives",
     "instrumentType": "Type of instrument",
     "status": "Status",
-    "sector": "Sector affected",
+    "sector": "Sector(s) affected",
     "ghgsAffected": "Gases affected",
     "startYear": "Start year of implementation",
-    "implementingEntities": "Implementing entities ",
-    "achievedGHGReduction": "GHG reduces (achieved ktCO2e)",
-    "expectedGHGReduction": "GHG reduces (expected ktCO2e)"
+    "implementingEntities": "Implementing entity or entities",
+    "achievedGHGReduction": "Estimates of GHG emission reductions (ktCO2eq) Achieved",
+    "expectedGHGReduction": "Estimates of GHG emission reductions (ktCO2eq) Expected"
 }
