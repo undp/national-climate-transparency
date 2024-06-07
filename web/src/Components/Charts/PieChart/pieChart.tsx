@@ -67,7 +67,8 @@ const PieChart: React.FC<Props> = ({ chart, t, chartWidth }) => {
                       },
                       value: {
                         show: true,
-                        formatter: (value) => (chart.chartId === 4 ? `$ ${value}` : value),
+                        formatter: (value) =>
+                          chart.chartId === 4 ? `$ ${Math.round(parseFloat(value))}` : value,
                       },
                       total: {
                         show: true,
