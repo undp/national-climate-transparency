@@ -66,8 +66,8 @@ export class SupportService {
 			);
 		}
 
-		support.requiredAmountDomestic = support.requiredAmount / support.exchangeRate;
-		support.receivedAmountDomestic = support.receivedAmount / support.exchangeRate;
+		support.requiredAmountDomestic = this.helperService.roundToTwoDecimals(support.requiredAmount / support.exchangeRate);
+		support.receivedAmountDomestic = this.helperService.roundToTwoDecimals(support.receivedAmount / support.exchangeRate);
 		support.sector = activity.sector;
 
 		support.activity = activity;
@@ -235,8 +235,8 @@ export class SupportService {
 		currentSupport.requiredAmount = supportUpdateDto.requiredAmount;
 		currentSupport.receivedAmount = supportUpdateDto.receivedAmount;
 		currentSupport.exchangeRate = supportUpdateDto.exchangeRate;
-		currentSupport.requiredAmountDomestic = currentSupport.requiredAmount / currentSupport.exchangeRate;
-		currentSupport.receivedAmountDomestic = currentSupport.receivedAmount / currentSupport.exchangeRate;
+		currentSupport.requiredAmountDomestic = this.helperService.roundToTwoDecimals(currentSupport.requiredAmount / currentSupport.exchangeRate);
+		currentSupport.receivedAmountDomestic = this.helperService.roundToTwoDecimals(currentSupport.receivedAmount / currentSupport.exchangeRate);
 
 		const sup = await this.entityManager
 			.transaction(async (em) => {
