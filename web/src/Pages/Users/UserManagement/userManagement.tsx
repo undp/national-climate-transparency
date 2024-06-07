@@ -186,7 +186,10 @@ const UserManagement = () => {
       if (response.status === 200) {
         message.open({
           type: 'success',
-          content: response.message,
+          content:
+            updatedUserRecord.status === '1'
+              ? ` ${updatedUserRecord.name} ${t('user:activateSuccessMsg')}`
+              : ` ${updatedUserRecord.name} ${t('user:deactivateSuccessMsg')}`,
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -231,7 +234,7 @@ const UserManagement = () => {
 
     if (
       // eslint-disable-next-line eqeqeq
-      record.status == 1 &&
+      record.status == UserState.ACTIVE &&
       (record.role === Role.GovernmentUser || record.role === Role.Observer)
     ) {
       data.push({
@@ -254,7 +257,7 @@ const UserManagement = () => {
       // eslint-disable-next-line eqeqeq
     } else if (
       // eslint-disable-next-line eqeqeq
-      record.status == 0 &&
+      record.status == UserState.SUSPENDED &&
       (record.role === Role.GovernmentUser || record.role === Role.Observer)
     ) {
       data.push({
