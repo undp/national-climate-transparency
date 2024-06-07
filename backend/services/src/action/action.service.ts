@@ -113,6 +113,7 @@ export class ActionService {
 			.transaction(async (em) => {
 				const savedAction = await em.save<ActionEntity>(action);
 				if (savedAction) {
+					await em.save<LogEntity>(eventLog);
 					// link programmes here
 					if (programmes && programmes.length > 0) {
 						await this.linkUnlinkService.linkProgrammesToAction(savedAction, programmes, action.actionId, user, em);
@@ -121,7 +122,6 @@ export class ActionService {
 					if (actionDto.kpis) {
 						await em.save<KpiEntity>(kpiList);
 					}
-					await em.save<LogEntity>(eventLog);
 				}
 				return savedAction;
 			})
