@@ -34,10 +34,8 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
       : process.env.STORYBOOK_COMPANY_NAME
       ? process.env.STORYBOOK_COMPANY_NAME
       : '',
-    companyState: localStorage.getItem('companyState')
-      ? parseInt(localStorage.getItem('companyState') as string)
-      : process.env.STORYBOOK_COMPANY_STATE
-      ? parseInt(process.env.STORYBOOK_COMPANY_STATE)
+    userState: localStorage.getItem('userState')
+      ? parseInt(localStorage.getItem('userState') as string)
       : 0,
     userSectors: localStorage.getItem('userSectors')?.split(',') ?? [],
   };
@@ -45,8 +43,8 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
   const [userInfoState, setUserInfoState] = useState<UserProps>(initialUserProps);
 
   const setUserInfo = (value: UserProps) => {
-    const state = userInfoState?.companyState === 1 ? userInfoState?.companyState : 0;
-    const { id, userRole, companyName, companyState = state, userSectors } = value;
+    const state = userInfoState?.userState === 1 ? userInfoState?.userState : 0;
+    const { id, userRole, companyName, userState = state, userSectors } = value;
     if (id) {
       setUserInfoState((prev) => ({ ...prev, id }));
       localStorage.setItem('userId', id);
@@ -62,8 +60,8 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
       localStorage.setItem('companyName', companyName);
     }
 
-    setUserInfoState((prev) => ({ ...prev, companyState }));
-    localStorage.setItem('companyState', companyState + '');
+    setUserInfoState((prev) => ({ ...prev, userState }));
+    localStorage.setItem('userState', userState + '');
 
     setUserInfoState((prev) => ({ ...prev, userSectors }));
     localStorage.setItem('userSectors', userSectors + '');
@@ -103,7 +101,7 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     localStorage.removeItem('userId');
     localStorage.removeItem('userRole');
     localStorage.removeItem('companyName');
-    localStorage.removeItem('companyState');
+    localStorage.removeItem('userState');
     localStorage.removeItem('userSectors');
     setUserInfoState(initialUserProps);
   };

@@ -88,6 +88,10 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
           .catch((e: any) => {
             if (e.response) {
               if (e.response.status) {
+                if (e.response.data.message === 'user deactivated') {
+                  localStorage.setItem('userState', '0');
+                }
+
                 if (
                   e.response.data.message === 'jwt expired' ||
                   e.response.data.message === 'user deactivated'
