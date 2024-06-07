@@ -25,6 +25,7 @@ import {
   quarterColumnBps,
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 const { Option } = Select;
 
@@ -185,14 +186,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               navigate(`/support/view/${entId}`);
             }
           }
-        } catch {
+        } catch (error: any) {
           navigate('/support');
-          message.open({
-            type: 'error',
-            content: t('noSuchEntity'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -239,12 +235,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
         navigate('/support');
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: `${error.message}`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
     }
   };
 
@@ -269,13 +260,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
           navigate('/support');
         }
       }
-    } catch {
-      message.open({
-        type: 'error',
-        content: `${entId} Validation Failed`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+    } catch (error: any) {
+      displayErrorMessage(error, `${entId} Validation Failed`);
     }
   };
 

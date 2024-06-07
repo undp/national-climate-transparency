@@ -39,6 +39,7 @@ import {
   quarterColumnBps,
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -257,13 +258,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             setKpiCounter(tempKpiCounter);
             setInheritedKpiList(tempInheritedKpiList);
           }
-        } catch {
-          message.open({
-            type: 'error',
-            content: t('kpiSearchFailed'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+        } catch (error: any) {
+          displayErrorMessage(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -407,14 +403,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               setStoredRstFiles(tempFiles);
             }
           }
-        } catch {
+        } catch (error: any) {
           navigate('/activities');
-          message.open({
-            type: 'error',
-            content: t('noSuchEntity'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -494,13 +485,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             setKpiCounter(tempKpiCounter);
             setInheritedKpiList(tempInheritedKpiList);
           }
-        } catch {
-          message.open({
-            type: 'error',
-            content: t('kpiSearchFailed'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+        } catch (error: any) {
+          displayErrorMessage(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -737,12 +723,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         navigate('/activities');
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: `${error.message}`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setWaitingForBE(false);
       navigate('/activities');
     }
@@ -769,13 +750,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           navigate('/activities');
         }
       }
-    } catch {
-      message.open({
-        type: 'error',
-        content: `${entId} Validation Failed`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+    } catch (error: any) {
+      displayErrorMessage(error, `${entId} Validation Failed`);
     }
   };
 
@@ -906,13 +882,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           setisMtgButtonEnabled(false);
         }
       }
-    } catch {
-      message.open({
-        type: 'error',
-        content: `${entId} Mitigation Timeline Failed to Update !`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+    } catch (error: any) {
+      displayErrorMessage(error, `${entId} Mitigation Timeline Failed to Update !`);
     }
   };
 

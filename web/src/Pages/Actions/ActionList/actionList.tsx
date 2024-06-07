@@ -20,6 +20,7 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 interface Item {
   key: number;
@@ -196,12 +197,7 @@ const actionList = () => {
         setLoading(false);
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setLoading(false);
     }
   };

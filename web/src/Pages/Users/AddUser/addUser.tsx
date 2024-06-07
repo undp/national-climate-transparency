@@ -21,6 +21,7 @@ import { Role } from '../../../Enums/role.enum';
 import { Sector } from '../../../Enums/sector.enum';
 import { Organisation } from '../../../Enums/organisation.enum';
 import { BankOutlined, ExperimentOutlined, KeyOutlined, StarOutlined } from '@ant-design/icons';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -63,13 +64,7 @@ const AddUser = () => {
         setCountries(alpha2Names);
       }
     } catch (error: any) {
-      console.log('Error in getCountryList', error);
-      message.open({
-        type: 'error',
-        content: `${error.message}`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
     } finally {
       setIsCountryListLoading(false);
     }
@@ -95,13 +90,7 @@ const AddUser = () => {
         setLoading(false);
       }
     } catch (error: any) {
-      console.log('Error in user creation', error);
-      message.open({
-        type: 'error',
-        content: `${error.message}`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
     } finally {
       setLoading(false);
     }
@@ -144,13 +133,7 @@ const AddUser = () => {
         setLoading(false);
       }
     } catch (error: any) {
-      console.log('Error in user update', error);
-      message.open({
-        type: 'error',
-        content: `${t('updateUserError')} ${error.message}`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setLoading(false);
     }
   };
