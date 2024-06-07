@@ -46,5 +46,6 @@
     "noSuchEntity": "Requested Action doesn't exist !",
     "investmentNeeds": " Estimated investment needs (USD)",
     "noActivityMessage": "No Activities Attached",
-    "noSupportMessage": "No Supports Attached"
+    "noSupportMessage": "No Supports Attached",
+    "kpiSearchFailed": "Searching for KPIs Failed"
 }
