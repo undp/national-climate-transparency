@@ -138,31 +138,35 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     // Initially Loading Non Validated Actions that can be parent
 
     const fetchNonValidatedActions = async () => {
-      const payload = {
-        filterAnd: [
-          {
-            key: 'validated',
-            operation: '=',
-            value: false,
+      try {
+        const payload = {
+          filterAnd: [
+            {
+              key: 'validated',
+              operation: '=',
+              value: false,
+            },
+          ],
+          sort: {
+            key: 'actionId',
+            order: 'ASC',
           },
-        ],
-        sort: {
-          key: 'actionId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/actions/query', payload);
+        };
+        const response: any = await post('national/actions/query', payload);
 
-      const tempActionData: ActionSelectData[] = [];
-      response.data.forEach((action: any) => {
-        tempActionData.push({
-          id: action.actionId,
-          title: action.title,
-          instrumentType: action.instrumentType,
-          sector: action.sector,
+        const tempActionData: ActionSelectData[] = [];
+        response.data.forEach((action: any) => {
+          tempActionData.push({
+            id: action.actionId,
+            title: action.title,
+            instrumentType: action.instrumentType,
+            sector: action.sector,
+          });
         });
-      });
-      setActionList(tempActionData);
+        setActionList(tempActionData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     fetchNonValidatedActions();
 
@@ -315,27 +319,31 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchConnectedProjectIds = async () => {
       if (method !== 'create') {
-        const payload = {
-          filterAnd: [
-            {
-              key: 'programmeId',
-              operation: '=',
-              value: entId,
+        try {
+          const payload = {
+            filterAnd: [
+              {
+                key: 'programmeId',
+                operation: '=',
+                value: entId,
+              },
+            ],
+            sort: {
+              key: 'projectId',
+              order: 'ASC',
             },
-          ],
-          sort: {
-            key: 'projectId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/projects/query', payload);
+          };
+          const response: any = await post('national/projects/query', payload);
 
-        const connectedProjectIds: string[] = [];
-        response.data.forEach((prj: any) => {
-          connectedProjectIds.push(prj.projectId);
-        });
-        setAttachedProjectIds(connectedProjectIds);
-        setTempProjectIds(connectedProjectIds);
+          const connectedProjectIds: string[] = [];
+          response.data.forEach((prj: any) => {
+            connectedProjectIds.push(prj.projectId);
+          });
+          setAttachedProjectIds(connectedProjectIds);
+          setTempProjectIds(connectedProjectIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchConnectedProjectIds();
@@ -344,31 +352,35 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchConnectedActivityIds = async () => {
       if (method !== 'create') {
-        const connectedActivityIds: string[] = [];
-        const payload = {
-          filterAnd: [
-            {
-              key: 'parentId',
-              operation: '=',
-              value: entId,
+        try {
+          const connectedActivityIds: string[] = [];
+          const payload = {
+            filterAnd: [
+              {
+                key: 'parentId',
+                operation: '=',
+                value: entId,
+              },
+              {
+                key: 'parentType',
+                operation: '=',
+                value: 'programme',
+              },
+            ],
+            sort: {
+              key: 'activityId',
+              order: 'ASC',
             },
-            {
-              key: 'parentType',
-              operation: '=',
-              value: 'programme',
-            },
-          ],
-          sort: {
-            key: 'activityId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/activities/query', payload);
-        response.data.forEach((act: any) => {
-          connectedActivityIds.push(act.activityId);
-        });
-        setAttachedActivityIds(connectedActivityIds);
-        setTempActivityIds(connectedActivityIds);
+          };
+          const response: any = await post('national/activities/query', payload);
+          response.data.forEach((act: any) => {
+            connectedActivityIds.push(act.activityId);
+          });
+          setAttachedActivityIds(connectedActivityIds);
+          setTempActivityIds(connectedActivityIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchConnectedActivityIds();
@@ -400,31 +412,35 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchData = async () => {
       if (tempProjectIds.length > 0) {
-        tempProjectIds.forEach((projId) => {
-          payload.filterOr.push({
-            key: 'projectId',
-            operation: '=',
-            value: projId,
+        try {
+          tempProjectIds.forEach((projId) => {
+            payload.filterOr.push({
+              key: 'projectId',
+              operation: '=',
+              value: projId,
+            });
           });
-        });
-        const response: any = await post('national/projects/query', payload);
+          const response: any = await post('national/projects/query', payload);
 
-        const tempPRJData: ProjectData[] = [];
+          const tempPRJData: ProjectData[] = [];
 
-        response.data.forEach((prj: any, index: number) => {
-          tempPRJData.push({
-            key: index.toString(),
-            projectId: prj.projectId,
-            projectName: prj.title,
-            type: prj.type,
-            internationalImplementingEntities: prj.internationalImplementingEntities ?? [],
-            recipientEntities: prj.recipientEntities ?? [],
-            ghgsAffected: prj.migratedData[0]?.ghgsAffected ?? [],
-            achievedReduction: prj.migratedData[0]?.achievedGHGReduction ?? 0,
-            estimatedReduction: prj.migratedData[0]?.expectedGHGReduction ?? 0,
+          response.data.forEach((prj: any, index: number) => {
+            tempPRJData.push({
+              key: index.toString(),
+              projectId: prj.projectId,
+              projectName: prj.title,
+              type: prj.type,
+              internationalImplementingEntities: prj.internationalImplementingEntities ?? [],
+              recipientEntities: prj.recipientEntities ?? [],
+              ghgsAffected: prj.migratedData[0]?.ghgsAffected ?? [],
+              achievedReduction: prj.migratedData[0]?.achievedGHGReduction ?? 0,
+              estimatedReduction: prj.migratedData[0]?.expectedGHGReduction ?? 0,
+            });
           });
-        });
-        setProjectData(tempPRJData);
+          setProjectData(tempPRJData);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       } else {
         setProjectData([]);
       }
@@ -457,57 +473,61 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchActivityAttachmentData = async () => {
       if (tempActivityIds.length > 0) {
-        tempActivityIds.forEach((activityId) => {
-          activityPayload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: activityId,
+        try {
+          tempActivityIds.forEach((activityId) => {
+            activityPayload.filterOr.push({
+              key: 'activityId',
+              operation: '=',
+              value: activityId,
+            });
+            supportPayload.filterOr.push({
+              key: 'activityId',
+              operation: '=',
+              value: activityId,
+            });
           });
-          supportPayload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: activityId,
+          const activityResponse: any = await post('national/activities/query', activityPayload);
+          const supportResponse: any = await post('national/supports/query', supportPayload);
+
+          const tempActivityData: ActivityData[] = [];
+          const tempSupportData: SupportData[] = [];
+
+          activityResponse.data.forEach((act: any, index: number) => {
+            tempActivityData.push({
+              key: index.toString(),
+              activityId: act.activityId,
+              title: act.title,
+              reductionMeasures: act.measure,
+              status: act.status,
+              natImplementor: act.nationalImplementingEntity ?? [],
+              ghgsAffected: act.ghgsAffected ?? [],
+              achievedReduction: act.achievedGHGReduction ?? 0,
+              estimatedReduction: act.expectedGHGReduction ?? 0,
+            });
           });
-        });
-        const activityResponse: any = await post('national/activities/query', activityPayload);
-        const supportResponse: any = await post('national/supports/query', supportPayload);
 
-        const tempActivityData: ActivityData[] = [];
-        const tempSupportData: SupportData[] = [];
-
-        activityResponse.data.forEach((act: any, index: number) => {
-          tempActivityData.push({
-            key: index.toString(),
-            activityId: act.activityId,
-            title: act.title,
-            reductionMeasures: act.measure,
-            status: act.status,
-            natImplementor: act.nationalImplementingEntity ?? [],
-            ghgsAffected: act.ghgsAffected ?? [],
-            achievedReduction: act.achievedGHGReduction ?? 0,
-            estimatedReduction: act.expectedGHGReduction ?? 0,
+          supportResponse.data.forEach((sup: any, index: number) => {
+            tempSupportData.push({
+              key: index.toString(),
+              supportId: sup.supportId,
+              financeNature: sup.financeNature,
+              direction: sup.direction,
+              finInstrument:
+                sup.financeNature === 'International'
+                  ? sup.internationalFinancialInstrument
+                  : sup.nationalFinancialInstrument,
+              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+              recievedUSD: getRounded(sup.receivedAmount ?? 0),
+              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+            });
           });
-        });
 
-        supportResponse.data.forEach((sup: any, index: number) => {
-          tempSupportData.push({
-            key: index.toString(),
-            supportId: sup.supportId,
-            financeNature: sup.financeNature,
-            direction: sup.direction,
-            finInstrument:
-              sup.financeNature === 'International'
-                ? sup.internationalFinancialInstrument
-                : sup.nationalFinancialInstrument,
-            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-            recievedUSD: getRounded(sup.receivedAmount ?? 0),
-            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
-          });
-        });
-
-        setActivityData(tempActivityData);
-        setSupportData(tempSupportData);
+          setActivityData(tempActivityData);
+          setSupportData(tempSupportData);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       } else {
         setActivityData([]);
         setSupportData([]);
@@ -586,12 +606,16 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     const toAttach = tempProjectIds.filter((prj) => !attachedProjectIds.includes(prj));
     const toDetach = attachedProjectIds.filter((prj) => !tempProjectIds.includes(prj));
 
-    if (toDetach.length > 0) {
-      await post('national/projects/unlink', { projects: toDetach });
-    }
+    try {
+      if (toDetach.length > 0) {
+        await post('national/projects/unlink', { projects: toDetach });
+      }
 
-    if (toAttach.length > 0) {
-      await post('national/projects/link', { programmeId: entId, projectIds: toAttach });
+      if (toAttach.length > 0) {
+        await post('national/projects/link', { programmeId: entId, projectIds: toAttach });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 
@@ -599,16 +623,20 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
     const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
 
-    if (toDetach.length > 0) {
-      await post('national/activities/unlink', { activityIds: toDetach });
-    }
+    try {
+      if (toDetach.length > 0) {
+        await post('national/activities/unlink', { activityIds: toDetach });
+      }
 
-    if (toAttach.length > 0) {
-      await post('national/activities/link', {
-        parentId: parentId,
-        parentType: 'programme',
-        activityIds: toAttach,
-      });
+      if (toAttach.length > 0) {
+        await post('national/activities/link', {
+          parentId: parentId,
+          parentType: 'programme',
+          activityIds: toAttach,
+        });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 

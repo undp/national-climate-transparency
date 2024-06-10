@@ -132,29 +132,33 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     // Initially Loading Non validated programmes that can be parent
 
     const fetchNonValidatedProgrammes = async () => {
-      const payload = {
-        filterAnd: [
-          {
-            key: 'validated',
-            operation: '=',
-            value: false,
+      try {
+        const payload = {
+          filterAnd: [
+            {
+              key: 'validated',
+              operation: '=',
+              value: false,
+            },
+          ],
+          sort: {
+            key: 'programmeId',
+            order: 'ASC',
           },
-        ],
-        sort: {
-          key: 'programmeId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/programmes/query', payload);
+        };
+        const response: any = await post('national/programmes/query', payload);
 
-      const tempProgrammeData: ProgrammeSelectData[] = [];
-      response.data.forEach((prg: any) => {
-        tempProgrammeData.push({
-          id: prg.programmeId,
-          title: prg.title,
+        const tempProgrammeData: ProgrammeSelectData[] = [];
+        response.data.forEach((prg: any) => {
+          tempProgrammeData.push({
+            id: prg.programmeId,
+            title: prg.title,
+          });
         });
-      });
-      setProgrammeList(tempProgrammeData);
+        setProgrammeList(tempProgrammeData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     fetchNonValidatedProgrammes();
 
@@ -316,27 +320,31 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchConnectedActivityIds = async () => {
       if (method !== 'create') {
-        const payload = {
-          filterAnd: [
-            {
-              key: 'parentId',
-              operation: '=',
-              value: entId,
+        try {
+          const payload = {
+            filterAnd: [
+              {
+                key: 'parentId',
+                operation: '=',
+                value: entId,
+              },
+            ],
+            sort: {
+              key: 'activityId',
+              order: 'ASC',
             },
-          ],
-          sort: {
-            key: 'activityId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/activities/query', payload);
+          };
+          const response: any = await post('national/activities/query', payload);
 
-        const connectedActivityIds: string[] = [];
-        response.data.forEach((act: any) => {
-          connectedActivityIds.push(act.activityId);
-        });
-        setAttachedActivityIds(connectedActivityIds);
-        setTempActivityIds(connectedActivityIds);
+          const connectedActivityIds: string[] = [];
+          response.data.forEach((act: any) => {
+            connectedActivityIds.push(act.activityId);
+          });
+          setAttachedActivityIds(connectedActivityIds);
+          setTempActivityIds(connectedActivityIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchConnectedActivityIds();
@@ -450,59 +458,63 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchActivityAttachmentData = async () => {
       if (tempActivityIds.length > 0) {
-        tempActivityIds.forEach((activityId) => {
-          activityPayload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: activityId,
+        try {
+          tempActivityIds.forEach((activityId) => {
+            activityPayload.filterOr.push({
+              key: 'activityId',
+              operation: '=',
+              value: activityId,
+            });
+            supportPayload.filterOr.push({
+              key: 'activityId',
+              operation: '=',
+              value: activityId,
+            });
           });
-          supportPayload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: activityId,
+          const activityResponse: any = await post('national/activities/query', activityPayload);
+          const supportResponse: any = await post('national/supports/query', supportPayload);
+
+          const tempActivityData: ActivityData[] = [];
+          const tempSupportData: SupportData[] = [];
+
+          activityResponse.data.forEach((act: any, index: number) => {
+            tempActivityData.push({
+              key: index.toString(),
+              activityId: act.activityId,
+              title: act.title,
+              reductionMeasures: act.measure,
+              status: act.status,
+              natImplementor: act.nationalImplementingEntity ?? [],
+              ghgsAffected: act.ghgsAffected ?? [],
+              achievedReduction: act.achievedGHGReduction ?? 0,
+              estimatedReduction: act.expectedGHGReduction ?? 0,
+              technologyType: act.technologyType,
+              meansOfImplementation: act.meansOfImplementation,
+            });
           });
-        });
-        const activityResponse: any = await post('national/activities/query', activityPayload);
-        const supportResponse: any = await post('national/supports/query', supportPayload);
 
-        const tempActivityData: ActivityData[] = [];
-        const tempSupportData: SupportData[] = [];
-
-        activityResponse.data.forEach((act: any, index: number) => {
-          tempActivityData.push({
-            key: index.toString(),
-            activityId: act.activityId,
-            title: act.title,
-            reductionMeasures: act.measure,
-            status: act.status,
-            natImplementor: act.nationalImplementingEntity ?? [],
-            ghgsAffected: act.ghgsAffected ?? [],
-            achievedReduction: act.achievedGHGReduction ?? 0,
-            estimatedReduction: act.expectedGHGReduction ?? 0,
-            technologyType: act.technologyType,
-            meansOfImplementation: act.meansOfImplementation,
+          supportResponse.data.forEach((sup: any, index: number) => {
+            tempSupportData.push({
+              key: index.toString(),
+              supportId: sup.supportId,
+              financeNature: sup.financeNature,
+              direction: sup.direction,
+              finInstrument:
+                sup.financeNature === 'International'
+                  ? sup.internationalFinancialInstrument
+                  : sup.nationalFinancialInstrument,
+              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+              recievedUSD: getRounded(sup.receivedAmount ?? 0),
+              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+            });
           });
-        });
 
-        supportResponse.data.forEach((sup: any, index: number) => {
-          tempSupportData.push({
-            key: index.toString(),
-            supportId: sup.supportId,
-            financeNature: sup.financeNature,
-            direction: sup.direction,
-            finInstrument:
-              sup.financeNature === 'International'
-                ? sup.internationalFinancialInstrument
-                : sup.nationalFinancialInstrument,
-            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-            recievedUSD: getRounded(sup.receivedAmount ?? 0),
-            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
-          });
-        });
-
-        setActivityData(tempActivityData);
-        setSupportData(tempSupportData);
+          setActivityData(tempActivityData);
+          setSupportData(tempSupportData);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       } else {
         setActivityData([]);
         setSupportData([]);
@@ -597,16 +609,20 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
     const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
 
-    if (toDetach.length > 0) {
-      await post('national/activities/unlink', { activityIds: toDetach });
-    }
+    try {
+      if (toDetach.length > 0) {
+        await post('national/activities/unlink', { activityIds: toDetach });
+      }
 
-    if (toAttach.length > 0) {
-      await post('national/activities/link', {
-        parentId: entId,
-        parentType: 'project',
-        activityIds: toAttach,
-      });
+      if (toAttach.length > 0) {
+        await post('national/activities/link', {
+          parentId: entId,
+          parentType: 'project',
+          activityIds: toAttach,
+        });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 

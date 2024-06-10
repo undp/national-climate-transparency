@@ -103,26 +103,30 @@ const programmeList = () => {
   // Get Attached Projects
 
   const getAttachedProjectIds = async (programmeId: string) => {
-    const payload = {
-      filterAnd: [
-        {
-          key: 'programmeId',
-          operation: '=',
-          value: programmeId,
+    try {
+      const payload = {
+        filterAnd: [
+          {
+            key: 'programmeId',
+            operation: '=',
+            value: programmeId,
+          },
+        ],
+        sort: {
+          key: 'projectId',
+          order: 'ASC',
         },
-      ],
-      sort: {
-        key: 'projectId',
-        order: 'ASC',
-      },
-    };
-    const response: any = await post('national/projects/query', payload);
+      };
+      const response: any = await post('national/projects/query', payload);
 
-    const freeProjectIds: string[] = [];
-    response.data.forEach((prj: any) => {
-      freeProjectIds.push(prj.projectId);
-    });
-    setAttachedProjectIds(freeProjectIds);
+      const freeProjectIds: string[] = [];
+      response.data.forEach((prj: any) => {
+        freeProjectIds.push(prj.projectId);
+      });
+      setAttachedProjectIds(freeProjectIds);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   // Data Read from DB
@@ -202,28 +206,32 @@ const programmeList = () => {
   // Attach Multiple Projects for a Project
 
   const attachProjects = async () => {
-    const payload = {
-      programmeId: selectedProgrammeId,
-      projectIds: toBeAttached,
-    };
-    const response: any = await post('national/projects/link', payload);
-    if (response.status === 200 || response.status === 201) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
-      });
+    try {
+      const payload = {
+        programmeId: selectedProgrammeId,
+        projectIds: toBeAttached,
+      };
+      const response: any = await post('national/projects/link', payload);
+      if (response.status === 200 || response.status === 201) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
 
-      message.open({
-        type: 'success',
-        content: t('projectLinkSuccess'),
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+        message.open({
+          type: 'success',
+          content: t('projectLinkSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
 
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
-      });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
 
-      getAllData();
+        getAllData();
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 

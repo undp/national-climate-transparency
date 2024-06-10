@@ -101,28 +101,32 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   useEffect(() => {
     // Fetching All Activities which can be the parent
     const fetchNonValidatedActivities = async () => {
-      const payload = {
-        filterAnd: [
-          {
-            key: 'validated',
-            operation: '=',
-            value: false,
+      try {
+        const payload = {
+          filterAnd: [
+            {
+              key: 'validated',
+              operation: '=',
+              value: false,
+            },
+          ],
+          sort: {
+            key: 'activityId',
+            order: 'ASC',
           },
-        ],
-        sort: {
-          key: 'activityId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/activities/query', payload);
-      const tempActivityData: ParentData[] = [];
-      response.data.forEach((activity: any) => {
-        tempActivityData.push({
-          id: activity.activityId,
-          title: activity.title,
+        };
+        const response: any = await post('national/activities/query', payload);
+        const tempActivityData: ParentData[] = [];
+        response.data.forEach((activity: any) => {
+          tempActivityData.push({
+            id: activity.activityId,
+            title: activity.title,
+          });
         });
-      });
-      setParentList(tempActivityData);
+        setParentList(tempActivityData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     fetchNonValidatedActivities();
 

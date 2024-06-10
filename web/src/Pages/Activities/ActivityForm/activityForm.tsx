@@ -275,34 +275,38 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   useEffect(() => {
     const fetchNonValidatedParents = async () => {
       if (parentType === 'action' || parentType === 'programme' || parentType === 'project') {
-        const payload = {
-          filterAnd: [
-            {
-              key: 'validated',
-              operation: '=',
-              value: false,
+        try {
+          const payload = {
+            filterAnd: [
+              {
+                key: 'validated',
+                operation: '=',
+                value: false,
+              },
+            ],
+            sort: {
+              key: `${parentType}Id`,
+              order: 'ASC',
             },
-          ],
-          sort: {
-            key: `${parentType}Id`,
-            order: 'ASC',
-          },
-        };
-        const response: any = await post(`national/${parentType}s/query`, payload);
+          };
+          const response: any = await post(`national/${parentType}s/query`, payload);
 
-        const tempParentData: ParentData[] = [];
-        response.data.forEach((parent: any) => {
-          tempParentData.push({
-            id:
-              parentType === 'action'
-                ? parent.actionId
-                : parentType === 'programme'
-                ? parent.programmeId
-                : parent.projectId,
-            title: parent.title,
+          const tempParentData: ParentData[] = [];
+          response.data.forEach((parent: any) => {
+            tempParentData.push({
+              id:
+                parentType === 'action'
+                  ? parent.actionId
+                  : parentType === 'programme'
+                  ? parent.programmeId
+                  : parent.projectId,
+              title: parent.title,
+            });
           });
-        });
-        setParentList(tempParentData);
+          setParentList(tempParentData);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchNonValidatedParents();
@@ -604,7 +608,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       });
 
       if (achievements.length > 0) {
-        await post('national/kpis/achievements/add', { achievements: achievements });
+        try {
+          await post('national/kpis/achievements/add', { achievements: achievements });
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     }
   };

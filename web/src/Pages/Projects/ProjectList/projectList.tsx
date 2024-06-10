@@ -105,26 +105,30 @@ const projectList = () => {
   // Get Attached Programmes
 
   const getAttachedActivityIds = async (projectId: string) => {
-    const payload = {
-      filterAnd: [
-        {
-          key: 'parentId',
-          operation: '=',
-          value: projectId,
+    try {
+      const payload = {
+        filterAnd: [
+          {
+            key: 'parentId',
+            operation: '=',
+            value: projectId,
+          },
+        ],
+        sort: {
+          key: 'activityId',
+          order: 'ASC',
         },
-      ],
-      sort: {
-        key: 'activityId',
-        order: 'ASC',
-      },
-    };
-    const response: any = await post('national/activities/query', payload);
+      };
+      const response: any = await post('national/activities/query', payload);
 
-    const attachedActIds: string[] = [];
-    response.data.forEach((act: any) => {
-      attachedActIds.push(act.activityId);
-    });
-    setAttachedActivityIds(attachedActIds);
+      const attachedActIds: string[] = [];
+      response.data.forEach((act: any) => {
+        attachedActIds.push(act.activityId);
+      });
+      setAttachedActivityIds(attachedActIds);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   // Data Read from DB
@@ -205,29 +209,33 @@ const projectList = () => {
 
   const attachActivities = async () => {
     if (toBeAttached.length > 0) {
-      const payload = {
-        parentType: 'project',
-        parentId: selectedProjectId,
-        activityIds: toBeAttached,
-      };
-      const response: any = await post('national/activities/link', payload);
-      if (response.status === 200 || response.status === 201) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
-        });
+      try {
+        const payload = {
+          parentType: 'project',
+          parentId: selectedProjectId,
+          activityIds: toBeAttached,
+        };
+        const response: any = await post('national/activities/link', payload);
+        if (response.status === 200 || response.status === 201) {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
 
-        message.open({
-          type: 'success',
-          content: t('activityLinkSuccess'),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
+          message.open({
+            type: 'success',
+            content: t('activityLinkSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
 
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
-        });
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
 
-        getAllData();
+          getAllData();
+        }
+      } catch (error: any) {
+        displayErrorMessage(error);
       }
     }
   };

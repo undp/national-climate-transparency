@@ -264,27 +264,31 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchConnectedProgrammeIds = async () => {
       if (method !== 'create') {
-        const payload = {
-          filterAnd: [
-            {
-              key: 'actionId',
-              operation: '=',
-              value: entId,
+        try {
+          const payload = {
+            filterAnd: [
+              {
+                key: 'actionId',
+                operation: '=',
+                value: entId,
+              },
+            ],
+            sort: {
+              key: 'programmeId',
+              order: 'ASC',
             },
-          ],
-          sort: {
-            key: 'programmeId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/programmes/query', payload);
+          };
+          const response: any = await post('national/programmes/query', payload);
 
-        const connectedProgrammeIds: string[] = [];
-        response.data.forEach((prg: any) => {
-          connectedProgrammeIds.push(prg.programmeId);
-        });
-        setAttachedProgramIds(connectedProgrammeIds);
-        setTempProgramIds(connectedProgrammeIds);
+          const connectedProgrammeIds: string[] = [];
+          response.data.forEach((prg: any) => {
+            connectedProgrammeIds.push(prg.programmeId);
+          });
+          setAttachedProgramIds(connectedProgrammeIds);
+          setTempProgramIds(connectedProgrammeIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchConnectedProgrammeIds();
@@ -293,31 +297,35 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchConnectedActivityIds = async () => {
       if (method !== 'create') {
-        const connectedActivityIds: string[] = [];
-        const payload = {
-          filterAnd: [
-            {
-              key: 'parentId',
-              operation: '=',
-              value: entId,
+        try {
+          const connectedActivityIds: string[] = [];
+          const payload = {
+            filterAnd: [
+              {
+                key: 'parentId',
+                operation: '=',
+                value: entId,
+              },
+              {
+                key: 'parentType',
+                operation: '=',
+                value: 'action',
+              },
+            ],
+            sort: {
+              key: 'activityId',
+              order: 'ASC',
             },
-            {
-              key: 'parentType',
-              operation: '=',
-              value: 'action',
-            },
-          ],
-          sort: {
-            key: 'activityId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/activities/query', payload);
-        response.data.forEach((act: any) => {
-          connectedActivityIds.push(act.activityId);
-        });
-        setAttachedActivityIds(connectedActivityIds);
-        setTempActivityIds(connectedActivityIds);
+          };
+          const response: any = await post('national/activities/query', payload);
+          response.data.forEach((act: any) => {
+            connectedActivityIds.push(act.activityId);
+          });
+          setAttachedActivityIds(connectedActivityIds);
+          setTempActivityIds(connectedActivityIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchConnectedActivityIds();
@@ -353,36 +361,40 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchAttachmentData = async () => {
       if (tempProgramIds.length > 0) {
-        tempProgramIds.forEach((progId) => {
-          payload.filterOr.push({
-            key: 'programmeId',
-            operation: '=',
-            value: progId,
+        try {
+          tempProgramIds.forEach((progId) => {
+            payload.filterOr.push({
+              key: 'programmeId',
+              operation: '=',
+              value: progId,
+            });
           });
-        });
-        const response: any = await post('national/programmes/query', payload);
+          const response: any = await post('national/programmes/query', payload);
 
-        const tempPRGData: ProgrammeData[] = [];
+          const tempPRGData: ProgrammeData[] = [];
 
-        response.data.forEach((prg: any, index: number) => {
-          tempPRGData.push({
-            key: index.toString(),
-            programmeId: prg.programmeId,
-            actionId: prg.action?.actionId,
-            title: prg.title,
-            type: prg.migratedData[0]?.types ?? [],
-            status: prg.programmeStatus,
-            subSectorsAffected: prg.affectedSubSector ?? [],
-            estimatedInvestment: prg.investment,
-            ghgsAffected: prg.migratedData[0]?.ghgsAffected ?? [],
-            types: prg.migratedData[0]?.types ?? [],
-            natImplementer: prg.natImplementor ?? [],
-            achievedReduction: prg.migratedData[0]?.achievedGHGReduction ?? 0,
-            estimatedReduction: prg.migratedData[0]?.expectedGHGReduction ?? 0,
+          response.data.forEach((prg: any, index: number) => {
+            tempPRGData.push({
+              key: index.toString(),
+              programmeId: prg.programmeId,
+              actionId: prg.action?.actionId,
+              title: prg.title,
+              type: prg.migratedData[0]?.types ?? [],
+              status: prg.programmeStatus,
+              subSectorsAffected: prg.affectedSubSector ?? [],
+              estimatedInvestment: prg.investment,
+              ghgsAffected: prg.migratedData[0]?.ghgsAffected ?? [],
+              types: prg.migratedData[0]?.types ?? [],
+              natImplementer: prg.natImplementor ?? [],
+              achievedReduction: prg.migratedData[0]?.achievedGHGReduction ?? 0,
+              estimatedReduction: prg.migratedData[0]?.expectedGHGReduction ?? 0,
+            });
           });
-        });
 
-        setProgramData(tempPRGData);
+          setProgramData(tempPRGData);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       } else {
         setProgramData([]);
       }
@@ -415,57 +427,61 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchActivityAttachmentData = async () => {
       if (tempActivityIds.length > 0) {
-        tempActivityIds.forEach((activityId) => {
-          activityPayload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: activityId,
+        try {
+          tempActivityIds.forEach((activityId) => {
+            activityPayload.filterOr.push({
+              key: 'activityId',
+              operation: '=',
+              value: activityId,
+            });
+            supportPayload.filterOr.push({
+              key: 'activityId',
+              operation: '=',
+              value: activityId,
+            });
           });
-          supportPayload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: activityId,
+          const activityResponse: any = await post('national/activities/query', activityPayload);
+          const supportResponse: any = await post('national/supports/query', supportPayload);
+
+          const tempActivityData: ActivityData[] = [];
+          const tempSupportData: SupportData[] = [];
+
+          activityResponse.data.forEach((act: any, index: number) => {
+            tempActivityData.push({
+              key: index.toString(),
+              activityId: act.activityId,
+              title: act.title,
+              reductionMeasures: act.measure,
+              status: act.status,
+              natImplementor: act.nationalImplementingEntity ?? [],
+              ghgsAffected: act.ghgsAffected ?? [],
+              achievedReduction: act.achievedGHGReduction ?? 0,
+              estimatedReduction: act.expectedGHGReduction ?? 0,
+            });
           });
-        });
-        const activityResponse: any = await post('national/activities/query', activityPayload);
-        const supportResponse: any = await post('national/supports/query', supportPayload);
 
-        const tempActivityData: ActivityData[] = [];
-        const tempSupportData: SupportData[] = [];
-
-        activityResponse.data.forEach((act: any, index: number) => {
-          tempActivityData.push({
-            key: index.toString(),
-            activityId: act.activityId,
-            title: act.title,
-            reductionMeasures: act.measure,
-            status: act.status,
-            natImplementor: act.nationalImplementingEntity ?? [],
-            ghgsAffected: act.ghgsAffected ?? [],
-            achievedReduction: act.achievedGHGReduction ?? 0,
-            estimatedReduction: act.expectedGHGReduction ?? 0,
+          supportResponse.data.forEach((sup: any, index: number) => {
+            tempSupportData.push({
+              key: index.toString(),
+              supportId: sup.supportId,
+              financeNature: sup.financeNature,
+              direction: sup.direction,
+              finInstrument:
+                sup.financeNature === 'International'
+                  ? sup.internationalFinancialInstrument
+                  : sup.nationalFinancialInstrument,
+              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+              recievedUSD: getRounded(sup.receivedAmount ?? 0),
+              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+            });
           });
-        });
 
-        supportResponse.data.forEach((sup: any, index: number) => {
-          tempSupportData.push({
-            key: index.toString(),
-            supportId: sup.supportId,
-            financeNature: sup.financeNature,
-            direction: sup.direction,
-            finInstrument:
-              sup.financeNature === 'International'
-                ? sup.internationalFinancialInstrument
-                : sup.nationalFinancialInstrument,
-            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-            recievedUSD: getRounded(sup.receivedAmount ?? 0),
-            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
-          });
-        });
-
-        setActivityData(tempActivityData);
-        setSupportData(tempSupportData);
+          setActivityData(tempActivityData);
+          setSupportData(tempSupportData);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       } else {
         setActivityData([]);
         setSupportData([]);
@@ -538,14 +554,18 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     const toAttach = tempProgramIds.filter((prg) => !attachedProgramIds.includes(prg));
     const toDetach = attachedProgramIds.filter((prg) => !tempProgramIds.includes(prg));
 
-    if (toDetach.length > 0) {
-      toDetach.forEach(async (prg) => {
-        await post('national/programmes/unlink', { programme: prg });
-      });
-    }
+    try {
+      if (toDetach.length > 0) {
+        toDetach.forEach(async (prg) => {
+          await post('national/programmes/unlink', { programme: prg });
+        });
+      }
 
-    if (toAttach.length > 0) {
-      await post('national/programmes/link', { actionId: entId, programmes: toAttach });
+      if (toAttach.length > 0) {
+        await post('national/programmes/link', { actionId: entId, programmes: toAttach });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 
@@ -553,16 +573,20 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
     const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
 
-    if (toDetach.length > 0) {
-      await post('national/activities/unlink', { activityIds: toDetach });
-    }
+    try {
+      if (toDetach.length > 0) {
+        await post('national/activities/unlink', { activityIds: toDetach });
+      }
 
-    if (toAttach.length > 0) {
-      await post('national/activities/link', {
-        parentId: parentId,
-        parentType: 'action',
-        activityIds: toAttach,
-      });
+      if (toAttach.length > 0) {
+        await post('national/activities/link', {
+          parentId: parentId,
+          parentType: 'action',
+          activityIds: toAttach,
+        });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 
