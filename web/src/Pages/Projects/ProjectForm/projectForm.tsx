@@ -10,7 +10,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import { GraphUpArrow } from 'react-bootstrap-icons';
 import './projectForm.scss';
 import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
-import { IntImplementor, Recipient } from '../../../Enums/shared.enum';
+import { IntImplementor, KPIAction, Recipient } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeSelectData } from '../../../Definitions/programmeDefinitions';
@@ -31,6 +31,14 @@ import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
 import { processOptionalFields } from '../../../Utils/optionalValueHandler';
 import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
+import {
+  attachButtonBps,
+  attachTableHeaderBps,
+  halfColumnBps,
+  quarterColumnBps,
+  shortButtonBps,
+} from '../../../Definitions/breakpoints/breakpoints';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -105,6 +113,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
   const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
+  const [handleKPI, setHandleKPI] = useState<boolean>(false);
 
   // Expected Time Frame
 
@@ -239,14 +248,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               expectedGHGReduction: entityData.migratedData?.expectedGHGReduction ?? 0,
             });
           }
-        } catch {
+        } catch (error: any) {
           navigate('/projects');
-          message.open({
-            type: 'error',
-            content: t('noSuchEntity'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -273,6 +277,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   unit: kpi.kpiUnit,
                   achieved: kpi.achieved ?? 0,
                   expected: kpi.expected,
+                  kpiAction: KPIAction.NONE,
                 });
               } else {
                 tempInheritedKpiList.push({
@@ -283,6 +288,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   unit: kpi.kpiUnit,
                   achieved: kpi.achieved ?? 0,
                   expected: kpi.expected,
+                  kpiAction: KPIAction.NONE,
                 });
               }
               tempKpiCounter = tempKpiCounter + 1;
@@ -290,14 +296,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             setKpiCounter(tempKpiCounter);
             setCreatedKpiList(tempCreatedKpiList);
             setInheritedKpiList(tempInheritedKpiList);
+
+            if (tempCreatedKpiList.length > 0 || tempInheritedKpiList.length > 0) {
+              setHandleKPI(true);
+            }
           }
-        } catch {
-          message.open({
-            type: 'error',
-            content: t('kpiSearchFailed'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+        } catch (error: any) {
+          displayErrorMessage(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -366,14 +371,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               natAnchor: actionData.natAnchor,
             });
           }
-        } catch {
+        } catch (error: any) {
           navigate('/projects');
-          message.open({
-            type: 'error',
-            content: t('actionNotFound'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+          displayErrorMessage(error, t('actionNotFound'));
         }
       } else {
         form.setFieldsValue({
@@ -405,14 +405,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             });
             setProgrammeConnectedAction(programmeData.actionId);
           }
-        } catch {
+        } catch (error: any) {
           navigate('/projects');
-          message.open({
-            type: 'error',
-            content: t('programmeNotFound'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+          displayErrorMessage(error, t('programmeNotFound'));
         }
       } else {
         form.setFieldsValue({
@@ -656,7 +651,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             expected: kpi.expected,
           });
         });
-      } else if (method === 'update') {
+      } else if (method === 'update' && handleKPI) {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
@@ -664,6 +659,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             kpiUnit: kpi.unit,
             creatorType: 'project',
             expected: kpi.expected,
+            kpiAction: KPIAction.CREATED,
           });
         });
         createdKpiList.forEach((kpi) => {
@@ -673,6 +669,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             name: kpi.name,
             creatorType: 'project',
             expected: kpi.expected,
+            kpiAction: kpi.kpiAction,
           });
         });
       }
@@ -725,12 +722,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         navigate('/projects');
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: `${error.message}`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
 
       await new Promise((resolve) => {
         setTimeout(resolve, 500);
@@ -762,13 +754,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
           navigate('/projects');
         }
       }
-    } catch {
-      message.open({
-        type: 'error',
-        content: `${entId} Validation Failed`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+    } catch (error: any) {
+      displayErrorMessage(error, `${entId} Validation Failed`);
     }
   };
 
@@ -790,6 +777,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
+    setHandleKPI(true);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
@@ -826,6 +814,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
+            kpi.kpiAction = KPIAction.UPDATED;
             return {
               ...kpi,
               [property]: property === 'expected' ? parseFloat(value) : value,
@@ -858,6 +847,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               unit: kpi.kpiUnit,
               achieved: kpi.achieved ?? 0,
               expected: kpi.expected,
+              kpiAction: KPIAction.NONE,
             });
 
             tempKpiCounter = tempKpiCounter + 1;
@@ -865,13 +855,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
           setKpiCounter(tempKpiCounter);
           setInheritedKpiList(tempInheritedKpiList);
         }
-      } catch {
-        message.open({
-          type: 'error',
-          content: t('kpiSearchFailed'),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
+      } catch (error: any) {
+        displayErrorMessage(error, t('kpiSearchFailed'));
       }
     }
   };
@@ -952,7 +937,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 <EntityIdCard calledIn="Project" entId={entId}></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('selectProgrammeHeader')}</label>}
                     name="programmeId"
@@ -976,7 +961,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('typeHeader')}</label>}
                     name="type"
@@ -999,7 +984,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('projTitleHeader')}</label>}
                     name="title"
@@ -1008,7 +993,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input className="form-input-box" disabled={isView} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('projDescHeader')}</label>}
                     name="description"
@@ -1019,7 +1004,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('projectNumberHeader')}</label>}
                     name="additionalProjectNumber"
@@ -1027,7 +1012,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input className="form-input-box" disabled={isView} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('actionTitleHeader')}</label>}
                     name="actionTitle"
@@ -1037,7 +1022,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('programmeTitleHeader')}</label>}
                     name="programmeTitle"
@@ -1045,7 +1030,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('natAnchorHeader')}</label>}
                     name="natAnchor"
@@ -1061,7 +1046,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('instrTypesHeader')}</label>}
                     name="instrTypes"
@@ -1075,7 +1060,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('projectStatusHeader')}</label>}
                     name="projectStatus"
@@ -1098,7 +1083,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('sectorsAffectedHeader')}</label>}
                     name="sector"
@@ -1106,7 +1091,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Select size="large" style={{ fontSize: inputFontSize }} disabled></Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={
                       <label className="form-item-header">{t('subSectorsAffectedHeader')}</label>
@@ -1122,7 +1107,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('startYearHeader')}</label>}
                     name="startYear"
@@ -1158,7 +1143,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('endYearHeader')}</label>}
                     name="endYear"
@@ -1196,7 +1181,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('timeFrameHeader')}</label>}
                     name="expectedTimeFrame"
@@ -1204,8 +1189,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input type="number" className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
-                <Col span={6}>
-                  <Form.Item<number>
+                <Col {...quarterColumnBps}>
+                  <Form.Item
                     label={<label className="form-item-header">{t('natImplementorHeader')}</label>}
                     name="nationalImplementor"
                   >
@@ -1218,8 +1203,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
-                  <Form.Item<number>
+                <Col {...halfColumnBps}>
+                  <Form.Item
                     label={<label className="form-item-header">{t('techTypeHeader')}</label>}
                     name="techType"
                   >
@@ -1234,7 +1219,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('recipientHeader')}</label>}
                     name="recipientEntities"
@@ -1256,8 +1241,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
-                  <Form.Item<number>
+                <Col {...halfColumnBps}>
+                  <Form.Item
                     label={<label className="form-item-header">{t('intImplementorHeader')}</label>}
                     name="internationalImplementingEntities"
                   >
@@ -1279,16 +1264,16 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
-                  <Form.Item<number>
+                <Col {...halfColumnBps}>
+                  <Form.Item
                     label={<label className="form-item-header">{t('techDevHeader')}</label>}
                     name="techDevContribution"
                   >
                     <Input className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
-                  <Form.Item<number>
+                <Col {...halfColumnBps}>
+                  <Form.Item
                     label={<label className="form-item-header">{t('capBuildHeader')}</label>}
                     name="capBuildObjectives"
                   >
@@ -1306,11 +1291,12 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 setUploadedFiles={setUploadedFiles}
                 removedFiles={filesToRemove}
                 setRemovedFiles={setFilesToRemove}
+                setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
               <div className="form-section-header">{t('mitigationInfoTitle')}</div>
               <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('achieved')}</label>}
                     name="achievedGHGReduction"
@@ -1318,7 +1304,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input type="number" className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('expected')}</label>}
                     name="expectedGHGReduction"
@@ -1409,7 +1395,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
               <div className="form-section-header">{t('financeInfoTitle')}</div>
               <Row gutter={gutterSize}>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('neededUSDHeader')}</label>}
                     name="neededUSD"
@@ -1417,7 +1403,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('neededLCLHeader')}</label>}
                     name="neededLCL"
@@ -1425,7 +1411,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('recievedUSDHeader')}</label>}
                     name="receivedUSD"
@@ -1433,7 +1419,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('recievedLCLHeader')}</label>}
                     name="receivedLCL"
@@ -1445,10 +1431,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col md={{ span: 15 }} xl={{ span: 20 }} style={{ paddingTop: '6px' }}>
+                <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col md={{ span: 9 }} xl={{ span: 4 }}>
+                <Col {...attachButtonBps}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1535,7 +1521,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'create' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1547,7 +1533,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1558,7 +1544,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'view' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1571,7 +1557,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ProjectEntity) && (
-                  <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                  <Col>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1591,7 +1577,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'update' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1603,7 +1589,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1616,7 +1602,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button
                       type="primary"

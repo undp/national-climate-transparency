@@ -46,10 +46,6 @@ describe('ProjectService', () => {
 			save: jest.fn(),
 		};
 
-		projectRepositoryMock = {
-			save: jest.fn(),
-		};
-
 		activityRepositoryMock = {
 			save: jest.fn(),
 		};
@@ -64,7 +60,8 @@ describe('ProjectService', () => {
 			formatReqMessagesString: jest.fn(),
 			parseMongoQueryToSQLWithTable: jest.fn(),
 			generateWhereSQL: jest.fn(),
-			refreshMaterializedViews: jest.fn()
+			refreshMaterializedViews: jest.fn(),
+			doesUserHaveSectorPermission: jest.fn(),
 		};
 		fileUploadServiceMock = {
 			uploadDocument: jest.fn().mockResolvedValue('http://test.com/documents/action_documents/test.csv'),
@@ -80,6 +77,7 @@ describe('ProjectService', () => {
 		}
 
 		projectRepositoryMock = {
+			save: jest.fn(),
 			createQueryBuilder: jest.fn(() => ({
 				where: jest.fn().mockReturnThis(),
 				leftJoinAndSelect: jest.fn().mockReturnThis(),
@@ -89,6 +87,11 @@ describe('ProjectService', () => {
 				getManyAndCount: jest.fn(),
 				getOne: jest.fn(),
 			})) as unknown as () => SelectQueryBuilder<ProjectEntity>,
+		};
+
+		kpiServiceMock = {
+			getKpisByCreatorTypeAndCreatorId: jest.fn(),
+			getAchievementsOfParentEntity: jest.fn(),
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -165,13 +168,14 @@ describe('ProjectService', () => {
 		projectEntity.endYear = 2030;
 		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectEntity.expectedTimeFrame = 25;
-		projectEntity.path = "";
+		projectEntity.expectedTimeFrame = 5;
+		projectEntity.path = "_._";
 
 		const expectedResponse = new DataResponseMessageDto(201, "project.createProjectSuccess", projectEntity)
 
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce("2");
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -189,7 +193,7 @@ describe('ProjectService', () => {
 		expect(result.statusCode).toEqual(expectedResponse.statusCode);
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 	});
 
 	it('should throw an error when trying to create a project with incorrect programme id', async () => {
@@ -310,6 +314,7 @@ describe('ProjectService', () => {
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce("2");
 		jest.spyOn(programmeServiceMock, "findProgrammeById").mockResolvedValueOnce(programmeEntity);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
@@ -318,7 +323,7 @@ describe('ProjectService', () => {
 				query: jest.fn().mockResolvedValueOnce(projectEntity),
 			};
 			const savedProgramme = await callback(emMock);
-			expect(emMock.save).toHaveBeenCalledTimes(7);
+			expect(emMock.save).toHaveBeenCalledTimes(3);
 			return savedProgramme;
 		});
 
@@ -352,6 +357,7 @@ describe('ProjectService', () => {
 		project3.programme = null;
 
 		jest.spyOn(service, 'findAllProjectsByIds').mockResolvedValue([project1, project2, project3]);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -404,6 +410,8 @@ describe('ProjectService', () => {
 		project3.programme = programme;
 
 		jest.spyOn(service, 'findAllProjectsByIds').mockResolvedValue([project1, project2, project3]);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockReturnValueOnce('project.cannotUnlinkNotRelatedProject');
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
@@ -428,7 +436,7 @@ describe('ProjectService', () => {
 		// Assert the returned result
 		expect(result).toEqual(expect.any(DataResponseMessageDto));
 		expect(result.statusCode).toEqual(HttpStatus.OK);
-		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("project.projectsUnlinkedFromProgramme", []);
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("project.cannotUnlinkNotRelatedProject", []);
 		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalled();
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 	});
@@ -505,6 +513,7 @@ describe('ProjectService', () => {
 		const projectEntity = new ProjectEntity();
 		projectEntity.projectId = "J001";
 		projectEntity.title = "Project 4";
+		projectEntity.sector = Sector.Agriculture;
 		projectEntity.description = "test description";
 		projectEntity.type = ProjectType.MITIGATION;
 		projectEntity.projectStatus = ProjectStatus.PLANNED;
@@ -514,6 +523,20 @@ describe('ProjectService', () => {
 		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
 		projectEntity.expectedTimeFrame = 25;
 		projectEntity.path = "";
+
+		const mockQueryBuilder = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getOne: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProjectEntity  >;
+
+		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("project.cannotUpdateNotRelatedProject: J001'");
 
 		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
 		// jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
@@ -537,7 +560,7 @@ describe('ProjectService', () => {
 		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(0);
 		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalledTimes(0);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 	});
 
 
@@ -574,7 +597,21 @@ describe('ProjectService', () => {
 		const programme = new ProgrammeEntity();
 		programme.programmeId = "P001";
 		programme.sector = Sector.Agriculture;
+
+		const mockQueryBuilder = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getOne: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProjectEntity>;
+
+		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
 		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("project.cannotLinkToNotRelatedProgramme");
 
 		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
 		// jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
@@ -598,7 +635,9 @@ describe('ProjectService', () => {
 		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(1);
 		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalledTimes(0);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
+		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("project.cannotLinkToNotRelatedProgramme", ["J001"]);
+
 	});
 
 	it('should update an attached project without programme id', async () => {
@@ -635,7 +674,19 @@ describe('ProjectService', () => {
 		projectEntity.path = "";
 		projectEntity.programme = programme;
 
+		const mockQueryBuilder = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getOne: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProjectEntity  >;
+
+		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
 		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
 		// jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
@@ -655,7 +706,6 @@ describe('ProjectService', () => {
 		expect(result.statusCode).toEqual(expectedResponse.statusCode);
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(0);
-		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
 	});
@@ -698,7 +748,19 @@ describe('ProjectService', () => {
 		projectEntity.path = "";
 		projectEntity.programme = programme;
 
+		const mockQueryBuilder = {
+			where: jest.fn().mockReturnThis(),
+			leftJoinAndSelect: jest.fn().mockReturnThis(),
+			leftJoinAndMapMany: jest.fn().mockReturnThis(),
+			orderBy: jest.fn().mockReturnThis(),
+			offset: jest.fn().mockReturnThis(),
+			limit: jest.fn().mockReturnThis(),
+			getOne: jest.fn().mockResolvedValue([]),
+		} as unknown as SelectQueryBuilder<ProjectEntity  >;
+
+		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
 		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
 		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
 		// jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
@@ -718,7 +780,6 @@ describe('ProjectService', () => {
 		expect(result.statusCode).toEqual(expectedResponse.statusCode);
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(0);
-		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
 	});

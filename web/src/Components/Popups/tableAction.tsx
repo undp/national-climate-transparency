@@ -141,7 +141,7 @@ export const detachMenu = (recordId: string, t: any, detachEntity: (recordId: st
       dataSource={[
         {
           text: t('detach'),
-          icon: <DisconnectOutlined style={{ color: 'red' }} />,
+          icon: <DisconnectOutlined style={{ color: '#fd6f70' }} />,
           click: () => {
             {
               detachEntity(recordId);

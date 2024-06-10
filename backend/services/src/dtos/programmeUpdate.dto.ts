@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max, ValidateNested} from 'class-validator';
 import { Sector } from "../enums/sector.enum";
-import { SubSector, NatImplementor } from "../enums/shared.enum";
+import { SubSector, NatImplementor, KPIAction } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { ProgrammeStatus } from "../enums/programme-status.enum";
 import { KpiUpdateDto } from "./kpi.update.dto";
@@ -123,7 +123,8 @@ export class ProgrammeUpdateDto {
           kpiId: "1",
           name: "KPI 1",
           creatorType: "action",
-          expected: 100
+          expected: 100,
+          KPIAction: KPIAction.CREATED,       // To check KPI is Updated or not for Update Timeline
       }],
         items: {
           $ref: getSchemaPath(KpiUpdateDto),

@@ -3,7 +3,7 @@ import '../../../Styles/app.scss';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import './activityList.scss';
 import { Action } from '../../../Enums/action.enum';
-import { Button, Col, Row, Input, Dropdown, Popover, message, Radio, Space, MenuProps } from 'antd';
+import { Button, Col, Row, Input, Dropdown, Popover, Radio, Space, MenuProps } from 'antd';
 import { EllipsisOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ import StatusChip from '../../../Components/StatusChip/statusChip';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { actionMenuWithoutAttaching } from '../../../Components/Popups/tableAction';
 import { ActivityEntity } from '../../../Entities/activity';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 interface Item {
   key: number;
@@ -153,12 +154,7 @@ const activityList = () => {
         setLoading(false);
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setLoading(false);
     }
   };

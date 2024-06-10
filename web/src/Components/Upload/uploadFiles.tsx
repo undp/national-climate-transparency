@@ -25,6 +25,7 @@ interface Props {
   >;
   removedFiles: string[];
   setRemovedFiles: React.Dispatch<React.SetStateAction<string[]>>;
+  setIsSaveButtonDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const UploadFileGrid: React.FC<Props> = ({
@@ -36,6 +37,7 @@ const UploadFileGrid: React.FC<Props> = ({
   setUploadedFiles,
   removedFiles,
   setRemovedFiles,
+  setIsSaveButtonDisabled,
 }) => {
   const { t } = useTranslation(['uploadGrid']);
 
@@ -78,6 +80,7 @@ const UploadFileGrid: React.FC<Props> = ({
     } else {
       const base64 = await handleFileRead(file);
       setUploadedFiles([...uploadedFiles, { key: file.uid, title: file.name, data: base64 }]);
+      setIsSaveButtonDisabled(false);
     }
     return false;
   };
@@ -103,6 +106,7 @@ const UploadFileGrid: React.FC<Props> = ({
 
   const handleStoredDelete = (fileId: string) => {
     setRemovedFiles((prevState) => [...prevState, fileId]);
+    setIsSaveButtonDisabled(false);
   };
 
   // Download functionality for stored files

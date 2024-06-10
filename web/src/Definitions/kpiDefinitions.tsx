@@ -14,4 +14,5 @@ export type CreatedKpiData = {
   unit: string;
   achieved: number;
   expected: number;
+  kpiAction: string;
 };

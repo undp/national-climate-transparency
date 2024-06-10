@@ -55,6 +55,7 @@ import '../../../Styles/common.table.scss';
 import { UserState } from '../../../Enums/user.state.enum';
 import { Role } from '../../../Enums/role.enum';
 import LayoutTable from '../../../Components/common/Table/layout.table';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 interface Filter {
   searchBy: string;
@@ -186,7 +187,10 @@ const UserManagement = () => {
       if (response.status === 200) {
         message.open({
           type: 'success',
-          content: response.message,
+          content:
+            updatedUserRecord.status === '1'
+              ? ` ${updatedUserRecord.name} ${t('user:activateSuccessMsg')}`
+              : ` ${updatedUserRecord.name} ${t('user:deactivateSuccessMsg')}`,
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -231,7 +235,7 @@ const UserManagement = () => {
 
     if (
       // eslint-disable-next-line eqeqeq
-      record.status == 1 &&
+      record.status == UserState.ACTIVE &&
       (record.role === Role.GovernmentUser || record.role === Role.Observer)
     ) {
       data.push({
@@ -254,7 +258,7 @@ const UserManagement = () => {
       // eslint-disable-next-line eqeqeq
     } else if (
       // eslint-disable-next-line eqeqeq
-      record.status == 0 &&
+      record.status == UserState.SUSPENDED &&
       (record.role === Role.GovernmentUser || record.role === Role.Observer)
     ) {
       data.push({
@@ -442,12 +446,7 @@ const UserManagement = () => {
       }
       setLoading(false);
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: error.message,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
       setLoading(false);
     }
   };

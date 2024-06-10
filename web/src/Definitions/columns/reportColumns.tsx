@@ -39,16 +39,21 @@ export const getReportFiveColumns = (t: any) => {
       },
     },
     {
-      title: t('achievedGHGReduction'),
-      dataIndex: 'achievedGHGReduction',
-      key: 'achievedGHGReduction',
-      width: 180,
-    },
-    {
-      title: t('expectedGHGReduction'),
-      dataIndex: 'expectedGHGReduction',
-      key: 'expectedGHGReduction',
-      width: 180,
+      title: t('ghgCommonTitle'),
+      children: [
+        {
+          title: t('achievedGHGReduction'),
+          dataIndex: 'achievedGHGReduction',
+          key: 'achievedGHGReduction',
+          width: 100,
+        },
+        {
+          title: t('expectedGHGReduction'),
+          dataIndex: 'expectedGHGReduction',
+          key: 'expectedGHGReduction',
+          width: 100,
+        },
+      ],
     },
   ];
 

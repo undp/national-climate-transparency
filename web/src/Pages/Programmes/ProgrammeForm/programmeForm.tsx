@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
-import { SubSector, NatImplementor } from '../../../Enums/shared.enum';
+import { SubSector, NatImplementor, KPIAction } from '../../../Enums/shared.enum';
 import { ProgrammeStatus } from '../../../Enums/programme.enum';
 import { GraphUpArrow, Layers } from 'react-bootstrap-icons';
 import './programmeForm.scss';
@@ -33,6 +33,15 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
 import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
+import {
+  attachButtonBps,
+  attachTableHeaderBps,
+  attachTableSeparatorBps,
+  halfColumnBps,
+  quarterColumnBps,
+  shortButtonBps,
+} from '../../../Definitions/breakpoints/breakpoints';
+import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -115,6 +124,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
   const [inheritedKpiList, setInheritedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
+  const [handleKPI, setHandleKPI] = useState<boolean>(false);
 
   // Initialization Logic
 
@@ -237,14 +247,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               expectedReduct: entityData.expectedGHGReduction,
             });
           }
-        } catch {
+        } catch (error: any) {
           navigate('/programmes');
-          message.open({
-            type: 'error',
-            content: t('noSuchEntity'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -271,6 +276,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   unit: kpi.kpiUnit,
                   achieved: kpi.achieved ?? 0,
                   expected: kpi.expected,
+                  kpiAction: KPIAction.NONE,
                 });
               } else {
                 tempInheritedKpiList.push({
@@ -281,6 +287,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   unit: kpi.kpiUnit,
                   achieved: kpi.achieved ?? 0,
                   expected: kpi.expected,
+                  kpiAction: KPIAction.NONE,
                 });
               }
               tempKpiCounter = tempKpiCounter + 1;
@@ -288,14 +295,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             setKpiCounter(tempKpiCounter);
             setCreatedKpiList(tempCreatedKpiList);
             setInheritedKpiList(tempInheritedKpiList);
+
+            if (tempCreatedKpiList.length > 0 || tempInheritedKpiList.length > 0) {
+              setHandleKPI(true);
+            }
           }
-        } catch {
-          message.open({
-            type: 'error',
-            content: t('kpiSearchFailed'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
+        } catch (error: any) {
+          displayErrorMessage(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -647,7 +653,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             expected: kpi.expected,
           });
         });
-      } else if (method === 'update') {
+      } else if (method === 'update' && handleKPI) {
         payload.kpis = [];
         newKpiList.forEach((kpi) => {
           payload.kpis.push({
@@ -655,6 +661,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             kpiUnit: kpi.unit,
             creatorType: 'programme',
             expected: kpi.expected,
+            kpiAction: KPIAction.CREATED,
           });
         });
         createdKpiList.forEach((kpi) => {
@@ -664,6 +671,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             name: kpi.name,
             creatorType: 'programme',
             expected: kpi.expected,
+            kpiAction: kpi.kpiAction,
           });
         });
       }
@@ -719,12 +727,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         navigate('/programmes');
       }
     } catch (error: any) {
-      message.open({
-        type: 'error',
-        content: `${error.message}`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+      displayErrorMessage(error);
 
       await new Promise((resolve) => {
         setTimeout(resolve, 500);
@@ -756,13 +759,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           navigate('/programmes');
         }
       }
-    } catch {
-      message.open({
-        type: 'error',
-        content: `${entId} Validation Failed`,
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+    } catch (error: any) {
+      displayErrorMessage(error, `${entId} Validation Failed`);
     }
   };
 
@@ -784,6 +782,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
+    setHandleKPI(true);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
@@ -820,6 +819,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       setCreatedKpiList((prevKpiList) => {
         const updatedKpiList = prevKpiList.map((kpi) => {
           if (kpi.index === index) {
+            kpi.kpiAction = KPIAction.UPDATED;
             return {
               ...kpi,
               [property]: property === 'expected' ? parseFloat(value) : value,
@@ -852,6 +852,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               unit: kpi.kpiUnit,
               achieved: kpi.achieved ?? 0,
               expected: kpi.expected,
+              kpiAction: KPIAction.NONE,
             });
 
             tempKpiCounter = tempKpiCounter + 1;
@@ -859,13 +860,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           setKpiCounter(tempKpiCounter);
           setInheritedKpiList(tempInheritedKpiList);
         }
-      } catch {
-        message.open({
-          type: 'error',
-          content: t('kpiSearchFailed'),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
+      } catch (error: any) {
+        displayErrorMessage(error, t('kpiSearchFailed'));
       }
     }
   };
@@ -972,7 +968,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 <EntityIdCard calledIn="Programme" entId={entId}></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('selectActionHeader')}</label>}
                     name="actionId"
@@ -1000,7 +996,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('typesHeader')}</label>}
                     name="type"
@@ -1013,7 +1009,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('progTitleHeader')}</label>}
                     name="title"
@@ -1024,7 +1020,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('progDescTitle')}</label>}
                     name="description"
@@ -1033,7 +1029,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     <TextArea maxLength={250} rows={3} disabled={isView} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('progObjectivesTitle')}</label>}
                     name="objective"
@@ -1044,7 +1040,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
                     name="instrumentType"
@@ -1057,7 +1053,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('progStatusTitle')}</label>}
                     name="programmeStatus"
@@ -1078,7 +1074,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('sectorsAffTitle')}</label>}
                     name="sector"
@@ -1090,7 +1086,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('subSectorsAffTitle')}</label>}
                     name="affectedSubSector"
@@ -1114,7 +1110,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('startYearTitle')}</label>}
                     name="startYear"
@@ -1135,7 +1131,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col {...quarterColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
                     name="intImplementor"
@@ -1148,7 +1144,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     ></Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('recipientEntityTitle')}</label>}
                     name="recipientEntity"
@@ -1163,7 +1159,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
                     name="natImplementor"
@@ -1185,7 +1181,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item<number>
                     label={<label className="form-item-header">{t('investmentNeedsTitle')}</label>}
                     name="investment"
@@ -1211,6 +1207,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 setUploadedFiles={setUploadedFiles}
                 removedFiles={filesToRemove}
                 setRemovedFiles={setFilesToRemove}
+                setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
               <Row gutter={gutterSize}>
                 <Col span={24}>
@@ -1249,10 +1246,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     emptyMessage={t('noProjectsMessage')}
                   />
                 </Col>
-                <Col md={{ span: 3 }} xl={{ span: 8 }}></Col>
+                <Col {...attachTableSeparatorBps}></Col>
                 <Col
-                  md={{ span: 9 }}
-                  xl={{ span: 4 }}
+                  {...attachButtonBps}
                   style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
                 >
                   <AttachEntity
@@ -1276,10 +1272,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             <div className="form-section-card">
               <Row>
-                <Col md={{ span: 15 }} xl={{ span: 20 }} style={{ paddingTop: '6px' }}>
+                <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col md={{ span: 9 }} xl={{ span: 4 }}>
+                <Col {...attachButtonBps}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1355,7 +1351,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('mitigationInfoTitle')}</div>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('ghgAffected')}</label>}
                     name="ghgsAffected"
@@ -1371,7 +1367,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
               <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
               <Row gutter={gutterSize}>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('achieved')}</label>}
                     name="achievedReduct"
@@ -1379,7 +1375,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Input className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('expected')}</label>}
                     name="expectedReduct"
@@ -1465,7 +1461,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'create' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1477,7 +1473,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
                       {t('add')}
@@ -1488,7 +1484,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'view' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1501,7 +1497,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ProgrammeEntity) && (
-                  <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                  <Col>
                     <Form.Item>
                       <Button
                         disabled={isValidated}
@@ -1521,7 +1517,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             )}
             {method === 'update' && (
               <Row className="sticky-footer" gutter={20} justify={'end'}>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1533,7 +1529,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('cancel')}
                   </Button>
                 </Col>
-                <Col md={{ span: 5 }} xl={{ span: 2 }}>
+                <Col>
                   <Button
                     type="default"
                     size="large"
@@ -1546,7 +1542,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('delete')}
                   </Button>
                 </Col>
-                <Col md={{ span: 4 }} xl={{ span: 2 }}>
+                <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button
                       type="primary"

@@ -1,4 +1,4 @@
-import { Button, Col, Form, Input, Row, Select, Spin } from 'antd';
+import { Button, Col, Form, Input, Row, Select, Spin, message } from 'antd';
 import { FC, Suspense, useContext, useEffect, useState } from 'react';
 import './login.scss';
 import countryLogo from '../../Assets/Images/mrvlogo.svg';
@@ -12,6 +12,7 @@ import { AbilityContext } from '../../Casl/Can';
 import { updateUserAbility } from '../../Casl/ability';
 import ForgotPassword from './forgotPassword';
 import ResetPassword from './resetPassword';
+import { UserState } from '../../Enums/user.state.enum';
 
 export interface LoginPageProps {
   forgotPassword?: boolean;
@@ -55,7 +56,6 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
         id: response.data.id,
         role: response.data.role,
         organisationId: response.data.companyId,
-        // companyState: response.data.companyState,
         organisationType: response.data.companyRole,
       });
 
@@ -66,7 +66,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
           id: response.data.id,
           userRole: response.data.role,
           companyName: response.data.companyName,
-          companyState: response.data.companyState,
+          userState: response.data.userState,
           userSectors: response.data.sector,
         });
         removeToken();
@@ -93,6 +93,20 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
   useEffect(() => {
     if (IsAuthenticated()) {
       navigate('/dashboard');
+    }
+  }, []);
+
+  useEffect(() => {
+    const currentUserState: string | null = localStorage.getItem('userState');
+
+    if (currentUserState && currentUserState === UserState.SUSPENDED) {
+      message.open({
+        type: 'error',
+        content: t('login:deactivatedUserAccount'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      localStorage.removeItem('userState');
     }
   }, []);
 

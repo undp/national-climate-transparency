@@ -54,6 +54,7 @@
     "supportInfoTitle": "List of Direct Linked Supports under the Programme",
     "noActivityMessage": "No Activities Attached",
     "noSupportMessage": "No Supports Attached",
-    "activityList": "Activity List"
+    "activityList": "Activity List",
+    "kpiSearchFailed": "Searching for KPIs Failed"
   }
   
