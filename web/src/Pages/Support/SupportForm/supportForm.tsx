@@ -692,7 +692,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                         validateEntity();
                       }}
                     >
-                      {isValidated ? t('invalidate') : t('validate')}
+                      {isValidated ? t('unvalidate') : t('validate')}
                     </Button>
                   </Form.Item>
                 </Col>

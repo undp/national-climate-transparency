@@ -47,7 +47,7 @@
     "documentsHeader": "Documents",
     "noSuchEntity": "Requested Programme doesn't exist !",
     "validate": "Validate",
-    "invalidate": "Invalidate",
+    "unvalidate": "Unvalidate",
     "back": "Back",
     "delete": "Delete",
     "update": "Save",

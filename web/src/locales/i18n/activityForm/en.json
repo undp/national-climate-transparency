@@ -64,6 +64,6 @@
     "ghgAffected": "GHG(s) Affected",
     "kpiSearchFailed": "Searching for KPIs Failed",
     "validate": "Validate",
-    "invalidate": "Invalidate"
+    "unvalidate": "Unvalidate"
   }
   

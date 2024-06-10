@@ -49,5 +49,5 @@
     "noSupportMessage": "No Supports Attached",
     "kpiSearchFailed": "Searching for KPIs Failed",
     "validate": "Validate",
-    "invalidate": "Invalidate"
+    "unvalidate": "Unvalidate"
 }

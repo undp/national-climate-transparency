@@ -1,6 +1,6 @@
 {
     "View/Validate": "View/Validate",
-    "View/Invalidate": "View/Invalidate",
+    "View/Unvalidate": "View/Unvalidate",
     "View": "View",
     "actionAttach": "Attach Programmes",
     "programmeAttach": "Attach Projects",

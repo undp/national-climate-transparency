@@ -27,7 +27,7 @@ export const actionMenuWithAttaching = (
   const isValidated: boolean = validationStatus === 'validated' ? true : false;
   const viewText = ability.can(Action.Validate, entity)
     ? isValidated
-      ? t('tableAction:View/Invalidate')
+      ? t('tableAction:View/Unvalidate')
       : t('tableAction:View/Validate')
     : t('tableAction:View');
   return (
@@ -92,7 +92,7 @@ export const actionMenuWithoutAttaching = (
   const isValidated: boolean = validationStatus === 'validated' ? true : false;
   const viewText = ability.can(Action.Validate, entity)
     ? isValidated
-      ? t('tableAction:View/Invalidate')
+      ? t('tableAction:View/Unvalidate')
       : t('tableAction:View/Validate')
     : t('tableAction:View');
   return (

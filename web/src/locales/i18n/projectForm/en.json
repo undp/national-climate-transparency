@@ -57,7 +57,7 @@
     "documentsHeader": "Documents",
     "projectUpdateSuccess": "Project Updated Successfully",
     "validate": "Validate",
-    "invalidate": "Invalidate",
+    "unvalidate": "Unvalidate",
     "back": "Back",
     "noSupportMessage": "No Supports Connected",
     "noActivityMessage": "No Activities Connected",

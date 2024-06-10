@@ -1528,7 +1528,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                           validateEntity();
                         }}
                       >
-                        {isValidated ? t('invalidate') : t('validate')}
+                        {isValidated ? t('unvalidate') : t('validate')}
                       </Button>
                     </Form.Item>
                   </Col>
