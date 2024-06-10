@@ -49,7 +49,6 @@ const TimelineTable: React.FC<Props> = ({
       align: 'center',
       ellipsis: true,
       width: 100,
-      fixed: allowFixedLegend ? 'left' : undefined,
     },
     {
       title: t('catExpectedEmissionReduct'),
@@ -66,7 +65,6 @@ const TimelineTable: React.FC<Props> = ({
       render: (colValue: any) => {
         return colValue;
       },
-      fixed: allowFixedLegend ? 'left' : undefined,
     },
   ];
 
@@ -77,7 +75,6 @@ const TimelineTable: React.FC<Props> = ({
       align: 'center',
       ellipsis: true,
       width: 100,
-      fixed: allowFixedLegend ? 'left' : undefined,
     },
     {
       title: t('catActualEmissionReduct'),
@@ -94,7 +91,6 @@ const TimelineTable: React.FC<Props> = ({
       render: (colValue: any) => {
         return colValue;
       },
-      fixed: allowFixedLegend ? 'left' : undefined,
     },
   ];
 
@@ -153,7 +149,6 @@ const TimelineTable: React.FC<Props> = ({
         columns={expectedTableColumns}
         loading={loading}
         pagination={false}
-        scroll={{ y: 350 }}
         className="custom-scroll-table"
       />
       <Table
@@ -161,7 +156,6 @@ const TimelineTable: React.FC<Props> = ({
         columns={actualTableColumns}
         loading={loading}
         pagination={false}
-        scroll={{ y: 210 }}
         className="custom-scroll-table"
       />
     </div>

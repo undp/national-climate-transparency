@@ -1,4 +1,4 @@
-import { Col, Grid, Row, Select, Spin } from 'antd';
+import { Col, Grid, Row, Select, Spin, Tag } from 'antd';
 import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
@@ -429,7 +429,10 @@ const Dashboard = () => {
                 <div className="chart-section-card">
                   <div className="chart-title">
                     <Row gutter={30}>
-                      <Col span={22}>{mitigationRecentChart.chartTitle}</Col>
+                      <Col span={17}>{mitigationRecentChart.chartTitle}</Col>
+                      <Col span={5} style={{ display: 'flex', alignItems: 'flex-end' }}>
+                        <Tag className="year-chip">{t('2023')}</Tag>
+                      </Col>
                       <Col span={2}>
                         <InfoCircleOutlined
                           onClick={() => {
