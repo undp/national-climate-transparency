@@ -87,13 +87,17 @@ const programmeList = () => {
   // Free Prg Read from DB
 
   const getFreeProjectIds = async () => {
-    const response: any = await get('national/projects/link/eligible');
+    try {
+      const response: any = await get('national/projects/link/eligible');
 
-    const freeProjectIds: string[] = [];
-    response.data.forEach((prj: any) => {
-      freeProjectIds.push(prj.projectId);
-    });
-    setAllFreeProjectIds(freeProjectIds);
+      const freeProjectIds: string[] = [];
+      response.data.forEach((prj: any) => {
+        freeProjectIds.push(prj.projectId);
+      });
+      setAllFreeProjectIds(freeProjectIds);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   // Get Attached Projects

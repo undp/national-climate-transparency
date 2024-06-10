@@ -93,13 +93,17 @@ const actionList = () => {
   // Free Prg Read from DB
 
   const getFreeProgrammeIds = async () => {
-    const response: any = await get('national/programmes/link/eligible');
+    try {
+      const response: any = await get('national/programmes/link/eligible');
 
-    const freeProgrammeIds: string[] = [];
-    response.data.forEach((prg: any) => {
-      freeProgrammeIds.push(prg.programmeId);
-    });
-    setAllFreeProgrammeIds(freeProgrammeIds);
+      const freeProgrammeIds: string[] = [];
+      response.data.forEach((prg: any) => {
+        freeProgrammeIds.push(prg.programmeId);
+      });
+      setAllFreeProgrammeIds(freeProgrammeIds);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   // Get Attached Programmes

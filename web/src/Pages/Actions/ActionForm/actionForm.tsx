@@ -143,21 +143,25 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchFreeChildren = async () => {
       if (method !== 'view') {
-        const prgResponse: any = await get('national/programmes/link/eligible');
+        try {
+          const prgResponse: any = await get('national/programmes/link/eligible');
 
-        const freeProgrammeIds: string[] = [];
-        prgResponse.data.forEach((prg: any) => {
-          freeProgrammeIds.push(prg.programmeId);
-        });
-        setAllProgramIdList(freeProgrammeIds);
+          const freeProgrammeIds: string[] = [];
+          prgResponse.data.forEach((prg: any) => {
+            freeProgrammeIds.push(prg.programmeId);
+          });
+          setAllProgramIdList(freeProgrammeIds);
 
-        const actResponse: any = await get('national/activities/link/eligible');
+          const actResponse: any = await get('national/activities/link/eligible');
 
-        const freeActivityIds: string[] = [];
-        actResponse.data.forEach((act: any) => {
-          freeActivityIds.push(act.activityId);
-        });
-        setAllActivityIdList(freeActivityIds);
+          const freeActivityIds: string[] = [];
+          actResponse.data.forEach((act: any) => {
+            freeActivityIds.push(act.activityId);
+          });
+          setAllActivityIdList(freeActivityIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchFreeChildren();

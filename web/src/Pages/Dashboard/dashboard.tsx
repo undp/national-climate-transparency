@@ -119,24 +119,28 @@ const Dashboard = () => {
   useEffect(() => {
     const getIndividualMitigationChartData = async () => {
       if (mtgYear) {
-        const response: any = await get(
-          `stats/analytics/ghgMitigationSummaryForYear/${mtgYear}`,
-          undefined,
-          statServerUrl
-        );
-        const mitigationIndividualChartData = response.data;
-        setMitigationIndividualChart({
-          chartId: 5,
-          chartTitle: t('mtgIndividualChartTitle'),
-          chartDescription: t('mtgIndividualChartDescription'),
-          categories: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
-            sector === null ? 'No Sector Attached' : sector
-          ),
-          values: mitigationIndividualChartData.stats.totals.map((count: string) =>
-            parseInt(count, 10)
-          ),
-          lastUpdatedTime: mitigationIndividualChartData.lastUpdate,
-        });
+        try {
+          const response: any = await get(
+            `stats/analytics/ghgMitigationSummaryForYear/${mtgYear}`,
+            undefined,
+            statServerUrl
+          );
+          const mitigationIndividualChartData = response.data;
+          setMitigationIndividualChart({
+            chartId: 5,
+            chartTitle: t('mtgIndividualChartTitle'),
+            chartDescription: t('mtgIndividualChartDescription'),
+            categories: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
+              sector === null ? 'No Sector Attached' : sector
+            ),
+            values: mitigationIndividualChartData.stats.totals.map((count: string) =>
+              parseInt(count, 10)
+            ),
+            lastUpdatedTime: mitigationIndividualChartData.lastUpdate,
+          });
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     getIndividualMitigationChartData();
@@ -148,89 +152,109 @@ const Dashboard = () => {
     setChartLoading(true);
 
     const getClimateActionChartData = async () => {
-      const response: any = await get('stats/analytics/actionsSummery', undefined, statServerUrl);
-      const actionChartData = response.data;
-      setActionChart({
-        chartId: 1,
-        chartTitle: t('actionChartTitle'),
-        chartDescription: t('actionChartDescription'),
-        categories: actionChartData.stats.sectors,
-        values: actionChartData.stats.counts.map((count: string) => parseInt(count, 10)),
-        lastUpdatedTime: actionChartData.lastUpdate,
-      });
+      try {
+        const response: any = await get('stats/analytics/actionsSummery', undefined, statServerUrl);
+        const actionChartData = response.data;
+        setActionChart({
+          chartId: 1,
+          chartTitle: t('actionChartTitle'),
+          chartDescription: t('actionChartDescription'),
+          categories: actionChartData.stats.sectors,
+          values: actionChartData.stats.counts.map((count: string) => parseInt(count, 10)),
+          lastUpdatedTime: actionChartData.lastUpdate,
+        });
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     getClimateActionChartData();
 
     const getProjectChartData = async () => {
-      const response: any = await get('stats/analytics/projectSummary', undefined, statServerUrl);
-      const projectChartData = response.data;
-      setProjectChart({
-        chartId: 2,
-        chartTitle: t('projectChartTitle'),
-        chartDescription: t('projectChartDescription'),
-        categories: projectChartData.stats.sectors.map((sector: string) =>
-          sector === null ? 'No Sector Attached' : sector
-        ),
-        values: projectChartData.stats.counts.map((count: string) => parseInt(count, 10)),
-        lastUpdatedTime: projectChartData.lastUpdate,
-      });
+      try {
+        const response: any = await get('stats/analytics/projectSummary', undefined, statServerUrl);
+        const projectChartData = response.data;
+        setProjectChart({
+          chartId: 2,
+          chartTitle: t('projectChartTitle'),
+          chartDescription: t('projectChartDescription'),
+          categories: projectChartData.stats.sectors.map((sector: string) =>
+            sector === null ? 'No Sector Attached' : sector
+          ),
+          values: projectChartData.stats.counts.map((count: string) => parseInt(count, 10)),
+          lastUpdatedTime: projectChartData.lastUpdate,
+        });
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     getProjectChartData();
 
     const getSupportChartData = async () => {
-      const response: any = await get('stats/analytics/supportSummary', undefined, statServerUrl);
-      const supportChartData = response.data;
-      setSupportChart({
-        chartId: 3,
-        chartTitle: t('supportChartTitle'),
-        chartDescription: t('supportChartDescription'),
-        categories: ['Support Received', 'Support Needed'],
-        values: [
-          supportChartData.stats.supportReceivedActivities,
-          supportChartData.stats.supportNeededActivities,
-        ],
-        lastUpdatedTime: supportChartData.lastUpdate,
-      });
+      try {
+        const response: any = await get('stats/analytics/supportSummary', undefined, statServerUrl);
+        const supportChartData = response.data;
+        setSupportChart({
+          chartId: 3,
+          chartTitle: t('supportChartTitle'),
+          chartDescription: t('supportChartDescription'),
+          categories: ['Support Received', 'Support Needed'],
+          values: [
+            supportChartData.stats.supportReceivedActivities,
+            supportChartData.stats.supportNeededActivities,
+          ],
+          lastUpdatedTime: supportChartData.lastUpdate,
+        });
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     getSupportChartData();
 
     const getFinanceChartData = async () => {
-      const response: any = await get(
-        'stats/analytics/supportFinanceSummary',
-        undefined,
-        statServerUrl
-      );
-      const financeChartData = response.data;
-      setFinanceChart({
-        chartId: 4,
-        chartTitle: t('financeChartTitle'),
-        chartDescription: t('financeChartDescription'),
-        categories: ['Support Received', 'Support Needed'],
-        values: [financeChartData.stats.supportReceived, financeChartData.stats.supportNeeded],
-        lastUpdatedTime: financeChartData.lastUpdate,
-      });
+      try {
+        const response: any = await get(
+          'stats/analytics/supportFinanceSummary',
+          undefined,
+          statServerUrl
+        );
+        const financeChartData = response.data;
+        setFinanceChart({
+          chartId: 4,
+          chartTitle: t('financeChartTitle'),
+          chartDescription: t('financeChartDescription'),
+          categories: ['Support Received', 'Support Needed'],
+          values: [financeChartData.stats.supportReceived, financeChartData.stats.supportNeeded],
+          lastUpdatedTime: financeChartData.lastUpdate,
+        });
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     getFinanceChartData();
 
     const getRecentMitigationChartData = async () => {
-      const response: any = await get(
-        'stats/analytics/getGhgMitigationSummary',
-        undefined,
-        statServerUrl
-      );
-      const mitigationIndividualChartData = response.data;
-      setMitigationRecentChart({
-        chartId: 6,
-        chartTitle: t('mtgRecentChartTitle'),
-        chartDescription: t('mtgRecentChartDescription'),
-        categories: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
-          sector === null ? 'No Sector Attached' : sector
-        ),
-        values: mitigationIndividualChartData.stats.totals.map((count: string) =>
-          parseInt(count, 10)
-        ),
-        lastUpdatedTime: mitigationIndividualChartData.lastUpdate,
-      });
+      try {
+        const response: any = await get(
+          'stats/analytics/getGhgMitigationSummary',
+          undefined,
+          statServerUrl
+        );
+        const mitigationIndividualChartData = response.data;
+        setMitigationRecentChart({
+          chartId: 6,
+          chartTitle: t('mtgRecentChartTitle'),
+          chartDescription: t('mtgRecentChartDescription'),
+          categories: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
+            sector === null ? 'No Sector Attached' : sector
+          ),
+          values: mitigationIndividualChartData.stats.totals.map((count: string) =>
+            parseInt(count, 10)
+          ),
+          lastUpdatedTime: mitigationIndividualChartData.lastUpdate,
+        });
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     getRecentMitigationChartData();
 

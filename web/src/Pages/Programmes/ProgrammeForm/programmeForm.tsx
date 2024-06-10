@@ -170,21 +170,25 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchFreeChildren = async () => {
       if (method !== 'view') {
-        const response: any = await get('national/projects/link/eligible');
+        try {
+          const response: any = await get('national/projects/link/eligible');
 
-        const freeProjectIds: string[] = [];
-        response.data.forEach((prj: any) => {
-          freeProjectIds.push(prj.projectId);
-        });
-        setAllProjectIdList(freeProjectIds);
+          const freeProjectIds: string[] = [];
+          response.data.forEach((prj: any) => {
+            freeProjectIds.push(prj.projectId);
+          });
+          setAllProjectIdList(freeProjectIds);
 
-        const actResponse: any = await get('national/activities/link/eligible');
+          const actResponse: any = await get('national/activities/link/eligible');
 
-        const freeActivityIds: string[] = [];
-        actResponse.data.forEach((act: any) => {
-          freeActivityIds.push(act.activityId);
-        });
-        setAllActivityIdList(freeActivityIds);
+          const freeActivityIds: string[] = [];
+          actResponse.data.forEach((act: any) => {
+            freeActivityIds.push(act.activityId);
+          });
+          setAllActivityIdList(freeActivityIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchFreeChildren();

@@ -162,13 +162,17 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchFreeActivities = async () => {
       if (method !== 'view') {
-        const response: any = await get('national/activities/link/eligible');
+        try {
+          const response: any = await get('national/activities/link/eligible');
 
-        const freeActivityIds: string[] = [];
-        response.data.forEach((act: any) => {
-          freeActivityIds.push(act.activityId);
-        });
-        setAllActivityList(freeActivityIds);
+          const freeActivityIds: string[] = [];
+          response.data.forEach((act: any) => {
+            freeActivityIds.push(act.activityId);
+          });
+          setAllActivityList(freeActivityIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchFreeActivities();

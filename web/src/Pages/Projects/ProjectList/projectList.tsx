@@ -89,13 +89,17 @@ const projectList = () => {
   // Free Act Read from DB
 
   const getFreeActivityIds = async () => {
-    const response: any = await get('national/activities/link/eligible');
+    try {
+      const response: any = await get('national/activities/link/eligible');
 
-    const freeActivityIds: string[] = [];
-    response.data.forEach((act: any) => {
-      freeActivityIds.push(act.activityId);
-    });
-    setAllFreeActivityIds(freeActivityIds);
+      const freeActivityIds: string[] = [];
+      response.data.forEach((act: any) => {
+        freeActivityIds.push(act.activityId);
+      });
+      setAllFreeActivityIds(freeActivityIds);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   // Get Attached Programmes

@@ -203,27 +203,31 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         (parentType === 'action' || parentType === 'programme' || parentType === 'project') &&
         connectedParentId
       ) {
-        const response: any = await get(`national/${parentType}s/${connectedParentId}`);
+        try {
+          const response: any = await get(`national/${parentType}s/${connectedParentId}`);
 
-        if (parentType === 'action') {
-          tempMigratedData.description = response.data.description;
-          tempMigratedData.affSectors = response.data.sector ?? undefined;
-          tempMigratedData.startYear = response.data.startYear;
-        } else if (parentType === 'programme') {
-          tempMigratedData.description = response.data.description;
-          tempMigratedData.recipient = response.data.recipientEntity;
-          tempMigratedData.affSectors = response.data.sector ?? undefined;
-          tempMigratedData.affSubSectors = response.data.affectedSubSector;
-          tempMigratedData.startYear = response.data.startYear;
-        } else {
-          tempMigratedData.description = response.data.description;
-          tempMigratedData.recipient = response.data.recipientEntities;
-          tempMigratedData.affSectors = response.data.sector ?? undefined;
-          tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
-          tempMigratedData.startYear = response.data.startYear;
-          tempMigratedData.type = response.data.type;
-          tempMigratedData.endYear = response.data.endYear;
-          tempMigratedData.expectedTimeFrame = response.data.expectedTimeFrame;
+          if (parentType === 'action') {
+            tempMigratedData.description = response.data.description;
+            tempMigratedData.affSectors = response.data.sector ?? undefined;
+            tempMigratedData.startYear = response.data.startYear;
+          } else if (parentType === 'programme') {
+            tempMigratedData.description = response.data.description;
+            tempMigratedData.recipient = response.data.recipientEntity;
+            tempMigratedData.affSectors = response.data.sector ?? undefined;
+            tempMigratedData.affSubSectors = response.data.affectedSubSector;
+            tempMigratedData.startYear = response.data.startYear;
+          } else {
+            tempMigratedData.description = response.data.description;
+            tempMigratedData.recipient = response.data.recipientEntities;
+            tempMigratedData.affSectors = response.data.sector ?? undefined;
+            tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
+            tempMigratedData.startYear = response.data.startYear;
+            tempMigratedData.type = response.data.type;
+            tempMigratedData.endYear = response.data.endYear;
+            tempMigratedData.expectedTimeFrame = response.data.expectedTimeFrame;
+          }
+        } catch (error: any) {
+          displayErrorMessage(error);
         }
       }
       setActivityMigratedData(tempMigratedData);
