@@ -152,7 +152,7 @@ export class AnalyticsService {
 			const query = `
 			SELECT 
 					activity.sector,
-					SUM((activity."mitigationTimeline"->'expected'->'expectedEmissionReductWithM'->>${index})::numeric) AS total
+					SUM((activity."mitigationTimeline"->'actual'->'actualEmissionReduct'->>${index})::numeric) AS total
 			FROM 
 					activity
 				Where activity."mitigationTimeline" IS NOT NULL
