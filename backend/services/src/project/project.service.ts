@@ -275,6 +275,9 @@ export class ProjectService {
 		const eventLog = [];
 		let programme;
 
+		// setting project to pending (Non-Validated) state
+		projectUpdate.validated = false;
+
 		const currentProject = await this.findProjectWithParentAndChildren(projectUpdateDto.projectId);
 		
 		if (!currentProject) {

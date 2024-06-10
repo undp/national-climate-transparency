@@ -166,6 +166,8 @@ export class ActivityService {
 		const activityUpdate: ActivityEntity = plainToClass(ActivityEntity, activityUpdateDto);
 		const eventLog = [];
 
+		activityUpdate.validated = false;
+
 		this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_UPDATED, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto);
 
 		const currentActivity = await this.findActivityById(activityUpdateDto.activityId);

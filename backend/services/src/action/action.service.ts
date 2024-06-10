@@ -286,6 +286,9 @@ export class ActionService {
 		const actionUpdate: ActionEntity = plainToClass(ActionEntity, actionUpdateDto);
 		const eventLog = [];
 
+		// setting action to pending (Non-Validated) state
+		actionUpdate.validated = false;
+
 		const currentAction = await this.findActionById(actionUpdateDto.actionId);
 		if (!currentAction) {
 			throw new HttpException(

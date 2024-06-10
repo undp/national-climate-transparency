@@ -38,7 +38,7 @@ export class CaslAbilityFactory {
 				can(Action.Create, User);
 				can(Action.Update, User);
 				can(Action.Delete, User);
-				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
+				cannot(Action.Update, User, ['apiKey', 'password', 'email']);
 
 				// Action
 				can(Action.Read, ActionEntity);

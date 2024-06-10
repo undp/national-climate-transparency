@@ -269,6 +269,9 @@ export class ProgrammeService {
 		const programmeUpdate: ProgrammeEntity = plainToClass(ProgrammeEntity, programmeUpdateDto);
 		const eventLog = [];
 
+		// setting programme to pending (Non-Validated) state
+		programmeUpdate.validated = false;
+
 		const currentProgramme = await this.findProgrammeWithParentChildren(programmeUpdateDto.programmeId);
 		if (!currentProgramme) {
 			throw new HttpException(
