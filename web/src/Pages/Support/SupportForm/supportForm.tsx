@@ -685,7 +685,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 <Col>
                   <Form.Item>
                     <Button
-                      disabled={isValidated}
                       type="primary"
                       size="large"
                       block
@@ -693,7 +692,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                         validateEntity();
                       }}
                     >
-                      {t('validate')}
+                      {isValidated ? t('invalidate') : t('validate')}
                     </Button>
                   </Form.Item>
                 </Col>

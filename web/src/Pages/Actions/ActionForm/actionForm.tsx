@@ -1368,7 +1368,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Col>
                     <Form.Item>
                       <Button
-                        disabled={isValidated}
                         type="primary"
                         size="large"
                         block
@@ -1376,7 +1375,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                           validateEntity();
                         }}
                       >
-                        {t('validate')}
+                        {isValidated ? t('invalidate') : t('validate')}
                       </Button>
                     </Form.Item>
                   </Col>

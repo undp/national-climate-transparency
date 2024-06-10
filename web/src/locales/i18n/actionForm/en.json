@@ -47,5 +47,7 @@
     "investmentNeeds": " Estimated investment needs (USD)",
     "noActivityMessage": "No Activities Attached",
     "noSupportMessage": "No Supports Attached",
-    "kpiSearchFailed": "Searching for KPIs Failed"
+    "kpiSearchFailed": "Searching for KPIs Failed",
+    "validate": "Validate",
+    "invalidate": "Invalidate"
 }

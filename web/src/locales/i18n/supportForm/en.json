@@ -26,6 +26,7 @@
     "supportCreationSuccess": "Support Added Successfully",
     "supportUpdateSuccess": "Support Updated Successfully",
     "validate": "Validate",
+    "invalidate": "Invalidate",
     "back": "Back",
     "delete": "Delete",
     "update": "Save"

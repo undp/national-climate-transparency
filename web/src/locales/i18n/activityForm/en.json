@@ -62,6 +62,8 @@
     "mtgDocUploadTwo": "Mitigation Results Documentation",
     "mitigationTimelineTitle" : "Mitigation Timeline",
     "ghgAffected": "GHG(s) Affected",
-    "kpiSearchFailed": "Searching for KPIs Failed"
+    "kpiSearchFailed": "Searching for KPIs Failed",
+    "validate": "Validate",
+    "invalidate": "Invalidate"
   }
   
