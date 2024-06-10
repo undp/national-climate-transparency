@@ -6,4 +6,16 @@
       text-align: center;
     }
 
+    .custom-scroll-table {
+      .ant-table-body {
+        &::-webkit-scrollbar {
+          display: none;
+        }
+    
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+        scrollbar-width: none;  /* Firefox */
+  
+      }
+    }
+
   }
