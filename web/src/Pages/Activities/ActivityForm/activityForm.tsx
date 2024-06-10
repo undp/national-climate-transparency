@@ -270,20 +270,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     fetchParentKPIData();
   }, [connectedParentId]);
 
-  // Loading Non Validated Entities that can be parent on Parent Type select
+  // Loading All Entities that can be parent on Parent Type select
 
   useEffect(() => {
     const fetchNonValidatedParents = async () => {
       if (parentType === 'action' || parentType === 'programme' || parentType === 'project') {
         try {
           const payload = {
-            filterAnd: [
-              {
-                key: 'validated',
-                operation: '=',
-                value: false,
-              },
-            ],
             sort: {
               key: `${parentType}Id`,
               order: 'ASC',

@@ -135,18 +135,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // Initially Loading Non Validated Actions that can be parent
+    // Initially Loading All Actions that can be parent
 
     const fetchNonValidatedActions = async () => {
       try {
         const payload = {
-          filterAnd: [
-            {
-              key: 'validated',
-              operation: '=',
-              value: false,
-            },
-          ],
           sort: {
             key: 'actionId',
             order: 'ASC',

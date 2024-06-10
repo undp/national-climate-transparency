@@ -129,18 +129,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // Initially Loading Non validated programmes that can be parent
+    // Initially Loading All programmes that can be parent
 
     const fetchNonValidatedProgrammes = async () => {
       try {
         const payload = {
-          filterAnd: [
-            {
-              key: 'validated',
-              operation: '=',
-              value: false,
-            },
-          ],
           sort: {
             key: 'programmeId',
             order: 'ASC',
