@@ -40,6 +40,7 @@ import {
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
+import { StoredData, UploadData } from '../../../Definitions/uploadDefinitions';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -76,10 +77,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // form state
 
   const [activityMigratedData, setActivityMigratedData] = useState<ActivityMigratedData>();
-  const [uploadedFiles, setUploadedFiles] = useState<
-    { key: string; title: string; data: string }[]
-  >([]);
-  const [storedFiles, setStoredFiles] = useState<{ key: string; title: string; url: string }[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadData[]>([]);
+  const [storedFiles, setStoredFiles] = useState<StoredData[]>([]);
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
@@ -90,22 +89,14 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Methodology Doc state
 
-  const [uploadedMthFiles, setUploadedMthFiles] = useState<
-    { key: string; title: string; data: string }[]
-  >([]);
-  const [storedMthFiles, setStoredMthFiles] = useState<
-    { key: string; title: string; url: string }[]
-  >([]);
+  const [uploadedMthFiles, setUploadedMthFiles] = useState<UploadData[]>([]);
+  const [storedMthFiles, setStoredMthFiles] = useState<StoredData[]>([]);
   const [mthFilesToRemove, setMthFilesToRemove] = useState<string[]>([]);
 
   // Results Doc state
 
-  const [uploadedRstFiles, setUploadedRstFiles] = useState<
-    { key: string; title: string; data: string }[]
-  >([]);
-  const [storedRstFiles, setStoredRstFiles] = useState<
-    { key: string; title: string; url: string }[]
-  >([]);
+  const [uploadedRstFiles, setUploadedRstFiles] = useState<UploadData[]>([]);
+  const [storedRstFiles, setStoredRstFiles] = useState<StoredData[]>([]);
   const [rstFilesToRemove, setRstFilesToRemove] = useState<string[]>([]);
 
   // Support state
@@ -124,7 +115,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [expectedTimeline, setExpectedTimeline] = useState<ExpectedTimeline[]>([]);
   const [actualTimeline, setActualTimeline] = useState<ActualTimeline[]>([]);
-  const [isMtgButtonEnabled, setisMtgButtonEnabled] = useState(false);
+  const [isMtgButtonEnabled, setIsMtgButtonEnabled] = useState(false);
 
   // Initialization Logic
 
@@ -682,13 +673,47 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         };
       }
 
-      uploadedMthFiles.forEach((file) => {
-        payload.mitigationInfo.methodologyDocuments.push({ title: file.title, data: file.data });
-      });
+      if (method === 'create') {
+        uploadedMthFiles.forEach((file) => {
+          payload.mitigationInfo.methodologyDocuments.push({ title: file.title, data: file.data });
+        });
 
-      uploadedRstFiles.forEach((file) => {
-        payload.mitigationInfo.resultDocuments.push({ title: file.title, data: file.data });
-      });
+        uploadedRstFiles.forEach((file) => {
+          payload.mitigationInfo.resultDocuments.push({ title: file.title, data: file.data });
+        });
+      } else if (method === 'update') {
+        // Resolving Methodology Files
+
+        storedMthFiles.forEach((file) => {
+          if (!mthFilesToRemove.includes(file.key)) {
+            payload.mitigationInfo.methodologyDocuments.push({
+              createdTime: file.key,
+              title: file.title,
+              url: file.url,
+            });
+          }
+        });
+
+        uploadedMthFiles.forEach((file) => {
+          payload.mitigationInfo.methodologyDocuments.push({ title: file.title, data: file.data });
+        });
+
+        // Resolving Result Files
+
+        storedRstFiles.forEach((file) => {
+          if (!rstFilesToRemove.includes(file.key)) {
+            payload.mitigationInfo.resultDocuments.push({
+              createdTime: file.key,
+              title: file.title,
+              url: file.url,
+            });
+          }
+        });
+
+        uploadedRstFiles.forEach((file) => {
+          payload.mitigationInfo.resultDocuments.push({ title: file.title, data: file.data });
+        });
+      }
 
       let response: any;
 
@@ -833,7 +858,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       });
       setActualTimeline(updatedTimeline);
     }
-    setisMtgButtonEnabled(true);
+    setIsMtgButtonEnabled(true);
   };
 
   // MTG timeline update
@@ -880,7 +905,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
 
-          setisMtgButtonEnabled(false);
+          setIsMtgButtonEnabled(false);
         }
       }
     } catch (error: any) {
