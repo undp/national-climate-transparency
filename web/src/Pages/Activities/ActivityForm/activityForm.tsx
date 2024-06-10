@@ -362,10 +362,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
             setIsValidated(entityData.validated ?? false);
 
-            if (entityData.validated && method === 'update') {
-              navigate(`/activities/view/${entId}`);
-            }
-
             // Setting up uploaded files
 
             if (entityData.documents?.length > 0) {

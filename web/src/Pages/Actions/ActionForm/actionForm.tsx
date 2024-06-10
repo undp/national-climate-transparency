@@ -189,10 +189,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
             setIsValidated(entityData.validated ?? false);
 
-            if (entityData.validated && method === 'update') {
-              navigate(`/actions/view/${entId}`);
-            }
-
             if (entityData.documents?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
               entityData.documents.forEach((document: any) => {

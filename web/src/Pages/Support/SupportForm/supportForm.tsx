@@ -185,10 +185,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             // Setting validation status
 
             setIsValidated(entityData.validated ?? false);
-
-            if (entityData.validated && method === 'update') {
-              navigate(`/support/view/${entId}`);
-            }
           }
         } catch (error: any) {
           navigate('/support');
