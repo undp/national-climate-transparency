@@ -506,10 +506,10 @@ const programmeList = () => {
           options={allFreeProjectIds}
           content={{
             buttonName: t('attachProject'),
-            attach: t('attach'),
+            attach: t('entityAction:attach'),
             contentTitle: t('attachProject'),
             listTitle: t('projectList'),
-            cancel: t('cancel'),
+            cancel: t('entityAction:cancel'),
           }}
           attachedUnits={attachedProjectIds}
           setToBeAttached={setToBeAttached}

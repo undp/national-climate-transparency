@@ -11,5 +11,7 @@
     "mtgIndividualChartDescription": "Description annuelle de la mitigation des GES (tCO2e)",
     "mtgRecentChartTitle": "Mitigation des GES (tCO2e) année la plus récente",
     "mtgRecentChartDescription": "Description de la mitigation des GES (tCO2e) année la plus récente",
-    "noChartDataAvailable": "Aucune statistique disponible"
+    "noChartDataAvailable": "Aucune statistique disponible",
+    "noActionsAvailable": "Pas d'actions disponibles",
+    "recentYear": "2023"
 }

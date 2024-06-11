@@ -431,7 +431,7 @@ const Dashboard = () => {
                     <Row gutter={30}>
                       <Col span={17}>{mitigationRecentChart.chartTitle}</Col>
                       <Col span={5} style={{ display: 'flex', alignItems: 'flex-end' }}>
-                        <Tag className="year-chip">{t('2023')}</Tag>
+                        <Tag className="year-chip">{t('recentYear')}</Tag>
                       </Col>
                       <Col span={2}>
                         <InfoCircleOutlined
@@ -476,7 +476,7 @@ const Dashboard = () => {
                 position: ['bottomRight'],
               }}
               handleTableChange={handleTableChange}
-              emptyMessage="No Actions Available"
+              emptyMessage={t('noActionsAvailable')}
             />
           </Col>
         </Row>

@@ -11,5 +11,7 @@
     "mtgIndividualChartDescription": "GHG Mitigation (tCO2e) Year Description",
     "mtgRecentChartTitle" : "GHG Mitigation (tCO2e) Most Recent Year",
     "mtgRecentChartDescription": "GHG Mitigation (tCO2e) Most Recent Year Description",
-    "noChartDataAvailable": "No Statistics Available"
+    "noChartDataAvailable": "No Statistics Available",
+    "noActionsAvailable": "No Actions Available",
+    "recentYear": "2023"
 }
