@@ -1,6 +1,5 @@
 {
   "viewTitle": "Support List",
-  "viewDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
   "addButtonType": "ADD support",
   "searchBarText": "Search by Support Title",
   "supportId": "Support ID",
@@ -12,6 +11,5 @@
   "financingStatus": "Financing Status",
   "validationStatus": "Validation Status",
   "internationalSource": "International Source",
-  "filterByValidationStatus": "Filter By Validation Status",
   "filterBySupportDirection": "Filter By Support Needed or Received"
 }

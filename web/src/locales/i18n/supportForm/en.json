@@ -2,7 +2,6 @@
     "addSupportTitle": "Add New Support",
     "viewSupportTitle": "View Support",
     "editSupportTitle": "Edit Support",
-    "addSupportDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
     "generalInfoTitle": "General Support Information ",
     "selectActivityTitle": "Select Activity",
     "supportDirectionTitle": "Support Needed or Received",
@@ -21,13 +20,6 @@
     "receivedUSDTitle": "Amount Received (USD)",
     "receivedLocalTitle": "Amount Received (Domestic currency)",
     "exchangeRateTitle": "Exchange Rate (USD/Domestic currency)",
-    "add": "ADD",
-    "cancel": "CANCEL",
     "supportCreationSuccess": "Support Added Successfully",
-    "supportUpdateSuccess": "Support Updated Successfully",
-    "validate": "Validate",
-    "unvalidate": "Unvalidate",
-    "back": "Back",
-    "delete": "Delete",
-    "update": "Save"
+    "supportUpdateSuccess": "Support Updated Successfully"
   }

@@ -1246,7 +1246,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
+              <div className="form-section-sub-header">{t('emissionInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
