@@ -43,7 +43,7 @@ type ParentData = {
 
 const SupportForm: React.FC<Props> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['supportForm']);
+  const { t } = useTranslation(['supportForm', 'entityAction']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Support', method);
@@ -655,13 +655,13 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     navigate('/support');
                   }}
                 >
-                  {t('cancel')}
+                  {t('entityAction:cancel')}
                 </Button>
               </Col>
               <Col {...shortButtonBps}>
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
-                    {t('add')}
+                    {t('entityAction:add')}
                   </Button>
                 </Form.Item>
               </Col>
@@ -678,7 +678,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     navigate('/support');
                   }}
                 >
-                  {t('back')}
+                  {t('entityAction:back')}
                 </Button>
               </Col>
               {ability.can(Action.Validate, SupportEntity) && (
@@ -692,7 +692,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                         validateEntity();
                       }}
                     >
-                      {isValidated ? t('unvalidate') : t('validate')}
+                      {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
                     </Button>
                   </Form.Item>
                 </Col>
@@ -710,7 +710,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     navigate('/support');
                   }}
                 >
-                  {t('cancel')}
+                  {t('entityAction:cancel')}
                 </Button>
               </Col>
               <Col>
@@ -723,7 +723,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   }}
                   style={{ color: 'red', borderColor: 'red' }}
                 >
-                  {t('delete')}
+                  {t('entityAction:delete')}
                 </Button>
               </Col>
               <Col {...shortButtonBps}>
@@ -735,7 +735,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     htmlType="submit"
                     disabled={isSaveButtonDisabled}
                   >
-                    {t('update')}
+                    {t('entityAction:update')}
                   </Button>
                 </Form.Item>
               </Col>
