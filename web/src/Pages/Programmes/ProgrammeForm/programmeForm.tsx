@@ -766,8 +766,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       if (entId) {
         const payload = {
           entityId: entId,
+          validateStatus: !isValidated,
         };
-        const response: any = await post('national/programmes/validate', payload);
+        const response: any = await post('national/programmes/validateStatus', payload);
 
         if (response.status === 200 || response.status === 201) {
           message.open({

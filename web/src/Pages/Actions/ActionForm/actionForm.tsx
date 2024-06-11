@@ -718,8 +718,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       if (entId) {
         const payload = {
           entityId: entId,
+          validateStatus: !isValidated,
         };
-        const response: any = await post('national/actions/validate', payload);
+        const response: any = await post('national/actions/validateStatus', payload);
 
         if (response.status === 200 || response.status === 201) {
           message.open({

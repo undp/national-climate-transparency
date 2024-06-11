@@ -246,8 +246,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       if (entId) {
         const payload = {
           entityId: entId,
+          validateStatus: !isValidated,
         };
-        const response: any = await post('national/supports/validate', payload);
+        const response: any = await post('national/supports/validateStatus', payload);
 
         if (response.status === 200 || response.status === 201) {
           message.open({
