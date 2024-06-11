@@ -1,11 +1,11 @@
 export enum LanguageShortName {
   ENGLISH = 'en',
   FRENCH = 'fr',
-  JAPANESE = 'jp',
+  SINHALA = 'sin',
 }
 
 export enum LanguageFullName {
   ENGLISH = 'English',
   FRENCH = 'Français',
-  JAPANESE = 'Japanese',
+  SINHALA = 'සිංහල',
 }
