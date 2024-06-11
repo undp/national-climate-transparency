@@ -53,7 +53,7 @@ export class SupportController {
 	@ApiBearerAuth('api_key')
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, SupportEntity))
-	@Post("validate")
+	@Post("validateStatus")
 	validateSupport(@Body() validateDto: ValidateDto, @Request() req) {
 			return this.supportService.validateSupport(validateDto, req.user);
 	}

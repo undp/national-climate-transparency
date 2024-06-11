@@ -282,16 +282,6 @@ export class ProgrammeService {
 			);
 		}
 
-		// if (currentProgramme.validated) {
-		// 	throw new HttpException(
-		// 		this.helperService.formatReqMessagesString(
-		// 			"programme.cannotEditValidated",
-		// 			[programmeUpdateDto.programmeId]
-		// 		),
-		// 		HttpStatus.BAD_REQUEST
-		// 	);
-		// }
-
 		if (!this.helperService.doesUserHaveSectorPermission(user, currentProgramme.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -722,18 +712,14 @@ export class ProgrammeService {
 			);
 		}
 
-		if (programme.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"programme.programmeAlreadyValidated",
-					[validateDto.entityId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
-
-		programme.validated = true;
-		const eventLog = this.buildLogEntity(LogEventType.PROGRAMME_VERIFIED, EntityType.PROGRAMME, programme.programmeId, user.id, validateDto)
+		programme.validated = validateDto.validateStatus;
+		const eventLog = this.buildLogEntity(
+			(validateDto.validateStatus) ? LogEventType.PROGRAMME_VERIFIED : LogEventType.PROGRAMME_UNVERIFIED,
+			EntityType.PROGRAMME, 
+			programme.programmeId, 
+			user.id, 
+			validateDto
+		);
 
 		const prog = await this.entityManager
 			.transaction(async (em) => {

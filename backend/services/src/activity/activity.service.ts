@@ -182,16 +182,6 @@ export class ActivityService {
 			);
 		}
 
-		// if (currentActivity.validated) {
-		// 	throw new HttpException(
-		// 		this.helperService.formatReqMessagesString(
-		// 			"activity.cannotEditValidated",
-		// 			[activityUpdate.activityId]
-		// 		),
-		// 		HttpStatus.BAD_REQUEST
-		// 	);
-		// }
-
 		if (!this.helperService.doesUserHaveSectorPermission(user, currentActivity.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -752,18 +742,14 @@ export class ActivityService {
 			);
 		}
 
-		if (activity.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"activity.activityAlreadyValidated",
-					[validateDto.entityId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
-
-		activity.validated = true;
-		const eventLog = this.buildLogEntity(LogEventType.ACTIVITY_VERIFIED, EntityType.ACTIVITY, activity.activityId, user.id, validateDto)
+		activity.validated = validateDto.validateStatus;
+		const eventLog = this.buildLogEntity(
+			(validateDto.validateStatus) ? LogEventType.ACTIVITY_VERIFIED : LogEventType.ACTIVITY_UNVERIFIED,
+			EntityType.ACTIVITY, 
+			activity.activityId, 
+			user.id, 
+			validateDto
+		)
 
 		const act = await this.entityManager
 			.transaction(async (em) => {
