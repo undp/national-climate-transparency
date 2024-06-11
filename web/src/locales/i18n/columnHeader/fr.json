@@ -1,0 +1,23 @@
+{
+    "actionType": "Type",
+    "sectorAffected": "Secteur affecté",
+    "financeNeeded": "Financement nécessaire (USD)",
+    "financeReceived": "Financement reçu (USD)",
+    "nationalImplementingEntity": "Entité nationale de mise en œuvre",
+    "validationStatus": "Statut de validation",
+    "filterByValidationStatus": "Filtrer par statut de validation",
+    "supportIdTitle": "ID du support",
+    "financeNatureTitle": "Financement international ou national",
+    "directionTitle": "Nécessaire/Reçu",
+    "finInstrumentTitle": "Instrument financier",
+    "neededUSDHeader": "Montant estimé nécessaire (USD)",
+    "neededLCLHeader": "Montant estimé nécessaire (domestique)",
+    "receivedUSDHeader": "Montant reçu (USD)",
+    "receivedLCLHeader": "Montant reçu (domestique)",
+    "supportType": "Type de support",
+    "recipientEntity": "Entité bénéficiaire",
+    "internationalImplementingEntity": "Entité internationale de mise en œuvre",
+    "type": "Type",
+    "subSectorAffected": "Sous-secteur affecté",
+    "estimatedInvestment": "Besoins d'investissement estimés (USD)"
+}

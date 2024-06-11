@@ -1,0 +1,15 @@
+{
+    "actionChartTitle": "Action climatique",
+    "actionChartDescription": "Description de l'action climatique",
+    "projectChartTitle": "Projets",
+    "projectChartDescription": "Description des projets climatiques",
+    "supportChartTitle": "Activités soutenues",
+    "supportChartDescription": "Description des activités soutenues",
+    "financeChartTitle": "Financement des activités",
+    "financeChartDescription": "Description du financement des activités",
+    "mtgIndividualChartTitle": "Mitigation des GES (tCO2e)",
+    "mtgIndividualChartDescription": "Description annuelle de la mitigation des GES (tCO2e)",
+    "mtgRecentChartTitle": "Mitigation des GES (tCO2e) année la plus récente",
+    "mtgRecentChartDescription": "Description de la mitigation des GES (tCO2e) année la plus récente",
+    "noChartDataAvailable": "Aucune statistique disponible"
+}

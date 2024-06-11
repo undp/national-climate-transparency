@@ -3,6 +3,7 @@
     "supportInfoTitle": "List of Direct Linked Supports under the Action",
     "ghgAffected": "GHG(s) Affected",
     "natAnchorTitle": "Anchored in a National Strategy",
+    "sectorsAffectedTitle": "Sector Affected", 
     "typesTitle": "Type",
     "expected": "Expected",
     "achieved": "Achieved",
@@ -10,6 +11,7 @@
     "kpiName": "KPI Name",
     "updatesInfoTitle": "Updates",
     "mitigationInfoTitle": "Mitigation Information",
+    "attachActivity": "Attach Activities",
     "supportTypeTitle": "Type of Support",
     "measuresTitle": "Reduction Measures",
     "recipientEntityHeader": "Recipient Entity (s)",
@@ -28,6 +30,8 @@
     "instrumentTypeHeader": "Type of Instruments(s)",
     "sectorsAffectedHeader": "Sector Affected",
     "subSectorsAffectedHeader": "Sub Sectors(s) Affected",
+    "startYearHeader": "Start Year",
+    "endYearHeader": "End Year",
     "timeFrameHeader": "Expected Time Frame",
     "techTypeHeader": "Type of Technology",
     "techTypeTitle": "Type of Technology (if applicable)",
@@ -35,6 +39,5 @@
     "capBuildHeader": "Contribution to Capacity-Building Objectives",
     "noSupportMessage": "No Supports Connected",
     "noActivityMessage": "No Activities Connected",
-    "kpiSearchFailed": "Searching for KPIs Failed",
-    "attachActivity": "Attach Activities"
+    "kpiSearchFailed": "Searching for KPIs Failed"
 }
