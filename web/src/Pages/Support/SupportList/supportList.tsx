@@ -38,7 +38,7 @@ const supportList = () => {
   const { post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['supportList', 'tableAction']);
+  const { t } = useTranslation(['supportList', 'tableAction', 'columnHeader', 'entityAction']);
 
   // General Page State
 
@@ -238,7 +238,7 @@ const supportList = () => {
       sorter: false,
     },
     {
-      title: t('validationStatus'),
+      title: t('columnHeader:validationStatus'),
       key: 'validationStatus',
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -335,7 +335,7 @@ const supportList = () => {
       title: 'Filter by Validation Status',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('filterByValidationStatus')}</div>
+          <div className="filter-title">{t('columnHeader:filterByValidationStatus')}</div>
           <Radio.Group
             onChange={(e) => {
               updatedTempFilters('validation', e?.target?.value);
@@ -367,7 +367,7 @@ const supportList = () => {
                   setTempFilterValue({ ...appliedFilterValue });
                 }}
               >
-                Cancel
+                {t('entityAction:cancel')}
               </Button>
             </Col>
             <Col span={12}>
@@ -382,7 +382,7 @@ const supportList = () => {
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >
-                Apply
+                {t('entityAction:apply')}
               </Button>
             </Col>
           </Row>

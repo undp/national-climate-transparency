@@ -40,7 +40,7 @@ const programmeList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['programmeList', 'tableAction']);
+  const { t } = useTranslation(['programmeList', 'tableAction', 'columnHeader', 'entityAction']);
 
   // General Page State
 
@@ -319,7 +319,7 @@ const programmeList = () => {
     { title: t('actionId'), dataIndex: 'actionId', key: 'actionId', sorter: false, width: 90 },
     { title: t('titleOfProgramme'), dataIndex: 'title', key: 'title', sorter: false, width: 130 },
     {
-      title: t('type'),
+      title: t('columnHeader:type'),
       width: 80, // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
         return <ScrollableList listToShow={record.type}></ScrollableList>;
@@ -327,7 +327,7 @@ const programmeList = () => {
     },
     { title: t('programmeStatus'), dataIndex: 'status', key: 'status', sorter: false, width: 130 },
     {
-      title: t('validationStatus'),
+      title: t('columnHeader:validationStatus'),
       key: 'validationStatus',
       width: 100,
       // eslint-disable-next-line no-unused-vars
@@ -336,7 +336,7 @@ const programmeList = () => {
       },
     },
     {
-      title: t('subSectorAffected'),
+      title: t('columnHeader:subSectorAffected'),
       sorter: false,
       align: 'center' as const,
       width: 150,
@@ -346,7 +346,7 @@ const programmeList = () => {
       },
     },
     {
-      title: t('estimatedInvestment'),
+      title: t('columnHeader:estimatedInvestment'),
       dataIndex: 'investment',
       key: 'investment',
       sorter: false,
@@ -438,7 +438,7 @@ const programmeList = () => {
       title: 'Filter by Validation Status',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('filterByValidationStatus')}</div>
+          <div className="filter-title">{t('columnHeader:filterByValidationStatus')}</div>
           <Radio.Group
             onChange={(e) => {
               updatedTempFilters('validation', e?.target?.value);
@@ -470,7 +470,7 @@ const programmeList = () => {
                   setTempFilterValue({ ...appliedFilterValue });
                 }}
               >
-                Cancel
+                {t('entityAction:cancel')}
               </Button>
             </Col>
             <Col span={12}>
@@ -485,7 +485,7 @@ const programmeList = () => {
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >
-                Apply
+                {t('entityAction:apply')}
               </Button>
             </Col>
           </Row>

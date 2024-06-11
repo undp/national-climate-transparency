@@ -9,5 +9,6 @@
     "validate": "Validate",
     "unvalidate": "Unvalidate",
     "back": "Back",
-    "delete": "Delete"
+    "delete": "Delete",
+    "apply": "Apply"
 }

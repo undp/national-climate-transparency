@@ -46,7 +46,7 @@ const actionList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['actionList', 'tableAction']);
+  const { t } = useTranslation(['actionList', 'tableAction', 'columnHeader', 'entityAction']);
 
   // General Page State
 
@@ -319,7 +319,7 @@ const actionList = () => {
     { title: t('actionId'), width: 100, dataIndex: 'actionId', key: 'actionId', sorter: false },
     { title: t('titleOfAction'), width: 120, dataIndex: 'title', key: 'title', sorter: false },
     {
-      title: t('actionType'),
+      title: t('columnHeader:type'),
       width: 100,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -327,21 +327,21 @@ const actionList = () => {
       },
     },
     {
-      title: t('sectorAffected'),
+      title: t('columnHeader:sectorAffected'),
       width: 120,
       dataIndex: 'affectedSectors',
       key: 'affectedSectors',
       sorter: false,
     },
     {
-      title: t('financeNeeded'),
+      title: t('columnHeader:financeNeeded'),
       width: 120,
       dataIndex: 'financeNeeded',
       key: 'financeNeeded',
       sorter: false,
     },
     {
-      title: t('financeReceived'),
+      title: t('columnHeader:financeReceived'),
       width: 130,
       dataIndex: 'financeReceived',
       key: 'financeReceived',
@@ -349,7 +349,7 @@ const actionList = () => {
     },
     { title: t('actionStatus'), width: 120, dataIndex: 'status', key: 'status', sorter: false },
     {
-      title: t('validationStatus'),
+      title: t('columnHeader:validationStatus'),
       key: 'validationStatus',
       width: 140,
       // eslint-disable-next-line no-unused-vars
@@ -358,7 +358,7 @@ const actionList = () => {
       },
     },
     {
-      title: t('nationalImplementingEntity'),
+      title: t('columnHeader:nationalImplementingEntity'),
       width: 180,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -450,7 +450,7 @@ const actionList = () => {
       title: 'Filter by Validation Status',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('filterByValidationStatus')}</div>
+          <div className="filter-title">{t('columnHeader:filterByValidationStatus')}</div>
           <Radio.Group
             onChange={(e) => {
               updatedTempFilters('validation', e?.target?.value);
@@ -482,7 +482,7 @@ const actionList = () => {
                   setTempFilterValue({ ...appliedFilterValue });
                 }}
               >
-                Cancel
+                {t('entityAction:cancel')}
               </Button>
             </Col>
             <Col span={12}>
@@ -497,7 +497,7 @@ const actionList = () => {
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >
-                Apply
+                {t('entityAction:apply')}
               </Button>
             </Col>
           </Row>

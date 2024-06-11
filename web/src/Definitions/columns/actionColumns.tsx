@@ -17,7 +17,7 @@ export const getActionTableColumns = (t: any) => {
       sorter: false,
     },
     {
-      title: t('actionList:actionType'),
+      title: t('columnHeader:type'),
       width: 100,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -25,7 +25,7 @@ export const getActionTableColumns = (t: any) => {
       },
     },
     {
-      title: t('actionList:sectorAffected'),
+      title: t('columnHeader:sectorAffected'),
       width: 120,
       dataIndex: 'affectedSectors',
       key: 'affectedSectors',
@@ -39,7 +39,7 @@ export const getActionTableColumns = (t: any) => {
       sorter: false,
     },
     {
-      title: t('actionList:nationalImplementingEntity'),
+      title: t('columnHeader:nationalImplementingEntity'),
       width: 180,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -47,14 +47,14 @@ export const getActionTableColumns = (t: any) => {
       },
     },
     {
-      title: t('actionList:financeNeeded'),
+      title: t('columnHeader:financeNeeded'),
       width: 120,
       dataIndex: 'financeNeeded',
       key: 'financeNeeded',
       sorter: false,
     },
     {
-      title: t('actionList:financeReceived'),
+      title: t('columnHeader:financeReceived'),
       width: 130,
       dataIndex: 'financeReceived',
       key: 'financeReceived',

@@ -19,7 +19,7 @@ const { useBreakpoint } = Grid;
 const Dashboard = () => {
   // Context Information
 
-  const { t } = useTranslation(['dashboard', 'actionList']);
+  const { t } = useTranslation(['dashboard', 'actionList', 'columnHeader']);
   const screens = useBreakpoint();
   const { get, post, statServerUrl } = useConnection();
 

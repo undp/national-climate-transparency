@@ -42,7 +42,7 @@ const projectList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['projectList', 'tableAction']);
+  const { t } = useTranslation(['projectList', 'tableAction', 'columnHeader', 'entityAction']);
 
   // General Page State
 
@@ -331,7 +331,7 @@ const projectList = () => {
       sorter: false,
     },
     {
-      title: t('recipientEntity'),
+      title: t('columnHeader:recipientEntity'),
       sorter: false,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -339,7 +339,7 @@ const projectList = () => {
       },
     },
     {
-      title: t('internationalImplementingEntity'),
+      title: t('columnHeader:internationalImplementingEntity'),
       sorter: false,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -347,7 +347,7 @@ const projectList = () => {
       },
     },
     {
-      title: t('validationStatus'),
+      title: t('columnHeader:validationStatus'),
       key: 'validationStatus',
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -355,14 +355,14 @@ const projectList = () => {
       },
     },
     {
-      title: t('nationalImplementingEntity'),
+      title: t('columnHeader:nationalImplementingEntity'),
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
         return <ScrollableList listToShow={record.natImplementingEntity}></ScrollableList>;
       },
     },
     {
-      title: t('estimatedInvestment'),
+      title: t('columnHeader:estimatedInvestment'),
       dataIndex: 'estimatedInvestment',
       key: 'estimatedInvestment',
       sorter: false,
@@ -452,7 +452,7 @@ const projectList = () => {
       title: 'Filter by Validation Status',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('filterByValidationStatus')}</div>
+          <div className="filter-title">{t('columnHeader:filterByValidationStatus')}</div>
           <Radio.Group
             onChange={(e) => {
               updatedTempFilters('validation', e?.target?.value);
@@ -484,7 +484,7 @@ const projectList = () => {
                   setTempFilterValue({ ...appliedFilterValue });
                 }}
               >
-                Cancel
+                {t('entityAction:cancel')}
               </Button>
             </Col>
             <Col span={12}>
@@ -499,7 +499,7 @@ const projectList = () => {
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >
-                Apply
+                {t('entityAction:apply')}
               </Button>
             </Col>
           </Row>
