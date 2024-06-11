@@ -28,8 +28,6 @@
     "instrumentTypeHeader": "Type of Instruments(s)",
     "sectorsAffectedHeader": "Sector Affected",
     "subSectorsAffectedHeader": "Sub Sectors(s) Affected",
-    "startYearHeader": "Start Year",
-    "endYearHeader": "End Year",
     "timeFrameHeader": "Expected Time Frame",
     "techTypeHeader": "Type of Technology",
     "techTypeTitle": "Type of Technology (if applicable)",

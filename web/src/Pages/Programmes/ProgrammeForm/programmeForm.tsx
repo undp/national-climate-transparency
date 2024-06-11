@@ -51,7 +51,7 @@ const inputFontSize = '13px';
 
 const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['programmeForm', 'detachPopup']);
+  const { t } = useTranslation(['programmeForm', 'detachPopup', 'formHeader', 'entityAction']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Programme', method);
@@ -1019,7 +1019,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('typesHeader')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:typesTitle')}</label>}
                     name="type"
                   >
                     <Select
@@ -1063,7 +1063,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:instrumentTypeHeader')}
+                      </label>
+                    }
                     name="instrumentType"
                   >
                     <Select
@@ -1097,7 +1101,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('sectorsAffTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:sectorsAffectedHeader')}
+                      </label>
+                    }
                     name="sector"
                   >
                     <Select
@@ -1109,7 +1117,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('subSectorsAffTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:subSectorsAffectedHeader')}
+                      </label>
+                    }
                     name="affectedSubSector"
                     rules={[validation.required]}
                   >
@@ -1133,7 +1145,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('startYearTitle')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:startYearTitle')}</label>
+                    }
                     name="startYear"
                     rules={[validation.required]}
                   >
@@ -1154,7 +1168,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:intImplementerHeader')}
+                      </label>
+                    }
                     name="intImplementor"
                   >
                     <Select
@@ -1167,7 +1185,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('recipientEntityTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:recipientEntityHeader')}
+                      </label>
+                    }
                     name="recipientEntity"
                   >
                     <Select
@@ -1182,7 +1204,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:natImplementerHeader')}
+                      </label>
+                    }
                     name="natImplementor"
                     rules={[validation.required]}
                   >
@@ -1204,7 +1230,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item<number>
-                    label={<label className="form-item-header">{t('investmentNeedsTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:investmentNeedsHeader')}
+                      </label>
+                    }
                     name="investment"
                     rules={[validation.required]}
                   >
@@ -1218,11 +1248,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('documentsHeader')}</div>
+              <div className="form-section-sub-header">{t('formHeader:documentsHeader')}</div>
               <UploadFileGrid
                 isSingleColumn={false}
                 usedIn={method}
-                buttonText={t('upload')}
+                buttonText={t('entityAction:upload')}
                 storedFiles={storedFiles}
                 uploadedFiles={uploadedFiles}
                 setUploadedFiles={setUploadedFiles}
@@ -1276,10 +1306,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     isDisabled={isView}
                     content={{
                       buttonName: t('attachProjects'),
-                      attach: t('attach'),
+                      attach: t('entityAction:attach'),
                       contentTitle: t('attachProjects'),
                       listTitle: t('projectList'),
-                      cancel: t('cancel'),
+                      cancel: t('entityAction:cancel'),
                     }}
                     options={allProjectIds}
                     alreadyAttached={attachedProjectIds}
@@ -1300,11 +1330,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   <AttachEntity
                     isDisabled={isView}
                     content={{
-                      buttonName: t('attachActivity'),
-                      attach: t('attach'),
-                      contentTitle: t('attachActivity'),
+                      buttonName: t('formHeader:attachActivity'),
+                      attach: t('entityAction:attach'),
+                      contentTitle: t('formHeader:attachActivity'),
                       listTitle: t('activityList'),
-                      cancel: t('cancel'),
+                      cancel: t('entityAction:cancel'),
                     }}
                     options={allActivityIds}
                     alreadyAttached={attachedActivityIds}
@@ -1334,7 +1364,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                         position: ['bottomRight'],
                       }}
                       handleTableChange={handleActivityTableChange}
-                      emptyMessage={t('noActivityMessage')}
+                      emptyMessage={t('formHeader:noActivityMessage')}
                     />{' '}
                   </div>
                 </Col>
@@ -1364,17 +1394,19 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       position: ['bottomRight'],
                     }}
                     handleTableChange={handleSupportTableChange}
-                    emptyMessage={t('noSupportMessage')}
+                    emptyMessage={t('formHeader:noSupportMessage')}
                   />
                 </Col>
               </Row>
             </div>
             <div className="form-section-card">
-              <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+              <div className="form-section-header">{t('formHeader:mitigationInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:ghgAffected')}</label>
+                    }
                     name="ghgsAffected"
                   >
                     <Select
@@ -1386,11 +1418,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
+              <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('achieved')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:achieved')}</label>}
                     name="achievedReduct"
                   >
                     <Input className="form-input-box" disabled />
@@ -1398,7 +1430,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('expected')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:expected')}</label>}
                     name="expectedReduct"
                   >
                     <Input className="form-input-box" disabled />
@@ -1409,7 +1441,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 method === 'update' ||
                 (method === 'view' &&
                   (inheritedKpiList.length > 0 || createdKpiList.length > 0))) && (
-                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+                <div className="form-section-sub-header">{t('formHeader:kpiInfoTitle')}</div>
               )}
               {inheritedKpiList.length > 0 &&
                 inheritedKpiList.map((createdKPI: CreatedKpiData) => (
@@ -1417,7 +1449,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     key={createdKPI.index}
                     index={createdKPI.index}
                     inherited={true}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     callingEntityId={entId}
                     ownerEntityId={createdKPI.creator}
@@ -1429,7 +1466,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     key={createdKPI.index}
                     index={createdKPI.index}
                     inherited={false}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     callingEntityId={entId}
                     ownerEntityId={createdKPI.creator}
@@ -1443,7 +1485,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     form={form}
                     rules={[validation.required]}
                     isFromActivity={false}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     updateKPI={updateKPI}
                     removeKPI={removeKPI}
@@ -1455,7 +1502,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   form={form}
                   rules={[validation.required]}
                   index={newKPI.index}
-                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                  headerNames={[
+                    t('formHeader:kpiName'),
+                    t('formHeader:kpiUnit'),
+                    t('formHeader:achieved'),
+                    t('formHeader:expected'),
+                  ]}
                   updateKPI={updateKPI}
                   removeKPI={removeKPI}
                 ></NewKpi>
@@ -1468,7 +1520,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       className="create-kpi-button"
                       onClick={createKPI}
                     >
-                      <span className="kpi-add-text">{t('addKPI')}</span>
+                      <span className="kpi-add-text">{t('entityAction:addKPI')}</span>
                     </Button>
                   )}
                 </Col>
@@ -1476,7 +1528,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             {method !== 'create' && (
               <div className="form-section-card">
-                <div className="form-section-header">{t('updatesInfoTitle')}</div>
+                <div className="form-section-header">{t('formHeader:updatesInfoTitle')}</div>
                 <UpdatesTimeline recordType={'programme'} recordId={entId} />
               </div>
             )}
@@ -1491,13 +1543,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/programmes');
                     }}
                   >
-                    {t('cancel')}
+                    {t('entityAction:cancel')}
                   </Button>
                 </Col>
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
-                      {t('add')}
+                      {t('entityAction:add')}
                     </Button>
                   </Form.Item>
                 </Col>
@@ -1514,7 +1566,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/programmes');
                     }}
                   >
-                    {t('back')}
+                    {t('entityAction:back')}
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ProgrammeEntity) && (
@@ -1528,7 +1580,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                           validateEntity();
                         }}
                       >
-                        {isValidated ? t('unvalidate') : t('validate')}
+                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
                       </Button>
                     </Form.Item>
                   </Col>
@@ -1546,7 +1598,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/programmes');
                     }}
                   >
-                    {t('cancel')}
+                    {t('entityAction:cancel')}
                   </Button>
                 </Col>
                 <Col>
@@ -1559,7 +1611,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     }}
                     style={{ color: 'red', borderColor: 'red' }}
                   >
-                    {t('delete')}
+                    {t('entityAction:delete')}
                   </Button>
                 </Col>
                 <Col {...shortButtonBps}>
@@ -1571,7 +1623,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       htmlType="submit"
                       disabled={isSaveButtonDisabled}
                     >
-                      {t('update')}
+                      {t('entityAction:update')}
                     </Button>
                   </Form.Item>
                 </Col>
