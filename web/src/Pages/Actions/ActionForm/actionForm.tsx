@@ -50,7 +50,7 @@ const inputFontSize = '13px';
 
 const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['actionForm', 'detachPopup']);
+  const { t } = useTranslation(['actionForm', 'detachPopup', 'entityAction', 'formHeader']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Action', method);
@@ -909,7 +909,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('typesTitle')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:typeHeader')}</label>}
                     name="type"
                   >
                     <Select
@@ -953,7 +953,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:instrumentTypeHeader')}
+                      </label>
+                    }
                     name="instrumentType"
                     rules={[validation.required]}
                   >
@@ -998,7 +1002,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:natImplementerHeader')}
+                      </label>
+                    }
                     name="natImplementor"
                   >
                     <Select
@@ -1011,7 +1019,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('sectorsAffectedTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:sectorsAffectedHeader')}
+                      </label>
+                    }
                     name="sector"
                     rules={[validation.required]}
                   >
@@ -1032,7 +1044,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('startYearTitle')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:startYearTitle')}</label>
+                    }
                     name="startYear"
                     rules={[validation.required]}
                   >
@@ -1055,7 +1069,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('investmentNeeds')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:investmentNeedsHeader')}
+                      </label>
+                    }
                     name="estimatedInvestment"
                   >
                     <Input className="form-input-box" disabled />
@@ -1063,7 +1081,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('natAnchorTitle')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:natAnchorTitle')}</label>
+                    }
                     name="natAnchor"
                     rules={[validation.required]}
                   >
@@ -1087,12 +1107,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               <div
                 style={{ color: '#3A3541', opacity: 0.8, marginTop: '10px', marginBottom: '10px' }}
               >
-                {t('documentsHeader')}
+                {t('formHeader:documentsHeader')}
               </div>
               <UploadFileGrid
                 isSingleColumn={false}
                 usedIn={method}
-                buttonText={t('upload')}
+                buttonText={t('entityAction:upload')}
                 storedFiles={storedFiles}
                 uploadedFiles={uploadedFiles}
                 setUploadedFiles={setUploadedFiles}
@@ -1111,10 +1131,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     isDisabled={isView}
                     content={{
                       buttonName: t('attachProgramme'),
-                      attach: t('attach'),
+                      attach: t('entityAction:attach'),
                       contentTitle: t('attachProgramme'),
                       listTitle: t('programmeList'),
-                      cancel: t('cancel'),
+                      cancel: t('entityAction:cancel'),
                     }}
                     options={allProgramIds}
                     alreadyAttached={attachedProgramIds}
@@ -1154,17 +1174,17 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <Row>
                 <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
-                  <div className="form-section-header">{t('activityInfoTitle')}</div>
+                  <div className="form-section-header">{t('formHeader:activityInfoTitle')}</div>
                 </Col>
                 <Col {...attachButtonBps}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
-                      buttonName: t('attachActivity'),
-                      attach: t('attach'),
-                      contentTitle: t('attachActivity'),
+                      buttonName: t('formHeader:attachActivity'),
+                      attach: t('entityAction:attach'),
+                      contentTitle: t('formHeader:attachActivity'),
                       listTitle: t('activityList'),
-                      cancel: t('cancel'),
+                      cancel: t('entityAction:cancel'),
                     }}
                     options={allActivityIds}
                     alreadyAttached={attachedActivityIds}
@@ -1194,8 +1214,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                         position: ['bottomRight'],
                       }}
                       handleTableChange={handleActivityTableChange}
-                      emptyMessage={t('noActivityMessage')}
-                    />{' '}
+                      emptyMessage={t('formHeader:noActivityMessage')}
+                    />
                   </div>
                 </Col>
               </Row>
@@ -1203,7 +1223,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <Row>
                 <Col span={20}>
-                  <div className="form-section-header">{t('supportInfoTitle')}</div>
+                  <div className="form-section-header">{t('formHeader:supportInfoTitle')}</div>
                 </Col>
               </Row>
               <Row>
@@ -1224,17 +1244,19 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                       position: ['bottomRight'],
                     }}
                     handleTableChange={handleSupportTableChange}
-                    emptyMessage={t('noSupportMessage')}
+                    emptyMessage={t('formHeader:noSupportMessage')}
                   />
                 </Col>
               </Row>
             </div>
             <div className="form-section-card">
-              <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+              <div className="form-section-header">{t('formHeader:mitigationInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:ghgAffected')}</label>
+                    }
                     name="ghgsAffected"
                   >
                     <Select
@@ -1246,11 +1268,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('emissionInfoTitle')}</div>
+              <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('achieved')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:achieved')}</label>}
                     name="achievedReduct"
                   >
                     <Input className="form-input-box" disabled />
@@ -1258,7 +1280,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('expected')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:expected')}</label>}
                     name="expectedReduct"
                   >
                     <Input className="form-input-box" disabled />
@@ -1268,7 +1290,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               {(method === 'create' ||
                 method === 'update' ||
                 (method === 'view' && createdKpiList.length > 0)) && (
-                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+                <div className="form-section-sub-header">{t('formHeader:kpiInfoTitle')}</div>
               )}
               {method === 'view' &&
                 createdKpiList.map((createdKPI: CreatedKpiData) => (
@@ -1276,7 +1298,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     key={createdKPI.index}
                     index={createdKPI.index}
                     inherited={false}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     callingEntityId={entId}
                     ownerEntityId={entId}
@@ -1290,7 +1317,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     form={form}
                     rules={[validation.required]}
                     isFromActivity={false}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     updateKPI={updateKPI}
                     removeKPI={removeKPI}
@@ -1302,7 +1334,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   form={form}
                   rules={[validation.required]}
                   index={newKPI.index}
-                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                  headerNames={[
+                    t('formHeader:kpiName'),
+                    t('formHeader:kpiUnit'),
+                    t('formHeader:achieved'),
+                    t('formHeader:expected'),
+                  ]}
                   updateKPI={updateKPI}
                   removeKPI={removeKPI}
                 ></NewKpi>
@@ -1315,15 +1352,15 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                       className="create-kpi-button"
                       onClick={createKPI}
                     >
-                      <span className="kpi-add-text">{t('addKPI')}</span>
+                      <span className="kpi-add-text">{t('entityAction:addKPI')}</span>
                     </Button>
                   )}
                 </Col>
               </Row>
             </div>
             {method !== 'create' && (
-              <div className="form-section-timelinecard">
-                <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              <div className="form-section-timelineCard">
+                <div className="form-section-header">{t('formHeader:updatesInfoTitle')}</div>
                 <UpdatesTimeline recordType={'action'} recordId={entId} />
               </div>
             )}
@@ -1338,13 +1375,13 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/actions');
                     }}
                   >
-                    {t('cancel')}
+                    {t('entityAction:cancel')}
                   </Button>
                 </Col>
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
-                      {t('add')}
+                      {t('entityAction:add')}
                     </Button>
                   </Form.Item>
                 </Col>
@@ -1361,7 +1398,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/actions');
                     }}
                   >
-                    {t('back')}
+                    {t('entityAction:back')}
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ActionEntity) && (
@@ -1375,7 +1412,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                           validateEntity();
                         }}
                       >
-                        {isValidated ? t('unvalidate') : t('validate')}
+                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
                       </Button>
                     </Form.Item>
                   </Col>
@@ -1393,7 +1430,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/actions');
                     }}
                   >
-                    {t('cancel')}
+                    {t('entityAction:cancel')}
                   </Button>
                 </Col>
                 <Col>
@@ -1406,7 +1443,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     }}
                     style={{ color: 'red', borderColor: 'red' }}
                   >
-                    {t('delete')}
+                    {t('entityAction:delete')}
                   </Button>
                 </Col>
                 <Col {...shortButtonBps}>
@@ -1418,7 +1455,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                       htmlType="submit"
                       disabled={isSaveButtonDisabled}
                     >
-                      {t('update')}
+                      {t('entityAction:update')}
                     </Button>
                   </Form.Item>
                 </Col>

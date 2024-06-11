@@ -11,8 +11,6 @@
     "kpiName": "KPI Name",
     "updatesInfoTitle": "Updates",
     "mitigationInfoTitle": "Mitigation Information",
-    "attachProgramme": "Attach Programmes",
-    "attachActivity": "Attach Activities",
     "supportTypeTitle": "Type of Support",
     "measuresTitle": "Reduction Measures",
     "recipientEntityHeader": "Recipient Entity (s)",
@@ -40,5 +38,6 @@
     "capBuildHeader": "Contribution to Capacity-Building Objectives",
     "noSupportMessage": "No Supports Connected",
     "noActivityMessage": "No Activities Connected",
-    "kpiSearchFailed": "Searching for KPIs Failed"
+    "kpiSearchFailed": "Searching for KPIs Failed",
+    "attachActivity": "Attach Activities"
 }

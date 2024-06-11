@@ -1523,7 +1523,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             </div>
             {method !== 'create' && (
-              <div className="form-section-timelinecard">
+              <div className="form-section-timelineCard">
                 <div className="form-section-header">{t('updatesInfoTitle')}</div>
                 <UpdatesTimeline recordType={'project'} recordId={entId} />
               </div>
