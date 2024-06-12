@@ -1,18 +1,11 @@
 {
   "viewTitle": "Activity List",
-  "viewDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
   "searchBarText": "Search by Activity Title",
   "activityId": "Activity ID",
   "parentId": "Attached Type ID",
   "parentType": "Attached Type",
   "titleOfActivity": "Title of Activity",
-  "supportType": "Type of Support",
   "activityStatus": "Activity Status",
-  "recipientEntity": "Recipient Entity (s)",
-  "internationalImplementingEntity": "International Implementing Entity (s)",
-  "nationalImplementingEntity": "National Implementing Entity (s)",
-  "validationStatus": "Validation Status",
   "addActivity": "Add Activity",
-  "filterByActivityStatus": "Filter By Activity Status",
-  "filterByValidationStatus": "Filter By Validation Status"
+  "filterByActivityStatus": "Filter By Activity Status"
 }

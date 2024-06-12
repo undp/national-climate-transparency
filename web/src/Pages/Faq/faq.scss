@@ -47,20 +47,18 @@
         }
 
         .documents {
-            display: flex;
-            justify-content: space-between;
-            width: 60%;
-            align-items: center;
+            margin-top: 30px;
+
+            .grid-column {
+                margin-bottom: 30px;
+            }
         }
 
         .videos {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            align-items: center;
+            margin-top: 30px;
 
-            iframe {
-                cursor: pointer;
+            .grid-column {
+                margin-bottom: 30px;
             }
         }
 

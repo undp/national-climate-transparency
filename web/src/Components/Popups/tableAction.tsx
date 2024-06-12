@@ -27,7 +27,7 @@ export const actionMenuWithAttaching = (
   const isValidated: boolean = validationStatus === 'validated' ? true : false;
   const viewText = ability.can(Action.Validate, entity)
     ? isValidated
-      ? t('tableAction:View')
+      ? t('tableAction:View/Unvalidate')
       : t('tableAction:View/Validate')
     : t('tableAction:View');
   return (
@@ -48,7 +48,7 @@ export const actionMenuWithAttaching = (
         {
           text: t(`tableAction:${calledIn}Attach`),
           icon: <PlusOutlined style={{ color: '#9155FD' }} />,
-          isDisabled: !ability.can(Action.Update, entity) || isValidated,
+          isDisabled: !ability.can(Action.Update, entity),
           click: () => {
             {
               setOpenAttaching(true);
@@ -60,7 +60,7 @@ export const actionMenuWithAttaching = (
         {
           text: t(`tableAction:${calledIn}Edit`),
           icon: <EditOutlined style={{ color: '#9155FD' }} />,
-          isDisabled: !ability.can(Action.Update, entity) || isValidated,
+          isDisabled: !ability.can(Action.Update, entity),
           click: () => {
             {
               navigate(`/${calledIn}s/edit/${recordId}`);
@@ -92,7 +92,7 @@ export const actionMenuWithoutAttaching = (
   const isValidated: boolean = validationStatus === 'validated' ? true : false;
   const viewText = ability.can(Action.Validate, entity)
     ? isValidated
-      ? t('tableAction:View')
+      ? t('tableAction:View/Unvalidate')
       : t('tableAction:View/Validate')
     : t('tableAction:View');
   return (
@@ -113,7 +113,7 @@ export const actionMenuWithoutAttaching = (
         {
           text: t(`tableAction:${calledIn}Edit`),
           icon: <EditOutlined style={{ color: '#9155FD' }} />,
-          isDisabled: !ability.can(Action.Update, entity) || isValidated,
+          isDisabled: !ability.can(Action.Update, entity),
           click: () => {
             {
               navigate(`/${calledIn}/edit/${recordId}`);

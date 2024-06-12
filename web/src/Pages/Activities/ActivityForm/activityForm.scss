@@ -53,5 +53,6 @@ body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless)
     padding: 15px 2px;
     position: sticky;
     bottom: 0;
+    z-index: 10;
   }
 }

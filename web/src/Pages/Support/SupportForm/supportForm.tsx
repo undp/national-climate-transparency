@@ -43,7 +43,7 @@ type ParentData = {
 
 const SupportForm: React.FC<Props> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['supportForm']);
+  const { t } = useTranslation(['supportForm', 'entityAction']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Support', method);
@@ -101,28 +101,32 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   useEffect(() => {
     // Fetching All Activities which can be the parent
     const fetchNonValidatedActivities = async () => {
-      const payload = {
-        filterAnd: [
-          {
-            key: 'validated',
-            operation: '=',
-            value: false,
+      try {
+        const payload = {
+          filterAnd: [
+            {
+              key: 'validated',
+              operation: '=',
+              value: false,
+            },
+          ],
+          sort: {
+            key: 'activityId',
+            order: 'ASC',
           },
-        ],
-        sort: {
-          key: 'activityId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/activities/query', payload);
-      const tempActivityData: ParentData[] = [];
-      response.data.forEach((activity: any) => {
-        tempActivityData.push({
-          id: activity.activityId,
-          title: activity.title,
+        };
+        const response: any = await post('national/activities/query', payload);
+        const tempActivityData: ParentData[] = [];
+        response.data.forEach((activity: any) => {
+          tempActivityData.push({
+            id: activity.activityId,
+            title: activity.title,
+          });
         });
-      });
-      setParentList(tempActivityData);
+        setParentList(tempActivityData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     fetchNonValidatedActivities();
 
@@ -181,10 +185,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             // Setting validation status
 
             setIsValidated(entityData.validated ?? false);
-
-            if (entityData.validated && method === 'update') {
-              navigate(`/support/view/${entId}`);
-            }
           }
         } catch (error: any) {
           navigate('/support');
@@ -246,8 +246,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       if (entId) {
         const payload = {
           entityId: entId,
+          validateStatus: !isValidated,
         };
-        const response: any = await post('national/supports/validate', payload);
+        const response: any = await post('national/supports/validateStatus', payload);
 
         if (response.status === 200 || response.status === 201) {
           message.open({
@@ -655,13 +656,13 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     navigate('/support');
                   }}
                 >
-                  {t('cancel')}
+                  {t('entityAction:cancel')}
                 </Button>
               </Col>
               <Col {...shortButtonBps}>
                 <Form.Item>
                   <Button type="primary" size="large" block htmlType="submit">
-                    {t('add')}
+                    {t('entityAction:add')}
                   </Button>
                 </Form.Item>
               </Col>
@@ -678,14 +679,13 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     navigate('/support');
                   }}
                 >
-                  {t('back')}
+                  {t('entityAction:back')}
                 </Button>
               </Col>
               {ability.can(Action.Validate, SupportEntity) && (
                 <Col>
                   <Form.Item>
                     <Button
-                      disabled={isValidated}
                       type="primary"
                       size="large"
                       block
@@ -693,7 +693,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                         validateEntity();
                       }}
                     >
-                      {t('validate')}
+                      {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
                     </Button>
                   </Form.Item>
                 </Col>
@@ -711,7 +711,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     navigate('/support');
                   }}
                 >
-                  {t('cancel')}
+                  {t('entityAction:cancel')}
                 </Button>
               </Col>
               <Col>
@@ -724,7 +724,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   }}
                   style={{ color: 'red', borderColor: 'red' }}
                 >
-                  {t('delete')}
+                  {t('entityAction:delete')}
                 </Button>
               </Col>
               <Col {...shortButtonBps}>
@@ -736,7 +736,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     htmlType="submit"
                     disabled={isSaveButtonDisabled}
                   >
-                    {t('update')}
+                    {t('entityAction:update')}
                   </Button>
                 </Form.Item>
               </Col>

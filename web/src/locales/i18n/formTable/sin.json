@@ -1,0 +1,32 @@
+{
+    "programmeId": "ප්‍රාථමික ID",
+    "actionId": "ක්‍රියාවාර ID",
+    "programmeTitle": "ප්‍රාථමික ශිෂ්‍යය",
+    "programmeType": "වර්ගය",
+    "programmeStatus": "ප්‍රාථමික තත්වය",
+    "subSectorAffected": "උප වර්ගය වෙනස් කරන ලදී",
+    "investmentNeeds": "ආයෝජන අවශ්‍යතා (USD)",
+
+    "projectId": "ප්‍රාථමික ID",
+    "projectName": "ප්‍රාථමික නම",
+
+    "activityIdTitle": "ක්‍රියාවාර ID",
+    "titleTitle": "ක්‍රියාවාර ශිෂ්‍යය",
+    "redMeasuresTitle": "වැඩසටහන් ක්‍රියාවලිය",
+    "statusTitle": "තත්වය",
+    "startYearHeader": "ආරම්භ වසරය",
+    "endYearHeader": "අවසාන වසරය",
+    "timeFrameHeader": "අනුක්‍රමය වසරය",
+    "natImplementorTitle": "ජාතික ක්‍රියාවන් සංක්‍රමණයක් (වැනි)",
+
+   "supportIdTitle": "සහාය ID",
+    "financeNatureTitle": "ජාතික හෝ ජාතික මුදල",
+    "directionTitle": "අපවත් හෝ ලබාදුනු සහාය",
+    "finInstrumentTitle": "ජාතික හෝ ජාතික මුදල් වෙළඳපනය",
+    "neededUSDHeader": "අවශ්‍ය ප්‍රමාණය (USD)",
+    "neededLCLHeader": "අවශ්‍ය ප්‍රමාණය (දිසා)",
+    "recievedUSDHeader": "ලබාගත් ප්‍රමාණය (USD)",
+    "recievedLCLHeader": "ලබාගත් ප්‍රමාණය (දිසා)",
+
+    "detach": "අලුත් කරන්න"
+}

@@ -13,6 +13,7 @@ import { updateUserAbility } from '../../Casl/ability';
 import ForgotPassword from './forgotPassword';
 import ResetPassword from './resetPassword';
 import { UserState } from '../../Enums/user.state.enum';
+import { AvailableLanguages } from '../../Definitions/languageDefinitions';
 
 export interface LoginPageProps {
   forgotPassword?: boolean;
@@ -301,20 +302,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                               .toLowerCase()
                               .localeCompare((optionB?.label ?? '').toLowerCase())
                           }
-                          options={[
-                            {
-                              value: 'en',
-                              label: 'English',
-                            },
-                            {
-                              value: 'es',
-                              label: 'Español',
-                            },
-                            {
-                              value: 'fr',
-                              label: 'Français',
-                            },
-                          ]}
+                          options={AvailableLanguages}
                         />
                       </span>
                     </div>

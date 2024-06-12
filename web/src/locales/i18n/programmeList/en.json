@@ -1,22 +1,14 @@
 {
   "viewTitle": "Programme List",
-  "viewDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
   "addButtonType": "ADD Programme",
   "searchBarText": "Search by Programme Title",
   "programmeId": "Programme ID",
   "actionId": "Action ID",
   "titleOfProgramme": "Title of Programme",
-  "type": "Type",
   "programmeStatus": "Programme Status",
-  "validationStatus": "Validation Status",
-  "subSectorAffected": "Sub-Sector Affected",
-  "estimatedInvestment": "Estimated investment needs (USD)",
   "filterByProgrammeStatus": "Filter By Programme Status",
-  "filterByValidationStatus": "Filter By Validation Status",
   "attachProject": "Attach Projects",
-  "attach" : "Attach",
   "projectList" : "Project List",
-  "cancel": "Cancel",
   "projectLinkSuccess": "Project/s Linked Successfully",
   "addProgramme": "Add Programme"
 }
