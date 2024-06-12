@@ -492,6 +492,31 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     };
     fetchCreatedKPIData();
 
+    //set mtg timeline data when it is null
+
+    const setDefaultTimelineValues = () => {
+      const tempExpectedEntries: ExpectedTimeline[] = [];
+      Object.entries(ExpectedRows).forEach(([key, value]) => {
+        const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
+        for (let year = 2015; year <= 2050; year++) {
+          rowData[year.toString()] = 0;
+        }
+        tempExpectedEntries.push(rowData);
+      });
+
+      const tempActualEntries: ActualTimeline[] = [];
+      Object.entries(ActualRows).forEach(([key, value]) => {
+        const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
+        for (let year = 2015; year <= 2050; year++) {
+          rowData[year.toString()] = 0;
+        }
+        tempActualEntries.push(rowData);
+      });
+
+      setExpectedTimeline(tempExpectedEntries);
+      setActualTimeline(tempActualEntries);
+    };
+
     // Get mtg timeline data
 
     const fetchMtgTimelineData = async () => {
@@ -533,9 +558,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
             setExpectedTimeline(tempExpectedEntries);
             setActualTimeline(tempActualEntries);
+          } else {
+            setDefaultTimelineValues();
           }
         } catch (error) {
           console.error('Error fetching timeline data:', error);
+          setDefaultTimelineValues();
         }
       }
     };
@@ -544,26 +572,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     // Initializing mtg timeline data when in create mode
 
     if (method === 'create') {
-      const tempExpectedEntries: ExpectedTimeline[] = [];
-      Object.entries(ExpectedRows).forEach(([key, value]) => {
-        const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-        for (let year = 2015; year <= 2050; year++) {
-          rowData[year.toString()] = 0;
-        }
-        tempExpectedEntries.push(rowData);
-      });
-
-      const tempActualEntries: ActualTimeline[] = [];
-      Object.entries(ActualRows).forEach(([key, value]) => {
-        const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-        for (let year = 2015; year <= 2050; year++) {
-          rowData[year.toString()] = 0;
-        }
-        tempActualEntries.push(rowData);
-      });
-
-      setExpectedTimeline(tempExpectedEntries);
-      setActualTimeline(tempActualEntries);
+      setDefaultTimelineValues();
     }
   }, []);
 
