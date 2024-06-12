@@ -105,3 +105,15 @@ export const exportBarBps = {
   xl: { span: 16 },
   xxl: { span: 18 },
 };
+
+export const listSearchBarBps = {
+  sm: { span: 24 },
+  md: { span: 20 },
+  lg: { span: 12 },
+};
+
+export const addActionBps = {
+  sm: { span: 24 },
+  md: { span: 4 },
+  lg: { span: 12 },
+};

@@ -367,33 +367,6 @@ body {
       width: fit-content;
     }
   }
-
-  .filter-section {
-    padding: 25px;
-    display: flex;
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-
-    .search-bar {
-      display: flex;
-      flex-direction: row-reverse;
-    }
-
-    .filter-bar {
-      display: flex;
-      flex-direction: row-reverse;
-      margin: 0px;
-      width: 5%;
-    }
-
-    .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button {
-      padding-top: 0;
-      padding-bottom: 0;
-      border-radius: 0 0.313rem 0.313rem 0;
-    }
-  }
 }
 
 .layout-content-container .ant-btn {
@@ -403,6 +376,19 @@ body {
 .table-actions-section {
   width: 100%;
   margin-bottom: 1rem;
+
+  .search-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 25px;
+  }
+
+  .filter-bar {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+  }
+
 }
 
 .action-menu {

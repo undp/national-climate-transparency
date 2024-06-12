@@ -56,6 +56,7 @@ import { UserState } from '../../../Enums/user.state.enum';
 import { Role } from '../../../Enums/role.enum';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
+import { addActionBps, listSearchBarBps } from '../../../Definitions/breakpoints/breakpoints';
 
 interface Filter {
   searchBy: string;
@@ -592,7 +593,7 @@ const UserManagement = () => {
       </div>
       <div className="content-card">
         <Row className="table-actions-section">
-          <Col md={8} xs={24}>
+          <Col {...addActionBps}>
             <div className="action-bar">
               {ability.can(Action.Create, User) && (
                 <Button
@@ -607,9 +608,9 @@ const UserManagement = () => {
               )}
             </div>
           </Col>
-          <Col md={16} xs={24}>
-            <div className="filter-section">
-              <div className="search-bar">
+          <Col {...listSearchBarBps}>
+            <Row gutter={10}>
+              <Col span={21} className="search-bar">
                 <Input
                   addonAfter={<SearchOutlined style={{ color: '#615d67' }} onClick={onSearch} />}
                   placeholder={
@@ -621,8 +622,8 @@ const UserManagement = () => {
                   style={{ width: 265 }}
                   value={tempSearchValue}
                 />
-              </div>
-              <div className="filter-bar" style={{ marginTop: '0.3rem' }}>
+              </Col>
+              <Col span={3} className="filter-bar">
                 <Dropdown
                   arrow={false}
                   placement="bottomRight"
@@ -641,8 +642,8 @@ const UserManagement = () => {
                     }}
                   />
                 </Dropdown>
-              </div>
-            </div>
+              </Col>
+            </Row>
           </Col>
         </Row>
         <Row>

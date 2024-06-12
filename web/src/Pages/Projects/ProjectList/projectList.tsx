@@ -17,6 +17,7 @@ import { GraphUpArrow } from 'react-bootstrap-icons';
 import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
 import { ProjectEntity } from '../../../Entities/project';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
+import { addActionBps, listSearchBarBps } from '../../../Definitions/breakpoints/breakpoints';
 
 interface Item {
   key: number;
@@ -530,7 +531,7 @@ const projectList = () => {
           icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
         ></SimpleAttachEntity>
         <Row className="table-actions-section">
-          <Col md={8} xs={24}>
+          <Col {...addActionBps}>
             <div className="action-bar">
               {ability.can(Action.Create, ActionEntity) && (
                 <Button
@@ -547,9 +548,9 @@ const projectList = () => {
               )}
             </div>
           </Col>
-          <Col md={16} xs={24}>
-            <div className="filter-section">
-              <div className="search-bar">
+          <Col {...listSearchBarBps}>
+            <Row gutter={10}>
+              <Col span={21} className="search-bar">
                 <Input
                   addonAfter={<SearchOutlined style={{ color: '#615d67' }} onClick={onSearch} />}
                   placeholder={
@@ -563,8 +564,8 @@ const projectList = () => {
                   style={{ width: 265 }}
                   value={tempSearchValue}
                 />
-              </div>
-              <div className="filter-bar" style={{ marginTop: '0.3rem' }}>
+              </Col>
+              <Col span={3} className="filter-bar">
                 <Dropdown
                   arrow={false}
                   placement="bottomRight"
@@ -583,8 +584,8 @@ const projectList = () => {
                     }}
                   />
                 </Dropdown>
-              </div>
-            </div>
+              </Col>
+            </Row>
           </Col>
         </Row>
         <Row>
