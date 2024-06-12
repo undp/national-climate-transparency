@@ -28,5 +28,10 @@
     "26": "Updated Support",
     "27": "Detached from Activity",
     "28": "Validated Programme",
-    "29": "Updated Mitigation Timeline"
+    "29": "Updated Mitigation Timeline",
+    "30": "Unvalidated Action",
+    "31": "Unvalidated Programme",
+    "32": "Unvalidated Project",
+    "33": "Unvalidated Activity",
+    "34": "Unvalidated Support"
 }
