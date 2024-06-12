@@ -84,7 +84,17 @@ const UpdatesTimeline: React.FC<UpdateProps> = ({ recordType, recordId }) => {
       case '28':
         return (
           <span className="step-icon verify-step">
-            <Icon.CheckAll />
+            <Icon.FileEarmarkCheck />
+          </span>
+        );
+      case '30': //Unvalidated steps
+      case '31':
+      case '32':
+      case '33':
+      case '34':
+        return (
+          <span className="step-icon unverify-step">
+            <Icon.FileEarmarkExcel />
           </span>
         );
       default:
