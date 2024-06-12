@@ -1,8 +1,8 @@
 import React from 'react';
-import pdfsvg from '../../Assets/FAQ/pdf.svg';
-import docsvg from '../../Assets/FAQ/doc.svg';
-import xlsxsvg from '../../Assets/FAQ/xlsx.svg';
-import txtsvg from '../../Assets/FAQ/txt.svg';
+import pdfSvg from '../../Assets/FAQ/pdf.svg';
+import docSvg from '../../Assets/FAQ/doc.svg';
+import xlsxSvg from '../../Assets/FAQ/xlsx.svg';
+import txtSvg from '../../Assets/FAQ/txt.svg';
 import './faqDocument.scss';
 
 interface Props {
@@ -25,13 +25,13 @@ const FAQDocuments: React.FC<Props> = ({ title, format, url }) => {
   const getIconByFormat = () => {
     switch (format) {
       case 'pdf':
-        return pdfsvg;
+        return pdfSvg;
       case 'docx':
-        return docsvg;
+        return docSvg;
       case 'xlsx':
-        return xlsxsvg;
+        return xlsxSvg;
       default:
-        return txtsvg;
+        return txtSvg;
     }
   };
   const iconSrc = getIconByFormat();

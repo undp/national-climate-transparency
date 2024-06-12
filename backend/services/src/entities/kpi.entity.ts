@@ -1,5 +1,5 @@
 import { EntityType } from '../enums/shared.enum';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, AfterLoad } from 'typeorm';
 import { AchievementEntity } from './achievement.entity';
 import { KpiUnits } from '../enums/kpi.enum';
 
@@ -20,7 +20,7 @@ export class KpiEntity {
   @Column()
   creatorId: string;
 
-  @Column({type: 'double precision'})
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   expected: number;
 
   @OneToMany(() => AchievementEntity, (achievementEntity) => achievementEntity.kpi)

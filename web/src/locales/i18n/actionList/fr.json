@@ -1,0 +1,15 @@
+{
+  "viewTitle": "Liste des actions",
+  "addButtonType": "AJOUTER ACTION",
+  "searchBarText": "Rechercher par titre d'action",
+  "actionId": "ID de l'action",
+  "titleOfAction": "Titre de l'action",
+  "actionStatus": "Statut de l'action",
+  "filterByActionStatus": "Filtrer par statut de l'action",
+  "attachProgramme": "Joindre des programmes",
+  "attach": "Joindre",
+  "programmeList": "Liste des programmes",
+  "cancel": "Annuler",
+  "programmeLinkSuccess": "Programme/s lié/s avec succès",
+  "addAction": "Ajouter ACTION"
+}

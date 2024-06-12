@@ -40,7 +40,7 @@ const activityList = () => {
   const { post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['activityList', 'tableAction']);
+  const { t } = useTranslation(['activityList', 'tableAction', 'columnHeader', 'entityAction']);
 
   // General Page State
 
@@ -225,7 +225,12 @@ const activityList = () => {
       key: 'title',
       sorter: false,
     },
-    { title: t('supportType'), dataIndex: 'supportType', key: 'supportType', sorter: false },
+    {
+      title: t('columnHeader:supportType'),
+      dataIndex: 'supportType',
+      key: 'supportType',
+      sorter: false,
+    },
     {
       title: t('activityStatus'),
       dataIndex: 'activityStatus',
@@ -233,7 +238,7 @@ const activityList = () => {
       sorter: false,
     },
     {
-      title: t('recipientEntity'),
+      title: t('columnHeader:recipientEntity'),
       sorter: false,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: Item) => {
@@ -241,14 +246,14 @@ const activityList = () => {
       },
     },
     {
-      title: t('internationalImplementingEntity'),
+      title: t('columnHeader:internationalImplementingEntity'),
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: Item) => {
         return <ScrollableList listToShow={record.intImplementingEntity}></ScrollableList>;
       },
     },
     {
-      title: t('validationStatus'),
+      title: t('columnHeader:validationStatus'),
       key: 'validationStatus',
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -256,7 +261,7 @@ const activityList = () => {
       },
     },
     {
-      title: t('nationalImplementingEntity'),
+      title: t('columnHeader:nationalImplementingEntity'),
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: Item) => {
         return <ScrollableList listToShow={record.natImplementingEntity}></ScrollableList>;
@@ -344,7 +349,7 @@ const activityList = () => {
       title: 'Filter by Validation Status',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('filterByValidationStatus')}</div>
+          <div className="filter-title">{t('columnHeader:filterByValidationStatus')}</div>
           <Radio.Group
             onChange={(e) => {
               updatedTempFilters('validation', e?.target?.value);
@@ -376,7 +381,7 @@ const activityList = () => {
                   setTempFilterValue({ ...appliedFilterValue });
                 }}
               >
-                Cancel
+                {t('entityAction:cancel')}
               </Button>
             </Col>
             <Col span={12}>
@@ -391,7 +396,7 @@ const activityList = () => {
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >
-                Apply
+                {t('entityAction:apply')}
               </Button>
             </Col>
           </Row>

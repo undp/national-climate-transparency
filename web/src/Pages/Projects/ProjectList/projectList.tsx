@@ -42,7 +42,7 @@ const projectList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['projectList', 'tableAction']);
+  const { t } = useTranslation(['projectList', 'tableAction', 'columnHeader', 'entityAction']);
 
   // General Page State
 
@@ -89,38 +89,46 @@ const projectList = () => {
   // Free Act Read from DB
 
   const getFreeActivityIds = async () => {
-    const response: any = await get('national/activities/link/eligible');
+    try {
+      const response: any = await get('national/activities/link/eligible');
 
-    const freeActivityIds: string[] = [];
-    response.data.forEach((act: any) => {
-      freeActivityIds.push(act.activityId);
-    });
-    setAllFreeActivityIds(freeActivityIds);
+      const freeActivityIds: string[] = [];
+      response.data.forEach((act: any) => {
+        freeActivityIds.push(act.activityId);
+      });
+      setAllFreeActivityIds(freeActivityIds);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   // Get Attached Programmes
 
   const getAttachedActivityIds = async (projectId: string) => {
-    const payload = {
-      filterAnd: [
-        {
-          key: 'parentId',
-          operation: '=',
-          value: projectId,
+    try {
+      const payload = {
+        filterAnd: [
+          {
+            key: 'parentId',
+            operation: '=',
+            value: projectId,
+          },
+        ],
+        sort: {
+          key: 'activityId',
+          order: 'ASC',
         },
-      ],
-      sort: {
-        key: 'activityId',
-        order: 'ASC',
-      },
-    };
-    const response: any = await post('national/activities/query', payload);
+      };
+      const response: any = await post('national/activities/query', payload);
 
-    const attachedActIds: string[] = [];
-    response.data.forEach((act: any) => {
-      attachedActIds.push(act.activityId);
-    });
-    setAttachedActivityIds(attachedActIds);
+      const attachedActIds: string[] = [];
+      response.data.forEach((act: any) => {
+        attachedActIds.push(act.activityId);
+      });
+      setAttachedActivityIds(attachedActIds);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   // Data Read from DB
@@ -201,29 +209,33 @@ const projectList = () => {
 
   const attachActivities = async () => {
     if (toBeAttached.length > 0) {
-      const payload = {
-        parentType: 'project',
-        parentId: selectedProjectId,
-        activityIds: toBeAttached,
-      };
-      const response: any = await post('national/activities/link', payload);
-      if (response.status === 200 || response.status === 201) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
-        });
+      try {
+        const payload = {
+          parentType: 'project',
+          parentId: selectedProjectId,
+          activityIds: toBeAttached,
+        };
+        const response: any = await post('national/activities/link', payload);
+        if (response.status === 200 || response.status === 201) {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
 
-        message.open({
-          type: 'success',
-          content: t('activityLinkSuccess'),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
+          message.open({
+            type: 'success',
+            content: t('activityLinkSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
 
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
-        });
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
 
-        getAllData();
+          getAllData();
+        }
+      } catch (error: any) {
+        displayErrorMessage(error);
       }
     }
   };
@@ -319,7 +331,7 @@ const projectList = () => {
       sorter: false,
     },
     {
-      title: t('recipientEntity'),
+      title: t('columnHeader:recipientEntity'),
       sorter: false,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -327,7 +339,7 @@ const projectList = () => {
       },
     },
     {
-      title: t('internationalImplementingEntity'),
+      title: t('columnHeader:internationalImplementingEntity'),
       sorter: false,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -335,7 +347,7 @@ const projectList = () => {
       },
     },
     {
-      title: t('validationStatus'),
+      title: t('columnHeader:validationStatus'),
       key: 'validationStatus',
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -343,14 +355,14 @@ const projectList = () => {
       },
     },
     {
-      title: t('nationalImplementingEntity'),
+      title: t('columnHeader:nationalImplementingEntity'),
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
         return <ScrollableList listToShow={record.natImplementingEntity}></ScrollableList>;
       },
     },
     {
-      title: t('estimatedInvestment'),
+      title: t('columnHeader:estimatedInvestment'),
       dataIndex: 'estimatedInvestment',
       key: 'estimatedInvestment',
       sorter: false,
@@ -440,7 +452,7 @@ const projectList = () => {
       title: 'Filter by Validation Status',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('filterByValidationStatus')}</div>
+          <div className="filter-title">{t('columnHeader:filterByValidationStatus')}</div>
           <Radio.Group
             onChange={(e) => {
               updatedTempFilters('validation', e?.target?.value);
@@ -472,7 +484,7 @@ const projectList = () => {
                   setTempFilterValue({ ...appliedFilterValue });
                 }}
               >
-                Cancel
+                {t('entityAction:cancel')}
               </Button>
             </Col>
             <Col span={12}>
@@ -487,7 +499,7 @@ const projectList = () => {
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >
-                Apply
+                {t('entityAction:apply')}
               </Button>
             </Col>
           </Row>
@@ -508,10 +520,10 @@ const projectList = () => {
           options={allFreeActivityIds}
           content={{
             buttonName: t('attachActivity'),
-            attach: t('attach'),
+            attach: t('entityAction:attach'),
             contentTitle: t('attachActivity'),
             listTitle: t('activityList'),
-            cancel: t('cancel'),
+            cancel: t('entityAction:cancel'),
           }}
           attachedUnits={attachedActivityIds}
           setToBeAttached={setToBeAttached}

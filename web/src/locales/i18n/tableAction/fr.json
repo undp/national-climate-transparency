@@ -1,0 +1,13 @@
+{
+    "View/Validate": "Voir/Valider",
+    "View/Unvalidate": "Voir/Dévalider",
+    "View": "Voir",
+    "actionAttach": "Joindre des programmes",
+    "programmeAttach": "Joindre des projets",
+    "projectAttach": "Joindre des activités",
+    "actionEdit": "Modifier l'action",
+    "programmeEdit": "Modifier le programme",
+    "projectEdit": "Modifier le projet",
+    "activitiesEdit": "Modifier l'activité",
+    "supportEdit": "Modifier le soutien"
+}

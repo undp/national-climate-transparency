@@ -274,6 +274,9 @@ export class ProjectService {
 		const eventLog = [];
 		let programme;
 
+		// setting project to pending (Non-Validated) state
+		projectUpdate.validated = false;
+
 		const currentProject = await this.findProjectWithParentAndChildren(projectUpdateDto.projectId);
 		
 		if (!currentProject) {
@@ -286,15 +289,7 @@ export class ProjectService {
 			);
 		}
 
-		// if (currentProject.validated) {
-		// 	throw new HttpException(
-		// 		this.helperService.formatReqMessagesString(
-		// 			"project.cannotEditValidated",
-		// 			[projectUpdateDto.projectId]
-		// 		),
-		// 		HttpStatus.BAD_REQUEST
-		// 	);
-		// }
+
 
 		if (!this.helperService.doesUserHaveSectorPermission(user, currentProject.sector)){
 			throw new HttpException(
@@ -748,18 +743,14 @@ export class ProjectService {
 			);
 		}
 
-		if (project.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"project.projectAlreadyValidated",
-					[validateDto.entityId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
-
-		project.validated = true;
-		const eventLog = this.buildLogEntity(LogEventType.PROJECT_VERIFIED,EntityType.PROJECT,project.projectId,user.id,validateDto)
+		project.validated = validateDto.validateStatus;
+		const eventLog = this.buildLogEntity(
+			(validateDto.validateStatus) ? LogEventType.PROJECT_VERIFIED : LogEventType.PROJECT_UNVERIFIED,
+			EntityType.PROJECT,
+			project.projectId,
+			user.id,
+			validateDto
+		)
 
 		const proj = await this.entityManager
 		.transaction(async (em) => {

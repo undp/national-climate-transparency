@@ -1,0 +1,7 @@
+{
+  "primaryMsg": "Êtes-vous sûr de vouloir supprimer ce document ?",
+  "secondaryMsg": "Vous ne pouvez pas annuler cette action",
+  "cancelTitle": "Annuler",
+  "actionTitle": "Supprimer",
+  "fileNotSupported": "Type de fichier non pris en charge !"
+}

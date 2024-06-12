@@ -1,8 +1,8 @@
 import { DataExportDto } from "./data.export.dto";
 
 export class DataExportReportFiveDto extends DataExportDto {
-	source;
-	actionId;
+	// source;
+	// actionId;
 	// programmeId;
 	// projectId;
 	titleOfAction;

@@ -1,0 +1,14 @@
+{
+  "viewTitle": "සහායක ලැයිස්තුව",
+  "addButtonType": "සහායකයක් එකතු කරන්න",
+  "searchBarText": "සහායක මාතෘකාව හමුවීම",
+  "supportId": "සහායක හැඳුනුම්පත",
+  "activityId": "ක්‍රියාලය හැඳුනුම්පත",
+  "supportNeededORReceived": "අවශ්‍ය හෝ ලබාදීමට සහායකය",
+  "internationalORNationalFinance": "ජාතික හෝ ජාතික මුදල",
+  "internationalChannelOFSupport": "ජාතික සහායක චැනලය",
+  "internationalFinancialInstrument": "ජාතික මුදල් වාර්තාව",
+  "financingStatus": "මුදල් තත්ත්වය",
+  "internationalSource": "ජාතික මුදල් ස්වභාවය",
+  "filterBySupportDirection": "සහායකය හෝ ලබාදීම හමුවීම පෙරදීම"
+}

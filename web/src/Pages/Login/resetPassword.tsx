@@ -10,17 +10,18 @@ export interface ResetPasswordPageProps {
   forgotPassword?: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
 const ResetPassword: FC<ResetPasswordPageProps> = (props: ResetPasswordPageProps) => {
-  const { i18n, t } = useTranslation(['common', 'resetPassword']);
+  const { t } = useTranslation(['common', 'resetPassword']);
   const [resetPasswordForm] = Form.useForm();
   const { put } = useConnection();
   const navigate = useNavigate();
   const { requestid } = useParams();
-  // const queryParameters = new URLSearchParams(window.location.search);
+
   const [loading, setLoading] = useState<boolean>(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   const [disable, setDisable] = useState<boolean>(false);
   const [resetError, setResetError] = useState<boolean>(false);
-  //   const requestid = queryParameters.get('requestid');
 
   const onSubmit = async (values: any) => {
     try {
@@ -79,6 +80,7 @@ const ResetPassword: FC<ResetPasswordPageProps> = (props: ResetPasswordPageProps
                     message: ``,
                   },
                   {
+                    // eslint-disable-next-line no-unused-vars
                     validator: async (rule, value) => {
                       if (
                         String(value).trim() === '' ||
@@ -102,6 +104,7 @@ const ResetPassword: FC<ResetPasswordPageProps> = (props: ResetPasswordPageProps
                 label={`${t('resetPassword:confirmNewPwd')}`}
                 rules={[
                   {
+                    // eslint-disable-next-line no-unused-vars
                     validator: async (rule, value) => {
                       if (
                         String(value).trim() === '' ||

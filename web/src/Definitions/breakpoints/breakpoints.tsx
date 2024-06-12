@@ -65,3 +65,43 @@ export const quarterColumnBps = {
   lg: { span: 12 },
   xl: { span: 6 },
 };
+
+export const faqVideoBps = {
+  sm: { span: 24 },
+  md: { span: 24 },
+  lg: { span: 12 },
+  xl: { span: 8 },
+  xxl: { span: 6 },
+};
+
+export const faqDocumentBps = {
+  sm: { span: 12 },
+  md: { span: 8 },
+  lg: { span: 6 },
+  xl: { span: 4 },
+  xxl: { span: 2 },
+};
+
+export const exportButtonBps = {
+  sm: { span: 11 },
+  md: { span: 11 },
+  lg: { span: 12 },
+  xl: { span: 7 },
+  xxl: { span: 5 },
+};
+
+export const reportTitleBps = {
+  sm: { span: 24 },
+  md: { span: 24 },
+  lg: { span: 12 },
+  xl: { span: 8 },
+  xxl: { span: 6 },
+};
+
+export const exportBarBps = {
+  sm: { span: 24 },
+  md: { span: 24 },
+  lg: { span: 12 },
+  xl: { span: 16 },
+  xxl: { span: 18 },
+};

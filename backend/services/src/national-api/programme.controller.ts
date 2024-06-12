@@ -87,7 +87,7 @@ export class ProgrammeController {
     @ApiBearerAuth('api_key')
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, ProgrammeEntity))
-    @Post("validate")
+    @Post("validateStatus")
     validateProgrammes(@Body() validateDto: ValidateDto, @Request() req) {
         return this.programmeService.validateProgramme(validateDto, req.user);
     }
