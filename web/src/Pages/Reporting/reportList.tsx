@@ -53,7 +53,7 @@ const reportList = () => {
         });
 
         setReportFiveData(tempReportFiveData);
-        setReportFiveTotal(response.data.total);
+        setReportFiveTotal(response.response.data.total);
         setLoading(false);
       }
     } catch (error: any) {
