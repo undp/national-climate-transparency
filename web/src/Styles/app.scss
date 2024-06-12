@@ -381,12 +381,23 @@ body {
     display: flex;
     justify-content: flex-end;
     margin-top: 25px;
+
+    @media (max-width: 767px) {
+      margin-left: 25px;
+      margin-top: 0;
+      justify-content: flex-start;
+    }
   }
 
   .filter-bar {
     display: flex;
     justify-content: center;
     margin-top: 25px;
+
+    @media (max-width: 767px) {
+      margin-top: 0;
+      justify-content: flex-start;
+    }
   }
 
 }

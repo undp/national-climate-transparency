@@ -108,19 +108,19 @@ export const exportBarBps = {
 
 export const listSearchBarBps = {
   sm: { span: 24 },
-  md: { span: 20 },
+  md: { span: 12 },
   lg: { span: 12 },
 };
 
 export const addActionBps = {
   sm: { span: 24 },
-  md: { span: 4 },
+  md: { span: 12 },
   lg: { span: 12 },
 };
 
 export const searchBoxBps = {
-  sm: { span: 20 },
-  md: { span: 20 },
+  sm: { span: 17 },
+  md: { span: 18 },
   lg: { span: 20 },
   xl: { span: 21 },
   xxl: { span: 21 },
@@ -128,7 +128,7 @@ export const searchBoxBps = {
 
 export const filterDropdownBps = {
   sm: { span: 4 },
-  md: { span: 4 },
+  md: { span: 6 },
   lg: { span: 4 },
   xl: { span: 3 },
   xxl: { span: 3 },
