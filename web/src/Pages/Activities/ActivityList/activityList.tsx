@@ -14,7 +14,12 @@ import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { actionMenuWithoutAttaching } from '../../../Components/Popups/tableAction';
 import { ActivityEntity } from '../../../Entities/activity';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
-import { addActionBps, listSearchBarBps } from '../../../Definitions/breakpoints/breakpoints';
+import {
+  addActionBps,
+  filterDropdownBps,
+  listSearchBarBps,
+  searchBoxBps,
+} from '../../../Definitions/breakpoints/breakpoints';
 
 interface Item {
   key: number;
@@ -432,7 +437,7 @@ const activityList = () => {
           </Col>
           <Col {...listSearchBarBps}>
             <Row gutter={10}>
-              <Col span={21} className="search-bar">
+              <Col {...searchBoxBps} className="search-bar">
                 <Input
                   addonAfter={<SearchOutlined style={{ color: '#615d67' }} onClick={onSearch} />}
                   placeholder={
@@ -447,7 +452,7 @@ const activityList = () => {
                   value={tempSearchValue}
                 />
               </Col>
-              <Col span={3} className="filter-bar">
+              <Col {...filterDropdownBps} className="filter-bar">
                 <Dropdown
                   arrow={false}
                   placement="bottomRight"

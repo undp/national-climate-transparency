@@ -117,3 +117,19 @@ export const addActionBps = {
   md: { span: 4 },
   lg: { span: 12 },
 };
+
+export const searchBoxBps = {
+  sm: { span: 20 },
+  md: { span: 20 },
+  lg: { span: 20 },
+  xl: { span: 21 },
+  xxl: { span: 21 },
+};
+
+export const filterDropdownBps = {
+  sm: { span: 4 },
+  md: { span: 4 },
+  lg: { span: 4 },
+  xl: { span: 3 },
+  xxl: { span: 3 },
+};

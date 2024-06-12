@@ -56,7 +56,12 @@ import { UserState } from '../../../Enums/user.state.enum';
 import { Role } from '../../../Enums/role.enum';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
-import { addActionBps, listSearchBarBps } from '../../../Definitions/breakpoints/breakpoints';
+import {
+  addActionBps,
+  filterDropdownBps,
+  listSearchBarBps,
+  searchBoxBps,
+} from '../../../Definitions/breakpoints/breakpoints';
 
 interface Filter {
   searchBy: string;
@@ -610,7 +615,7 @@ const UserManagement = () => {
           </Col>
           <Col {...listSearchBarBps}>
             <Row gutter={10}>
-              <Col span={21} className="search-bar">
+              <Col {...searchBoxBps} className="search-bar">
                 <Input
                   addonAfter={<SearchOutlined style={{ color: '#615d67' }} onClick={onSearch} />}
                   placeholder={
@@ -623,7 +628,7 @@ const UserManagement = () => {
                   value={tempSearchValue}
                 />
               </Col>
-              <Col span={3} className="filter-bar">
+              <Col {...filterDropdownBps} className="filter-bar">
                 <Dropdown
                   arrow={false}
                   placement="bottomRight"
