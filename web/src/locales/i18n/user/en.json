@@ -14,7 +14,7 @@
     "deactivateConfirmHeaderText": "Are you sure you want to deactivate this User?",
     "deactivateConfirmText": "Note: Please provide any remarks for deactivation in the field below. ",
     "searchBy": "Search by",
-    "filterByRole": "Filter by User Role",
+    "filterByRole": "Filter By User Role",
     "filterByCompanyRole": "Filter by Organisation Type",
     "activateSuccessMsg" : "User has been activated successfully",
     "deactivateSuccessMsg": "User has been deactivated successfully"

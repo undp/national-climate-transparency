@@ -64,7 +64,7 @@ interface Filter {
 
 const UserManagement = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation(['company', 'userProfile']);
+  const { t } = useTranslation(['company', 'userProfile', 'entityAction']);
 
   const visibleColumns = [
     UserManagementColumns.logo,
@@ -561,7 +561,7 @@ const UserManagement = () => {
                   setTempFilterValue({ ...appliedFilterValue });
                 }}
               >
-                Cancel
+                {t('entityAction:cancel')}
               </Button>
             </Col>
             <Col span={12}>
@@ -576,7 +576,7 @@ const UserManagement = () => {
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >
-                Apply
+                {t('entityAction:apply')}
               </Button>
             </Col>
           </Row>

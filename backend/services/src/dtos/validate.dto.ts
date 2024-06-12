@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
 
 export class ValidateDto {
 
@@ -7,4 +7,9 @@ export class ValidateDto {
 	@IsNotEmpty()
 	@ApiProperty()
 	entityId: string;
+
+	@IsBoolean()
+	@IsNotEmpty()
+	@ApiProperty()
+	validateStatus: boolean
 }

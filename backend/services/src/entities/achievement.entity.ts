@@ -28,7 +28,7 @@ export class AchievementEntity {
   @JoinColumn([{ name: "activityId", referencedColumnName: "activityId" }])
   activity: ActivityEntity;
 
-  @Column({type: 'double precision'})
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   achieved: number;
 
 }

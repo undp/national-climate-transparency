@@ -111,7 +111,7 @@ export class ActivityController {
 	@ApiBearerAuth('api_key')
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, ActivityEntity))
-	@Post("validate")
+	@Post("validateStatus")
 	validateActivity(@Body() validateDto: ValidateDto, @Request() req) {
 		return this.activityService.validateActivity(validateDto, req.user);
 	}

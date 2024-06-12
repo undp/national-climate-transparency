@@ -51,7 +51,7 @@ const inputFontSize = '13px';
 
 const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['programmeForm', 'detachPopup']);
+  const { t } = useTranslation(['programmeForm', 'detachPopup', 'formHeader', 'entityAction']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Programme', method);
@@ -135,34 +135,31 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // Initially Loading Non Validated Actions that can be parent
+    // Initially Loading All Actions that can be parent
 
     const fetchNonValidatedActions = async () => {
-      const payload = {
-        filterAnd: [
-          {
-            key: 'validated',
-            operation: '=',
-            value: false,
+      try {
+        const payload = {
+          sort: {
+            key: 'actionId',
+            order: 'ASC',
           },
-        ],
-        sort: {
-          key: 'actionId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/actions/query', payload);
+        };
+        const response: any = await post('national/actions/query', payload);
 
-      const tempActionData: ActionSelectData[] = [];
-      response.data.forEach((action: any) => {
-        tempActionData.push({
-          id: action.actionId,
-          title: action.title,
-          instrumentType: action.instrumentType,
-          sector: action.sector,
+        const tempActionData: ActionSelectData[] = [];
+        response.data.forEach((action: any) => {
+          tempActionData.push({
+            id: action.actionId,
+            title: action.title,
+            instrumentType: action.instrumentType,
+            sector: action.sector,
+          });
         });
-      });
-      setActionList(tempActionData);
+        setActionList(tempActionData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     fetchNonValidatedActions();
 
@@ -170,21 +167,25 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchFreeChildren = async () => {
       if (method !== 'view') {
-        const response: any = await get('national/projects/link/eligible');
+        try {
+          const response: any = await get('national/projects/link/eligible');
 
-        const freeProjectIds: string[] = [];
-        response.data.forEach((prj: any) => {
-          freeProjectIds.push(prj.projectId);
-        });
-        setAllProjectIdList(freeProjectIds);
+          const freeProjectIds: string[] = [];
+          response.data.forEach((prj: any) => {
+            freeProjectIds.push(prj.projectId);
+          });
+          setAllProjectIdList(freeProjectIds);
 
-        const actResponse: any = await get('national/activities/link/eligible');
+          const actResponse: any = await get('national/activities/link/eligible');
 
-        const freeActivityIds: string[] = [];
-        actResponse.data.forEach((act: any) => {
-          freeActivityIds.push(act.activityId);
-        });
-        setAllActivityIdList(freeActivityIds);
+          const freeActivityIds: string[] = [];
+          actResponse.data.forEach((act: any) => {
+            freeActivityIds.push(act.activityId);
+          });
+          setAllActivityIdList(freeActivityIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchFreeChildren();
@@ -220,10 +221,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             // Setting validation status
 
             setIsValidated(entityData.validated ?? false);
-
-            if (entityData.validated && method === 'update') {
-              navigate(`/programmes/view/${entId}`);
-            }
 
             if (entityData.documents?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
@@ -311,27 +308,31 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchConnectedProjectIds = async () => {
       if (method !== 'create') {
-        const payload = {
-          filterAnd: [
-            {
-              key: 'programmeId',
-              operation: '=',
-              value: entId,
+        try {
+          const payload = {
+            filterAnd: [
+              {
+                key: 'programmeId',
+                operation: '=',
+                value: entId,
+              },
+            ],
+            sort: {
+              key: 'projectId',
+              order: 'ASC',
             },
-          ],
-          sort: {
-            key: 'projectId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/projects/query', payload);
+          };
+          const response: any = await post('national/projects/query', payload);
 
-        const connectedProjectIds: string[] = [];
-        response.data.forEach((prj: any) => {
-          connectedProjectIds.push(prj.projectId);
-        });
-        setAttachedProjectIds(connectedProjectIds);
-        setTempProjectIds(connectedProjectIds);
+          const connectedProjectIds: string[] = [];
+          response.data.forEach((prj: any) => {
+            connectedProjectIds.push(prj.projectId);
+          });
+          setAttachedProjectIds(connectedProjectIds);
+          setTempProjectIds(connectedProjectIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchConnectedProjectIds();
@@ -340,31 +341,35 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchConnectedActivityIds = async () => {
       if (method !== 'create') {
-        const connectedActivityIds: string[] = [];
-        const payload = {
-          filterAnd: [
-            {
-              key: 'parentId',
-              operation: '=',
-              value: entId,
+        try {
+          const connectedActivityIds: string[] = [];
+          const payload = {
+            filterAnd: [
+              {
+                key: 'parentId',
+                operation: '=',
+                value: entId,
+              },
+              {
+                key: 'parentType',
+                operation: '=',
+                value: 'programme',
+              },
+            ],
+            sort: {
+              key: 'activityId',
+              order: 'ASC',
             },
-            {
-              key: 'parentType',
-              operation: '=',
-              value: 'programme',
-            },
-          ],
-          sort: {
-            key: 'activityId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/activities/query', payload);
-        response.data.forEach((act: any) => {
-          connectedActivityIds.push(act.activityId);
-        });
-        setAttachedActivityIds(connectedActivityIds);
-        setTempActivityIds(connectedActivityIds);
+          };
+          const response: any = await post('national/activities/query', payload);
+          response.data.forEach((act: any) => {
+            connectedActivityIds.push(act.activityId);
+          });
+          setAttachedActivityIds(connectedActivityIds);
+          setTempActivityIds(connectedActivityIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchConnectedActivityIds();
@@ -396,31 +401,35 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchData = async () => {
       if (tempProjectIds.length > 0) {
-        tempProjectIds.forEach((projId) => {
-          payload.filterOr.push({
-            key: 'projectId',
-            operation: '=',
-            value: projId,
+        try {
+          tempProjectIds.forEach((projId) => {
+            payload.filterOr.push({
+              key: 'projectId',
+              operation: '=',
+              value: projId,
+            });
           });
-        });
-        const response: any = await post('national/projects/query', payload);
+          const response: any = await post('national/projects/query', payload);
 
-        const tempPRJData: ProjectData[] = [];
+          const tempPRJData: ProjectData[] = [];
 
-        response.data.forEach((prj: any, index: number) => {
-          tempPRJData.push({
-            key: index.toString(),
-            projectId: prj.projectId,
-            projectName: prj.title,
-            type: prj.type,
-            internationalImplementingEntities: prj.internationalImplementingEntities ?? [],
-            recipientEntities: prj.recipientEntities ?? [],
-            ghgsAffected: prj.migratedData[0]?.ghgsAffected ?? [],
-            achievedReduction: prj.migratedData[0]?.achievedGHGReduction ?? 0,
-            estimatedReduction: prj.migratedData[0]?.expectedGHGReduction ?? 0,
+          response.data.forEach((prj: any, index: number) => {
+            tempPRJData.push({
+              key: index.toString(),
+              projectId: prj.projectId,
+              projectName: prj.title,
+              type: prj.type,
+              internationalImplementingEntities: prj.internationalImplementingEntities ?? [],
+              recipientEntities: prj.recipientEntities ?? [],
+              ghgsAffected: prj.migratedData[0]?.ghgsAffected ?? [],
+              achievedReduction: prj.migratedData[0]?.achievedGHGReduction ?? 0,
+              estimatedReduction: prj.migratedData[0]?.expectedGHGReduction ?? 0,
+            });
           });
-        });
-        setProjectData(tempPRJData);
+          setProjectData(tempPRJData);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       } else {
         setProjectData([]);
       }
@@ -453,57 +462,61 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchActivityAttachmentData = async () => {
       if (tempActivityIds.length > 0) {
-        tempActivityIds.forEach((activityId) => {
-          activityPayload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: activityId,
+        try {
+          tempActivityIds.forEach((activityId) => {
+            activityPayload.filterOr.push({
+              key: 'activityId',
+              operation: '=',
+              value: activityId,
+            });
+            supportPayload.filterOr.push({
+              key: 'activityId',
+              operation: '=',
+              value: activityId,
+            });
           });
-          supportPayload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: activityId,
+          const activityResponse: any = await post('national/activities/query', activityPayload);
+          const supportResponse: any = await post('national/supports/query', supportPayload);
+
+          const tempActivityData: ActivityData[] = [];
+          const tempSupportData: SupportData[] = [];
+
+          activityResponse.data.forEach((act: any, index: number) => {
+            tempActivityData.push({
+              key: index.toString(),
+              activityId: act.activityId,
+              title: act.title,
+              reductionMeasures: act.measure,
+              status: act.status,
+              natImplementor: act.nationalImplementingEntity ?? [],
+              ghgsAffected: act.ghgsAffected ?? [],
+              achievedReduction: act.achievedGHGReduction ?? 0,
+              estimatedReduction: act.expectedGHGReduction ?? 0,
+            });
           });
-        });
-        const activityResponse: any = await post('national/activities/query', activityPayload);
-        const supportResponse: any = await post('national/supports/query', supportPayload);
 
-        const tempActivityData: ActivityData[] = [];
-        const tempSupportData: SupportData[] = [];
-
-        activityResponse.data.forEach((act: any, index: number) => {
-          tempActivityData.push({
-            key: index.toString(),
-            activityId: act.activityId,
-            title: act.title,
-            reductionMeasures: act.measure,
-            status: act.status,
-            natImplementor: act.nationalImplementingEntity ?? [],
-            ghgsAffected: act.ghgsAffected ?? [],
-            achievedReduction: act.achievedGHGReduction ?? 0,
-            estimatedReduction: act.expectedGHGReduction ?? 0,
+          supportResponse.data.forEach((sup: any, index: number) => {
+            tempSupportData.push({
+              key: index.toString(),
+              supportId: sup.supportId,
+              financeNature: sup.financeNature,
+              direction: sup.direction,
+              finInstrument:
+                sup.financeNature === 'International'
+                  ? sup.internationalFinancialInstrument
+                  : sup.nationalFinancialInstrument,
+              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+              recievedUSD: getRounded(sup.receivedAmount ?? 0),
+              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+            });
           });
-        });
 
-        supportResponse.data.forEach((sup: any, index: number) => {
-          tempSupportData.push({
-            key: index.toString(),
-            supportId: sup.supportId,
-            financeNature: sup.financeNature,
-            direction: sup.direction,
-            finInstrument:
-              sup.financeNature === 'International'
-                ? sup.internationalFinancialInstrument
-                : sup.nationalFinancialInstrument,
-            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-            recievedUSD: getRounded(sup.receivedAmount ?? 0),
-            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
-          });
-        });
-
-        setActivityData(tempActivityData);
-        setSupportData(tempSupportData);
+          setActivityData(tempActivityData);
+          setSupportData(tempSupportData);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       } else {
         setActivityData([]);
         setSupportData([]);
@@ -582,12 +595,16 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     const toAttach = tempProjectIds.filter((prj) => !attachedProjectIds.includes(prj));
     const toDetach = attachedProjectIds.filter((prj) => !tempProjectIds.includes(prj));
 
-    if (toDetach.length > 0) {
-      await post('national/projects/unlink', { projects: toDetach });
-    }
+    try {
+      if (toDetach.length > 0) {
+        await post('national/projects/unlink', { projects: toDetach });
+      }
 
-    if (toAttach.length > 0) {
-      await post('national/projects/link', { programmeId: entId, projectIds: toAttach });
+      if (toAttach.length > 0) {
+        await post('national/projects/link', { programmeId: entId, projectIds: toAttach });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 
@@ -595,16 +612,20 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
     const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
 
-    if (toDetach.length > 0) {
-      await post('national/activities/unlink', { activityIds: toDetach });
-    }
+    try {
+      if (toDetach.length > 0) {
+        await post('national/activities/unlink', { activityIds: toDetach });
+      }
 
-    if (toAttach.length > 0) {
-      await post('national/activities/link', {
-        parentId: parentId,
-        parentType: 'programme',
-        activityIds: toAttach,
-      });
+      if (toAttach.length > 0) {
+        await post('national/activities/link', {
+          parentId: parentId,
+          parentType: 'programme',
+          activityIds: toAttach,
+        });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 
@@ -745,8 +766,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       if (entId) {
         const payload = {
           entityId: entId,
+          validateStatus: !isValidated,
         };
-        const response: any = await post('national/programmes/validate', payload);
+        const response: any = await post('national/programmes/validateStatus', payload);
 
         if (response.status === 200 || response.status === 201) {
           message.open({
@@ -998,7 +1020,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('typesHeader')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:typesTitle')}</label>}
                     name="type"
                   >
                     <Select
@@ -1042,7 +1064,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('instrTypeTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:instrumentTypeHeader')}
+                      </label>
+                    }
                     name="instrumentType"
                   >
                     <Select
@@ -1076,7 +1102,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('sectorsAffTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:sectorsAffectedHeader')}
+                      </label>
+                    }
                     name="sector"
                   >
                     <Select
@@ -1088,7 +1118,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('subSectorsAffTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:subSectorsAffectedHeader')}
+                      </label>
+                    }
                     name="affectedSubSector"
                     rules={[validation.required]}
                   >
@@ -1112,7 +1146,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('startYearTitle')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:startYearTitle')}</label>
+                    }
                     name="startYear"
                     rules={[validation.required]}
                   >
@@ -1133,7 +1169,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('intImplementorTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:intImplementerHeader')}
+                      </label>
+                    }
                     name="intImplementor"
                   >
                     <Select
@@ -1146,7 +1186,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('recipientEntityTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:recipientEntityHeader')}
+                      </label>
+                    }
                     name="recipientEntity"
                   >
                     <Select
@@ -1161,7 +1205,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('natImplementorTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:natImplementerHeader')}
+                      </label>
+                    }
                     name="natImplementor"
                     rules={[validation.required]}
                   >
@@ -1183,7 +1231,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item<number>
-                    label={<label className="form-item-header">{t('investmentNeedsTitle')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:investmentNeedsHeader')}
+                      </label>
+                    }
                     name="investment"
                     rules={[validation.required]}
                   >
@@ -1197,11 +1249,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('documentsHeader')}</div>
+              <div className="form-section-sub-header">{t('formHeader:documentsHeader')}</div>
               <UploadFileGrid
                 isSingleColumn={false}
                 usedIn={method}
-                buttonText={t('upload')}
+                buttonText={t('entityAction:upload')}
                 storedFiles={storedFiles}
                 uploadedFiles={uploadedFiles}
                 setUploadedFiles={setUploadedFiles}
@@ -1255,10 +1307,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     isDisabled={isView}
                     content={{
                       buttonName: t('attachProjects'),
-                      attach: t('attach'),
+                      attach: t('entityAction:attach'),
                       contentTitle: t('attachProjects'),
                       listTitle: t('projectList'),
-                      cancel: t('cancel'),
+                      cancel: t('entityAction:cancel'),
                     }}
                     options={allProjectIds}
                     alreadyAttached={attachedProjectIds}
@@ -1279,11 +1331,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   <AttachEntity
                     isDisabled={isView}
                     content={{
-                      buttonName: t('attachActivity'),
-                      attach: t('attach'),
-                      contentTitle: t('attachActivity'),
+                      buttonName: t('formHeader:attachActivity'),
+                      attach: t('entityAction:attach'),
+                      contentTitle: t('formHeader:attachActivity'),
                       listTitle: t('activityList'),
-                      cancel: t('cancel'),
+                      cancel: t('entityAction:cancel'),
                     }}
                     options={allActivityIds}
                     alreadyAttached={attachedActivityIds}
@@ -1313,7 +1365,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                         position: ['bottomRight'],
                       }}
                       handleTableChange={handleActivityTableChange}
-                      emptyMessage={t('noActivityMessage')}
+                      emptyMessage={t('formHeader:noActivityMessage')}
                     />{' '}
                   </div>
                 </Col>
@@ -1343,17 +1395,19 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       position: ['bottomRight'],
                     }}
                     handleTableChange={handleSupportTableChange}
-                    emptyMessage={t('noSupportMessage')}
+                    emptyMessage={t('formHeader:noSupportMessage')}
                   />
                 </Col>
               </Row>
             </div>
             <div className="form-section-card">
-              <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+              <div className="form-section-header">{t('formHeader:mitigationInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('ghgAffected')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:ghgAffected')}</label>
+                    }
                     name="ghgsAffected"
                   >
                     <Select
@@ -1365,11 +1419,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
+              <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('achieved')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:achieved')}</label>}
                     name="achievedReduct"
                   >
                     <Input className="form-input-box" disabled />
@@ -1377,7 +1431,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('expected')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:expected')}</label>}
                     name="expectedReduct"
                   >
                     <Input className="form-input-box" disabled />
@@ -1388,7 +1442,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 method === 'update' ||
                 (method === 'view' &&
                   (inheritedKpiList.length > 0 || createdKpiList.length > 0))) && (
-                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+                <div className="form-section-sub-header">{t('formHeader:kpiInfoTitle')}</div>
               )}
               {inheritedKpiList.length > 0 &&
                 inheritedKpiList.map((createdKPI: CreatedKpiData) => (
@@ -1396,7 +1450,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     key={createdKPI.index}
                     index={createdKPI.index}
                     inherited={true}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     callingEntityId={entId}
                     ownerEntityId={createdKPI.creator}
@@ -1408,7 +1467,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     key={createdKPI.index}
                     index={createdKPI.index}
                     inherited={false}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     callingEntityId={entId}
                     ownerEntityId={createdKPI.creator}
@@ -1422,7 +1486,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     form={form}
                     rules={[validation.required]}
                     isFromActivity={false}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     updateKPI={updateKPI}
                     removeKPI={removeKPI}
@@ -1434,7 +1503,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   form={form}
                   rules={[validation.required]}
                   index={newKPI.index}
-                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                  headerNames={[
+                    t('formHeader:kpiName'),
+                    t('formHeader:kpiUnit'),
+                    t('formHeader:achieved'),
+                    t('formHeader:expected'),
+                  ]}
                   updateKPI={updateKPI}
                   removeKPI={removeKPI}
                 ></NewKpi>
@@ -1447,7 +1521,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       className="create-kpi-button"
                       onClick={createKPI}
                     >
-                      <span className="kpi-add-text">{t('addKPI')}</span>
+                      <span className="kpi-add-text">{t('entityAction:addKPI')}</span>
                     </Button>
                   )}
                 </Col>
@@ -1455,7 +1529,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             </div>
             {method !== 'create' && (
               <div className="form-section-card">
-                <div className="form-section-header">{t('updatesInfoTitle')}</div>
+                <div className="form-section-header">{t('formHeader:updatesInfoTitle')}</div>
                 <UpdatesTimeline recordType={'programme'} recordId={entId} />
               </div>
             )}
@@ -1470,13 +1544,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/programmes');
                     }}
                   >
-                    {t('cancel')}
+                    {t('entityAction:cancel')}
                   </Button>
                 </Col>
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
-                      {t('add')}
+                      {t('entityAction:add')}
                     </Button>
                   </Form.Item>
                 </Col>
@@ -1493,14 +1567,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/programmes');
                     }}
                   >
-                    {t('back')}
+                    {t('entityAction:back')}
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ProgrammeEntity) && (
                   <Col>
                     <Form.Item>
                       <Button
-                        disabled={isValidated}
                         type="primary"
                         size="large"
                         block
@@ -1508,7 +1581,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                           validateEntity();
                         }}
                       >
-                        {t('validate')}
+                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
                       </Button>
                     </Form.Item>
                   </Col>
@@ -1526,7 +1599,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/programmes');
                     }}
                   >
-                    {t('cancel')}
+                    {t('entityAction:cancel')}
                   </Button>
                 </Col>
                 <Col>
@@ -1539,7 +1612,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     }}
                     style={{ color: 'red', borderColor: 'red' }}
                   >
-                    {t('delete')}
+                    {t('entityAction:delete')}
                   </Button>
                 </Col>
                 <Col {...shortButtonBps}>
@@ -1551,7 +1624,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       htmlType="submit"
                       disabled={isSaveButtonDisabled}
                     >
-                      {t('update')}
+                      {t('entityAction:update')}
                     </Button>
                   </Form.Item>
                 </Col>

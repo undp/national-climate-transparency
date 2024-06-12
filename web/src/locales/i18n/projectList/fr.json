@@ -1,0 +1,14 @@
+{
+  "viewTitle": "Liste des projets",
+  "addButtonType": "AJOUTER un projet",
+  "searchBarText": "Rechercher par titre de projet",
+  "projectId": "ID du projet",
+  "programmeId": "ID du programme",
+  "titleOfProject": "Titre du projet",
+  "projectStatus": "Statut du projet",
+  "filterByProjectStatus": "Filtrer par statut du projet",
+  "attachActivity": "Joindre des activités",
+  "activityList": "Liste des activités",
+  "activityLinkSuccess": "Activité(s) liée(s) avec succès",
+  "addProject": "Ajouter un projet"
+}

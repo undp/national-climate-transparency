@@ -14,7 +14,6 @@ const LayoutHeader = () => {
             className="icon"
             color="#3A354199"
             style={{ cursor: 'pointer' }}
-            // size={44}
             onClick={() => {
               navigate('/userProfile/view');
             }}

@@ -38,24 +38,24 @@ export class ReportService {
 	async downloadReportFive(dataExportQueryDto: DataExportQueryDto) {
     const resp = await this.reportFiveViewRepo
       .createQueryBuilder("reportFive")
-      .select([
-        // "reportFive.actionId",
-        // "reportFive.programmeId",
-        // "reportFive.projectId",
-        "reportFive.titleOfAction",
-        // "reportFive.titleOfProgramme",
-        // "reportFive.titleOfProject",
-        "reportFive.description",
-        "reportFive.objective",
-        "reportFive.instrumentType",
-        "reportFive.status",
-        "reportFive.sector",
-        "reportFive.ghgsAffected",
-        "reportFive.startYear",
-        "reportFive.implementingEntities",
-        "reportFive.achievedGHGReduction",
-        "reportFive.expectedGHGReduction"
-      ])
+      // .select([
+      //   // "reportFive.actionId",
+      //   // "reportFive.programmeId",
+      //   // "reportFive.projectId",
+      //   "reportFive.titleOfAction",
+      //   // "reportFive.titleOfProgramme",
+      //   // "reportFive.titleOfProject",
+      //   "reportFive.description",
+      //   "reportFive.objective",
+      //   "reportFive.instrumentType",
+      //   "reportFive.status",
+      //   "reportFive.sector",
+      //   "reportFive.ghgsAffected",
+      //   "reportFive.startYear",
+      //   "reportFive.implementingEntities",
+      //   "reportFive.achievedGHGReduction",
+      //   "reportFive.expectedGHGReduction"
+      // ])
       .getMany();
       
     if (resp.length > 0) {
@@ -91,7 +91,19 @@ export class ReportService {
     const exportData: DataExportReportFiveDto[] = [];
 
     for (const report of data) {
-      const dto: DataExportReportFiveDto = plainToClass(ReportFiveViewEntity, report);
+      const dto: DataExportReportFiveDto = new DataExportReportFiveDto();
+			dto.titleOfAction = report.titleOfAction;
+			dto.description = report.description;
+			dto.objective = report.objective;
+			dto.instrumentType = report.instrumentType;
+			dto.status = report.status;
+			dto.sector = report.sector;
+			dto.ghgsAffected = report.ghgsAffected;
+			dto.startYear = report.startYear;
+			dto.implementingEntities = report.implementingEntities;
+			dto.achievedGHGReduction = report.achievedGHGReduction;
+			dto.expectedGHGReduction = report.expectedGHGReduction;
+			
       exportData.push(dto);
     }
 

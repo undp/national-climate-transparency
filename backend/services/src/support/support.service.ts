@@ -202,17 +202,6 @@ export class SupportService {
 		this.addEventLogEntry(eventLog, LogEventType.SUPPORT_UPDATED, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, supportUpdateDto);
 
 		if (supportUpdateDto.activityId != currentSupport.activity.activityId) {
-
-			// if (currentSupport.activity.validated) {
-			// 	throw new HttpException(
-			// 		this.helperService.formatReqMessagesString(
-			// 			"common.cannotUnlinkedFromValidated",
-			// 			[EntityType.ACTIVITY, activity.activityId]
-			// 		),
-			// 		HttpStatus.BAD_REQUEST
-			// 	);
-			// }
-
 			this.addEventLogEntry(eventLog, LogEventType.UNLINKED_FROM_ACTIVITY, EntityType.SUPPORT, currentSupport.supportId, user.id, currentSupport.activity.activityId);
 			this.addEventLogEntry(eventLog, LogEventType.SUPPORT_LINKED, EntityType.ACTIVITY, activity.activityId, user.id, supportUpdateDto.supportId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTIVITY, EntityType.SUPPORT, supportUpdateDto.supportId, user.id, activity.activityId);
@@ -290,18 +279,14 @@ export class SupportService {
 			);
 		}
 
-		if (support.validated) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"support.supportAlreadyValidated",
-					[validateDto.entityId]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
-
-		support.validated = true;
-		const eventLog = this.buildLogEntity(LogEventType.SUPPORT_VERIFIED, EntityType.SUPPORT, support.supportId, user.id, validateDto)
+		support.validated = validateDto.validateStatus;
+		const eventLog = this.buildLogEntity(
+			(validateDto.validateStatus) ? LogEventType.SUPPORT_VERIFIED : LogEventType.SUPPORT_UNVERIFIED,
+			EntityType.SUPPORT, 
+			support.supportId, 
+			user.id, 
+			validateDto
+		)
 
 		const act = await this.entityManager
 			.transaction(async (em) => {

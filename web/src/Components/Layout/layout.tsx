@@ -11,6 +11,7 @@ import { Loading } from '../Loading/loading';
 import { ConfigurationSettingsType } from '../../Enums/configuration.setting.type.enum';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useSettingsContext } from '../../Context/SettingsContext/settingsContext';
+import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 
 const CustomLayout = (props: any) => {
   const { selectedKey } = props;
@@ -19,13 +20,17 @@ const CustomLayout = (props: any) => {
   const { t } = useTranslation(['creditTransfer']);
 
   const getTransferFrozenStatus = async () => {
-    const response = await get(
-      `national/Settings/query?id=${ConfigurationSettingsType.isTransferFrozen}`
-    );
-    if (response && response.data) {
-      setTransferFrozen(response.data);
-    } else {
-      setTransferFrozen(false);
+    try {
+      const response = await get(
+        `national/Settings/query?id=${ConfigurationSettingsType.isTransferFrozen}`
+      );
+      if (response && response.data) {
+        setTransferFrozen(response.data);
+      } else {
+        setTransferFrozen(false);
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 

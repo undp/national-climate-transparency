@@ -48,7 +48,13 @@ const inputFontSize = '13px';
 
 const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['projectForm', 'tableAction', 'detachPopup']);
+  const { t } = useTranslation([
+    'projectForm',
+    'tableAction',
+    'detachPopup',
+    'formHeader',
+    'entityAction',
+  ]);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Project', method);
@@ -129,32 +135,29 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // Initially Loading Non validated programmes that can be parent
+    // Initially Loading All programmes that can be parent
 
     const fetchNonValidatedProgrammes = async () => {
-      const payload = {
-        filterAnd: [
-          {
-            key: 'validated',
-            operation: '=',
-            value: false,
+      try {
+        const payload = {
+          sort: {
+            key: 'programmeId',
+            order: 'ASC',
           },
-        ],
-        sort: {
-          key: 'programmeId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/programmes/query', payload);
+        };
+        const response: any = await post('national/programmes/query', payload);
 
-      const tempProgrammeData: ProgrammeSelectData[] = [];
-      response.data.forEach((prg: any) => {
-        tempProgrammeData.push({
-          id: prg.programmeId,
-          title: prg.title,
+        const tempProgrammeData: ProgrammeSelectData[] = [];
+        response.data.forEach((prg: any) => {
+          tempProgrammeData.push({
+            id: prg.programmeId,
+            title: prg.title,
+          });
         });
-      });
-      setProgrammeList(tempProgrammeData);
+        setProgrammeList(tempProgrammeData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
     };
     fetchNonValidatedProgrammes();
 
@@ -162,13 +165,17 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchFreeActivities = async () => {
       if (method !== 'view') {
-        const response: any = await get('national/activities/link/eligible');
+        try {
+          const response: any = await get('national/activities/link/eligible');
 
-        const freeActivityIds: string[] = [];
-        response.data.forEach((act: any) => {
-          freeActivityIds.push(act.activityId);
-        });
-        setAllActivityList(freeActivityIds);
+          const freeActivityIds: string[] = [];
+          response.data.forEach((act: any) => {
+            freeActivityIds.push(act.activityId);
+          });
+          setAllActivityList(freeActivityIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchFreeActivities();
@@ -208,10 +215,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             // Setting validation status
 
             setIsValidated(entityData.validated ?? false);
-
-            if (entityData.validated && method === 'update') {
-              navigate(`/projects/view/${entId}`);
-            }
 
             if (entityData.documents?.length > 0) {
               const tempFiles: { key: string; title: string; url: string }[] = [];
@@ -312,27 +315,31 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchConnectedActivityIds = async () => {
       if (method !== 'create') {
-        const payload = {
-          filterAnd: [
-            {
-              key: 'parentId',
-              operation: '=',
-              value: entId,
+        try {
+          const payload = {
+            filterAnd: [
+              {
+                key: 'parentId',
+                operation: '=',
+                value: entId,
+              },
+            ],
+            sort: {
+              key: 'activityId',
+              order: 'ASC',
             },
-          ],
-          sort: {
-            key: 'activityId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/activities/query', payload);
+          };
+          const response: any = await post('national/activities/query', payload);
 
-        const connectedActivityIds: string[] = [];
-        response.data.forEach((act: any) => {
-          connectedActivityIds.push(act.activityId);
-        });
-        setAttachedActivityIds(connectedActivityIds);
-        setTempActivityIds(connectedActivityIds);
+          const connectedActivityIds: string[] = [];
+          response.data.forEach((act: any) => {
+            connectedActivityIds.push(act.activityId);
+          });
+          setAttachedActivityIds(connectedActivityIds);
+          setTempActivityIds(connectedActivityIds);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       }
     };
     fetchConnectedActivityIds();
@@ -446,59 +453,63 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const fetchActivityAttachmentData = async () => {
       if (tempActivityIds.length > 0) {
-        tempActivityIds.forEach((activityId) => {
-          activityPayload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: activityId,
+        try {
+          tempActivityIds.forEach((activityId) => {
+            activityPayload.filterOr.push({
+              key: 'activityId',
+              operation: '=',
+              value: activityId,
+            });
+            supportPayload.filterOr.push({
+              key: 'activityId',
+              operation: '=',
+              value: activityId,
+            });
           });
-          supportPayload.filterOr.push({
-            key: 'activityId',
-            operation: '=',
-            value: activityId,
+          const activityResponse: any = await post('national/activities/query', activityPayload);
+          const supportResponse: any = await post('national/supports/query', supportPayload);
+
+          const tempActivityData: ActivityData[] = [];
+          const tempSupportData: SupportData[] = [];
+
+          activityResponse.data.forEach((act: any, index: number) => {
+            tempActivityData.push({
+              key: index.toString(),
+              activityId: act.activityId,
+              title: act.title,
+              reductionMeasures: act.measure,
+              status: act.status,
+              natImplementor: act.nationalImplementingEntity ?? [],
+              ghgsAffected: act.ghgsAffected ?? [],
+              achievedReduction: act.achievedGHGReduction ?? 0,
+              estimatedReduction: act.expectedGHGReduction ?? 0,
+              technologyType: act.technologyType,
+              meansOfImplementation: act.meansOfImplementation,
+            });
           });
-        });
-        const activityResponse: any = await post('national/activities/query', activityPayload);
-        const supportResponse: any = await post('national/supports/query', supportPayload);
 
-        const tempActivityData: ActivityData[] = [];
-        const tempSupportData: SupportData[] = [];
-
-        activityResponse.data.forEach((act: any, index: number) => {
-          tempActivityData.push({
-            key: index.toString(),
-            activityId: act.activityId,
-            title: act.title,
-            reductionMeasures: act.measure,
-            status: act.status,
-            natImplementor: act.nationalImplementingEntity ?? [],
-            ghgsAffected: act.ghgsAffected ?? [],
-            achievedReduction: act.achievedGHGReduction ?? 0,
-            estimatedReduction: act.expectedGHGReduction ?? 0,
-            technologyType: act.technologyType,
-            meansOfImplementation: act.meansOfImplementation,
+          supportResponse.data.forEach((sup: any, index: number) => {
+            tempSupportData.push({
+              key: index.toString(),
+              supportId: sup.supportId,
+              financeNature: sup.financeNature,
+              direction: sup.direction,
+              finInstrument:
+                sup.financeNature === 'International'
+                  ? sup.internationalFinancialInstrument
+                  : sup.nationalFinancialInstrument,
+              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+              recievedUSD: getRounded(sup.receivedAmount ?? 0),
+              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+            });
           });
-        });
 
-        supportResponse.data.forEach((sup: any, index: number) => {
-          tempSupportData.push({
-            key: index.toString(),
-            supportId: sup.supportId,
-            financeNature: sup.financeNature,
-            direction: sup.direction,
-            finInstrument:
-              sup.financeNature === 'International'
-                ? sup.internationalFinancialInstrument
-                : sup.nationalFinancialInstrument,
-            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-            recievedUSD: getRounded(sup.receivedAmount ?? 0),
-            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
-          });
-        });
-
-        setActivityData(tempActivityData);
-        setSupportData(tempSupportData);
+          setActivityData(tempActivityData);
+          setSupportData(tempSupportData);
+        } catch (error: any) {
+          displayErrorMessage(error);
+        }
       } else {
         setActivityData([]);
         setSupportData([]);
@@ -593,16 +604,20 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
     const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
 
-    if (toDetach.length > 0) {
-      await post('national/activities/unlink', { activityIds: toDetach });
-    }
+    try {
+      if (toDetach.length > 0) {
+        await post('national/activities/unlink', { activityIds: toDetach });
+      }
 
-    if (toAttach.length > 0) {
-      await post('national/activities/link', {
-        parentId: entId,
-        parentType: 'project',
-        activityIds: toAttach,
-      });
+      if (toAttach.length > 0) {
+        await post('national/activities/link', {
+          parentId: entId,
+          parentType: 'project',
+          activityIds: toAttach,
+        });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 
@@ -740,8 +755,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       if (entId) {
         const payload = {
           entityId: entId,
+          validateStatus: !isValidated,
         };
-        const response: any = await post('national/projects/validate', payload);
+        const response: any = await post('national/projects/validateStatus', payload);
 
         if (response.status === 200 || response.status === 201) {
           message.open({
@@ -963,7 +979,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('typeHeader')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:typesTitle')}</label>}
                     name="type"
                     rules={[validation.required]}
                   >
@@ -1032,7 +1048,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('natAnchorHeader')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:natAnchorHeader')}</label>
+                    }
                     name="natAnchor"
                   >
                     <Select
@@ -1048,7 +1066,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('instrTypesHeader')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:instrumentTypeHeader')}
+                      </label>
+                    }
                     name="instrTypes"
                   >
                     <Select
@@ -1085,7 +1107,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('sectorsAffectedHeader')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:sectorsAffectedHeader')}
+                      </label>
+                    }
                     name="sector"
                   >
                     <Select size="large" style={{ fontSize: inputFontSize }} disabled></Select>
@@ -1094,7 +1120,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col {...quarterColumnBps}>
                   <Form.Item
                     label={
-                      <label className="form-item-header">{t('subSectorsAffectedHeader')}</label>
+                      <label className="form-item-header">
+                        {t('formHeader:subSectorsAffectedHeader')}
+                      </label>
                     }
                     name="subSectorsAffected"
                   >
@@ -1109,7 +1137,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('startYearHeader')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:startYearTitle')}</label>
+                    }
                     name="startYear"
                     rules={[
                       validation.required,
@@ -1145,7 +1175,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('endYearHeader')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:endYearTitle')}</label>
+                    }
                     name="endYear"
                     rules={[
                       validation.required,
@@ -1183,7 +1215,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('timeFrameHeader')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:timeFrameHeader')}</label>
+                    }
                     name="expectedTimeFrame"
                   >
                     <Input type="number" className="form-input-box" disabled />
@@ -1191,7 +1225,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...quarterColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('natImplementorHeader')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:natImplementerHeader')}
+                      </label>
+                    }
                     name="nationalImplementor"
                   >
                     <Select
@@ -1205,7 +1243,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('techTypeHeader')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:techTypeHeader')}</label>
+                    }
                     name="techType"
                   >
                     <Select
@@ -1221,7 +1261,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('recipientHeader')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:recipientEntityHeader')}
+                      </label>
+                    }
                     name="recipientEntities"
                     rules={[validation.required]}
                   >
@@ -1243,7 +1287,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('intImplementorHeader')}</label>}
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:intImplementerHeader')}
+                      </label>
+                    }
                     name="internationalImplementingEntities"
                   >
                     <Select
@@ -1266,7 +1314,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('techDevHeader')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:techDevHeader')}</label>
+                    }
                     name="techDevContribution"
                   >
                     <Input className="form-input-box" disabled />
@@ -1274,18 +1324,20 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('capBuildHeader')}</label>}
+                    label={
+                      <label className="form-item-header">{t('formHeader:capBuildHeader')}</label>
+                    }
                     name="capBuildObjectives"
                   >
                     <Input className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-sub-header">{t('documentsHeader')}</div>
+              <div className="form-section-sub-header">{t('formHeader:documentsHeader')}</div>
               <UploadFileGrid
                 isSingleColumn={false}
                 usedIn={method}
-                buttonText={t('upload')}
+                buttonText={t('entityAction:upload')}
                 storedFiles={storedFiles}
                 uploadedFiles={uploadedFiles}
                 setUploadedFiles={setUploadedFiles}
@@ -1294,11 +1346,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
               <div className="form-section-header">{t('mitigationInfoTitle')}</div>
-              <div className="form-section-sub-header">{t('emmissionInfoTitle')}</div>
+              <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('achieved')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:achieved')}</label>}
                     name="achievedGHGReduction"
                   >
                     <Input type="number" className="form-input-box" disabled />
@@ -1306,7 +1358,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={<label className="form-item-header">{t('expected')}</label>}
+                    label={<label className="form-item-header">{t('formHeader:expected')}</label>}
                     name="expectedGHGReduction"
                   >
                     <Input type="number" className="form-input-box" disabled />
@@ -1317,7 +1369,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 method === 'update' ||
                 (method === 'view' &&
                   (inheritedKpiList.length > 0 || createdKpiList.length > 0))) && (
-                <div className="form-section-sub-header">{t('kpiInfoTitle')}</div>
+                <div className="form-section-sub-header">{t('formHeader:kpiInfoTitle')}</div>
               )}
               {inheritedKpiList.length > 0 &&
                 inheritedKpiList.map((createdKPI: CreatedKpiData) => (
@@ -1325,7 +1377,12 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     key={createdKPI.index}
                     index={createdKPI.index}
                     inherited={true}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     callingEntityId={entId}
                     ownerEntityId={createdKPI.creator}
@@ -1337,7 +1394,12 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     key={createdKPI.index}
                     index={createdKPI.index}
                     inherited={false}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     callingEntityId={entId}
                     ownerEntityId={createdKPI.creator}
@@ -1351,7 +1413,12 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     form={form}
                     rules={[validation.required]}
                     isFromActivity={false}
-                    headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                    headerNames={[
+                      t('formHeader:kpiName'),
+                      t('formHeader:kpiUnit'),
+                      t('formHeader:achieved'),
+                      t('formHeader:expected'),
+                    ]}
                     kpi={createdKPI}
                     updateKPI={updateKPI}
                     removeKPI={removeKPI}
@@ -1363,7 +1430,12 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   form={form}
                   rules={[validation.required]}
                   index={newKPI.index}
-                  headerNames={[t('kpiName'), t('kpiUnit'), t('achieved'), t('expected')]}
+                  headerNames={[
+                    t('formHeader:kpiName'),
+                    t('formHeader:kpiUnit'),
+                    t('formHeader:achieved'),
+                    t('formHeader:expected'),
+                  ]}
                   updateKPI={updateKPI}
                   removeKPI={removeKPI}
                 ></NewKpi>
@@ -1376,7 +1448,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       className="create-kpi-button"
                       onClick={createKPI}
                     >
-                      <span className="kpi-add-text">{t('addKPI')}</span>
+                      <span className="kpi-add-text">{t('entityAction:addKPI')}</span>
                     </Button>
                   )}
                 </Col>
@@ -1438,11 +1510,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   <AttachEntity
                     isDisabled={isView}
                     content={{
-                      buttonName: t('attachActivity'),
-                      attach: t('attach'),
-                      contentTitle: t('attachActivity'),
+                      buttonName: t('formHeader:attachActivity'),
+                      attach: t('entityAction:attach'),
+                      contentTitle: t('formHeader:attachActivity'),
                       listTitle: t('activityList'),
-                      cancel: t('cancel'),
+                      cancel: t('entityAction:cancel'),
                     }}
                     options={allActivityIds}
                     alreadyAttached={attachedActivityIds}
@@ -1475,7 +1547,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                         position: ['bottomRight'],
                       }}
                       handleTableChange={handleActivityTableChange}
-                      emptyMessage={t('noActivityMessage')}
+                      emptyMessage={t('formHeader:noActivityMessage')}
                     />{' '}
                   </div>
                 </Col>
@@ -1508,14 +1580,14 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       position: ['bottomRight'],
                     }}
                     handleTableChange={handleSupportTableChange}
-                    emptyMessage={t('noSupportMessage')}
+                    emptyMessage={t('formHeader:noSupportMessage')}
                   />
                 </Col>
               </Row>
             </div>
             {method !== 'create' && (
-              <div className="form-section-timelinecard">
-                <div className="form-section-header">{t('updatesInfoTitle')}</div>
+              <div className="form-section-timelineCard">
+                <div className="form-section-header">{t('formHeader:updatesInfoTitle')}</div>
                 <UpdatesTimeline recordType={'project'} recordId={entId} />
               </div>
             )}
@@ -1530,13 +1602,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/projects');
                     }}
                   >
-                    {t('cancel')}
+                    {t('entityAction:cancel')}
                   </Button>
                 </Col>
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button type="primary" size="large" block htmlType="submit">
-                      {t('add')}
+                      {t('entityAction:add')}
                     </Button>
                   </Form.Item>
                 </Col>
@@ -1553,14 +1625,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/projects');
                     }}
                   >
-                    {t('back')}
+                    {t('entityAction:back')}
                   </Button>
                 </Col>
                 {ability.can(Action.Validate, ProjectEntity) && (
                   <Col>
                     <Form.Item>
                       <Button
-                        disabled={isValidated}
                         type="primary"
                         size="large"
                         block
@@ -1568,7 +1639,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                           validateEntity();
                         }}
                       >
-                        {t('validate')}
+                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
                       </Button>
                     </Form.Item>
                   </Col>
@@ -1586,7 +1657,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       navigate('/projects');
                     }}
                   >
-                    {t('cancel')}
+                    {t('entityAction:cancel')}
                   </Button>
                 </Col>
                 <Col>
@@ -1599,7 +1670,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     }}
                     style={{ color: 'red', borderColor: 'red' }}
                   >
-                    {t('delete')}
+                    {t('entityAction:delete')}
                   </Button>
                 </Col>
                 <Col {...shortButtonBps}>
@@ -1611,7 +1682,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       htmlType="submit"
                       disabled={isSaveButtonDisabled}
                     >
-                      {t('update')}
+                      {t('entityAction:update')}
                     </Button>
                   </Form.Item>
                 </Col>

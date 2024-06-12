@@ -31,6 +31,7 @@ export class LinkUnlinkService {
 					programme.action = action;
 					programme.path = action.actionId;
 					programme.sector = action.sector;
+					programme.validated = false;
 
 					const linkedProgramme = await em.save<ProgrammeEntity>(programme);
 
@@ -41,6 +42,7 @@ export class LinkUnlinkService {
 							// update each activity's path that are directly linked to the programme
 							for (const activity of programme.activities) {
 								activity.sector = action.sector;
+								activity.validated = false;
 								activity.path = this.addActionToActivityPath(activity.path, action.actionId)
 								activities.push(activity);
 							}
@@ -51,6 +53,7 @@ export class LinkUnlinkService {
 							for (const project of programme.projects) {
 								// update project's path
 								project.sector = action.sector;
+								project.validated = false;
 								project.path = this.addActionToProjectPath(project.path, action.actionId);
 								projects.push(project);
 
@@ -59,6 +62,7 @@ export class LinkUnlinkService {
 									const activities = [];
 									for (const activity of project.activities) {
 										activity.sector = action.sector;
+										activity.validated = false;
 										activity.path = this.addActionToActivityPath(activity.path, action.actionId);
 										activities.push(activity);
 									}
@@ -106,6 +110,7 @@ export class LinkUnlinkService {
 				programme.action = null;
 				programme.path = "";
 				programme.sector = null;
+				programme.validated = false;
 
 				const unlinkedProgramme = await em.save<ProgrammeEntity>(programme);
 
@@ -117,6 +122,7 @@ export class LinkUnlinkService {
 							const parts = activity.path.split(".");
 							activity.path = ["_", parts[1], parts[2]].join(".");
 							activity.sector = null;
+							activity.validated = false;
 							activities.push(activity);
 						}
 						await em.save<ActivityEntity>(activities)
@@ -130,6 +136,7 @@ export class LinkUnlinkService {
 							// const partOne = parts[0].replace("_", action.actionId);
 							project.path = ["_", parts[1]].join(".");
 							project.sector = null;
+							project.validated = false;
 							projects.push(project);
 
 							// update each activity's path that are linked to the project
@@ -139,6 +146,7 @@ export class LinkUnlinkService {
 									// const partOne = parts[0].replace("_", action.actionId);
 									activity.path = ["_", parts[1], parts[2]].join(".");
 									activity.sector = null;
+									activity.validated = false;
 									activities.push(activity);
 								}
 							}
@@ -179,6 +187,7 @@ export class LinkUnlinkService {
 				const programmes = []
 				for (const programme of children.programmeChildren) {
 					programme.sector = newSector;
+					programme.validated = false;
 					programmes.push(programme)
 				}
 
@@ -187,6 +196,7 @@ export class LinkUnlinkService {
 				const projects = []
 				for (const project of children.projectChildren) {
 					project.sector = newSector;
+					project.validated = false;
 					projects.push(project)
 				}
 
@@ -195,11 +205,13 @@ export class LinkUnlinkService {
 				const activities = []
 				for (const activity of children.activityChildren) {
 					activity.sector = newSector;
+					activity.validated = false;
 					activities.push(activity)
 
 					const supports = []
 					for (const support of activity.support) {
 						support.sector = newSector;
+						support.validated = false;
 						supports.push(support)
 					}
 
@@ -220,6 +232,7 @@ export class LinkUnlinkService {
 					project.programme = programme;
 					project.path = this.addProgrammeToProjectPath(project.path, programme.programmeId, programme.path);
 					project.sector = programme.sector;
+					project.validated = false;
 
 					const linkedProject = await em.save<ProjectEntity>(project);
 
@@ -231,11 +244,13 @@ export class LinkUnlinkService {
 								if (activity.support && activity.support.length > 0) {
 									activity.support.forEach((support) => {
 										support.sector = programme.sector;
+										support.validated = false;
 										supports.push(support);
 									});
 								}
 								activity.path = this.addProgrammeToActivityPath(activity.path, programme.programmeId, programme.path);
 								activity.sector = programme.sector;
+								activity.validated = false;
 								activities.push(activity);
 							}
 							await em.save<SupportEntity>(supports);
@@ -279,6 +294,7 @@ export class LinkUnlinkService {
 					project.programme = null;
 					project.path = `_._`;
 					project.sector = null;
+					project.validated = false;
 
 					const unLinkedProgramme = await em.save<ProjectEntity>(project);
 
@@ -290,11 +306,13 @@ export class LinkUnlinkService {
 								if (activity.support && activity.support.length > 0) {
 									activity.support.forEach((support) => {
 										support.sector = null;
+										support.validated = false;
 										supports.push(support);
 									});
 								}
 								activity.path = `_._.${project.projectId}`
 								activity.sector = null;
+								activity.validated = false;
 								activities.push(activity);
 							}
 							await em.save<SupportEntity>(supports);
@@ -356,6 +374,7 @@ export class LinkUnlinkService {
 					}
 					activity.parentId = linkActivitiesDto.parentId;
 					activity.parentType = linkActivitiesDto.parentType;
+					activity.validated = false;
 
 					const linkedActivity = await em.save<ActivityEntity>(activity);
 
@@ -364,6 +383,7 @@ export class LinkUnlinkService {
 						if (activity.support && activity.support.length > 0) {
 							activity.support.forEach((support) => {
 								support.sector = linkedActivity.sector;
+								support.validated = false;
 								supports.push(support);
 							});
 						}
@@ -423,6 +443,7 @@ export class LinkUnlinkService {
 					activity.parentType = null;
 					activity.path = '_._._';
 					activity.sector = null;
+					activity.validated = false;
 
 					const unlinkedActivity = await em.save<ActivityEntity>(activity);
 
@@ -431,6 +452,7 @@ export class LinkUnlinkService {
 						if (activity.support && activity.support.length > 0) {
 							activity.support.forEach((support) => {
 								support.sector = null;
+								support.validated = false;
 								supports.push(support);
 							});
 						}

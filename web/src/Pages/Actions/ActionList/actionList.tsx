@@ -46,7 +46,7 @@ const actionList = () => {
   const { get, post } = useConnection();
   const ability = useAbilityContext();
 
-  const { t } = useTranslation(['actionList', 'tableAction']);
+  const { t } = useTranslation(['actionList', 'tableAction', 'columnHeader', 'entityAction']);
 
   // General Page State
 
@@ -93,38 +93,46 @@ const actionList = () => {
   // Free Prg Read from DB
 
   const getFreeProgrammeIds = async () => {
-    const response: any = await get('national/programmes/link/eligible');
+    try {
+      const response: any = await get('national/programmes/link/eligible');
 
-    const freeProgrammeIds: string[] = [];
-    response.data.forEach((prg: any) => {
-      freeProgrammeIds.push(prg.programmeId);
-    });
-    setAllFreeProgrammeIds(freeProgrammeIds);
+      const freeProgrammeIds: string[] = [];
+      response.data.forEach((prg: any) => {
+        freeProgrammeIds.push(prg.programmeId);
+      });
+      setAllFreeProgrammeIds(freeProgrammeIds);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   // Get Attached Programmes
 
   const getAttachedProgrammeIds = async (actionId: string) => {
-    const payload = {
-      filterAnd: [
-        {
-          key: 'actionId',
-          operation: '=',
-          value: actionId,
+    try {
+      const payload = {
+        filterAnd: [
+          {
+            key: 'actionId',
+            operation: '=',
+            value: actionId,
+          },
+        ],
+        sort: {
+          key: 'programmeId',
+          order: 'ASC',
         },
-      ],
-      sort: {
-        key: 'programmeId',
-        order: 'ASC',
-      },
-    };
-    const response: any = await post('national/programmes/query', payload);
+      };
+      const response: any = await post('national/programmes/query', payload);
 
-    const freeProgrammeIds: string[] = [];
-    response.data.forEach((prg: any) => {
-      freeProgrammeIds.push(prg.programmeId);
-    });
-    setAttachedProgrammeIds(freeProgrammeIds);
+      const freeProgrammeIds: string[] = [];
+      response.data.forEach((prg: any) => {
+        freeProgrammeIds.push(prg.programmeId);
+      });
+      setAttachedProgrammeIds(freeProgrammeIds);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   // Data Read from DB
@@ -205,28 +213,32 @@ const actionList = () => {
   // Attach Multiple Programmes for an Action
 
   const attachProgrammes = async () => {
-    const payload = {
-      actionId: selectedActionId,
-      programmes: toBeAttached,
-    };
-    const response: any = await post('national/programmes/link', payload);
-    if (response.status === 200 || response.status === 201) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
-      });
+    try {
+      const payload = {
+        actionId: selectedActionId,
+        programmes: toBeAttached,
+      };
+      const response: any = await post('national/programmes/link', payload);
+      if (response.status === 200 || response.status === 201) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
 
-      message.open({
-        type: 'success',
-        content: t('programmeLinkSuccess'),
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
+        message.open({
+          type: 'success',
+          content: t('programmeLinkSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
 
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
-      });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
 
-      getAllData();
+        getAllData();
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
     }
   };
 
@@ -307,7 +319,7 @@ const actionList = () => {
     { title: t('actionId'), width: 100, dataIndex: 'actionId', key: 'actionId', sorter: false },
     { title: t('titleOfAction'), width: 120, dataIndex: 'title', key: 'title', sorter: false },
     {
-      title: t('actionType'),
+      title: t('columnHeader:type'),
       width: 100,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -315,21 +327,21 @@ const actionList = () => {
       },
     },
     {
-      title: t('sectorAffected'),
+      title: t('columnHeader:sectorAffected'),
       width: 120,
       dataIndex: 'affectedSectors',
       key: 'affectedSectors',
       sorter: false,
     },
     {
-      title: t('financeNeeded'),
+      title: t('columnHeader:financeNeeded'),
       width: 120,
       dataIndex: 'financeNeeded',
       key: 'financeNeeded',
       sorter: false,
     },
     {
-      title: t('financeReceived'),
+      title: t('columnHeader:financeReceived'),
       width: 130,
       dataIndex: 'financeReceived',
       key: 'financeReceived',
@@ -337,7 +349,7 @@ const actionList = () => {
     },
     { title: t('actionStatus'), width: 120, dataIndex: 'status', key: 'status', sorter: false },
     {
-      title: t('validationStatus'),
+      title: t('columnHeader:validationStatus'),
       key: 'validationStatus',
       width: 140,
       // eslint-disable-next-line no-unused-vars
@@ -346,7 +358,7 @@ const actionList = () => {
       },
     },
     {
-      title: t('nationalImplementingEntity'),
+      title: t('columnHeader:nationalImplementingEntity'),
       width: 180,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: any) => {
@@ -438,7 +450,7 @@ const actionList = () => {
       title: 'Filter by Validation Status',
       label: (
         <div className="filter-menu-item">
-          <div className="filter-title">{t('filterByValidationStatus')}</div>
+          <div className="filter-title">{t('columnHeader:filterByValidationStatus')}</div>
           <Radio.Group
             onChange={(e) => {
               updatedTempFilters('validation', e?.target?.value);
@@ -470,7 +482,7 @@ const actionList = () => {
                   setTempFilterValue({ ...appliedFilterValue });
                 }}
               >
-                Cancel
+                {t('entityAction:cancel')}
               </Button>
             </Col>
             <Col span={12}>
@@ -485,7 +497,7 @@ const actionList = () => {
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >
-                Apply
+                {t('entityAction:apply')}
               </Button>
             </Col>
           </Row>
@@ -506,10 +518,10 @@ const actionList = () => {
           options={allFreeProgrammeIds}
           content={{
             buttonName: t('attachProgramme'),
-            attach: t('attach'),
+            attach: t('entityAction:attach'),
             contentTitle: t('attachProgramme'),
             listTitle: t('programmeList'),
-            cancel: t('cancel'),
+            cancel: t('entityAction:cancel'),
           }}
           attachedUnits={attachedProgrammeIds}
           setToBeAttached={setToBeAttached}

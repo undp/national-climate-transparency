@@ -31,6 +31,28 @@
     width: 100%;
     margin-bottom: 0px;
     padding: 10px;
+
+    .export-action-row {
+      padding-top: 10px;
+      padding-bottom: 10px;
+      padding-right: 10px;
+      display: flex;
+      justify-content: flex-end;
+
+      @media (max-width: 992px) {
+        justify-content: flex-start;
+        padding-right: 0px;
+        padding-left: 25px;
+      }
+
+      .export-button {
+        @media (max-width: 576px) {
+          margin-bottom: 10px !important;
+        } 
+      }
+
+
+    }
   }
 
 }

@@ -9,6 +9,11 @@ import { ExportFileType } from '../../Enums/shared.enum';
 import { ReportFiveRecord } from '../../Definitions/reportDefinitions';
 import { getReportFiveColumns } from '../../Definitions/columns/reportColumns';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
+import {
+  exportBarBps,
+  exportButtonBps,
+  reportTitleBps,
+} from '../../Definitions/breakpoints/breakpoints';
 
 const reportList = () => {
   const { post } = useConnection();
@@ -105,40 +110,42 @@ const reportList = () => {
       </div>
       <div className="content-card">
         <Row className="table-actions-section">
-          <Col span={16}>
+          <Col {...reportTitleBps}>
             <div className="action-bar">
               <div className="title">{t('title')}</div>
             </div>
           </Col>
-          <Col span={4}>
-            <div className="action-bar">
-              <Button
-                type="primary"
-                size="large"
-                block
-                icon={<DownloadOutlined />}
-                onClick={() => {
-                  downloadReportData(ExportFileType.XLSX);
-                }}
-              >
-                {t('exportAsExcel')}
-              </Button>
-            </div>
-          </Col>
-          <Col span={4}>
-            <div className="action-bar">
-              <Button
-                type="primary"
-                size="large"
-                block
-                icon={<DownloadOutlined />}
-                onClick={() => {
-                  downloadReportData(ExportFileType.CSV);
-                }}
-              >
-                {t('exportAsCsv')}
-              </Button>
-            </div>
+          <Col {...exportBarBps}>
+            <Row gutter={20} className="export-action-row">
+              <Col {...exportButtonBps}>
+                <Button
+                  className="export-button"
+                  type="primary"
+                  size="large"
+                  block
+                  icon={<DownloadOutlined />}
+                  onClick={() => {
+                    downloadReportData(ExportFileType.XLSX);
+                  }}
+                >
+                  {t('exportAsExcel')}
+                </Button>
+              </Col>
+              <Col {...exportButtonBps}>
+                <Button
+                  className="export-button"
+                  type="primary"
+                  size="large"
+                  block
+                  icon={<DownloadOutlined />}
+                  onClick={() => {
+                    downloadReportData(ExportFileType.CSV);
+                  }}
+                >
+                  {t('exportAsCsv')}
+                </Button>
+              </Col>
+            </Row>
           </Col>
         </Row>
         <Row>

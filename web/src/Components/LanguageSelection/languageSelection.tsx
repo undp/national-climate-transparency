@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import { Select } from 'antd';
 import './languageSelection.scss';
+import { AvailableLanguages } from '../../Definitions/languageDefinitions';
 
 export interface LanguageSelectionProps {
   i18n: any;
@@ -28,20 +29,7 @@ const LanguageSelection: FC<LanguageSelectionProps> = (props: LanguageSelectionP
           filterSort={(optionA, optionB) =>
             (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
           }
-          options={[
-            {
-              value: 'en',
-              label: 'English',
-            },
-            {
-              value: 'es',
-              label: 'Español',
-            },
-            {
-              value: 'fr',
-              label: 'Français',
-            },
-          ]}
+          options={AvailableLanguages}
         />
       </span>
     </div>

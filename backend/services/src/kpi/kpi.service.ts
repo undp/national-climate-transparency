@@ -223,7 +223,7 @@ export class KpiService {
 		const query = `
 			SELECT *
 			FROM (
-				SELECT "kpiId", SUM(achieved) as achieved
+				SELECT "kpiId", ROUND(SUM(achieved), 2) as achieved
 				FROM (
 					SELECT *
 					FROM public.activity

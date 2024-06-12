@@ -5,7 +5,7 @@ import './layout.footer.scss';
 import { CcCircle } from 'react-bootstrap-icons';
 
 const LayoutFooter = () => {
-  const { i18n, t } = useTranslation(['common', 'homepage']);
+  const { t } = useTranslation(['common', 'homepage']);
 
   return (
     <div className="homepage-footer-container">

@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import './faq.scss';
-import { Collapse } from 'antd';
+import { Col, Collapse, Row } from 'antd';
 import FAQDocuments from '../../Components/FAQ/faqDocument';
+import { faqDocumentBps, faqVideoBps } from '../../Definitions/breakpoints/breakpoints';
 
 const { Panel } = Collapse;
 
@@ -47,28 +48,31 @@ const faq = () => {
       </div>
       <div className="content-card">
         <div className="section-header">{t('docsAndTemplates')}</div>
-        <div className="documents">
+        <Row gutter={30} className="documents">
           {documents.map((doc) => (
-            <FAQDocuments key={doc.key} title={doc.title} format={doc.format} url={doc.url} />
+            <Col {...faqDocumentBps} className="grid-column">
+              <FAQDocuments key={doc.key} title={doc.title} format={doc.format} url={doc.url} />
+            </Col>
           ))}
-        </div>
+        </Row>
       </div>
       <div className="content-card">
         <div className="section-header">{t('trainingVideos')}</div>
-        <div className="videos">
+        <Row gutter={30} className="videos">
           {videos.map((video) => (
-            <iframe
-              key={video.key}
-              width="300"
-              height="200"
-              src={`${video.url}?rel=0`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+            <Col {...faqVideoBps} className="grid-column">
+              <iframe
+                key={video.key}
+                width="300"
+                height="200"
+                src={`${video.url}?rel=0`}
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </Col>
           ))}
-        </div>
+        </Row>
       </div>
     </div>
   );
