@@ -6,6 +6,8 @@
     "programInfoTitle": "List of Programme under the Action",
     "actionCreationSuccess": "Action Added Successfully",
     "actionUpdateSuccess": "Action Updated Successfully",
+    "actionValidateSuccess": "Action Validated Successfully",
+    "actionUnvalidateSuccess": "Action Unvalidated Successfully",
     "noProgramsMessage": "No Programmes Attached",
     "programmeList" : "Programme List",
     "activityList" : "Activity List",

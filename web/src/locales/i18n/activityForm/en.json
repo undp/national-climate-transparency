@@ -16,6 +16,8 @@
     "mitigationInfoTitle": "Summary of Activities Results",
     "activityCreationSuccess": "Activity Added Successfully",
     "activityUpdateSuccess": "Activity Updated Successfully",
+    "activityValidateSuccess": "Activity Validated Successfully",
+    "activityUnvalidateSuccess": "Activity Unvalidated Successfully",
     "noSupportsMessage": "No Supports Attached",
     "supportTableHeader": "List of Support under the Activity",
     "mtgInfoTitle": "Mitigation  Information",
