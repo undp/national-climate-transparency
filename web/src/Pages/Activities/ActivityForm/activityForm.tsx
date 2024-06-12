@@ -461,9 +461,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
-                achieved:
+                achieved: parseFloat(
                   kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
-                    ?.achieved ?? 0,
+                    ?.achieved ?? 0
+                ),
                 expected: kpi.expected,
                 kpiAction: KPIAction.NONE,
               });
@@ -479,6 +480,31 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchCreatedKPIData();
+
+    //set mtg timeline data when it is null
+
+    const setDefaultTimelineValues = () => {
+      const tempExpectedEntries: ExpectedTimeline[] = [];
+      Object.entries(ExpectedRows).forEach(([key, value]) => {
+        const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
+        for (let year = 2015; year <= 2050; year++) {
+          rowData[year.toString()] = 0;
+        }
+        tempExpectedEntries.push(rowData);
+      });
+
+      const tempActualEntries: ActualTimeline[] = [];
+      Object.entries(ActualRows).forEach(([key, value]) => {
+        const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
+        for (let year = 2015; year <= 2050; year++) {
+          rowData[year.toString()] = 0;
+        }
+        tempActualEntries.push(rowData);
+      });
+
+      setExpectedTimeline(tempExpectedEntries);
+      setActualTimeline(tempActualEntries);
+    };
 
     // Get mtg timeline data
 
@@ -521,9 +547,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
             setExpectedTimeline(tempExpectedEntries);
             setActualTimeline(tempActualEntries);
+          } else {
+            setDefaultTimelineValues();
           }
         } catch (error) {
           console.error('Error fetching timeline data:', error);
+          setDefaultTimelineValues();
         }
       }
     };
@@ -532,26 +561,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     // Initializing mtg timeline data when in create mode
 
     if (method === 'create') {
-      const tempExpectedEntries: ExpectedTimeline[] = [];
-      Object.entries(ExpectedRows).forEach(([key, value]) => {
-        const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-        for (let year = 2015; year <= 2050; year++) {
-          rowData[year.toString()] = 0;
-        }
-        tempExpectedEntries.push(rowData);
-      });
-
-      const tempActualEntries: ActualTimeline[] = [];
-      Object.entries(ActualRows).forEach(([key, value]) => {
-        const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-        for (let year = 2015; year <= 2050; year++) {
-          rowData[year.toString()] = 0;
-        }
-        tempActualEntries.push(rowData);
-      });
-
-      setExpectedTimeline(tempExpectedEntries);
-      setActualTimeline(tempActualEntries);
+      setDefaultTimelineValues();
     }
   }, []);
 
@@ -769,7 +779,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         if (response.status === 200 || response.status === 201) {
           message.open({
             type: 'success',
-            content: 'Successfully Validated !',
+            content: isValidated ? t('activityUnvalidateSuccess') : t('activityValidateSuccess'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
