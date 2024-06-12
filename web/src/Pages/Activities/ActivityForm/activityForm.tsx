@@ -461,9 +461,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
-                achieved:
+                achieved: parseFloat(
                   kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
-                    ?.achieved ?? 0,
+                    ?.achieved ?? 0
+                ),
                 expected: kpi.expected,
                 kpiAction: KPIAction.NONE,
               });
