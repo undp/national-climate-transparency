@@ -100,7 +100,7 @@ jobs:
         id: deploy-backend
         env:
           PRIVATE_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE }}
-          HOSTNAME: ${{secrets.HOST_IP }}
+          HOSTNAME: ${{secrets.HOST_IP_DEMO }}
           USER_NAME: ec2-user
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
@@ -148,7 +148,7 @@ jobs:
         id: deploy-frontend
         env:
           PRIVATE_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE }}
-          HOSTNAME: ${{secrets.HOST_IP }}
+          HOSTNAME: ${{secrets.HOST_IP_DEMO }}
           USER_NAME: ec2-user
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
