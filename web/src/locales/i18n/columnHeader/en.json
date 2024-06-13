@@ -18,7 +18,7 @@
     "recipientEntity": "Recipient Entity (s)",
     "internationalImplementingEntity": "International Implementing Entity (s)",
     "type": "Type",
-    "subSectorAffected": "Sub-Sector Affected",
+    "subSectorAffected": "Sub Sectors(s) Affected",
     "estimatedInvestment": "Estimated investment needs (USD)"
 }
   
