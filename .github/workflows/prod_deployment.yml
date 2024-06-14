@@ -99,7 +99,7 @@ jobs:
       - name: Deploy backend images to Amazon EC2
         id: deploy-backend
         env:
-          PRIVATE_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE }}
+          PRIVATE_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE_DEMO }}
           HOSTNAME: ${{secrets.HOST_IP_DEMO }}
           USER_NAME: ec2-user
         run: |
@@ -147,7 +147,7 @@ jobs:
       - name: Deploy frontend images to Amazon EC2
         id: deploy-frontend
         env:
-          PRIVATE_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE }}
+          PRIVATE_KEY: ${{ secrets.AWS_SSH_KEY_PRIVATE_DEMO }}
           HOSTNAME: ${{secrets.HOST_IP_DEMO }}
           USER_NAME: ec2-user
         run: |
