@@ -101,7 +101,7 @@ const reportList = () => {
     }
   };
 
-  // Get Report Five columns
+  // Get Report Five set
 
   const reportFiveColumns = getReportFiveColumns(t);
 
