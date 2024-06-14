@@ -103,13 +103,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     const fetchNonValidatedActivities = async () => {
       try {
         const payload = {
-          filterAnd: [
-            {
-              key: 'validated',
-              operation: '=',
-              value: false,
-            },
-          ],
           sort: {
             key: 'activityId',
             order: 'ASC',

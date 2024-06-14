@@ -206,6 +206,99 @@ export class ActionService {
 		return { haveChildren: haveChildren, programmeChildren: programmeChildren, projectChildren: projectChildren, activityChildren: activityChildren };
 	}
 
+
+	async updateAllValidatedChildrenStatus(actionId: string, entityManager: EntityManager) {
+
+		const programmeChildren: ProgrammeEntity[] =
+			await this.programmeRepo.createQueryBuilder('programme')
+				.where('programme.actionId = :actionId AND programme.validated IS TRUE', { actionId })
+				.getMany();
+
+		const projectChildren: ProjectEntity[] =
+			await this.projectRepo.createQueryBuilder('project')
+				.where("subpath(project.path, 0, 1) = :actionId AND project.validated IS TRUE", { actionId })
+				.getMany();
+
+		const activityChildren: ActivityEntity[] =
+			await this.activityRepo.createQueryBuilder('activity')
+				.leftJoinAndSelect('activity.support', 'support')
+				.where("subpath(activity.path, 0, 1) = :actionId AND activity.validated IS TRUE", { actionId })
+				.getMany();
+
+		if ((programmeChildren.length > 0) || (projectChildren.length > 0) || (activityChildren.length > 0)) {
+
+			await entityManager
+				.transaction(async (em) => {
+					const logs = [];
+
+					const programmes = []
+					for (const programme of programmeChildren) {
+						// unvalidate programme
+					if (programme.validated) {
+						programme.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.PROGRAMME,
+							programme.programmeId,
+							0,
+							actionId)
+						)
+					}
+						programmes.push(programme)
+					}
+
+					await em.save<ProgrammeEntity>(programmes);
+
+					const projects = []
+					for (const project of projectChildren) {
+						// unvalidate project
+					if (project.validated) {
+						project.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.PROJECT,
+							project.projectId,
+							0,
+							actionId)
+						)
+					}
+
+						projects.push(project)
+					}
+
+					await em.save<ProjectEntity>(projects);
+
+					const activities = []
+					for (const activity of activityChildren) {
+						// unvalidate activity
+					if (activity.validated) {
+						activity.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.ACTIVITY,
+							activity.activityId,
+							0,
+							actionId)
+						)
+					}
+						activities.push(activity)
+
+						// const supports = []
+						// for (const support of activity.support) {
+						// 	support.validated = false;
+						// 	supports.push(support)
+						// }
+
+						// await em.save<SupportEntity>(supports);
+					}
+
+					await em.save<ActivityEntity>(activities);
+					await em.save<LogEntity>(logs);
+
+				});
+		}
+	}
+
 	async getActionViewData(actionId: string) {
 
 		const queryBuilder = this.actionRepo
@@ -287,8 +380,7 @@ export class ActionService {
 		const actionUpdate: ActionEntity = plainToClass(ActionEntity, actionUpdateDto);
 		const eventLog = [];
 
-		// setting action to pending (Non-Validated) state
-		actionUpdate.validated = false;
+		this.addEventLogEntry(eventLog, LogEventType.ACTION_UPDATED, EntityType.ACTION, actionUpdate.actionId, user.id, actionUpdateDto);
 
 		const currentAction = await this.findActionById(actionUpdateDto.actionId);
 		if (!currentAction) {
@@ -319,6 +411,12 @@ export class ActionService {
 				),
 				HttpStatus.FORBIDDEN
 			);
+		}
+
+		// setting action to pending (Non-Validated) state
+		if (currentAction.validated) {
+			actionUpdate.validated = false;
+			this.addEventLogEntry(eventLog, LogEventType.ACTION_UNVERIFIED_DUE_UPDATE, EntityType.ACTION, actionUpdate.actionId, 0, actionUpdateDto);
 		}
 
 		// Finding children to update their sector value
@@ -373,7 +471,7 @@ export class ActionService {
 		const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, actionUpdate.actionId);
 
 		if (actionUpdateDto.kpis && actionUpdateDto.kpis.length > 0) {
-			
+
 			const addedKpis = actionUpdateDto.kpis.filter(kpi => !kpi.kpiId);
 
 			if (addedKpis && addedKpis.length > 0) {
@@ -416,14 +514,12 @@ export class ActionService {
 			}
 		}
 
-		this.addEventLogEntry(eventLog, LogEventType.ACTION_UPDATED, EntityType.ACTION, actionUpdate.actionId, user.id, actionUpdateDto);
-
-		if (actionUpdateDto.kpis && actionUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.UPDATED)) {
+		if (actionUpdateDto.kpis && actionUpdateDto.kpis.some(kpi => kpi.kpiAction === KPIAction.UPDATED)) {
 			// Add event log entry after the loop completes
 			this.addEventLogEntry(eventLog, LogEventType.KPI_UPDATED, EntityType.ACTION, actionUpdateDto.actionId, user.id, kpiList);
 		}
 
-		if (actionUpdateDto.kpis && actionUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.CREATED)) {
+		if (actionUpdateDto.kpis && actionUpdateDto.kpis.some(kpi => kpi.kpiAction === KPIAction.CREATED)) {
 			// Add event log entry after the loop completes
 			this.addEventLogEntry(eventLog, LogEventType.KPI_ADDED, EntityType.ACTION, actionUpdateDto.actionId, user.id, kpiList);
 		}
@@ -434,7 +530,9 @@ export class ActionService {
 				if (savedAction) {
 					// Update children sector
 					if (children.haveChildren && (actionUpdate.sector !== currentAction.sector)) {
-						await this.linkUnlinkService.updateActionChildrenSector(children, actionUpdate.sector, em);
+						await this.linkUnlinkService.updateActionChildrenSector(actionUpdate.actionId, children, actionUpdate.sector, em);
+					} else {
+						await this.updateAllValidatedChildrenStatus(actionUpdate.actionId, em);
 					}
 
 					// Save new KPIs
@@ -497,10 +595,10 @@ export class ActionService {
 
 		action.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(
-			(validateDto.validateStatus) ? LogEventType.ACTION_VERIFIED : LogEventType.ACTION_UNVERIFIED, 
-			EntityType.ACTION, 
-			action.actionId, 
-			user.id, 
+			(validateDto.validateStatus) ? LogEventType.ACTION_VERIFIED : LogEventType.ACTION_UNVERIFIED,
+			EntityType.ACTION,
+			action.actionId,
+			user.id,
 			validateDto
 		);
 
