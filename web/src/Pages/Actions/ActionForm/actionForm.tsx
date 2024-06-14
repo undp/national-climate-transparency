@@ -80,7 +80,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
-  // Spinner When Form Submit Occurs
+  // Spinner For Form Submit
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 

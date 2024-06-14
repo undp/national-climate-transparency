@@ -94,6 +94,7 @@ export class ActionService {
 			action.documents = documents;
 
 		}
+		// Add event log entry
 		this.addEventLogEntry(eventLog, LogEventType.ACTION_CREATED, EntityType.ACTION, action.actionId, user.id, actionDto);
 
 		const kpiList = [];
