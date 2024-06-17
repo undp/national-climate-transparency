@@ -74,7 +74,6 @@ const ForgotPassword = () => {
           </div>
         </Col>
       </Row>
-
       <Form layout="vertical" onFinish={onSubmit} name="login-details" requiredMark={false}>
         <Row className="centred-row">
           <Col span={24}>
