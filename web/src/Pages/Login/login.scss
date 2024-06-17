@@ -70,10 +70,6 @@
     flex-direction: column;
     margin-top: 5vh;
 
-    @media (max-width: $lg-size) {
-      text-align: center;
-    }
-
     .login-text-sign {
       font-size: 2.25rem;
       line-height: 2.5rem;
@@ -135,7 +131,20 @@
       left: 0;
       right: 0;
       margin-bottom: 30px;
+      margin-right: 62px;
     }
+
+    .centred-row {
+      margin-left: 62px;
+      margin-right: 62px;
+    }
+  }
+
+  .logo-row {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    margin-left: 62px;
+    margin-right: 62px;
   }
 
   .error-message-icon {
@@ -150,21 +159,10 @@
     font-size: 14px;
     margin-left: 2px;
   }
-}
 
-.forgot-password-container {
-  .note-container {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-top: 1.5rem;
-    font-size: 0.875rem;
-    color: $note-light-text;
-    text-align: justify;
-
-    .label {
-      margin-right: 0.5rem;
-    }
+  .expiry-message-text {
+    color: rgba(255, 77, 79, 0.8);
+    font-size: 13px;
+    margin-left: 2px;
   }
 }

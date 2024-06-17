@@ -144,7 +144,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
       {!IsAuthenticated() ? (
         <Row className="login-container">
           {fullScreen && (
-            <Col xl={16} flex="auto">
+            <Col xl={15} flex="auto">
               <div className="login-img-container container-image">
                 <div className="text-ctn">
                   <span>
@@ -155,8 +155,8 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
               </div>
             </Col>
           )}
-          <Col xl={{ span: 8, offset: 1 }} flex="auto">
-            <Row style={{ marginBottom: '10px', marginLeft: '1px' }}>
+          <Col xl={{ span: 9 }} flex="auto">
+            <Row className="logo-row">
               <Col span={12}>
                 <TransparencyLogo></TransparencyLogo>
               </Col>
@@ -167,7 +167,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
               <ResetPassword />
             ) : (
               <div className="row-container">
-                <Row>
+                <Row className="centred-row">
                   <Col>
                     <div className="login-text-contents">
                       <span className="login-text-sign">
@@ -183,7 +183,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                   name="login-details"
                   requiredMark={false}
                 >
-                  <Row style={{ marginRight: '62px' }}>
+                  <Row className="centred-row">
                     <Col span={24}>
                       <Form.Item
                         name="email"
@@ -215,7 +215,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                       </Form.Item>
                     </Col>
                   </Row>
-                  <Row style={{ marginRight: '62px' }}>
+                  <Row className="centred-row">
                     <Col span={24}>
                       <Form.Item
                         name="password"
@@ -233,7 +233,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                     </Col>
                   </Row>
                   {showError && (
-                    <Row style={{ marginRight: '62px' }}>
+                    <Row className="centred-row">
                       <Col span={1}>
                         <ExclamationCircleOutlined className="error-message-icon" />
                       </Col>
@@ -244,12 +244,12 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                       </Col>
                     </Row>
                   )}
-                  <Row style={{ marginRight: '62px' }}>
+                  <Row className="centred-row">
                     <Col span={24} className="forget-password">
                       <span onClick={() => onClickForgotPassword()}>{t('login:forgot-pwd')}?</span>
                     </Col>
                   </Row>
-                  <Row style={{ marginRight: '62px' }}>
+                  <Row className="centred-row">
                     <Col span={24}>
                       <Form.Item>
                         <div className="login-submit-btn-container">
@@ -267,25 +267,19 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                     </Col>
                   </Row>
                   {isTokenExpired && !forgotPassword && !resetPassword && !showError && (
-                    <Row style={{ marginRight: '62px' }}>
-                      <Col span={24}>
-                        <div className="logged-out-section">
-                          <div className="info-icon">
-                            <ExclamationCircleOutlined
-                              style={{
-                                color: 'rgba(255, 77, 79, 0.8)',
-                                marginRight: '0.5rem',
-                                fontSize: '1.1rem',
-                              }}
-                            />
-                          </div>
-                          <div className="msg">{t('common:sessionExpiredErrorMsg')}</div>
-                        </div>
+                    <Row className="centred-row">
+                      <Col span={1}>
+                        <ExclamationCircleOutlined className="error-message-icon" />
+                      </Col>
+                      <Col span={23}>
+                        <span className="expiry-message-text">
+                          {t('common:sessionExpiredErrorMsg')}
+                        </span>
                       </Col>
                     </Row>
                   )}
                 </Form>
-                <Row style={{ marginRight: '62px' }} className="language-row">
+                <Row className="language-row">
                   <Col span={24} className="language-section">
                     <Select
                       placeholder="Search to Select"
