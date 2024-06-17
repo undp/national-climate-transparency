@@ -38,7 +38,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
   const { post, updateToken, removeToken } = useConnection();
   const { IsAuthenticated, setUserInfo, isTokenExpired, setIsTokenExpired } = useUserContext();
 
-  // Login Page Props
+  // Login Page State
 
   const [loading, setLoading] = useState<boolean>(false);
   const [showError, setShowError] = useState<boolean>(false);
@@ -252,17 +252,15 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                   <Row className="centred-row">
                     <Col span={24}>
                       <Form.Item>
-                        <div className="login-submit-btn-container">
-                          <Button
-                            type="primary"
-                            size="large"
-                            htmlType="submit"
-                            block
-                            loading={loading}
-                          >
-                            {t('common:login')}
-                          </Button>
-                        </div>
+                        <Button
+                          type="primary"
+                          size="large"
+                          htmlType="submit"
+                          block
+                          loading={loading}
+                        >
+                          {t('common:login')}
+                        </Button>
                       </Form.Item>
                     </Col>
                   </Row>
