@@ -10,7 +10,7 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { LogEntity } from "../entities/log.entity";
 import { User } from "../entities/user.entity";
 import { CounterType } from "../enums/counter.type.enum";
-import { LogEventType, EntityType } from "../enums/shared.enum";
+import { LogEventType, EntityType, Method } from "../enums/shared.enum";
 import { ProgrammeService } from "../programme/programme.service";
 import { ProjectService } from "../project/project.service";
 import { CounterService } from "../util/counter.service";
@@ -109,7 +109,7 @@ export class ActivityService {
 		}
 
 		if (activityDto.mitigationTimeline) {
-			this.payloadValidator.validateMitigationTimelinePayload(activityDto);
+			this.payloadValidator.validateMitigationTimelinePayload(activityDto, Method.CREATE);
 		}
 
 		const activ = await this.entityManager
@@ -1000,7 +1000,7 @@ export class ActivityService {
 
 	//MARK: update mitigation timeline Data
 	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto, user: User) {
-		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto);
+		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto, Method.UPDATE);
 		const { activityId, mitigationTimeline } = mitigationTimelineDto;
 		const activity = await this.findActivityById(activityId);
 
@@ -1024,12 +1024,20 @@ export class ActivityService {
 			);
 		}
 
+		const currentMitigationTimeline = activity.mitigationTimeline;
+
+		const updatedMitigationTimeline = {
+			...currentMitigationTimeline,
+			expected: mitigationTimeline.expected,
+			actual: mitigationTimeline.actual
+		};
+
 		const activ = await this.entityManager
 			.transaction(async (em) => {
 				await em
 					.createQueryBuilder()
 					.update(ActivityEntity)
-					.set({ mitigationTimeline })
+					.set({ mitigationTimeline: updatedMitigationTimeline})
 					.where('activityId = :activityId', { activityId })
 					.execute();
 

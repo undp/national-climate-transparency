@@ -9,7 +9,7 @@ import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { SubSector, NatImplementor, KPIAction } from '../../../Enums/shared.enum';
 import { ProgrammeStatus } from '../../../Enums/programme.enum';
-import { GraphUpArrow, Layers } from 'react-bootstrap-icons';
+import { Layers } from 'react-bootstrap-icons';
 import './programmeForm.scss';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
@@ -98,8 +98,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
-  // Activity Attachment state
+  // Activity Attachment State:Activity link functions removed keeping original state
 
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
   const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
@@ -898,11 +899,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Detach Activity
 
-  const detachActivity = async (actId: string) => {
-    setDetachingEntityId(actId);
-    setDetachingEntityType('Activity');
-    setOpenDetachPopup(true);
-  };
+  // const detachActivity = async (actId: string) => {
+  //   setDetachingEntityId(actId);
+  //   setDetachingEntityType('Activity');
+  //   setOpenDetachPopup(true);
+  // };
 
   // Handle Detachment
 
@@ -924,7 +925,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Activity Column Definition
 
-  const activityTableColumns = getActivityTableColumns(isView, detachActivity);
+  const activityTableColumns = getActivityTableColumns();
 
   // Support Column Definition
 
@@ -1327,7 +1328,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col {...attachButtonBps}>
+                {/* <Col {...attachButtonBps}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1344,7 +1345,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
                   ></AttachEntity>
-                </Col>
+                </Col> */}
               </Row>
               <Row>
                 <Col span={24}>
