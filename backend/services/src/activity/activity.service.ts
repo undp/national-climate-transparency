@@ -131,7 +131,7 @@ export class ActivityService {
 		}
 
 		if (activityDto.mitigationTimeline) {
-			this.payloadValidator.validateMitigationTimelinePayload(activityDto);
+			this.payloadValidator.validateMitigationTimelinePayload(activityDto, 'create');
 		}
 
 		const activ = await this.entityManager
@@ -840,7 +840,7 @@ export class ActivityService {
 
 	//MARK: update mitigation timeline Data
 	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto, user: User) {
-		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto);
+		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto, 'update');
 		const { activityId, mitigationTimeline } = mitigationTimelineDto;
 		const activity = await this.findActivityById(activityId);
 

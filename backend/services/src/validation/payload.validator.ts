@@ -4,6 +4,7 @@ import { HelperService } from "../util/helpers.service";
 import { EntityType } from "../enums/shared.enum";
 import { mitigationTimelineDto } from "../dtos/mitigationTimeline.dto";
 import { expectedMitigationTimelineProperties, actualMitigationTimelineProperties } from "../enums/mitigationTimeline.enum";
+import { ActivityDto } from "src/dtos/activity.dto";
 
 @Injectable()
 export class PayloadValidator {
@@ -32,7 +33,7 @@ export class PayloadValidator {
 		}
 	}
 
-	validateMitigationTimelinePayload(mitigationTimelineDto: mitigationTimelineDto) {
+	validateMitigationTimelinePayload(mitigationTimelineDto: mitigationTimelineDto | ActivityDto, method: string) {
 		const { mitigationTimeline } = mitigationTimelineDto;
 
 		if (!mitigationTimeline) {
@@ -62,6 +63,13 @@ export class PayloadValidator {
 			} else {
 				this.validateTotalValues(actual.total, actualMitigationTimelineProperties);
 				this.validateArraySum(actual, actual.total);
+			}
+		}
+
+		if(method==='create'){
+			const {startYear} = mitigationTimeline;
+			if(!startYear){
+				throw new HttpException('Mitigation timeline Start Year is missing', HttpStatus.BAD_REQUEST);
 			}
 		}
 	}
