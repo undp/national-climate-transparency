@@ -28,6 +28,9 @@ import { ActivityUpdateDto } from "../dtos/activityUpdate.dto";
 import { ValidateDto } from "../dtos/validate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { PayloadValidator } from "../validation/payload.validator";
+import { ProgrammeEntity } from "../entities/programme.entity";
+import { ProjectEntity } from "../entities/project.entity";
+import { ActionEntity } from "../entities/action.entity";
 
 @Injectable()
 export class ActivityService {
@@ -55,21 +58,15 @@ export class ActivityService {
 		this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_CREATED, EntityType.ACTIVITY, activity.activityId, user.id, activityDto);
 
 		activity.path = "_._._"
+
+		let action: ActionEntity;
+		let programme: ProgrammeEntity;
+		let project: ProjectEntity;
+
 		if (activityDto.parentId && activityDto.parentType) {
 			switch (activityDto.parentType) {
 				case EntityType.ACTION: {
-					const action = await this.isActionValid(activityDto.parentId, user);
-					
-					// if (action.validated) {
-					// 	throw new HttpException(
-					// 		this.helperService.formatReqMessagesString(
-					// 			"common.cannotLinkedToValidated",
-					// 			[EntityType.ACTION , action.actionId]
-					// 		),
-					// 		HttpStatus.BAD_REQUEST
-					// 	);
-					// }
-
+					action = await this.isActionValid(activityDto.parentId, user);
 					activity.path = `${activityDto.parentId}._._`;
 					activity.sector = action.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.ACTION, activityDto.parentId, user.id, activity.activityId);
@@ -77,18 +74,8 @@ export class ActivityService {
 					break;
 				}
 				case EntityType.PROGRAMME: {
-					const programme = await this.isProgrammeValid(activityDto.parentId, user);
-
-					// if (programme.validated) {
-					// 	throw new HttpException(
-					// 		this.helperService.formatReqMessagesString(
-					// 			"common.cannotLinkedToValidated",
-					// 			[EntityType.PROGRAMME , programme.programmeId]
-					// 		),
-					// 		HttpStatus.BAD_REQUEST
-					// 	);
-					// }
-
+					programme = await this.isProgrammeValid(activityDto.parentId, user);
+					action = programme.action;
 					activity.path = programme.path && programme.path.trim() !== '' ? `${programme.path}.${activityDto.parentId}._` : `_.${activityDto.parentId}._`;
 					activity.sector = programme.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROGRAMME, activityDto.parentId, user.id, activity.activityId);
@@ -96,18 +83,9 @@ export class ActivityService {
 					break;
 				}
 				case EntityType.PROJECT: {
-					const project = await this.isProjectValid(activityDto.parentId, user);
-
-					// if (project.validated) {
-					// 	throw new HttpException(
-					// 		this.helperService.formatReqMessagesString(
-					// 			"common.cannotLinkedToValidated",
-					// 			[EntityType.PROJECT , project.projectId]
-					// 		),
-					// 		HttpStatus.BAD_REQUEST
-					// 	);
-					// }
-
+					project = await this.isProjectValid(activityDto.parentId, user);
+					programme = project.programme;
+					action = programme?.action;
 					activity.path = project.path && project.path.trim() !== '' ? `${project.path}.${activityDto.parentId}` : `_._.${activityDto.parentId}`;
 					activity.sector = project.sector;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, activityDto.parentId, user.id, activity.activityId);
@@ -138,7 +116,45 @@ export class ActivityService {
 			.transaction(async (em) => {
 				const savedActivity = await em.save<ActivityEntity>(activity);
 				if (savedActivity) {
-					em.save<LogEntity>(eventLog);
+					if (project && project.validated) {
+						project.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
+							EntityType.PROJECT, 
+							project.projectId, 
+							0, 
+							activity.activityId
+						);
+						await em.save<ProjectEntity>(project);
+					}
+					if (programme && programme.validated) {
+						programme.validated = false;
+						this.addEventLogEntry(
+							eventLog,
+							(activity.parentType == EntityType.PROGRAMME) ?
+								LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE : LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.PROGRAMME,
+							programme.programmeId,
+							0,
+							project.projectId
+						);
+						await em.save<ProgrammeEntity>(programme);
+					}
+					if (action && action.validated) {
+						action.validated = false;
+						this.addEventLogEntry(
+							eventLog,
+							(activity.parentType == EntityType.ACTION) ?
+								LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_CHANGE : LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.ACTION,
+							action.actionId,
+							0,
+							programme.programmeId
+						);
+						await em.save<ActionEntity>(action);
+					}
+					await em.save<LogEntity>(eventLog);
 				}
 				return savedActivity;
 			})
@@ -166,8 +182,6 @@ export class ActivityService {
 		const activityUpdate: ActivityEntity = plainToClass(ActivityEntity, activityUpdateDto);
 		const eventLog = [];
 
-		activityUpdate.validated = false;
-
 		this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_UPDATED, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto);
 
 		const currentActivity = await this.findActivityById(activityUpdateDto.activityId);
@@ -192,6 +206,11 @@ export class ActivityService {
 			);
 		}
 
+		if (currentActivity.validated) {
+			activityUpdate.validated = false;
+			this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_UNVERIFIED_DUE_UPDATE, EntityType.ACTIVITY, activityUpdate.activityId, 0, activityUpdateDto);
+		}
+
 		let isActivityLinked = false;
 		let logEventType: any;
 
@@ -203,39 +222,116 @@ export class ActivityService {
 
 		activityUpdate.path = currentActivity.path;
 
-		if (isActivityLinked && (!activityUpdateDto.parentType || !activityUpdateDto.parentId)) {
-			// let parent;
-			// switch (currentActivity.parentType) {
-			// 	case EntityType.ACTION: {
-			// 		parent = await this.isActionValid(currentActivity.parentId, user);
-			// 		break;
-			// 	}
-			// 	case EntityType.PROGRAMME: {
-			// 		parent = await this.isProgrammeValid(currentActivity.parentId, user);
-			// 		break;
-			// 	}
-			// 	case EntityType.PROJECT: {
-			// 		parent = await this.isProjectValid(currentActivity.parentId, user);
-			// 		break;
-			// 	}
-			// }
+		const actionList: ActionEntity[] = [];
+		const programmeList: ProgrammeEntity[] = [];
+		const projectList: ProjectEntity[] = [];
 
-			// if (parent && parent.validated) {
-			// 	throw new HttpException(
-			// 		this.helperService.formatReqMessagesString(
-			// 			"common.cannotUnlinkedFromValidated",
-			// 			[currentActivity.parentType , currentActivity.parentId]
-			// 		),
-			// 		HttpStatus.BAD_REQUEST
-			// 	);
-			// }
+		if (isActivityLinked) {
+			
+			// update validation status of previously linked parents
+			switch (currentActivity.parentType) {
+				case EntityType.ACTION: {
+					const action = await this.isActionValid(currentActivity.parentId, user);
+					if (action.validated) {
+						action.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
+							EntityType.ACTION, 
+							action.actionId, 
+							0, 
+							activityUpdate.activityId
+						);
+						actionList.push(action);
+					}
+					break;
+				}
+				case EntityType.PROGRAMME: {
+					const programme = await this.isProgrammeValid(currentActivity.parentId, user);
+					const action = programme.action;
 
+					if (programme.validated) {
+						programme.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
+							EntityType.PROGRAMME, 
+							programme.programmeId, 
+							0, 
+							activityUpdate.activityId
+						);
+						programmeList.push(programme);
+					}
+
+					if (action && action.validated) {
+						action.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+							EntityType.ACTION, 
+							action.actionId, 
+							0, 
+							programme.programmeId
+						);
+						actionList.push(action);
+					}
+					break;
+				}
+				case EntityType.PROJECT: {
+					const project = await this.isProjectValid(currentActivity.parentId, user);
+					const programme = project.programme;
+					const action = programme?.action;
+
+					if (project.validated) {
+						project.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
+							EntityType.PROJECT, 
+							project.projectId, 
+							0, 
+							activityUpdate.activityId
+						);
+						projectList.push(project);
+					}
+
+					if (programme && programme.validated) {
+						programme.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+							EntityType.PROGRAMME, 
+							programme.programmeId, 
+							0, 
+							project.projectId
+						);
+						programmeList.push(programme);
+					}
+
+					if (action && action.validated) {
+						action.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+							EntityType.ACTION, 
+							action.actionId, 
+							0, 
+							programme.programmeId
+						);
+						actionList.push(action);
+					}
+					break;
+				}
+			}
+
+			if (!activityUpdateDto.parentType || !activityUpdateDto.parentId) {
 			this.addEventLogEntry(eventLog, logEventType, EntityType.ACTIVITY, activityUpdate.activityId, user.id, currentActivity.parentId);
 			activityUpdate.parentId = null;
 			activityUpdate.parentType = null;
 			activityUpdate.sector = null;
 			activityUpdate.path = '_._._';
 		}
+	}
 
 		if (activityUpdateDto.parentType && activityUpdateDto.parentId && activityUpdateDto.parentId != currentActivity.parentId) {
 			if (isActivityLinked) {
@@ -245,15 +341,19 @@ export class ActivityService {
 				case EntityType.ACTION: {
 					const action = await this.isActionValid(activityUpdateDto.parentId, user);
 
-					// if (action.validated) {
-					// 	throw new HttpException(
-					// 		this.helperService.formatReqMessagesString(
-					// 			"common.cannotLinkedToValidated",
-					// 			[EntityType.ACTION , action.actionId]
-					// 		),
-					// 		HttpStatus.BAD_REQUEST
-					// 	);
-					// }
+					// update validation status of linking action
+					if (action && action.validated) {
+						action.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
+							EntityType.ACTION, 
+							action.actionId, 
+							0, 
+							activityUpdate.activityId
+						);
+						actionList.push(action);
+					}
 
 					activityUpdate.path = `${activityUpdateDto.parentId}._._`;
 					activityUpdate.sector = action.sector;
@@ -263,16 +363,34 @@ export class ActivityService {
 				}
 				case EntityType.PROGRAMME: {
 					const programme = await this.isProgrammeValid(activityUpdateDto.parentId, user);
+					const action = programme.action;
 
-					// if (programme.validated) {
-					// 	throw new HttpException(
-					// 		this.helperService.formatReqMessagesString(
-					// 			"common.cannotLinkedToValidated",
-					// 			[EntityType.PROGRAMME , programme.programmeId]
-					// 		),
-					// 		HttpStatus.BAD_REQUEST
-					// 	);
-					// }
+					// update validation status of linking parents
+					if (programme.validated) {
+						programme.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
+							EntityType.PROGRAMME, 
+							programme.programmeId, 
+							0, 
+							activityUpdate.activityId
+						);
+						programmeList.push(programme);
+					}
+
+					if (action && action.validated) {
+						action.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+							EntityType.ACTION, 
+							action.actionId, 
+							0, 
+							programme.programmeId
+						);
+						actionList.push(action);
+					}
 
 					activityUpdate.path = programme.path && programme.path.trim() !== '' ? `${programme.path}.${activityUpdateDto.parentId}._` : `_.${activityUpdateDto.parentId}._`;
 					activityUpdate.sector = programme.sector;
@@ -282,16 +400,47 @@ export class ActivityService {
 				}
 				case EntityType.PROJECT: {
 					const project = await this.isProjectValid(activityUpdateDto.parentId, user);
+					const programme = project.programme;
+					const action = programme?.action;
 
-					// if (project.validated) {
-					// 	throw new HttpException(
-					// 		this.helperService.formatReqMessagesString(
-					// 			"common.cannotLinkedToValidated",
-					// 			[EntityType.PROJECT , project.projectId]
-					// 		),
-					// 		HttpStatus.BAD_REQUEST
-					// 	);
-					// }
+					if (project.validated) {
+						project.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
+							EntityType.PROJECT, 
+							project.projectId, 
+							0, 
+							activityUpdate.activityId
+						);
+						projectList.push(project);
+					}
+
+					if (programme && programme.validated) {
+						programme.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+							EntityType.PROGRAMME, 
+							programme.programmeId, 
+							0, 
+							project.projectId
+						);
+						programmeList.push(programme);
+					}
+
+					if (action && action.validated) {
+						action.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+							EntityType.ACTION, 
+							action.actionId, 
+							0, 
+							programme.programmeId
+						);
+						actionList.push(action);
+					}
 
 					activityUpdate.path = project.path && project.path.trim() !== '' ? `${project.path}.${activityUpdateDto.parentId}` : `_._.${activityUpdateDto.parentId}`;
 					activityUpdate.sector = project.sector;
@@ -363,6 +512,17 @@ export class ActivityService {
 			.transaction(async (em) => {
 				const savedActivity = await em.save<ActivityEntity>(activityUpdate);
 				if (savedActivity) {
+
+					if (projectList.length > 0) {
+						em.save<ProjectEntity>(projectList);
+					}
+					if (programmeList.length > 0) {
+						em.save<ProgrammeEntity>(programmeList);
+					}
+					if (actionList.length > 0) {
+						em.save<ActionEntity>(actionList);
+					}
+
 					// Save event logs
 					if (eventLog.length > 0) {
 						await em.save<LogEntity>(eventLog);

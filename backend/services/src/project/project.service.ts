@@ -27,7 +27,9 @@ import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { ValidateDto } from "../dtos/validate.dto";
 import { SupportEntity } from "../entities/support.entity";
-import { AchievementEntity } from "src/entities/achievement.entity";
+import { AchievementEntity } from "../entities/achievement.entity";
+import { ProgrammeEntity } from "../entities/programme.entity";
+import { ActionEntity } from "../entities/action.entity";
 
 @Injectable()
 export class ProjectService {
@@ -66,8 +68,10 @@ export class ProjectService {
 		project.path = "_._";
 		project.expectedTimeFrame = projectDto.endYear - projectDto.startYear;
 
+		let programme: ProgrammeEntity;
+
 		if (projectDto.programmeId) {
-			const programme = await this.programmeService.findProgrammeById(projectDto.programmeId);
+			programme = await this.programmeService.findProgrammeById(projectDto.programmeId);
 			if (!programme) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -77,16 +81,6 @@ export class ProjectService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
-
-			// if (programme.validated) {
-			// 	throw new HttpException(
-			// 		this.helperService.formatReqMessagesString(
-			// 			"common.cannotLinkedToValidated",
-			// 			[EntityType.PROGRAMME , programme.programmeId]
-			// 		),
-			// 		HttpStatus.BAD_REQUEST
-			// 	);
-			// }
 
 			if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
 				throw new HttpException(
@@ -153,6 +147,34 @@ export class ProjectService {
 			.transaction(async (em) => {
 				const savedProject = await em.save<ProjectEntity>(project);
 				if (savedProject) {
+					if (projectDto.programmeId) {
+						const action = programme.action;
+						if (programme.validated) {
+							programme.validated = false;
+							this.addEventLogEntry(
+								eventLog, 
+								LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
+								EntityType.PROGRAMME, 
+								programme.programmeId, 
+								0, 
+								project.projectId
+							);
+							await em.save<ProgrammeEntity>(programme)
+						}
+		
+						if (action && action.validated) {
+							action.validated = false;
+							this.addEventLogEntry(
+								eventLog, 
+								LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+								EntityType.ACTION, 
+								action.actionId, 
+								0, 
+								programme.programmeId
+							);
+							await em.save<ActionEntity>(action)
+						}
+					}
 					await em.save<LogEntity>(eventLog);
 					// linking activities and updating paths of projects and activities
 					if (activities && activities.length > 0) {
@@ -274,8 +296,7 @@ export class ProjectService {
 		const eventLog = [];
 		let programme;
 
-		// setting project to pending (Non-Validated) state
-		projectUpdate.validated = false;
+		this.addEventLogEntry(eventLog, LogEventType.PROJECT_UPDATED, EntityType.PROJECT, projectUpdate.projectId, user.id, projectUpdateDto);
 
 		const currentProject = await this.findProjectWithParentAndChildren(projectUpdateDto.projectId);
 		
@@ -301,6 +322,12 @@ export class ProjectService {
 			);
 		}
 
+		// setting project to pending (Non-Validated) state
+		if (currentProject.validated) {
+			projectUpdate.validated = false;
+			this.addEventLogEntry(eventLog, LogEventType.PROJECT_UNVERIFIED_DUE_UPDATE, EntityType.PROJECT, projectUpdate.projectId, 0, projectUpdateDto);
+		}
+
 		if (projectUpdateDto.endYear < projectUpdateDto.startYear) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -322,16 +349,6 @@ export class ProjectService {
 					HttpStatus.BAD_REQUEST
 				);
 			}
-
-			// if (programme.validated) {
-			// 	throw new HttpException(
-			// 		this.helperService.formatReqMessagesString(
-			// 			"common.cannotLinkedToValidated",
-			// 			[EntityType.PROGRAMME , programme.programmeId]
-			// 		),
-			// 		HttpStatus.BAD_REQUEST
-			// 	);
-			// }
 
 			if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
 				throw new HttpException(
@@ -448,7 +465,6 @@ export class ProjectService {
 			}
 		}
 
-		this.addEventLogEntry(eventLog, LogEventType.PROJECT_UPDATED, EntityType.PROJECT, projectUpdate.projectId, user.id, projectUpdateDto);
 
 		if (projectUpdateDto.kpis && projectUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.UPDATED)) {
 			// Add event log entry after the loop completes
@@ -519,9 +535,6 @@ export class ProjectService {
 			this.helperService.formatReqMessagesString("project.updateProjectSuccess", []),
 			proj
 		);
-
-
-
 	}
 
 	async findProjectsEligibleForLinking() {
@@ -543,16 +556,6 @@ export class ProjectService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
-
-		// if (programme.validated) {
-		// 	throw new HttpException(
-		// 		this.helperService.formatReqMessagesString(
-		// 			"common.cannotLinkedToValidated",
-		// 			[EntityType.PROGRAMME , programme.programmeId]
-		// 		),
-		// 		HttpStatus.BAD_REQUEST
-		// 	);
-		// }
 
 		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)){
 			throw new HttpException(
@@ -624,16 +627,6 @@ export class ProjectService {
 				);
 			}
 
-			// if (project.programme.validated) {
-			// 	throw new HttpException(
-			// 		this.helperService.formatReqMessagesString(
-			// 			"common.cannotUnlinkedFromValidated",
-			// 			[EntityType.PROGRAMME , project.programme.programmeId]
-			// 		),
-			// 		HttpStatus.BAD_REQUEST
-			// 	);
-			// }
-
 			if (!this.helperService.doesUserHaveSectorPermission(user, project.sector)){
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -678,6 +671,7 @@ export class ProjectService {
 	async findAllProjectsByIds(projectIds: string[]) {
 		return await this.projectRepo.createQueryBuilder('project')
 			.leftJoinAndSelect('project.programme', 'programme')
+			.leftJoinAndSelect('programme.action', 'action')
 			.leftJoinAndMapMany(
 				"project.activities",
 				ActivityEntity,
@@ -696,14 +690,17 @@ export class ProjectService {
 	}
 
 	async findProjectById(projectId: string) {
-		return await this.projectRepo.findOneBy({
-			projectId
-		})
+		return await this.projectRepo.createQueryBuilder('project')
+			.leftJoinAndSelect('project.programme', 'programme')
+			.leftJoinAndSelect('programme.action', 'action')
+			.where('project.projectId = :projectId', { projectId })
+			.getOne();
 	}
 
 	async findProjectWithParentAndChildren(projectId: string) {
 		return await this.projectRepo.createQueryBuilder('project')
 			.leftJoinAndSelect('project.programme', 'programme')
+			.leftJoinAndSelect('programme.action', 'action')
 			.leftJoinAndMapMany(
 				"project.activities",
 				ActivityEntity,
