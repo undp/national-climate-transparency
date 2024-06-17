@@ -23,6 +23,8 @@
     "attachACTIVITY": "ATTACH ACTIVITIES",
     "activityList": "Activity List",
     "projectCreationSuccess": "Project Added Successfully",
-    "noProjectsMessage": "No Activities Attached",
-    "projectUpdateSuccess": "Project Updated Successfully"
+    "projectUpdateSuccess": "Project Updated Successfully",
+    "projectValidateSuccess": "Project Validated Successfully",
+    "projectUnvalidateSuccess": "Project Unvalidated Successfully",
+    "noProjectsMessage": "No Activities Attached"
   }

@@ -14,6 +14,12 @@ import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { actionMenuWithoutAttaching } from '../../../Components/Popups/tableAction';
 import { ActivityEntity } from '../../../Entities/activity';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
+import {
+  addActionBps,
+  filterDropdownBps,
+  listSearchBarBps,
+  searchBoxBps,
+} from '../../../Definitions/breakpoints/breakpoints';
 
 interface Item {
   key: number;
@@ -412,7 +418,7 @@ const activityList = () => {
       </div>
       <div className="content-card">
         <Row className="table-actions-section">
-          <Col md={8} xs={24}>
+          <Col {...addActionBps}>
             <div className="action-bar">
               {ability.can(Action.Create, ActivityEntity) && (
                 <Button
@@ -429,9 +435,9 @@ const activityList = () => {
               )}
             </div>
           </Col>
-          <Col md={16} xs={24}>
-            <div className="filter-section">
-              <div className="search-bar">
+          <Col {...listSearchBarBps}>
+            <Row gutter={10}>
+              <Col {...searchBoxBps} className="search-bar">
                 <Input
                   addonAfter={<SearchOutlined style={{ color: '#615d67' }} onClick={onSearch} />}
                   placeholder={
@@ -445,8 +451,8 @@ const activityList = () => {
                   style={{ width: 265 }}
                   value={tempSearchValue}
                 />
-              </div>
-              <div className="filter-bar" style={{ marginTop: '0.3rem' }}>
+              </Col>
+              <Col {...filterDropdownBps} className="filter-bar">
                 <Dropdown
                   arrow={false}
                   placement="bottomRight"
@@ -465,8 +471,8 @@ const activityList = () => {
                     }}
                   />
                 </Dropdown>
-              </div>
-            </div>
+              </Col>
+            </Row>
           </Col>
         </Row>
         <Row>

@@ -430,9 +430,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
-                achieved:
+                achieved: parseFloat(
                   kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
-                    ?.achieved ?? 0,
+                    ?.achieved ?? 0
+                ),
                 expected: kpi.expected,
                 kpiAction: KPIAction.NONE,
               });
@@ -506,7 +507,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         if (response.status === 200 || response.status === 201) {
           message.open({
             type: 'success',
-            content: 'Successfully Validated !',
+            content: isValidated ? t('activityUnvalidateSuccess') : t('activityValidateSuccess'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });

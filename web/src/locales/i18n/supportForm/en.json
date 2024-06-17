@@ -21,5 +21,7 @@
     "receivedLocalTitle": "Amount Received (Domestic currency)",
     "exchangeRateTitle": "Exchange Rate (USD/Domestic currency)",
     "supportCreationSuccess": "Support Added Successfully",
-    "supportUpdateSuccess": "Support Updated Successfully"
+    "supportUpdateSuccess": "Support Updated Successfully",
+    "supportValidateSuccess": "Support Validated Successfully",
+    "supportUnvalidateSuccess": "Support Unvalidated Successfully"
   }

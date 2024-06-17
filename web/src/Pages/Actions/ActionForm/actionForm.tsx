@@ -79,7 +79,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
-  // Spinner When Form Submit Occurs
+  // Spinner For Form Submit
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 
@@ -725,7 +725,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         if (response.status === 200 || response.status === 201) {
           message.open({
             type: 'success',
-            content: 'Successfully Validated !',
+            content: isValidated ? t('actionUnvalidateSuccess') : t('actionValidateSuccess'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });

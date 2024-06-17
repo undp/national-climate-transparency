@@ -31,19 +31,53 @@ export class LinkUnlinkService {
 					programme.action = action;
 					programme.path = action.actionId;
 					programme.sector = action.sector;
-					programme.validated = false;
+
+					logs.push(this.buildLogEntity(LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, payload))
+
+					if (programme.validated) {
+						programme.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+							EntityType.PROGRAMME,
+							programme.programmeId,
+							0,
+							action.actionId)
+						)
+					}
 
 					const linkedProgramme = await em.save<ProgrammeEntity>(programme);
 
 					if (linkedProgramme) {
+						if (action.validated) {
+							action.validated = false;
+							await em.save<ActionEntity>(action)
+							logs.push(this.buildLogEntity(
+								LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+								EntityType.ACTION,
+								action.actionId,
+								0,
+								programme.programmeId)
+							)
+						}
 
 						if (programme.activities && programme.activities.length > 0) {
 							const activities = [];
 							// update each activity's path that are directly linked to the programme
 							for (const activity of programme.activities) {
 								activity.sector = action.sector;
-								activity.validated = false;
 								activity.path = this.addActionToActivityPath(activity.path, action.actionId)
+
+								// unvalidate the activity linked to programme
+								if (activity.validated) {
+									activity.validated = false;
+									logs.push(this.buildLogEntity(
+										LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+										EntityType.ACTIVITY,
+										activity.activityId,
+										0,
+										programme.programmeId)
+									)
+								}
 								activities.push(activity);
 							}
 							await em.save<ActivityEntity>(activities)
@@ -53,8 +87,19 @@ export class LinkUnlinkService {
 							for (const project of programme.projects) {
 								// update project's path
 								project.sector = action.sector;
-								project.validated = false;
 								project.path = this.addActionToProjectPath(project.path, action.actionId);
+
+								// unvalidate the linked projects
+								if (project.validated) {
+									project.validated = false;
+									logs.push(this.buildLogEntity(
+										LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+										EntityType.PROJECT,
+										project.projectId,
+										0,
+										programme.programmeId)
+									)
+								}
 								projects.push(project);
 
 								// update each activity's path that are linked to the project
@@ -62,8 +107,19 @@ export class LinkUnlinkService {
 									const activities = [];
 									for (const activity of project.activities) {
 										activity.sector = action.sector;
-										activity.validated = false;
 										activity.path = this.addActionToActivityPath(activity.path, action.actionId);
+
+										// unvalidate the activity linked to project
+										if (activity.validated) {
+											activity.validated = false;
+											logs.push(this.buildLogEntity(
+												LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+												EntityType.ACTIVITY,
+												activity.activityId,
+												0,
+												programme.programmeId)
+											)
+										}
 										activities.push(activity);
 									}
 									await em.save<ActivityEntity>(activities)
@@ -72,16 +128,6 @@ export class LinkUnlinkService {
 							}
 							await em.save<ProjectEntity>(projects)
 						}
-
-						logs.push(
-							this.buildLogEntity(
-								LogEventType.LINKED_TO_ACTION,
-								EntityType.PROGRAMME,
-								programme.programmeId,
-								user.id,
-								payload
-							)
-						)
 					}
 				}
 				logs.push(
@@ -98,6 +144,7 @@ export class LinkUnlinkService {
 	}
 
 	async unlinkProgrammesFromAction(
+		action: ActionEntity,
 		programme: ProgrammeEntity,
 		payload: any,
 		user: User,
@@ -106,15 +153,28 @@ export class LinkUnlinkService {
 	) {
 		await entityManager
 			.transaction(async (em) => {
-
+				const logs = [];
 				programme.action = null;
 				programme.path = "";
 				programme.sector = null;
-				programme.validated = false;
+
+				logs.push(this.buildLogEntity(LogEventType.UNLINKED_FROM_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, payload))
+
+				if (programme.validated) {
+					programme.validated = false;
+					logs.push(this.buildLogEntity(LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE, EntityType.PROGRAMME, programme.programmeId, 0, payload))
+				}
 
 				const unlinkedProgramme = await em.save<ProgrammeEntity>(programme);
 
 				if (unlinkedProgramme) {
+
+					if (action.validated) {
+						action.validated = false;
+						logs.push(this.buildLogEntity(LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_CHANGE, EntityType.ACTION, action.actionId, 0, programme.programmeId))
+						await em.save<ActionEntity>(action)
+					}
+
 					if (programme.activities && programme.activities.length > 0) {
 						// update each activity's path that are directly linked to the programme
 						const activities = [];
@@ -122,7 +182,18 @@ export class LinkUnlinkService {
 							const parts = activity.path.split(".");
 							activity.path = ["_", parts[1], parts[2]].join(".");
 							activity.sector = null;
-							activity.validated = false;
+
+							// unvalidate the activity linked to programme
+							if (activity.validated) {
+								activity.validated = false;
+								logs.push(this.buildLogEntity(
+									LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+									EntityType.ACTIVITY,
+									activity.activityId,
+									0,
+									programme.programmeId)
+								)
+							}
 							activities.push(activity);
 						}
 						await em.save<ActivityEntity>(activities)
@@ -133,20 +204,40 @@ export class LinkUnlinkService {
 						for (const project of programme.projects) {
 							// update project's path
 							const parts = project.path.split(".");
-							// const partOne = parts[0].replace("_", action.actionId);
 							project.path = ["_", parts[1]].join(".");
 							project.sector = null;
-							project.validated = false;
+
+							// unvalidate the activity linked to programme
+							if (project.validated) {
+								project.validated = false;
+								logs.push(this.buildLogEntity(
+									LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+									EntityType.PROJECT,
+									project.projectId,
+									0,
+									programme.programmeId)
+								)
+							}
 							projects.push(project);
 
 							// update each activity's path that are linked to the project
 							if (project.activities && project.activities.length > 0) {
 								for (const activity of project.activities) {
 									const parts = activity.path.split(".");
-									// const partOne = parts[0].replace("_", action.actionId);
 									activity.path = ["_", parts[1], parts[2]].join(".");
 									activity.sector = null;
-									activity.validated = false;
+
+									// unvalidate the activity linked to project
+									if (activity.validated) {
+										activity.validated = false;
+										logs.push(this.buildLogEntity(
+											LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+											EntityType.ACTIVITY,
+											activity.activityId,
+											0,
+											programme.programmeId)
+										)
+									}
 									activities.push(activity);
 								}
 							}
@@ -158,20 +249,13 @@ export class LinkUnlinkService {
 					if (achievementsToRemove.length > 0) {
 						await this.deleteAchievements(achievementsToRemove, em);
 					}
-					await em.save<LogEntity>(
-						this.buildLogEntity(
-							LogEventType.UNLINKED_FROM_ACTION,
-							EntityType.PROGRAMME,
-							programme.programmeId,
-							user.id,
-							payload
-						)
-					);
+					await em.save<LogEntity>(logs);
 				}
 			});
 	}
 
 	async updateActionChildrenSector(
+		actionId: string,
 		children: {
 			haveChildren: boolean;
 			programmeChildren: ProgrammeEntity[];
@@ -183,11 +267,23 @@ export class LinkUnlinkService {
 	) {
 		await entityManager
 			.transaction(async (em) => {
+				const logs = [];
 
 				const programmes = []
 				for (const programme of children.programmeChildren) {
 					programme.sector = newSector;
-					programme.validated = false;
+					// unvalidate programme
+					if (programme.validated) {
+						programme.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.PROGRAMME,
+							programme.programmeId,
+							0,
+							actionId)
+						)
+					}
+
 					programmes.push(programme)
 				}
 
@@ -196,7 +292,17 @@ export class LinkUnlinkService {
 				const projects = []
 				for (const project of children.projectChildren) {
 					project.sector = newSector;
-					project.validated = false;
+					// unvalidate project
+					if (project.validated) {
+						project.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.PROJECT,
+							project.projectId,
+							0,
+							actionId)
+						)
+					}
 					projects.push(project)
 				}
 
@@ -205,13 +311,36 @@ export class LinkUnlinkService {
 				const activities = []
 				for (const activity of children.activityChildren) {
 					activity.sector = newSector;
-					activity.validated = false;
+
+					// unvalidate activity
+					if (activity.validated) {
+						activity.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.ACTIVITY,
+							activity.activityId,
+							0,
+							actionId)
+						)
+					}
+
 					activities.push(activity)
 
 					const supports = []
 					for (const support of activity.support) {
 						support.sector = newSector;
-						support.validated = false;
+
+						// unvalidate support
+						if (support.validated) {
+							support.validated = false;
+							logs.push(this.buildLogEntity(
+								LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+								EntityType.SUPPORT,
+								support.supportId,
+								0,
+								actionId)
+							)
+						}
 						supports.push(support)
 					}
 
@@ -219,11 +348,14 @@ export class LinkUnlinkService {
 				}
 
 				await em.save<ActivityEntity>(activities);
+				await em.save<LogEntity>(logs);
 
 			});
 	}
 
 	async linkProjectsToProgramme(programme: ProgrammeEntity, projects: ProjectEntity[], payload: any, user: User, entityManager: EntityManager) {
+		const action = programme.action;
+
 		await entityManager
 			.transaction(async (em) => {
 				const logs = [];
@@ -232,7 +364,18 @@ export class LinkUnlinkService {
 					project.programme = programme;
 					project.path = this.addProgrammeToProjectPath(project.path, programme.programmeId, programme.path);
 					project.sector = programme.sector;
-					project.validated = false;
+
+					// unvalidate project
+					if (project.validated) {
+						project.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+							EntityType.PROJECT,
+							project.projectId,
+							0,
+							programme.programmeId)
+						)
+					}
 
 					const linkedProject = await em.save<ProjectEntity>(project);
 
@@ -243,14 +386,36 @@ export class LinkUnlinkService {
 							for (const activity of project.activities) {
 								if (activity.support && activity.support.length > 0) {
 									activity.support.forEach((support) => {
+
 										support.sector = programme.sector;
-										support.validated = false;
+										// unvalidate support
+										if (support.validated) {
+											support.validated = false;
+											logs.push(this.buildLogEntity(
+												LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+												EntityType.SUPPORT,
+												support.supportId,
+												0,
+												project.projectId)
+											)
+										}
 										supports.push(support);
 									});
 								}
 								activity.path = this.addProgrammeToActivityPath(activity.path, programme.programmeId, programme.path);
 								activity.sector = programme.sector;
-								activity.validated = false;
+
+								// unvalidate activity
+								if (activity.validated) {
+									activity.validated = false;
+									logs.push(this.buildLogEntity(
+										LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+										EntityType.ACTIVITY,
+										activity.activityId,
+										0,
+										project.projectId)
+									)
+								}
 								activities.push(activity);
 							}
 							await em.save<SupportEntity>(supports);
@@ -268,6 +433,30 @@ export class LinkUnlinkService {
 						)
 					}
 				}
+				if (programme.validated) {
+					programme.validated = false;
+					logs.push(this.buildLogEntity(
+						LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+						EntityType.PROGRAMME,
+						programme.programmeId,
+						0,
+						payload)
+					)
+					await em.save<ProgrammeEntity>(programme)
+				}
+
+				if (action && action.validated) {
+					action.validated = false;
+					logs.push(this.buildLogEntity(
+						LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+						EntityType.ACTION,
+						action.actionId,
+						0,
+						programme.programmeId)
+					)
+					await em.save<ActionEntity>(action)
+				}
+
 				logs.push(
 					this.buildLogEntity(
 						LogEventType.PROJECT_LINKED,
@@ -290,15 +479,59 @@ export class LinkUnlinkService {
 	) {
 		await entityManager
 			.transaction(async (em) => {
+				const logs = [];
+
 				for (const project of projects) {
+
+					const programme = project.programme;
+					const action = project.programme.action;
+
+					logs.push(this.buildLogEntity(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, payload))
+
+					// unvalidate programme
+					if (programme.validated) {
+						programme.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+							EntityType.PROGRAMME,
+							programme.programmeId,
+							0,
+							project.projectId)
+						)
+						await em.save<ProgrammeEntity>(programme)
+					}
+
+					if (action && action.validated) {
+						action.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.ACTION,
+							action.actionId,
+							0,
+							programme.programmeId)
+						)
+						await em.save<ActionEntity>(action)
+					}
+
 					project.programme = null;
 					project.path = `_._`;
 					project.sector = null;
-					project.validated = false;
 
-					const unLinkedProgramme = await em.save<ProjectEntity>(project);
+					// unvalidate project
+					if (project.validated) {
+						project.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+							EntityType.PROJECT,
+							project.projectId,
+							0,
+							programme.programmeId)
+						)
+					}
 
-					if (unLinkedProgramme) {
+					const unlinkedProject = await em.save<ProjectEntity>(project);
+
+					if (unlinkedProject) {
 						const activities = [];
 						const supports = [];
 						if (project.activities && project.activities.length > 0) {
@@ -306,13 +539,35 @@ export class LinkUnlinkService {
 								if (activity.support && activity.support.length > 0) {
 									activity.support.forEach((support) => {
 										support.sector = null;
-										support.validated = false;
+										
+										// unvalidate project
+										if (support.validated) {
+											support.validated = false;
+											logs.push(this.buildLogEntity(
+												LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+												EntityType.SUPPORT,
+												support.supportId,
+												0,
+												programme.programmeId)
+											)
+										}
 										supports.push(support);
 									});
 								}
 								activity.path = `_._.${project.projectId}`
 								activity.sector = null;
-								activity.validated = false;
+
+								// unvalidate project
+								if (activity.validated) {
+									activity.validated = false;
+									logs.push(this.buildLogEntity(
+										LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+										EntityType.ACTIVITY,
+										activity.activityId,
+										0,
+										programme.programmeId)
+									)
+								}
 								activities.push(activity);
 							}
 							await em.save<SupportEntity>(supports);
@@ -320,15 +575,7 @@ export class LinkUnlinkService {
 						}
 						await this.deleteAchievements(achievementsToRemove, em);
 
-						await em.save<LogEntity>(
-							this.buildLogEntity(
-								LogEventType.UNLINKED_FROM_PROGRAMME,
-								EntityType.PROJECT,
-								project.projectId,
-								user.id,
-								payload
-							)
-						);
+						await em.save<LogEntity>(logs);
 					}
 				}
 			});
@@ -374,7 +621,19 @@ export class LinkUnlinkService {
 					}
 					activity.parentId = linkActivitiesDto.parentId;
 					activity.parentType = linkActivitiesDto.parentType;
-					activity.validated = false;
+
+					if (activity.validated) {
+						activity.validated = false;
+						logs.push(
+							this.buildLogEntity(
+								LogEventType.ACTIVITY_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+								EntityType.ACTIVITY,
+								activity.activityId,
+								0,
+								linkActivitiesDto.parentId
+							)
+						)
+					}
 
 					const linkedActivity = await em.save<ActivityEntity>(activity);
 
@@ -383,7 +642,19 @@ export class LinkUnlinkService {
 						if (activity.support && activity.support.length > 0) {
 							activity.support.forEach((support) => {
 								support.sector = linkedActivity.sector;
-								support.validated = false;
+
+								if (support.validated) {
+									support.validated = false;
+									logs.push(
+										this.buildLogEntity(
+											LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+											EntityType.SUPPORT,
+											support.supportId,
+											0,
+											linkActivitiesDto.parentId
+										)
+									)
+								}
 								supports.push(support);
 							});
 						}

@@ -103,13 +103,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     const fetchNonValidatedActivities = async () => {
       try {
         const payload = {
-          filterAnd: [
-            {
-              key: 'validated',
-              operation: '=',
-              value: false,
-            },
-          ],
           sort: {
             key: 'activityId',
             order: 'ASC',
@@ -253,7 +246,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
         if (response.status === 200 || response.status === 201) {
           message.open({
             type: 'success',
-            content: 'Successfully Validated !',
+            content: isValidated ? t('supportUnvalidateSuccess') : t('supportValidateSuccess'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
