@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './login.scss';
-import { Button, Col, Form, Input, Row } from 'antd';
+import { Button, Col, Form, Input, Row, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useNavigate } from 'react-router-dom';
@@ -34,9 +34,15 @@ const ForgotPassword = () => {
       if (response.status === 200 || response.status === 201) {
         setEmailSent(true);
         setEmailError(false);
+
+        message.open({
+          type: 'success',
+          content: t('forgotPassword:emailSent'),
+          duration: 5,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
       }
     } catch (error: any) {
-      console.log('Error in sending resetting password', error);
       setEmailError(true);
     } finally {
       setLoading(false);
