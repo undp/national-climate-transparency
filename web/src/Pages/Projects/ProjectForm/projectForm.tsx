@@ -1,13 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
-import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
-import { GraphUpArrow } from 'react-bootstrap-icons';
 import './projectForm.scss';
 import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
 import { IntImplementor, KPIAction, Recipient } from '../../../Enums/shared.enum';
@@ -30,9 +28,7 @@ import { NewKpi } from '../../../Components/KPI/newKpi';
 import { ViewKpi } from '../../../Components/KPI/viewKpi';
 import { EditKpi } from '../../../Components/KPI/editKpi';
 import { processOptionalFields } from '../../../Utils/optionalValueHandler';
-import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 import {
-  attachButtonBps,
   attachTableHeaderBps,
   halfColumnBps,
   quarterColumnBps,
@@ -92,8 +88,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 
-  // Activity Attachment State
+  // Activity Attachment State:Activity link functions removed keeping original state
 
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   const [allActivityIds, setAllActivityList] = useState<string[]>([]);
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
   const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
@@ -104,8 +101,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Detach Popup Visibility
 
-  const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
-  const [detachingEntityId, setDetachingEntityId] = useState<string>();
+  // const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  // const [detachingEntityId, setDetachingEntityId] = useState<string>();
 
   // Supports state
 
@@ -879,22 +876,22 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Detach Activity
 
-  const detachActivity = async (actId: string) => {
-    setDetachingEntityId(actId);
-    setOpenDetachPopup(true);
-  };
+  // const detachActivity = async (actId: string) => {
+  //   setDetachingEntityId(actId);
+  //   setOpenDetachPopup(true);
+  // };
 
   // Handle Detachment
 
-  const detachEntity = async (entityId: string) => {
-    const filteredIds = tempActivityIds.filter((id) => id !== entityId);
-    setTempActivityIds(filteredIds);
-    setIsSaveButtonDisabled(false);
-  };
+  // const detachEntity = async (entityId: string) => {
+  //   const filteredIds = tempActivityIds.filter((id) => id !== entityId);
+  //   setTempActivityIds(filteredIds);
+  //   setIsSaveButtonDisabled(false);
+  // };
 
   // Activity Column Definition
 
-  const activityTableColumns = getActivityTableColumns(isView, detachActivity);
+  const activityTableColumns = getActivityTableColumns();
 
   // Support Column Definition
 
@@ -922,7 +919,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   return (
     <div className="content-container">
-      <ConfirmPopup
+      {/* <ConfirmPopup
         icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
@@ -935,7 +932,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         doAction={detachEntity}
         open={openDetachPopup}
         setOpen={setOpenDetachPopup}
-      />
+      /> */}
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -1506,7 +1503,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col {...attachButtonBps}>
+                {/* <Col {...attachButtonBps}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1523,7 +1520,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
                   ></AttachEntity>
-                </Col>
+                </Col> */}
               </Row>
               <Row>
                 <Col span={24}>

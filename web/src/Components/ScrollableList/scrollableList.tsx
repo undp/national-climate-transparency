@@ -40,7 +40,7 @@ const ScrollableList: React.FC<Props> = ({ listToShow }) => {
   return (
     <div>
       <Popover placement="bottom" trigger={'click'} showArrow={false} content={fullList()}>
-        <Row gutter={[30, 5]}>
+        <Row gutter={[30, 5]} style={{ maxWidth: '250px' }}>
           {options.map((listValue: any, index: number) => (
             <Col key={index} span={24}>
               <Tag color={listValue.color} className="table-full-width-tag">

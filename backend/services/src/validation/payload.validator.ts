@@ -70,7 +70,7 @@ export class PayloadValidator {
 		for (const propertyName in propertiesEnum) {
 			const property = propertiesEnum[propertyName];
 			const array = data[propertyName];
-			const arraySize = 36;
+			const arraySize = 31;
 
 			if (!Array.isArray(array)) {
 				throw new HttpException(`Mitigation timeline ${property} array is missing`, HttpStatus.BAD_REQUEST);

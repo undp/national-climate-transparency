@@ -19,17 +19,16 @@ export class ActivityDto {
 	@ApiProperty()
 	description: string;
 
-	@ValidateIf((c) => c.parentType)
 	@IsNotEmpty()
-	@ApiPropertyOptional({ enum: [EntityType.ACTION, EntityType.PROGRAMME, EntityType.PROJECT] })
+	@ApiProperty({ enum: [EntityType.ACTION, EntityType.PROGRAMME, EntityType.PROJECT] })
 	@IsIn([EntityType.ACTION, EntityType.PROGRAMME, EntityType.PROJECT], {
 		message: 'Invalid Entity Type. Supported types are:' + Object.values([EntityType.ACTION, EntityType.PROGRAMME, EntityType.PROJECT]),
 	})
 	parentType: EntityType;
 
-	@IsOptional()
+	@IsNotEmpty()
 	@IsString()
-	@ApiPropertyOptional()
+	@ApiProperty()
 	parentId: string;
 
 	@ValidateIf((c) => c.measure)
@@ -195,7 +194,8 @@ export class ActivityDto {
 					activityActualEmissions:31,
 					actualEmissionReduct:31,
 				}
-			  }
+			  },
+			  startYear: 2015,
 		},
 	})
 	mitigationTimeline: any;

@@ -23,10 +23,10 @@ export class ActivityEntity implements EntitySubject {
   @Column()
   description: string;
 
-  @Column({ type: "enum", enum: EntityType, nullable: true })
+  @Column({ type: "enum", enum: EntityType })
   parentType: string;
 
-  @Column({ nullable: true })
+  @Column()
   parentId: string;
 
   @Column({ type: "enum", enum: Measure, nullable: true })
@@ -97,6 +97,7 @@ export class ActivityEntity implements EntitySubject {
         actualEmissionReduct: number;
       };
     };
+    startYear: number;
   };
 
 	@Column({ type: "enum", enum: Sector, nullable: true })

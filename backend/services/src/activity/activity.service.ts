@@ -864,12 +864,20 @@ export class ActivityService {
 			);
 		}
 
+		const currentMitigationTimeline = activity.mitigationTimeline;
+
+		const updatedMitigationTimeline = {
+			...currentMitigationTimeline,
+			expected: mitigationTimeline.expected,
+			actual: mitigationTimeline.actual
+		};
+
 		const activ = await this.entityManager
 			.transaction(async (em) => {
 				await em
 					.createQueryBuilder()
 					.update(ActivityEntity)
-					.set({ mitigationTimeline })
+					.set({ mitigationTimeline: updatedMitigationTimeline})
 					.where('activityId = :activityId', { activityId })
 					.execute();
 

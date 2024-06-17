@@ -9,6 +9,8 @@ interface Props {
   actualTimeline: any;
   loading: boolean;
   method: 'create' | 'view' | 'update';
+  mtgStartYear: any;
+  mtgRange: any;
   onValueEnter: (
     tableTYpe: 'expected' | 'actual',
     rowId: string,
@@ -24,6 +26,8 @@ const TimelineTable: React.FC<Props> = ({
   actualTimeline,
   loading,
   method,
+  mtgStartYear,
+  mtgRange,
   onValueEnter,
 }) => {
   const { t } = useTranslation(['timelineTable']);
@@ -94,7 +98,7 @@ const TimelineTable: React.FC<Props> = ({
     },
   ];
 
-  for (let year = 2015; year <= 2050; year++) {
+  for (let year = mtgStartYear; year <= mtgStartYear + mtgRange; year++) {
     expectedTableColumns.push({
       title: year.toString(),
       dataIndex: year.toString(),
