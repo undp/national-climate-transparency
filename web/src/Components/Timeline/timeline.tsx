@@ -9,8 +9,8 @@ interface Props {
   actualTimeline: any;
   loading: boolean;
   method: 'create' | 'view' | 'update';
-  mtgStartYear: any;
-  mtgRange: any;
+  mtgStartYear: number;
+  mtgRange: number;
   onValueEnter: (
     tableTYpe: 'expected' | 'actual',
     rowId: string,
