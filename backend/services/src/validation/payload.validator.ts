@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { KpiDto } from "../dtos/kpi.dto";
 import { HelperService } from "../util/helpers.service";
-import { EntityType } from "../enums/shared.enum";
+import { EntityType, Method } from "../enums/shared.enum";
 import { mitigationTimelineDto } from "../dtos/mitigationTimeline.dto";
 import { expectedMitigationTimelineProperties, actualMitigationTimelineProperties } from "../enums/mitigationTimeline.enum";
 import { ActivityDto } from "src/dtos/activity.dto";
@@ -33,7 +33,7 @@ export class PayloadValidator {
 		}
 	}
 
-	validateMitigationTimelinePayload(mitigationTimelineDto: mitigationTimelineDto | ActivityDto, method: string) {
+	validateMitigationTimelinePayload(mitigationTimelineDto: mitigationTimelineDto | ActivityDto, method: Method) {
 		const { mitigationTimeline } = mitigationTimelineDto;
 
 		if (!mitigationTimeline) {
@@ -66,7 +66,7 @@ export class PayloadValidator {
 			}
 		}
 
-		if(method==='create'){
+		if(method === Method.CREATE){
 			const {startYear} = mitigationTimeline;
 			if(!startYear){
 				throw new HttpException('Mitigation timeline Start Year is missing', HttpStatus.BAD_REQUEST);

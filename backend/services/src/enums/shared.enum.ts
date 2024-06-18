@@ -185,3 +185,9 @@ export enum KPIAction {
   CREATED = 'Created',
   UPDATED = 'Updated',
 }
+
+export enum Method {
+  CREATE = 'create',
+  UPDATE = 'update',
+  VIEW = 'view',
+}
