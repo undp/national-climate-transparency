@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useEffect, useState } from 'react';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import './reportList.scss';
@@ -31,7 +30,7 @@ const reportList = () => {
 
   // Reports to Display
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   const [reportsToDisplay, setReportsToDisplay] = useState<ReportType[]>([
     ReportType.FIVE,
     ReportType.TWELVE,
@@ -55,6 +54,8 @@ const reportList = () => {
     [ReportType.FIVE]: 1,
     [ReportType.TWELVE]: 1,
   });
+
+  // Functions to Retrieve Tale Data
 
   const getTableFiveData = async () => {
     setLoading(true);
@@ -152,18 +153,9 @@ const reportList = () => {
     }
   };
 
-  useEffect(() => {
-    getTableFiveData();
-  }, [aggregateCurrentPage?.tableFive, aggregatePageSize?.tableFive]);
-
-  useEffect(() => {
-    getTableTwelveData();
-  }, [aggregateCurrentPage?.tableTwelve, aggregatePageSize?.tableTwelve]);
-
-  //Export Report Data
+  // Function to Export Report Data
 
   const downloadReportData = async (exportFileType: string, whichTable: ReportType) => {
-    setLoading(true);
     try {
       const payload: any = { fileType: exportFileType };
       const response: any = await post(`national/reports/${whichTable}/export`, payload);
@@ -177,12 +169,12 @@ const reportList = () => {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
       }
-      setLoading(false);
     } catch (error: any) {
       displayErrorMessage(error);
-      setLoading(false);
     }
   };
+
+  // Function to Retrieve Column Definitions
 
   const getReportColumns = (reportType: ReportType) => {
     switch (reportType) {
@@ -192,6 +184,8 @@ const reportList = () => {
         return getReportTwelveColumns(t);
     }
   };
+
+  // Function to Handle Table wise Pagination
 
   const handleTablePagination = (pagination: any, whichReport: ReportType) => {
     setAggregateCurrentPage((prevState) => ({
@@ -204,6 +198,16 @@ const reportList = () => {
       [whichReport]: pagination.pageSize,
     }));
   };
+
+  // Updating the Table Data when the Pagination changes
+
+  useEffect(() => {
+    getTableFiveData();
+  }, [aggregateCurrentPage?.tableFive, aggregatePageSize?.tableFive]);
+
+  useEffect(() => {
+    getTableTwelveData();
+  }, [aggregateCurrentPage?.tableTwelve, aggregatePageSize?.tableTwelve]);
 
   return (
     <div className="content-container report-table5">
