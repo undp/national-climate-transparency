@@ -14,6 +14,7 @@ import { JWTPayload } from "../dtos/jwt.payload";
 import { EmailTemplates } from "../email-helper/email.template";
 import { API_KEY_SEPARATOR } from "../constants";
 import { UserState } from "../enums/user.state.enum";
+import { User } from "src/entities/user.entity";
 
 @Injectable()
 export class AuthService {
@@ -29,13 +30,27 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.userService.getUserCredentials(username?.toLowerCase());
+    let validationResponse : {user: Omit<User, 'password'> | null; message: string};
+
     pass = this.passwordHashService.getPasswordHash(pass);
-    if (user && user.password === pass && user.state == UserState.ACTIVE) {
-      const { password, ...result } = user;
-      return result;
+    const user = await this.userService.getUserCredentials(username?.toLowerCase());
+
+    if (user) {
+      if (user.state == UserState.ACTIVE) {
+        if (user.password === pass) {
+          const { password, ...result } = user;
+          validationResponse = { user: result, message: 'Validated'};
+        } else {
+          validationResponse = {user : null, message: "incorrectPassword"}
+        }
+      } else {
+        validationResponse = {user : null, message: "accountDeactivated"}
+      }
+    } else {
+      validationResponse = {user : null, message: "invalidUsername"}
     }
-    return null;
+    
+    return validationResponse;
   }
 
   async validateApiKey(apiKey: string): Promise<any> {
