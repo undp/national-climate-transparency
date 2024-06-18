@@ -3,9 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import configuration from '../configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from '../typeorm.config.service';
-import { ReportFiveViewEntity } from 'src/entities/report.five.view.entity';
+import { ReportFiveViewEntity } from '../entities/report.five.view.entity';
 import { ReportService } from './report.service';
-import { UtilModule } from 'src/util/util.module';
+import { UtilModule } from '../util/util.module';
+import { ReportTwelveViewEntity } from '../entities/report.twelve.view.entity';
 
 @Module({
 	imports: [
@@ -19,7 +20,8 @@ import { UtilModule } from 'src/util/util.module';
 			imports: undefined,
 		}),
 		TypeOrmModule.forFeature([
-			ReportFiveViewEntity
+			ReportFiveViewEntity,
+			ReportTwelveViewEntity
 		]),
 		UtilModule
 	],

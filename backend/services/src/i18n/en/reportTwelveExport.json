@@ -1,0 +1,15 @@
+{
+    "tableTwelve": "Tables Annex II -12",
+    "nothingToExport": "Data not found for export",
+    "projectId": "Project No.",
+    "titleOfProject": "Title of Project",
+    "description": "Description",
+    "startYear": "Start year",
+    "projectStatus": "Status",
+    "endYear": "End year",
+    "transparency": "Contribution to Enhancing Transparency ",
+    "internationalSupportChannel": "Channel",
+    "supportReceivedOrNeeded": "Support Needed or Received",
+    "receivedAmount": "International Funds (USD)",
+    "receivedAmountDomestic": "International Funds (XXD)"
+}

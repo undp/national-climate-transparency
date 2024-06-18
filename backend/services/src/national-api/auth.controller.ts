@@ -14,6 +14,7 @@ import { AuthService } from "src/auth/auth.service";
 import { ForgotPasswordDto } from "src/dtos/forgotPassword.dto";
 import { LoginDto } from "src/dtos/login.dto";
 import { PasswordResetDto } from "src/dtos/passwordReset.dto";
+import { User } from "src/entities/user.entity";
 import { HelperService } from "src/util/helpers.service";
 import { PasswordResetService } from "src/util/passwordReset.service";
 
@@ -28,16 +29,18 @@ export class AuthController {
 
   @Post("login")
   async login(@Body() login: LoginDto, @Request() req) {
-    const user = await this.authService.validateUser(
+    const validationResponse: {user: Omit<User, 'password'> | null; message: string} = 
+    await this.authService.validateUser(
       login.username,
       login.password
     );
-    if (user != null) {
+
+    if (validationResponse.user != null) {
       global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-      return this.authService.login(user);
+      return this.authService.login(validationResponse.user);
     }
     throw new HttpException(this.helperService.formatReqMessagesString(
-      "common.invalidLogin",
+      `common.${validationResponse.message}`,
       []
     ), HttpStatus.UNAUTHORIZED);
   }
