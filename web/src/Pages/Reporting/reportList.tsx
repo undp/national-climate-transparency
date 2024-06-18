@@ -131,7 +131,9 @@ const reportList = () => {
             endYear: entry.endYear,
             fundUsd: entry.receivedAmount,
             fundDomestic: entry.receivedAmountDomestic,
-            internationalSupportChannel: entry.internationalSupportChannel,
+            internationalSupportChannel:
+              entry.internationalSupportChannel?.split(',').map((item: string) => item.trim()) ??
+              [],
           });
         });
 

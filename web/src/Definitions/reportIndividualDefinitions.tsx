@@ -26,5 +26,5 @@ export type ReportTwelveRecord = {
   endYear: number;
   fundUsd: number;
   fundDomestic: number;
-  internationalSupportChannel: string;
+  internationalSupportChannel: string[];
 };

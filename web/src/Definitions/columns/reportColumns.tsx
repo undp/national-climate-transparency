@@ -1,5 +1,5 @@
 import ScrollableList from '../../Components/ScrollableList/scrollableList';
-import { ReportFiveRecord } from '../reportIndividualDefinitions';
+import { ReportFiveRecord, ReportTwelveRecord } from '../reportIndividualDefinitions';
 
 export const getReportFiveColumns = (t: any) => {
   const reportFiveColumns = [
@@ -103,9 +103,11 @@ export const getReportTwelveColumns = (t: any) => {
     },
     {
       title: t('internationalSupportChannel'),
-      dataIndex: 'internationalSupportChannel',
-      key: 'internationalSupportChannel',
-      width: 100,
+      width: 150,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: ReportTwelveRecord) => {
+        return <ScrollableList listToShow={record.internationalSupportChannel}></ScrollableList>;
+      },
     },
   ];
 
