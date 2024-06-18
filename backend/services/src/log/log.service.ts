@@ -18,7 +18,12 @@ export class LogService {
             LogEventType.LINKED_TO_ACTION,
             LogEventType.LINKED_TO_PROGRAMME,
             LogEventType.LINKED_TO_PROJECT,
-            LogEventType.LINKED_TO_ACTIVITY
+            LogEventType.LINKED_TO_ACTIVITY,
+            LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+            LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+            LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+            LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+            LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
         ];
 
         const queryBuilder = await this.logRepo

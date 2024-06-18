@@ -286,7 +286,7 @@ export class ActivityService {
 						project.validated = false;
 						this.addEventLogEntry(
 							eventLog, 
-							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
+							LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
 							EntityType.PROJECT, 
 							project.projectId, 
 							0, 
@@ -303,7 +303,7 @@ export class ActivityService {
 							EntityType.PROGRAMME, 
 							programme.programmeId, 
 							0, 
-							project.projectId
+							activityUpdate.activityId
 						);
 						programmeList.push(programme);
 					}
@@ -316,7 +316,7 @@ export class ActivityService {
 							EntityType.ACTION, 
 							action.actionId, 
 							0, 
-							programme.programmeId
+							activityUpdate.activityId
 						);
 						actionList.push(action);
 					}

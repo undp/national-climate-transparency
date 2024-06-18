@@ -275,6 +275,8 @@ export class ProgrammeService {
 	async updateProgramme(programmeUpdateDto: ProgrammeUpdateDto, user: User) {
 		const programmeUpdate: ProgrammeEntity = plainToClass(ProgrammeEntity, programmeUpdateDto);
 		const eventLog = [];
+		
+		this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_UPDATED, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, programmeUpdateDto);
 
 		const currentProgramme = await this.findProgrammeWithParentChildren(programmeUpdateDto.programmeId);
 		if (!currentProgramme) {
@@ -406,8 +408,6 @@ export class ProgrammeService {
 				achievementsToRemove.push(...achievements);
 			}
 		}
-
-		this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_UPDATED, EntityType.PROGRAMME, programmeUpdate.programmeId, user.id, programmeUpdateDto);
 
 		if (programmeUpdateDto.kpis && programmeUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.UPDATED)) {
 			// Add event log entry after the loop completes
@@ -872,7 +872,7 @@ export class ProgrammeService {
 					for (const project of projectChildren) {
 						project.validated = false;
 						logs.push(this.buildLogEntity(
-							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
 							EntityType.PROJECT,
 							project.projectId,
 							0,
