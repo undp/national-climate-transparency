@@ -1,22 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import { Button, Col, Row } from 'antd';
 import './reportList.scss';
-import { DownloadOutlined } from '@ant-design/icons';
-import LayoutTable from '../../Components/common/Table/layout.table';
 import { useTranslation } from 'react-i18next';
-import { ExportFileType } from '../../Enums/shared.enum';
 import { ReportFiveRecord, ReportTwelveRecord } from '../../Definitions/reportDefinitions';
 import {
   getReportFiveColumns,
   getReportTwelveColumns,
 } from '../../Definitions/columns/reportColumns';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
-import {
-  exportBarBps,
-  exportButtonBps,
-  reportTitleBps,
-} from '../../Definitions/breakpoints/breakpoints';
+import ReportCard from '../../Components/reportCard/reportCard';
 
 const reportList = () => {
   const { post } = useConnection();
@@ -166,148 +158,32 @@ const reportList = () => {
       <div className="title-bar">
         <div className="body-title">{t('viewTitle')}</div>
       </div>
-      <div className="content-card">
-        <Row className="table-actions-section">
-          <Col {...reportTitleBps}>
-            <div className="action-bar">
-              <div className="title">{t('reportFiveTitle')}</div>
-            </div>
-          </Col>
-          <Col {...exportBarBps}>
-            <Row gutter={20} className="export-action-row">
-              <Col {...exportButtonBps}>
-                <Button
-                  className="export-button"
-                  type="primary"
-                  size="large"
-                  block
-                  icon={<DownloadOutlined />}
-                  onClick={() => {
-                    downloadReportData(ExportFileType.XLSX);
-                  }}
-                >
-                  {t('exportAsExcel')}
-                </Button>
-              </Col>
-              <Col {...exportButtonBps}>
-                <Button
-                  className="export-button"
-                  type="primary"
-                  size="large"
-                  block
-                  icon={<DownloadOutlined />}
-                  onClick={() => {
-                    downloadReportData(ExportFileType.CSV);
-                  }}
-                >
-                  {t('exportAsCsv')}
-                </Button>
-              </Col>
-            </Row>
-          </Col>
-        </Row>
-        <Row>
-          <Col span={24}>
-            <div className="action-bar">
-              <div className="subTitle">{t('reportFiveSubTitle')}</div>
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col span={24}>
-            <LayoutTable
-              tableData={reportFiveData}
-              columns={reportFiveColumns}
-              loading={loading}
-              pagination={{
-                total: reportFiveTotal,
-                current: currentPage,
-                pageSize: pageSize,
-                showQuickJumper: true,
-                pageSizeOptions: ['10', '20', '30'],
-                showSizeChanger: true,
-                style: { textAlign: 'center' },
-                locale: { page: '' },
-                position: ['bottomRight'],
-              }}
-              handleTableChange={handleTableChange}
-              emptyMessage="No Report Data Available"
-              handleHorizontalOverflow={true}
-            />
-          </Col>
-        </Row>
-      </div>
-      <div className="content-card">
-        <Row className="table-actions-section">
-          <Col {...reportTitleBps}>
-            <div className="action-bar">
-              <div className="title">{t('reportTwelveTitle')}</div>
-            </div>
-          </Col>
-          <Col {...exportBarBps}>
-            <Row gutter={20} className="export-action-row">
-              <Col {...exportButtonBps}>
-                <Button
-                  className="export-button"
-                  type="primary"
-                  size="large"
-                  block
-                  icon={<DownloadOutlined />}
-                  onClick={() => {
-                    downloadReportData(ExportFileType.XLSX);
-                  }}
-                >
-                  {t('exportAsExcel')}
-                </Button>
-              </Col>
-              <Col {...exportButtonBps}>
-                <Button
-                  className="export-button"
-                  type="primary"
-                  size="large"
-                  block
-                  icon={<DownloadOutlined />}
-                  onClick={() => {
-                    downloadReportData(ExportFileType.CSV);
-                  }}
-                >
-                  {t('exportAsCsv')}
-                </Button>
-              </Col>
-            </Row>
-          </Col>
-        </Row>
-        <Row>
-          <Col span={24}>
-            <div className="action-bar">
-              <div className="subTitle">{t('reportTwelveSubTitle')}</div>
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col span={24}>
-            <LayoutTable
-              tableData={reportTwelveData}
-              columns={reportTwelveColumns}
-              loading={loading}
-              pagination={{
-                total: reportTwelveTotal,
-                current: twelveCurrentPage,
-                pageSize: twelvePageSize,
-                showQuickJumper: true,
-                pageSizeOptions: ['10', '20', '30'],
-                showSizeChanger: true,
-                style: { textAlign: 'center' },
-                locale: { page: '' },
-                position: ['bottomRight'],
-              }}
-              handleTableChange={handleTableTwelveChange}
-              emptyMessage="No Report Data Available"
-              handleHorizontalOverflow={true}
-            />
-          </Col>
-        </Row>
-      </div>
+      <ReportCard
+        loading={loading}
+        reportTitle={t('reportFiveTitle')}
+        reportSubtitle={t('reportFiveSubTitle')}
+        reportData={reportFiveData}
+        columns={reportFiveColumns}
+        totalEntries={reportFiveTotal ?? 0}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        exportButtonNames={[t('exportAsExcel'), t('exportAsCsv')]}
+        downloadReportData={downloadReportData}
+        handleTableChange={handleTableChange}
+      ></ReportCard>
+      <ReportCard
+        loading={loading}
+        reportTitle={t('reportTwelveTitle')}
+        reportSubtitle={t('reportTwelveSubTitle')}
+        reportData={reportTwelveData}
+        columns={reportTwelveColumns}
+        totalEntries={reportTwelveTotal ?? 0}
+        currentPage={twelveCurrentPage}
+        pageSize={twelvePageSize}
+        exportButtonNames={[t('exportAsExcel'), t('exportAsCsv')]}
+        downloadReportData={downloadReportData}
+        handleTableChange={handleTableTwelveChange}
+      ></ReportCard>
     </div>
   );
 };
