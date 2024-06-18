@@ -59,3 +59,55 @@ export const getReportFiveColumns = (t: any) => {
 
   return reportFiveColumns;
 };
+
+export const getReportTwelveColumns = (t: any) => {
+  const reportTwelveColumns = [
+    {
+      title: t('titleOfProject'),
+      dataIndex: 'title',
+      key: 'title',
+      width: 150,
+    },
+    { title: t('descriptionOfProject'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('statusOfProject'), dataIndex: 'status', key: 'status', width: 100 },
+    {
+      title: t('supportDirection'),
+      dataIndex: 'supportDirection',
+      key: 'supportDirection',
+      width: 100,
+    },
+    {
+      title: t('isEnhancingTransparency'),
+      dataIndex: 'isEnhancingTransparency',
+      key: 'isEnhancingTransparency',
+      width: 100,
+    },
+    { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
+    { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
+    {
+      title: t('amountCommonTitle'),
+      children: [
+        {
+          title: t('usd'),
+          dataIndex: 'fundUsd',
+          key: 'fundUsd',
+          width: 50,
+        },
+        {
+          title: t('domestic'),
+          dataIndex: 'fundDomestic',
+          key: 'fundDomestic',
+          width: 50,
+        },
+      ],
+    },
+    {
+      title: t('internationalSupportChannel'),
+      dataIndex: 'internationalSupportChannel',
+      key: 'internationalSupportChannel',
+      width: 100,
+    },
+  ];
+
+  return reportTwelveColumns;
+};
