@@ -8,9 +8,11 @@ import {
 import { DownloadOutlined } from '@ant-design/icons';
 import LayoutTable from '../common/Table/layout.table';
 import { ExportFileType } from '../../Enums/shared.enum';
+import { ReportType } from '../../Enums/report.enum';
 
 interface Props {
   loading: boolean;
+  whichReport: ReportType;
   reportTitle: string;
   reportSubtitle: string;
   reportData: any;
@@ -19,12 +21,13 @@ interface Props {
   currentPage: number;
   pageSize: number;
   exportButtonNames: string[];
-  downloadReportData: (data: any) => void;
-  handleTableChange: (pagination: any) => void;
+  downloadReportData: (dataType: ExportFileType, whichReport: ReportType) => void;
+  handleTablePagination: (pagination: any, whichReport: ReportType) => void;
 }
 
 const ReportCard: React.FC<Props> = ({
   loading,
+  whichReport,
   reportTitle,
   reportSubtitle,
   reportData,
@@ -34,8 +37,12 @@ const ReportCard: React.FC<Props> = ({
   pageSize,
   exportButtonNames,
   downloadReportData,
-  handleTableChange,
+  handleTablePagination,
 }) => {
+  const handleTableChange = (pagination: any) => {
+    handleTablePagination(pagination, whichReport);
+  };
+
   return (
     <div className="report-card">
       <Row className="title-bar">
@@ -54,7 +61,7 @@ const ReportCard: React.FC<Props> = ({
                 block
                 icon={<DownloadOutlined />}
                 onClick={() => {
-                  downloadReportData(ExportFileType.XLSX);
+                  downloadReportData(ExportFileType.XLSX, whichReport);
                 }}
               >
                 {exportButtonNames[0]}
@@ -68,7 +75,7 @@ const ReportCard: React.FC<Props> = ({
                 block
                 icon={<DownloadOutlined />}
                 onClick={() => {
-                  downloadReportData(ExportFileType.CSV);
+                  downloadReportData(ExportFileType.CSV, whichReport);
                 }}
               >
                 {exportButtonNames[1]}

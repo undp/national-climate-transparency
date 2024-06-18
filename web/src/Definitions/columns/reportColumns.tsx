@@ -1,5 +1,5 @@
 import ScrollableList from '../../Components/ScrollableList/scrollableList';
-import { ReportFiveRecord } from '../reportDefinitions';
+import { ReportFiveRecord } from '../reportIndividualDefinitions';
 
 export const getReportFiveColumns = (t: any) => {
   const reportFiveColumns = [

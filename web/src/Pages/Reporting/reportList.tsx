@@ -1,14 +1,25 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from 'react';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import './reportList.scss';
 import { useTranslation } from 'react-i18next';
-import { ReportFiveRecord, ReportTwelveRecord } from '../../Definitions/reportDefinitions';
+import {
+  ReportFiveRecord,
+  ReportTwelveRecord,
+} from '../../Definitions/reportIndividualDefinitions';
 import {
   getReportFiveColumns,
   getReportTwelveColumns,
 } from '../../Definitions/columns/reportColumns';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import ReportCard from '../../Components/reportCard/reportCard';
+import {
+  AggregateReportData,
+  AggregateReportTotal,
+  AggregateReportCurrentPage,
+  AggregateReportPageSize,
+} from '../../Definitions/reportBulkDefinitions';
+import { ReportType } from '../../Enums/report.enum';
 
 const reportList = () => {
   const { post } = useConnection();
@@ -18,24 +29,40 @@ const reportList = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Report Five State
+  // Reports to Display
 
-  const [reportFiveData, setReportFiveData] = useState<ReportFiveRecord[]>([]);
-  const [reportFiveTotal, setReportFiveTotal] = useState<number>();
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [currentPage, setCurrentPage] = useState<any>(1);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [reportsToDisplay, setReportsToDisplay] = useState<ReportType[]>([
+    ReportType.FIVE,
+    ReportType.TWELVE,
+  ]);
 
-  // Report Twelve State
+  // Bulk Report Definitions
 
-  const [reportTwelveData, setReportTwelveData] = useState<ReportTwelveRecord[]>([]);
-  const [reportTwelveTotal, setReportTwelveTotal] = useState<number>();
-  const [twelvePageSize, setTwelvePageSize] = useState<number>(10);
-  const [twelveCurrentPage, setTwelveCurrentPage] = useState<any>(1);
+  const [aggregateReportData, setAggregateReportData] = useState<AggregateReportData>({
+    [ReportType.FIVE]: [],
+    [ReportType.TWELVE]: [],
+  });
+  const [aggregateReportTotal, setAggregateReportTotal] = useState<AggregateReportTotal>({
+    [ReportType.FIVE]: 0,
+    [ReportType.TWELVE]: 0,
+  });
+  const [aggregatePageSize, setAggregatePageSize] = useState<AggregateReportPageSize>({
+    [ReportType.FIVE]: 10,
+    [ReportType.TWELVE]: 10,
+  });
+  const [aggregateCurrentPage, setAggregateCurrentPage] = useState<AggregateReportCurrentPage>({
+    [ReportType.FIVE]: 1,
+    [ReportType.TWELVE]: 1,
+  });
 
   const getTableFiveData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize };
+      const payload: any = {
+        page: aggregateCurrentPage.tableFive,
+        size: aggregatePageSize.tableFive,
+      };
 
       const response: any = await post('national/reports/tableFive/query', payload);
       if (response) {
@@ -59,8 +86,16 @@ const reportList = () => {
           });
         });
 
-        setReportFiveData(tempReportFiveData);
-        setReportFiveTotal(response.response.data.total);
+        setAggregateReportData((prevState) => ({
+          ...prevState,
+          [ReportType.FIVE]: tempReportFiveData,
+        }));
+
+        setAggregateReportTotal((prevState) => ({
+          ...prevState,
+          [ReportType.FIVE]: response.response.data.total,
+        }));
+
         setLoading(false);
       }
     } catch (error: any) {
@@ -72,7 +107,10 @@ const reportList = () => {
   const getTableTwelveData = async () => {
     setLoading(true);
     try {
-      const payload: any = { page: currentPage, size: pageSize };
+      const payload: any = {
+        page: aggregateCurrentPage.tableTwelve,
+        size: aggregatePageSize.tableTwelve,
+      };
 
       const response: any = await post('national/reports/tableTwelve/query', payload);
 
@@ -96,8 +134,16 @@ const reportList = () => {
           });
         });
 
-        setReportTwelveData(tempReportTwelveData);
-        setReportTwelveTotal(response.response.data.total);
+        setAggregateReportData((prevState) => ({
+          ...prevState,
+          [ReportType.TWELVE]: tempReportTwelveData,
+        }));
+
+        setAggregateReportTotal((prevState) => ({
+          ...prevState,
+          [ReportType.TWELVE]: response.response.data.total,
+        }));
+
         setLoading(false);
       }
     } catch (error: any) {
@@ -106,33 +152,21 @@ const reportList = () => {
     }
   };
 
-  const handleTableChange = (pagination: any) => {
-    // Setting Pagination
-    setCurrentPage(pagination.current);
-    setPageSize(pagination.pageSize);
-  };
-
-  const handleTableTwelveChange = (pagination: any) => {
-    // Setting Pagination
-    setTwelveCurrentPage(pagination.current);
-    setTwelvePageSize(pagination.pageSize);
-  };
-
   useEffect(() => {
     getTableFiveData();
-  }, [currentPage, pageSize]);
+  }, [aggregateCurrentPage?.tableFive, aggregatePageSize?.tableFive]);
 
   useEffect(() => {
     getTableTwelveData();
-  }, [twelveCurrentPage, twelvePageSize]);
+  }, [aggregateCurrentPage?.tableTwelve, aggregatePageSize?.tableTwelve]);
 
   //Export Report Data
 
-  const downloadReportData = async (exportFileType: string) => {
+  const downloadReportData = async (exportFileType: string, whichTable: ReportType) => {
     setLoading(true);
     try {
       const payload: any = { fileType: exportFileType };
-      const response: any = await post('national/reports/tableFive/export', payload);
+      const response: any = await post(`national/reports/${whichTable}/export`, payload);
       if (response && response.data) {
         const url = response.data.url;
         const a = document.createElement('a');
@@ -150,40 +184,49 @@ const reportList = () => {
     }
   };
 
-  const reportFiveColumns = getReportFiveColumns(t);
-  const reportTwelveColumns = getReportTwelveColumns(t);
+  const getReportColumns = (reportType: ReportType) => {
+    switch (reportType) {
+      case ReportType.FIVE:
+        return getReportFiveColumns(t);
+      case ReportType.TWELVE:
+        return getReportTwelveColumns(t);
+    }
+  };
+
+  const handleTablePagination = (pagination: any, whichReport: ReportType) => {
+    setAggregateCurrentPage((prevState) => ({
+      ...prevState,
+      [whichReport]: pagination.current,
+    }));
+
+    setAggregatePageSize((prevState) => ({
+      ...prevState,
+      [whichReport]: pagination.pageSize,
+    }));
+  };
 
   return (
     <div className="content-container report-table5">
       <div className="title-bar">
         <div className="body-title">{t('viewTitle')}</div>
       </div>
-      <ReportCard
-        loading={loading}
-        reportTitle={t('reportFiveTitle')}
-        reportSubtitle={t('reportFiveSubTitle')}
-        reportData={reportFiveData}
-        columns={reportFiveColumns}
-        totalEntries={reportFiveTotal ?? 0}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        exportButtonNames={[t('exportAsExcel'), t('exportAsCsv')]}
-        downloadReportData={downloadReportData}
-        handleTableChange={handleTableChange}
-      ></ReportCard>
-      <ReportCard
-        loading={loading}
-        reportTitle={t('reportTwelveTitle')}
-        reportSubtitle={t('reportTwelveSubTitle')}
-        reportData={reportTwelveData}
-        columns={reportTwelveColumns}
-        totalEntries={reportTwelveTotal ?? 0}
-        currentPage={twelveCurrentPage}
-        pageSize={twelvePageSize}
-        exportButtonNames={[t('exportAsExcel'), t('exportAsCsv')]}
-        downloadReportData={downloadReportData}
-        handleTableChange={handleTableTwelveChange}
-      ></ReportCard>
+      {reportsToDisplay.map((report) => (
+        <ReportCard
+          loading={loading}
+          whichReport={report}
+          reportTitle={t(`${report}Title`)}
+          reportSubtitle={t(`${report}SubTitle`)}
+          reportData={aggregateReportData[report]}
+          columns={getReportColumns(report)}
+          totalEntries={aggregateReportTotal[report] ?? 0}
+          currentPage={aggregateCurrentPage[report]}
+          pageSize={aggregatePageSize[report]}
+          exportButtonNames={[t('exportAsExcel'), t('exportAsCsv')]}
+          downloadReportData={downloadReportData}
+          handleTablePagination={handleTablePagination}
+        ></ReportCard>
+      ))}
+      ;
     </div>
   );
 };
