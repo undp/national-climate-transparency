@@ -186,6 +186,13 @@ export enum KPIAction {
   UPDATED = 'Updated',
 }
 
+export enum Reports {
+	FIVE = '5',
+	TWELVE = '12',
+	THIRTEEN = '13',
+
+}
+
 export enum Method {
   CREATE = 'create',
   UPDATE = 'update',

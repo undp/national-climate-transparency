@@ -121,6 +121,7 @@ export class ProjectService {
 				const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
 				kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
 				kpi.creatorId = project.projectId;
+				kpi.expected = parseFloat(kpiItem.expected.toFixed(2));
 				kpiList.push(kpi);
 			}
 			// Add event log entry after the loop completes
@@ -431,6 +432,7 @@ export class ProjectService {
 					const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
 					kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
 					kpi.creatorId = projectUpdateDto.projectId;
+					kpi.expected = parseFloat(kpiItem.expected.toFixed(2));
 					kpiList.push(kpi);
 				}
 			}
@@ -438,12 +440,13 @@ export class ProjectService {
 			for (const currentKpi of currentKpis) {
 				const kpiToUpdate = projectUpdateDto.kpis.find(kpi => currentKpi.kpiId == kpi.kpiId);
 				if (kpiToUpdate) {
+					this.payloadValidator.validateKpiPayload(kpiToUpdate, EntityType.PROJECT);
 					const kpi = new KpiEntity();
 					kpi.kpiId = kpiToUpdate.kpiId;
 					kpi.creatorId = kpiToUpdate.creatorId;
 					kpi.creatorType = kpiToUpdate.creatorType;
 					kpi.name = kpiToUpdate.name;
-					kpi.expected = kpiToUpdate.expected;
+					kpi.expected = parseFloat(kpiToUpdate.expected.toFixed(2));
 					kpi.kpiUnit = kpiToUpdate.kpiUnit;
 					kpiList.push(kpi);
 				} else {
@@ -500,6 +503,8 @@ export class ProjectService {
 						);
 						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove);
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
+					} else {
+						await this.updateAllValidatedChildrenAndParentStatus(projectUpdate, em);
 					}
 
 					// Save new KPIs
@@ -776,6 +781,71 @@ export class ProjectService {
 			proj
 		);
 
+	}
+
+	async updateAllValidatedChildrenAndParentStatus(project: ProjectEntity, entityManager: EntityManager) {
+		const projectId = project.projectId;
+		const programme = project.programme;
+
+		const activityChildren: ActivityEntity[] =
+			await this.activityRepo.createQueryBuilder('activity')
+				.leftJoinAndSelect('activity.support', 'support')
+				.where("subpath(activity.path, 2, 1) = :projectId AND activity.validated IS TRUE", { projectId })
+				.getMany();
+
+		if ((activityChildren.length > 0) || programme) {
+
+			await entityManager
+				.transaction(async (em) => {
+					const logs = [];
+
+					if (programme.validated) {
+						programme.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.PROGRAMME,
+							programme.programmeId,
+							0,
+							projectId)
+						);
+						await em.save<ProgrammeEntity>(programme)
+					}
+
+					const activities = []
+					for (const activity of activityChildren) {
+						activity.validated = false;
+
+						logs.push(this.buildLogEntity(
+							LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.ACTIVITY,
+							activity.activityId,
+							0,
+							projectId)
+						);
+						activities.push(activity)
+
+						const supports = []
+						for (const support of activity.support) {
+							support.validated = false;
+
+							logs.push(this.buildLogEntity(
+								LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+								EntityType.SUPPORT,
+								support.supportId,
+								0,
+								projectId)
+							);
+							supports.push(support)
+						}
+
+						await em.save<SupportEntity>(supports);
+					}
+
+					await em.save<ActivityEntity>(activities);
+					await em.save<LogEntity>(logs);
+
+				});
+		}
 	}
 
 	private addEventLogEntry = (
