@@ -19,6 +19,11 @@ import {
   AggregateReportPageSize,
 } from '../../Definitions/reportBulkDefinitions';
 import { ReportType } from '../../Enums/report.enum';
+import { Col, Empty, Row, Select, SelectProps, Tag } from 'antd';
+import { CloseCircleOutlined } from '@ant-design/icons';
+
+const { Option } = Select;
+type TagRender = SelectProps['tagRender'];
 
 const reportList = () => {
   const { post } = useConnection();
@@ -30,7 +35,6 @@ const reportList = () => {
 
   // Reports to Display
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   const [reportsToDisplay, setReportsToDisplay] = useState<ReportType[]>([
     ReportType.FIVE,
     ReportType.TWELVE,
@@ -211,28 +215,86 @@ const reportList = () => {
     getTableTwelveData();
   }, [aggregateCurrentPage?.tableTwelve, aggregatePageSize?.tableTwelve]);
 
+  const tagRender: TagRender = (props) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    const { label, value, closable, onClose } = props;
+    const onPreventMouseDown = (event: React.MouseEvent<HTMLSpanElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    return (
+      <Tag
+        onMouseDown={onPreventMouseDown}
+        closable={closable}
+        onClose={onClose}
+        className="report-chip"
+      >
+        <label className="report-label">{label}</label>
+      </Tag>
+    );
+  };
+
+  const handleReportSelection = (value: any) => {
+    setReportsToDisplay(value);
+  };
+
   return (
-    <div className="content-container report-table5">
+    <div className="content-container">
       <div className="title-bar">
         <div className="body-title">{t('viewTitle')}</div>
       </div>
-      {reportsToDisplay.map((report) => (
-        <ReportCard
-          loading={loading}
-          whichReport={report}
-          reportTitle={t(`${report}Title`)}
-          reportSubtitle={t(`${report}SubTitle`)}
-          reportData={aggregateReportData[report]}
-          columns={getReportColumns(report)}
-          totalEntries={aggregateReportTotal[report] ?? 0}
-          currentPage={aggregateCurrentPage[report]}
-          pageSize={aggregatePageSize[report]}
-          exportButtonNames={[t('exportAsExcel'), t('exportAsCsv')]}
-          downloadReportData={downloadReportData}
-          handleTablePagination={handleTablePagination}
-        ></ReportCard>
-      ))}
-      ;
+      <div className="select-report-bar">
+        <Row gutter={20}>
+          <Col span={24}>
+            <Select
+              className="report-selector"
+              mode="multiple"
+              value={reportsToDisplay}
+              tagRender={tagRender}
+              size="large"
+              showSearch={false}
+              placeholder={
+                <label className="placeholder-label">
+                  {'Click to select the Reports to display'}
+                </label>
+              }
+              onChange={handleReportSelection}
+              suffixIcon={<CloseCircleOutlined />}
+            >
+              {Object.values(ReportType).map((report) => (
+                <Option key={report} value={report}>
+                  {t(`${report}Title`)}
+                </Option>
+              ))}
+            </Select>
+          </Col>
+        </Row>
+      </div>
+      {reportsToDisplay.length > 0 ? (
+        <div>
+          {reportsToDisplay.map((report) => (
+            <ReportCard
+              key={`Report_card_${report}`}
+              loading={loading}
+              whichReport={report}
+              reportTitle={t(`${report}Title`)}
+              reportSubtitle={t(`${report}SubTitle`)}
+              reportData={aggregateReportData[report]}
+              columns={getReportColumns(report)}
+              totalEntries={aggregateReportTotal[report] ?? 0}
+              currentPage={aggregateCurrentPage[report]}
+              pageSize={aggregatePageSize[report]}
+              exportButtonNames={[t('exportAsExcel'), t('exportAsCsv')]}
+              downloadReportData={downloadReportData}
+              handleTablePagination={handleTablePagination}
+            ></ReportCard>
+          ))}
+        </div>
+      ) : (
+        <div className="no-reports-selected">
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={'No Reports Selected'} />
+        </div>
+      )}
     </div>
   );
 };
