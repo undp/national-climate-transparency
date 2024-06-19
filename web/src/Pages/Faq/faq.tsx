@@ -50,8 +50,8 @@ const faq = () => {
         <div className="section-header">{t('docsAndTemplates')}</div>
         <Row gutter={30} className="documents">
           {documents.map((doc) => (
-            <Col {...faqDocumentBps} className="grid-column">
-              <FAQDocuments key={doc.key} title={doc.title} format={doc.format} url={doc.url} />
+            <Col key={doc.key} {...faqDocumentBps} className="grid-column">
+              <FAQDocuments title={doc.title} format={doc.format} url={doc.url} />
             </Col>
           ))}
         </Row>
@@ -60,9 +60,8 @@ const faq = () => {
         <div className="section-header">{t('trainingVideos')}</div>
         <Row gutter={30} className="videos">
           {videos.map((video) => (
-            <Col {...faqVideoBps} className="grid-column">
+            <Col key={video.key} {...faqVideoBps} className="grid-column">
               <iframe
-                key={video.key}
                 width="300"
                 height="200"
                 src={`${video.url}?rel=0`}
