@@ -3,11 +3,14 @@
     "exportAsExcel": "Export As Excel",
     "exportAsCsv": "Export As CSV",
 
-    "tableFiveTitle": "5/CMA.3 - Annex II - Table 5",
-    "tableFiveSubTitle": "Mitigation Policies and Measures, Actions and Plans, including those with mitigation co-benefits resulting from adaption actions and economic diversification plans, related to implementing and achieving a nationally determined contribution under Article 4",
+    "5Title": "5/CMA.3 - Annex II - Table 5",
+    "5SubTitle": "Mitigation Policies and Measures, Actions and Plans, including those with mitigation co-benefits resulting from adaption actions and economic diversification plans, related to implementing and achieving a nationally determined contribution under Article 4",
 
-    "tableTwelveTitle": "5/CMA.3 - Annex III - Table 12",
-    "tableTwelveSubTitle": "Information on support needed by developing country Parties for the implementation of Article 13 of the Paris Agreement and transparency-related activities, including for transparency-related capacity-building",
+    "12Title": "5/CMA.3 - Annex III - Table 12",
+    "12SubTitle": "Information on support needed by developing country Parties for the implementation of Article 13 of the Paris Agreement and transparency-related activities, including for transparency-related capacity-building",
+
+    "13Title": "5/CMA.3 - Annex III - Table 13",
+    "13SubTitle": "Information on support received by developing country Parties for the implementation of Article 13 of the Paris Agreement and transparency-related activities, including for transparency-related capacity-building",
 
     "titleOfAction": "Name of Action",
     "description": "Description",
@@ -31,6 +34,8 @@
     "usd": "USD",
     "supportDirection": "Support Needed or Received",
     "isEnhancingTransparency": "Contributing to Enhancing Transparency",
-    "internationalSupportChannel": "Channel"
+    "internationalSupportChannel": "Channel",
+
+    "recipientEntities": "Recipient entity"
 
 }

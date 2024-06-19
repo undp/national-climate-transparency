@@ -4,11 +4,13 @@ import './reportList.scss';
 import { useTranslation } from 'react-i18next';
 import {
   ReportFiveRecord,
+  ReportThirteenRecord,
   ReportTwelveRecord,
 } from '../../Definitions/reportIndividualDefinitions';
 import {
   getReportFiveColumns,
   getReportTwelveColumns,
+  getReportThirteenColumns,
 } from '../../Definitions/columns/reportColumns';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import ReportCard from '../../Components/reportCard/reportCard';
@@ -17,10 +19,13 @@ import {
   AggregateReportTotal,
   AggregateReportCurrentPage,
   AggregateReportPageSize,
+  initialAggData,
+  initialAggTotal,
+  initialAggPageSize,
+  initialAggCurrentPage,
 } from '../../Definitions/reportBulkDefinitions';
 import { ReportType } from '../../Enums/report.enum';
 import { Col, Empty, Row, Select, SelectProps, Tag } from 'antd';
-import { CloseCircleOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 type TagRender = SelectProps['tagRender'];
@@ -36,28 +41,20 @@ const reportList = () => {
   // Reports to Display
 
   const [reportsToDisplay, setReportsToDisplay] = useState<ReportType[]>([
-    ReportType.FIVE,
     ReportType.TWELVE,
+    ReportType.THIRTEEN,
   ]);
 
   // Bulk Report Definitions
 
-  const [aggregateReportData, setAggregateReportData] = useState<AggregateReportData>({
-    [ReportType.FIVE]: [],
-    [ReportType.TWELVE]: [],
-  });
-  const [aggregateReportTotal, setAggregateReportTotal] = useState<AggregateReportTotal>({
-    [ReportType.FIVE]: 0,
-    [ReportType.TWELVE]: 0,
-  });
-  const [aggregatePageSize, setAggregatePageSize] = useState<AggregateReportPageSize>({
-    [ReportType.FIVE]: 10,
-    [ReportType.TWELVE]: 10,
-  });
-  const [aggregateCurrentPage, setAggregateCurrentPage] = useState<AggregateReportCurrentPage>({
-    [ReportType.FIVE]: 1,
-    [ReportType.TWELVE]: 1,
-  });
+  const [aggregateReportData, setAggregateReportData] =
+    useState<AggregateReportData>(initialAggData);
+  const [aggregateReportTotal, setAggregateReportTotal] =
+    useState<AggregateReportTotal>(initialAggTotal);
+  const [aggregatePageSize, setAggregatePageSize] =
+    useState<AggregateReportPageSize>(initialAggPageSize);
+  const [aggregateCurrentPage, setAggregateCurrentPage] =
+    useState<AggregateReportCurrentPage>(initialAggCurrentPage);
 
   // Functions to Retrieve Tale Data
 
@@ -65,11 +62,11 @@ const reportList = () => {
     setLoading(true);
     try {
       const payload: any = {
-        page: aggregateCurrentPage.tableFive,
-        size: aggregatePageSize.tableFive,
+        page: aggregateCurrentPage[5],
+        size: aggregatePageSize[5],
       };
 
-      const response: any = await post('national/reports/tableFive/query', payload);
+      const response: any = await post('national/reports/5/query', payload);
       if (response) {
         const tempReportFiveData: ReportFiveRecord[] = [];
 
@@ -113,11 +110,11 @@ const reportList = () => {
     setLoading(true);
     try {
       const payload: any = {
-        page: aggregateCurrentPage.tableTwelve,
-        size: aggregatePageSize.tableTwelve,
+        page: aggregateCurrentPage[12],
+        size: aggregatePageSize[12],
       };
 
-      const response: any = await post('national/reports/tableTwelve/query', payload);
+      const response: any = await post('national/reports/12/query', payload);
 
       if (response) {
         const tempReportTwelveData: ReportTwelveRecord[] = [];
@@ -159,6 +156,56 @@ const reportList = () => {
     }
   };
 
+  const getTableThirteenData = async () => {
+    setLoading(true);
+    try {
+      const payload: any = {
+        page: aggregateCurrentPage[13],
+        size: aggregatePageSize[13],
+      };
+
+      const response: any = await post('national/reports/13/query', payload);
+
+      if (response) {
+        const tempReportThirteenData: ReportThirteenRecord[] = [];
+
+        response.data.forEach((entry: any, index: number) => {
+          tempReportThirteenData.push({
+            key: index,
+            title: entry.title,
+            description: entry.description,
+            recipientEntities: entry.recipientEntities ?? [],
+            projectStatus: entry.projectStatus,
+            supportDirection: entry.supportReceivedOrNeeded,
+            isEnhancingTransparency: entry.transparency,
+            startYear: entry.startYear,
+            endYear: entry.endYear,
+            fundUsd: entry.receivedAmount,
+            fundDomestic: entry.receivedAmountDomestic,
+            internationalSupportChannel:
+              entry.internationalSupportChannel?.split(',').map((item: string) => item.trim()) ??
+              [],
+          });
+        });
+
+        setAggregateReportData((prevState) => ({
+          ...prevState,
+          [ReportType.THIRTEEN]: tempReportThirteenData,
+        }));
+
+        setAggregateReportTotal((prevState) => ({
+          ...prevState,
+          [ReportType.THIRTEEN]: response.response.data.total,
+        }));
+
+        setLoading(false);
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+      setLoading(false);
+    }
+  };
+
   // Function to Export Report Data
 
   const downloadReportData = async (exportFileType: string, whichTable: ReportType) => {
@@ -188,6 +235,8 @@ const reportList = () => {
         return getReportFiveColumns(t);
       case ReportType.TWELVE:
         return getReportTwelveColumns(t);
+      case ReportType.THIRTEEN:
+        return getReportThirteenColumns(t);
     }
   };
 
@@ -209,11 +258,17 @@ const reportList = () => {
 
   useEffect(() => {
     getTableFiveData();
-  }, [aggregateCurrentPage?.tableFive, aggregatePageSize?.tableFive]);
+  }, [aggregateCurrentPage?.[5], aggregatePageSize?.[5]]);
 
   useEffect(() => {
     getTableTwelveData();
-  }, [aggregateCurrentPage?.tableTwelve, aggregatePageSize?.tableTwelve]);
+  }, [aggregateCurrentPage?.[12], aggregatePageSize?.[12]]);
+
+  useEffect(() => {
+    getTableThirteenData();
+  }, [aggregateCurrentPage?.[13], aggregatePageSize?.[13]]);
+
+  // Selected Reports Custom Rendering Function
 
   const tagRender: TagRender = (props) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
@@ -259,7 +314,6 @@ const reportList = () => {
                 </label>
               }
               onChange={handleReportSelection}
-              suffixIcon={<CloseCircleOutlined />}
             >
               {Object.values(ReportType).map((report) => (
                 <Option key={report} value={report}>

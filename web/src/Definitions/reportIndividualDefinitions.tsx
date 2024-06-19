@@ -28,3 +28,18 @@ export type ReportTwelveRecord = {
   fundDomestic: number;
   internationalSupportChannel: string[];
 };
+
+export type ReportThirteenRecord = {
+  key: number;
+  title: string;
+  description: string;
+  recipientEntities: string[];
+  projectStatus: string;
+  startYear: number;
+  endYear: number;
+  isEnhancingTransparency: boolean;
+  internationalSupportChannel: string[];
+  supportDirection: string;
+  fundUsd: number;
+  fundDomestic: number;
+};

@@ -1,4 +1,5 @@
 export enum ReportType {
-  FIVE = 'tableFive',
-  TWELVE = 'tableTwelve',
+  FIVE = '5',
+  TWELVE = '12',
+  THIRTEEN = '13',
 }
