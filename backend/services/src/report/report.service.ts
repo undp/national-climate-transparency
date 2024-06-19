@@ -1,15 +1,17 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
-import { plainToClass } from "class-transformer";
-import { DataExportQueryDto } from "src/dtos/data.export.query.dto";
-import { DataExportReportFiveDto } from "src/dtos/data.export.reportFive.dto";
-import { DataExportReportTwelveDto } from "src/dtos/data.export.reportTwelve.dto";
-import { DataListResponseDto } from "src/dtos/data.list.response";
-import { QueryDto } from "src/dtos/query.dto";
-import { ReportFiveViewEntity } from "src/entities/report.five.view.entity";
-import { ReportTwelveViewEntity } from "src/entities/report.twelve.view.entity";
-import { DataExportService } from "src/util/dataExport.service";
-import { HelperService } from "src/util/helpers.service";
+import { DataExportQueryDto } from "../dtos/data.export.query.dto";
+import { DataExportReportFiveDto } from "../dtos/data.export.reportFive.dto";
+import { DataExportReportThirteenDto } from "../dtos/data.export.reportThirteen.dto";
+import { DataExportReportTwelveDto } from "../dtos/data.export.reportTwelve.dto";
+import { DataListResponseDto } from "../dtos/data.list.response";
+import { QueryDto } from "../dtos/query.dto";
+import { ReportFiveViewEntity } from "../entities/report.five.view.entity";
+import { ReportThirteenViewEntity } from "../entities/report.thirteen.view.entity";
+import { ReportTwelveViewEntity } from "../entities/report.twelve.view.entity";
+import { Reports } from "../enums/shared.enum";
+import { DataExportService } from "../util/dataExport.service";
+import { HelperService } from "../util/helpers.service";
 import { EntityManager, Repository } from "typeorm";
 
 export class ReportService {
@@ -19,11 +21,11 @@ export class ReportService {
 		private helperService: HelperService,
 		private dataExportService: DataExportService,
 		@InjectRepository(ReportTwelveViewEntity) private reportTwelveViewRepo: Repository<ReportTwelveViewEntity>,
+		@InjectRepository(ReportThirteenViewEntity) private reportThirteenViewRepo: Repository<ReportThirteenViewEntity>,
 	) { }
 
-	async tableFiveData(query: QueryDto,) {
-		const queryBuilder = this.reportFiveViewRepo
-			.createQueryBuilder("reportFive");
+	async getTableData(id: Reports, query: QueryDto,) {
+		const queryBuilder = this.getReportQueryBuilder(id);
 
 		if (query.size && query.page) {
 			queryBuilder.offset(query.size * query.page - query.size)
@@ -38,44 +40,67 @@ export class ReportService {
 		);
 	}
 
-	async getTableTwelveData(query: QueryDto,) {
-		const queryBuilder = this.reportTwelveViewRepo
-			.createQueryBuilder("reportTwelve");
+	getReportQueryBuilder(reportNumber: Reports) {
+		switch (reportNumber) {
+			case Reports.FIVE:
+				return this.reportFiveViewRepo.createQueryBuilder("reportFive");
 
-		if (query.size && query.page) {
-			queryBuilder.offset(query.size * query.page - query.size)
-				.limit(query.size);
+			case Reports.TWELVE:
+				return this.reportTwelveViewRepo.createQueryBuilder("reportTwelve");
+
+			case Reports.THIRTEEN:
+				return this.reportThirteenViewRepo.createQueryBuilder("reportThirteen");
+
+			default:
+				break;
 		}
 
-		const resp = await queryBuilder.getManyAndCount();
-
-		return new DataListResponseDto(
-			resp.length > 0 ? resp[0] : undefined,
-			resp.length > 1 ? resp[1] : undefined
-		);
 	}
  
-	async downloadReportFive(dataExportQueryDto: DataExportQueryDto) {
-    const resp = await this.reportFiveViewRepo
-      .createQueryBuilder("reportFive")
-      .getMany();
+	async downloadReportData(tableNumber: Reports, dataExportQueryDto: DataExportQueryDto) {
+    const resp = await this.getReportQueryBuilder(tableNumber).getMany();
       
     if (resp.length > 0) {
-      const prepData = this.prepareReportFiveDataForExport(resp)
+      let prepData;
+			let localFileName;
+			let localTableNameKey;
+
+			switch (tableNumber) {
+				case Reports.FIVE:
+					prepData =  this.prepareReportFiveDataForExport(resp as ReportFiveViewEntity[]);
+					localFileName = "reportExport.";
+					localTableNameKey = "reportExport.tableFive";
+					break;
+	
+				case Reports.TWELVE:
+					prepData = this.prepareReportTwelveDataForExport(resp as ReportTwelveViewEntity[]);
+					localFileName = "reportTwelveExport.";
+					localTableNameKey = "reportTwelveExport.tableTwelve";
+					break;
+	
+					case Reports.THIRTEEN:
+						prepData = this.prepareReportThirteenDataForExport(resp as ReportThirteenViewEntity[]);
+						localFileName = "reportTwelveExport.";
+						localTableNameKey = "reportTwelveExport.tableThirteen";
+						break;
+	
+				default:
+					break;
+			}
 
       let headers: string[] = [];
       const titleKeys = Object.keys(prepData[0]);
       for (const key of titleKeys) {
         headers.push(
           this.helperService.formatReqMessagesString(
-            "reportExport." + key,
+            localFileName + key,
             []
           )
         )
       }
 
       const path = await this.dataExportService.generateCsvOrExcel(prepData, headers, this.helperService.formatReqMessagesString(
-        "reportExport.tableFive",
+        localTableNameKey,
         []
       ), dataExportQueryDto.fileType);
       return path;
@@ -83,39 +108,6 @@ export class ReportService {
     throw new HttpException(
       this.helperService.formatReqMessagesString(
         "reportExport.nothingToExport",
-        []
-      ),
-      HttpStatus.BAD_REQUEST
-    );
-  }
-
-	async downloadReportTwelve(dataExportQueryDto: DataExportQueryDto) {
-    const resp = await this.reportTwelveViewRepo
-			.createQueryBuilder("reportTwelve").getMany();
-      
-    if (resp.length > 0) {
-      const prepData = this.prepareReportTwelveDataForExport(resp)
-
-      let headers: string[] = [];
-      const titleKeys = Object.keys(prepData[0]);
-      for (const key of titleKeys) {
-        headers.push(
-          this.helperService.formatReqMessagesString(
-            "reportTwelveExport." + key,
-            []
-          )
-        )
-      }
-
-      const path = await this.dataExportService.generateCsvOrExcel(prepData, headers, this.helperService.formatReqMessagesString(
-        "reportTwelveExport.tableTwelve",
-        []
-      ), dataExportQueryDto.fileType);
-      return path;
-    }
-    throw new HttpException(
-      this.helperService.formatReqMessagesString(
-        "reportTwelveExport.nothingToExport",
         []
       ),
       HttpStatus.BAD_REQUEST
@@ -153,6 +145,30 @@ export class ReportService {
 			dto.projectId = report.projectId;
 			dto.titleOfProject = report.title;
 			dto.description = report.description;
+			dto.projectStatus = report.projectStatus;
+			dto.startYear = report.startYear;
+			dto.endYear = report.endYear;
+			dto.transparency = report.transparency;
+			dto.internationalSupportChannel = report.internationalSupportChannel;
+			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
+			dto.receivedAmount = report.receivedAmount;
+			dto.receivedAmountDomestic = report.receivedAmountDomestic;
+
+      exportData.push(dto);
+    }
+
+    return exportData;
+  }
+
+	private prepareReportThirteenDataForExport(data: ReportThirteenViewEntity[]) {
+    const exportData: DataExportReportThirteenDto[] = [];
+
+    for (const report of data) {
+      const dto: DataExportReportThirteenDto = new DataExportReportThirteenDto();
+			dto.projectId = report.projectId;
+			dto.titleOfProject = report.title;
+			dto.description = report.description;
+			dto.recipientEntities = report.recipientEntities;
 			dto.projectStatus = report.projectStatus;
 			dto.startYear = report.startYear;
 			dto.endYear = report.endYear;

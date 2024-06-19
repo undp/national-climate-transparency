@@ -185,3 +185,10 @@ export enum KPIAction {
   CREATED = 'Created',
   UPDATED = 'Updated',
 }
+
+export enum Reports {
+	FIVE = '5',
+	TWELVE = '12',
+	THIRTEEN = '13',
+
+}

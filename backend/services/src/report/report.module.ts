@@ -7,6 +7,7 @@ import { ReportFiveViewEntity } from '../entities/report.five.view.entity';
 import { ReportService } from './report.service';
 import { UtilModule } from '../util/util.module';
 import { ReportTwelveViewEntity } from '../entities/report.twelve.view.entity';
+import { ReportThirteenViewEntity } from 'src/entities/report.thirteen.view.entity';
 
 @Module({
 	imports: [
@@ -21,7 +22,8 @@ import { ReportTwelveViewEntity } from '../entities/report.twelve.view.entity';
 		}),
 		TypeOrmModule.forFeature([
 			ReportFiveViewEntity,
-			ReportTwelveViewEntity
+			ReportTwelveViewEntity,
+			ReportThirteenViewEntity
 		]),
 		UtilModule
 	],
