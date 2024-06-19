@@ -64,7 +64,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
         if (showError) setShowError(false);
         updateToken(response.data.access_token);
         setUserInfo({
-          id: response.data.id,
+          id: response.data.id.toString(),
           userRole: response.data.role,
           companyName: response.data.companyName,
           userState: response.data.userState,
