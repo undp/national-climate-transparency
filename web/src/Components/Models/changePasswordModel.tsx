@@ -34,7 +34,7 @@ const ChangePasswordModel: FC<ChangePasswordProps> = (props: ChangePasswordProps
           <div className="icon">
             <Lock size={100} color={themeColor} />
           </div>
-          <div>{t('passwordReset:changePassword')}</div>
+          <div>{t('changePassword:changePassword')}</div>
         </div>
       }
       open={openModal}
@@ -54,11 +54,11 @@ const ChangePasswordModel: FC<ChangePasswordProps> = (props: ChangePasswordProps
         <Form.Item
           className="mg-top-1"
           name="oldPassword"
-          label={t('passwordReset:oldPassword')}
+          label={t('changePassword:oldPassword')}
           rules={[
             {
               required: true,
-              message: `${t('passwordReset:oldPassword')} ${t('passwordReset:isRequired')}`,
+              message: `${t('changePassword:oldPassword')} ${t('changePassword:isRequired')}`,
             },
           ]}
         >
@@ -67,11 +67,11 @@ const ChangePasswordModel: FC<ChangePasswordProps> = (props: ChangePasswordProps
 
         <Form.Item
           name="newPassword"
-          label={t('passwordReset:newPassword')}
+          label={t('changePassword:newPassword')}
           rules={[
             {
               required: true,
-              message: `${t('passwordReset:newPassword')} ${t('passwordReset:isRequired')}`,
+              message: `${t('changePassword:newPassword')} ${t('changePassword:isRequired')}`,
             },
           ]}
         >
@@ -80,20 +80,23 @@ const ChangePasswordModel: FC<ChangePasswordProps> = (props: ChangePasswordProps
 
         <Form.Item
           name="confirm_password"
-          label={t('passwordReset:confirmNewPassword')}
+          label={t('changePassword:confirmNewPassword')}
           dependencies={['newPassword']}
           rules={[
             {
               required: true,
-              message: `${t('passwordReset:confirmNewPassword')} ${t('passwordReset:isRequired')}`,
+              message: `${t('changePassword:confirmNewPassword')} ${t(
+                'changePassword:isRequired'
+              )}`,
             },
             ({ getFieldValue }) => ({
+              // eslint-disable-next-line no-unused-vars
               validator(_, value) {
                 if (!value || getFieldValue('newPassword') === value) {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error(t('passwordReset:passwordsNotMatchedErr').toString())
+                  new Error(t('changePassword:passwordsNotMatchedErr').toString())
                 );
               },
             }),
@@ -106,10 +109,10 @@ const ChangePasswordModel: FC<ChangePasswordProps> = (props: ChangePasswordProps
 
         <div className="mg-top-2 ant-modal-footer">
           <Button htmlType="button" onClick={onCanceled}>
-            {t('passwordReset:cancel')}
+            {t('changePassword:cancel')}
           </Button>
           <Button className="mg-left-2" type="primary" htmlType="submit" loading={loadingBtn}>
-            {t('passwordReset:setPassword')}
+            {t('changePassword:setPassword')}
           </Button>
         </div>
       </Form>

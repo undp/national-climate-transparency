@@ -25,7 +25,7 @@ import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 const AddUser = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation(['addUser', 'passwordReset', 'userProfile']);
+  const { t } = useTranslation(['addUser', 'changePassword', 'userProfile']);
   const themeColor = '#9155fd';
 
   const onNavigateToUserManagement = () => {
