@@ -236,8 +236,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
-                achieved: kpi.achieved ?? 0,
-                expected: kpi.expected,
+                achieved: parseFloat(kpi.achieved ?? 0),
+                expected: parseFloat(kpi.expected ?? 0),
                 kpiAction: KPIAction.NONE,
               });
               tempKpiCounter = tempKpiCounter + 1;

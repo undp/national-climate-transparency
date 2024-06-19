@@ -77,6 +77,7 @@ export class KpiService {
 	
 			achievement.kpi = kpi;
 			achievement.activity = activity;
+			achievement.achieved = parseFloat(achievementDto.achieved.toFixed(2));
 	
 			const activityKpis = await this.getKpisForEntity(activity.activityId, EntityType.ACTIVITY);
 	

@@ -11,5 +11,7 @@
     "internationalSupportChannel": "Channel",
     "supportReceivedOrNeeded": "Support Needed or Received",
     "receivedAmount": "International Funds (USD)",
-    "receivedAmountDomestic": "International Funds (XXD)"
+    "receivedAmountDomestic": "International Funds (XXD)",
+    "tableThirteen": "Tables Annex II -13",
+    "recipientEntities": "Recipient entity / Ministry"
 }

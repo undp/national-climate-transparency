@@ -104,6 +104,7 @@ export class ActionService {
 				const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
 				kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
 				kpi.creatorId = action.actionId;
+				kpi.expected = parseFloat(kpiItem.expected.toFixed(2));
 				kpiList.push(kpi);
 			}
 			// Add event log entry after the loop completes
@@ -481,6 +482,7 @@ export class ActionService {
 					const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
 					kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
 					kpi.creatorId = actionUpdateDto.actionId;
+					kpi.expected = parseFloat(kpiItem.expected.toFixed(2));
 					kpiList.push(kpi);
 				}
 			}
@@ -488,12 +490,13 @@ export class ActionService {
 			for (const currentKpi of currentKpis) {
 				const kpiToUpdate = actionUpdateDto.kpis.find(kpi => currentKpi.kpiId == kpi.kpiId);
 				if (kpiToUpdate) {
+					this.payloadValidator.validateKpiPayload(kpiToUpdate, EntityType.ACTION);
 					const kpi = new KpiEntity();
 					kpi.kpiId = kpiToUpdate.kpiId;
 					kpi.creatorId = kpiToUpdate.creatorId;
 					kpi.creatorType = kpiToUpdate.creatorType;
 					kpi.name = kpiToUpdate.name;
-					kpi.expected = kpiToUpdate.expected;
+					kpi.expected = parseFloat(kpiToUpdate.expected.toFixed(2));
 					kpi.kpiUnit = kpiToUpdate.kpiUnit;
 					kpiList.push(kpi);
 				} else {

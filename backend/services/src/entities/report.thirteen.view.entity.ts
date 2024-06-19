@@ -1,11 +1,11 @@
-import { ProjectStatus } from "src/enums/project.enum";
 import { Index, ViewColumn, ViewEntity } from "typeorm"
 
-export const reportTwelveViewSQL = `
+export const reportThirteenViewSQL = `
 SELECT 
 	pr."projectId",
     pr.title, 
     pr.description, 
+		pr."recipientEntities",
     pr."projectStatus", 
     pr."startYear", 
     pr."endYear", 
@@ -58,12 +58,12 @@ ORDER BY
     pr."projectId";`
 
 @ViewEntity({
-	name: 'report_twelve_view_entity',
+	name: 'report_thirteen_view_entity',
 	materialized: false,
-	expression: reportTwelveViewSQL,
+	expression: reportThirteenViewSQL,
 	synchronize: false,
 })
-export class ReportTwelveViewEntity {
+export class ReportThirteenViewEntity {
 
 	@Index()
 	@ViewColumn()
@@ -74,6 +74,9 @@ export class ReportTwelveViewEntity {
 
 	@ViewColumn()
 	description: string;
+
+	@ViewColumn()
+	recipientEntities: string;
 
 	@ViewColumn()
 	projectStatus: string;

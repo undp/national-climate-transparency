@@ -1,5 +1,9 @@
 import ScrollableList from '../../Components/ScrollableList/scrollableList';
-import { ReportFiveRecord } from '../reportDefinitions';
+import {
+  ReportFiveRecord,
+  ReportThirteenRecord,
+  ReportTwelveRecord,
+} from '../reportIndividualDefinitions';
 
 export const getReportFiveColumns = (t: any) => {
   const reportFiveColumns = [
@@ -58,4 +62,120 @@ export const getReportFiveColumns = (t: any) => {
   ];
 
   return reportFiveColumns;
+};
+
+export const getReportTwelveColumns = (t: any) => {
+  const reportTwelveColumns = [
+    {
+      title: t('titleOfProject'),
+      dataIndex: 'title',
+      key: 'title',
+      width: 150,
+    },
+    { title: t('descriptionOfProject'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('statusOfProject'), dataIndex: 'status', key: 'status', width: 100 },
+    {
+      title: t('supportDirection'),
+      dataIndex: 'supportDirection',
+      key: 'supportDirection',
+      width: 100,
+    },
+    {
+      title: t('isEnhancingTransparency'),
+      dataIndex: 'isEnhancingTransparency',
+      key: 'isEnhancingTransparency',
+      width: 100,
+    },
+    { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
+    { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
+    {
+      title: t('amountCommonTitle'),
+      children: [
+        {
+          title: t('usd'),
+          dataIndex: 'fundUsd',
+          key: 'fundUsd',
+          width: 50,
+        },
+        {
+          title: t('domestic'),
+          dataIndex: 'fundDomestic',
+          key: 'fundDomestic',
+          width: 50,
+        },
+      ],
+    },
+    {
+      title: t('internationalSupportChannel'),
+      width: 150,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: ReportTwelveRecord) => {
+        return <ScrollableList listToShow={record.internationalSupportChannel}></ScrollableList>;
+      },
+    },
+  ];
+
+  return reportTwelveColumns;
+};
+
+export const getReportThirteenColumns = (t: any) => {
+  const reportThirteenColumns = [
+    {
+      title: t('titleOfProject'),
+      dataIndex: 'title',
+      key: 'title',
+      width: 150,
+    },
+    { title: t('descriptionOfProject'), dataIndex: 'description', key: 'description', width: 150 },
+    {
+      title: t('recipientEntities'),
+      width: 150,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: ReportThirteenRecord) => {
+        return <ScrollableList listToShow={record.recipientEntities}></ScrollableList>;
+      },
+    },
+    { title: t('statusOfProject'), dataIndex: 'projectStatus', key: 'projectStatus', width: 100 },
+    {
+      title: t('supportDirection'),
+      dataIndex: 'supportDirection',
+      key: 'supportDirection',
+      width: 100,
+    },
+    {
+      title: t('isEnhancingTransparency'),
+      dataIndex: 'isEnhancingTransparency',
+      key: 'isEnhancingTransparency',
+      width: 100,
+    },
+    { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
+    { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
+    {
+      title: t('amountCommonTitle'),
+      children: [
+        {
+          title: t('usd'),
+          dataIndex: 'fundUsd',
+          key: 'fundUsd',
+          width: 50,
+        },
+        {
+          title: t('domestic'),
+          dataIndex: 'fundDomestic',
+          key: 'fundDomestic',
+          width: 50,
+        },
+      ],
+    },
+    {
+      title: t('internationalSupportChannel'),
+      width: 150,
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: ReportTwelveRecord) => {
+        return <ScrollableList listToShow={record.internationalSupportChannel}></ScrollableList>;
+      },
+    },
+  ];
+
+  return reportThirteenColumns;
 };

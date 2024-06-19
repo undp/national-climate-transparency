@@ -1,0 +1,41 @@
+{
+    "viewTitle": "Reporting",
+    "exportAsExcel": "Export As Excel",
+    "exportAsCsv": "Export As CSV",
+
+    "5Title": "5/CMA.3 - Annex II - Table 5",
+    "5SubTitle": "Mitigation Policies and Measures, Actions and Plans, including those with mitigation co-benefits resulting from adaption actions and economic diversification plans, related to implementing and achieving a nationally determined contribution under Article 4",
+
+    "12Title": "5/CMA.3 - Annex III - Table 12",
+    "12SubTitle": "Information on support needed by developing country Parties for the implementation of Article 13 of the Paris Agreement and transparency-related activities, including for transparency-related capacity-building",
+
+    "13Title": "5/CMA.3 - Annex III - Table 13",
+    "13SubTitle": "Information on support received by developing country Parties for the implementation of Article 13 of the Paris Agreement and transparency-related activities, including for transparency-related capacity-building",
+
+    "titleOfAction": "Name of Action",
+    "description": "Description",
+    "objective": "Objectives",
+    "instrumentType": "Type of instrument",
+    "status": "Status",
+    "sector": "Sector(s) affected",
+    "ghgsAffected": "Gases affected",
+    "startYear": "Start year of implementation",
+    "implementingEntities": "Implementing entity or entities",
+    "ghgCommonTitle": "Estimates of GHG emission reductions (ktCO2eq)",
+    "achievedGHGReduction": "Achieved",
+    "expectedGHGReduction": "Expected",
+
+    "titleOfProject": "Name of Project",
+    "descriptionOfProject": "Objectives and description",
+    "statusOfProject": "Status of Project",
+    "endYear": "End year of implementation",
+    "amountCommonTitle": "Amount",
+    "domestic": "Domestic currency",
+    "usd": "USD",
+    "supportDirection": "Support Needed or Received",
+    "isEnhancingTransparency": "Contributing to Enhancing Transparency",
+    "internationalSupportChannel": "Channel",
+
+    "recipientEntities": "Recipient entity"
+
+}
