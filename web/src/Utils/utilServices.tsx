@@ -94,10 +94,20 @@ export const getArraySum = (values: number[]) => {
   return values.reduce((acc, value) => acc + value, 0);
 };
 
-export const getRounded = (num: number) => {
-  if (Number.isInteger(num)) {
-    return num;
+const customRound = (value: number) => {
+  return Math.round(value * 100) / 100;
+};
+
+export const getRounded = (num: number | string): number => {
+  if (typeof num === 'string') {
+    return customRound(parseFloat(num));
+  } else if (typeof num === 'number') {
+    if (Number.isInteger(num)) {
+      return num;
+    } else {
+      return customRound(num);
+    }
   } else {
-    return parseFloat(num.toFixed(2));
+    return 0;
   }
 };

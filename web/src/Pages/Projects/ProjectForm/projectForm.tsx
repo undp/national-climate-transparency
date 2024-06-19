@@ -350,10 +350,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         techDevContribution: projectMigratedData.techDevContribution,
         capBuildObjectives: projectMigratedData.capBuildObjectives,
         techType: projectMigratedData.techType,
-        neededUSD: projectMigratedData.neededUSD,
-        neededLCL: projectMigratedData.neededLCL,
-        receivedUSD: projectMigratedData.receivedUSD,
-        receivedLCL: projectMigratedData.receivedLCL,
+        neededUSD: getRounded(projectMigratedData.neededUSD),
+        neededLCL: getRounded(projectMigratedData.neededLCL),
+        receivedUSD: getRounded(projectMigratedData.receivedUSD),
+        receivedLCL: getRounded(projectMigratedData.receivedLCL),
         achievedGHGReduction: projectMigratedData.achievedGHGReduction,
         expectedGHGReduction: projectMigratedData.expectedGHGReduction,
       });
@@ -495,10 +495,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 sup.financeNature === 'International'
                   ? sup.internationalFinancialInstrument
                   : sup.nationalFinancialInstrument,
-              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-              recievedUSD: getRounded(sup.receivedAmount ?? 0),
-              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+              estimatedUSD: sup.requiredAmount ?? 0,
+              estimatedLC: sup.requiredAmountDomestic ?? 0,
+              recievedUSD: sup.receivedAmount ?? 0,
+              recievedLC: sup.receivedAmountDomestic ?? 0,
             });
           });
 
