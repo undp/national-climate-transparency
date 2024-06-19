@@ -25,7 +25,7 @@ import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
 const AddUser = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation(['addUser', 'passwordReset', 'userProfile']);
+  const { t } = useTranslation(['addUser', 'changePassword', 'userProfile']);
   const themeColor = '#9155fd';
 
   const onNavigateToUserManagement = () => {
@@ -209,7 +209,7 @@ const AddUser = () => {
           <div className="main">{isUpdate ? t('addUser:editUser') : t('addUser:addNewUser')}</div>
         </div>
         {isUpdate &&
-          userInfoState?.id === state?.record?.id &&
+          userInfoState?.id === state?.record?.id.toString() &&
           !ability.can(Action.Update, plainToClass(User, state?.record), 'email') && (
             <div className="actions">
               <Button className="mg-left-1" type="primary" onClick={onChangedPassword}>

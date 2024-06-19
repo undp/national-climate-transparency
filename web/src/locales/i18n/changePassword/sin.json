@@ -1,0 +1,10 @@
+{
+    "changePassword": "මුරපදය වෙනස් කරන්න",
+    "oldPassword": "පැරණි මුරපදය",
+    "newPassword": "නව මුරපදය",
+    "confirmNewPassword": "නව මුරපදය තහවුරු කරන්න",
+    "setPassword": "මුරපදය සකසන්න",
+    "cancel": "අවලංගු කරන්න",
+    "isRequired": "අවශ්ය වේ",
+    "passwordsNotMatchedErr": "මුරපද නොගැලපේ"
+}
