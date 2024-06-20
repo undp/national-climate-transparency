@@ -148,7 +148,14 @@ const activityList = () => {
             parentId: unstructuredData[i].parentId,
             title: unstructuredData[i].title,
             activityStatus: unstructuredData[i].status,
-            supportType: unstructuredData[i].migratedData?.type ?? '',
+            supportType:
+              tempParentType === 'action'
+                ? unstructuredData[i].migratedData?.type
+                : tempParentType === 'programme'
+                ? unstructuredData[i].migratedData?.action?.type
+                : tempParentType === 'project'
+                ? unstructuredData[i].migratedData?.programme?.action?.type
+                : '',
             recipientEntity: unstructuredData[i].migratedData?.recipientEntities ?? [],
             intImplementingEntity: unstructuredData[i].internationalImplementingEntity ?? [],
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',

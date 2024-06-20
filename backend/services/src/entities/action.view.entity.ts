@@ -7,32 +7,30 @@ WITH fullp AS (
 			prg."actionId",
 			prg."investment",
 			prg."natImplementor" AS nat_impl,
-			pve.types AS types,
 			COALESCE(SUM(pve."achievedGHGReduction"), 0) AS "achievedGHGReduction",
 			COALESCE(SUM(pve."expectedGHGReduction"), 0) AS "expectedGHGReduction",
-	CUSTOM_ARRAY_AGG(pve."ghgsAffected") FILTER (WHERE pve."ghgsAffected" IS NOT NULL) AS "ghgsAffected"
+			CUSTOM_ARRAY_AGG(pve."ghgsAffected") FILTER (WHERE pve."ghgsAffected" IS NOT NULL) AS "ghgsAffected"
 	FROM 
 			programme prg
 	LEFT JOIN (
 			SELECT 
 					id,
-					types,
 					SUM("achievedGHGReduction") AS "achievedGHGReduction",
 					SUM("expectedGHGReduction") AS "expectedGHGReduction",
-		CUSTOM_ARRAY_AGG("ghgsAffected") FILTER (WHERE "ghgsAffected" IS NOT NULL) AS "ghgsAffected"
+					CUSTOM_ARRAY_AGG("ghgsAffected") FILTER (WHERE "ghgsAffected" IS NOT NULL) AS "ghgsAffected"
 			FROM 
 					programme_view_entity
 			GROUP BY 
-					id, types
+					id
 	) pve ON prg."programmeId" = pve.id
 	GROUP BY 
-			prg."programmeId", prg."actionId", prg."investment", prg."natImplementor", pve.types
+			prg."programmeId", prg."actionId", prg."investment", prg."natImplementor"
 ),
 act AS (
 	SELECT 
 			a."parentId" AS "actionId",
 			COALESCE(SUM(a."achievedGHGReduction"), 0) AS "achievedGHGReduction",
-	COALESCE(SUM(a."expectedGHGReduction"), 0) AS "expectedGHGReduction",
+			COALESCE(SUM(a."expectedGHGReduction"), 0) AS "expectedGHGReduction",
 			CUSTOM_ARRAY_AGG(a."ghgsAffected") FILTER (WHERE a."ghgsAffected" IS NOT NULL) AS "ghgsAffected"
 	FROM 
 			activity a
@@ -54,13 +52,12 @@ finance AS (
 SELECT 
 	a."actionId" AS id,
 	CUSTOM_ARRAY_AGG(fullp.nat_impl) FILTER (WHERE fullp.nat_impl IS NOT NULL) AS "natImplementors",
-	CUSTOM_ARRAY_AGG(fullp.types) FILTER (WHERE fullp.types IS NOT NULL) AS types,
 	COALESCE(SUM(fullp."achievedGHGReduction"), 0) + COALESCE(act."achievedGHGReduction", 0) AS "achievedGHGReduction",
-COALESCE(SUM(fullp."expectedGHGReduction"), 0) + COALESCE(act."expectedGHGReduction", 0) AS "expectedGHGReduction",
+	COALESCE(SUM(fullp."expectedGHGReduction"), 0) + COALESCE(act."expectedGHGReduction", 0) AS "expectedGHGReduction",
 	SUM(fullp."investment") AS "totalInvestment",
 	MAX(finance."totalRequired") AS "financeNeeded",
 	MAX(finance."totalReceived") AS "financeReceived",
-CUSTOM_ARRAY_AGG(DISTINCT COALESCE(fullp."ghgsAffected", '{}') || COALESCE(act."ghgsAffected", '{}')) FILTER (WHERE (fullp."ghgsAffected" IS NOT NULL OR act."ghgsAffected" IS NOT NULL)) AS "ghgsAffected"
+	CUSTOM_ARRAY_AGG(DISTINCT COALESCE(fullp."ghgsAffected", '{}') || COALESCE(act."ghgsAffected", '{}')) FILTER (WHERE (fullp."ghgsAffected" IS NOT NULL OR act."ghgsAffected" IS NOT NULL)) AS "ghgsAffected"
 FROM 
 	action a
 LEFT JOIN fullp ON a."actionId" = fullp."actionId"
@@ -87,9 +84,6 @@ export class ActionViewEntity {
 	totalInvestment: number
 
 	// From Project Entities
-
-	@ViewColumn()
-	types: string[];
 
 	@ViewColumn()
 	achievedGHGReduction: number

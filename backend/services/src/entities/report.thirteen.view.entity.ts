@@ -5,7 +5,7 @@ SELECT
 	pr."projectId",
     pr.title, 
     pr.description, 
-		pr."recipientEntities",
+	pr."recipientEntities",
     pr."projectStatus", 
     pr."startYear", 
     pr."endYear", 
