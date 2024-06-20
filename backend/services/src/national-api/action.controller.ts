@@ -17,8 +17,8 @@ import { PoliciesGuardEx } from "../casl/policy.guard";
 import { ActionDto } from "../dtos/action.dto";
 import { ActionEntity } from "../entities/action.entity";
 import { QueryDto } from "../dtos/query.dto";
-import { ActionUpdateDto } from "src/dtos/actionUpdate.dto";
-import { ValidateDto } from "src/dtos/validate.dto";
+import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
+import { ValidateDto } from "../dtos/validate.dto";
 
 @ApiTags("Actions")
 @ApiBearerAuth()

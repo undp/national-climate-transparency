@@ -15,12 +15,12 @@ import { Action } from "../casl/action.enum";
 import { PoliciesGuardEx } from "../casl/policy.guard";
 import { ProgrammeDto } from "../dtos/programme.dto";
 import { ProgrammeService } from "../programme/programme.service";
-import { ProgrammeEntity } from "src/entities/programme.entity";
-import { LinkProgrammesDto } from "src/dtos/link.programmes.dto";
-import { UnlinkProgrammesDto } from "src/dtos/unlink.programmes.dto";
+import { ProgrammeEntity } from "../entities/programme.entity";
+import { LinkProgrammesDto } from "../dtos/link.programmes.dto";
+import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
 import { QueryDto } from "../dtos/query.dto";
-import { ProgrammeUpdateDto } from "src/dtos/programmeUpdate.dto";
-import { ValidateDto } from "src/dtos/validate.dto";
+import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
+import { ValidateDto } from "../dtos/validate.dto";
 
 @ApiTags("Programmes")
 @ApiBearerAuth()

@@ -28,6 +28,7 @@ import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { Sector } from "../enums/sector.enum";
 import { ValidateDto } from "../dtos/validate.dto";
+import { KPIAction } from "../enums/shared.enum";
 
 describe('ActionService', () => {
 	let service: ActionService;
@@ -854,22 +855,25 @@ describe('ActionService', () => {
 		const user = new User();
 		user.id = 2;
 
-		const kpiDto1 = new KpiEntity();
+		const kpiDto1 = new KpiUpdateDto();
 		kpiDto1.kpiId = 1;
 		kpiDto1.name = "KPI 1";
 		kpiDto1.creatorType = "action";
 		kpiDto1.expected = 100;
+		kpiDto1.kpiAction = KPIAction.NONE;
 
-		const kpiDto2 = new KpiEntity();
+		const kpiDto2 = new KpiUpdateDto();
 		kpiDto2.kpiId = 2;
 		kpiDto2.name = "KPI 2";
 		kpiDto2.creatorType = "action";
 		kpiDto2.expected = 100;
+		kpiDto2.kpiAction = KPIAction.NONE;
 
 		const kpiAdded = new KpiUpdateDto();
-		kpiDto2.name = "KPI Added";
-		kpiDto2.creatorType = "action";
-		kpiDto2.expected = 300;
+		kpiAdded.name = "KPI Added";
+		kpiAdded.creatorType = "action";
+		kpiAdded.expected = 300;
+		kpiAdded.kpiAction = KPIAction.CREATED;
 
 		const actionUpdateDto = new ActionUpdateDto();
 		actionUpdateDto.title = "test Updated";

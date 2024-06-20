@@ -1,4 +1,3 @@
-import { ProjectStatus } from "src/enums/project.enum";
 import { Index, ViewColumn, ViewEntity } from "typeorm"
 
 export const reportTwelveViewSQL = `

@@ -12,10 +12,10 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { Action } from "../casl/action.enum";
 import { PoliciesGuardEx } from "../casl/policy.guard";
 import { QueryDto } from "../dtos/query.dto";
-import { SupportEntity } from "src/entities/support.entity";
-import { ReportService } from "src/report/report.service";
-import { DataExportQueryDto } from "src/dtos/data.export.query.dto";
-import { Reports } from "src/enums/shared.enum";
+import { SupportEntity } from "../entities/support.entity";
+import { ReportService } from "../report/report.service";
+import { DataExportQueryDto } from "../dtos/data.export.query.dto";
+import { Reports } from "../enums/shared.enum";
 
 @ApiTags("Reports")
 @ApiBearerAuth()

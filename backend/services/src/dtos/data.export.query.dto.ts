@@ -5,7 +5,7 @@ import {
 	IsEnum,
 	IsNotEmpty,
 } from "class-validator";
-import { ExportFileType } from "src/enums/shared.enum";
+import { ExportFileType } from "../enums/shared.enum";
 
 export class DataExportQueryDto {
 

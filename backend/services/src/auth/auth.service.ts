@@ -14,7 +14,7 @@ import { JWTPayload } from "../dtos/jwt.payload";
 import { EmailTemplates } from "../email-helper/email.template";
 import { API_KEY_SEPARATOR } from "../constants";
 import { UserState } from "../enums/user.state.enum";
-import { User } from "src/entities/user.entity";
+import { User } from "../entities/user.entity";
 
 @Injectable()
 export class AuthService {

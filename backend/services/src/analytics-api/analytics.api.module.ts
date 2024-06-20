@@ -8,8 +8,8 @@ import { AnalyticsController } from "./analytics.api.controller";
 import { AnalyticsService } from "./analytics.api.service";
 import { AuthModule } from "../auth/auth.module";
 import { CaslModule } from "../casl/casl.module";
-import { ActivityEntity } from "src/entities/activity.entity";
-import { UtilModule } from "src/util/util.module";
+import { ActivityEntity } from "../entities/activity.entity";
+import { UtilModule } from "../util/util.module";
 
 @Module({
 	imports: [

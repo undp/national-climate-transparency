@@ -6,7 +6,7 @@ import { DocumentDto } from "./document.dto";
 import { KpiUpdateDto } from "./kpi.update.dto";
 import { KpiUnits } from "../enums/kpi.enum";
 import { Sector } from "../enums/sector.enum";
-import { KPIAction } from "src/enums/shared.enum";
+import { KPIAction } from "../enums/shared.enum";
 
 export class ActionUpdateDto {
 

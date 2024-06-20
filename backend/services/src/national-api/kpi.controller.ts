@@ -12,10 +12,10 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
 import { Action } from "../casl/action.enum";
 import { PoliciesGuardEx } from "../casl/policy.guard";
-import { KpiService } from "src/kpi/kpi.service";
-import { EntityType } from "src/enums/shared.enum";
-import { AchievementDto, AchievementDtoList } from "src/dtos/achievementDto";
-import { KpiEntity } from "src/entities/kpi.entity";
+import { KpiService } from "../kpi/kpi.service";
+import { EntityType } from "../enums/shared.enum";
+import { AchievementDto, AchievementDtoList } from "../dtos/achievementDto";
+import { KpiEntity } from "../entities/kpi.entity";
 
 @ApiTags("Kpis")
 @ApiBearerAuth()

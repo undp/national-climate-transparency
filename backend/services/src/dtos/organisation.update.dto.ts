@@ -12,7 +12,7 @@ import {
   ValidateIf,
 } from "class-validator";
 import { OrganisationType } from "../enums/organisation.enum";
-import { Sector } from "src/enums/sector.enum";
+import { Sector } from "../enums/sector.enum";
 
 export class OrganisationUpdateDto {
   @IsNotEmpty()

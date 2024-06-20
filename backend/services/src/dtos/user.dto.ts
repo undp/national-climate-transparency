@@ -13,9 +13,9 @@ import {
 	ValidateIf,
 } from "class-validator";
 import { Role, SubRole } from "../casl/role.enum";
-import { Organisation, OrganisationType } from "../enums/organisation.enum";
+import { Organisation } from "../enums/organisation.enum";
 import { IsValidCountry } from "../util/validcountry.decorator";
-import { Sector } from "src/enums/sector.enum";
+import { Sector } from "../enums/sector.enum";
 
 export class UserDto {
   @IsNotEmpty()

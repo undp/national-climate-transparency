@@ -30,8 +30,8 @@ import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { SupportEntity } from "../entities/support.entity";
 import { ValidateDto } from "../dtos/validate.dto";
-import { AchievementEntity } from "src/entities/achievement.entity";
-import { ActionEntity } from "src/entities/action.entity";
+import { AchievementEntity } from "../entities/achievement.entity";
+import { ActionEntity } from "../entities/action.entity";
 
 @Injectable()
 export class ProgrammeService {

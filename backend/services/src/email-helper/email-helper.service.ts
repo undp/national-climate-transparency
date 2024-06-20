@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import {
   AsyncAction,
@@ -6,7 +6,6 @@ import {
 } from "../async-operations/async-operations.interface";
 import { AsyncActionType } from "../enums/async.action.type.enum";
 import { HelperService } from "../util/helpers.service";
-// import { OrganisationService } from "src/organisation/organisation.service";
 
 @Injectable()
 export class EmailHelperService {

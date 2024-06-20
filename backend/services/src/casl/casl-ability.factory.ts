@@ -17,8 +17,8 @@ import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
-import { SupportEntity } from "src/entities/support.entity";
-import { KpiEntity } from "src/entities/kpi.entity";
+import { SupportEntity } from "../entities/support.entity";
+import { KpiEntity } from "../entities/kpi.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
