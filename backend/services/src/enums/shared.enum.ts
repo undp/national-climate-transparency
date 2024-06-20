@@ -189,6 +189,7 @@ export enum KPIAction {
 export enum Reports {
 	FIVE = '5',
 	SIX = '6',
+	SEVEN = '7',
 	TWELVE = '12',
 	THIRTEEN = '13',
 

@@ -9,6 +9,7 @@ import { UtilModule } from '../util/util.module';
 import { ReportTwelveViewEntity } from '../entities/report.twelve.view.entity';
 import { ReportThirteenViewEntity } from 'src/entities/report.thirteen.view.entity';
 import { ReportSixViewEntity } from 'src/entities/report.six.view.entity';
+import { ReportSevenViewEntity } from 'src/entities/report.seven.view.entity';
 
 @Module({
 	imports: [
@@ -25,7 +26,8 @@ import { ReportSixViewEntity } from 'src/entities/report.six.view.entity';
 			ReportFiveViewEntity,
 			ReportTwelveViewEntity,
 			ReportThirteenViewEntity,
-			ReportSixViewEntity
+			ReportSixViewEntity,
+			ReportSevenViewEntity
 		]),
 		UtilModule
 	],

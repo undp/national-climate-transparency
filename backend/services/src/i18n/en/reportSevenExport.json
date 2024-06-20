@@ -1,5 +1,5 @@
 {
-    "tableSix": "Tables Annex III -06",
+    "tableSeven": "Tables Annex III -07",
     "nothingToExport": "Data not found for export",
     "projectId": "Project No.",
     "titleOfProject": "Title of Project",
@@ -7,8 +7,10 @@
     "sector": "Sector",
     "subSectors": "Subsector",
     "type": "Type of Support (NDC Component)",
+    "recipientEntities": "Recipient entity / Ministry",
+	"nationalImplementingEntities": "National Implementing entity / agency",
+    "internationalImplementingEntities": "International Implementing entity / agency",
     "supportReceivedOrNeeded": "Support Needed or Received",
-    "anchoredInNationalStrategy": "Is the activity is anchored in a national strategy and/or an NDC",
     "techDevelopment": "For technology development and transfer",
     "capacityBuilding": "Contribution to capacity building objectives",
 	"financingOnly": "For Financing (only)",
@@ -17,5 +19,6 @@
     "internationalSupportChannel": "Channel",
     "receivedAmount": "International Funds (USD)",
     "receivedAmountDomestic": "International Funds (XXD)",
-    "financialInstrument": "Financial Instrument"
+    "financialInstrument": "Financial Instrument",
+    "financingStatus": "Financing Status"
 }
