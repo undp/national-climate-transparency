@@ -79,48 +79,48 @@ export class ProgrammeDto {
 	})
 	programmeStatus: number;
   
-    @IsOptional()
-		@ApiPropertyOptional(
-			{
-				type: "array",
-				example: [{
-					title: "document 1",
-					data: "base64 document string"
-				}],
-				items: {
-					$ref: getSchemaPath(DocumentDto),
-				},
-			}
-		)
-    documents: DocumentDto[];
-  
-    @IsOptional()
-    @ApiPropertyOptional()
-    @IsString()
-    comments: string;
+  @IsOptional()
+  @ApiPropertyOptional(
+    {
+      type: "array",
+      example: [{
+        title: "document 1",
+        data: "base64 document string"
+      }],
+      items: {
+        $ref: getSchemaPath(DocumentDto),
+      },
+    }
+  )
+  documents: DocumentDto[];
 
-    @IsOptional()
-    @ApiPropertyOptional()
-    actionId?: string;
+  @IsOptional()
+  @ApiPropertyOptional()
+  @IsString()
+  comments: string;
 
-    @IsOptional()
-    @ApiPropertyOptional()
-    linkedProjects: string[];
+  @IsOptional()
+  @ApiPropertyOptional()
+  actionId?: string;
 
-    @IsOptional()
-		@ApiPropertyOptional(
-			{
-				type: "array",
-				example: [{
-					name: "KPI 1",
-					kpiUnit: KpiUnits.GWp_INSTALLED,
-					creatorType: "programme",
-					expected: 100
-			}],
-				items: {
-					$ref: getSchemaPath(KpiDto),
-				},
-			}
-		)
-    kpis: KpiDto[];
+  @IsOptional()
+  @ApiPropertyOptional()
+  linkedProjects: string[];
+
+  @IsOptional()
+  @ApiPropertyOptional(
+    {
+      type: "array",
+      example: [{
+        name: "KPI 1",
+        kpiUnit: KpiUnits.GWp_INSTALLED,
+        creatorType: "programme",
+        expected: 100
+    }],
+      items: {
+        $ref: getSchemaPath(KpiDto),
+      },
+    }
+  )
+  kpis: KpiDto[];
 }
