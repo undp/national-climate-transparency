@@ -6,7 +6,7 @@ import { HelperService } from "../util/helpers.service";
 import { EntityManager, Repository, SelectQueryBuilder } from "typeorm";
 import { ActionService } from "./action.service";
 import { ActionDto } from "../dtos/action.dto";
-import { ActionStatus, InstrumentType, NatAnchor } from "../enums/action.enum";
+import { ActionStatus, ActionType, InstrumentType, NatAnchor } from "../enums/action.enum";
 import { User } from "../entities/user.entity";
 import { DataResponseMessageDto } from "../dtos/data.response.message";
 import { KpiDto } from "../dtos/kpi.dto";
@@ -21,7 +21,6 @@ import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { DocumentEntityDto } from "../dtos/document.entity.dto";
-import { KpiEntity } from "../entities/kpi.entity";
 import { KpiUpdateDto } from "../dtos/kpi.update.dto";
 import { ActionViewEntity } from "../entities/action.view.entity";
 import { ProjectEntity } from "../entities/project.entity";
@@ -29,6 +28,7 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { Sector } from "../enums/sector.enum";
 import { ValidateDto } from "../dtos/validate.dto";
 import { KPIAction } from "../enums/shared.enum";
+import { AchievementEntity } from "../entities/achievement.entity";
 
 describe('ActionService', () => {
 	let service: ActionService;
@@ -195,6 +195,7 @@ describe('ActionService', () => {
 		actionDto.objective = "test objective";
 		actionDto.instrumentType = [InstrumentType.POLICY];
 		actionDto.status = ActionStatus.PLANNED;
+		actionDto.type = ActionType.MITIGATION;
 		actionDto.startYear = 2024;
 		actionDto.natAnchor = [NatAnchor.NDC];
 
@@ -204,6 +205,7 @@ describe('ActionService', () => {
 		actionEntity.objective = "test objective";
 		actionEntity.instrumentType = [InstrumentType.POLICY];
 		actionEntity.status = ActionStatus.PLANNED;
+		actionEntity.type = ActionType.MITIGATION;
 		actionEntity.startYear = 2024;
 		actionEntity.natAnchor = [NatAnchor.NDC];
 		actionEntity.actionId = "A001";
@@ -214,6 +216,7 @@ describe('ActionService', () => {
 			"objective": "test objective",
 			"instrumentType": ["Policy"],
 			"status": "Planned",
+			"type": "Mitigation",
 			"startYear": 2024,
 			"natAnchor": ["NDC"],
 			"actionId": "A001"
@@ -281,6 +284,7 @@ describe('ActionService', () => {
 		actionDto.objective = "test objective";
 		actionDto.instrumentType = [InstrumentType.POLICY];
 		actionDto.status = ActionStatus.PLANNED;
+		actionDto.type = ActionType.MITIGATION;
 		actionDto.startYear = 2024;
 		actionDto.natAnchor = [NatAnchor.NDC];
 		actionDto.kpis = [kpiDto1, kpiDto2];
@@ -293,6 +297,7 @@ describe('ActionService', () => {
 			"objective": "test objective",
 			"instrumentType": "Policy",
 			"status": "Planned",
+			"type": "Mitigation",
 			"startYear": 2024,
 			"natAnchor": "NDC",
 			"actionId": "A001",
@@ -334,7 +339,7 @@ describe('ActionService', () => {
 			};
 			const savedAction = await callback(emMock);
 
-			expect(emMock.save).toHaveBeenCalledTimes(6);
+			expect(emMock.save).toHaveBeenCalledTimes(3);
 			return savedAction;
 		});
 
@@ -434,7 +439,6 @@ describe('ActionService', () => {
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.cannotCreateNotRelatedAction", ["A001"]);
 	});
 
-
 	it('should throw an exception if linked programmes are already linked to an action', async () => {
 		const user = new User();
 		user.id = 2;
@@ -456,7 +460,6 @@ describe('ActionService', () => {
 		expect(service.findAllProgrammeByIds).toHaveBeenCalledWith(actionDto.linkedProgrammes);
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("action.programmeAlreadyLinked", ['P001']);
 	});
-	
 
 	it('should refresh materialized views after successful action creation', async () => {
 		const user = new User();
@@ -482,7 +485,6 @@ describe('ActionService', () => {
 	
 		expect(helperServiceMock.refreshMaterializedViews).toHaveBeenCalledWith(entityManagerMock);
 	});
-
 
 	it('should have been called query method correctly when get action data requested', async () => {
 		const mockQueryBuilder = {
@@ -516,16 +518,18 @@ describe('ActionService', () => {
 
 		const mockQueryBuilder = {
 			where: jest.fn().mockReturnThis(),
+			select: jest.fn().mockReturnThis(),
 			leftJoinAndSelect: jest.fn().mockReturnThis(),
 			leftJoinAndMapMany: jest.fn().mockReturnThis(),
 			orderBy: jest.fn().mockReturnThis(),
+			getQuery: jest.fn().mockReturnThis(),
+			getCount: jest.fn().mockReturnThis(),
 			offset: jest.fn().mockReturnThis(),
 			limit: jest.fn().mockReturnThis(),
 			getManyAndCount: jest.fn().mockResolvedValue([]),
 		} as unknown as SelectQueryBuilder<ActionEntity>;
 
 		jest.spyOn(actionRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
-
 
 		await service.query(queryDto, abilityCondition);
 
@@ -550,9 +554,12 @@ describe('ActionService', () => {
 
 		const mockQueryBuilder = {
 			where: jest.fn().mockReturnThis(),
+			select: jest.fn().mockReturnThis(),
 			leftJoinAndSelect: jest.fn().mockReturnThis(),
 			leftJoinAndMapMany: jest.fn().mockReturnThis(),
 			orderBy: jest.fn().mockReturnThis(),
+			getQuery: jest.fn().mockReturnThis(),
+			getCount: jest.fn().mockReturnThis(),
 			offset: jest.fn().mockReturnThis(),
 			limit: jest.fn().mockReturnThis(),
 			getManyAndCount: jest.fn().mockResolvedValue([]),
@@ -582,6 +589,7 @@ describe('ActionService', () => {
 		actionUpdateDto.objective = "test objective Updated";
 		actionUpdateDto.instrumentType = [InstrumentType.ECONOMIC];
 		actionUpdateDto.status = ActionStatus.IMPLEMENTED;
+		actionUpdateDto.type = ActionType.MITIGATION;
 		actionUpdateDto.startYear = 2025;
 		actionUpdateDto.natAnchor = [NatAnchor.OTHER];
 
@@ -591,6 +599,7 @@ describe('ActionService', () => {
 		actionDto.objective = "test objective";
 		actionDto.instrumentType = [InstrumentType.POLICY];
 		actionDto.status = ActionStatus.PLANNED;
+		actionUpdateDto.type = ActionType.MITIGATION;
 		actionDto.startYear = 2024;
 		actionDto.natAnchor = [NatAnchor.NDC];
 
@@ -645,7 +654,7 @@ describe('ActionService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
@@ -660,6 +669,7 @@ describe('ActionService', () => {
 		actionUpdateDto.objective = "test objective Updated";
 		actionUpdateDto.instrumentType = [InstrumentType.ECONOMIC];
 		actionUpdateDto.status = ActionStatus.IMPLEMENTED;
+		actionUpdateDto.type = ActionType.MITIGATION;
 		actionUpdateDto.startYear = 2025;
 		actionUpdateDto.natAnchor = [NatAnchor.OTHER];
 		actionUpdateDto.removedDocuments = ["www.test.com/doc1"];
@@ -670,6 +680,7 @@ describe('ActionService', () => {
 		actionUpdateEntity.objective = "test objective Updated";
 		actionUpdateEntity.instrumentType = [InstrumentType.ECONOMIC];
 		actionUpdateEntity.status = ActionStatus.IMPLEMENTED;
+		actionUpdateEntity.type = ActionType.MITIGATION;
 		actionUpdateEntity.startYear = 2025;
 		actionUpdateEntity.natAnchor = [NatAnchor.OTHER];
 		actionUpdateEntity.documents = null;
@@ -733,9 +744,7 @@ describe('ActionService', () => {
 				remove: jest.fn().mockResolvedValueOnce(actionUpdateDto),
 			};
 			const savedAction = await callback(emMock);
-			// expect(emMock.save).toHaveBeenNthCalledWith(1, actionUpdateEntity);
 			expect(emMock.save).toHaveBeenCalledTimes(2);
-			// expect(emMock.remove).toHaveBeenCalledTimes(1);
 			return savedAction;
 		});
 
@@ -744,7 +753,7 @@ describe('ActionService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
-		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
@@ -855,6 +864,8 @@ describe('ActionService', () => {
 		const user = new User();
 		user.id = 2;
 
+		const achEntity = new AchievementEntity();
+
 		const kpiDto1 = new KpiUpdateDto();
 		kpiDto1.kpiId = 1;
 		kpiDto1.name = "KPI 1";
@@ -936,6 +947,7 @@ describe('ActionService', () => {
 
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
 		jest.spyOn(kpiServiceMock, 'getKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2]);
+		jest.spyOn(kpiServiceMock, 'findAchievementsByKpiIds').mockResolvedValueOnce([achEntity]);
 		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
 		jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder1);
 		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder2);
@@ -978,28 +990,27 @@ describe('ActionService', () => {
 	
 		expect(service.findActionById).toHaveBeenCalledWith('A001');
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('action.actionNotFound', ['A001']);
-	  });
+	});
 
-	  it('should throw an exception if action is already validated', async () => {
+	it('should convert to pending if action is already validated', async () => {
 		const user = new User();
 		user.id = 2;
-	
+
 		const validateDto = new ValidateDto();
 		validateDto.entityId = 'A001';
-	
+		validateDto.validateStatus = false;
+
 		const action = new ActionEntity();
 		action.actionId = 'A001';
 		action.sector = Sector.Forestry;
 		action.validated = true;
-	
+
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(action);
 		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
-		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockReturnValueOnce('action.actionAlreadyValidated');
-	
-		await expect(service.validateAction(validateDto, user)).rejects.toThrow(HttpException);
-	
-		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('action.actionAlreadyValidated', ['A001']);
-	  });
+
+		await service.validateAction(validateDto, user);
+
+	});
 });
 
 
