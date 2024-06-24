@@ -1,5 +1,5 @@
 {
-    "tableTwelve": "Tables Annex II -12",
+    "tableTwelve": "Tables Annex III -12",
     "nothingToExport": "Data not found for export",
     "projectId": "Project No.",
     "titleOfProject": "Title of Project",
@@ -12,6 +12,6 @@
     "supportReceivedOrNeeded": "Support Needed or Received",
     "receivedAmount": "International Funds (USD)",
     "receivedAmountDomestic": "International Funds (XXD)",
-    "tableThirteen": "Tables Annex II -13",
+    "tableThirteen": "Tables Annex III -13",
     "recipientEntities": "Recipient entity / Ministry"
 }
