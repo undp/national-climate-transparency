@@ -37,7 +37,7 @@ export class ActionEntity {
 	@Column({ type: "enum", enum: Sector, nullable: false })
   sector: Sector;
 
-  @Column({ type: "enum", enum: ActionType, nullable: false })
+  @Column({ type: "enum", enum: ActionType, default: ActionType.MITIGATION ,nullable: false })
   type: string;
 
   @OneToMany(() => ProgrammeEntity, (programmeEntity) => programmeEntity.action)
