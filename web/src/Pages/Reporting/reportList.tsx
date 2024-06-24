@@ -49,8 +49,8 @@ const reportList = () => {
   // Reports to Display
 
   const [reportsToDisplay, setReportsToDisplay] = useState<ReportType[]>([
-    ReportType.TEN,
-    ReportType.ELEVEN,
+    ReportType.SIX,
+    ReportType.SEVEN,
   ]);
 
   // Bulk Report Definitions
@@ -141,7 +141,7 @@ const reportList = () => {
             startYear: entry.startYear,
             endYear: entry.endYear,
             internationalSupportChannel: entry.internationalSupportChannel ?? [],
-            supportDirection: entry.supportDirection,
+            supportDirection: entry.supportReceivedOrNeeded,
             receivedAmount: entry.receivedAmount,
             receivedAmountDomestic: entry.receivedAmountDomestic,
             financialInstrument: entry.financialInstrument,
@@ -246,7 +246,7 @@ const reportList = () => {
             type: entry.type,
             startYear: entry.startYear,
             endYear: entry.endYear,
-            supportDirection: entry.supportDirection,
+            supportDirection: entry.supportReceivedOrNeeded,
           });
         });
 
