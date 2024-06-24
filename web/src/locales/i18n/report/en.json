@@ -48,6 +48,19 @@
     "isEnhancingTransparency": "Contributing to Enhancing Transparency",
     "internationalSupportChannel": "Channel",
 
-    "recipientEntities": "Recipient entity"
+    "recipientEntities": "Recipient entity",
+
+    "subSectors": "Subsector",
+    "type": "Type of support",
+    "natAnchor": "Whether the activity is anchored in a national strategy and/or an NDC",
+    "techDevelopment": "Contribution to technology development and transfer objectives",
+    "capacityBuilding": "Contribution to capacity building objectives",
+
+    "nationalImplementingEntities": "National implementing entity",
+    "internationalImplementingEntities": "International implementing entity",
+    "financialInstrument": "Expected financial instrument",
+    "financingStatus": "Status",
+
+    "projectStatus": "Status of Project"
 
 }

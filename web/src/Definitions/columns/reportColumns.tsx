@@ -14,7 +14,7 @@ export const getReportFiveColumns = (t: any) => {
       title: t('titleOfAction'),
       dataIndex: 'titleOfAction',
       key: 'titleOfAction',
-      width: 150,
+      width: 200,
     },
     { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
     { title: t('objective'), dataIndex: 'objective', key: 'objective', width: 150 },
@@ -70,10 +70,10 @@ export const getReportFiveColumns = (t: any) => {
 export const getReportSixColumns = (t: any) => {
   const reportSixColumns = [
     {
-      title: t('title'),
+      title: t('titleOfProject'),
       dataIndex: 'title',
       key: 'title',
-      width: 150,
+      width: 250,
     },
     { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
     { title: t('sector'), dataIndex: 'sector', key: 'sector', width: 150 },
@@ -86,18 +86,18 @@ export const getReportSixColumns = (t: any) => {
       },
     },
     { title: t('type'), dataIndex: 'type', key: 'type', width: 150 },
-    { title: t('natAnchor'), dataIndex: 'natAnchor', key: 'natAnchor', width: 150 },
+    { title: t('natAnchor'), dataIndex: 'natAnchor', key: 'natAnchor', width: 1000 },
     {
       title: t('techDevelopment'),
       dataIndex: 'techDevelopment',
       key: 'techDevelopment',
-      width: 150,
+      width: 500,
     },
     {
       title: t('capacityBuilding'),
       dataIndex: 'capacityBuilding',
       key: 'capacityBuilding',
-      width: 150,
+      width: 500,
     },
     { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
     { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
@@ -113,7 +113,7 @@ export const getReportSixColumns = (t: any) => {
       title: t('supportDirection'),
       dataIndex: 'supportDirection',
       key: 'supportDirection',
-      width: 100,
+      width: 1000,
     },
     {
       title: t('amountCommonTitle'),
@@ -140,10 +140,10 @@ export const getReportSixColumns = (t: any) => {
 export const getReportSevenColumns = (t: any) => {
   const reportSevenColumns = [
     {
-      title: t('title'),
+      title: t('titleOfProject'),
       dataIndex: 'title',
       key: 'title',
-      width: 150,
+      width: 250,
     },
     { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
     { title: t('sector'), dataIndex: 'sector', key: 'sector', width: 150 },
@@ -184,19 +184,19 @@ export const getReportSevenColumns = (t: any) => {
       title: t('supportDirection'),
       dataIndex: 'supportDirection',
       key: 'supportDirection',
-      width: 100,
+      width: 250,
     },
     {
       title: t('techDevelopment'),
       dataIndex: 'techDevelopment',
       key: 'techDevelopment',
-      width: 150,
+      width: 600,
     },
     {
       title: t('capacityBuilding'),
       dataIndex: 'capacityBuilding',
       key: 'capacityBuilding',
-      width: 150,
+      width: 500,
     },
     { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
     { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
@@ -245,7 +245,7 @@ export const getReportSevenColumns = (t: any) => {
 export const getReportTenColumns = (t: any) => {
   const reportTenColumns = [
     {
-      title: t('title'),
+      title: t('titleOfProject'),
       dataIndex: 'title',
       key: 'title',
       width: 150,
@@ -277,7 +277,7 @@ export const getReportTenColumns = (t: any) => {
 export const getReportElevenColumns = (t: any) => {
   const reportElevenColumns = [
     {
-      title: t('title'),
+      title: t('titleOfProject'),
       dataIndex: 'title',
       key: 'title',
       width: 150,
