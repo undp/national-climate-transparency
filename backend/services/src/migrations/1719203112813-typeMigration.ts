@@ -11,6 +11,7 @@ export class TypeMigration1719203112813 implements MigrationInterface {
 
         await queryRunner.query(`DROP INDEX IF EXISTS idx_action_view_entity_id`); // Dropping the action view entity index
         await queryRunner.query(`DROP INDEX IF EXISTS idx_programme_view_entity_id`); // Dropping the programme view entity index
+        await queryRunner.query(`DROP INDEX IF EXISTS idx_report_five_view_entity_id`); // Dropping the report five view entity index
 
         await queryRunner.query(`DROP MATERIALIZED VIEW IF EXISTS report_five_view_entity`); // Dropping the report five view entity
         await queryRunner.query(`DROP MATERIALIZED VIEW IF EXISTS action_view_entity`); // Dropping the action view entity 
@@ -24,7 +25,8 @@ export class TypeMigration1719203112813 implements MigrationInterface {
 
 		await queryRunner.query(`
             CREATE UNIQUE INDEX idx_programme_view_entity_id ON programme_view_entity(id);
-            CREATE UNIQUE INDEX idx_action_view_entity_id ON action_view_entity(id);`
+            CREATE UNIQUE INDEX idx_action_view_entity_id ON action_view_entity(id);
+            CREATE UNIQUE INDEX idx_report_five_view_entity_id ON report_five_view_entity(source, "actionId");`
         );
 
         await queryRunner.query(`DROP VIEW IF EXISTS report_six_view_entity`); // Dropping Report 6 View
