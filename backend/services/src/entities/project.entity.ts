@@ -5,7 +5,10 @@ import { ProgrammeEntity } from "./programme.entity";
 import { ActivityEntity } from "./activity.entity";
 import { Sector } from "../enums/sector.enum";
 
-@Entity("project")
+@Entity({
+  name: 'project',
+  synchronize: false,
+})
 export class ProjectEntity {
   @PrimaryColumn()
   projectId: string;
