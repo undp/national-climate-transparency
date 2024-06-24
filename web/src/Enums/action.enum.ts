@@ -9,6 +9,13 @@ export enum Action {
   Validate = 'validate',
 }
 
+export enum ActionType {
+  MITIGATION = 'Mitigation',
+  // ADAPTION = 'Adaption',
+  // CROSSCUT = 'Cross-cutting',
+  // ENABLING = 'Enabling',
+}
+
 export enum InstrumentType {
   POLICY = 'Policy',
   REGULATORY = 'Regulatory',

@@ -269,7 +269,6 @@ export class ProjectService {
 		const queryBuilder = this.projectRepo
 			.createQueryBuilder("project")
 			.where('project.projectId = :projectId', { projectId })
-			.leftJoinAndSelect("project.programme", "programme")
 			.leftJoinAndMapOne(
 				"project.migratedData",
 				ProjectViewEntity,
@@ -277,6 +276,12 @@ export class ProjectService {
 				"projectViewEntity.id = project.projectId"
 			);
 		const result = await queryBuilder.getOne();
+
+		if (result && result.path) {
+			const programmeId: string = result.path.split(".")[1];
+			const programme = await this.programmeService.findProgrammeById(programmeId);
+			result.programme = programme
+		}
 
 		if (!result) {
 			throw new HttpException(

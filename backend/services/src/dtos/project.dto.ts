@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max, ValidateIf } from 'class-validator';
-import { ProjectStatus, ProjectType } from "../enums/project.enum";
+import { ProjectStatus } from "../enums/project.enum";
 import { IntImplementor, Recipient } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { KpiDto } from "./kpi.dto";
@@ -12,17 +12,6 @@ export class ProjectDto {
 	@IsOptional()
 	@ApiProperty()
 	programmeId: string;
-
-	@IsNotEmpty()
-	@IsEnum(ProjectType, {
-		each: true,
-		message: 'Invalid International Implementing Entity. Supported following entities:' + Object.values(ProjectType)
-	})
-	@ApiProperty({
-		type: [String],
-		enum: Object.values(ProjectType),
-	})
-	type: ProjectType;
 
 	@IsString()
 	@IsNotEmpty()

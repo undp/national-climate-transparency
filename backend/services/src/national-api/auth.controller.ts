@@ -10,13 +10,13 @@ import {
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
-import { AuthService } from "src/auth/auth.service";
-import { ForgotPasswordDto } from "src/dtos/forgotPassword.dto";
-import { LoginDto } from "src/dtos/login.dto";
-import { PasswordResetDto } from "src/dtos/passwordReset.dto";
-import { User } from "src/entities/user.entity";
-import { HelperService } from "src/util/helpers.service";
-import { PasswordResetService } from "src/util/passwordReset.service";
+import { AuthService } from "../auth/auth.service";
+import { ForgotPasswordDto } from "../dtos/forgotPassword.dto";
+import { LoginDto } from "../dtos/login.dto";
+import { PasswordResetDto } from "../dtos/passwordReset.dto";
+import { User } from "../entities/user.entity";
+import { HelperService } from "../util/helpers.service";
+import { PasswordResetService } from "../util/passwordReset.service";
 
 @ApiTags("Auth")
 @Controller("auth")

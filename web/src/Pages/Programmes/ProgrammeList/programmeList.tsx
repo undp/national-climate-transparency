@@ -196,7 +196,7 @@ const programmeList = () => {
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             subSectorsAffected: unstructuredData[i].affectedSubSector,
             investment: Math.round(unstructuredData[i].investment ?? 0),
-            type: unstructuredData[i].migratedData[0]?.types ?? [],
+            type: unstructuredData[i].action?.type,
           });
         }
         setTableData(structuredData);
@@ -326,10 +326,10 @@ const programmeList = () => {
     { title: t('titleOfProgramme'), dataIndex: 'title', key: 'title', sorter: false, width: 130 },
     {
       title: t('columnHeader:type'),
-      width: 80, // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: any) => {
-        return <ScrollableList listToShow={record.type}></ScrollableList>;
-      },
+      width: 120,
+      dataIndex: 'type',
+      key: 'type',
+      sorter: false,
     },
     { title: t('programmeStatus'), dataIndex: 'status', key: 'status', sorter: false, width: 130 },
     {

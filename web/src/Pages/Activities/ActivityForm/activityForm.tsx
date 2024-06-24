@@ -167,21 +167,23 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             tempMigratedData.description = response.data.description;
             tempMigratedData.affSectors = response.data.sector ?? undefined;
             tempMigratedData.startYear = response.data.startYear;
+            tempMigratedData.type = response.data.type;
           } else if (parentType === 'programme') {
             tempMigratedData.description = response.data.description;
             tempMigratedData.recipient = response.data.recipientEntity;
             tempMigratedData.affSectors = response.data.sector ?? undefined;
             tempMigratedData.affSubSectors = response.data.affectedSubSector;
             tempMigratedData.startYear = response.data.startYear;
+            tempMigratedData.type = response.data.type;
           } else {
             tempMigratedData.description = response.data.description;
             tempMigratedData.recipient = response.data.recipientEntities;
             tempMigratedData.affSectors = response.data.sector ?? undefined;
             tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
             tempMigratedData.startYear = response.data.startYear;
-            tempMigratedData.type = response.data.type;
             tempMigratedData.endYear = response.data.endYear;
             tempMigratedData.expectedTimeFrame = response.data.expectedTimeFrame;
+            tempMigratedData.type = response.data.programme?.action?.type;
           }
           if (method === 'create') {
             setMtgStartYear(response.data.startYear);
@@ -1144,26 +1146,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                {parentType === 'project' && (
-                  <Col {...halfColumnBps}>
-                    <Form.Item
-                      label={
-                        <label className="form-item-header">
-                          {t('formHeader:supportTypeTitle')}
-                        </label>
-                      }
-                      name="supportType"
-                    >
-                      <Select
-                        size="large"
-                        style={{ fontSize: inputFontSize }}
-                        allowClear
-                        disabled
-                        showSearch
-                      ></Select>
-                    </Form.Item>
-                  </Col>
-                )}
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">{t('formHeader:supportTypeTitle')}</label>
+                    }
+                    name="supportType"
+                  >
+                    <Select size="large" style={{ fontSize: inputFontSize }} disabled></Select>
+                  </Form.Item>
+                </Col>
               </Row>
               <Row gutter={gutterSize}>
                 <Col {...quarterColumnBps}>

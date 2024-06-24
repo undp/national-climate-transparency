@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { DataCountResponseDto } from "../dtos/data.count.response";
-import { ActionEntity } from "src/entities/action.entity";
+import { ActionEntity } from "../entities/action.entity";
 import { EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
-import { ProjectEntity } from "src/entities/project.entity";
-import { ActivityEntity } from "src/entities/activity.entity";
-import { FinanceNature, SupportDirection } from "src/enums/support.enum";
-import { HelperService } from "src/util/helpers.service";
+import { ProjectEntity } from "../entities/project.entity";
+import { ActivityEntity } from "../entities/activity.entity";
+import { FinanceNature, SupportDirection } from "../enums/support.enum";
+import { HelperService } from "../util/helpers.service";
 
 @Injectable()
 export class AnalyticsService {

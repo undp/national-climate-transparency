@@ -16,13 +16,13 @@ import { PoliciesGuardEx } from "../casl/policy.guard";
 import { ActivityService } from "../activity/activity.service";
 import { ActivityEntity } from "../entities/activity.entity";
 import { ActivityDto } from "../dtos/activity.dto";
-import { LinkActivitiesDto } from "src/dtos/link.activities.dto";
-import { UnlinkActivitiesDto } from "src/dtos/unlink.activities.dto";
-import { mitigationTimelineDto } from "src/dtos/mitigationTimeline.dto";
+import { LinkActivitiesDto } from "../dtos/link.activities.dto";
+import { UnlinkActivitiesDto } from "../dtos/unlink.activities.dto";
+import { mitigationTimelineDto } from "../dtos/mitigationTimeline.dto";
 import { QueryDto } from "../dtos/query.dto";
-import { ActivityUpdateDto } from "src/dtos/activityUpdate.dto";
-import { ValidateDto } from "src/dtos/validate.dto";
-import { EntityType } from "src/enums/shared.enum";
+import { ActivityUpdateDto } from "../dtos/activityUpdate.dto";
+import { ValidateDto } from "../dtos/validate.dto";
+import { EntityType } from "../enums/shared.enum";
 
 @ApiTags("Activities")
 @ApiBearerAuth()

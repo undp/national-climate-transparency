@@ -16,9 +16,8 @@ import { EntityType, LogEventType } from "../enums/shared.enum";
 import { CounterService } from "../util/counter.service";
 import { HelperService } from "../util/helpers.service";
 import { EntityManager, Repository } from "typeorm";
-import { ProjectService } from "../project/project.service";
-import { ProjectEntity } from "src/entities/project.entity";
-import { ActivityEntity } from "src/entities/activity.entity";
+import { ProjectEntity } from "../entities/project.entity";
+import { ActivityEntity } from "../entities/activity.entity";
 
 @Injectable()
 export class SupportService {

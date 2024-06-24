@@ -24,21 +24,21 @@ import { nanoid } from "nanoid";
 import { ConfigService } from "@nestjs/config";
 import { Organisation, OrganisationType } from "../enums/organisation.enum";
 import { plainToClass } from "class-transformer";
-import { HelperService } from "src/util/helpers.service";
-import { AsyncAction, AsyncOperationsInterface } from "src/async-operations/async-operations.interface";
-import { PasswordHashService } from "src/util/passwordHash.service";
-import { HttpUtilService } from "src/util/http.util.service";
-import { AsyncActionType } from "src/enums/async.action.type.enum";
-import { EmailTemplates } from "src/email-helper/email.template";
-import { PasswordUpdateDto } from "src/dtos/password.update.dto";
-import { BasicResponseDto } from "src/dtos/basic.response.dto";
-import { QueryDto } from "src/dtos/query.dto";
-import { DataListResponseDto } from "src/dtos/data.list.response";
-import { DataResponseMessageDto } from "src/dtos/data.response.message";
-import { API_KEY_SEPARATOR } from "src/constants";
-import { DataResponseDto } from "src/dtos/data.response.dto";
-import { UserState } from "src/enums/user.state.enum";
-import { Sector } from "src/enums/sector.enum";
+import { HelperService } from "../util/helpers.service";
+import { AsyncAction, AsyncOperationsInterface } from "../async-operations/async-operations.interface";
+import { PasswordHashService } from "../util/passwordHash.service";
+import { HttpUtilService } from "../util/http.util.service";
+import { AsyncActionType } from "../enums/async.action.type.enum";
+import { EmailTemplates } from "../email-helper/email.template";
+import { PasswordUpdateDto } from "../dtos/password.update.dto";
+import { BasicResponseDto } from "../dtos/basic.response.dto";
+import { QueryDto } from "../dtos/query.dto";
+import { DataListResponseDto } from "../dtos/data.list.response";
+import { DataResponseMessageDto } from "../dtos/data.response.message";
+import { API_KEY_SEPARATOR } from "../constants";
+import { DataResponseDto } from "../dtos/data.response.dto";
+import { UserState } from "../enums/user.state.enum";
+import { Sector } from "../enums/sector.enum";
 
 @Injectable()
 export class UserService {

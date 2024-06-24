@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsArray, IsEnum, IsIn } from "class-validator";
-import { EntityType } from "src/enums/shared.enum";
+import { IsNotEmpty, IsArray, IsIn } from "class-validator";
+import { EntityType } from "../enums/shared.enum";
 
 export class LinkActivitiesDto {
 

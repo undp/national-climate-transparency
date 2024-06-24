@@ -7,7 +7,7 @@ SELECT
     pr.description, 
     pr.sector,
     pro."affectedSubSector" as "subSectors",
-    pr.type,
+    acti.type,
 	pr."recipientEntities",
 	act."nationalImplementingEntities",
     act."internationalImplementingEntities",
@@ -93,6 +93,7 @@ LEFT JOIN (
 ) act ON pr."projectId" = act."parentId"
 LEFT JOIN project_view_entity pve ON pve.id = pr."projectId"
 LEFT JOIN programme pro ON pro."programmeId" = pr."programmeId" AND pro.validated IS TRUE
+LEFT JOIN action acti ON acti."actionId" = subpath(pr.path, 0, 1)::text
 WHERE 
     pr.validated IS TRUE
 ORDER BY 

@@ -26,7 +26,6 @@ import { KpiService } from "../kpi/kpi.service";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { ProjectEntity } from "../entities/project.entity";
-import { SupportEntity } from "../entities/support.entity";
 import { KPIAction } from "../enums/shared.enum";
 
 @Injectable()

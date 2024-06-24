@@ -1,25 +1,18 @@
 import { NestFactory } from "@nestjs/core";
-// import { LocationInterface, LocationModule, getLogger } from "@undp/carbon-services-lib";
-// import { ProgrammeService,ProgrammeModule,Country,UtilModule, LocationInterface,LocationModule,CountryService} from "@undp/carbon-services-lib";
-import { OrganisationDto as OrganisationDto } from "../dtos/organisation.dto";
 import { Handler } from "aws-lambda";
-import { ConfigService } from "@nestjs/config";
-import { UserModule } from "src/user/user.module";
-import { UserService } from "src/user/user.service";
-import { Organisation, OrganisationType } from "src/enums/organisation.enum";
-import { Role, SubRole } from "src/casl/role.enum";
-// import { OrganisationModule } from "src/organisation/organisation.module";
-// import { OrganisationService } from "src/organisation/organisation.service";
-import { UserDto } from "src/dtos/user.dto";
-import { UtilModule } from "src/util/util.module";
-import { CountryService } from "src/util/country.service";
-import { Country } from "src/entities/country.entity";
-import { getLogger } from "src/server";
-import { LocationModule } from "src/location/location.module";
-import { LocationInterface } from "src/location/location.interface";
-import { Sector } from "src/enums/sector.enum";
-// import { LedgerDbModule } from "../shared/ledger-db/ledger-db.module";
-// import { LedgerDBInterface } from "../shared/ledger-db/ledger.db.interface";
+import { UserModule } from "../user/user.module";
+import { UserService } from "../user/user.service";
+import { Organisation, OrganisationType } from "../enums/organisation.enum";
+import { Role, SubRole } from "../casl/role.enum";
+import { UserDto } from "../dtos/user.dto";
+import { UtilModule } from "../util/util.module";
+import { CountryService } from "../util/country.service";
+import { Country } from "../entities/country.entity";
+import { getLogger } from "../server";
+import { LocationModule } from "../location/location.module";
+import { LocationInterface } from "../location/location.interface";
+import { Sector } from "../enums/sector.enum";
+
 const fs = require("fs");
 
 export const handler: Handler = async (event) => {

@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { EntityType } from "src/enums/shared.enum";
+import { EntityType } from "../enums/shared.enum";
 
 export class LogDto {
 

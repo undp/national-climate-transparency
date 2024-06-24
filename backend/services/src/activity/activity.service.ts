@@ -956,9 +956,9 @@ export class ActivityService {
 	async getParentEntity(parentType: string, parentId: string): Promise<any> {
 		switch (parentType) {
 			case "action":
-				return await this.actionService.findActionViewById(parentId);
+				return await this.actionService.findActionById(parentId);
 			case "programme":
-				return await this.programmeService.findProgrammeViewById(parentId);
+				return await this.programmeService.findProgrammeById(parentId);
 			case "project":
 				return await this.projectService.findProjectById(parentId);
 			default:

@@ -1,5 +1,4 @@
 export type ActionMigratedData = {
-  type: string[];
   ghgsAffected: string[];
   natImplementer: string[];
   estimatedInvestment: number;
@@ -12,4 +11,5 @@ export type ActionSelectData = {
   title: string;
   instrumentType: string;
   sector: string;
+  type: string;
 };

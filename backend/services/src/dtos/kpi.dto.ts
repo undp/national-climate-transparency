@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { EntityType } from "../enums/shared.enum";
 import { KpiUnits } from "../enums/kpi.enum";
-import { IsTwoDecimalPoints } from "src/util/twoDecimalPointNumber.decorator";
+import { IsTwoDecimalPoints } from "../util/twoDecimalPointNumber.decorator";
 
 export class KpiDto {
     @IsNotEmpty()
