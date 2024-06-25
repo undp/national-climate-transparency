@@ -6,6 +6,18 @@
     "5Title": "5/CMA.3 - Annex II - Table 5",
     "5SubTitle": "Mitigation Policies and Measures, Actions and Plans, including those with mitigation co-benefits resulting from adaption actions and economic diversification plans, related to implementing and achieving a nationally determined contribution under Article 4",
 
+    "6Title": "5/CMA.3 - Annex III - Table 6",
+    "6SubTitle": "Information  on financial support needed vby developing country Parties under Article  of the Paris Agreement",
+
+    "7Title": "5/CMA.3 - Annex III - Table 7",
+    "7SubTitle": "Information on financial support received by developing country Parties under Article 9 of the Paris Agreement",
+
+    "10Title": "5/CMA.3 - Annex III - Table 10",
+    "10SubTitle": "Information on capacity-building support needed by developing country Parties under Article 11 of the Paris Agreement",
+
+    "11Title": "5/CMA.3 - Annex III - Table 11",
+    "11SubTitle": "Information on capacity-building support received by developing country Parties under Article 11 of the Paris Agreement",
+
     "12Title": "5/CMA.3 - Annex III - Table 12",
     "12SubTitle": "Information on support needed by developing country Parties for the implementation of Article 13 of the Paris Agreement and transparency-related activities, including for transparency-related capacity-building",
 
@@ -36,6 +48,19 @@
     "isEnhancingTransparency": "Contributing to Enhancing Transparency",
     "internationalSupportChannel": "Channel",
 
-    "recipientEntities": "Recipient entity"
+    "recipientEntities": "Recipient entity",
+
+    "subSectors": "Subsector",
+    "type": "Type of support",
+    "natAnchor": "Whether the activity is anchored in a national strategy and/or an NDC",
+    "techDevelopment": "Contribution to technology development and transfer objectives",
+    "capacityBuilding": "Contribution to capacity building objectives",
+
+    "nationalImplementingEntities": "National implementing entity",
+    "internationalImplementingEntities": "International implementing entity",
+    "financialInstrument": "Expected financial instrument",
+    "financingStatus": "Status",
+
+    "projectStatus": "Status of Project"
 
 }
