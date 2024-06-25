@@ -7,5 +7,6 @@
     "cancel": "ANNULER",
     "isRequired": "est requis",
     "passwordsNotMatchedErr": "Les mots de passe ne correspondent pas",
+    "cannotEnterOldPassword": "Impossible d'utiliser l'ancien mot de passe",
     "forcePasswordResetSuccess":"Mot de passe changé et utilisateur informé"
 }

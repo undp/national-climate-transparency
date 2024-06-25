@@ -7,5 +7,6 @@
     "cancel":"CANCEL",
     "isRequired": "is required",
     "passwordsNotMatchedErr":"Passwords do not match",
+    "cannotEnterOldPassword": "Cannot Use the Old Password",
     "forcePasswordResetSuccess":"Password Changed and User Informed"
 }
