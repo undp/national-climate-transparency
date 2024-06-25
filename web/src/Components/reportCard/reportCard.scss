@@ -3,12 +3,13 @@
     background-color: #ffffff;
     border-radius: 10px;
     width: 100%;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
 
     .title-bar {
         width: 100%;
         margin-bottom: 0px;
         padding: 10px;
+        padding-left: 20px;
 
         .title-row {
             padding-top: 10px;
@@ -51,12 +52,17 @@
     .subtitle-bar {
         padding-top: 10px;
         padding-bottom: 10px;
+        padding-left: 20px;
 
         .subTitle {
             font-weight: 500;
-            padding-left: 10px;
             padding-bottom: 10px;
             color: #3a3541CC;
         }
+    }
+
+    .table-bar {
+        padding-left: 20px;
+        padding-right: 20px;
     }
 }
