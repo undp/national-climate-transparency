@@ -266,7 +266,7 @@ const AddUser = () => {
         <div className="titles">
           <div className="main">{isUpdate ? t('addUser:editUser') : t('addUser:addNewUser')}</div>
         </div>
-        {isUpdate && (
+        {isUpdate && (isProfilePasswordReset || isForcePasswordReset) && (
           <div className="actions">
             <Button
               className="mg-left-1"
