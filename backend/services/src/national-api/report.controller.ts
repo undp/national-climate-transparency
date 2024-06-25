@@ -39,18 +39,4 @@ export class ReportController {
     return this.reportService.downloadReportData(tableNumber, query);
   }
 
-	// @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, SupportEntity, true))
-  // @Post("tableTwelve/query")
-  // queryReportTwelveData(@Body() query: QueryDto, @Request() req) {
-  //   return this.reportService.getTableTwelveData(query);
-  // }
-	
-	// @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, SupportEntity, true))
-  // @Post("tableTwelve/export")
-  // exportReportTwelveData(@Body() query: DataExportQueryDto, @Request() req) {
-  //   return this.reportService.downloadReportTwelve(query);
-  // }
-
 }

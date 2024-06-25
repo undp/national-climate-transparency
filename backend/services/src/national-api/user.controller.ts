@@ -29,6 +29,7 @@ import { User } from "../entities/user.entity";
 import { UserService } from "../user/user.service";
 import { CountryService } from "../util/country.service";
 import { HelperService } from "../util/helpers.service";
+import { PasswordForceResetDto } from "../dtos/password.forceReset.dto";
 
 @ApiTags("Users")
 @ApiBearerAuth()
@@ -77,17 +78,32 @@ export class UserController {
     return this.userService.update(user, req.abilityCondition, req.user);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, User, true))
-  // @CheckPolicies((ability, body) => ability.can(Action.Update, Object.assign(new User(), body)))
-  @Put("resetPassword")
-  resetPassword(@Body() reset: PasswordUpdateDto, @Request() req) {
-    return this.userService.resetPassword(
-      req.user.id,
-      reset,
-      req.abilityCondition
-    );
-  }
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, User, true))
+	// @CheckPolicies((ability, body) => ability.can(Action.Update, Object.assign(new User(), body)))
+	@Put("resetPassword")
+	resetPassword(@Body() reset: PasswordUpdateDto, @Request() req) {
+		return this.userService.resetPassword(
+			req.user,
+			req.user.id,
+			reset,
+			req.abilityCondition,
+			false
+		);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.ForceResetPassword, User, true))
+	@Put("forceResetPassword")
+	forceResetPassword(@Body() forceReset: PasswordForceResetDto, @Request() req) {
+		return this.userService.resetPassword(
+			req.user,
+			forceReset.userId,
+			forceReset,
+			req.abilityCondition,
+			true
+		);
+	}
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, User, true))

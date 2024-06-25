@@ -7,4 +7,5 @@ export enum Action {
     Approve = 'approve',
     Reject = 'reject',
 		Validate = 'validate',
+		ForceResetPassword = 'forceResetPassword',
 }

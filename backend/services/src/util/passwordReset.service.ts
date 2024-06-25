@@ -98,15 +98,15 @@ export class PasswordResetService {
       const action: AsyncAction = {
         actionType: AsyncActionType.Email,
         actionProps: {
-          emailType: EmailTemplates.CHANGE_PASSOWRD.id,
+          emailType: EmailTemplates.CHANGE_PASSWORD.id,
           sender: email,
           subject: this.helperService.getEmailTemplateMessage(
-            EmailTemplates.CHANGE_PASSOWRD["subject"],
+            EmailTemplates.CHANGE_PASSWORD["subject"],
             templateData,
             true
           ),
           emailBody: this.helperService.getEmailTemplateMessage(
-            EmailTemplates.CHANGE_PASSOWRD["html"],
+            EmailTemplates.CHANGE_PASSWORD["html"],
             templateData,
             false
           ),
