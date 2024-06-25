@@ -3,12 +3,20 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import './reportList.scss';
 import { useTranslation } from 'react-i18next';
 import {
+  ReportElevenRecord,
   ReportFiveRecord,
+  ReportSevenRecord,
+  ReportSixRecord,
+  ReportTenRecord,
   ReportThirteenRecord,
   ReportTwelveRecord,
 } from '../../Definitions/reportIndividualDefinitions';
 import {
   getReportFiveColumns,
+  getReportSixColumns,
+  getReportSevenColumns,
+  getReportTenColumns,
+  getReportElevenColumns,
   getReportTwelveColumns,
   getReportThirteenColumns,
 } from '../../Definitions/columns/reportColumns';
@@ -41,8 +49,8 @@ const reportList = () => {
   // Reports to Display
 
   const [reportsToDisplay, setReportsToDisplay] = useState<ReportType[]>([
-    ReportType.TWELVE,
-    ReportType.THIRTEEN,
+    ReportType.SIX,
+    ReportType.SEVEN,
   ]);
 
   // Bulk Report Definitions
@@ -96,6 +104,210 @@ const reportList = () => {
         setAggregateReportTotal((prevState) => ({
           ...prevState,
           [ReportType.FIVE]: response.response.data.total,
+        }));
+
+        setLoading(false);
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+      setLoading(false);
+    }
+  };
+
+  const getTableSixData = async () => {
+    setLoading(true);
+    try {
+      const payload: any = {
+        page: aggregateCurrentPage[6],
+        size: aggregatePageSize[6],
+      };
+
+      const response: any = await post('national/reports/6/query', payload);
+      if (response) {
+        const tempReportSixData: ReportSixRecord[] = [];
+
+        response.data.forEach((entry: any, index: number) => {
+          tempReportSixData.push({
+            key: index,
+            title: entry.title,
+            description: entry.description,
+            objective: entry.objective,
+            sector: entry.sector,
+            subSectors: entry.subSectors ?? [],
+            type: entry.type,
+            natAnchor: entry.anchoredInNationalStrategy,
+            techDevelopment: entry.techDevelopment,
+            capacityBuilding: entry.capacityBuilding,
+            startYear: entry.startYear,
+            endYear: entry.endYear,
+            internationalSupportChannel: entry.internationalSupportChannel ?? [],
+            supportDirection: entry.supportReceivedOrNeeded,
+            receivedAmount: entry.receivedAmount,
+            receivedAmountDomestic: entry.receivedAmountDomestic,
+            financialInstrument: entry.financialInstrument,
+          });
+        });
+
+        setAggregateReportData((prevState) => ({
+          ...prevState,
+          [ReportType.SIX]: tempReportSixData,
+        }));
+
+        setAggregateReportTotal((prevState) => ({
+          ...prevState,
+          [ReportType.SIX]: response.response.data.total,
+        }));
+
+        setLoading(false);
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+      setLoading(false);
+    }
+  };
+
+  const getTableSevenData = async () => {
+    setLoading(true);
+    try {
+      const payload: any = {
+        page: aggregateCurrentPage[7],
+        size: aggregatePageSize[7],
+      };
+
+      const response: any = await post('national/reports/7/query', payload);
+
+      if (response) {
+        const tempReportSevenData: ReportSevenRecord[] = [];
+
+        response.data.forEach((entry: any, index: number) => {
+          tempReportSevenData.push({
+            key: index,
+            title: entry.title,
+            description: entry.description,
+            objective: entry.objective,
+            sector: entry.sector,
+            subSectors: entry.subSectors ?? [],
+            type: entry.type,
+            recipientEntities: entry.recipientEntities ?? [],
+            natImplementers: entry.nationalImplementingEntities ?? [],
+            intImplementers: entry.internationalImplementingEntities ?? [],
+            supportDirection: entry.supportReceivedOrNeeded,
+            techDevelopment: entry.techDevelopment,
+            capacityBuilding: entry.capacityBuilding,
+            startYear: entry.startYear,
+            endYear: entry.endYear,
+            receivedAmount: entry.receivedAmount,
+            receivedAmountDomestic: entry.receivedAmountDomestic,
+            internationalSupportChannel: entry.internationalSupportChannel ?? [],
+            financialInstrument: entry.financialInstrument,
+            financingStatus: entry.financingStatus,
+          });
+        });
+
+        setAggregateReportData((prevState) => ({
+          ...prevState,
+          [ReportType.SEVEN]: tempReportSevenData,
+        }));
+
+        setAggregateReportTotal((prevState) => ({
+          ...prevState,
+          [ReportType.SEVEN]: response.response.data.total,
+        }));
+
+        setLoading(false);
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+      setLoading(false);
+    }
+  };
+
+  const getTableTenData = async () => {
+    setLoading(true);
+    try {
+      const payload: any = {
+        page: aggregateCurrentPage[10],
+        size: aggregatePageSize[10],
+      };
+
+      const response: any = await post('national/reports/10/query', payload);
+
+      if (response) {
+        const tempReportTenData: ReportTenRecord[] = [];
+
+        response.data.forEach((entry: any, index: number) => {
+          tempReportTenData.push({
+            key: index,
+            title: entry.title,
+            description: entry.description,
+            objective: entry.objective,
+            sector: entry.sector,
+            subSectors: entry.subSectors ?? [],
+            type: entry.type,
+            startYear: entry.startYear,
+            endYear: entry.endYear,
+            supportDirection: entry.supportReceivedOrNeeded,
+          });
+        });
+
+        setAggregateReportData((prevState) => ({
+          ...prevState,
+          [ReportType.TEN]: tempReportTenData,
+        }));
+
+        setAggregateReportTotal((prevState) => ({
+          ...prevState,
+          [ReportType.TEN]: response.response.data.total,
+        }));
+
+        setLoading(false);
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+      setLoading(false);
+    }
+  };
+
+  const getTableElevenData = async () => {
+    setLoading(true);
+    try {
+      const payload: any = {
+        page: aggregateCurrentPage[11],
+        size: aggregatePageSize[11],
+      };
+
+      const response: any = await post('national/reports/11/query', payload);
+
+      if (response) {
+        const tempReportElevenData: ReportElevenRecord[] = [];
+
+        response.data.forEach((entry: any, index: number) => {
+          tempReportElevenData.push({
+            key: index,
+            title: entry.title,
+            description: entry.description,
+            objective: entry.objective,
+            sector: entry.sector,
+            subSectors: entry.subSectors ?? [],
+            type: entry.type,
+            projectStatus: entry.projectStatus,
+            recipientEntities: entry.recipientEntities ?? [],
+            natImplementers: entry.nationalImplementingEntities ?? [],
+            intImplementers: entry.internationalImplementingEntities ?? [],
+            supportDirection: entry.supportReceivedOrNeeded,
+            startYear: entry.startYear,
+            endYear: entry.endYear,
+          });
+        });
+
+        setAggregateReportData((prevState) => ({
+          ...prevState,
+          [ReportType.ELEVEN]: tempReportElevenData,
+        }));
+
+        setAggregateReportTotal((prevState) => ({
+          ...prevState,
+          [ReportType.ELEVEN]: response.response.data.total,
         }));
 
         setLoading(false);
@@ -233,6 +445,14 @@ const reportList = () => {
     switch (reportType) {
       case ReportType.FIVE:
         return getReportFiveColumns(t);
+      case ReportType.SIX:
+        return getReportSixColumns(t);
+      case ReportType.SEVEN:
+        return getReportSevenColumns(t);
+      case ReportType.TEN:
+        return getReportTenColumns(t);
+      case ReportType.ELEVEN:
+        return getReportElevenColumns(t);
       case ReportType.TWELVE:
         return getReportTwelveColumns(t);
       case ReportType.THIRTEEN:
@@ -259,6 +479,22 @@ const reportList = () => {
   useEffect(() => {
     getTableFiveData();
   }, [aggregateCurrentPage?.[5], aggregatePageSize?.[5]]);
+
+  useEffect(() => {
+    getTableSixData();
+  }, [aggregateCurrentPage?.[6], aggregatePageSize?.[6]]);
+
+  useEffect(() => {
+    getTableSevenData();
+  }, [aggregateCurrentPage?.[7], aggregatePageSize?.[7]]);
+
+  useEffect(() => {
+    getTableTenData();
+  }, [aggregateCurrentPage?.[10], aggregatePageSize?.[10]]);
+
+  useEffect(() => {
+    getTableElevenData();
+  }, [aggregateCurrentPage?.[11], aggregatePageSize?.[11]]);
 
   useEffect(() => {
     getTableTwelveData();

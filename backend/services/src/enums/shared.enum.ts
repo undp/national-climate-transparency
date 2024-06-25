@@ -192,9 +192,10 @@ export enum Reports {
 	SEVEN = '7',
 	EIGHT = '8',
 	NINE = '9',
+  TEN = '10',
+	ELEVEN = '11',
 	TWELVE = '12',
 	THIRTEEN = '13',
-
 }
 
 export enum Method {

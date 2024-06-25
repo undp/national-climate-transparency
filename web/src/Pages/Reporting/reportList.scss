@@ -20,18 +20,20 @@
         justify-content: center;
         align-items: center;
         height: 34px;
+        width: 287px;
         border-width: 0;
         border-radius: 6px;
         background-color: #e3f3fb;
         color: #7d858a;
         padding: 10px;
-        margin-left: 1px;
+        margin-left: 3px;
         margin-right: 5px;
-        margin-bottom: 1px;
-        margin-top: 1px;
+        margin-bottom: 3px;
+        margin-top: 3px;
 
         .report-label {
             margin-right: 10px;
+            font-size: 13px;
         }
     }
 }
