@@ -12,6 +12,8 @@ import { ReportSixViewEntity } from '../entities/report.six.view.entity';
 import { ReportSevenViewEntity } from '../entities/report.seven.view.entity';
 import { ReportTenViewEntity } from '../entities/report.ten.view.entity';
 import { ReportElevenViewEntity } from '../entities/report.eleven.view.entity';
+import { ReportEightViewEntity } from '../entities/report.eight.view.entity';
+import { ReportNineViewEntity } from '../entities/report.nine.view.entity';
 
 @Module({
 	imports: [
@@ -30,6 +32,8 @@ import { ReportElevenViewEntity } from '../entities/report.eleven.view.entity';
 			ReportThirteenViewEntity,
 			ReportSixViewEntity,
 			ReportSevenViewEntity,
+			ReportEightViewEntity,
+			ReportNineViewEntity,
 			ReportTenViewEntity,
 			ReportElevenViewEntity
 		]),

@@ -1,0 +1,17 @@
+{
+    "tableNine": "Tables Annex III -09",
+    "nothingToExport": "Data not found for export",
+    "projectId": "Project No.",
+    "titleOfProject": "Title of Project",
+    "description": "Description",
+    "sector": "Sector",
+    "subSectors": "Subsector",
+    "type": "Type of Support (NDC Component)",
+    "technologyType": "Technology",
+    "recipientEntities": "Recipient entity / Ministry",
+	"nationalImplementingEntities": "National Implementing entity / agency",
+    "projectStatus": "Status",
+    "supportReceivedOrNeeded": "Support Needed or Received",
+    "startYear": "Start year",
+    "endYear": "End year"
+}
