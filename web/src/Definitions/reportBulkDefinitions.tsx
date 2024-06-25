@@ -21,8 +21,6 @@ export type AggregateReportData = {
   [ReportType.ELEVEN]: ReportElevenRecord[];
   [ReportType.TWELVE]: ReportTwelveRecord[];
   [ReportType.THIRTEEN]: ReportThirteenRecord[];
-  [ReportType.TWELVE]: ReportTwelveRecord[];
-  [ReportType.THIRTEEN]: ReportThirteenRecord[];
 };
 
 export type AggregateReportTotal = {
