@@ -190,6 +190,8 @@ export enum Reports {
 	FIVE = '5',
 	SIX = '6',
 	SEVEN = '7',
+	EIGHT = '8',
+	NINE = '9',
 	TWELVE = '12',
 	THIRTEEN = '13',
 

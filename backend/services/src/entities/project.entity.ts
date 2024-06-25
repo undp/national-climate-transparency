@@ -7,7 +7,7 @@ import { Sector } from "../enums/sector.enum";
 
 @Entity({
   name: 'project',
-  synchronize: false,
+  synchronize: true,
 })
 export class ProjectEntity {
   @PrimaryColumn()

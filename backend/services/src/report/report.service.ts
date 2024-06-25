@@ -13,10 +13,14 @@ import { Reports } from "../enums/shared.enum";
 import { DataExportService } from "../util/dataExport.service";
 import { HelperService } from "../util/helpers.service";
 import { EntityManager, Repository } from "typeorm";
-import { ReportSixViewEntity } from "src/entities/report.six.view.entity";
-import { DataExportReportSixDto } from "src/dtos/data.export.reportSix.dto";
-import { ReportSevenViewEntity } from "src/entities/report.seven.view.entity";
-import { DataExportReportSevenDto } from "src/dtos/data.export.reportSeven.dto";
+import { ReportSixViewEntity } from "../entities/report.six.view.entity";
+import { DataExportReportSixDto } from "../dtos/data.export.reportSix.dto";
+import { ReportSevenViewEntity } from "../entities/report.seven.view.entity";
+import { DataExportReportSevenDto } from "../dtos/data.export.reportSeven.dto";
+import { ReportEightViewEntity } from "../entities/report.eight.view.entity";
+import { DataExportReportEightDto } from "../dtos/data.export.reportEight.dto";
+import { ReportNineViewEntity } from "../entities/report.nine.view.entity";
+import { DataExportReportNineDto } from "src/dtos/data.export.reportNine.dto";
 
 export class ReportService {
 	constructor(
@@ -28,6 +32,8 @@ export class ReportService {
 		@InjectRepository(ReportThirteenViewEntity) private reportThirteenViewRepo: Repository<ReportThirteenViewEntity>,
 		@InjectRepository(ReportSixViewEntity) private reportSixViewRepo: Repository<ReportSixViewEntity>,
 		@InjectRepository(ReportSevenViewEntity) private reportSevenViewRepo: Repository<ReportSevenViewEntity>,
+		@InjectRepository(ReportEightViewEntity) private reportEightViewRepo: Repository<ReportEightViewEntity>,
+		@InjectRepository(ReportNineViewEntity) private reportNineViewRepo: Repository<ReportNineViewEntity>,
 	) { }
 
 	async getTableData(id: Reports, query: QueryDto,) {
@@ -57,6 +63,12 @@ export class ReportService {
 			case Reports.SEVEN:
 					return this.reportSevenViewRepo.createQueryBuilder("reportSeven");
 
+			case Reports.EIGHT:
+					return this.reportEightViewRepo.createQueryBuilder("reportEight");
+
+			case Reports.NINE:
+				return this.reportNineViewRepo.createQueryBuilder("reportNine");
+	
 			case Reports.TWELVE:
 				return this.reportTwelveViewRepo.createQueryBuilder("reportTwelve");
 
@@ -85,16 +97,28 @@ export class ReportService {
 					break;
 
 				case Reports.SIX:
-						prepData =  this.prepareReportSixDataForExport(resp as ReportSixViewEntity[]);
-						localFileName = "reportSixExport.";
-						localTableNameKey = "reportSixExport.tableSix";
-						break;
+					prepData =  this.prepareReportSixDataForExport(resp as ReportSixViewEntity[]);
+					localFileName = "reportSixExport.";
+					localTableNameKey = "reportSixExport.tableSix";
+					break;
 
 				case Reports.SEVEN:
-						prepData =  this.prepareReportSevenDataForExport(resp as ReportSevenViewEntity[]);
-						localFileName = "reportSevenExport.";
-						localTableNameKey = "reportSevenExport.tableSeven";
-						break;
+					prepData =  this.prepareReportSevenDataForExport(resp as ReportSevenViewEntity[]);
+					localFileName = "reportSevenExport.";
+					localTableNameKey = "reportSevenExport.tableSeven";
+					break;
+
+				case Reports.EIGHT:
+					prepData =  this.prepareReportEightDataForExport(resp as ReportEightViewEntity[]);
+					localFileName = "reportEightExport.";
+					localTableNameKey = "reportEightExport.tableEight";
+					break;
+
+				case Reports.NINE:
+					prepData =  this.prepareReportNineDataForExport(resp as ReportNineViewEntity[]);
+					localFileName = "reportNineExport.";
+					localTableNameKey = "reportNineExport.tableNine";
+					break;
 	
 				case Reports.TWELVE:
 					prepData = this.prepareReportTwelveDataForExport(resp as ReportTwelveViewEntity[]);
@@ -102,11 +126,11 @@ export class ReportService {
 					localTableNameKey = "reportTwelveExport.tableTwelve";
 					break;
 	
-					case Reports.THIRTEEN:
-						prepData = this.prepareReportThirteenDataForExport(resp as ReportThirteenViewEntity[]);
-						localFileName = "reportTwelveExport.";
-						localTableNameKey = "reportTwelveExport.tableThirteen";
-						break;
+				case Reports.THIRTEEN:
+					prepData = this.prepareReportThirteenDataForExport(resp as ReportThirteenViewEntity[]);
+					localFileName = "reportTwelveExport.";
+					localTableNameKey = "reportTwelveExport.tableThirteen";
+					break;
 	
 				default:
 					break;
@@ -216,6 +240,51 @@ export class ReportService {
 			dto.financialInstrument = report.financialInstrument;
 			dto.financingStatus = report.financingStatus;
 
+      exportData.push(dto);
+    }
+
+    return exportData;
+  }
+
+	private prepareReportEightDataForExport(data: ReportEightViewEntity[]) {
+    const exportData: DataExportReportEightDto[] = [];
+
+    for (const report of data) {
+      const dto: DataExportReportEightDto = new DataExportReportEightDto();
+			dto.projectId = report.projectId;
+			dto.titleOfProject = report.title;
+			dto.description = report.description;
+			dto.sector = report.sector;
+			dto.subSectors = report.subSectors;
+			dto.type = report.type;
+			dto.technologyType = report.technologyType;
+			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
+			dto.startYear = report.startYear;
+			dto.endYear = report.endYear;
+      exportData.push(dto);
+    }
+
+    return exportData;
+  }
+
+	private prepareReportNineDataForExport(data: ReportNineViewEntity[]) {
+    const exportData: DataExportReportNineDto[] = [];
+
+    for (const report of data) {
+      const dto: DataExportReportNineDto = new DataExportReportNineDto();
+			dto.projectId = report.projectId;
+			dto.titleOfProject = report.title;
+			dto.description = report.description;
+			dto.sector = report.sector;
+			dto.subSectors = report.subSectors;
+			dto.type = report.type;
+			dto.technologyType = report.technologyType;
+			dto.recipientEntities = report.recipientEntities;
+			dto.nationalImplementingEntities = report.nationalImplementingEntities;
+			dto.projectStatus = report.projectStatus;
+			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
+			dto.startYear = report.startYear;
+			dto.endYear = report.endYear;
       exportData.push(dto);
     }
 
