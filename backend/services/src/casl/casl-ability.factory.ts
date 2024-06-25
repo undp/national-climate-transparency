@@ -39,6 +39,7 @@ export class CaslAbilityFactory {
 				can(Action.Update, User);
 				can(Action.Delete, User);
 				cannot(Action.Update, User, ['apiKey', 'password', 'email']);
+				can(Action.ForceResetPassword, User);
 
 				// Action
 				can(Action.Read, ActionEntity);
@@ -90,6 +91,7 @@ export class CaslAbilityFactory {
 				can(Action.Update, User);
 				can(Action.Delete, User);
 				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
+				cannot(Action.ForceResetPassword, User);
 
 				// Action
 				can(Action.Read, ActionEntity);
@@ -144,6 +146,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
 					id: { $eq: user.id },
 				});
+				cannot(Action.ForceResetPassword, User);
 
 				// ----------------------------- Action ------------------------------
 
@@ -244,6 +247,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
 					id: { $eq: user.id },
 				});
+				cannot(Action.ForceResetPassword, User);
 
 				// ----------------------------- Action ------------------------------
 

@@ -39,6 +39,7 @@ import { API_KEY_SEPARATOR } from "../constants";
 import { DataResponseDto } from "../dtos/data.response.dto";
 import { UserState } from "../enums/user.state.enum";
 import { Sector } from "../enums/sector.enum";
+import { PasswordForceResetDto } from "../dtos/password.forceReset.dto";
 
 @Injectable()
 export class UserService {
@@ -338,16 +339,28 @@ export class UserService {
 	}
 
 	async resetPassword(
-		id: number,
-		passwordResetDto: PasswordUpdateDto,
-		abilityCondition: string
+		requestingUser: User,
+		userId: number,
+		passwordResetDto: PasswordUpdateDto | PasswordForceResetDto,
+		abilityCondition: string,
+		isForcedPasswordReset: boolean
 	) {
-		this.logger.verbose("User password reset received", id);
+		this.logger.verbose("User password reset received", userId);
+
+		if (isForcedPasswordReset && requestingUser.role != Role.Root) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.userUnAUth",
+					[]
+				),
+				HttpStatus.UNAUTHORIZED
+			);
+		}
 
 		const user = await this.userRepo
 			.createQueryBuilder()
 			.where(
-				`id = '${id}' ${abilityCondition
+				`id = '${userId}' ${abilityCondition
 					? " AND (" +
 					this.helperService.parseMongoQueryToSQL(abilityCondition) + ")"
 					: ""
@@ -356,22 +369,27 @@ export class UserService {
 			.addSelect(["User.password"])
 			.getOne();
 
-		passwordResetDto.oldPassword = this.passwordHashService.getPasswordHash(passwordResetDto.oldPassword);
+		if (!isForcedPasswordReset && this.isPasswordUpdateDto(passwordResetDto)) {
+			const oldPassword = this.passwordHashService.getPasswordHash(passwordResetDto.oldPassword);
+
+			if (!user || user.password != oldPassword) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"user.oldPasswordIncorrect",
+						[]
+					),
+					HttpStatus.UNAUTHORIZED
+				);
+			}
+		}
+		// keeping the text form password as it is needed for the email later
+		const newPassword = passwordResetDto.newPassword;
 		passwordResetDto.newPassword = this.passwordHashService.getPasswordHash(passwordResetDto.newPassword);
 
-		if (!user || user.password != passwordResetDto.oldPassword) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"user.oldPasswordIncorrect",
-					[]
-				),
-				HttpStatus.UNAUTHORIZED
-			);
-		}
 		const result = await this.userRepo
 			.update(
 				{
-					id: id,
+					id: userId,
 				},
 				{
 					password: passwordResetDto.newPassword,
@@ -385,19 +403,20 @@ export class UserService {
 			const templateData = {
 				name: user.name,
 				countryName: this.configService.get("systemCountryName"),
+				newPassword: newPassword,
 			};
 			const action: AsyncAction = {
 				actionType: AsyncActionType.Email,
 				actionProps: {
-					emailType: EmailTemplates.CHANGE_PASSOWRD.id,
+					emailType: (isForcedPasswordReset) ? EmailTemplates.FORCE_CHANGE_PASSWORD.id : EmailTemplates.CHANGE_PASSWORD.id,
 					sender: user.email,
 					subject: this.helperService.getEmailTemplateMessage(
-						EmailTemplates.CHANGE_PASSOWRD["subject"],
+						(isForcedPasswordReset) ? EmailTemplates.FORCE_CHANGE_PASSWORD["subject"] : EmailTemplates.CHANGE_PASSWORD["subject"],
 						templateData,
 						true
 					),
 					emailBody: this.helperService.getEmailTemplateMessage(
-						EmailTemplates.CHANGE_PASSOWRD["html"],
+						(isForcedPasswordReset) ? EmailTemplates.FORCE_CHANGE_PASSWORD["html"] : EmailTemplates.CHANGE_PASSWORD["html"],
 						templateData,
 						false
 					),
@@ -416,6 +435,10 @@ export class UserService {
 			),
 			HttpStatus.INTERNAL_SERVER_ERROR
 		);
+	}
+
+	isPasswordUpdateDto(dto: PasswordUpdateDto | PasswordForceResetDto): dto is PasswordUpdateDto {
+		return (dto as PasswordUpdateDto).oldPassword !== undefined;
 	}
 
 	async regenerateApiKey(email, abilityCondition) {

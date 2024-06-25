@@ -82,13 +82,30 @@ export const EmailTemplates = {
         `,
     text: "",
   },
-  CHANGE_PASSOWRD: {
-    id: "CHANGE_PASSOWRD",
+  CHANGE_PASSWORD: {
+    id: "CHANGE_PASSWORD",
     subject: "Your Password was Changed!",
     html: `
         Hi {{name}},<br><br>
         The password of your NDC Transparency System account was changed successfully. <br><br>
         If you do not use {{countryName}} NDC Transparency System, please ignore this email.
+
+        <br><br>
+        Sincerely, <br>
+        The {{countryName}} NDC Transparency System Team
+        `,
+    text: "",
+  },
+	FORCE_CHANGE_PASSWORD: {
+    id: "FORCE_CHANGE_PASSWORD",
+    subject: "Your Password was Changed by an admin!",
+    html: `
+        Hi {{name}},<br><br>
+        Password of Your NDC Transparency System account has been changed by an admin. <br><br>
+
+        Your new password is: {{newPassword}}  <br><br>
+
+				Please enter your email and new password to access your NDC Transparency System account. 
 
         <br><br>
         Sincerely, <br>
