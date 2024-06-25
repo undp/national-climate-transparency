@@ -91,7 +91,7 @@ const ReportCard: React.FC<Props> = ({
           </div>
         </Col>
       </Row>
-      <Row>
+      <Row className="table-bar">
         <Col span={24}>
           <LayoutTable
             tableData={reportData}

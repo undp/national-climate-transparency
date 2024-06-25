@@ -3,8 +3,10 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import './reportList.scss';
 import { useTranslation } from 'react-i18next';
 import {
+  ReportEightRecord,
   ReportElevenRecord,
   ReportFiveRecord,
+  ReportNineRecord,
   ReportSevenRecord,
   ReportSixRecord,
   ReportTenRecord,
@@ -19,6 +21,8 @@ import {
   getReportElevenColumns,
   getReportTwelveColumns,
   getReportThirteenColumns,
+  getReportEightColumns,
+  getReportNineColumns,
 } from '../../Definitions/columns/reportColumns';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import ReportCard from '../../Components/reportCard/reportCard';
@@ -212,6 +216,103 @@ const reportList = () => {
         setAggregateReportTotal((prevState) => ({
           ...prevState,
           [ReportType.SEVEN]: response.response.data.total,
+        }));
+
+        setLoading(false);
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+      setLoading(false);
+    }
+  };
+
+  const getTableEightData = async () => {
+    setLoading(true);
+    try {
+      const payload: any = {
+        page: aggregateCurrentPage[8],
+        size: aggregatePageSize[8],
+      };
+
+      const response: any = await post('national/reports/8/query', payload);
+
+      if (response) {
+        const tempReportEightData: ReportEightRecord[] = [];
+
+        response.data.forEach((entry: any, index: number) => {
+          tempReportEightData.push({
+            key: index,
+            title: entry.title,
+            description: entry.description,
+            objective: entry.objective,
+            sector: entry.sector,
+            subSectors: entry.subSectors ?? [],
+            type: entry.type,
+            techType: entry.technologyType ?? [],
+            supportDirection: entry.supportReceivedOrNeeded,
+            startYear: entry.startYear,
+            endYear: entry.endYear,
+          });
+        });
+
+        setAggregateReportData((prevState) => ({
+          ...prevState,
+          [ReportType.EIGHT]: tempReportEightData,
+        }));
+
+        setAggregateReportTotal((prevState) => ({
+          ...prevState,
+          [ReportType.EIGHT]: response.response.data.total,
+        }));
+
+        setLoading(false);
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+      setLoading(false);
+    }
+  };
+
+  const getTableNineData = async () => {
+    setLoading(true);
+    try {
+      const payload: any = {
+        page: aggregateCurrentPage[9],
+        size: aggregatePageSize[9],
+      };
+
+      const response: any = await post('national/reports/9/query', payload);
+
+      if (response) {
+        const tempReportNineData: ReportNineRecord[] = [];
+
+        response.data.forEach((entry: any, index: number) => {
+          tempReportNineData.push({
+            key: index,
+            title: entry.title,
+            description: entry.description,
+            objective: entry.objective,
+            sector: entry.sector,
+            subSectors: entry.subSectors ?? [],
+            type: entry.type,
+            techType: entry.technologyType ?? [],
+            recipientEntities: entry.recipientEntities ?? [],
+            natImplementers: entry.nationalImplementingEntities ?? [],
+            projectStatus: entry.projectStatus,
+            supportDirection: entry.supportReceivedOrNeeded,
+            startYear: entry.startYear,
+            endYear: entry.endYear,
+          });
+        });
+
+        setAggregateReportData((prevState) => ({
+          ...prevState,
+          [ReportType.NINE]: tempReportNineData,
+        }));
+
+        setAggregateReportTotal((prevState) => ({
+          ...prevState,
+          [ReportType.NINE]: response.response.data.total,
         }));
 
         setLoading(false);
@@ -449,6 +550,10 @@ const reportList = () => {
         return getReportSixColumns(t);
       case ReportType.SEVEN:
         return getReportSevenColumns(t);
+      case ReportType.EIGHT:
+        return getReportEightColumns(t);
+      case ReportType.NINE:
+        return getReportNineColumns(t);
       case ReportType.TEN:
         return getReportTenColumns(t);
       case ReportType.ELEVEN:
@@ -487,6 +592,14 @@ const reportList = () => {
   useEffect(() => {
     getTableSevenData();
   }, [aggregateCurrentPage?.[7], aggregatePageSize?.[7]]);
+
+  useEffect(() => {
+    getTableEightData();
+  }, [aggregateCurrentPage?.[8], aggregatePageSize?.[9]]);
+
+  useEffect(() => {
+    getTableNineData();
+  }, [aggregateCurrentPage?.[9], aggregatePageSize?.[9]]);
 
   useEffect(() => {
     getTableTenData();
