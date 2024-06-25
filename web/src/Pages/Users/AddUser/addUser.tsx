@@ -22,7 +22,7 @@ import { Sector } from '../../../Enums/sector.enum';
 import { Organisation } from '../../../Enums/organisation.enum';
 import { BankOutlined, ExperimentOutlined, KeyOutlined, StarOutlined } from '@ant-design/icons';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
-import ForceResetPasswordModel from '../../../Components/Models/forceResetPasswordModel';
+import ForceResetPasswordModel from '../../../Components/Models/ForceReset/forceResetPasswordModel';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -204,8 +204,8 @@ const AddUser = () => {
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
-          content: t('forcePasswordReset'),
-          duration: 3,
+          content: t('changePassword:forcePasswordResetSuccess'),
+          duration: 5,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
       }

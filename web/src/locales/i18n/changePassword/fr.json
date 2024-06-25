@@ -6,5 +6,6 @@
     "setPassword": "DÉFINIR LE MOT DE PASSE",
     "cancel": "ANNULER",
     "isRequired": "est requis",
-    "passwordsNotMatchedErr": "Les mots de passe ne correspondent pas"
+    "passwordsNotMatchedErr": "Les mots de passe ne correspondent pas",
+    "forcePasswordResetSuccess":"Mot de passe changé et utilisateur informé"
 }

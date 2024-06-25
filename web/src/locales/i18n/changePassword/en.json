@@ -6,5 +6,6 @@
     "setPassword":"SET PASSWORD",
     "cancel":"CANCEL",
     "isRequired": "is required",
-    "passwordsNotMatchedErr":"Passwords do not match"
+    "passwordsNotMatchedErr":"Passwords do not match",
+    "forcePasswordResetSuccess":"Password Changed and User Informed"
 }

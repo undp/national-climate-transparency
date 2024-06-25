@@ -1,7 +1,8 @@
 import { FC } from 'react';
 import { Lock } from 'react-bootstrap-icons';
 import { Button, Form, Input, Modal } from 'antd';
-import '../../Styles/app.scss';
+import '../../../Styles/app.scss';
+import './forceResetPasswordModel.scss';
 
 export interface ForceResetPasswordProps {
   t: any;
@@ -32,18 +33,12 @@ const ForceResetPasswordModel: FC<ForceResetPasswordProps> = ({
         </div>
       }
       open={isModelVisible}
-      className={'popup-success password-reset-model'}
       centered={true}
       destroyOnClose={true}
       footer={null}
       onCancel={() => setIsModelVisible(false)}
     >
-      <Form
-        name="change_password"
-        layout="vertical"
-        className="login-form"
-        onFinish={doPasswordReset}
-      >
+      <Form name="change_password" layout="vertical" onFinish={doPasswordReset}>
         <Form.Item
           name="newPassword"
           label={t('changePassword:newPassword')}
@@ -54,9 +49,8 @@ const ForceResetPasswordModel: FC<ForceResetPasswordProps> = ({
             },
           ]}
         >
-          <Input.Password placeholder="" className="border-radius-5" />
+          <Input.Password className="password-input" />
         </Form.Item>
-
         <Form.Item
           name="confirm_password"
           label={t('changePassword:confirmNewPassword')}
@@ -81,7 +75,7 @@ const ForceResetPasswordModel: FC<ForceResetPasswordProps> = ({
             }),
           ]}
         >
-          <Input.Password placeholder="" className="border-radius-5" />
+          <Input.Password className="password-input" />
         </Form.Item>
         <div className="mg-top-2 ant-modal-footer">
           <Button htmlType="button" onClick={() => setIsModelVisible(false)}>
