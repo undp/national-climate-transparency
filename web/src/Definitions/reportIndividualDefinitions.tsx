@@ -57,6 +57,37 @@ export type ReportSevenRecord = {
   financingStatus: string;
 };
 
+export type ReportEightRecord = {
+  key: number;
+  title: string;
+  description: string;
+  objective: string;
+  sector: string;
+  subSectors: string[];
+  type: string;
+  techType: string[];
+  supportDirection: string;
+  startYear: number;
+  endYear: number;
+};
+
+export type ReportNineRecord = {
+  key: number;
+  title: string;
+  description: string;
+  objective: string;
+  sector: string;
+  subSectors: string[];
+  type: string;
+  techType: string[];
+  recipientEntities: string[];
+  natImplementers: string[];
+  projectStatus: string;
+  supportDirection: string;
+  startYear: number;
+  endYear: number;
+};
+
 export type ReportTenRecord = {
   key: number;
   title: string;

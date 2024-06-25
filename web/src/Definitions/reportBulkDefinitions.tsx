@@ -1,7 +1,9 @@
 import { ReportType } from '../Enums/report.enum';
 import {
+  ReportEightRecord,
   ReportElevenRecord,
   ReportFiveRecord,
+  ReportNineRecord,
   ReportSevenRecord,
   ReportSixRecord,
   ReportTenRecord,
@@ -13,8 +15,12 @@ export type AggregateReportData = {
   [ReportType.FIVE]: ReportFiveRecord[];
   [ReportType.SIX]: ReportSixRecord[];
   [ReportType.SEVEN]: ReportSevenRecord[];
+  [ReportType.EIGHT]: ReportEightRecord[];
+  [ReportType.NINE]: ReportNineRecord[];
   [ReportType.TEN]: ReportTenRecord[];
   [ReportType.ELEVEN]: ReportElevenRecord[];
+  [ReportType.TWELVE]: ReportTwelveRecord[];
+  [ReportType.THIRTEEN]: ReportThirteenRecord[];
   [ReportType.TWELVE]: ReportTwelveRecord[];
   [ReportType.THIRTEEN]: ReportThirteenRecord[];
 };
