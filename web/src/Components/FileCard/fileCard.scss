@@ -1,0 +1,15 @@
+.upload-file-card {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    border: 1px solid #d9d9d9;
+    
+    .file-content {
+        width: 100%;
+        color: #3A3541;
+        opacity: 0.8;
+    }
+}
+

@@ -1,3 +1,4 @@
+import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
 import { Buffer } from 'buffer';
 
@@ -110,4 +111,12 @@ export const getRounded = (num: number | string): number => {
   } else {
     return 0;
   }
+};
+
+export const getCollapseIcon = (isActive: boolean) => {
+  return isActive ? (
+    <MinusCircleOutlined style={{ color: '#16B1FF' }} />
+  ) : (
+    <PlusCircleOutlined style={{ color: '#16B1FF' }} />
+  );
 };
