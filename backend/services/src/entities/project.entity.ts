@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { ProjectStatus } from "../enums/project.enum";
 import { Recipient, IntImplementor } from "../enums/shared.enum";
 import { ProgrammeEntity } from "./programme.entity";
@@ -59,4 +59,11 @@ export class ProjectEntity {
 
 	@Column({ type: "boolean", default: false })
 	validated: boolean;
+
+	@CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	createdTime: Date;
+
+	@UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	updatedTime: Date;
+	
 }
