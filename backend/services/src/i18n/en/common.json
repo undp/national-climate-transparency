@@ -7,5 +7,6 @@
     "cannotUnlinkedFromValidated": "Cannot detached from {} with id {} as it is validated",
     "invalidUsername": "Invalid Username !",
     "accountDeactivated": "Account Deactivated !",
-    "incorrectPassword": "Invalid Password !"
+    "incorrectPassword": "Invalid Password !",
+    "unableToGetStats": "Unable to retrieve the statistics for the charts."
 }
