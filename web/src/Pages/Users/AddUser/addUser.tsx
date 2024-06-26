@@ -245,7 +245,7 @@ const AddUser = () => {
       // Permission Setting for the Password Change
       if (userInfoState?.id === state?.record?.id.toString()) {
         setIsProfilePasswordReset(true);
-      } else if (userInfoState?.userRole === Role.Root || userInfoState?.userRole === Role.Admin) {
+      } else if (userInfoState?.userRole === Role.Root) {
         setIsForcePasswordReset(true);
       } else {
         setIsProfilePasswordReset(false);
