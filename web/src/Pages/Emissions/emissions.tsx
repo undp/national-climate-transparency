@@ -1,7 +1,7 @@
 import { Tabs } from 'antd';
 import './emissions.scss';
 import { useTranslation } from 'react-i18next';
-import { EmissionForm } from '../../Components/Inventory/Emission/emissionForm';
+import { EmissionForm } from '../../Components/Inventory/emissionForm';
 import { useState } from 'react';
 
 const GhgEmissions = () => {

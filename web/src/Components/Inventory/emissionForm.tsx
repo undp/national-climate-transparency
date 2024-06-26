@@ -2,10 +2,11 @@ import { Row, Col, DatePicker, Upload, Button, message, Collapse } from 'antd';
 import './emissionForm.scss';
 import { UploadOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
-import { AcceptedMimeTypes } from '../../../Definitions/fileTypes';
-import { FileCard } from '../../FileCard/fileCard';
-import { getBase64, getCollapseIcon } from '../../../Utils/utilServices';
-import { EmissionSectorTitles } from '../../../Enums/emission.enum';
+import { AcceptedMimeTypes } from '../../Definitions/fileTypes';
+import { FileCard } from '../FileCard/fileCard';
+import { getBase64, getCollapseIcon } from '../../Utils/utilServices';
+import { EmissionSectorTitles, EmissionUnits } from '../../Enums/emission.enum';
+import NumberChip from '../NumberChip/numberChip';
 
 interface Props {
   index: number;
@@ -70,6 +71,23 @@ export const EmissionForm: React.FC<Props> = ({ index, t, uploadedFile, setUploa
             />
           )}
         </Col>
+      </Row>
+      <Row gutter={25} className="unit-row">
+        {Object.values(EmissionUnits).map((unit) => (
+          <Col span={3}>
+            <div className="unit-div">{unit}</div>
+          </Col>
+        ))}
+      </Row>
+      <Row gutter={25} className="total-row">
+        <Col span={12}>
+          <div className="total-div">{'Total National Emissions and Removals '}</div>
+        </Col>
+        {Object.values(EmissionUnits).map((unit) => (
+          <Col span={3}>
+            <NumberChip value={100} valueType={unit} />
+          </Col>
+        ))}
       </Row>
       <Row className="collapsing-row">
         <Col span={24}>

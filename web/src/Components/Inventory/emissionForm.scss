@@ -1,0 +1,71 @@
+.emission-form {
+
+    .first-row {
+        
+        margin-top: 20px;
+        padding-left: 16px;
+
+        .height-column {
+            height: 40px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .year-picker {
+            width: 100%;
+            min-height: 40px;
+        }
+
+        .upload-button {
+            min-width: 100%;
+            min-height: 40px;
+            color: #3A3541;
+            opacity: 0.8;
+            border: 1px solid #d9d9d9;
+        }
+    }
+
+    .unit-row {
+        margin-top: 30px;
+        padding-left: 16px;
+        padding-right: 50px;
+        display: flex;
+        justify-content: flex-end;
+
+        .unit-div{
+            font-weight: 500;
+            color: #7e7e7e;
+            display: flex;
+            justify-content: center;
+        }
+    }
+
+    .total-row {
+        margin-top: 30px;
+        padding-left: 16px;
+        padding-right: 50px;
+        display: flex;
+        justify-content: flex-end;
+
+        .total-div{
+            font-size: 14px;
+            font-weight: 800;
+            color: #7e7e7e;
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .unit-div{
+            font-weight: 500;
+            color: #7e7e7e;
+            display: flex;
+            justify-content: center;
+        }
+    }
+
+    .collapsing-row {
+        margin-top: 20px;
+    }
+
+}

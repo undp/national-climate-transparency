@@ -5,3 +5,10 @@ export enum EmissionSectorTitles {
   WASTE = 'Waste',
   OTHER = 'Other',
 }
+
+export enum EmissionUnits {
+  CO2 = 'tCO2',
+  CH4 = 'tCH4',
+  N2O = 'tN2O',
+  CO2EQ = 'tCO2-eq',
+}
