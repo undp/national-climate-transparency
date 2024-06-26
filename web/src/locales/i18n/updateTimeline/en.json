@@ -48,5 +48,9 @@
     "46": "Unvalidated the Programme Due to Attachment(s) Change",
     "47": "Unvalidated the Project Due to Attachment(s) Change",
     "48": "Unvalidated the Activity Due to Attachment(s) Change",
-    "49": "Unvalidated the Support Due to Attachment(s) Change"
+    "49": "Unvalidated the Support Due to Attachment(s) Change",
+    "50": "unvalidated the action due to a deletion of a linked entity",
+    "51": "unvalidated the programme due to a deletion of a linked entity",
+    "52": "unvalidated the project due to a deletion of a linked entity",
+    "53": "unvalidated the activity due to a deletion of a linked entity"
 }

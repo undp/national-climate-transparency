@@ -376,19 +376,57 @@ export class SupportService {
 				HttpStatus.FORBIDDEN
 			);
 		}
+		
+		const eventLog = [];
+		const activity = support.activity;
 
-		try {
-			await this.supportRepo.delete(support.supportId);
-		} catch (err) {
+		const sup = await this.entityManager
+		.transaction(async (em) => {
+			const result = await em.delete<SupportEntity>(SupportEntity, support.supportId);
+			if (result.affected > 0) {
+				if (activity.validated) {
+					activity.validated = false;
+					this.addEventLogEntry(
+						eventLog, 
+						LogEventType.ACTIVITY_UNVERIFIED_DUE_ATTACHMENT_DELETE, 
+						EntityType.ACTIVITY, 
+						activity.activityId, 
+						0, 
+						support.supportId
+					);
+					await em.save<ActivityEntity>(activity);
+				}
+		
+				if (activity.parentType == EntityType.PROJECT) {
+					const parentProject = await this.activityService.isProjectValid(activity.parentId, user);
+					if (parentProject.validated) {
+						parentProject.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+							EntityType.PROJECT, 
+							parentProject.projectId, 
+							0, 
+							activity.activityId
+						);
+						await em.save<ProjectEntity>(parentProject);
+					}
+				}
+				// Save event logs
+				await em.save<LogEntity>(eventLog);
+			}
+			return result;
+		})
+		.catch((err: any) => {
 			console.error(err);
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"support.supportDeleteFailed",
 					[err]
 				),
-				HttpStatus.INTERNAL_SERVER_ERROR
+				HttpStatus.BAD_REQUEST
 			);
-		}
+		});
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
@@ -431,7 +469,7 @@ export class SupportService {
 			validateDto
 		)
 
-		const act = await this.entityManager
+		const sup = await this.entityManager
 			.transaction(async (em) => {
 				const savedSupport = await em.save<SupportEntity>(support);
 				if (savedSupport) {
@@ -455,7 +493,7 @@ export class SupportService {
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
 			this.helperService.formatReqMessagesString("support.verifySupportSuccess", []),
-			act
+			sup
 		);
 
 	}
