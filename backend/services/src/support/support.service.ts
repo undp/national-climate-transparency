@@ -18,6 +18,8 @@ import { HelperService } from "../util/helpers.service";
 import { EntityManager, Repository } from "typeorm";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
+import { DeleteDto } from "src/dtos/delete.dto";
+import { Role } from "src/casl/role.enum";
 
 @Injectable()
 export class SupportService {
@@ -339,6 +341,62 @@ export class SupportService {
 			this.helperService.formatReqMessagesString("support.updateSupportSuccess", []),
 			sup
 		);
+	}
+
+	//MARK: Delete Support
+	async deleteSupport(deleteDto: DeleteDto, user: User) {
+
+		if (user.role !== Role.Admin && user.role !== Role.Root) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.userUnAUth",
+					[]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const support = await this.findSupportById(deleteDto.entityId);
+		if (!support) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.supportNotFound",
+					[deleteDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, support.sector)) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.permissionDeniedForSector",
+					[support.supportId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		try {
+			await this.supportRepo.delete(support.supportId);
+		} catch (err) {
+			console.error(err);
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.supportDeleteFailed",
+					[err]
+				),
+				HttpStatus.INTERNAL_SERVER_ERROR
+			);
+		}
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("support.deleteSupportSuccess", []),
+			null
+		);
+
 	}
 
 	//MARK: Validate Support
