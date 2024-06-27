@@ -59,6 +59,7 @@
 
     .collapsing-row {
         margin-top: 20px;
+        margin-bottom: 20px;
 
         .sector-header-row {
             padding-right: 50px;
@@ -74,21 +75,70 @@
                 height: 100%;
             }
         }
+
+        .sector-sub-header-row {
+            padding-left: 26px;
+            padding-right: 50px;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: flex-end;
+            border-bottom: 1px solid #e8e8e8;
+    
+            .title-div{
+                font-size: 12px;
+                font-weight: 600;
+                color: #7e7e7e;
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+        }
+
+        .input-number-row {
+            margin: 0;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            padding-left: 26px;
+            padding-right: 50px;
+            display: flex;
+            justify-content: flex-end;
+            border-bottom: 1px solid #e8e8e8;
+    
+            .title-div{
+                font-size: 12px;
+                font-weight: 500;
+                color: #7e7e7e;
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+    
+            .number-column {
+                display: flex;
+                justify-content: center;
+    
+                .input-emission {
+                    width: 60px;
+                }
+            }
+    
+        }
     }
 
     .input-number-row {
-        margin-top: 30px;
+        padding-top: 10px;
+        padding-bottom: 10px;
         padding-left: 42px;
         padding-right: 66px;
         display: flex;
         justify-content: flex-end;
+        border-bottom: 1px solid #e8e8e8;
 
         .title-div{
             font-size: 12px;
             font-weight: 600;
             color: #7e7e7e;
             display: flex;
-            align-items: center;
             height: 100%;
         }
 
