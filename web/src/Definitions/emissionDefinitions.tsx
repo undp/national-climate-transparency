@@ -24,7 +24,25 @@ export const emissionSections: SectionDefinition[] = [
   {
     id: '2',
     hasSubSections: false,
-    mainSections: ['2A', '2B', '2C', '2D', '2E', '2F', '2F'],
+    mainSections: ['2A', '2B', '2C', '2D', '2E', '2F', '2G', '2H'],
+    subSections: null,
+  },
+  {
+    id: '3',
+    hasSubSections: false,
+    mainSections: ['3A', '3B', '3C', '3D'],
+    subSections: null,
+  },
+  {
+    id: '4',
+    hasSubSections: false,
+    mainSections: ['4A', '4B', '4C', '4D', '4E'],
+    subSections: null,
+  },
+  {
+    id: '5',
+    hasSubSections: false,
+    mainSections: ['5A', '5B'],
     subSections: null,
   },
 ];

@@ -104,7 +104,7 @@ export const EmissionForm: React.FC<Props> = ({ index, t, uploadedFile, setUploa
                     <Col className="title-div" span={12}>
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <span>{sectionIndex + 1}</span>
-                        <span>{`${t(section.id)}_title`}</span>
+                        <span>{t(`${section.id}_title`)}</span>
                       </div>
                     </Col>
                     {Object.values(EmissionUnits).map((unit) => (
@@ -118,10 +118,15 @@ export const EmissionForm: React.FC<Props> = ({ index, t, uploadedFile, setUploa
               >
                 {section.mainSections &&
                   section.mainSections.map((mainSection: string) => (
-                    <Row gutter={25} className="input-number-row" align={'middle'}>
+                    <Row
+                      key={mainSection}
+                      gutter={25}
+                      className="input-number-row"
+                      align={'middle'}
+                    >
                       <Col span={12} className="title-div">
                         <div style={{ display: 'flex', gap: '10px' }}>
-                          <span>{t(mainSection)}</span>
+                          <span>{mainSection}</span>
                           <span>{t(`${mainSection}_title`)}</span>
                         </div>
                       </Col>
@@ -134,11 +139,11 @@ export const EmissionForm: React.FC<Props> = ({ index, t, uploadedFile, setUploa
                   ))}
                 {section.subSections &&
                   section.subSections.map((subSection: SubSectionsDefinition) => (
-                    <>
+                    <div key={subSection.id}>
                       <Row gutter={25} className="sector-sub-header-row" align={'middle'}>
                         <Col className="title-div" span={12}>
                           <div style={{ display: 'flex', gap: '10px' }}>
-                            <span>{t(subSection.id)}</span>
+                            <span>{subSection.id}</span>
                             <span>{t(`${subSection.id}_title`)}</span>
                           </div>
                         </Col>
@@ -153,7 +158,7 @@ export const EmissionForm: React.FC<Props> = ({ index, t, uploadedFile, setUploa
                           <Row gutter={25} className="input-number-row" align={'middle'}>
                             <Col className="title-div" span={12}>
                               <div style={{ display: 'flex', gap: '10px', paddingLeft: '50px' }}>
-                                <span>{t(secondarySection)}</span>
+                                <span>{secondarySection}</span>
                                 <span>{t(`${secondarySection}_title`)}</span>
                               </div>
                             </Col>
@@ -169,7 +174,7 @@ export const EmissionForm: React.FC<Props> = ({ index, t, uploadedFile, setUploa
                             ))}
                           </Row>
                         ))}
-                    </>
+                    </div>
                   ))}
               </Panel>
             ))}
