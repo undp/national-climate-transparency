@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './projectForm.scss';
-import { ProjectStatus, ProjectType } from '../../../Enums/project.enum';
+import { ProjectStatus } from '../../../Enums/project.enum';
 import { IntImplementor, KPIAction, Recipient } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
@@ -190,7 +190,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
             // Populating Project owned data fields
             form.setFieldsValue({
-              type: entityData.type,
               title: entityData.title,
               description: entityData.description,
               additionalProjectNumber: entityData.additionalProjectNumber ?? undefined,
@@ -275,8 +274,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   id: kpi.kpiId,
                   name: kpi.name,
                   unit: kpi.kpiUnit,
-                  achieved: kpi.achieved ?? 0,
-                  expected: kpi.expected,
+                  achieved: parseFloat(kpi.achieved ?? 0),
+                  expected: parseFloat(kpi.expected ?? 0),
                   kpiAction: KPIAction.NONE,
                 });
               } else {
@@ -286,8 +285,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   id: kpi.kpiId,
                   name: kpi.name,
                   unit: kpi.kpiUnit,
-                  achieved: kpi.achieved ?? 0,
-                  expected: kpi.expected,
+                  achieved: parseFloat(kpi.achieved ?? 0),
+                  expected: parseFloat(kpi.expected ?? 0),
                   kpiAction: KPIAction.NONE,
                 });
               }
@@ -350,10 +349,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         techDevContribution: projectMigratedData.techDevContribution,
         capBuildObjectives: projectMigratedData.capBuildObjectives,
         techType: projectMigratedData.techType,
-        neededUSD: projectMigratedData.neededUSD,
-        neededLCL: projectMigratedData.neededLCL,
-        receivedUSD: projectMigratedData.receivedUSD,
-        receivedLCL: projectMigratedData.receivedLCL,
+        neededUSD: getRounded(projectMigratedData.neededUSD),
+        neededLCL: getRounded(projectMigratedData.neededLCL),
+        receivedUSD: getRounded(projectMigratedData.receivedUSD),
+        receivedLCL: getRounded(projectMigratedData.receivedLCL),
         achievedGHGReduction: projectMigratedData.achievedGHGReduction,
         expectedGHGReduction: projectMigratedData.expectedGHGReduction,
       });
@@ -371,6 +370,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
           if (response.status === 200 || response.status === 201) {
             const actionData: any = response.data;
             form.setFieldsValue({
+              type: actionData.type,
               actionTitle: actionData.title,
               natAnchor: actionData.natAnchor,
             });
@@ -495,10 +495,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 sup.financeNature === 'International'
                   ? sup.internationalFinancialInstrument
                   : sup.nationalFinancialInstrument,
-              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-              recievedUSD: getRounded(sup.receivedAmount ?? 0),
-              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+              estimatedUSD: sup.requiredAmount ?? 0,
+              estimatedLC: sup.requiredAmountDomestic ?? 0,
+              recievedUSD: sup.receivedAmount ?? 0,
+              recievedLC: sup.receivedAmountDomestic ?? 0,
             });
           });
 
@@ -858,8 +858,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               id: kpi.kpiId,
               name: kpi.name,
               unit: kpi.kpiUnit,
-              achieved: kpi.achieved ?? 0,
-              expected: kpi.expected,
+              achieved: parseFloat(kpi.achieved ?? 0),
+              expected: parseFloat(kpi.expected ?? 0),
               kpiAction: KPIAction.NONE,
             });
 
@@ -978,21 +978,12 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('formHeader:typesTitle')}</label>}
                     name="type"
-                    rules={[validation.required]}
                   >
                     <Select
                       size="large"
                       style={{ fontSize: inputFontSize }}
-                      allowClear
-                      disabled={isView}
-                      showSearch
-                    >
-                      {Object.values(ProjectType).map((pType) => (
-                        <Option key={pType} value={pType}>
-                          {pType}
-                        </Option>
-                      ))}
-                    </Select>
+                      disabled={true}
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>

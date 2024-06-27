@@ -155,6 +155,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             title: action.title,
             instrumentType: action.instrumentType,
             sector: action.sector,
+            type: action.type,
           });
         });
         setActionList(tempActionData);
@@ -205,6 +206,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             // Populating Action owned data fields
             form.setFieldsValue({
               actionId: entityData.actionId,
+              type: entityData.type,
               instrumentType: entityData.instrumentType,
               title: entityData.title,
               description: entityData.description,
@@ -237,7 +239,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
             // Populating Migrated Fields (Will be overwritten when attachments change)
             setProgrammeMigratedData({
-              type: entityData.types ?? [],
               intImplementor: entityData.interNationalImplementor ?? [],
               recipientEntity: entityData.recipientEntity ?? [],
               ghgsAffected: entityData.ghgsAffected ?? [],
@@ -272,8 +273,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   id: kpi.kpiId,
                   name: kpi.name,
                   unit: kpi.kpiUnit,
-                  achieved: kpi.achieved ?? 0,
-                  expected: kpi.expected,
+                  achieved: parseFloat(kpi.achieved ?? 0),
+                  expected: parseFloat(kpi.expected ?? 0),
                   kpiAction: KPIAction.NONE,
                 });
               } else {
@@ -283,8 +284,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   id: kpi.kpiId,
                   name: kpi.name,
                   unit: kpi.kpiUnit,
-                  achieved: kpi.achieved ?? 0,
-                  expected: kpi.expected,
+                  achieved: parseFloat(kpi.achieved ?? 0),
+                  expected: parseFloat(kpi.expected ?? 0),
                   kpiAction: KPIAction.NONE,
                 });
               }
@@ -381,7 +382,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   useEffect(() => {
     if (programmeMigratedData) {
       form.setFieldsValue({
-        type: programmeMigratedData.type,
         intImplementor: programmeMigratedData.intImplementor,
         recipientEntity: programmeMigratedData.recipientEntity,
         ghgsAffected: programmeMigratedData.ghgsAffected,
@@ -419,7 +419,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               key: index.toString(),
               projectId: prj.projectId,
               projectName: prj.title,
-              type: prj.type,
               internationalImplementingEntities: prj.internationalImplementingEntities ?? [],
               recipientEntities: prj.recipientEntities ?? [],
               ghgsAffected: prj.migratedData[0]?.ghgsAffected ?? [],
@@ -537,7 +536,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   useEffect(() => {
     const tempMigratedData: ProgrammeMigratedData = {
-      type: [],
       intImplementor: [],
       recipientEntity: [],
       ghgsAffected: [],
@@ -546,10 +544,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     };
 
     projectData.forEach((prj: ProjectData) => {
-      if (!tempMigratedData.type.includes(prj.type)) {
-        tempMigratedData.type.push(prj.type);
-      }
-
       tempMigratedData.intImplementor = joinTwoArrays(
         tempMigratedData.intImplementor,
         prj.internationalImplementingEntities ?? []
@@ -873,8 +867,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               id: kpi.kpiId,
               name: kpi.name,
               unit: kpi.kpiUnit,
-              achieved: kpi.achieved ?? 0,
-              expected: kpi.expected,
+              achieved: parseFloat(kpi.achieved ?? 0),
+              expected: parseFloat(kpi.expected ?? 0),
               kpiAction: KPIAction.NONE,
             });
 
@@ -1007,6 +1001,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                           instrumentType: actionList.find((action) => action.id === value)
                             ?.instrumentType,
                           sector: actionList.find((action) => action.id === value)?.sector,
+                          type: actionList.find((action) => action.id === value)?.type,
                         });
                         fetchParentKPIData(value);
                       }}
@@ -1027,7 +1022,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Select
                       size="large"
                       style={{ fontSize: inputFontSize }}
-                      mode="multiple"
                       disabled={true}
                     ></Select>
                   </Form.Item>

@@ -1,5 +1,5 @@
-import { Entity, Column, PrimaryColumn, OneToMany, BeforeInsert, BeforeUpdate } from "typeorm";
-import { InstrumentType } from "../enums/action.enum";
+import { Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
+import { ActionType, InstrumentType } from "../enums/action.enum";
 import { ActionStatus } from "../enums/action.enum";
 import { NatAnchor } from "../enums/action.enum";
 import { ProgrammeEntity } from "./programme.entity";
@@ -36,6 +36,9 @@ export class ActionEntity {
 
 	@Column({ type: "enum", enum: Sector, nullable: false })
   sector: Sector;
+
+  @Column({ type: "enum", enum: ActionType, default: ActionType.MITIGATION ,nullable: false })
+  type: string;
 
   @OneToMany(() => ProgrammeEntity, (programmeEntity) => programmeEntity.action)
   programmes?: ProgrammeEntity[];

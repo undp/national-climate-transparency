@@ -1,4 +1,4 @@
-import { Sector } from "src/enums/sector.enum";
+import { Sector } from "../enums/sector.enum";
 import { Role, SubRole } from "../casl/role.enum"
 import { UserState } from "src/enums/user.enum";
 

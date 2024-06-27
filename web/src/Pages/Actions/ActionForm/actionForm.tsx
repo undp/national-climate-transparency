@@ -4,7 +4,13 @@ import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
 import { AppstoreOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import { InstrumentType, ActionStatus, NatAnchor, Action } from '../../../Enums/action.enum';
+import {
+  InstrumentType,
+  ActionStatus,
+  NatAnchor,
+  Action,
+  ActionType,
+} from '../../../Enums/action.enum';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
@@ -180,6 +186,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               title: entityData.title,
               description: entityData.description,
               objective: entityData.objective,
+              type: entityData.type,
               sector: entityData.sector,
               instrumentType: entityData.instrumentType,
               status: entityData.status,
@@ -203,7 +210,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
             // Populating Migrated Fields (Will be overwritten when attachments change)
             setActionMigratedData({
-              type: entityData.migratedData?.types ?? [],
               ghgsAffected: entityData.migratedData?.ghgsAffected,
               estimatedInvestment: entityData.migratedData?.totalInvestment,
               achievedReduction: entityData.migratedData?.achievedGHGReduction,
@@ -236,8 +242,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
-                achieved: kpi.achieved ?? 0,
-                expected: kpi.expected,
+                achieved: parseFloat(kpi.achieved ?? 0),
+                expected: parseFloat(kpi.expected ?? 0),
                 kpiAction: KPIAction.NONE,
               });
               tempKpiCounter = tempKpiCounter + 1;
@@ -332,7 +338,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   useEffect(() => {
     if (actionMigratedData) {
       form.setFieldsValue({
-        type: actionMigratedData.type,
         ghgsAffected: actionMigratedData.ghgsAffected,
         natImplementor: actionMigratedData.natImplementer,
         estimatedInvestment: actionMigratedData.estimatedInvestment,
@@ -499,7 +504,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     const tempMigratedData: ActionMigratedData = {
       natImplementer: [],
       estimatedInvestment: 0,
-      type: [],
       achievedReduction: 0,
       expectedReduction: 0,
       ghgsAffected: [],
@@ -510,8 +514,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         tempMigratedData.ghgsAffected,
         prg.ghgsAffected ?? []
       );
-
-      tempMigratedData.type = joinTwoArrays(tempMigratedData.type, prg.types ?? []);
 
       tempMigratedData.natImplementer = joinTwoArrays(
         tempMigratedData.natImplementer,
@@ -912,13 +914,21 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('formHeader:typeHeader')}</label>}
                     name="type"
+                    rules={[validation.required]}
                   >
                     <Select
                       size="large"
                       style={{ fontSize: inputFontSize }}
-                      mode="multiple"
-                      disabled={true}
-                    ></Select>
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(ActionType).map((aType) => (
+                        <Option key={aType} value={aType}>
+                          {aType}
+                        </Option>
+                      ))}
+                    </Select>
                   </Form.Item>
                 </Col>
                 <Col {...halfColumnBps}>

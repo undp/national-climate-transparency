@@ -8,7 +8,7 @@ export class ProgrammeViewDto {
 
   actionId: string;
 
-  types: string[];
+  type: string;
 
   title: string;
 

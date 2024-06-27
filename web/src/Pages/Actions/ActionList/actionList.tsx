@@ -199,7 +199,7 @@ const actionList = () => {
             title: unstructuredData[i].title,
             status: unstructuredData[i].status,
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
-            actionType: unstructuredData[i].migratedData[0]?.types ?? [],
+            actionType: unstructuredData[i].type,
             affectedSectors: unstructuredData[i].sector,
             nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? [],
             financeNeeded: Math.round(unstructuredData[i].migratedData[0]?.financeNeeded ?? 0),
@@ -326,11 +326,10 @@ const actionList = () => {
     { title: t('titleOfAction'), width: 120, dataIndex: 'title', key: 'title', sorter: false },
     {
       title: t('columnHeader:type'),
-      width: 100,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: any) => {
-        return <ScrollableList listToShow={record.actionType}></ScrollableList>;
-      },
+      width: 120,
+      dataIndex: 'actionType',
+      key: 'actionType',
+      sorter: false,
     },
     {
       title: t('columnHeader:sectorAffected'),

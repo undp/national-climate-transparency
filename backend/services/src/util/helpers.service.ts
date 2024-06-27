@@ -9,7 +9,7 @@ import { programmeStatusRequestDto } from "../dtos/programmeStatus.request.dto";
 import { EntityManager } from "typeorm";
 import { SubpathDto } from "../dtos/subpath.dto";
 import { User } from "../entities/user.entity";
-import { Sector } from "src/enums/sector.enum";
+import { Sector } from "../enums/sector.enum";
 
 @Injectable()
 export class HelperService {

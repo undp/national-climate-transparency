@@ -9,12 +9,12 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
-import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
-import { Action } from "src/casl/action.enum";
-import { PoliciesGuardEx } from "src/casl/policy.guard";
-import { SettingsDto } from "src/dtos/settings.dto";
-import { ConfigurationSettings } from "src/entities/configuration.settings";
-import { ConfigurationSettingsService } from "src/util/configurationSettings.service";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { Action } from "../casl/action.enum";
+import { PoliciesGuardEx } from "../casl/policy.guard";
+import { SettingsDto } from "../dtos/settings.dto";
+import { ConfigurationSettings } from "../entities/configuration.settings";
+import { ConfigurationSettingsService } from "../util/configurationSettings.service";
 
 @ApiTags("Settings")
 @Controller("Settings")

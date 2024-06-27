@@ -2,7 +2,6 @@ export type ProjectData = {
   key: string;
   projectId: string;
   projectName: string;
-  type: string;
   internationalImplementingEntities: string[];
   recipientEntities: string[];
   ghgsAffected: string[];

@@ -18,9 +18,9 @@ import { ProjectDto } from "../dtos/project.dto";
 import { LinkProjectsDto } from "../dtos/link.projects.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
-import { QueryDto } from "src/dtos/query.dto";
-import { ProjectUpdateDto } from "src/dtos/projectUpdate.dto";
-import { ValidateDto } from "src/dtos/validate.dto";
+import { QueryDto } from "../dtos/query.dto";
+import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
+import { ValidateDto } from "../dtos/validate.dto";
 
 @ApiTags("Projects")
 @ApiBearerAuth()

@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { ArrayMinSize, IsArray, IsEmail, IsEnum, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, MaxLength } from "class-validator";
 import { Role, SubRole } from "../casl/role.enum";
-import { UserState } from "src/enums/user.enum";
-import { Sector } from "src/enums/sector.enum";
-import { Organisation } from "src/enums/organisation.enum";
+import { UserState } from "../enums/user.enum";
+import { Sector } from "../enums/sector.enum";
+import { Organisation } from "../enums/organisation.enum";
 
 export class UserUpdateDto {
 

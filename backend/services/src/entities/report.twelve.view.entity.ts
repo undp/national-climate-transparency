@@ -1,4 +1,3 @@
-import { ProjectStatus } from "src/enums/project.enum";
 import { Index, ViewColumn, ViewEntity } from "typeorm"
 
 export const reportTwelveViewSQL = `
@@ -61,11 +60,11 @@ ORDER BY
 	name: 'report_twelve_view_entity',
 	materialized: false,
 	expression: reportTwelveViewSQL,
-	synchronize: true,
+	synchronize: false,
 })
-@Index("idx_report_twelve_view_entity_id")
 export class ReportTwelveViewEntity {
 
+	@Index()
 	@ViewColumn()
 	projectId: string;
 

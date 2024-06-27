@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
-import { FinanceNature, FinancingStatus, IntFinInstrument, IntSource, IntSupChannel, NatFinInstrument, SupportDirection } from "src/enums/support.enum";
-import { IsTwoDecimalPoints } from "src/util/twoDecimalPointNumber.decorator";
+import { FinanceNature, FinancingStatus, IntFinInstrument, IntSource, IntSupChannel, NatFinInstrument, SupportDirection } from "../enums/support.enum";
+import { IsTwoDecimalPoints } from "../util/twoDecimalPointNumber.decorator";
 
 export class SupportUpdateDto {
 

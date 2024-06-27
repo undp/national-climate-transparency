@@ -17,8 +17,8 @@ import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
-import { SupportEntity } from "src/entities/support.entity";
-import { KpiEntity } from "src/entities/kpi.entity";
+import { SupportEntity } from "../entities/support.entity";
+import { KpiEntity } from "../entities/kpi.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -39,6 +39,7 @@ export class CaslAbilityFactory {
 				can(Action.Update, User);
 				can(Action.Delete, User);
 				cannot(Action.Update, User, ['apiKey', 'password', 'email']);
+				can(Action.ForceResetPassword, User);
 
 				// Action
 				can(Action.Read, ActionEntity);
@@ -90,6 +91,7 @@ export class CaslAbilityFactory {
 				can(Action.Update, User);
 				can(Action.Delete, User);
 				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
+				cannot(Action.ForceResetPassword, User);
 
 				// Action
 				can(Action.Read, ActionEntity);
@@ -144,6 +146,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
 					id: { $eq: user.id },
 				});
+				cannot(Action.ForceResetPassword, User);
 
 				// ----------------------------- Action ------------------------------
 
@@ -244,6 +247,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
 					id: { $eq: user.id },
 				});
+				cannot(Action.ForceResetPassword, User);
 
 				// ----------------------------- Action ------------------------------
 

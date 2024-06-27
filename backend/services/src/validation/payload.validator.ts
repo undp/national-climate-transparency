@@ -4,7 +4,7 @@ import { HelperService } from "../util/helpers.service";
 import { EntityType, Method } from "../enums/shared.enum";
 import { mitigationTimelineDto } from "../dtos/mitigationTimeline.dto";
 import { expectedMitigationTimelineProperties, actualMitigationTimelineProperties } from "../enums/mitigationTimeline.enum";
-import { ActivityDto } from "src/dtos/activity.dto";
+import { ActivityDto } from "../dtos/activity.dto";
 
 @Injectable()
 export class PayloadValidator {

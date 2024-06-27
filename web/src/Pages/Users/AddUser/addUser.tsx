@@ -23,11 +23,48 @@ import { Organisation } from '../../../Enums/organisation.enum';
 import { ValidateEntity } from '../../../Enums/user.enum';
 import { BankOutlined, ExperimentOutlined, KeyOutlined, StarOutlined } from '@ant-design/icons';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
+import ForceResetPasswordModel from '../../../Components/Models/ForceReset/forceResetPasswordModel';
 
 const AddUser = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['addUser', 'changePassword', 'userProfile']);
   const themeColor = '#9155fd';
+
+  const { post, put, get } = useConnection();
+  const [formOne] = Form.useForm();
+  const { state } = useLocation();
+  const { updateToken } = useConnection();
+  const { removeUserInfo } = useUserContext();
+  const { userInfoState } = useUserContext();
+  const ability = useAbilityContext();
+
+  // General State
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<any>('');
+  const [countries, setCountries] = useState<[]>([]);
+  const [isCountryListLoading, setIsCountryListLoading] = useState(false);
+  const [role, setRole] = useState(state?.record?.role);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [validatePermission, setValidatePermission] = useState(
+    state?.record?.validatePermission || ValidateEntity.CANNOT
+  );
+
+  // Password Change Auth State
+
+  const [isProfilePasswordReset, setIsProfilePasswordReset] = useState<boolean>(false);
+  const [isForcePasswordReset, setIsForcePasswordReset] = useState<boolean>(true);
+
+  // Profile Password Change State
+
+  const [openPasswordChangeModal, setopenPasswordChangeModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Force Password Change State
+
+  const [forcePasswordChangeVisible, setForcePasswordChangeVisible] = useState<boolean>(false);
+  const [forcePasswordChangeRunning, setForcePasswordChangeRunning] = useState<boolean>(false);
 
   const onNavigateToUserManagement = () => {
     navigate('/userManagement/viewAll', { replace: true });
@@ -36,26 +73,6 @@ const AddUser = () => {
   const onNavigateToLogin = () => {
     navigate('/login', { replace: true });
   };
-
-  const { post, put, get } = useConnection();
-  const [formOne] = Form.useForm();
-  const { state } = useLocation();
-  const { updateToken } = useConnection();
-  const { removeUserInfo } = useUserContext();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isUpdate, setIsUpdate] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [openPasswordChangeModal, setopenPasswordChangeModal] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<any>('');
-  const { userInfoState } = useUserContext();
-  const ability = useAbilityContext();
-  const [countries, setCountries] = useState<[]>([]);
-  const [isCountryListLoading, setIsCountryListLoading] = useState(false);
-  const [role, setRole] = useState(state?.record?.role);
-  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
-  const [validatePermission, setValidatePermission] = useState(
-    state?.record?.validatePermission || ValidateEntity.CANNOT
-  );
 
   const getCountryList = async () => {
     setIsCountryListLoading(true);
@@ -179,6 +196,32 @@ const AddUser = () => {
     }
   };
 
+  const forceResetPasswordAction = async (props: any) => {
+    setForcePasswordChangeRunning(true);
+    try {
+      const response = await put('national/users/forceResetPassword', {
+        userId: state?.record?.id,
+        newPassword: props.newPassword,
+      });
+
+      setForcePasswordChangeRunning(false);
+      setForcePasswordChangeVisible(false);
+
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: t('changePassword:forcePasswordResetSuccess'),
+          duration: 5,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+    } catch (error: any) {
+      setForcePasswordChangeRunning(false);
+      setForcePasswordChangeVisible(false);
+      displayErrorMessage(error);
+    }
+  };
+
   const onChangedPassword = () => {
     setErrorMsg('');
     setopenPasswordChangeModal(true);
@@ -206,8 +249,23 @@ const AddUser = () => {
 
   useEffect(() => {
     getCountryList();
-    setIsUpdate(state?.record ? true : false);
-    if (isUpdate) setIsSaveButtonDisabled(true);
+
+    if (state?.record) {
+      setIsUpdate(true);
+      setIsSaveButtonDisabled(true);
+
+      // Permission Setting for the Password Change
+      if (userInfoState?.id === state?.record?.id.toString()) {
+        setIsProfilePasswordReset(true);
+      } else if (userInfoState?.userRole === Role.Root) {
+        setIsForcePasswordReset(true);
+      } else {
+        setIsProfilePasswordReset(false);
+        setIsForcePasswordReset(false);
+      }
+    } else {
+      setIsUpdate(false);
+    }
   }, []);
 
   const handleValuesChange = () => {
@@ -220,15 +278,23 @@ const AddUser = () => {
         <div className="titles">
           <div className="main">{isUpdate ? t('addUser:editUser') : t('addUser:addNewUser')}</div>
         </div>
-        {isUpdate &&
-          userInfoState?.id === state?.record?.id &&
-          !ability.can(Action.Update, plainToClass(User, state?.record), 'email') && (
-            <div className="actions">
-              <Button className="mg-left-1" type="primary" onClick={onChangedPassword}>
-                {t('userProfile:changePassword')}
-              </Button>
-            </div>
-          )}
+        {isUpdate && (isProfilePasswordReset || isForcePasswordReset) && (
+          <div className="actions">
+            <Button
+              className="mg-left-1"
+              type="primary"
+              onClick={
+                isProfilePasswordReset
+                  ? onChangedPassword
+                  : isForcePasswordReset
+                  ? () => setForcePasswordChangeVisible(true)
+                  : undefined
+              }
+            >
+              {t('userProfile:changePassword')}
+            </Button>
+          </div>
+        )}
       </div>
       <div className="content-card user-content-card">
         <Form
@@ -614,6 +680,14 @@ const AddUser = () => {
         loadingBtn={isLoading}
         themeColor={themeColor}
       ></ChangePasswordModel>
+      <ForceResetPasswordModel
+        t={t}
+        themeColor={themeColor}
+        doPasswordReset={forceResetPasswordAction}
+        passwordChangeRunning={forcePasswordChangeRunning}
+        isModelVisible={forcePasswordChangeVisible}
+        setIsModelVisible={setForcePasswordChangeVisible}
+      ></ForceResetPasswordModel>
     </div>
   );
 };

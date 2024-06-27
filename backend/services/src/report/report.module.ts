@@ -7,6 +7,13 @@ import { ReportFiveViewEntity } from '../entities/report.five.view.entity';
 import { ReportService } from './report.service';
 import { UtilModule } from '../util/util.module';
 import { ReportTwelveViewEntity } from '../entities/report.twelve.view.entity';
+import { ReportThirteenViewEntity } from '../entities/report.thirteen.view.entity';
+import { ReportSixViewEntity } from '../entities/report.six.view.entity';
+import { ReportSevenViewEntity } from '../entities/report.seven.view.entity';
+import { ReportTenViewEntity } from '../entities/report.ten.view.entity';
+import { ReportElevenViewEntity } from '../entities/report.eleven.view.entity';
+import { ReportEightViewEntity } from '../entities/report.eight.view.entity';
+import { ReportNineViewEntity } from '../entities/report.nine.view.entity';
 
 @Module({
 	imports: [
@@ -21,7 +28,14 @@ import { ReportTwelveViewEntity } from '../entities/report.twelve.view.entity';
 		}),
 		TypeOrmModule.forFeature([
 			ReportFiveViewEntity,
-			ReportTwelveViewEntity
+			ReportTwelveViewEntity,
+			ReportThirteenViewEntity,
+			ReportSixViewEntity,
+			ReportSevenViewEntity,
+			ReportEightViewEntity,
+			ReportNineViewEntity,
+			ReportTenViewEntity,
+			ReportElevenViewEntity
 		]),
 		UtilModule
 	],

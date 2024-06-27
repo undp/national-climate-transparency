@@ -30,8 +30,8 @@ import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { SupportEntity } from "../entities/support.entity";
 import { ValidateDto } from "../dtos/validate.dto";
-import { AchievementEntity } from "src/entities/achievement.entity";
-import { ActionEntity } from "src/entities/action.entity";
+import { AchievementEntity } from "../entities/achievement.entity";
+import { ActionEntity } from "../entities/action.entity";
 
 @Injectable()
 export class ProgrammeService {
@@ -81,6 +81,7 @@ export class ProgrammeService {
 				const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
 				kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
 				kpi.creatorId = programme.programmeId;
+				kpi.expected = parseFloat(kpiItem.expected.toFixed(2));
 				kpiList.push(kpi);
 			}
 			// Add event log entry after the loop completes
@@ -375,6 +376,7 @@ export class ProgrammeService {
 					const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
 					kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
 					kpi.creatorId = programmeUpdateDto.programmeId;
+					kpi.expected = parseFloat(kpiItem.expected.toFixed(2));
 					kpiList.push(kpi);
 				}
 			}
@@ -382,12 +384,13 @@ export class ProgrammeService {
 			for (const currentKpi of currentKpis) {
 				const kpiToUpdate = programmeUpdateDto.kpis.find(kpi => currentKpi.kpiId == kpi.kpiId);
 				if (kpiToUpdate) {
+					this.payloadValidator.validateKpiPayload(kpiToUpdate, EntityType.PROGRAMME);
 					const kpi = new KpiEntity();
 					kpi.kpiId = kpiToUpdate.kpiId;
 					kpi.creatorId = kpiToUpdate.creatorId;
 					kpi.creatorType = kpiToUpdate.creatorType;
 					kpi.name = kpiToUpdate.name;
-					kpi.expected = kpiToUpdate.expected;
+					kpi.expected = parseFloat(kpiToUpdate.expected.toFixed(2));
 					kpi.kpiUnit = kpiToUpdate.kpiUnit;
 					kpiList.push(kpi);
 				} else {
@@ -954,13 +957,12 @@ export class ProgrammeService {
 
 	getProgrammeViewDto(programme: ProgrammeEntity) {
 
-		const typesSet: Set<string> = new Set();
+		let type: string = null;
 		const recipientEntitySet: Set<Recipient> = new Set();
 		const interNationalImplementorSet: Set<IntImplementor> = new Set();
 
 		if (programme.projects && programme.projects.length > 0) {
 			for (const project of programme.projects) {
-				if (project.type) typesSet.add(project.type);
 				if (project.recipientEntities) {
 					project.recipientEntities.forEach(recipient => {
 						recipientEntitySet.add(recipient);
@@ -974,14 +976,18 @@ export class ProgrammeService {
 			}
 		}
 
-		const types: string[] = Array.from(typesSet);
+		if (programme.action) {
+			type = programme.action.type;
+		}
+
+		
 		const recipientEntity: string[] = Array.from(recipientEntitySet);
 		const interNationalImplementor: string[] = Array.from(interNationalImplementorSet);
 
 		const programmeViewDto = new ProgrammeViewDto();
 		programmeViewDto.programmeId = programme.programmeId;
 		programmeViewDto.actionId = programme.action?.actionId;
-		programmeViewDto.types = types;
+		programmeViewDto.type = type;
 		programmeViewDto.title = programme.title;
 		programmeViewDto.description = programme.description;
 		programmeViewDto.objectives = programme.objective;
