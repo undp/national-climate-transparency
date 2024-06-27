@@ -80,8 +80,8 @@ export const EmissionForm: React.FC<Props> = ({ index, t, uploadedFile, setUploa
         ))}
       </Row>
       <Row gutter={25} className="total-row">
-        <Col span={12}>
-          <div className="total-div">{'Total National Emissions and Removals '}</div>
+        <Col className="total-div" span={12}>
+          {'Total National Emissions and Removals '}
         </Col>
         {Object.values(EmissionUnits).map((unit) => (
           <Col span={3}>
@@ -92,9 +92,26 @@ export const EmissionForm: React.FC<Props> = ({ index, t, uploadedFile, setUploa
       <Row className="collapsing-row">
         <Col span={24}>
           <Collapse ghost={true} expandIcon={({ isActive }) => getCollapseIcon(isActive ?? false)}>
-            {Object.values(EmissionSectorTitles).map((sectorTitle) => (
-              <Panel header={sectorTitle} key={sectorTitle}>
-                <p>Content of panel 1</p>
+            {Object.values(EmissionSectorTitles).map((sectorTitle, sectorIndex) => (
+              <Panel
+                header={
+                  <Row gutter={25} className="sector-header-row">
+                    <Col className="title-div" span={12}>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <span>{sectorIndex + 1}</span>
+                        <span>{sectorTitle}</span>
+                      </div>
+                    </Col>
+                    {Object.values(EmissionUnits).map((unit) => (
+                      <Col span={3}>
+                        <NumberChip value={100} valueType={unit} />
+                      </Col>
+                    ))}
+                  </Row>
+                }
+                key={sectorTitle}
+              >
+                <p>{'Content'}</p>
               </Panel>
             ))}
           </Collapse>

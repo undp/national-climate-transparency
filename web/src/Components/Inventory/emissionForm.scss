@@ -27,8 +27,8 @@
 
     .unit-row {
         margin-top: 30px;
-        padding-left: 16px;
-        padding-right: 50px;
+        padding-left: 42px;
+        padding-right: 66px;
         display: flex;
         justify-content: flex-end;
 
@@ -42,8 +42,8 @@
 
     .total-row {
         margin-top: 30px;
-        padding-left: 16px;
-        padding-right: 50px;
+        padding-left: 42px;
+        padding-right: 66px;
         display: flex;
         justify-content: flex-end;
 
@@ -55,17 +55,25 @@
             align-items: center;
             height: 100%;
         }
-
-        .unit-div{
-            font-weight: 500;
-            color: #7e7e7e;
-            display: flex;
-            justify-content: center;
-        }
     }
 
     .collapsing-row {
         margin-top: 20px;
+
+        .sector-header-row {
+            padding-right: 50px;
+            display: flex;
+            justify-content: flex-end;
+    
+            .title-div{
+                font-size: 14px;
+                font-weight: 800;
+                color: #7e7e7e;
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+        }
     }
 
 }

@@ -115,8 +115,8 @@ export const getRounded = (num: number | string): number => {
 
 export const getCollapseIcon = (isActive: boolean) => {
   return isActive ? (
-    <MinusCircleOutlined style={{ color: '#16B1FF' }} />
+    <MinusCircleOutlined style={{ color: '#16B1FF', fontSize: '14px' }} />
   ) : (
-    <PlusCircleOutlined style={{ color: '#16B1FF' }} />
+    <PlusCircleOutlined style={{ color: '#16B1FF', fontSize: '14px' }} />
   );
 };
