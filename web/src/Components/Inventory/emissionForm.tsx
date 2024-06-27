@@ -1,4 +1,4 @@
-import { Row, Col, DatePicker, Upload, Button, message, Collapse } from 'antd';
+import { Row, Col, DatePicker, Upload, Button, message, Collapse, Input } from 'antd';
 import './emissionForm.scss';
 import { UploadOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
@@ -116,6 +116,26 @@ export const EmissionForm: React.FC<Props> = ({ index, t, uploadedFile, setUploa
             ))}
           </Collapse>
         </Col>
+      </Row>
+      <Row gutter={25} className="input-number-row">
+        <Col className="title-div" span={12}>
+          {'Total CO2 equivalent emissions without land use, land-use change and forestry'}
+        </Col>
+        {Object.values(EmissionUnits).map(() => (
+          <Col span={3} className="number-column">
+            <Input type="number" min={0} step={0.01} className="input-emission" />
+          </Col>
+        ))}
+      </Row>
+      <Row gutter={25} className="input-number-row">
+        <Col className="title-div" span={12}>
+          {'Total CO2 equivalent emissions with land use, land-use change and forestry'}
+        </Col>
+        {Object.values(EmissionUnits).map(() => (
+          <Col span={3} className="number-column">
+            <Input type="number" min={0} step={0.01} className="input-emission" />
+          </Col>
+        ))}
       </Row>
     </div>
   );

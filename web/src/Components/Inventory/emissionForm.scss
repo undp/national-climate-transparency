@@ -66,14 +66,41 @@
             justify-content: flex-end;
     
             .title-div{
-                font-size: 14px;
-                font-weight: 800;
+                font-size: 12px;
+                font-weight: 600;
                 color: #7e7e7e;
                 display: flex;
                 align-items: center;
                 height: 100%;
             }
         }
+    }
+
+    .input-number-row {
+        margin-top: 30px;
+        padding-left: 42px;
+        padding-right: 66px;
+        display: flex;
+        justify-content: flex-end;
+
+        .title-div{
+            font-size: 12px;
+            font-weight: 600;
+            color: #7e7e7e;
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .number-column {
+            display: flex;
+            justify-content: center;
+
+            .input-emission {
+                width: 60px;
+            }
+        }
+
     }
 
 }
