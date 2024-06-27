@@ -18,6 +18,8 @@ import { HelperService } from "../util/helpers.service";
 import { EntityManager, Repository } from "typeorm";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
+import { DeleteDto } from "src/dtos/delete.dto";
+import { Role } from "src/casl/role.enum";
 
 @Injectable()
 export class SupportService {
@@ -341,6 +343,100 @@ export class SupportService {
 		);
 	}
 
+	//MARK: Delete Support
+	async deleteSupport(deleteDto: DeleteDto, user: User) {
+
+		if (user.role !== Role.Admin && user.role !== Role.Root) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.userUnAUth",
+					[]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const support = await this.findSupportById(deleteDto.entityId);
+		if (!support) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.supportNotFound",
+					[deleteDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, support.sector)) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.permissionDeniedForSector",
+					[support.supportId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+		
+		const eventLog = [];
+		const activity = support.activity;
+
+		const sup = await this.entityManager
+		.transaction(async (em) => {
+			const result = await em.delete<SupportEntity>(SupportEntity, support.supportId);
+			if (result.affected > 0) {
+				if (activity.validated) {
+					activity.validated = false;
+					this.addEventLogEntry(
+						eventLog, 
+						LogEventType.ACTIVITY_UNVERIFIED_DUE_ATTACHMENT_DELETE, 
+						EntityType.ACTIVITY, 
+						activity.activityId, 
+						0, 
+						support.supportId
+					);
+					await em.save<ActivityEntity>(activity);
+				}
+		
+				if (activity.parentType == EntityType.PROJECT) {
+					const parentProject = await this.activityService.isProjectValid(activity.parentId, user);
+					if (parentProject.validated) {
+						parentProject.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+							EntityType.PROJECT, 
+							parentProject.projectId, 
+							0, 
+							activity.activityId
+						);
+						await em.save<ProjectEntity>(parentProject);
+					}
+				}
+				// Save event logs
+				await em.save<LogEntity>(eventLog);
+			}
+			return result;
+		})
+		.catch((err: any) => {
+			console.error(err);
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.supportDeleteFailed",
+					[err]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("support.deleteSupportSuccess", []),
+			null
+		);
+
+	}
+
 	//MARK: Validate Support
 	async validateSupport(validateDto: ValidateDto, user: User) {
 		const support = await this.findSupportById(validateDto.entityId);
@@ -373,7 +469,7 @@ export class SupportService {
 			validateDto
 		)
 
-		const act = await this.entityManager
+		const sup = await this.entityManager
 			.transaction(async (em) => {
 				const savedSupport = await em.save<SupportEntity>(support);
 				if (savedSupport) {
@@ -397,7 +493,7 @@ export class SupportService {
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
 			this.helperService.formatReqMessagesString("support.verifySupportSuccess", []),
-			act
+			sup
 		);
 
 	}

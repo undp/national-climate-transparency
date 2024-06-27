@@ -45,7 +45,7 @@ export const EmailTemplates = {
     html: `
         Welcome {{name}}, <br><br>
 
-        Your account has been created for the {{countryName}} NDC Transparency System. You can access your account using the temporary
+        Your account has been created for the {{countryName}} NDC Transparency System. You can access your account using the
         Homepage: <a href="{{home}}">{{home}}</a> <br><br>
 
         User: {{email}} <br>

@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import {
   SupportDirection,
   FinanceNature,
@@ -75,4 +75,10 @@ export class SupportEntity {
 
 	@Column({ type: "boolean", default: false })
 	validated: boolean;
+
+	@CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	createdTime: Date;
+
+	@UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	updatedTime: Date;
 }

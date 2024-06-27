@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
+import { Entity, Column, PrimaryColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { ActionType, InstrumentType } from "../enums/action.enum";
 import { ActionStatus } from "../enums/action.enum";
 import { NatAnchor } from "../enums/action.enum";
@@ -45,5 +45,11 @@ export class ActionEntity {
 
 	@Column({ type: "boolean", default: false })
 	validated: boolean;
+
+	@CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	createdTime: Date;
+
+	@UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	updatedTime: Date;
 	
 }
