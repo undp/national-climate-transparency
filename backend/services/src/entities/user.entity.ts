@@ -2,7 +2,7 @@ import { Role, SubRole } from '../casl/role.enum';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { EntitySubject } from './entity.subject';
 import { Organisation, OrganisationType } from '../enums/organisation.enum'
-import { UserState } from '../enums/user.state.enum';
+import { UserState } from '../enums/user.enum';
 import { Sector } from '../enums/sector.enum';
 
 @Entity()

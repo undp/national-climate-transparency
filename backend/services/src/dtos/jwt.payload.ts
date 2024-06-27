@@ -1,6 +1,6 @@
 import { Sector } from "src/enums/sector.enum";
 import { Role, SubRole } from "../casl/role.enum"
-import { UserState } from "src/enums/user.state.enum";
+import { UserState } from "src/enums/user.enum";
 
 export class JWTPayload {
     constructor(

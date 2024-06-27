@@ -4,7 +4,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { useAbilityContext } from '../../../Casl/Can';
 import { useEffect, useState } from 'react';
-import { Row, Col, Button, Form, Input, message, Skeleton, Radio, Select } from 'antd';
+import { Row, Col, Button, Form, Input, message, Skeleton, Radio, Select, Checkbox } from 'antd';
 import PhoneInput, {
   formatPhoneNumber,
   formatPhoneNumberIntl,
@@ -20,6 +20,7 @@ import ChangePasswordModel from '../../../Components/Models/changePasswordModel'
 import { Role } from '../../../Enums/role.enum';
 import { Sector } from '../../../Enums/sector.enum';
 import { Organisation } from '../../../Enums/organisation.enum';
+import { ValidateEntity } from '../../../Enums/user.enum';
 import { BankOutlined, ExperimentOutlined, KeyOutlined, StarOutlined } from '@ant-design/icons';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 
@@ -52,6 +53,9 @@ const AddUser = () => {
   const [isCountryListLoading, setIsCountryListLoading] = useState(false);
   const [role, setRole] = useState(state?.record?.role);
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [validatePermission, setValidatePermission] = useState(
+    state?.record?.validatePermission || ValidateEntity.CANNOT
+  );
 
   const getCountryList = async () => {
     setIsCountryListLoading(true);
@@ -110,6 +114,8 @@ const AddUser = () => {
         name: formOneValues?.name,
         phoneNo: formOneValues?.phoneNo,
         organisation: formOneValues?.organisation,
+        validatePermission: formOneValues?.validatePermission,
+        subRolePermission: formOneValues?.subRolePermission,
         sector: formOneValues?.sector,
         subRole: formOneValues?.subRole,
       };
@@ -190,6 +196,12 @@ const AddUser = () => {
     const value = event.target.value;
     setRole(value);
     formOne.setFieldsValue({ subRole: undefined });
+  };
+
+  const onChangeValidatePermission = (event: any) => {
+    const value = event.target.checked;
+    setValidatePermission(value ? ValidateEntity.CANNOT : ValidateEntity.CAN);
+    console.log('Validate Permission Granted - ', validatePermission);
   };
 
   useEffect(() => {
@@ -341,27 +353,38 @@ const AddUser = () => {
                     </Form.Item>
                   )}
                 </Skeleton>
-                {(role === Role.GovernmentUser || role === Role.Observer) && (
+                <div className="abc">
                   <Form.Item
-                    label={t('addUser:organisation')}
-                    initialValue={state?.record?.organisation}
-                    name="organisation"
+                    label={t('addUser:validatePermission')}
+                    initialValue={state?.record?.validatePermission}
+                    name="validatePermission"
                     rules={[
                       {
-                        required: true,
-                        message: `${t('addUser:organisation')} ${t('isRequired')}`,
+                        required: false,
                       },
                     ]}
                   >
-                    <Select size="large" allowClear showSearch>
-                      {Object.values(Organisation).map((instrument) => (
-                        <Select.Option key={instrument} value={instrument}>
-                          {instrument}
-                        </Select.Option>
-                      ))}
-                    </Select>
+                    <Checkbox
+                      onChange={onChangeValidatePermission}
+                      value={validatePermission}
+                    ></Checkbox>
                   </Form.Item>
-                )}
+                </div>
+                <Form.Item
+                  label={t('addUser:subRolePermission')}
+                  initialValue={state?.record?.subRolePermission}
+                  name="subRolePermission"
+                  rules={[
+                    {
+                      required: false,
+                    },
+                  ]}
+                >
+                  {/* <Checkbox onChange={handleCheckboxChange}> */}
+                  <Checkbox value={state?.record?.subRolePermission}>
+                    {t('addUser:subRolePermission')}
+                  </Checkbox>
+                </Form.Item>
               </div>
             </Col>
             <Col xl={12} md={24}>
@@ -534,6 +557,27 @@ const AddUser = () => {
                       }
                     >
                       {Object.values(Sector).map((instrument) => (
+                        <Select.Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                )}
+                {(role === Role.GovernmentUser || role === Role.Observer) && (
+                  <Form.Item
+                    label={t('addUser:organisation')}
+                    initialValue={state?.record?.organisation}
+                    name="organisation"
+                    rules={[
+                      {
+                        required: true,
+                        message: `${t('addUser:organisation')} ${t('isRequired')}`,
+                      },
+                    ]}
+                  >
+                    <Select size="large" allowClear showSearch>
+                      {Object.values(Organisation).map((instrument) => (
                         <Select.Option key={instrument} value={instrument}>
                           {instrument}
                         </Select.Option>

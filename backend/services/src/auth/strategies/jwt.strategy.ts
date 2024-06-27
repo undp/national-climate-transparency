@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JWTPayload } from '../../dtos/jwt.payload';
-import { UserState } from 'src/enums/user.state.enum';
+import { UserState } from 'src/enums/user.enum';
 import { UserService } from 'src/user/user.service';
 
 

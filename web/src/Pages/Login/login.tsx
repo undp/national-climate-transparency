@@ -11,7 +11,7 @@ import { AbilityContext } from '../../Casl/Can';
 import { updateUserAbility } from '../../Casl/ability';
 import ForgotPassword from './forgotPassword';
 import ResetPassword from './resetPassword';
-import { UserState } from '../../Enums/user.state.enum';
+import { UserState } from '../../Enums/user.enum';
 import { AvailableLanguages } from '../../Definitions/languageDefinitions';
 import TransparencyLogo from '../../Components/logo/transparencyLogo';
 

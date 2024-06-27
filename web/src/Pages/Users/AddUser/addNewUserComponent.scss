@@ -69,6 +69,11 @@
     }
     .row {
       .details-part-one {
+
+        .abc{
+          display: flex;
+          flex-direction: row;
+        }
       }
       .details-part-two {
         .role-group {

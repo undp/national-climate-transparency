@@ -37,7 +37,7 @@ import { DataListResponseDto } from "src/dtos/data.list.response";
 import { DataResponseMessageDto } from "src/dtos/data.response.message";
 import { API_KEY_SEPARATOR } from "src/constants";
 import { DataResponseDto } from "src/dtos/data.response.dto";
-import { UserState } from "src/enums/user.state.enum";
+import { UserState } from "src/enums/user.enum";
 import { Sector } from "src/enums/sector.enum";
 
 @Injectable()

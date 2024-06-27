@@ -52,7 +52,7 @@ import { PersonDash, PersonCheck } from 'react-bootstrap-icons';
 import { UserManagementColumns } from '../../../Enums/user.management.columns.enum';
 import './userManagementComponent.scss';
 import '../../../Styles/common.table.scss';
-import { UserState } from '../../../Enums/user.state.enum';
+import { UserState } from '../../../Enums/user.enum';
 import { Role } from '../../../Enums/role.enum';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
