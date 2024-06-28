@@ -38,7 +38,7 @@ import {
   wasteSectionInit,
 } from '../../Definitions/emissionDefinitions';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Props {
   index: number;
@@ -71,6 +71,80 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
   // Total State
 
   const [emissionTotal, setEmissionTotal] = useState<EmissionTotals>(emissionTotals);
+
+  // Emission Total Update for Section State Change
+
+  useEffect(() => {
+    const currentEmissionTotal = { ...emissionTotal };
+    Object.values(EnergyLevels).forEach((mainLevel) => {
+      Object.values(EmissionUnits).forEach((unit) => {
+        let unitTotal = 0;
+        if (mainLevel === EnergyLevels.OneA) {
+          Object.values(EnergyOne).forEach((level) => {
+            unitTotal = unitTotal + (energySection[mainLevel][level][unit] ?? 0);
+          });
+        } else if (mainLevel === EnergyLevels.OneB) {
+          Object.values(EnergyTwo).forEach((level) => {
+            unitTotal = unitTotal + (energySection[mainLevel][level][unit] ?? 0);
+          });
+        } else {
+          Object.values(EnergyThree).forEach((level) => {
+            unitTotal = unitTotal + (energySection[mainLevel][level][unit] ?? 0);
+          });
+        }
+        currentEmissionTotal[SectionLevels.One][mainLevel][unit] = unitTotal;
+      });
+    });
+    setEmissionTotal(currentEmissionTotal);
+  }, [energySection]);
+
+  useEffect(() => {
+    const currentEmissionTotal = { ...emissionTotal };
+    Object.values(EmissionUnits).forEach((unit) => {
+      let unitTotal = 0;
+      Object.values(IndustryLevels).forEach((level) => {
+        unitTotal = unitTotal + (industrySection[level][unit] ?? 0);
+      });
+      currentEmissionTotal[SectionLevels.Two][unit] = unitTotal;
+    });
+    setEmissionTotal(currentEmissionTotal);
+  }, [industrySection]);
+
+  useEffect(() => {
+    const currentEmissionTotal = { ...emissionTotal };
+    Object.values(EmissionUnits).forEach((unit) => {
+      let unitTotal = 0;
+      Object.values(AgrLevels).forEach((level) => {
+        unitTotal = unitTotal + (agrSection[level][unit] ?? 0);
+      });
+      currentEmissionTotal[SectionLevels.Three][unit] = unitTotal;
+    });
+    setEmissionTotal(currentEmissionTotal);
+  }, [agrSection]);
+
+  useEffect(() => {
+    const currentEmissionTotal = { ...emissionTotal };
+    Object.values(EmissionUnits).forEach((unit) => {
+      let unitTotal = 0;
+      Object.values(WasteLevels).forEach((level) => {
+        unitTotal = unitTotal + (wasteSection[level][unit] ?? 0);
+      });
+      currentEmissionTotal[SectionLevels.Four][unit] = unitTotal;
+    });
+    setEmissionTotal(currentEmissionTotal);
+  }, [wasteSection]);
+
+  useEffect(() => {
+    const currentEmissionTotal = { ...emissionTotal };
+    Object.values(EmissionUnits).forEach((unit) => {
+      let unitTotal = 0;
+      Object.values(OtherLevels).forEach((level) => {
+        unitTotal = unitTotal + (otherSection[level][unit] ?? 0);
+      });
+      currentEmissionTotal[SectionLevels.Five][unit] = unitTotal;
+    });
+    setEmissionTotal(currentEmissionTotal);
+  }, [otherSection]);
 
   // Handle Data Enter
 
@@ -443,7 +517,7 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
             <Input
               value={eqWithout[unit]}
               onChange={(e) =>
-                setIndividualEntry(parseFloat(e.target.value), 'eqWithout', null, null, unit)
+                setIndividualEntry(parseNumber(e.target.value), 'eqWithout', null, null, unit)
               }
               type="number"
               min={0}
@@ -462,7 +536,7 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
             <Input
               value={eqWith[unit]}
               onChange={(e) =>
-                setIndividualEntry(parseFloat(e.target.value), 'eqWith', null, null, unit)
+                setIndividualEntry(parseNumber(e.target.value), 'eqWith', null, null, unit)
               }
               type="number"
               min={0}
