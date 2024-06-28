@@ -42,6 +42,7 @@ import { useEffect, useState } from 'react';
 import { getEmissionCreatePayload } from '../../Utils/payloadCreators';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
+import moment from 'moment';
 
 interface Props {
   index: number;
@@ -52,7 +53,7 @@ const { Panel } = Collapse;
 
 export const EmissionForm: React.FC<Props> = ({ index, year }) => {
   // context Usage
-  const { t } = useTranslation(['emission']);
+  const { t } = useTranslation(['emission', 'entityAction']);
   const { post } = useConnection();
 
   // File Upload State
@@ -62,6 +63,11 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
     data: string;
     url: string;
   }>();
+
+  // Year State
+
+  const [emissionYear, setEmissionYear] = useState<string>();
+  const [isYearFixed, setIsYearFixed] = useState<boolean>();
 
   // Section State
 
@@ -150,6 +156,15 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
     });
     setEmissionTotal(currentEmissionTotal);
   }, [otherSection]);
+
+  // Initializing Function
+
+  useEffect(() => {
+    if (year) {
+      setEmissionYear(year);
+      setIsYearFixed(true);
+    }
+  }, []);
 
   // Handle Data Enter
 
@@ -345,23 +360,32 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
 
   const handleEmissionAction = async (state: 'SAVED' | 'FINALIZED') => {
     try {
-      const emissionCreatePayload = getEmissionCreatePayload(
-        '2023',
-        energySection,
-        industrySection,
-        agrSection,
-        wasteSection,
-        otherSection,
-        eqWith,
-        eqWithout,
-        state
-      );
-      const response: any = await post('national/emissions/add', emissionCreatePayload);
+      if (emissionYear) {
+        const emissionCreatePayload = getEmissionCreatePayload(
+          emissionYear,
+          energySection,
+          industrySection,
+          agrSection,
+          wasteSection,
+          otherSection,
+          eqWith,
+          eqWithout,
+          state
+        );
+        const response: any = await post('national/emissions/add', emissionCreatePayload);
 
-      if (response.status === 200 || response.status === 201) {
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('emissionCreationSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+        }
+      } else {
         message.open({
-          type: 'success',
-          content: t('emissionCreationSuccess'),
+          type: 'error',
+          content: t('emissionYearRequired'),
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
@@ -375,12 +399,20 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
     <div key={index} className="emission-form">
       <Row gutter={30} className="first-row" align={'middle'}>
         <Col span={8} className="height-column">
-          <DatePicker className="year-picker" picker="year" size="middle" />
+          <DatePicker
+            disabled={isYearFixed}
+            value={emissionYear ? moment(emissionYear, 'YYYY') : null}
+            onChange={(value) => setEmissionYear(value ? value.format('YYYY') : undefined)}
+            className="year-picker"
+            picker="year"
+            size="middle"
+            placeholder="Emission Year"
+          />
         </Col>
         <Col span={3} className="height-column">
           <Upload {...props}>
             <Button className="upload-button" icon={<UploadOutlined />}>
-              {'Upload'}
+              {t('entityAction:upload')}
             </Button>
           </Upload>
         </Col>
@@ -403,7 +435,7 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
       </Row>
       <Row gutter={25} className="total-row" align={'middle'}>
         <Col className="total-div" span={12}>
-          {'Total National Emissions and Removals '}
+          {t('totalRowHeader')}
         </Col>
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`total_${unit}`} span={3}>
@@ -545,7 +577,7 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
       </Row>
       <Row gutter={25} className="input-number-row" align={'middle'}>
         <Col className="title-div" span={12}>
-          {'Total CO2 equivalent emissions without land use, land-use change and forestry'}
+          {t('eqWithoutHeader')}
         </Col>
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`eqWithout_${unit}`} span={3} className="number-column">
@@ -564,7 +596,7 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
       </Row>
       <Row gutter={25} className="input-number-row" align={'middle'}>
         <Col className="title-div" span={12}>
-          {'Total CO2 equivalent emissions with land use, land-use change and forestry'}
+          {t('eqWithHeader')}
         </Col>
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`eqWith_${unit}`} span={3} className="number-column">

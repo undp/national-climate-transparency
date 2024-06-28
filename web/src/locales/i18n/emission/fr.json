@@ -1,0 +1,65 @@
+{
+    "addNew": "Ajouter Nouveau",
+
+    "totalRowHeader" : "Total National des Émissions et Absorptions",
+
+    "eqWithHeader" : "Total des émissions équivalentes en CO2 avec utilisation des terres, changement d'utilisation des terres et foresterie",
+    "eqWithoutHeader" : "Total des émissions équivalentes en CO2 sans utilisation des terres, changement d'utilisation des terres et foresterie",
+
+    "co2" : "tCO2",
+    "ch4" : "tCH4",
+    "n2o" : "tN2O",
+    "co2eq" : "tCO2-éq",
+
+    "1_title": "Énergie",
+    "2_title": "Procédés Industriels et Utilisation des Produits",
+    "3_title": "Agriculture, Foresterie et Autres Utilisations des Terres",
+    "4_title": "Déchets",
+    "5_title": "Autre",
+
+    "1A_title": "Activités de Combustion de Carburant",
+    "1B_title": "Émissions Fugitives des Carburants",
+    "1C_title": "Transport et Stockage du Dioxyde de Carbone",
+
+    "1A1_title": "Industries de l'Énergie",
+    "1A2_title": "Industries Manufacturières et Construction",
+    "1A3_title": "Transport",
+    "1A4_title": "Autres Secteurs",
+    "1A5_title": "Non Spécifié",
+
+    "1B1_title": "Combustibles Solides",
+    "1B2_title": "Pétrole et Gaz Naturel",
+    "1B3_title": "Autres Émissions de la Production d'Énergie",
+
+    "1C1_title": "Transport de CO2",
+    "1C2_title": "Injection et Stockage",
+    "1C3_title": "Autre",
+
+    "2A_title": "Industrie Minérale",
+    "2B_title": "Industrie Chimique",
+    "2C_title": "Industrie Métallurgique",
+    "2D_title": "Produits Non Énergétiques issus des Carburants et Utilisation de Solvants",
+    "2E_title": "Industrie Électronique",
+    "2F_title": "Utilisations de Produits en tant que Substituts aux Substances Appauvrissant la Couche d’Ozone",
+    "2G_title": "Autre Fabrication et Utilisation de Produits",
+    "2H_title": "Autre",
+
+    "3A_title": "Élevage",
+    "3B_title": "Terres",
+    "3C_title": "Sources Agrégées et Sources d'Émissions Non-CO2 sur les Terres",
+    "3D_title": "Autre",
+
+    "4A_title": "Élimination des Déchets Solides",
+    "4B_title": "Traitement Biologique des Déchets Solides",
+    "4C_title": "Incinération et Brûlage Ouvert des Déchets",
+    "4D_title": "Traitement et Rejet des Eaux Usées",
+    "4E_title": "Autre",
+
+    "5A_title": "Émissions Indirectes de N2O dues au Dépôt Atmosphérique de l'Azote sous forme de NOx et NH3",
+    "5B_title": "Autre",
+
+    "yearFetchingFailed": "Recherche de l'Année Échouée !",
+    "fileNotSupported": "Fichier Non Supporté !",
+    "emissionCreationSuccess": "Données d'Émission Enregistrées avec Succès",
+    "emissionYearRequired": "Année d'Émission Requise !"
+}

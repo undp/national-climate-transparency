@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 const GhgEmissions = () => {
   // Page Context
 
-  const { t } = useTranslation(['emissions']);
+  const { t } = useTranslation(['emission']);
   const { get } = useConnection();
 
   // Years State for Tab Panel
@@ -35,7 +35,7 @@ const GhgEmissions = () => {
   useEffect(() => {
     const tempTabItems = [
       {
-        label: 'Add New',
+        label: t('addNew'),
         key: '1',
         children: <EmissionForm index={0} year={null} />,
       },

@@ -1,4 +1,11 @@
 {
+    "addNew": "Add New",
+
+    "totalRowHeader" : "Total National Emissions and Removals",
+
+    "eqWithHeader" : "Total CO2 equivalent emissions with land use, land-use change and forestry",
+    "eqWithoutHeader" : "Total CO2 equivalent emissions without land use, land-use change and forestry",
+
     "co2" : "tCO2",
     "ch4" : "tCH4",
     "n2o" : "tN2O",
@@ -49,5 +56,10 @@
     "4E_title": "Other",
 
     "5A_title": "Indirect N2O emissions from the atmospheric deposition of nitrogen in NOx and NH3",
-    "5B_title": "Other"
+    "5B_title": "Other",
+
+    "yearFetchingFailed": "Year Search Failed !",
+    "fileNotSupported": "File Not Supported !",
+    "emissionCreationSuccess": "Successfully Saved the Emission Data",
+    "emissionYearRequired": "Emission Year is Required !"
 }
