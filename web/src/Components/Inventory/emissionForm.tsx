@@ -546,6 +546,18 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
           </Col>
         ))}
       </Row>
+      <Row gutter={20} className="action-row" justify={'end'}>
+        <Col>
+          <Button type="primary" size="large" block>
+            {t('entityAction:submit')}
+          </Button>
+        </Col>
+        <Col>
+          <Button type="primary" size="large" block htmlType="submit">
+            {t('entityAction:finalize')}
+          </Button>
+        </Col>
+      </Row>
     </div>
   );
 };

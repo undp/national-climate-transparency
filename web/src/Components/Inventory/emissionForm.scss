@@ -28,7 +28,7 @@
     .unit-row {
         margin-top: 30px;
         padding-left: 42px;
-        padding-right: 66px;
+        padding-right: 16px;
         display: flex;
         justify-content: flex-end;
 
@@ -43,7 +43,7 @@
     .total-row {
         margin-top: 30px;
         padding-left: 42px;
-        padding-right: 66px;
+        padding-right: 16px;
         display: flex;
         justify-content: flex-end;
 
@@ -62,7 +62,6 @@
         margin-bottom: 20px;
 
         .sector-header-row {
-            padding-right: 50px;
             display: flex;
             justify-content: flex-end;
     
@@ -78,7 +77,6 @@
 
         .sector-sub-header-row {
             padding-left: 26px;
-            padding-right: 50px;
             padding-top: 10px;
             padding-bottom: 10px;
             display: flex;
@@ -100,7 +98,7 @@
             padding-top: 10px;
             padding-bottom: 10px;
             padding-left: 26px;
-            padding-right: 50px;
+            padding-right: 0px;
             display: flex;
             justify-content: flex-end;
             border-bottom: 1px solid #e8e8e8;
@@ -130,7 +128,7 @@
         padding-top: 10px;
         padding-bottom: 10px;
         padding-left: 42px;
-        padding-right: 66px;
+        padding-right: 16px;
         display: flex;
         justify-content: flex-end;
         border-bottom: 1px solid #e8e8e8;
@@ -152,6 +150,11 @@
             }
         }
 
+    }
+
+    .action-row {
+        margin-top: 40px;
+        padding-right: 16px;
     }
 
 }
