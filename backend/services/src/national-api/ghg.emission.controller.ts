@@ -33,5 +33,12 @@ export class GHGEmissionController {
     getEmissions(@Param('year') year: string, @Request() req) {
       return this.emissionService.getEmissionByYear(year);
     }
+
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, EmissionEntity, true))
+    @Get("/year/available")
+    getEmissionYears() {
+      return this.emissionService.getEmissionYears();
+    }
     
 }

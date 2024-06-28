@@ -109,6 +109,16 @@ export class GhgEmissionsService {
         return { status: HttpStatus.CREATED, data: savedEmission };
     }
 
+    async getEmissionYears() {
+        const emissions = await this.emissionRepo
+            .createQueryBuilder("emission_entity")
+            .select("year")
+            .distinct(true)
+            .getRawMany();
+            
+        return emissions.map(emission => emission.year);
+    }
+
     getEmissionByYear = async (year: string) => {
         return await this.emissionRepo.find({
             where: {
@@ -122,6 +132,7 @@ export class GhgEmissionsService {
         this.logger.verbose("Converted emissionDto to Emission entity", JSON.stringify(data));
         return plainToClass(EmissionEntity, data);
     }
+
     private fileExtensionMap = new Map([
         ["vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx"],
         ["vnd.ms-excel", "xls"],
@@ -198,5 +209,5 @@ export class GhgEmissionsService {
           }
         }
         return true;
-      }
+    }
 }

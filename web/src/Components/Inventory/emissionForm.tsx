@@ -45,11 +45,12 @@ import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 
 interface Props {
   index: number;
+  year: string | null;
 }
 
 const { Panel } = Collapse;
 
-export const EmissionForm: React.FC<Props> = ({ index }) => {
+export const EmissionForm: React.FC<Props> = ({ index, year }) => {
   // context Usage
   const { t } = useTranslation(['emission']);
   const { post } = useConnection();
