@@ -120,3 +120,8 @@ export const getCollapseIcon = (isActive: boolean) => {
     <PlusCircleOutlined style={{ color: '#16B1FF', fontSize: '14px' }} />
   );
 };
+
+export const parseNumber = (stringValue: string | undefined) => {
+  console.log(stringValue);
+  return stringValue ? (stringValue === 'NaN' ? undefined : parseFloat(stringValue)) : undefined;
+};
