@@ -6,7 +6,7 @@ import { AcceptedMimeTypes } from '../../Definitions/fileTypes';
 import { FileCard } from '../FileCard/fileCard';
 import { getBase64, getCollapseIcon, parseNumber } from '../../Utils/utilServices';
 import {
-  AgriLevels,
+  AgrLevels,
   EmissionUnits,
   EnergyLevels,
   EnergyOne,
@@ -14,12 +14,14 @@ import {
   EnergyTwo,
   IndustryLevels,
   OtherLevels,
+  SectionLevels,
   WasteLevels,
 } from '../../Enums/emission.enum';
 import NumberChip from '../NumberChip/numberChip';
 import {
   AgricultureSection,
   EmissionData,
+  EmissionTotals,
   EnergySection,
   IndustrySection,
   OtherSection,
@@ -29,6 +31,7 @@ import {
   agricultureSectionInit,
   emissionInitData,
   emissionSections,
+  emissionTotals,
   energySectionInit,
   industrySectionInit,
   otherSectionInit,
@@ -55,30 +58,19 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
     url: string;
   }>();
 
-  // Energy Section State
+  // Section State
 
   const [energySection, setEnergySection] = useState<EnergySection>(energySectionInit);
-
-  // Industry Section State
-
   const [industrySection, setIndustrySection] = useState<IndustrySection>(industrySectionInit);
-
-  // Agriculture Section State
-
-  const [agriSection, setAgriSection] = useState<AgricultureSection>(agricultureSectionInit);
-
-  // Waste Waste
-
+  const [agrSection, setAgrSection] = useState<AgricultureSection>(agricultureSectionInit);
   const [wasteSection, setWasteSection] = useState<WasteSection>(wasteSectionInit);
-
-  // Other State
-
   const [otherSection, setOtherSection] = useState<OtherSection>(otherSectionInit);
-
-  // General State
-
   const [eqWithout, setEqWithout] = useState<EmissionData>({ ...emissionInitData });
   const [eqWith, setEqWith] = useState<EmissionData>({ ...emissionInitData });
+
+  // Total State
+
+  const [emissionTotal, setEmissionTotal] = useState<EmissionTotals>(emissionTotals);
 
   // Handle Data Enter
 
@@ -130,8 +122,8 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
         }));
         return;
       case '3':
-        const agriculture = levelTwo as AgriLevels;
-        setAgriSection((prevState) => ({
+        const agriculture = levelTwo as AgrLevels;
+        setAgrSection((prevState) => ({
           ...prevState,
           [agriculture]: {
             ...prevState[agriculture],
@@ -191,8 +183,8 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
         const industry = levelTwo as IndustryLevels;
         return industry ? industrySection[industry][unit] : undefined;
       case '3':
-        const agriculture = levelTwo as AgriLevels;
-        return agriculture ? agriSection[agriculture][unit] : undefined;
+        const agriculture = levelTwo as AgrLevels;
+        return agriculture ? agrSection[agriculture][unit] : undefined;
       case '4':
         const waste = levelTwo as WasteLevels;
         return waste ? wasteSection[waste][unit] : undefined;
@@ -200,6 +192,45 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
         const other = levelTwo as OtherLevels;
         return other ? otherSection[other][unit] : undefined;
     }
+  };
+
+  // Get Section Sum
+
+  const getSubSectionUnitSum = (subSection: EnergyLevels, unit: EmissionUnits) => {
+    return emissionTotal[SectionLevels.One][subSection][unit] ?? 0;
+  };
+
+  // Get Section Sum
+
+  const getSectionUnitSum = (section: string, unit: EmissionUnits) => {
+    switch (section) {
+      case '1':
+        return (
+          getSubSectionUnitSum(EnergyLevels.OneA, unit) +
+          getSubSectionUnitSum(EnergyLevels.OneB, unit) +
+          getSubSectionUnitSum(EnergyLevels.OneC, unit)
+        );
+      case '2':
+        return emissionTotal[section][unit];
+      case '3':
+        return emissionTotal[section][unit];
+      case '4':
+        return emissionTotal[section][unit];
+      case '5':
+        return emissionTotal[section][unit];
+    }
+  };
+
+  // Get Overall Sum
+
+  const getOverallUnitSum = (unit: EmissionUnits) => {
+    let overallSum = 0;
+
+    Object.values(SectionLevels).map(
+      (section) => (overallSum += getSectionUnitSum(section, unit) ?? 0)
+    );
+
+    return (overallSum ?? 0) + (eqWith[unit] ?? 0) + (eqWithout[unit] ?? 0);
   };
 
   // File Uploading Handling
@@ -267,7 +298,7 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
         </Col>
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`total_${unit}`} span={3}>
-            <NumberChip value={100} valueType={unit} />
+            <NumberChip value={getOverallUnitSum(unit)} valueType={unit} />
           </Col>
         ))}
       </Row>
@@ -286,7 +317,10 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
                     </Col>
                     {Object.values(EmissionUnits).map((unit) => (
                       <Col key={`section_${section.id}_${unit}`} span={3}>
-                        <NumberChip value={100} valueType={unit} />
+                        <NumberChip
+                          value={getSectionUnitSum(section.id, unit) ?? 0}
+                          valueType={unit}
+                        />
                       </Col>
                     ))}
                   </Row>
@@ -341,7 +375,10 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
                         </Col>
                         {Object.values(EmissionUnits).map((unit) => (
                           <Col key={`subsection_${subSection.id}_${unit}`} span={3}>
-                            <NumberChip value={100} valueType={unit} />
+                            <NumberChip
+                              value={getSubSectionUnitSum(subSection.id, unit)}
+                              valueType={unit}
+                            />
                           </Col>
                         ))}
                       </Row>

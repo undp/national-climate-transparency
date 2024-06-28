@@ -1,5 +1,5 @@
 import {
-  AgriLevels,
+  AgrLevels,
   EmissionUnits,
   EnergyLevels,
   EnergyOne,
@@ -11,14 +11,14 @@ import {
 } from '../Enums/emission.enum';
 
 export type SubSectionsDefinition = {
-  id: string;
+  id: EnergyLevels;
   sections: EnergyOne[] | EnergyTwo[] | EnergyThree[];
 };
 
 export type SectionDefinition = {
   id: string;
   hasSubSections: boolean;
-  mainSections: IndustryLevels[] | AgriLevels[] | WasteLevels[] | OtherLevels[] | null;
+  mainSections: IndustryLevels[] | AgrLevels[] | WasteLevels[] | OtherLevels[] | null;
   subSections: SubSectionsDefinition[] | null;
 };
 
@@ -61,10 +61,10 @@ export type IndustrySection = {
 };
 
 export type AgricultureSection = {
-  [AgriLevels.ThreeA]: EmissionData;
-  [AgriLevels.ThreeB]: EmissionData;
-  [AgriLevels.ThreeC]: EmissionData;
-  [AgriLevels.ThreeD]: EmissionData;
+  [AgrLevels.ThreeA]: EmissionData;
+  [AgrLevels.ThreeB]: EmissionData;
+  [AgrLevels.ThreeC]: EmissionData;
+  [AgrLevels.ThreeD]: EmissionData;
 };
 
 export type WasteSection = {
@@ -119,10 +119,10 @@ export const industrySectionInit = {
 };
 
 export const agricultureSectionInit: AgricultureSection = {
-  [AgriLevels.ThreeA]: { ...emissionInitData },
-  [AgriLevels.ThreeB]: { ...emissionInitData },
-  [AgriLevels.ThreeC]: { ...emissionInitData },
-  [AgriLevels.ThreeD]: { ...emissionInitData },
+  [AgrLevels.ThreeA]: { ...emissionInitData },
+  [AgrLevels.ThreeB]: { ...emissionInitData },
+  [AgrLevels.ThreeC]: { ...emissionInitData },
+  [AgrLevels.ThreeD]: { ...emissionInitData },
 };
 
 export const wasteSectionInit: WasteSection = {
@@ -179,7 +179,7 @@ export const emissionSections: SectionDefinition[] = [
   {
     id: '3',
     hasSubSections: false,
-    mainSections: [AgriLevels.ThreeA, AgriLevels.ThreeB, AgriLevels.ThreeC, AgriLevels.ThreeD],
+    mainSections: [AgrLevels.ThreeA, AgrLevels.ThreeB, AgrLevels.ThreeC, AgrLevels.ThreeD],
     subSections: null,
   },
   {
@@ -201,3 +201,27 @@ export const emissionSections: SectionDefinition[] = [
     subSections: null,
   },
 ];
+
+export type EmissionTotals = {
+  '1': {
+    [EnergyLevels.OneA]: EmissionData;
+    [EnergyLevels.OneB]: EmissionData;
+    [EnergyLevels.OneC]: EmissionData;
+  };
+  '2': EmissionData;
+  '3': EmissionData;
+  '4': EmissionData;
+  '5': EmissionData;
+};
+
+export const emissionTotals = {
+  '1': {
+    [EnergyLevels.OneA]: { ...emissionInitData },
+    [EnergyLevels.OneB]: { ...emissionInitData },
+    [EnergyLevels.OneC]: { ...emissionInitData },
+  },
+  '2': { ...emissionInitData },
+  '3': { ...emissionInitData },
+  '4': { ...emissionInitData },
+  '5': { ...emissionInitData },
+};
