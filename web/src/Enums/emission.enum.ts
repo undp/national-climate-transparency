@@ -7,10 +7,10 @@ export enum EmissionSectorTitles {
 }
 
 export enum EmissionUnits {
-  CO2 = 'tCO2',
-  CH4 = 'tCH4',
-  N2O = 'tN2O',
-  CO2EQ = 'tCO2-eq',
+  CO2 = 'co2',
+  CH4 = 'ch4',
+  N2O = 'n2o',
+  CO2EQ = 'co2eq',
 }
 
 export enum EnergyLevels {

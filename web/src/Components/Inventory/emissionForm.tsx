@@ -39,6 +39,9 @@ import {
 } from '../../Definitions/emissionDefinitions';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
+import { getEmissionCreatePayload } from '../../Utils/payloadCreators';
+import { useConnection } from '../../Context/ConnectionContext/connectionContext';
+import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 
 interface Props {
   index: number;
@@ -49,6 +52,7 @@ const { Panel } = Collapse;
 export const EmissionForm: React.FC<Props> = ({ index }) => {
   // context Usage
   const { t } = useTranslation(['emission']);
+  const { post } = useConnection();
 
   // File Upload State
   const [uploadedFile, setUploadedFile] = useState<{
@@ -336,6 +340,36 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
     multiple: false,
   };
 
+  // Handle Submit
+
+  const handleEmissionAction = async (state: 'SAVED' | 'FINALIZED') => {
+    try {
+      const emissionCreatePayload = getEmissionCreatePayload(
+        '2023',
+        energySection,
+        industrySection,
+        agrSection,
+        wasteSection,
+        otherSection,
+        eqWith,
+        eqWithout,
+        state
+      );
+      const response: any = await post('national/emissions/add', emissionCreatePayload);
+
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: t('emissionCreationSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
+  };
+
   return (
     <div key={index} className="emission-form">
       <Row gutter={30} className="first-row" align={'middle'}>
@@ -362,7 +396,7 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
       <Row gutter={25} className="unit-row" align={'middle'}>
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`unit_${unit}`} span={3}>
-            <div className="unit-div">{unit}</div>
+            <div className="unit-div">{t(`${unit}`)}</div>
           </Col>
         ))}
       </Row>
@@ -548,12 +582,18 @@ export const EmissionForm: React.FC<Props> = ({ index }) => {
       </Row>
       <Row gutter={20} className="action-row" justify={'end'}>
         <Col>
-          <Button type="primary" size="large" block>
+          <Button type="primary" size="large" block onClick={() => handleEmissionAction('SAVED')}>
             {t('entityAction:submit')}
           </Button>
         </Col>
         <Col>
-          <Button type="primary" size="large" block htmlType="submit">
+          <Button
+            type="primary"
+            size="large"
+            block
+            htmlType="submit"
+            onClick={() => handleEmissionAction('FINALIZED')}
+          >
             {t('entityAction:finalize')}
           </Button>
         </Col>
