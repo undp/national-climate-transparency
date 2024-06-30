@@ -36,9 +36,9 @@ export class GHGEmissionController {
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, EmissionEntity, true))
-    @Get("/year/available")
+    @Get("/summary/available")
     getEmissionYears() {
-      return this.emissionService.getEmissionYears();
+      return this.emissionService.getEmissionReportSummary();
     }
     
 }

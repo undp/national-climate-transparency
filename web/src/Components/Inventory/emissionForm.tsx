@@ -35,6 +35,12 @@ import {
   energySectionInit,
   industrySectionInit,
   otherSectionInit,
+  processAgrEmissionData,
+  processEnergyEmissionData,
+  processIndividualEmissionData,
+  processIndustryEmissionData,
+  processOtherEmissionData,
+  processWasteEmissionData,
   wasteSectionInit,
 } from '../../Definitions/emissionDefinitions';
 import { useTranslation } from 'react-i18next';
@@ -47,14 +53,15 @@ import moment from 'moment';
 interface Props {
   index: number;
   year: string | null;
+  finalized: boolean;
 }
 
 const { Panel } = Collapse;
 
-export const EmissionForm: React.FC<Props> = ({ index, year }) => {
+export const EmissionForm: React.FC<Props> = ({ index, year, finalized }) => {
   // context Usage
   const { t } = useTranslation(['emission', 'entityAction']);
-  const { post } = useConnection();
+  const { get, post } = useConnection();
 
   // File Upload State
   const [uploadedFile, setUploadedFile] = useState<{
@@ -68,6 +75,10 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
 
   const [emissionYear, setEmissionYear] = useState<string>();
   const [isYearFixed, setIsYearFixed] = useState<boolean>();
+
+  // Finalized State
+
+  const [isFinalized, setIsFinalized] = useState<boolean>();
 
   // Section State
 
@@ -159,10 +170,37 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
 
   // Initializing Function
 
+  // Year Emission Data Loading Function
+
+  const getYearEmission = async () => {
+    if (year) {
+      try {
+        const response = await get(`national/emissions/${year}`);
+
+        if (response.status === 200 || response.status === 201) {
+          setEnergySection(processEnergyEmissionData(response.data[0].energyEmissions));
+          setIndustrySection(
+            processIndustryEmissionData(response.data[0].industrialProcessesProductUse)
+          );
+          setAgrSection(processAgrEmissionData(response.data[0].agricultureForestryOtherLandUse));
+          setWasteSection(processWasteEmissionData(response.data[0].waste));
+          setOtherSection(processOtherEmissionData(response.data[0].other));
+          setEqWith(processIndividualEmissionData(response.data[0].totalCo2WithLand));
+          setEqWithout(processIndividualEmissionData(response.data[0].totalCo2WithoutLand));
+        }
+      } catch (error) {
+        console.error('Error fetching timeline data:', error);
+        displayErrorMessage(error, t('errorFetchingEmissionForYear'));
+      }
+    }
+  };
+
   useEffect(() => {
     if (year) {
       setEmissionYear(year);
+      setIsFinalized(finalized);
       setIsYearFixed(true);
+      getYearEmission();
     }
   }, []);
 
@@ -381,6 +419,10 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
+
+          if (state === 'FINALIZED') {
+            setIsFinalized(true);
+          }
         }
       } else {
         message.open({
@@ -485,6 +527,7 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
                       {Object.values(EmissionUnits).map((unit) => (
                         <Col key={`${mainSection}_${unit}`} span={3} className="number-column">
                           <Input
+                            disabled={isFinalized}
                             value={getIndividualEntry(section.id, mainSection, null, unit)}
                             onChange={(e) =>
                               setIndividualEntry(
@@ -544,6 +587,7 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
                                 className="number-column"
                               >
                                 <Input
+                                  disabled={isFinalized}
                                   value={getIndividualEntry(
                                     section.id,
                                     subSection.id,
@@ -582,6 +626,7 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`eqWithout_${unit}`} span={3} className="number-column">
             <Input
+              disabled={isFinalized}
               value={eqWithout[unit]}
               onChange={(e) =>
                 setIndividualEntry(parseNumber(e.target.value), 'eqWithout', null, null, unit)
@@ -601,6 +646,7 @@ export const EmissionForm: React.FC<Props> = ({ index, year }) => {
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`eqWith_${unit}`} span={3} className="number-column">
             <Input
+              disabled={isFinalized}
               value={eqWith[unit]}
               onChange={(e) =>
                 setIndividualEntry(parseNumber(e.target.value), 'eqWith', null, null, unit)

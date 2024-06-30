@@ -225,3 +225,115 @@ export const emissionTotals = {
   '4': { ...emissionInitData },
   '5': { ...emissionInitData },
 };
+
+export const processIndividualEmissionData = (receivedEmission: any) => {
+  const tempEmission = {
+    [EmissionUnits.CO2]: receivedEmission[EmissionUnits.CO2] ?? undefined,
+    [EmissionUnits.CH4]: receivedEmission[EmissionUnits.CH4] ?? undefined,
+    [EmissionUnits.N2O]: receivedEmission[EmissionUnits.N2O] ?? undefined,
+    [EmissionUnits.CO2EQ]: receivedEmission[EmissionUnits.CO2EQ] ?? undefined,
+  };
+
+  return tempEmission;
+};
+
+export const processEnergyEmissionData = (energyEmissions: any) => {
+  const processedEmission: EnergySection = {
+    [EnergyLevels.OneA]: {
+      [EnergyOne.OneA1]: processIndividualEmissionData(
+        energyEmissions.fuelCombustionActivities.energyIndustries
+      ),
+      [EnergyOne.OneA2]: processIndividualEmissionData(
+        energyEmissions.fuelCombustionActivities.manufacturingIndustriesConstruction
+      ),
+      [EnergyOne.OneA3]: processIndividualEmissionData(
+        energyEmissions.fuelCombustionActivities.transport
+      ),
+      [EnergyOne.OneA4]: processIndividualEmissionData(
+        energyEmissions.fuelCombustionActivities.otherSectors
+      ),
+      [EnergyOne.OneA5]: processIndividualEmissionData(
+        energyEmissions.fuelCombustionActivities.nonSpecified
+      ),
+    },
+    [EnergyLevels.OneB]: {
+      [EnergyTwo.OneB1]: processIndividualEmissionData(
+        energyEmissions.fugitiveEmissionsFromFuels.solidFuels
+      ),
+      [EnergyTwo.OneB2]: processIndividualEmissionData(
+        energyEmissions.fugitiveEmissionsFromFuels.oilNaturalGas
+      ),
+      [EnergyTwo.OneB3]: processIndividualEmissionData(
+        energyEmissions.fugitiveEmissionsFromFuels.otherEmissionsEnergyProduction
+      ),
+    },
+    [EnergyLevels.OneC]: {
+      [EnergyThree.OneC1]: processIndividualEmissionData(
+        energyEmissions.carbonDioxideTransportStorage.solidFuels
+      ),
+      [EnergyThree.OneC2]: processIndividualEmissionData(
+        energyEmissions.carbonDioxideTransportStorage.oilNaturalGas
+      ),
+      [EnergyThree.OneC3]: processIndividualEmissionData(
+        energyEmissions.carbonDioxideTransportStorage.otherEmissionsEnergyProduction
+      ),
+    },
+  };
+
+  return processedEmission;
+};
+
+export const processIndustryEmissionData = (industryEmissions: any) => {
+  const processedEmission: IndustrySection = {
+    [IndustryLevels.TwoA]: processIndividualEmissionData(industryEmissions.mineralIndustry),
+    [IndustryLevels.TwoB]: processIndividualEmissionData(industryEmissions.chemicalIndustry),
+    [IndustryLevels.TwoC]: processIndividualEmissionData(industryEmissions.metalIndustry),
+    [IndustryLevels.TwoD]: processIndividualEmissionData(
+      industryEmissions.nonEnergyProductsFuelsSolventUse
+    ),
+    [IndustryLevels.TwoE]: processIndividualEmissionData(industryEmissions.electronicsIndustry),
+    [IndustryLevels.TwoF]: processIndividualEmissionData(
+      industryEmissions.productUsesSubstOzoneDepletingSubs
+    ),
+    [IndustryLevels.TwoG]: processIndividualEmissionData(
+      industryEmissions.otherProductManufactureUse
+    ),
+    [IndustryLevels.TwoH]: processIndividualEmissionData(industryEmissions.other),
+  };
+
+  return processedEmission;
+};
+
+export const processAgrEmissionData = (agrEmissions: any) => {
+  const processedEmission: AgricultureSection = {
+    [AgrLevels.ThreeA]: processIndividualEmissionData(agrEmissions.livestock),
+    [AgrLevels.ThreeB]: processIndividualEmissionData(agrEmissions.land),
+    [AgrLevels.ThreeC]: processIndividualEmissionData(agrEmissions.aggregateNonCo2SourcesLand),
+    [AgrLevels.ThreeD]: processIndividualEmissionData(agrEmissions.other),
+  };
+
+  return processedEmission;
+};
+
+export const processWasteEmissionData = (wasteEmissions: any) => {
+  const processedEmission: WasteSection = {
+    [WasteLevels.FourA]: processIndividualEmissionData(wasteEmissions.solidWasteDisposal),
+    [WasteLevels.FourB]: processIndividualEmissionData(
+      wasteEmissions.biologicalTreatmentSolidWaste
+    ),
+    [WasteLevels.FourC]: processIndividualEmissionData(wasteEmissions.incinerationOpenBurningWaste),
+    [WasteLevels.FourD]: processIndividualEmissionData(wasteEmissions.wastewaterTreatmentDischarge),
+    [WasteLevels.FourE]: processIndividualEmissionData(wasteEmissions.other),
+  };
+
+  return processedEmission;
+};
+
+export const processOtherEmissionData = (otherEmissions: any) => {
+  const processedEmission: OtherSection = {
+    [OtherLevels.FiveA]: processIndividualEmissionData(otherEmissions.indirectN2oEmissions),
+    [OtherLevels.FiveB]: processIndividualEmissionData(otherEmissions.other),
+  };
+
+  return processedEmission;
+};

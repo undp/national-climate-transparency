@@ -109,14 +109,13 @@ export class GhgEmissionsService {
         return { status: HttpStatus.CREATED, data: savedEmission };
     }
 
-    async getEmissionYears() {
+    async getEmissionReportSummary() {
         const emissions = await this.emissionRepo
             .createQueryBuilder("emission_entity")
-            .select("year")
-            .distinct(true)
+            .select(["year", "state"])
             .getRawMany();
             
-        return emissions.map(emission => emission.year);
+        return emissions;
     }
 
     getEmissionByYear = async (year: string) => {

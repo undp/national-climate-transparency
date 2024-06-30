@@ -13,14 +13,15 @@ const GhgEmissions = () => {
   const { get } = useConnection();
 
   // Years State for Tab Panel
-  const [availableYears, setAvailableYears] = useState<string[]>();
+  const [availableReports, setAvailableReports] =
+    useState<{ year: string; state: 'SAVED' | 'FINALIZED' }[]>();
   const [tabItems, setTabItems] = useState<any>();
 
-  const getAvailableYears = async () => {
+  const getAvailableEmissionReports = async () => {
     try {
-      const response: any = await get('national/emissions/year/available');
+      const response: any = await get('national/emissions/summary/available');
       if (response.status === 200 || response.status === 201) {
-        setAvailableYears(response.data);
+        setAvailableReports(response.data);
       }
     } catch (error: any) {
       displayErrorMessage(error, t('yearFetchingFailed'));
@@ -29,7 +30,7 @@ const GhgEmissions = () => {
   };
 
   useEffect(() => {
-    getAvailableYears();
+    getAvailableEmissionReports();
   }, []);
 
   useEffect(() => {
@@ -37,23 +38,28 @@ const GhgEmissions = () => {
       {
         label: t('addNew'),
         key: '1',
-        children: <EmissionForm index={0} year={null} />,
+        children: <EmissionForm index={0} year={null} finalized={false} />,
       },
     ];
 
-    if (availableYears) {
-      console.log(availableYears);
-      availableYears.forEach((year, index) =>
+    if (availableReports) {
+      availableReports.forEach((report, index) =>
         tempTabItems.push({
-          label: year,
+          label: report.year,
           key: `${index + 2}`,
-          children: <EmissionForm index={index + 1} year={year} />,
+          children: (
+            <EmissionForm
+              index={index + 1}
+              year={report.year}
+              finalized={report.state === 'FINALIZED' ? true : false}
+            />
+          ),
         })
       );
     }
 
     setTabItems(tempTabItems);
-  }, [availableYears]);
+  }, [availableReports]);
 
   return (
     <div className="content-container">
