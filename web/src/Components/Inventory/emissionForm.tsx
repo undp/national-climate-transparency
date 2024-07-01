@@ -476,7 +476,7 @@ export const EmissionForm: React.FC<Props> = ({
   return (
     <div key={index} className="emission-form">
       <Row gutter={30} className="first-row" align={'middle'}>
-        <Col span={8} className="height-column">
+        <Col span={6} className="height-column">
           <DatePicker
             key={`date_picker_${index}`}
             disabled={isYearFixed}
@@ -485,18 +485,21 @@ export const EmissionForm: React.FC<Props> = ({
             className="year-picker"
             picker="year"
             size="middle"
-            placeholder="Emission Year"
+            placeholder="Select Emission Year"
             disabledDate={disabledDate}
           />
         </Col>
-        <Col span={3} className="height-column">
+        <Col span={8} className="height-column">
           <Upload {...props}>
-            <Button className="upload-button" icon={<UploadOutlined />}>
-              {t('entityAction:upload')}
+            <Button
+              className="upload-button"
+              icon={<UploadOutlined style={{ color: '#bfbfbf' }} />}
+            >
+              <span className="button-text">{t('emission:upload')}</span>
             </Button>
           </Upload>
         </Col>
-        <Col span={13} className="height-column">
+        <Col span={10} className="height-column">
           {uploadedFile && (
             <FileCard
               file={uploadedFile}

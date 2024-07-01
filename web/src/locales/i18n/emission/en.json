@@ -1,5 +1,8 @@
 {
+    "emissionTitle": "Emission",
+    
     "addNew": "Add New",
+    "upload": "Upload Emissions & Removals Document",
 
     "totalRowHeader" : "Total National Emissions and Removals",
 

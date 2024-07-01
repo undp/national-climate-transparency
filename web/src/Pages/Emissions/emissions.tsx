@@ -74,7 +74,7 @@ const GhgEmissions = () => {
   return (
     <div className="content-container">
       <div className="title-bar">
-        <div className="body-title">{'emissionTitle'}</div>
+        <div className="body-title">{t('emissionTitle')}</div>
       </div>
       <div className="emission-section-card">
         <Tabs

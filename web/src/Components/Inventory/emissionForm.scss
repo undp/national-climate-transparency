@@ -7,21 +7,24 @@
 
         .height-column {
             height: 40px;
-            display: flex;
-            justify-content: flex-end;
-        }
 
-        .year-picker {
-            width: 100%;
-            min-height: 40px;
-        }
+            .year-picker {
+                width: 100%;
+                min-height: 40px;                
+            }
 
-        .upload-button {
-            min-width: 100%;
-            min-height: 40px;
-            color: #3A3541;
-            opacity: 0.8;
-            border: 1px solid #d9d9d9;
+            .upload-button {
+                width: 350px;
+                min-height: 40px;
+                opacity: 0.8;
+                border: 1px solid #d9d9d9;
+
+                .button-text{
+                    text-transform: none;
+                    color: #a8a8a8;
+                    font-weight: 100;
+                }
+            }
         }
     }
 
