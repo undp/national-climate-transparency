@@ -11,5 +11,6 @@
     "verifySupportSuccess": "Support verified successfully",
     "supportVerificationFailed": "Support verification failed due to {}",
     "cannotEditValidated": "The support with id {} is validated and cannot be edited",
-    "deleteSupportSuccess": "Support deleted successfully"
+    "deleteSupportSuccess": "Support deleted successfully",
+    "supportDeleteFailed": "Support delete failed due to {}"
 }
