@@ -55,6 +55,7 @@ interface Props {
   year: string | null;
   finalized: boolean;
   availableYears: number[];
+  setActiveYear: React.Dispatch<React.SetStateAction<string | undefined>>;
   getAvailableEmissionReports?: () => void;
 }
 
@@ -65,6 +66,7 @@ export const EmissionForm: React.FC<Props> = ({
   year,
   finalized,
   availableYears,
+  setActiveYear,
   getAvailableEmissionReports,
 }) => {
   // context Usage
@@ -430,6 +432,7 @@ export const EmissionForm: React.FC<Props> = ({
 
           if (index === 0 && getAvailableEmissionReports) {
             getAvailableEmissionReports();
+            setActiveYear(emissionYear);
           }
         }
       } else {
@@ -454,6 +457,7 @@ export const EmissionForm: React.FC<Props> = ({
       <Row gutter={30} className="first-row" align={'middle'}>
         <Col span={8} className="height-column">
           <DatePicker
+            key={`date_picker_${index}`}
             disabled={isYearFixed}
             value={emissionYear ? moment(emissionYear, 'YYYY') : null}
             onChange={(value) => setEmissionYear(value ? value.format('YYYY') : undefined)}

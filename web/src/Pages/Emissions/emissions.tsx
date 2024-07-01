@@ -20,6 +20,11 @@ const GhgEmissions = () => {
     useState<{ year: string; state: 'SAVED' | 'FINALIZED' }[]>();
   const [tabItems, setTabItems] = useState<EmissionTabItem[]>();
 
+  // Active Tab State
+
+  const [activeKey, setActiveKey] = useState<string>('1');
+  const [activeYear, setActiveYear] = useState<string>();
+
   const getAvailableEmissionReports = async () => {
     try {
       const response: any = await get('national/emissions/summary/available');
@@ -40,7 +45,11 @@ const GhgEmissions = () => {
     const tempTabItems: EmissionTabItem[] = [];
 
     if (availableReports) {
-      availableReports.forEach((report, index) =>
+      availableReports.forEach((report, index) => {
+        if (activeYear === report.year) {
+          setActiveKey(`${index + 2}`);
+          setActiveYear(undefined);
+        }
         tempTabItems.push({
           key: `${index + 2}`,
           label: report.year,
@@ -50,11 +59,12 @@ const GhgEmissions = () => {
               index={index + 1}
               year={report.year}
               availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
+              setActiveYear={setActiveYear}
               finalized={report.state === 'FINALIZED' ? true : false}
             />
           ),
-        })
-      );
+        });
+      });
     }
 
     tempTabItems.sort((a, b) => parseFloat(a.label) - parseFloat(b.label));
@@ -67,7 +77,7 @@ const GhgEmissions = () => {
         <div className="body-title">{'emissionTitle'}</div>
       </div>
       <div className="emission-section-card">
-        <Tabs centered defaultActiveKey="1">
+        <Tabs centered activeKey={activeKey} onTabClick={(key: string) => setActiveKey(key)}>
           <TabPane
             tab={
               <span>
@@ -82,6 +92,7 @@ const GhgEmissions = () => {
               year={null}
               finalized={false}
               availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
+              setActiveYear={setActiveYear}
               getAvailableEmissionReports={getAvailableEmissionReports}
             />
           </TabPane>
