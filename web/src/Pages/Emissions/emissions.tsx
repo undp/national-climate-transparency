@@ -5,6 +5,9 @@ import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import { useTranslation } from 'react-i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { useEffect, useState } from 'react';
+import TabPane from 'antd/lib/tabs/TabPane';
+import { LockOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { EmissionTabItem } from '../../Definitions/emissionDefinitions';
 
 const GhgEmissions = () => {
   // Page Context
@@ -15,7 +18,7 @@ const GhgEmissions = () => {
   // Years State for Tab Panel
   const [availableReports, setAvailableReports] =
     useState<{ year: string; state: 'SAVED' | 'FINALIZED' }[]>();
-  const [tabItems, setTabItems] = useState<any>();
+  const [tabItems, setTabItems] = useState<EmissionTabItem[]>();
 
   const getAvailableEmissionReports = async () => {
     try {
@@ -34,23 +37,19 @@ const GhgEmissions = () => {
   }, []);
 
   useEffect(() => {
-    const tempTabItems = [
-      {
-        label: t('addNew'),
-        key: '1',
-        children: <EmissionForm index={0} year={null} finalized={false} />,
-      },
-    ];
+    const tempTabItems: EmissionTabItem[] = [];
 
     if (availableReports) {
       availableReports.forEach((report, index) =>
         tempTabItems.push({
-          label: report.year,
           key: `${index + 2}`,
-          children: (
+          label: report.year,
+          icon: report.state === 'FINALIZED' ? <LockOutlined /> : null,
+          content: (
             <EmissionForm
               index={index + 1}
               year={report.year}
+              availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
               finalized={report.state === 'FINALIZED' ? true : false}
             />
           ),
@@ -58,6 +57,7 @@ const GhgEmissions = () => {
       );
     }
 
+    tempTabItems.sort((a, b) => parseFloat(a.label) - parseFloat(b.label));
     setTabItems(tempTabItems);
   }, [availableReports]);
 
@@ -67,7 +67,39 @@ const GhgEmissions = () => {
         <div className="body-title">{'emissionTitle'}</div>
       </div>
       <div className="emission-section-card">
-        <Tabs defaultActiveKey="1" centered items={tabItems} />
+        <Tabs centered defaultActiveKey="1">
+          <TabPane
+            tab={
+              <span>
+                <PlusCircleOutlined />
+                {t('addNew')}
+              </span>
+            }
+            key="1"
+          >
+            <EmissionForm
+              index={0}
+              year={null}
+              finalized={false}
+              availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
+              getAvailableEmissionReports={getAvailableEmissionReports}
+            />
+          </TabPane>
+          {tabItems &&
+            tabItems.map((tab: any) => (
+              <TabPane
+                tab={
+                  <span>
+                    <span style={{ marginRight: '8px' }}>{tab.label}</span>
+                    <span>{tab.icon}</span>
+                  </span>
+                }
+                key={tab.key}
+              >
+                {tab.content}
+              </TabPane>
+            ))}
+        </Tabs>
       </div>
     </div>
   );

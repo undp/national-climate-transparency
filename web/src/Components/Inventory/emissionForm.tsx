@@ -48,17 +48,25 @@ import { useEffect, useState } from 'react';
 import { getEmissionCreatePayload } from '../../Utils/payloadCreators';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 
 interface Props {
   index: number;
   year: string | null;
   finalized: boolean;
+  availableYears: number[];
+  getAvailableEmissionReports?: () => void;
 }
 
 const { Panel } = Collapse;
 
-export const EmissionForm: React.FC<Props> = ({ index, year, finalized }) => {
+export const EmissionForm: React.FC<Props> = ({
+  index,
+  year,
+  finalized,
+  availableYears,
+  getAvailableEmissionReports,
+}) => {
   // context Usage
   const { t } = useTranslation(['emission', 'entityAction']);
   const { get, post } = useConnection();
@@ -420,8 +428,8 @@ export const EmissionForm: React.FC<Props> = ({ index, year, finalized }) => {
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
 
-          if (state === 'FINALIZED') {
-            setIsFinalized(true);
+          if (index === 0 && getAvailableEmissionReports) {
+            getAvailableEmissionReports();
           }
         }
       } else {
@@ -437,6 +445,10 @@ export const EmissionForm: React.FC<Props> = ({ index, year, finalized }) => {
     }
   };
 
+  const disabledDate = (current: Moment | null): boolean => {
+    return current ? availableYears.includes(current.year()) : false;
+  };
+
   return (
     <div key={index} className="emission-form">
       <Row gutter={30} className="first-row" align={'middle'}>
@@ -449,6 +461,7 @@ export const EmissionForm: React.FC<Props> = ({ index, year, finalized }) => {
             picker="year"
             size="middle"
             placeholder="Emission Year"
+            disabledDate={disabledDate}
           />
         </Col>
         <Col span={3} className="height-column">
