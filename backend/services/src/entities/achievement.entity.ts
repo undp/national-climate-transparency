@@ -18,12 +18,14 @@ export class AchievementEntity {
 
   @ManyToOne(() => KpiEntity, (kpi) => kpi.achievements, {
     nullable: false,
+		onDelete: 'CASCADE',
   })
   @JoinColumn([{ name: "kpiId", referencedColumnName: "kpiId" }])
   kpi: KpiEntity;
 
   @ManyToOne(() => ActivityEntity, (activity) => activity.achievements, {
     nullable: false,
+		onDelete: 'CASCADE',
   })
   @JoinColumn([{ name: "activityId", referencedColumnName: "activityId" }])
   activity: ActivityEntity;
