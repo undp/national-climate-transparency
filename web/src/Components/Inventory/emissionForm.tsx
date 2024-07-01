@@ -56,7 +56,7 @@ interface Props {
   finalized: boolean;
   availableYears: number[];
   setActiveYear: React.Dispatch<React.SetStateAction<string | undefined>>;
-  getAvailableEmissionReports?: () => void;
+  getAvailableEmissionReports: () => void;
 }
 
 const { Panel } = Collapse;
@@ -449,11 +449,11 @@ export const EmissionForm: React.FC<Props> = ({
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
 
-          revertToInit();
+          getAvailableEmissionReports();
+          setActiveYear(emissionYear);
 
-          if (index === 0 && getAvailableEmissionReports) {
-            getAvailableEmissionReports();
-            setActiveYear(emissionYear);
+          if (index === 0) {
+            revertToInit();
           }
         }
       } else {
@@ -493,7 +493,7 @@ export const EmissionForm: React.FC<Props> = ({
           <Upload {...props}>
             <Button
               className="upload-button"
-              icon={<UploadOutlined style={{ color: '#bfbfbf' }} />}
+              icon={<UploadOutlined style={{ color: '#a8a8a8' }} />}
             >
               <span className="button-text">{t('emission:upload')}</span>
             </Button>

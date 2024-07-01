@@ -61,6 +61,7 @@ const GhgEmissions = () => {
               availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
               setActiveYear={setActiveYear}
               finalized={report.state === 'FINALIZED' ? true : false}
+              getAvailableEmissionReports={getAvailableEmissionReports}
             />
           ),
         });
@@ -69,7 +70,7 @@ const GhgEmissions = () => {
 
     tempTabItems.sort((a, b) => parseFloat(a.label) - parseFloat(b.label));
     setTabItems(tempTabItems);
-  }, [availableReports]);
+  }, [availableReports, activeYear]);
 
   return (
     <div className="content-container">
