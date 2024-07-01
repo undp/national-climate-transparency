@@ -122,6 +122,5 @@ export const getCollapseIcon = (isActive: boolean) => {
 };
 
 export const parseNumber = (stringValue: string | undefined) => {
-  console.log(stringValue);
   return stringValue ? (stringValue === 'NaN' ? undefined : parseFloat(stringValue)) : undefined;
 };

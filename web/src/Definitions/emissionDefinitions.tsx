@@ -109,7 +109,7 @@ export const energySectionInit = {
   },
 };
 
-export const industrySectionInit = {
+export const indSectionInit = {
   [IndustryLevels.TwoA]: { ...emissionInitData },
   [IndustryLevels.TwoB]: { ...emissionInitData },
   [IndustryLevels.TwoC]: { ...emissionInitData },

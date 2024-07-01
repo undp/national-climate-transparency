@@ -33,7 +33,7 @@ import {
   emissionSections,
   emissionTotals,
   energySectionInit,
-  industrySectionInit,
+  indSectionInit,
   otherSectionInit,
   processAgrEmissionData,
   processEnergyEmissionData,
@@ -92,17 +92,19 @@ export const EmissionForm: React.FC<Props> = ({
 
   // Section State
 
-  const [energySection, setEnergySection] = useState<EnergySection>(energySectionInit);
-  const [industrySection, setIndustrySection] = useState<IndustrySection>(industrySectionInit);
-  const [agrSection, setAgrSection] = useState<AgricultureSection>(agricultureSectionInit);
-  const [wasteSection, setWasteSection] = useState<WasteSection>(wasteSectionInit);
-  const [otherSection, setOtherSection] = useState<OtherSection>(otherSectionInit);
+  const [energySection, setEnergySection] = useState<EnergySection>(
+    JSON.parse(JSON.stringify(energySectionInit))
+  );
+  const [industrySection, setIndustrySection] = useState<IndustrySection>({ ...indSectionInit });
+  const [agrSection, setAgrSection] = useState<AgricultureSection>({ ...agricultureSectionInit });
+  const [wasteSection, setWasteSection] = useState<WasteSection>({ ...wasteSectionInit });
+  const [otherSection, setOtherSection] = useState<OtherSection>({ ...otherSectionInit });
   const [eqWithout, setEqWithout] = useState<EmissionData>({ ...emissionInitData });
   const [eqWith, setEqWith] = useState<EmissionData>({ ...emissionInitData });
 
   // Total State
 
-  const [emissionTotal, setEmissionTotal] = useState<EmissionTotals>(emissionTotals);
+  const [emissionTotal, setEmissionTotal] = useState<EmissionTotals>({ ...emissionTotals });
 
   // Emission Total Update for Section State Change
 
@@ -203,6 +205,23 @@ export const EmissionForm: React.FC<Props> = ({
         displayErrorMessage(error, t('errorFetchingEmissionForYear'));
       }
     }
+  };
+
+  // Revert All State to Zero
+
+  const revertToInit = () => {
+    setEnergySection(JSON.parse(JSON.stringify(energySectionInit)));
+    setIndustrySection({ ...indSectionInit });
+    setAgrSection({ ...agricultureSectionInit });
+    setWasteSection({ ...wasteSectionInit });
+    setOtherSection({ ...otherSectionInit });
+    setEqWithout({ ...emissionInitData });
+    setEqWith({ ...emissionInitData });
+
+    setEmissionTotal({ ...emissionTotals });
+    setEmissionYear(undefined);
+    setIsFinalized(false);
+    setIsYearFixed(false);
   };
 
   useEffect(() => {
@@ -429,6 +448,8 @@ export const EmissionForm: React.FC<Props> = ({
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
+
+          revertToInit();
 
           if (index === 0 && getAvailableEmissionReports) {
             getAvailableEmissionReports();
