@@ -339,3 +339,57 @@ export const processOtherEmissionData = (otherEmissions: any) => {
 
   return processedEmission;
 };
+
+export type EmissionPayload = {
+  year: string;
+  energyEmissions: {
+    fuelCombustionActivities: {
+      energyIndustries: any;
+      manufacturingIndustriesConstruction: any;
+      transport: any;
+      otherSectors: any;
+      nonSpecified: any;
+    };
+    fugitiveEmissionsFromFuels: {
+      solidFuels: any;
+      oilNaturalGas: any;
+      otherEmissionsEnergyProduction: any;
+    };
+    carbonDioxideTransportStorage: {
+      solidFuels: any;
+      oilNaturalGas: any;
+      otherEmissionsEnergyProduction: any;
+    };
+  };
+  industrialProcessesProductUse: {
+    mineralIndustry: any;
+    chemicalIndustry: any;
+    metalIndustry: any;
+    nonEnergyProductsFuelsSolventUse: any;
+    electronicsIndustry: any;
+    productUsesSubstOzoneDepletingSubs: any;
+    otherProductManufactureUse: any;
+    other: any;
+  };
+  agricultureForestryOtherLandUse: {
+    livestock: any;
+    land: any;
+    aggregateNonCo2SourcesLand: any;
+    other: any;
+  };
+  waste: {
+    solidWasteDisposal: any;
+    biologicalTreatmentSolidWaste: any;
+    incinerationOpenBurningWaste: any;
+    wastewaterTreatmentDischarge: any;
+    other: any;
+  };
+  other: {
+    indirectN2oEmissions: any;
+    other: any;
+  };
+  totalCo2WithoutLand: any;
+  totalCo2WithLand: any;
+  emissionDocument?: string;
+  state: any;
+};

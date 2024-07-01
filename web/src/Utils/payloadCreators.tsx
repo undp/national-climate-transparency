@@ -1,6 +1,7 @@
 import {
   AgricultureSection,
   EmissionData,
+  EmissionPayload,
   EnergySection,
   IndustrySection,
   OtherSection,
@@ -28,7 +29,7 @@ export const getEmissionCreatePayload = (
   eqWithout: EmissionData,
   state: string
 ) => {
-  return {
+  const tempPayload: EmissionPayload = {
     year: year,
     energyEmissions: {
       fuelCombustionActivities: {
@@ -78,6 +79,9 @@ export const getEmissionCreatePayload = (
     },
     totalCo2WithoutLand: eqWithout,
     totalCo2WithLand: eqWith,
+    emissionDocument: '',
     state: state,
   };
+
+  return tempPayload;
 };
