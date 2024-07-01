@@ -1,10 +1,10 @@
-import { Row, Col, DatePicker, Upload, Button, message, Collapse, Input } from 'antd';
+import { Row, Col, DatePicker, Upload, Button, message, Collapse, InputNumber } from 'antd';
 import './emissionForm.scss';
 import { UploadOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
 import { AcceptedMimeTypes } from '../../Definitions/fileTypes';
 import { FileCard } from '../FileCard/fileCard';
-import { getBase64, getCollapseIcon, parseNumber } from '../../Utils/utilServices';
+import { getBase64, getCollapseIcon } from '../../Utils/utilServices';
 import {
   AgrLevels,
   EmissionUnits,
@@ -564,12 +564,12 @@ export const EmissionForm: React.FC<Props> = ({
                       </Col>
                       {Object.values(EmissionUnits).map((unit) => (
                         <Col key={`${mainSection}_${unit}`} span={3} className="number-column">
-                          <Input
+                          <InputNumber
                             disabled={isFinalized}
                             value={getIndividualEntry(section.id, mainSection, null, unit)}
-                            onChange={(e) =>
+                            onChange={(value) =>
                               setIndividualEntry(
-                                parseNumber(e.target.value),
+                                value ?? undefined,
                                 section.id,
                                 mainSection,
                                 null,
@@ -579,6 +579,7 @@ export const EmissionForm: React.FC<Props> = ({
                             type="number"
                             min={0}
                             step={0.01}
+                            controls={false}
                             className="input-emission"
                           />
                         </Col>
@@ -624,7 +625,7 @@ export const EmissionForm: React.FC<Props> = ({
                                 span={3}
                                 className="number-column"
                               >
-                                <Input
+                                <InputNumber
                                   disabled={isFinalized}
                                   value={getIndividualEntry(
                                     section.id,
@@ -632,9 +633,9 @@ export const EmissionForm: React.FC<Props> = ({
                                     secondarySection,
                                     unit
                                   )}
-                                  onChange={(e) =>
+                                  onChange={(value) =>
                                     setIndividualEntry(
-                                      parseNumber(e.target.value),
+                                      value ?? undefined,
                                       section.id,
                                       subSection.id,
                                       secondarySection,
@@ -644,6 +645,7 @@ export const EmissionForm: React.FC<Props> = ({
                                   type="number"
                                   min={0}
                                   step={0.01}
+                                  controls={false}
                                   className="input-emission"
                                 />
                               </Col>
@@ -663,15 +665,16 @@ export const EmissionForm: React.FC<Props> = ({
         </Col>
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`eqWithout_${unit}`} span={3} className="number-column">
-            <Input
+            <InputNumber
               disabled={isFinalized}
               value={eqWithout[unit]}
-              onChange={(e) =>
-                setIndividualEntry(parseNumber(e.target.value), 'eqWithout', null, null, unit)
+              onChange={(value) =>
+                setIndividualEntry(value ?? undefined, 'eqWithout', null, null, unit)
               }
               type="number"
               min={0}
               step={0.01}
+              controls={false}
               className="input-emission"
             />
           </Col>
@@ -683,15 +686,16 @@ export const EmissionForm: React.FC<Props> = ({
         </Col>
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`eqWith_${unit}`} span={3} className="number-column">
-            <Input
+            <InputNumber
               disabled={isFinalized}
               value={eqWith[unit]}
-              onChange={(e) =>
-                setIndividualEntry(parseNumber(e.target.value), 'eqWith', null, null, unit)
+              onChange={(value) =>
+                setIndividualEntry(value ?? undefined, 'eqWith', null, null, unit)
               }
               type="number"
               min={0}
               step={0.01}
+              controls={false}
               className="input-emission"
             />
           </Col>

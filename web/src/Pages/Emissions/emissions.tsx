@@ -77,7 +77,12 @@ const GhgEmissions = () => {
         <div className="body-title">{'emissionTitle'}</div>
       </div>
       <div className="emission-section-card">
-        <Tabs centered activeKey={activeKey} onTabClick={(key: string) => setActiveKey(key)}>
+        <Tabs
+          centered
+          activeKey={activeKey}
+          onTabClick={(key: string) => setActiveKey(key)}
+          destroyInactiveTabPane={true}
+        >
           <TabPane
             tab={
               <span>
