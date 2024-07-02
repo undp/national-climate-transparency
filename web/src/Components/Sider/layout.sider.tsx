@@ -4,7 +4,12 @@ import sliderLogo from '../../Assets/Images/mrvlogo.svg';
 import { useNavigate } from 'react-router-dom';
 import './layout.sider.scss';
 import * as Icon from 'react-bootstrap-icons';
-import { AppstoreOutlined, DashboardOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  AppstoreOutlined,
+  CloudDownloadOutlined,
+  DashboardOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import { ClipboardMinus, Coin, GraphUpArrow, Headset, Layers } from 'react-bootstrap-icons';
 import { LayoutSiderProps } from '../../Definitions/props/layout.sider.definitions';
 import { useTranslation } from 'react-i18next';
@@ -43,6 +48,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
     getItem(t('nav:projects'), 'projects', <Layers />),
     getItem(t('nav:activities'), 'activities', <GraphUpArrow />),
     getItem(t('nav:support'), 'support', <Coin />),
+    getItem(t('nav:ghgInventory'), 'emissions', <CloudDownloadOutlined />),
     getItem(t('nav:reporting'), 'reportings', <ClipboardMinus />),
     getItem(t('nav:faq'), 'faqs', <Headset />),
   ];

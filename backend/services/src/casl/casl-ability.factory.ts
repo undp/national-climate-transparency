@@ -19,6 +19,7 @@ import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { SupportEntity } from "../entities/support.entity";
 import { KpiEntity } from "../entities/kpi.entity";
+import { EmissionEntity } from "src/entities/emission.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -81,6 +82,12 @@ export class CaslAbilityFactory {
 				can(Action.Create, KpiEntity);
 				can(Action.Update, KpiEntity);
 				can(Action.Delete, KpiEntity);
+
+				//Emission
+				can(Action.Read, EmissionEntity);
+				can(Action.Create, EmissionEntity);
+				can(Action.Update, EmissionEntity);
+				can(Action.Delete, EmissionEntity);
 			}
 
 			if (user.role == Role.Admin) {
@@ -134,6 +141,11 @@ export class CaslAbilityFactory {
 				can(Action.Update, KpiEntity);
 				can(Action.Delete, KpiEntity);
 
+				//Emission
+				can(Action.Read, EmissionEntity);
+				can(Action.Create, EmissionEntity);
+				can(Action.Update, EmissionEntity);
+				can(Action.Delete, EmissionEntity);
 			}
 
 			if (user.role == Role.GovernmentUser) {
@@ -237,6 +249,12 @@ export class CaslAbilityFactory {
 				can(Action.Update, KpiEntity);
 				can(Action.Delete, KpiEntity);
 
+				//Emission
+				can(Action.Read, EmissionEntity);
+				can(Action.Create, EmissionEntity);
+				can(Action.Update, EmissionEntity);
+				can(Action.Delete, EmissionEntity);
+
 			}
 
 			if (user.role == Role.Observer) {
@@ -336,6 +354,12 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, KpiEntity);
 				cannot(Action.Update, KpiEntity);
 				cannot(Action.Delete, KpiEntity);
+
+				//Emission
+				can(Action.Read, EmissionEntity);
+				cannot(Action.Create, EmissionEntity);
+				cannot(Action.Update, EmissionEntity);
+				cannot(Action.Delete, EmissionEntity);
 
 			}
 

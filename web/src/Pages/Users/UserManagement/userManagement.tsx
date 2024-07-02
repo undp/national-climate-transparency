@@ -242,7 +242,9 @@ const UserManagement = () => {
     if (
       // eslint-disable-next-line eqeqeq
       record.status == UserState.ACTIVE &&
-      (record.role === Role.GovernmentUser || record.role === Role.Observer)
+      (record.role === Role.Admin ||
+        record.role === Role.GovernmentUser ||
+        record.role === Role.Observer)
     ) {
       data.push({
         text: 'Deactivate',
@@ -261,11 +263,12 @@ const UserManagement = () => {
           setOpenDeactivationConfirmationModal(true);
         },
       });
-      // eslint-disable-next-line eqeqeq
     } else if (
       // eslint-disable-next-line eqeqeq
       record.status == UserState.SUSPENDED &&
-      (record.role === Role.GovernmentUser || record.role === Role.Observer)
+      (record.role === Role.Admin ||
+        record.role === Role.GovernmentUser ||
+        record.role === Role.Observer)
     ) {
       data.push({
         text: 'Activate',
