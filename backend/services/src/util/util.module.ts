@@ -26,6 +26,7 @@ import { FileUploadService } from "./fileUpload.service";
 import { LinkUnlinkService } from "./linkUnlink.service";
 import { IsTwoDecimalPointsConstraint } from "./twoDecimalPointNumber.decorator";
 import { DataExportService } from "./dataExport.service";
+import { LinkedEntityUnvalidateService } from "./linkedEntityUnvalidate.service";
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { DataExportService } from "./dataExport.service";
 		LinkUnlinkService,
 		IsTwoDecimalPointsConstraint,
 		DataExportService,
+		LinkedEntityUnvalidateService,
   ],
   exports: [
     CounterService,
@@ -87,6 +89,7 @@ import { DataExportService } from "./dataExport.service";
     FileUploadService,
 		LinkUnlinkService,
 		DataExportService,
+		LinkedEntityUnvalidateService,
   ],
 })
 export class UtilModule {}
