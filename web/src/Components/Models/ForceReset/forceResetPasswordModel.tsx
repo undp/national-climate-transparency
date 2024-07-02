@@ -29,7 +29,7 @@ const ForceResetPasswordModel: FC<ForceResetPasswordProps> = ({
           <div className="icon">
             <Lock size={100} color={themeColor} />
           </div>
-          <div>{t('changePassword:changePassword')}</div>
+          <div>{t('changePassword:forceChangePassword')}</div>
         </div>
       }
       open={isModelVisible}

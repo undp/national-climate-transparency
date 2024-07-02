@@ -1,5 +1,6 @@
 {
     "changePassword": "Change Password",
+    "forceChangePassword": "Set Password for User",
     "oldPassword": "Old Password",
     "newPassword": "New Password",
     "confirmNewPassword":"Confirm New Password",
