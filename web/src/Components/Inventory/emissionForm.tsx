@@ -69,14 +69,6 @@ export const EmissionForm: React.FC<Props> = ({
   const { t } = useTranslation(['emission', 'entityAction']);
   const { get, post } = useConnection();
 
-  // File Upload State
-  const [uploadedFile, setUploadedFile] = useState<{
-    key: string;
-    title: string;
-    data: string;
-    url: string;
-  }>();
-
   // Year State
 
   const [emissionYear, setEmissionYear] = useState<string>();
@@ -195,15 +187,6 @@ export const EmissionForm: React.FC<Props> = ({
           setOtherSection(processOtherEmissionData(response.data[0].other));
           setEqWith(processIndividualEmissionData(response.data[0].totalCo2WithLand));
           setEqWithout(processIndividualEmissionData(response.data[0].totalCo2WithoutLand));
-
-          if (response.data[0].emissionDocument !== null) {
-            setUploadedFile({
-              key: year,
-              title: 'GHG Emission Template',
-              data: '',
-              url: response.data[0].emissionDocument,
-            });
-          }
         }
       } catch (error) {
         console.error('Error fetching timeline data:', error);
@@ -399,35 +382,6 @@ export const EmissionForm: React.FC<Props> = ({
     return (overallSum ?? 0) + (eqWith[unit] ?? 0) + (eqWithout[unit] ?? 0);
   };
 
-  // File Uploading Handling
-  // const beforeUpload = async (file: RcFile): Promise<boolean> => {
-  //   if (!AcceptedMimeTypes.includes(file.type)) {
-  //     message.open({
-  //       type: 'error',
-  //       content: t('fileNotSupported'),
-  //       duration: 3,
-  //       style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-  //     });
-  //     return Upload.LIST_IGNORE as any;
-  //   } else {
-  //     const base64 = await getBase64(file);
-  //     setUploadedFile({ key: file.uid, title: file.name, data: base64, url: '' });
-  //   }
-  //   return false;
-  // };
-
-  // const onDelete = (fileId: string) => {
-  //   console.log('Deleting File with ID:', fileId);
-  //   setUploadedFile(undefined);
-  // };
-
-  // const props = {
-  //   showUploadList: false,
-  //   beforeUpload,
-  //   accept: '.xlsx',
-  //   multiple: false,
-  // };
-
   // Handle Submit
 
   const handleEmissionAction = async (state: 'SAVED' | 'FINALIZED') => {
@@ -445,11 +399,6 @@ export const EmissionForm: React.FC<Props> = ({
           state
         );
 
-        if (uploadedFile) {
-          emissionCreatePayload.emissionDocument = uploadedFile.data;
-        } else {
-          delete emissionCreatePayload.emissionDocument;
-        }
         const response: any = await post('national/emissions/add', emissionCreatePayload);
 
         if (response.status === 200 || response.status === 201) {
@@ -486,8 +435,8 @@ export const EmissionForm: React.FC<Props> = ({
 
   return (
     <div key={index} className="emission-form">
-      <Row gutter={30} className="first-row" align={'middle'}>
-        <Col span={6} className="height-column">
+      <Row gutter={25} className="first-row" align={'middle'}>
+        <Col span={6} className="year-picker-column">
           <DatePicker
             key={`date_picker_${index}`}
             disabled={isYearFixed}
@@ -500,25 +449,6 @@ export const EmissionForm: React.FC<Props> = ({
             disabledDate={disabledDate}
           />
         </Col>
-        {/* <Col span={8} className="height-column">
-          <Upload {...props}>
-            <Button
-              className="upload-button"
-              icon={<UploadOutlined style={{ color: '#a8a8a8' }} />}
-            >
-              <span className="button-text">{t('emission:upload')}</span>
-            </Button>
-          </Upload>
-        </Col>
-        <Col span={10} className="height-column">
-          {uploadedFile && (
-            <FileCard
-              file={uploadedFile}
-              usedIn={'edit'}
-              deleteFile={(fileId) => onDelete(fileId)}
-            />
-          )}
-        </Col> */}
       </Row>
       <Row gutter={25} className="unit-row" align={'middle'}>
         {Object.values(EmissionUnits).map((unit) => (

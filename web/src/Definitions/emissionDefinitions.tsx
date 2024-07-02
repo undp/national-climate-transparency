@@ -390,6 +390,5 @@ export type EmissionPayload = {
   };
   totalCo2WithoutLand: any;
   totalCo2WithLand: any;
-  emissionDocument?: string;
   state: any;
 };

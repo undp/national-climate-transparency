@@ -79,7 +79,6 @@ export const getEmissionCreatePayload = (
     },
     totalCo2WithoutLand: eqWithout,
     totalCo2WithLand: eqWith,
-    emissionDocument: '',
     state: state,
   };
 
