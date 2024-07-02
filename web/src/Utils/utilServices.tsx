@@ -113,6 +113,18 @@ export const getRounded = (num: number | string): number => {
   }
 };
 
+export const convertToMillions = (value: number) => {
+  const roundedNumber = getRounded(value);
+  let numberInMills = roundedNumber.toString();
+  if (roundedNumber > 1000000000) {
+    numberInMills = `${customRound(roundedNumber / 1000000000)} billion`;
+  } else if (roundedNumber > 1000000) {
+    numberInMills = `${customRound(roundedNumber / 1000000)} million`;
+  }
+
+  return numberInMills;
+};
+
 export const getCollapseIcon = (isActive: boolean) => {
   return isActive ? (
     <MinusCircleOutlined style={{ color: '#16B1FF', fontSize: '14px' }} />

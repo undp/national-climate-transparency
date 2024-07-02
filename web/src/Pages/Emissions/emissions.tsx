@@ -16,14 +16,16 @@ const GhgEmissions = () => {
   const { get } = useConnection();
 
   // Years State for Tab Panel
+
   const [availableReports, setAvailableReports] =
     useState<{ year: string; state: 'SAVED' | 'FINALIZED' }[]>();
   const [tabItems, setTabItems] = useState<EmissionTabItem[]>();
 
   // Active Tab State
 
-  const [activeKey, setActiveKey] = useState<string>('1');
   const [activeYear, setActiveYear] = useState<string>();
+
+  // Getter of all available emission report years and their state
 
   const getAvailableEmissionReports = async () => {
     try {
@@ -37,21 +39,21 @@ const GhgEmissions = () => {
     }
   };
 
+  // Init Function at first render
+
   useEffect(() => {
     getAvailableEmissionReports();
   }, []);
+
+  // Tab Pane Population when the available reports change
 
   useEffect(() => {
     const tempTabItems: EmissionTabItem[] = [];
 
     if (availableReports) {
       availableReports.forEach((report, index) => {
-        if (activeYear === report.year) {
-          setActiveKey(`${index + 2}`);
-          setActiveYear(undefined);
-        }
         tempTabItems.push({
-          key: `${index + 2}`,
+          key: report.year,
           label: report.year,
           icon: report.state === 'FINALIZED' ? <LockOutlined /> : null,
           content: (
@@ -70,7 +72,7 @@ const GhgEmissions = () => {
 
     tempTabItems.sort((a, b) => parseFloat(a.label) - parseFloat(b.label));
     setTabItems(tempTabItems);
-  }, [availableReports, activeYear]);
+  }, [availableReports]);
 
   return (
     <div className="content-container">
@@ -80,8 +82,8 @@ const GhgEmissions = () => {
       <div className="emission-section-card">
         <Tabs
           centered
-          activeKey={activeKey}
-          onTabClick={(key: string) => setActiveKey(key)}
+          activeKey={activeYear}
+          onTabClick={(key: string) => setActiveYear(key)}
           destroyInactiveTabPane={true}
         >
           <TabPane
@@ -91,7 +93,7 @@ const GhgEmissions = () => {
                 {t('addNew')}
               </span>
             }
-            key="1"
+            key="addNew"
           >
             <EmissionForm
               index={0}

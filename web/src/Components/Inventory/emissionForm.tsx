@@ -461,10 +461,10 @@ export const EmissionForm: React.FC<Props> = ({
           });
 
           getAvailableEmissionReports();
-          setActiveYear(emissionYear);
 
           if (index === 0) {
             revertToInit();
+            setActiveYear(emissionYear);
           }
         }
       } else {
@@ -717,12 +717,19 @@ export const EmissionForm: React.FC<Props> = ({
       </Row>
       <Row gutter={20} className="action-row" justify={'end'}>
         <Col>
-          <Button type="primary" size="large" block onClick={() => handleEmissionAction('SAVED')}>
+          <Button
+            disabled={isFinalized}
+            type="primary"
+            size="large"
+            block
+            onClick={() => handleEmissionAction('SAVED')}
+          >
             {t('entityAction:submit')}
           </Button>
         </Col>
         <Col>
           <Button
+            disabled={isFinalized || year === null}
             type="primary"
             size="large"
             block
