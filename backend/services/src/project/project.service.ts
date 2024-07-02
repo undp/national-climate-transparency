@@ -30,6 +30,9 @@ import { SupportEntity } from "../entities/support.entity";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ActionEntity } from "../entities/action.entity";
+import { DeleteDto } from "../dtos/delete.dto";
+import { Role } from "../casl/role.enum";
+import { LinkedEntityUnvalidateService } from "../util/linkedEntityUnvalidate.service";
 
 @Injectable()
 export class ProjectService {
@@ -44,6 +47,7 @@ export class ProjectService {
 		private payloadValidator: PayloadValidator,
 		private linkUnlinkService: LinkUnlinkService,
 		private kpiService: KpiService,
+		private linkedEntityUnvalidateService: LinkedEntityUnvalidateService,
 	) { }
 
 	async createProject(projectDto: ProjectDto, user: User) {
@@ -544,6 +548,103 @@ export class ProjectService {
 			HttpStatus.OK,
 			this.helperService.formatReqMessagesString("project.updateProjectSuccess", []),
 			proj
+		);
+	}
+
+	//MARK: Delete Project
+	async deleteProject(deleteDto: DeleteDto, user: User) {
+		if (user.role !== Role.Admin && user.role !== Role.Root) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.userUnAUth",
+					[]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const project = await this.findProjectWithParentAndChildren(deleteDto.entityId);
+		if (!project) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.projectNotFound",
+					[deleteDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, project.sector)) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.permissionDeniedForSector",
+					[project.projectId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const eventLog = [];
+
+		const projectKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, project.projectId);
+
+		const projectKpiIds = projectKPIs.map(kpi => kpi.kpiId);
+
+		const linkedActivityIds = project.activities?.map(activity => activity.activityId);
+
+		const proj = await this.entityManager
+			.transaction(async (em) => {
+				const result = await em.delete<ProjectEntity>(ProjectEntity, project.projectId);
+				if (result.affected > 0) {
+					if (linkedActivityIds && linkedActivityIds.length > 0) {
+						await em.delete<ActivityEntity>(ActivityEntity, linkedActivityIds);
+					}
+
+					if (projectKpiIds && projectKpiIds.length > 0) {
+						await em.delete<KpiEntity>(KpiEntity, projectKpiIds);
+					}
+
+					if (project.programme && project.programme.validated) {
+						await this.linkedEntityUnvalidateService.unvalidateProgrammes(
+							[project.programme],
+							project.projectId,
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_DELETE,
+							em
+						)
+					}
+
+					if (project.programme?.action && project.programme?.action.validated) {
+						await this.linkedEntityUnvalidateService.unvalidateAction(
+							project.programme?.action,
+							project.programme?.programmeId,
+							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							em
+						)
+					}
+
+					// Save event logs
+					if (eventLog.length > 0) {
+						await em.save<LogEntity>(eventLog);
+					}
+				}
+				return result;
+			})
+			.catch((err: any) => {
+				console.log(err);
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"project.projectDeletionFailed",
+						[err]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("project.deleteProjectSuccess", []),
+			null
 		);
 	}
 

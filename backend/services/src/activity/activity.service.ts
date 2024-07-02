@@ -31,10 +31,10 @@ import { PayloadValidator } from "../validation/payload.validator";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActionEntity } from "../entities/action.entity";
-import { DeleteDto } from "src/dtos/delete.dto";
-import { Role } from "src/casl/role.enum";
-import { SupportEntity } from "src/entities/support.entity";
-import { AchievementEntity } from "src/entities/achievement.entity";
+import { DeleteDto } from "../dtos/delete.dto";
+import { Role } from "../casl/role.enum";
+import { AchievementEntity } from "../entities/achievement.entity";
+import { LinkedEntityUnvalidateService } from "../util/linkedEntityUnvalidate.service";
 
 @Injectable()
 export class ActivityService {
@@ -50,6 +50,7 @@ export class ActivityService {
 		private actionService: ActionService,
 		private kpiService: KpiService,
 		private payloadValidator: PayloadValidator,
+		private linkedEntityUnvalidateService: LinkedEntityUnvalidateService,
 	) { }
 
 	//MARK: Activity Create
@@ -600,11 +601,11 @@ export class ActivityService {
 				HttpStatus.FORBIDDEN
 			);
 		}
-		
+
 		const eventLog = [];
 
 		const parent = await this.getParentEntity(activity.parentType, activity.parentId);
-		
+
 		// Unvalidate the parents
 		let project: ProjectEntity;
 		let programme: ProgrammeEntity;
@@ -625,7 +626,7 @@ export class ActivityService {
 			case EntityType.ACTION:
 				action = parent;
 				break;
-		
+
 			default:
 				break;
 		}
@@ -634,48 +635,37 @@ export class ActivityService {
 			.transaction(async (em) => {
 				const result = await em.delete<ActivityEntity>(ActivityEntity, activity.activityId);
 				if (result.affected > 0) {
-					if (project && project.validated) {
-						project.validated = false;
-						this.addEventLogEntry(
-							eventLog, 
-							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_DELETE, 
-							EntityType.PROJECT, 
-							project.projectId, 
-							0, 
-							activity.activityId
-						);
-						em.save<ProjectEntity>(project);
-					}
-					if (programme && programme.validated) {
-						programme.validated = false;
-						this.addEventLogEntry(
-							eventLog, 
-							(activity.parentType == EntityType.PROGRAMME) 
-								? LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
-							EntityType.PROGRAMME, 
-							programme.programmeId, 
-							0, 
-							(activity.parentType == EntityType.PROGRAMME) ? activity.activityId : project.projectId
-						);
-						em.save<ProgrammeEntity>(programme);
-					}
-					if (action && action.validated) {
-						action.validated = false;
-						this.addEventLogEntry(
-							eventLog, 
-							(activity.parentType == EntityType.ACTION) 
-								? LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
-							EntityType.ACTION, 
-							action.actionId, 
-							0, 
-							(activity.parentType == EntityType.ACTION) ? activity.activityId : programme.programmeId
-						);
-						em.save<ActionEntity>(action);
-					}
-
 					// Save event logs
 					if (eventLog.length > 0) {
 						await em.save<LogEntity>(eventLog);
+					}
+
+					if (project && project.validated) {
+						await this.linkedEntityUnvalidateService.unvalidateProjects(
+							[project],
+							activity.activityId,
+							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_DELETE,
+							em
+						)
+					}
+					if (programme && programme.validated) {
+						await this.linkedEntityUnvalidateService.unvalidateProgrammes(
+							[programme],
+							(activity.parentType == EntityType.PROGRAMME) ? activity.activityId : project.projectId,
+							(activity.parentType == EntityType.PROGRAMME)
+								? LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							em
+						)
+
+					}
+					if (action && action.validated) {
+						await this.linkedEntityUnvalidateService.unvalidateAction(
+							action,
+							(activity.parentType == EntityType.ACTION) ? activity.activityId : programme.programmeId,
+							(activity.parentType == EntityType.ACTION)
+								? LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							em
+						)
 					}
 				}
 				return result;
@@ -697,8 +687,6 @@ export class ActivityService {
 			this.helperService.formatReqMessagesString("activity.deleteActivitySuccess", []),
 			null
 		);
-
-
 	}
 
 	//MARK: updateDocumentList
