@@ -103,6 +103,7 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     localStorage.removeItem('companyName');
     localStorage.removeItem('userState');
     localStorage.removeItem('userSectors');
+    localStorage.removeItem('token');
     setUserInfoState(initialUserProps);
   };
 

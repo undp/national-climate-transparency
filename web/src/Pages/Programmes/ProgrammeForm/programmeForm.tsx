@@ -800,13 +800,18 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
     setHandleKPI(true);
+    setIsSaveButtonDisabled(false);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
     if (inWhich === 'new') {
       setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
+      if (method === 'update') {
+        setIsSaveButtonDisabled(false);
+      }
     } else {
       setCreatedKpiList(createdKpiList.filter((obj) => obj.index !== kpiIndex));
+      setIsSaveButtonDisabled(false);
     }
     const updatedValues = {
       [`kpi_name_${kpiIndex}`]: undefined,

@@ -127,9 +127,9 @@ export const convertToMillions = (value: number) => {
 
 export const getCollapseIcon = (isActive: boolean) => {
   return isActive ? (
-    <MinusCircleOutlined style={{ color: '#16B1FF', fontSize: '14px' }} />
+    <MinusCircleOutlined style={{ color: '#9155fd', fontSize: '14px' }} />
   ) : (
-    <PlusCircleOutlined style={{ color: '#16B1FF', fontSize: '14px' }} />
+    <PlusCircleOutlined style={{ color: '#9155fd', fontSize: '14px' }} />
   );
 };
 
