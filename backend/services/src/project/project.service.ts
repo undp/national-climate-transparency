@@ -32,7 +32,6 @@ import { ProgrammeEntity } from "../entities/programme.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
-import { LinkedEntityUnvalidateService } from "../util/linkedEntityUnvalidate.service";
 
 @Injectable()
 export class ProjectService {
@@ -47,9 +46,9 @@ export class ProjectService {
 		private payloadValidator: PayloadValidator,
 		private linkUnlinkService: LinkUnlinkService,
 		private kpiService: KpiService,
-		private linkedEntityUnvalidateService: LinkedEntityUnvalidateService,
 	) { }
 
+	//MARK: Create Project
 	async createProject(projectDto: ProjectDto, user: User) {
 
 		const project: ProjectEntity = plainToClass(ProjectEntity, projectDto);
@@ -212,6 +211,7 @@ export class ProjectService {
 
 	}
 
+	//MARK: Query Project
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
 		// Subquery to get distinct project IDs
 		const subQuery = this.projectRepo
@@ -268,6 +268,7 @@ export class ProjectService {
 		);
 	}
 
+	//MARK: Get Project View Data
 	async getProjectViewData(projectId: string, abilityCondition: string) {
 
 		const queryBuilder = this.projectRepo
@@ -301,6 +302,7 @@ export class ProjectService {
 
 	}
 
+	//MARK: Update Project
 	async updateProject(projectUpdateDto: ProjectUpdateDto, user: User) {
 		const projectUpdate: ProjectEntity = plainToClass(ProjectEntity, projectUpdateDto);
 		const eventLog = [];
@@ -502,7 +504,7 @@ export class ProjectService {
 							currentProject.projectId, 
 							EntityType.PROJECT
 						);
-						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove);
+						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove, false);
 					} else if (currentProject.programme?.programmeId != projectUpdateDto.programmeId) {
 						const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
 							currentProject.programme.programmeId, 
@@ -510,7 +512,7 @@ export class ProjectService {
 							currentProject.projectId, 
 							EntityType.PROJECT
 						);
-						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove);
+						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove, false);
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
 					} else {
 						await this.updateAllValidatedChildrenAndParentStatus(projectUpdate, em);
@@ -605,7 +607,7 @@ export class ProjectService {
 					}
 
 					if (project.programme && project.programme.validated) {
-						await this.linkedEntityUnvalidateService.unvalidateProgrammes(
+						await this.linkUnlinkService.unvalidateProgrammes(
 							[project.programme],
 							project.projectId,
 							LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_DELETE,
@@ -614,7 +616,7 @@ export class ProjectService {
 					}
 
 					if (project.programme?.action && project.programme?.action.validated) {
-						await this.linkedEntityUnvalidateService.unvalidateAction(
+						await this.linkUnlinkService.unvalidateAction(
 							project.programme?.action,
 							project.programme?.programmeId,
 							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
@@ -648,6 +650,7 @@ export class ProjectService {
 		);
 	}
 
+	//MARK: Find Projects for Linking
 	async findProjectsEligibleForLinking() {
 		return await this.projectRepo.createQueryBuilder('project')
 			.select(['"projectId"', 'title'])
@@ -656,6 +659,7 @@ export class ProjectService {
 			.getRawMany();
 	}
 
+	//MARK: Link Projects
 	async linkProjectsToProgramme(linkProjectsDto: LinkProjectsDto, user: User) {
 		const programme = await this.programmeService.findProgrammeById(linkProjectsDto.programmeId);
 		if (!programme) {
@@ -714,6 +718,7 @@ export class ProjectService {
 
 	}
 
+	//MARK: Unlink Projects
 	async unlinkProjectsFromProgramme(unlinkProjectsDto: UnlinkProjectsDto, user: User) {
 		const projects = await this.findAllProjectsByIds(unlinkProjectsDto.projects);
 
@@ -763,7 +768,7 @@ export class ProjectService {
 			}
 		}
 
-		const proj = await this.linkUnlinkService.unlinkProjectsFromProgramme(projects, unlinkProjectsDto, user, this.entityManager, achievementsToRemove);
+		const proj = await this.linkUnlinkService.unlinkProjectsFromProgramme(projects, unlinkProjectsDto, user, this.entityManager, achievementsToRemove, false);
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
@@ -773,12 +778,14 @@ export class ProjectService {
 
 	}
 
+	//MARK: Find Activities by Id
 	async findAllActivitiesByIds(activityIds: string[]) {
 		return await this.activityRepo.createQueryBuilder('activity')
 			.where('activity.activityId IN (:...activityIds)', { activityIds })
 			.getMany();
 	}
 
+	//MARK: Find Projects by Id
 	async findAllProjectsByIds(projectIds: string[]) {
 		return await this.projectRepo.createQueryBuilder('project')
 			.leftJoinAndSelect('project.programme', 'programme')
@@ -800,6 +807,7 @@ export class ProjectService {
 			.getMany();
 	}
 
+	//MARK: Find Project by Id
 	async findProjectById(projectId: string) {
 		return await this.projectRepo.createQueryBuilder('project')
 			.leftJoinAndSelect('project.programme', 'programme')
@@ -808,6 +816,7 @@ export class ProjectService {
 			.getOne();
 	}
 
+	//MARK: Find Projects with parents children
 	async findProjectWithParentAndChildren(projectId: string) {
 		return await this.projectRepo.createQueryBuilder('project')
 			.leftJoinAndSelect('project.programme', 'programme')
@@ -829,6 +838,7 @@ export class ProjectService {
 			.getOne();
 	}
 
+	//MARK: Validate Project
 	async validateProject(validateDto: ValidateDto, user: User) {
 		const project = await this.findProjectById(validateDto.entityId);
 		if (!project) {
@@ -889,6 +899,7 @@ export class ProjectService {
 
 	}
 
+	//MARK: Update linked validated entities
 	async updateAllValidatedChildrenAndParentStatus(project: ProjectEntity, entityManager: EntityManager) {
 		const projectId = project.projectId;
 		const programme = project.programme;
@@ -954,6 +965,7 @@ export class ProjectService {
 		}
 	}
 
+	//MARK: Add Event Log Entry
 	private addEventLogEntry = (
 		eventLog: any[],
 		eventType: LogEventType,

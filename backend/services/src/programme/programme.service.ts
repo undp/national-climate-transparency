@@ -32,6 +32,8 @@ import { SupportEntity } from "../entities/support.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ActionEntity } from "../entities/action.entity";
+import { DeleteDto } from "src/dtos/delete.dto";
+import { Role } from "src/casl/role.enum";
 
 @Injectable()
 export class ProgrammeService {
@@ -50,6 +52,7 @@ export class ProgrammeService {
 		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
 	) { }
 
+	//MARK: Create Programme
 	async createProgramme(programmeDto: ProgrammeDto, user: User) {
 
 		const programme: ProgrammeEntity = plainToClass(ProgrammeEntity, programmeDto);
@@ -189,6 +192,7 @@ export class ProgrammeService {
 
 	}
 
+	//MARK: Get Programme View Data
 	async getProgrammeViewData(programmeId: string, abilityCondition: string) {
 		const filterAnd: FilterEntry[] = [];
 		filterAnd.push({
@@ -215,6 +219,7 @@ export class ProgrammeService {
 		return this.getProgrammeViewDto(programme.data[0]);
 	}
 
+	//MARK: Query Programme
 	async query(query: QueryDto, abilityCondition: string): Promise<any> {
 		// Subquery to get distinct programme IDs
 		const subQuery = this.programmeRepo
@@ -273,6 +278,7 @@ export class ProgrammeService {
 		);
 	}
 
+	//MARK: Update Programme
 	async updateProgramme(programmeUpdateDto: ProgrammeUpdateDto, user: User) {
 		const programmeUpdate: ProgrammeEntity = plainToClass(ProgrammeEntity, programmeUpdateDto);
 		const eventLog = [];
@@ -475,6 +481,89 @@ export class ProgrammeService {
 		);
 	}
 
+	//MARK: Delete Programme
+	async deleteProgramme(deleteDto: DeleteDto, user: User) {
+		if (user.role !== Role.Admin && user.role !== Role.Root) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.userUnAUth",
+					[]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const programme = await this.findProgrammeWithParentChildren(deleteDto.entityId);
+		if (!programme) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeNotFound",
+					[deleteDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, programme.sector)) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.permissionDeniedForSector",
+					[programme.programmeId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const programmeKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programme.programmeId);
+
+		const programmeKpiIds = programmeKPIs.map(kpi => kpi.kpiId);
+
+		const linkedActivityIds = programme.activities?.map(activity => activity.activityId);
+
+		// creating project payload expected by unlinkProjectsFromProgramme method
+		for(const project of programme.projects) {
+			project.programme = programme;
+		}
+
+		const pro = await this.entityManager
+		.transaction(async (em) => {
+
+			// related parent and children entity un-validation happens when projects are unlinking
+			await this.linkUnlinkService.unlinkProjectsFromProgramme(programme.projects, null, user, this.entityManager, [], true);
+			const result = await em.delete<ProgrammeEntity>(ProgrammeEntity, programme.programmeId);
+
+			if (result.affected > 0) {
+				if (linkedActivityIds && linkedActivityIds.length > 0) {
+					await em.delete<ActivityEntity>(ActivityEntity, linkedActivityIds);
+				}
+
+				if (programmeKpiIds && programmeKpiIds.length > 0) {
+					await em.delete<KpiEntity>(KpiEntity, programmeKpiIds);
+				}
+			}
+			return result;
+		})
+		.catch((err: any) => {
+			console.log(err);
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.programmeDeletionFailed",
+					[err]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		});
+
+	await this.helperService.refreshMaterializedViews(this.entityManager);
+	return new DataResponseMessageDto(
+		HttpStatus.OK,
+		this.helperService.formatReqMessagesString("programme.deleteProgrammeSuccess", []),
+		null
+	);
+
+	}
+
+	//MARK: Link Updated Programme
 	async linkUpdatedProgrammeToAction(actionId: string, updatedProgramme: ProgrammeEntity, user: User, em: EntityManager) {
 		const action = await this.actionService.findActionById(actionId);
 		if (!action) {
@@ -516,6 +605,7 @@ export class ProgrammeService {
 		);
 	}
 
+	//MARK: Unlink Updated Programme
 	async unlinkUpdatedProgrammeFromAction(updatedProgramme: ProgrammeEntity, user: User, em?: EntityManager) {
 
 		if (!updatedProgramme.action) {
@@ -551,6 +641,7 @@ export class ProgrammeService {
 		);
 	}
 
+	//MARK: Link Programme
 	async linkProgrammesToAction(linkProgrammesDto: LinkProgrammesDto, user: User) {
 		const action = await this.actionService.findActionById(linkProgrammesDto.actionId);
 		if (!action) {
@@ -606,6 +697,7 @@ export class ProgrammeService {
 		);
 	}
 
+	//MARK: Unlink Programme
 	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User) {
 
 		const programmes = await this.findAllProgrammeByIds([unlinkProgrammesDto.programme]);
@@ -643,16 +735,6 @@ export class ProgrammeService {
 			);
 		}
 
-		// if (programme.action.validated) {
-		// 	throw new HttpException(
-		// 		this.helperService.formatReqMessagesString(
-		// 			"common.cannotUnlinkedFromValidated",
-		// 			[EntityType.ACTION, programme.action.actionId]
-		// 		),
-		// 		HttpStatus.BAD_REQUEST
-		// 	);
-		// }
-
 		const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
 			programme.action.actionId,
 			EntityType.ACTION,
@@ -678,6 +760,7 @@ export class ProgrammeService {
 		);
 	}
 
+	//MARK: Validate Programme
 	async validateProgramme(validateDto: ValidateDto, user: User) {
 		const programme = await this.findProgrammeById(validateDto.entityId);
 		if (!programme) {
@@ -765,9 +848,6 @@ export class ProgrammeService {
 			.leftJoinAndSelect('programme.action', 'action')
 			.where('programme.programmeId = :programmeId', { programmeId })
 			.getOne();
-		// return await this.programmeRepo.findOneBy({
-		// 	programmeId
-		// })
 	}
 
 	async findProgrammeWithParentChildren(programmeId: string) {
@@ -788,6 +868,12 @@ export class ProgrammeService {
 				"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
 				{ project: EntityType.PROJECT }
 			)
+			.leftJoinAndMapMany(
+				"projectActivity.support",
+				SupportEntity, 
+				"support", 
+				"support.activityId = projectActivity.activityId" 
+		)
 			.where('programme.programmeId = :programmeId', { programmeId })
 			.getOne();
 	}

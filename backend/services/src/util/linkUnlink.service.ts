@@ -475,7 +475,8 @@ export class LinkUnlinkService {
 		payload: any,
 		user: User,
 		entityManager: EntityManager,
-		achievementsToRemove: AchievementEntity[]
+		achievementsToRemove: AchievementEntity[],
+		isProgrammeDelete: boolean
 	) {
 		await entityManager
 			.transaction(async (em) => {
@@ -484,33 +485,27 @@ export class LinkUnlinkService {
 				for (const project of projects) {
 
 					const programme = project.programme;
-					const action = project.programme.action;
+					const action = project.programme?.action;
 
 					logs.push(this.buildLogEntity(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, payload))
 
 					// unvalidate programme
-					if (programme.validated) {
-						programme.validated = false;
-						logs.push(this.buildLogEntity(
+					if (programme?.validated && !isProgrammeDelete) {
+						await this.unvalidateProgrammes(
+							[project.programme],
+							project.projectId,
 							LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
-							EntityType.PROGRAMME,
-							programme.programmeId,
-							0,
-							project.projectId)
+							em
 						)
-						await em.save<ProgrammeEntity>(programme)
 					}
 
 					if (action && action.validated) {
-						action.validated = false;
-						logs.push(this.buildLogEntity(
-							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							EntityType.ACTION,
-							action.actionId,
-							0,
-							programme.programmeId)
+						await this.unvalidateAction(
+							action,
+							programme.programmeId,
+							(isProgrammeDelete) ? LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							em
 						)
-						await em.save<ActionEntity>(action)
 					}
 
 					project.programme = null;
@@ -521,7 +516,7 @@ export class LinkUnlinkService {
 					if (project.validated) {
 						project.validated = false;
 						logs.push(this.buildLogEntity(
-							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+							(isProgrammeDelete) ? LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
 							EntityType.PROJECT,
 							project.projectId,
 							0,
@@ -548,7 +543,7 @@ export class LinkUnlinkService {
 												EntityType.SUPPORT,
 												support.supportId,
 												0,
-												programme.programmeId)
+												project.projectId)
 											)
 										}
 										supports.push(support);
@@ -565,7 +560,7 @@ export class LinkUnlinkService {
 										EntityType.ACTIVITY,
 										activity.activityId,
 										0,
-										programme.programmeId)
+										project.projectId)
 									)
 								}
 								activities.push(activity);
@@ -573,8 +568,10 @@ export class LinkUnlinkService {
 							await em.save<SupportEntity>(supports);
 							await em.save<ActivityEntity>(activities);
 						}
-						await this.deleteAchievements(achievementsToRemove, em);
 
+						if (achievementsToRemove?.length > 0) {
+							await this.deleteAchievements(achievementsToRemove, em);
+						}
 						await em.save<LogEntity>(logs);
 					}
 				}
@@ -786,6 +783,97 @@ export class LinkUnlinkService {
 		parts[0] = currentProgrammePath && currentProgrammePath.trim() !== '' ? currentProgrammePath : "_";
 		parts[1] = programmeId;
 		return [parts[0], parts[1]].join(".");
+	}
+
+	async unvalidateAction(
+		action: ActionEntity,
+		sourceEntityId: string,
+		logType: LogEventType,
+		entityManager: EntityManager
+	) {
+		await entityManager
+			.transaction(async (em) => {
+				const logs = [];
+				if (action.validated) {
+					action.validated = false;
+					logs.push(
+						this.buildLogEntity(
+							logType,
+							EntityType.ACTION,
+							action.actionId,
+							0,
+							sourceEntityId
+						)
+					)
+				}
+
+				await em.save<ActionEntity>(action);
+				await em.save<LogEntity>(logs);
+			})
+	}
+	
+	async unvalidateProgrammes(
+		programmes: ProgrammeEntity[],
+		sourceEntityId: string,
+		logType: LogEventType,
+		entityManager: EntityManager
+	) {
+		await entityManager
+			.transaction(async (em) => {
+				const logs = [];
+				const unvalidatedProgrammes: ProgrammeEntity[] = [];
+
+				for (const programme of programmes) {
+					if (programme.validated) {
+						programme.validated = false;
+						unvalidatedProgrammes.push(programme);
+						logs.push(
+							this.buildLogEntity(
+								logType,
+								EntityType.PROGRAMME,
+								programme.programmeId,
+								0,
+								sourceEntityId
+							)
+						)
+					}
+
+				}
+				await em.save<ProgrammeEntity>(unvalidatedProgrammes);
+				await em.save<LogEntity>(logs);
+			})
+	}
+
+	async unvalidateProjects(
+		projects: ProjectEntity[],
+		sourceEntityId: string,
+		logType: LogEventType,
+		entityManager: EntityManager
+	) {
+		await entityManager
+			.transaction(async (em) => {
+				const logs = [];
+				const unvalidatedProjects: ProjectEntity[] = [];
+
+				for (const project of projects) {
+					if (project.validated) {
+						project.validated = false;
+						unvalidatedProjects.push(project);
+						logs.push(
+							this.buildLogEntity(
+								logType,
+								EntityType.PROJECT,
+								project.projectId,
+								0,
+								sourceEntityId
+							)
+						)
+					}
+
+				}
+				await em.save<ProjectEntity>(unvalidatedProjects);
+				await em.save<LogEntity>(logs);
+			})
 	}
 
 	buildLogEntity = (
