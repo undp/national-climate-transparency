@@ -46,11 +46,6 @@ export class SupportDto {
 	})
 	internationalSupportChannel: IntSupChannel;
 
-	@IsNotEmpty()
-	@IsString()
-	@ApiProperty()
-	otherInternationalSupportChannel: string;
-
 	@ValidateIf((c) => c.financeNature == FinanceNature.INTERNATIONAL)
 	@IsNotEmpty()
 	@IsEnum(IntFinInstrument, {
@@ -63,11 +58,6 @@ export class SupportDto {
 	})
 	internationalFinancialInstrument: IntFinInstrument;
 
-	@IsNotEmpty()
-	@IsString()
-	@ApiProperty()
-	otherInternationalFinancialInstrument: string;
-
 	@ValidateIf((c) => c.financeNature == FinanceNature.NATIONAL)
 	@IsNotEmpty()
 	@IsEnum(NatFinInstrument, {
@@ -79,12 +69,6 @@ export class SupportDto {
 		enum: Object.values(NatFinInstrument),
 	})
 	nationalFinancialInstrument: NatFinInstrument;
-
-	@IsOptional()
-	@IsNotEmpty()
-	@IsString()
-	@ApiPropertyOptional()
-	otherNationalFinancialInstrument: string;
 
 	@ValidateIf((c) => c.direction == SupportDirection.RECEIVED)
 	@IsNotEmpty()
@@ -135,6 +119,5 @@ export class SupportDto {
 	@IsNumber()
 	@ApiProperty()
   	exchangeRate: number;
-
-
+	
 }

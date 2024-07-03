@@ -148,13 +148,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               direction: entityData.direction,
               financeNature: entityData.financeNature,
               internationalSupportChannel: entityData.internationalSupportChannel,
-              otherInternationalSupportChannel: entityData.otherInternationalSupportChannel,
               internationalFinancialInstrument: entityData.internationalFinancialInstrument,
-              otherInternationalFinancialInstrument:
-                entityData.otherInternationalFinancialInstrument,
               nationalFinancialInstrument: entityData.nationalFinancialInstrument,
-              otherNationalFinancialInstrument:
-                entityData.otherNationalFinancialInstrument ?? undefined,
               financingStatus: entityData.financingStatus,
               internationalSource: entityData.internationalSource ?? undefined,
               nationalSource: entityData.nationalSource ?? undefined,
@@ -409,88 +404,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             <Row gutter={gutterSize}>
               <Col {...halfColumnBps}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('otherIntSupportChannel')}</label>}
-                  name="otherInternationalSupportChannel"
-                  rules={[validation.required]}
-                >
-                  <Input className="form-input-box" disabled={isView} />
-                </Form.Item>
-              </Col>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={
-                    <label className="form-item-header">{t('intFinancialInstrumentTitle')}</label>
-                  }
-                  name="internationalFinancialInstrument"
-                  rules={[{ required: !isView && isInternational, message: 'Required Field' }]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    disabled={isView || !isInternational}
-                    showSearch
-                  >
-                    {Object.values(IntFinInstrument).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={
-                    <label className="form-item-header">
-                      {t('otherIntFinanceInstrumentTitle')}
-                    </label>
-                  }
-                  name="otherInternationalFinancialInstrument"
-                  rules={[validation.required]}
-                >
-                  <Input className="form-input-box" disabled={isView} />
-                </Form.Item>
-              </Col>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={
-                    <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
-                  }
-                  name="nationalFinancialInstrument"
-                  rules={[{ required: !isView && isNational, message: 'Required Field' }]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    disabled={isView || !isNational}
-                    showSearch
-                  >
-                    {Object.values(NatFinInstrument).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={
-                    <label className="form-item-header">
-                      {t('otherNatFinanceInstrumentTitle')}
-                    </label>
-                  }
-                  name="otherNationalFinancialInstrument"
-                >
-                  <Input className="form-input-box" disabled={isView} />
-                </Form.Item>
-              </Col>
-              <Col {...halfColumnBps}>
-                <Form.Item
                   label={<label className="form-item-header">{t('financeStatus')}</label>}
                   name="financingStatus"
                   rules={[{ required: !isView && isReceived, message: 'Required Field' }]}
@@ -509,6 +422,54 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   </Select>
                 </Form.Item>
               </Col>
+              {isInternational && (
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">{t('intFinancialInstrumentTitle')}</label>
+                    }
+                    name="internationalFinancialInstrument"
+                    rules={[{ required: !isView && isInternational, message: 'Required Field' }]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(IntFinInstrument).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              )}
+              {isNational && (
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
+                    }
+                    name="nationalFinancialInstrument"
+                    rules={[{ required: !isView && isNational, message: 'Required Field' }]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(NatFinInstrument).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
             <Row gutter={gutterSize}>
               <Col {...halfColumnBps}>
@@ -539,7 +500,15 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   label={<label className="form-item-header">{t('nationalSourceTitle')}</label>}
                   name="nationalSource"
                 >
-                  <Input className="form-input-box" disabled={isView} />
+                  <Input
+                    className="form-input-box"
+                    disabled={isView}
+                    onChange={(e) => {
+                      if (e.target.value === '') {
+                        form.setFieldsValue({ nationalSource: undefined });
+                      }
+                    }}
+                  />
                 </Form.Item>
               </Col>
             </Row>
