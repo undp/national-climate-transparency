@@ -242,7 +242,7 @@ const UserManagement = () => {
     if (
       // eslint-disable-next-line eqeqeq
       record.status == UserState.ACTIVE &&
-      (record.role === Role.Admin ||
+      ((userInfoState?.userRole === Role.Root && record.role === Role.Admin) ||
         record.role === Role.GovernmentUser ||
         record.role === Role.Observer)
     ) {
@@ -266,7 +266,7 @@ const UserManagement = () => {
     } else if (
       // eslint-disable-next-line eqeqeq
       record.status == UserState.SUSPENDED &&
-      (record.role === Role.Admin ||
+      ((userInfoState?.userRole === Role.Root && record.role === Role.Admin) ||
         record.role === Role.GovernmentUser ||
         record.role === Role.Observer)
     ) {
