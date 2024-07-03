@@ -34,7 +34,6 @@ import { ActionEntity } from "../entities/action.entity";
 import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 import { AchievementEntity } from "../entities/achievement.entity";
-import { LinkedEntityUnvalidateService } from "../util/linkedEntityUnvalidate.service";
 
 @Injectable()
 export class ActivityService {
@@ -50,7 +49,6 @@ export class ActivityService {
 		private actionService: ActionService,
 		private kpiService: KpiService,
 		private payloadValidator: PayloadValidator,
-		private linkedEntityUnvalidateService: LinkedEntityUnvalidateService,
 	) { }
 
 	//MARK: Activity Create
@@ -641,7 +639,7 @@ export class ActivityService {
 					}
 
 					if (project && project.validated) {
-						await this.linkedEntityUnvalidateService.unvalidateProjects(
+						await this.linkUnlinkService.unvalidateProjects(
 							[project],
 							activity.activityId,
 							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_DELETE,
@@ -649,7 +647,7 @@ export class ActivityService {
 						)
 					}
 					if (programme && programme.validated) {
-						await this.linkedEntityUnvalidateService.unvalidateProgrammes(
+						await this.linkUnlinkService.unvalidateProgrammes(
 							[programme],
 							(activity.parentType == EntityType.PROGRAMME) ? activity.activityId : project.projectId,
 							(activity.parentType == EntityType.PROGRAMME)
@@ -659,7 +657,7 @@ export class ActivityService {
 
 					}
 					if (action && action.validated) {
-						await this.linkedEntityUnvalidateService.unvalidateAction(
+						await this.linkUnlinkService.unvalidateAction(
 							action,
 							(activity.parentType == EntityType.ACTION) ? activity.activityId : programme.programmeId,
 							(activity.parentType == EntityType.ACTION)
