@@ -85,7 +85,7 @@ export class SupportUpdateDto {
 	})
 	financingStatus: FinancingStatus;
 
-	@ValidateIf((c) => c.internationalSource)
+	@ValidateIf((c) => c.internationalSource && c.financeNature == FinanceNature.INTERNATIONAL)
 	@IsArray()
 	@MaxLength(100, { each: true })
 	@IsNotEmpty({ each: true })
@@ -99,6 +99,7 @@ export class SupportUpdateDto {
 	})
 	internationalSource: IntSource[];
 
+	@ValidateIf((c) => c.financeNature == FinanceNature.NATIONAL)
 	@IsOptional()
 	@IsNotEmpty()
 	@IsString()
