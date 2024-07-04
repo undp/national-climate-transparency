@@ -98,12 +98,12 @@ export const EmailTemplates = {
   },
 	FORCE_CHANGE_PASSWORD: {
     id: "FORCE_CHANGE_PASSWORD",
-    subject: "Your Password was Changed by an admin!",
+    subject: "Your Password was Changed by the Super Admin!",
     html: `
         Hi {{name}},<br><br>
-        Password of Your NDC Transparency System account has been changed by an admin. <br><br>
+        Password of Your NDC Transparency System account has been changed by the Super Admin. <br><br>
 
-        Your new password is: {{newPassword}}  <br><br>
+        Your new password: {{newPassword}}  <br><br>
 
 				Please enter your email and new password to access your NDC Transparency System account. 
 
