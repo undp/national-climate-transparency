@@ -292,11 +292,8 @@ export class SupportService {
 		currentSupport.direction = supportUpdateDto.direction;
 		currentSupport.financeNature = supportUpdateDto.financeNature;
 		currentSupport.internationalSupportChannel = supportUpdateDto.internationalSupportChannel;
-		currentSupport.otherInternationalSupportChannel = supportUpdateDto.otherInternationalSupportChannel;
 		currentSupport.internationalFinancialInstrument = supportUpdateDto.internationalFinancialInstrument;
-		currentSupport.otherInternationalFinancialInstrument = supportUpdateDto.otherInternationalFinancialInstrument;
 		currentSupport.nationalFinancialInstrument = supportUpdateDto.nationalFinancialInstrument;
-		currentSupport.otherNationalFinancialInstrument = supportUpdateDto.otherNationalFinancialInstrument;
 		currentSupport.financingStatus = supportUpdateDto.financingStatus;
 		currentSupport.internationalSource = supportUpdateDto.internationalSource;
 		currentSupport.nationalSource = supportUpdateDto.nationalSource;

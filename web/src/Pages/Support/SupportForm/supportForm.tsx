@@ -148,13 +148,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               direction: entityData.direction,
               financeNature: entityData.financeNature,
               internationalSupportChannel: entityData.internationalSupportChannel,
-              otherInternationalSupportChannel: entityData.otherInternationalSupportChannel,
-              internationalFinancialInstrument: entityData.internationalFinancialInstrument,
-              otherInternationalFinancialInstrument:
-                entityData.otherInternationalFinancialInstrument,
-              nationalFinancialInstrument: entityData.nationalFinancialInstrument,
-              otherNationalFinancialInstrument:
-                entityData.otherNationalFinancialInstrument ?? undefined,
+              internationalFinancialInstrument:
+                entityData.internationalFinancialInstrument ?? undefined,
+              nationalFinancialInstrument: entityData.nationalFinancialInstrument ?? undefined,
               financingStatus: entityData.financingStatus,
               internationalSource: entityData.internationalSource ?? undefined,
               nationalSource: entityData.nationalSource ?? undefined,
@@ -370,9 +366,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     showSearch
                     onChange={(nature) => {
                       form.setFieldsValue({
-                        internationalSupportChannel: undefined,
                         internationalFinancialInstrument: undefined,
                         nationalFinancialInstrument: undefined,
+                        internationalSource: undefined,
+                        nationalSource: undefined,
                       });
                       renderNatureBasedFields(nature);
                     }}
@@ -387,14 +384,14 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
               <Col {...halfColumnBps}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('intSupportChannelTitle')}</label>}
+                  label={<label className="form-item-header">{t('supportChannelTitle')}</label>}
                   name="internationalSupportChannel"
-                  rules={[{ required: !isView && isInternational, message: 'Required Field' }]}
+                  rules={[{ required: !isView, message: 'Required Field' }]}
                 >
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
-                    disabled={isView || !isInternational}
+                    disabled={isView}
                     showSearch
                   >
                     {Object.values(IntSupChannel).map((channel) => (
@@ -407,88 +404,99 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
             </Row>
             <Row gutter={gutterSize}>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('otherIntSupportChannel')}</label>}
-                  name="otherInternationalSupportChannel"
-                  rules={[validation.required]}
-                >
-                  <Input className="form-input-box" disabled={isView} />
-                </Form.Item>
-              </Col>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={
-                    <label className="form-item-header">{t('intFinancialInstrumentTitle')}</label>
-                  }
-                  name="internationalFinancialInstrument"
-                  rules={[{ required: !isView && isInternational, message: 'Required Field' }]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    disabled={isView || !isInternational}
-                    showSearch
+              {isInternational && (
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">{t('intFinancialInstrumentTitle')}</label>
+                    }
+                    name="internationalFinancialInstrument"
+                    rules={[{ required: !isView && isInternational, message: 'Required Field' }]}
                   >
-                    {Object.values(IntFinInstrument).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(IntFinInstrument).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              )}
+              {isNational && (
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
+                    }
+                    name="nationalFinancialInstrument"
+                    rules={[{ required: !isView && isNational, message: 'Required Field' }]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(NatFinInstrument).map((instrument) => (
+                        <Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              )}
+              {isInternational && (
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">{t('internationalSourceTitle')}</label>
+                    }
+                    name="internationalSource"
+                  >
+                    <Select
+                      size="large"
+                      mode="multiple"
+                      style={{ fontSize: inputFontSize }}
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(IntSource).map((source) => (
+                        <Option key={source} value={source}>
+                          {source}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              )}
+              {isNational && (
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('nationalSourceTitle')}</label>}
+                    name="nationalSource"
+                  >
+                    <Input
+                      className="form-input-box"
+                      disabled={isView}
+                      onChange={(e) => {
+                        if (e.target.value === '') {
+                          form.setFieldsValue({ nationalSource: undefined });
+                        }
+                      }}
+                    />
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
             <Row gutter={gutterSize}>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={
-                    <label className="form-item-header">
-                      {t('otherIntFinanceInstrumentTitle')}
-                    </label>
-                  }
-                  name="otherInternationalFinancialInstrument"
-                  rules={[validation.required]}
-                >
-                  <Input className="form-input-box" disabled={isView} />
-                </Form.Item>
-              </Col>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={
-                    <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
-                  }
-                  name="nationalFinancialInstrument"
-                  rules={[{ required: !isView && isNational, message: 'Required Field' }]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    disabled={isView || !isNational}
-                    showSearch
-                  >
-                    {Object.values(NatFinInstrument).map((instrument) => (
-                      <Option key={instrument} value={instrument}>
-                        {instrument}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={
-                    <label className="form-item-header">
-                      {t('otherNatFinanceInstrumentTitle')}
-                    </label>
-                  }
-                  name="otherNationalFinancialInstrument"
-                >
-                  <Input className="form-input-box" disabled={isView} />
-                </Form.Item>
-              </Col>
               <Col {...halfColumnBps}>
                 <Form.Item
                   label={<label className="form-item-header">{t('financeStatus')}</label>}
@@ -509,37 +517,28 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   </Select>
                 </Form.Item>
               </Col>
-            </Row>
-            <Row gutter={gutterSize}>
               <Col {...halfColumnBps}>
                 <Form.Item
-                  label={
-                    <label className="form-item-header">{t('internationalSourceTitle')}</label>
-                  }
-                  name="internationalSource"
+                  label={<label className="form-item-header">{t('exchangeRateTitle')}</label>}
+                  name="exchangeRate"
+                  rules={[validation.greaterThanZero, validation.required]}
                 >
-                  <Select
-                    size="large"
-                    mode="multiple"
-                    style={{ fontSize: inputFontSize }}
-                    allowClear
+                  <Input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    className="form-input-box"
+                    onChange={(event) => {
+                      const value = parseFloat(event.target.value);
+                      handleCurrencyChange(value, 'rate');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === '-' || e.key === 'e' || e.key === '+') {
+                        e.preventDefault();
+                      }
+                    }}
                     disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(IntSource).map((source) => (
-                      <Option key={source} value={source}>
-                        {source}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('nationalSourceTitle')}</label>}
-                  name="nationalSource"
-                >
-                  <Input className="form-input-box" disabled={isView} />
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -608,32 +607,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   name="receivedLocal"
                 >
                   <Input type="number" className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('exchangeRateTitle')}</label>}
-                  name="exchangeRate"
-                  rules={[validation.greaterThanZero, validation.required]}
-                >
-                  <Input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    className="form-input-box"
-                    onChange={(event) => {
-                      const value = parseFloat(event.target.value);
-                      handleCurrencyChange(value, 'rate');
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === '-' || e.key === 'e' || e.key === '+') {
-                        e.preventDefault();
-                      }
-                    }}
-                    disabled={isView}
-                  />
                 </Form.Item>
               </Col>
             </Row>
