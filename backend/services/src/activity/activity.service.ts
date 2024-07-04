@@ -987,16 +987,6 @@ export class ActivityService {
 			);
 		}
 
-		if (user.validatePermission===ValidateEntity.CANNOT) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"activity.permissionDeniedForValidate",
-					[],
-				),
-				HttpStatus.FORBIDDEN
-			);
-		}
-
 		const activityResponseDto: ActivityResponseDto = plainToClass(ActivityResponseDto, activity);
 		if (activity && activity.parentId && activity.parentType) {
 			const migratedData = await this.getParentEntity(activity.parentType, activity.parentId)
@@ -1045,6 +1035,16 @@ export class ActivityService {
 				this.helperService.formatReqMessagesString(
 					"activity.permissionDeniedForSector",
 					[activity.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		if (user.validatePermission===ValidateEntity.CANNOT) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.permissionDeniedForValidate",
+					[],
 				),
 				HttpStatus.FORBIDDEN
 			);
