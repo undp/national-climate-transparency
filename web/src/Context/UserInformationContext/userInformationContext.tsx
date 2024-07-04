@@ -125,6 +125,7 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     localStorage.removeItem('userSectors');
     localStorage.removeItem('validatePermission');
     localStorage.removeItem('subRolePermission');
+    localStorage.removeItem('token');
     setUserInfoState(initialUserProps);
   };
 

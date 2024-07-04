@@ -26,5 +26,7 @@
     "activityVerificationFailed": "Activity verification failed due to {}",
     "cannotEditValidated": "The activity with id {} is validated and cannot be edited",
     "permissionDeniedForValidate": "Permission Denied: Unable to Validate Activity"
-
+,
+    "deleteActivitySuccess": "Activity deleted successfully",
+    "activityDeletionFailed": "Activity delete failed due to {}"
 }

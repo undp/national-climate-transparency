@@ -69,6 +69,7 @@ export class SupportEntity {
 
   @ManyToOne(() => ActivityEntity, (activity) => activity.support, {
     nullable: false,
+		onDelete: 'CASCADE',
   })
   @JoinColumn([{ name: "activityId", referencedColumnName: "activityId" }])
   activity: ActivityEntity;

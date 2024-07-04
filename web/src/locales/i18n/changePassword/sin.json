@@ -1,5 +1,6 @@
 {
     "changePassword": "මුරපදය වෙනස් කරන්න",
+    "forceChangePassword": "පරිශීලකයා සඳහා මුරපදයක් සකසන්න",
     "oldPassword": "පැරණි මුරපදය",
     "newPassword": "නව මුරපදය",
     "confirmNewPassword": "නව මුරපදය තහවුරු කරන්න",

@@ -31,6 +31,9 @@ import { PayloadValidator } from "../validation/payload.validator";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActionEntity } from "../entities/action.entity";
+import { DeleteDto } from "../dtos/delete.dto";
+import { Role } from "../casl/role.enum";
+import { AchievementEntity } from "../entities/achievement.entity";
 import { ValidateEntity } from "src/enums/user.enum";
 
 @Injectable()
@@ -226,6 +229,7 @@ export class ActivityService {
 		const actionList: ActionEntity[] = [];
 		const programmeList: ProgrammeEntity[] = [];
 		const projectList: ProjectEntity[] = [];
+		const achievements: AchievementEntity[] = [];
 
 		if (isActivityLinked) {
 			
@@ -338,6 +342,16 @@ export class ActivityService {
 			if (isActivityLinked) {
 				this.addEventLogEntry(eventLog, logEventType, EntityType.ACTIVITY, activityUpdate.activityId, user.id, currentActivity.parentId);
 			}
+			
+			// finding achievements created for old kpis
+			const achievementsToRemove = await this.kpiService.getAchievementsOfParentEntity(
+				currentActivity.parentId,
+				currentActivity.parentType as EntityType,
+				currentActivity.activityId,
+				EntityType.ACTIVITY
+			);
+			achievements.push(...achievementsToRemove);
+
 			switch (activityUpdateDto.parentType) {
 				case EntityType.ACTION: {
 					const action = await this.isActionValid(activityUpdateDto.parentId, user);
@@ -523,6 +537,9 @@ export class ActivityService {
 					if (actionList.length > 0) {
 						em.save<ActionEntity>(actionList);
 					}
+					if (achievements.length > 0) {
+						em.delete<AchievementEntity>(AchievementEntity, achievements);
+					}
 
 					// Save event logs
 					if (eventLog.length > 0) {
@@ -549,6 +566,126 @@ export class ActivityService {
 			acti
 		);
 
+	}
+
+	//MARK: Delete Activity
+	async deleteActivity(deleteDto: DeleteDto, user: User) {
+		if (user.role !== Role.Admin && user.role !== Role.Root) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.userUnAUth",
+					[]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const activity = await this.findActivityById(deleteDto.entityId);
+		if (!activity) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.activityNotFound",
+					[deleteDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, activity.sector)) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.permissionDeniedForSector",
+					[activity.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const eventLog = [];
+
+		const parent = await this.getParentEntity(activity.parentType, activity.parentId);
+
+		// Unvalidate the parents
+		let project: ProjectEntity;
+		let programme: ProgrammeEntity;
+		let action: ActionEntity;
+
+		switch (activity.parentType) {
+			case EntityType.PROJECT:
+				project = parent;
+				programme = project?.programme;
+				action = programme?.action;
+				break;
+
+			case EntityType.PROGRAMME:
+				programme = parent;
+				action = programme?.action;
+				break;
+
+			case EntityType.ACTION:
+				action = parent;
+				break;
+
+			default:
+				break;
+		}
+
+		const acti = await this.entityManager
+			.transaction(async (em) => {
+				const result = await em.delete<ActivityEntity>(ActivityEntity, activity.activityId);
+				if (result.affected > 0) {
+					// Save event logs
+					if (eventLog.length > 0) {
+						await em.save<LogEntity>(eventLog);
+					}
+
+					if (project && project.validated) {
+						await this.linkUnlinkService.unvalidateProjects(
+							[project],
+							activity.activityId,
+							LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_DELETE,
+							em
+						)
+					}
+					if (programme && programme.validated) {
+						await this.linkUnlinkService.unvalidateProgrammes(
+							[programme],
+							(activity.parentType == EntityType.PROGRAMME) ? activity.activityId : project.projectId,
+							(activity.parentType == EntityType.PROGRAMME)
+								? LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							em
+						)
+
+					}
+					if (action && action.validated) {
+						await this.linkUnlinkService.unvalidateAction(
+							action,
+							(activity.parentType == EntityType.ACTION) ? activity.activityId : programme.programmeId,
+							(activity.parentType == EntityType.ACTION)
+								? LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							em
+						)
+					}
+				}
+				return result;
+			})
+			.catch((err: any) => {
+				console.log(err);
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"activity.activityDeletionFailed",
+						[err]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("activity.deleteActivitySuccess", []),
+			null
+		);
 	}
 
 	//MARK: updateDocumentList

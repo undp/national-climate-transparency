@@ -1,5 +1,6 @@
 {
     "changePassword": "Changer le mot de passe",
+    "forceChangePassword": "Définir un mot de passe pour l'utilisateur",
     "oldPassword": "Ancien mot de passe",
     "newPassword": "Nouveau mot de passe",
     "confirmNewPassword": "Confirmer le nouveau mot de passe",
