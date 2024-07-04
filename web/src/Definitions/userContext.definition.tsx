@@ -4,6 +4,8 @@ export type UserProps = {
   companyName: string;
   userState: number;
   userSectors: string[];
+  validatePermission: string;
+  subRolePermission: string;
 };
 
 export interface UserContextProps {

@@ -20,6 +20,7 @@ import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { DeleteDto } from "src/dtos/delete.dto";
 import { Role } from "src/casl/role.enum";
+import { ValidateEntity } from "src/enums/user.enum";
 
 @Injectable()
 export class SupportService {
@@ -455,6 +456,16 @@ export class SupportService {
 				this.helperService.formatReqMessagesString(
 					"support.permissionDeniedForSector",
 					[support.supportId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		if (user.validatePermission===ValidateEntity.CANNOT) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.permissionDeniedForValidate",
+					[],
 				),
 				HttpStatus.FORBIDDEN
 			);

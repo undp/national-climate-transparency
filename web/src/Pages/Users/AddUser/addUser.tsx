@@ -20,10 +20,19 @@ import ChangePasswordModel from '../../../Components/Models/changePasswordModel'
 import { Role } from '../../../Enums/role.enum';
 import { Sector } from '../../../Enums/sector.enum';
 import { Organisation } from '../../../Enums/organisation.enum';
-import { ValidateEntity } from '../../../Enums/user.enum';
+import { SubRoleManipulate, ValidateEntity } from '../../../Enums/user.enum';
 import { BankOutlined, ExperimentOutlined, KeyOutlined, StarOutlined } from '@ant-design/icons';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import ForceResetPasswordModel from '../../../Components/Models/ForceReset/forceResetPasswordModel';
+import { RoleIcon } from '../../../Components/common/RoleIcon/role.icon';
+import { CheckAll, Diagram3 } from 'react-bootstrap-icons';
+
+import {
+  subRolePermitBGColor,
+  subRolePermitColor,
+  validatePermitBGColor,
+  validatePermitColor,
+} from '../../../Styles/role.color.constants';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -35,7 +44,7 @@ const AddUser = () => {
   const { state } = useLocation();
   const { updateToken } = useConnection();
   const { removeUserInfo } = useUserContext();
-  const { userInfoState } = useUserContext();
+  const { userInfoState, setUserInfo } = useUserContext();
   const ability = useAbilityContext();
 
   // General State
@@ -50,10 +59,13 @@ const AddUser = () => {
   const [validatePermission, setValidatePermission] = useState(
     state?.record?.validatePermission || ValidateEntity.CANNOT
   );
+  const [subRolePermission, setSubRolePermission] = useState(
+    state?.record?.subRolePermission || SubRoleManipulate.CANNOT
+  );
+  const [isOwnProfile, setIsOwnProfile] = useState<boolean>(false);
 
   // Password Change Auth State
 
-  const [isProfilePasswordReset, setIsProfilePasswordReset] = useState<boolean>(false);
   const [isForcePasswordReset, setIsForcePasswordReset] = useState<boolean>(true);
 
   // Profile Password Change State
@@ -99,6 +111,9 @@ const AddUser = () => {
       } else {
         values.phoneNo = undefined;
       }
+      values.validatePermission = validatePermission;
+      values.subRolePermission = subRolePermission;
+
       const response = await post('national/users/add', values);
       if (response.status === 200 || response.status === 201) {
         message.open({
@@ -125,6 +140,15 @@ const AddUser = () => {
     } else {
       formOneValues.phoneNo = undefined;
     }
+
+    if (role === Role.Root) {
+      formOneValues.validatePermission = ValidateEntity.CAN;
+      formOneValues.subRolePermission = SubRoleManipulate.CAN;
+    } else {
+      formOneValues.validatePermission = validatePermission;
+      formOneValues.subRolePermission = subRolePermission;
+    }
+
     try {
       const values: any = {
         id: state?.record?.id,
@@ -151,6 +175,17 @@ const AddUser = () => {
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
+        if (userInfoState) {
+          setUserInfo({
+            id: userInfoState.id,
+            userRole: userInfoState.userRole,
+            companyName: userInfoState.companyName,
+            userState: userInfoState.userState,
+            userSectors: userInfoState.userSectors,
+            validatePermission: formOneValues?.validatePermission,
+            subRolePermission: formOneValues?.subRolePermission,
+          });
+        }
         onNavigateToUserManagement();
         state.record = {};
         setLoading(false);
@@ -238,13 +273,15 @@ const AddUser = () => {
   const onChangeuserRole = (event: any) => {
     const value = event.target.value;
     setRole(value);
-    formOne.setFieldsValue({ subRole: undefined });
+    formOne.setFieldValue('subRole', null);
   };
 
   const onChangeValidatePermission = (event: any) => {
-    const value = event.target.checked;
-    setValidatePermission(value ? ValidateEntity.CANNOT : ValidateEntity.CAN);
-    console.log('Validate Permission Granted - ', validatePermission);
+    setValidatePermission(event.target.checked ? ValidateEntity.CAN : ValidateEntity.CANNOT);
+  };
+
+  const onChangeSubRolePermission = (event: any) => {
+    setSubRolePermission(event.target.checked ? SubRoleManipulate.CAN : SubRoleManipulate.CANNOT);
   };
 
   useEffect(() => {
@@ -256,11 +293,11 @@ const AddUser = () => {
 
       // Permission Setting for the Password Change
       if (userInfoState?.id === state?.record?.id.toString()) {
-        setIsProfilePasswordReset(true);
+        setIsOwnProfile(true);
       } else if (userInfoState?.userRole === Role.Root) {
         setIsForcePasswordReset(true);
       } else {
-        setIsProfilePasswordReset(false);
+        setIsOwnProfile(false);
         setIsForcePasswordReset(false);
       }
     } else {
@@ -278,13 +315,13 @@ const AddUser = () => {
         <div className="titles">
           <div className="main">{isUpdate ? t('addUser:editUser') : t('addUser:addNewUser')}</div>
         </div>
-        {isUpdate && (isProfilePasswordReset || isForcePasswordReset) && (
+        {isUpdate && (isOwnProfile || isForcePasswordReset) && (
           <div className="actions">
             <Button
               className="mg-left-1"
               type="primary"
               onClick={
-                isProfilePasswordReset
+                isOwnProfile
                   ? onChangedPassword
                   : isForcePasswordReset
                   ? () => setForcePasswordChangeVisible(true)
@@ -419,38 +456,70 @@ const AddUser = () => {
                     </Form.Item>
                   )}
                 </Skeleton>
-                <div className="abc">
-                  <Form.Item
-                    label={t('addUser:validatePermission')}
-                    initialValue={state?.record?.validatePermission}
-                    name="validatePermission"
-                    rules={[
-                      {
-                        required: false,
-                      },
-                    ]}
-                  >
-                    <Checkbox
-                      onChange={onChangeValidatePermission}
-                      value={validatePermission}
-                    ></Checkbox>
-                  </Form.Item>
-                </div>
                 <Form.Item
-                  label={t('addUser:subRolePermission')}
-                  initialValue={state?.record?.subRolePermission}
-                  name="subRolePermission"
+                  initialValue={state?.record?.validatePermission}
+                  name="validatePermission"
                   rules={[
                     {
                       required: false,
                     },
                   ]}
                 >
-                  {/* <Checkbox onChange={handleCheckboxChange}> */}
-                  <Checkbox value={state?.record?.subRolePermission}>
-                    {t('addUser:subRolePermission')}
-                  </Checkbox>
+                  <div className="validate-permissions">
+                    <RoleIcon
+                      icon={<CheckAll />}
+                      bg={validatePermitBGColor}
+                      color={validatePermitColor}
+                    />
+                    <div className="align">{t('addUser:validatePermission')}</div>
+                    <Checkbox
+                      onChange={onChangeValidatePermission}
+                      checked={validatePermission === ValidateEntity.CAN}
+                      disabled={
+                        role === Role.Root ||
+                        (isUpdate &&
+                          !ability.can(
+                            Action.Update,
+                            plainToClass(User, state?.record),
+                            'validatePermission'
+                          ))
+                      }
+                    ></Checkbox>
+                  </div>
                 </Form.Item>
+                {(role === Role.GovernmentUser || role === Role.Observer) && (
+                  <Form.Item
+                    initialValue={state?.record?.subRolePermission}
+                    name="subRolePermission"
+                    rules={[
+                      {
+                        required: false,
+                      },
+                    ]}
+                  >
+                    <div className="subRole-permissions">
+                      <RoleIcon
+                        icon={<Diagram3 />}
+                        bg={subRolePermitBGColor}
+                        color={subRolePermitColor}
+                      />
+                      <div className="align">{t('addUser:subRolePermission')}</div>
+                      <Checkbox
+                        onChange={onChangeSubRolePermission}
+                        checked={subRolePermission === SubRoleManipulate.CAN}
+                        disabled={
+                          role === Role.Root ||
+                          (isUpdate &&
+                            !ability.can(
+                              Action.Update,
+                              plainToClass(User, state?.record),
+                              'subRolePermission'
+                            ))
+                        }
+                      ></Checkbox>
+                    </div>
+                  </Form.Item>
+                )}
               </div>
             </Col>
             <Col xl={12} md={24}>
@@ -533,8 +602,9 @@ const AddUser = () => {
                       value={state?.record?.subRole}
                       size="large"
                       disabled={
+                        isOwnProfile &&
                         isUpdate &&
-                        !ability.can(Action.Update, plainToClass(User, state?.record), 'subRole')
+                        state?.record?.subRolePermission === SubRoleManipulate.CANNOT
                       }
                     >
                       <div className="department-radio-container">
@@ -578,8 +648,9 @@ const AddUser = () => {
                       value={state?.record?.subRole}
                       size="large"
                       disabled={
+                        isOwnProfile &&
                         isUpdate &&
-                        !ability.can(Action.Update, plainToClass(User, state?.record), 'subRole')
+                        state?.record?.subRolePermission === SubRoleManipulate.CANNOT
                       }
                     >
                       <div className="tec-rev-radio-container">
@@ -597,6 +668,27 @@ const AddUser = () => {
                         {/* </Tooltip> */}
                       </div>
                     </Radio.Group>
+                  </Form.Item>
+                )}
+                {(role === Role.GovernmentUser || role === Role.Observer) && (
+                  <Form.Item
+                    label={t('addUser:organisation')}
+                    initialValue={state?.record?.organisation}
+                    name="organisation"
+                    rules={[
+                      {
+                        required: true,
+                        message: `${t('addUser:organisation')} ${t('isRequired')}`,
+                      },
+                    ]}
+                  >
+                    <Select size="large" allowClear showSearch>
+                      {Object.values(Organisation).map((instrument) => (
+                        <Select.Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Select.Option>
+                      ))}
+                    </Select>
                   </Form.Item>
                 )}
                 {(role === Role.GovernmentUser || role === Role.Observer) && (
@@ -623,27 +715,6 @@ const AddUser = () => {
                       }
                     >
                       {Object.values(Sector).map((instrument) => (
-                        <Select.Option key={instrument} value={instrument}>
-                          {instrument}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                )}
-                {(role === Role.GovernmentUser || role === Role.Observer) && (
-                  <Form.Item
-                    label={t('addUser:organisation')}
-                    initialValue={state?.record?.organisation}
-                    name="organisation"
-                    rules={[
-                      {
-                        required: true,
-                        message: `${t('addUser:organisation')} ${t('isRequired')}`,
-                      },
-                    ]}
-                  >
-                    <Select size="large" allowClear showSearch>
-                      {Object.values(Organisation).map((instrument) => (
                         <Select.Option key={instrument} value={instrument}>
                           {instrument}
                         </Select.Option>

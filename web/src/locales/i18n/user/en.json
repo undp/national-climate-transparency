@@ -17,5 +17,11 @@
     "filterByRole": "Filter By User Role",
     "filterByCompanyRole": "Filter by Organisation Type",
     "activateSuccessMsg" : "User has been activated successfully",
-    "deactivateSuccessMsg": "User has been deactivated successfully"
+    "deactivateSuccessMsg": "User has been deactivated successfully",
+    "Root": "Super Admin",
+    "Admin": "Administrator",
+    "GovernmentUser": "Government User",
+    "Observer": "Observer",
+    "validationPermission": "Validation Permission",
+    "subRolePermission": "Sub Role Manipulation Permission"
 }

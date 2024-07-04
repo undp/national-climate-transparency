@@ -69,10 +69,26 @@
     }
     .row {
       .details-part-one {
-
-        .abc{
+        .validate-permissions{
           display: flex;
           flex-direction: row;
+          color: rgba(58, 53, 65, 0.5) !important;
+          justify-content: space-between;
+          width: 75%;
+          .align{
+            padding-right: 35%;
+          }
+        }
+        .subRole-permissions{
+          display: flex;
+          flex-direction: row;
+          color: rgba(58, 53, 65, 0.5) !important;
+          justify-content: space-between;
+          margin-top: -15px;
+          width: 75%;
+          .align{
+            padding-right: 15%;
+          }
         }
       }
       .details-part-two {

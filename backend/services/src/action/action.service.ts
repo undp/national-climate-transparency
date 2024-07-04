@@ -27,6 +27,7 @@ import { AchievementEntity } from "../entities/achievement.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { KPIAction } from "../enums/shared.enum";
+import { ValidateEntity } from "src/enums/user.enum";
 
 @Injectable()
 export class ActionService {
@@ -591,6 +592,16 @@ export class ActionService {
 				this.helperService.formatReqMessagesString(
 					"action.permissionDeniedForSector",
 					[action.actionId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		if (user.validatePermission===ValidateEntity.CANNOT) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.permissionDeniedForValidate",
+					[],
 				),
 				HttpStatus.FORBIDDEN
 			);

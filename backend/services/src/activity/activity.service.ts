@@ -31,6 +31,7 @@ import { PayloadValidator } from "../validation/payload.validator";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActionEntity } from "../entities/action.entity";
+import { ValidateEntity } from "src/enums/user.enum";
 
 @Injectable()
 export class ActivityService {
@@ -844,6 +845,16 @@ export class ActivityService {
 				this.helperService.formatReqMessagesString(
 					"activity.userDoesNotHavePermission",
 					[activity.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		if (user.validatePermission===ValidateEntity.CANNOT) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.permissionDeniedForValidate",
+					[],
 				),
 				HttpStatus.FORBIDDEN
 			);

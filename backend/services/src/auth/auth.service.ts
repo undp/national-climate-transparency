@@ -77,6 +77,8 @@ export class AuthService {
 			user.subRole,
 			user.sector,
       user.email,
+      user.validatePermission,
+      user.subRolePermission,
     );
     const ability = this.caslAbilityFactory.createForUser(user);
     return {
@@ -89,6 +91,8 @@ export class AuthService {
       ability: JSON.stringify(ability),
 			sector: user.sector,
       userState: user.state,
+      validatePermission: user.validatePermission,
+      subRolePermission: user.subRolePermission,
     };
   }
 

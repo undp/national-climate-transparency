@@ -21,6 +21,7 @@ import {
   Radio,
   Row,
   Space,
+  Tooltip,
   Typography,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +38,10 @@ import {
   RootColor,
   GovColor,
   ObsColor,
+  validatePermitBGColor,
+  validatePermitColor,
+  subRolePermitBGColor,
+  subRolePermitColor,
 } from '../../../Styles/role.color.constants';
 
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
@@ -48,11 +53,11 @@ import { UserData } from '../../../Definitions/userManagement.definitions';
 import { plainToClass } from 'class-transformer';
 import { Action } from '../../../Enums/action.enum';
 import { User } from '../../../Entities/user';
-import { PersonDash, PersonCheck } from 'react-bootstrap-icons';
+import { PersonDash, PersonCheck, CheckAll, Diagram3 } from 'react-bootstrap-icons';
 import { UserManagementColumns } from '../../../Enums/user.management.columns.enum';
 import './userManagementComponent.scss';
 import '../../../Styles/common.table.scss';
-import { UserState } from '../../../Enums/user.enum';
+import { SubRoleManipulate, UserState, ValidateEntity } from '../../../Enums/user.enum';
 import { Role } from '../../../Enums/role.enum';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
@@ -156,28 +161,61 @@ const UserManagement = () => {
 
   const getRoleComponent = (item: UserData) => {
     const role = item?.role;
+    const validatePermission = item?.validatePermission;
+    const subRolePermission = item?.subRolePermission;
+    let userName;
+
+    switch (role) {
+      case 'Admin':
+        userName = t('user:Admin');
+        break;
+      case 'Root':
+        userName = t('user:Root');
+        break;
+      case 'GovernmentUser':
+        userName = t('user:GovernmentUser');
+        break;
+      default:
+        userName = t('user:Observer');
+    }
+
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
-        {role === 'Root' ? (
-          <RoleIcon icon={<KeyOutlined />} bg={RootBGColor} color={RootColor} />
-        ) : role === 'Admin' ? (
-          <RoleIcon icon={<StarOutlined />} bg={AdminBGColor} color={AdminColor} />
-        ) : role === 'GovernmentUser' ? (
-          <RoleIcon icon={<BankOutlined />} bg={GovBGColor} color={GovColor} />
-        ) : (
-          <RoleIcon icon={<ExperimentOutlined />} bg={ObsBGColor} color={ObsColor} />
-        )}
-        <div>
-          {role === 'Admin'
-            ? 'Administrator'
-            : role === 'Root'
-            ? 'Super Admin'
-            : role === 'GovernmentUser'
-            ? 'Government User'
-            : role === 'Observer'
-            ? 'Observer'
-            : role}
-        </div>
+        <Tooltip placement="top" title={userName} showArrow={false}>
+          <div>
+            {role === 'Root' ? (
+              <RoleIcon icon={<KeyOutlined />} bg={RootBGColor} color={RootColor} />
+            ) : role === 'Admin' ? (
+              <RoleIcon icon={<StarOutlined />} bg={AdminBGColor} color={AdminColor} />
+            ) : role === 'GovernmentUser' ? (
+              <RoleIcon icon={<BankOutlined />} bg={GovBGColor} color={GovColor} />
+            ) : (
+              <RoleIcon icon={<ExperimentOutlined />} bg={ObsBGColor} color={ObsColor} />
+            )}
+          </div>
+        </Tooltip>
+        <Tooltip placement="top" title={t('user:validationPermission')} showArrow={false}>
+          <div>
+            {validatePermission === ValidateEntity.CAN ? (
+              <RoleIcon
+                icon={<CheckAll />}
+                bg={validatePermitBGColor}
+                color={validatePermitColor}
+              />
+            ) : (
+              <></>
+            )}
+          </div>
+        </Tooltip>
+        <Tooltip placement="top" title={t('user:subRolePermission')} showArrow={false}>
+          <div>
+            {subRolePermission === SubRoleManipulate.CAN ? (
+              <RoleIcon icon={<Diagram3 />} bg={subRolePermitBGColor} color={subRolePermitColor} />
+            ) : (
+              <></>
+            )}
+          </div>
+        </Tooltip>
       </div>
     );
   };
@@ -445,6 +483,8 @@ const UserManagement = () => {
             role: availableUsers[i].role,
             subRole: availableUsers[i].subRole,
             sector: availableUsers[i].sector,
+            validatePermission: availableUsers[i].validatePermission,
+            subRolePermission: availableUsers[i].subRolePermission,
           });
         }
         setTableData(tempUsers);

@@ -9,6 +9,8 @@ import { UserRoleIcon } from '../../../Components/UserRoleIcon/userRoleIcon';
 import LanguageSelection from '../../../Components/LanguageSelection/languageSelection';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './userProfileComponent.scss';
+import { SubRoleManipulate, ValidateEntity } from '../../../Enums/user.enum';
+import { Role } from '../../../Enums/role.enum';
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -159,6 +161,25 @@ const UserProfile = () => {
                         {userDetails.phoneNo ? userDetails.phoneNo : '-'}
                       </Col>
                     </Row>
+                    <Row className="field">
+                      <Col span={12} className="field-key">
+                        {t('userProfile:validatePermission')}
+                      </Col>
+                      <Col span={12} className="field-value">
+                        {userDetails.validatePermission === ValidateEntity.CAN ? 'Yes' : 'No'}
+                      </Col>
+                    </Row>
+                    {(userDetails.role === Role.GovernmentUser ||
+                      userDetails.role === Role.Observer) && (
+                      <Row className="field">
+                        <Col span={12} className="field-key">
+                          {t('userProfile:subRolePermission')}
+                        </Col>
+                        <Col span={12} className="field-value">
+                          {userDetails.subRolePermission === SubRoleManipulate.CAN ? 'Yes' : 'No'}
+                        </Col>
+                      </Row>
+                    )}
                     <Row className="field">
                       <Col span={12} className="field-key">
                         {t('userProfile:role')}

@@ -16,8 +16,8 @@
     "projectAlreadyValidated": "The project with id {} is already validated",
     "verifyProjectSuccess": "Project verified successfully",
     "projectVerificationFailed": "Project verification failed due to {}",
-    "cannotEditValidated": "The project with id {} is validated and cannot be edited"
-
+    "cannotEditValidated": "The project with id {} is validated and cannot be edited",
+    "permissionDeniedForValidate": "Permission Denied: Unable to Validate Project"
 
 
 

@@ -2,7 +2,7 @@ import { Role, SubRole } from '../casl/role.enum';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { EntitySubject } from './entity.subject';
 import { Organisation, OrganisationType } from '../enums/organisation.enum'
-import { UserState } from '../enums/user.enum';
+import { SubRoleManipulate, UserState, ValidateEntity } from '../enums/user.enum';
 import { Sector } from '../enums/sector.enum';
 
 @Entity()
@@ -65,4 +65,11 @@ export class User  implements EntitySubject{
         default: UserState.ACTIVE,
     })
     state: UserState;
+
+    @Column({ type: "enum", enum: ValidateEntity, default: ValidateEntity.CANNOT ,nullable: false })
+    validatePermission: ValidateEntity;
+
+    @Column({ type: "enum", enum: SubRoleManipulate, default: SubRoleManipulate.CANNOT,nullable: false })
+    subRolePermission: SubRoleManipulate;
+    
 }

@@ -42,6 +42,8 @@ import {
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
+import { ValidateEntity } from '../../../Enums/user.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -59,6 +61,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
   const ability = useAbilityContext();
+  const { userInfoState } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -68,6 +71,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
+  const [isValidateButtonDisabled, setIsValidateButtonDisabled] = useState(false);
 
   // Parent Select state
 
@@ -134,6 +138,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   for (let year = 2013; year <= 2050; year++) {
     yearsList.push(year);
   }
+
+  useEffect(() => {
+    // check user permission for validate programme and disable validate button
+    if (userInfoState?.validatePermission === ValidateEntity.CANNOT) {
+      setIsValidateButtonDisabled(true);
+    }
+  }, [userInfoState]);
 
   useEffect(() => {
     // Initially Loading All Actions that can be parent
@@ -777,7 +788,14 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      displayErrorMessage(error, `${entId} Validation Failed`);
+      if (error?.message) {
+        if (error.message === 'Permission Denied: Unable to Validate Programme') {
+          setIsValidateButtonDisabled(true);
+        }
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Validation Failed`);
+      }
     }
   };
 
@@ -1575,6 +1593,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                         onClick={() => {
                           validateEntity();
                         }}
+                        disabled={isValidateButtonDisabled}
                       >
                         {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
                       </Button>

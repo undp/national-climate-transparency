@@ -26,6 +26,8 @@ import {
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
+import { ValidateEntity } from '../../../Enums/user.enum';
 
 const { Option } = Select;
 
@@ -51,6 +53,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   const navigate = useNavigate();
   const { post, put } = useConnection();
   const ability = useAbilityContext();
+  const { userInfoState } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -60,6 +63,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
+  const [isValidateButtonDisabled, setIsValidateButtonDisabled] = useState(false);
 
   // Form General State
 
@@ -97,6 +101,13 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   };
 
   // Initialization Logic
+
+  useEffect(() => {
+    // check user permission for validate action and disable validate button
+    if (userInfoState?.validatePermission === ValidateEntity.CANNOT) {
+      setIsValidateButtonDisabled(true);
+    }
+  }, [userInfoState]);
 
   useEffect(() => {
     // Fetching All Activities which can be the parent
@@ -255,7 +266,14 @@ const SupportForm: React.FC<Props> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      displayErrorMessage(error, `${entId} Validation Failed`);
+      if (error?.message) {
+        if (error.message === 'Permission Denied: Unable to Validate Support') {
+          setIsValidateButtonDisabled(true);
+        }
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Validation Failed`);
+      }
     }
   };
 
@@ -685,6 +703,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                       onClick={() => {
                         validateEntity();
                       }}
+                      disabled={isValidateButtonDisabled}
                     >
                       {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
                     </Button>

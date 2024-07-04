@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { ArrayMinSize, IsArray, IsEmail, IsEnum, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, MaxLength } from "class-validator";
+import { ArrayMinSize, IsArray, IsEmail, IsEnum, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, MaxLength, ValidateIf } from "class-validator";
 import { Role, SubRole } from "../casl/role.enum";
-import { UserState } from "../enums/user.enum";
+import { SubRoleManipulate, UserState, ValidateEntity } from "../enums/user.enum";
 import { Sector } from "../enums/sector.enum";
 import { Organisation } from "../enums/organisation.enum";
 
@@ -29,7 +29,17 @@ export class UserUpdateDto {
     @ApiPropertyOptional()
     email: string;
 
-		@IsOptional()
+    @ValidateIf(
+      (c) => ![Role.Root].includes(c.role)
+    )
+    @IsOptional()
+    @ApiProperty({ enum: Role })
+    @IsEnum(Role, {
+      message: "Invalid role. Supported following roles:" + Object.values(Role),
+    })
+    role: Role;
+
+    @IsOptional()
 		@ApiProperty({ enum: SubRole })
 		@IsEnum(SubRole, {
 			message: "Invalid sub role. Supported following roles:" + Object.values(SubRole),
@@ -68,5 +78,19 @@ export class UserUpdateDto {
     @IsOptional()
     @ApiPropertyOptional()
     remarks: string;
+
+    @IsOptional()
+    @ApiPropertyOptional({ enum: ValidateEntity })
+    @IsEnum(ValidateEntity, {
+      message: "Invalid Entity Validate Permission. Supported following type:" + Object.values(ValidateEntity),
+    })
+    validatePermission: ValidateEntity;
+  
+    @IsOptional()
+    @ApiPropertyOptional({ enum: SubRoleManipulate })
+    @IsEnum(SubRoleManipulate, {
+      message: "Invalid Sub Role Manipulate Permission. Supported following type:" + Object.values(SubRoleManipulate),
+    })
+    subRolePermission: SubRoleManipulate;
 }
 

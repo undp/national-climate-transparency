@@ -24,7 +24,7 @@ import { nanoid } from "nanoid";
 import { ConfigService } from "@nestjs/config";
 import { Organisation, OrganisationType } from "../enums/organisation.enum";
 import { plainToClass } from "class-transformer";
-import { UserState } from "../enums/user.enum";
+import { SubRoleManipulate, UserState, ValidateEntity } from "../enums/user.enum";
 import { HelperService } from "../util/helpers.service";
 import { AsyncAction, AsyncOperationsInterface } from "../async-operations/async-operations.interface";
 import { PasswordHashService } from "../util/passwordHash.service";
@@ -230,12 +230,15 @@ export class UserService {
 				"email",
 				"password",
 				"role",
+				"subRole",
 				"apiKey",
 				"organisation",
 				"name",
 				"state",
 				"sector",
 				"state",
+				"validatePermission",
+				"subRolePermission",
 			],
 			where: {
 				email: username,
@@ -283,7 +286,6 @@ export class UserService {
 		this.logger.verbose("User update received", abilityCondition);
 
 		userDto.email = userDto.email?.toLowerCase()
-
 		const { id, remarks, ...update } = userDto;
 		const user = await this.findById(id);
 		if (!user) {
@@ -293,7 +295,31 @@ export class UserService {
 			);
 		}
 
-		this.validateRoleAndSubRole(user.role, userDto.subRole);
+		if(user.role===Role.Root){
+			if(update.validatePermission===ValidateEntity.CANNOT || update.subRolePermission===SubRoleManipulate.CANNOT){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.validateAndSubrolePermissionShouldBeTrue", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
+			update.validatePermission=ValidateEntity.CAN;
+			update.subRolePermission=SubRoleManipulate.CAN;
+		}
+
+		if(requestingUser.id===userDto.id){
+			if(requestingUser.subRole!==userDto.subRole && requestingUser.subRolePermission === SubRoleManipulate.CANNOT){
+					throw new HttpException(
+						this.helperService.formatReqMessagesString("user.subRolePermissionDenied", []),
+						HttpStatus.FORBIDDEN
+					);
+				}
+		}
+
+		if(requestingUser.role===Role.Root){
+			this.validateRoleAndSubRole(userDto.role, userDto.subRole);
+		}else{
+			this.validateRoleAndSubRole(user.role, userDto.subRole);
+		}
 
 		this.validateSectorUpdate(userDto.sector, user.sector, requestingUser);
 
@@ -553,7 +579,7 @@ export class UserService {
 
 		const templateData = {
 			name: user.name,
-			countryName: this.configService.get("systemCountry"),
+			countryName: this.configService.get("systemCountryName"),
 			remarks: userDto.remarks,
 			government: this.configService.get("systemCountryGovernmentName"),
 		};

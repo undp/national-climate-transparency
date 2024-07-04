@@ -30,6 +30,7 @@ import { SupportEntity } from "../entities/support.entity";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ActionEntity } from "../entities/action.entity";
+import { ValidateEntity } from "src/enums/user.enum";
 
 @Injectable()
 export class ProjectService {
@@ -745,6 +746,16 @@ export class ProjectService {
 				this.helperService.formatReqMessagesString(
 					"project.permissionDeniedForSector",
 					[project.projectId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		if (user.validatePermission===ValidateEntity.CANNOT) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.permissionDeniedForValidate",
+					[],
 				),
 				HttpStatus.FORBIDDEN
 			);

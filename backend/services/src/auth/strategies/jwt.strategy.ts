@@ -25,6 +25,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (user.state !== UserState.ACTIVE) {
             throw new UnauthorizedException('user deactivated');
         }
-        return { id: jwtPayload.sub, companyName: jwtPayload.cn, role: jwtPayload.r, SubRole: jwtPayload.sr, name: jwtPayload.n, sector: jwtPayload.sc };
+        return { id: user.id, companyName: user.organisation, role: user.role, SubRole: user.subRole, name: user.name, sector: user.sector, validatePermission: user.validatePermission, subRolePermission:user.subRolePermission };
     }
 }
