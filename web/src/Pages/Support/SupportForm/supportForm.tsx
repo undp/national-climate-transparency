@@ -365,9 +365,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     showSearch
                     onChange={(nature) => {
                       form.setFieldsValue({
-                        internationalSupportChannel: undefined,
                         internationalFinancialInstrument: undefined,
                         nationalFinancialInstrument: undefined,
+                        internationalSource: undefined,
+                        nationalSource: undefined,
                       });
                       renderNatureBasedFields(nature);
                     }}
@@ -382,14 +383,14 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               </Col>
               <Col {...halfColumnBps}>
                 <Form.Item
-                  label={<label className="form-item-header">{t('intSupportChannelTitle')}</label>}
+                  label={<label className="form-item-header">{t('supportChannelTitle')}</label>}
                   name="internationalSupportChannel"
-                  rules={[{ required: !isView && isInternational, message: 'Required Field' }]}
+                  rules={[{ required: !isView, message: 'Required Field' }]}
                 >
                   <Select
                     size={'large'}
                     style={{ fontSize: inputFontSize }}
-                    disabled={isView || !isInternational}
+                    disabled={isView}
                     showSearch
                   >
                     {Object.values(IntSupChannel).map((channel) => (

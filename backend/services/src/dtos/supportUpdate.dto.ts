@@ -37,11 +37,10 @@ export class SupportUpdateDto {
 	})
 	financeNature: FinanceNature;
 
-	@ValidateIf((c) => c.financeNature == FinanceNature.INTERNATIONAL)
 	@IsNotEmpty()
 	@IsEnum(IntSupChannel, {
 		each: true,
-		message: 'Invalid International Support Channel. Supported following types:' + Object.values(IntSupChannel)
+		message: 'Invalid Support Channel. Supported following types:' + Object.values(IntSupChannel)
 	})
 	@ApiProperty({
 		type: [String],

@@ -229,7 +229,7 @@ const supportList = () => {
       sorter: false,
     },
     {
-      title: t('internationalChannelOfSupport'),
+      title: t('channelOfSupport'),
       dataIndex: 'internationalSupportChannel',
       key: 'internationalSupportChannel',
       sorter: false,

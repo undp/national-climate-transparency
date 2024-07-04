@@ -6,7 +6,7 @@
   "activityId": "ID de l'activité",
   "supportNeededOrReceived": "Support nécessaire ou reçu",
   "internationalOrNationalFinance": "Financement international ou national",
-  "internationalChannelOfSupport": "Canal international de support",
+  "channelOfSupport": "Canal de support",
   "financialInstrument": "Instrument financier",
   "financingStatus": "Statut du financement",
   "internationalSource": "Source internationale",
