@@ -4,6 +4,8 @@ import { ActionStatus } from "../enums/action.enum";
 import { NatAnchor } from "../enums/action.enum";
 import { ProgrammeEntity } from "./programme.entity";
 import { Sector } from "../enums/sector.enum";
+import { ActivityEntity } from "./activity.entity";
+import { KpiEntity } from "./kpi.entity";
 
 @Entity("action")
 export class ActionEntity {
@@ -42,6 +44,8 @@ export class ActionEntity {
 
   @OneToMany(() => ProgrammeEntity, (programmeEntity) => programmeEntity.action)
   programmes?: ProgrammeEntity[];
+
+	activities?: ActivityEntity[];
 
 	@Column({ type: "boolean", default: false })
 	validated: boolean;

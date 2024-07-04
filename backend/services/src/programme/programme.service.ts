@@ -521,45 +521,45 @@ export class ProgrammeService {
 		const linkedActivityIds = programme.activities?.map(activity => activity.activityId);
 
 		// creating project payload expected by unlinkProjectsFromProgramme method
-		for(const project of programme.projects) {
+		for (const project of programme.projects) {
 			project.programme = programme;
 		}
 
 		const pro = await this.entityManager
-		.transaction(async (em) => {
+			.transaction(async (em) => {
 
-			// related parent and children entity un-validation happens when projects are unlinking
-			await this.linkUnlinkService.unlinkProjectsFromProgramme(programme.projects, null, user, this.entityManager, [], true);
-			const result = await em.delete<ProgrammeEntity>(ProgrammeEntity, programme.programmeId);
+				// related parent and children entity un-validation happens when projects are unlinking
+				await this.linkUnlinkService.unlinkProjectsFromProgramme(programme.projects, null, user, this.entityManager, [], true);
+				const result = await em.delete<ProgrammeEntity>(ProgrammeEntity, programme.programmeId);
 
-			if (result.affected > 0) {
-				if (linkedActivityIds && linkedActivityIds.length > 0) {
-					await em.delete<ActivityEntity>(ActivityEntity, linkedActivityIds);
+				if (result.affected > 0) {
+					if (linkedActivityIds && linkedActivityIds.length > 0) {
+						await em.delete<ActivityEntity>(ActivityEntity, linkedActivityIds);
+					}
+
+					if (programmeKpiIds && programmeKpiIds.length > 0) {
+						await em.delete<KpiEntity>(KpiEntity, programmeKpiIds);
+					}
 				}
+				return result;
+			})
+			.catch((err: any) => {
+				console.log(err);
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.programmeDeletionFailed",
+						[err]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			});
 
-				if (programmeKpiIds && programmeKpiIds.length > 0) {
-					await em.delete<KpiEntity>(KpiEntity, programmeKpiIds);
-				}
-			}
-			return result;
-		})
-		.catch((err: any) => {
-			console.log(err);
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"programme.programmeDeletionFailed",
-					[err]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		});
-
-	await this.helperService.refreshMaterializedViews(this.entityManager);
-	return new DataResponseMessageDto(
-		HttpStatus.OK,
-		this.helperService.formatReqMessagesString("programme.deleteProgrammeSuccess", []),
-		null
-	);
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("programme.deleteProgrammeSuccess", []),
+			null
+		);
 
 	}
 
@@ -626,12 +626,13 @@ export class ProgrammeService {
 		);
 
 		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(
+			[updatedProgramme],
 			updatedProgramme.action,
-			updatedProgramme,
 			updatedProgramme.programmeId,
 			user,
 			em ? em : this.entityManager,
-			achievementsToRemove
+			achievementsToRemove,
+			false
 		);
 
 		return new DataResponseMessageDto(
@@ -743,12 +744,13 @@ export class ProgrammeService {
 		);
 
 		const prog = await this.linkUnlinkService.unlinkProgrammesFromAction(
+			[programme],
 			programme.action,
-			programme,
 			unlinkProgrammesDto,
 			user,
 			this.entityManager,
-			achievementsToRemove
+			achievementsToRemove,
+			false
 		);
 
 		await this.helperService.refreshMaterializedViews(this.entityManager);
