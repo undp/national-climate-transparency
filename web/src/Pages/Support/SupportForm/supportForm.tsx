@@ -148,8 +148,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
               direction: entityData.direction,
               financeNature: entityData.financeNature,
               internationalSupportChannel: entityData.internationalSupportChannel,
-              internationalFinancialInstrument: entityData.internationalFinancialInstrument,
-              nationalFinancialInstrument: entityData.nationalFinancialInstrument,
+              internationalFinancialInstrument:
+                entityData.internationalFinancialInstrument ?? undefined,
+              nationalFinancialInstrument: entityData.nationalFinancialInstrument ?? undefined,
               financingStatus: entityData.financingStatus,
               internationalSource: entityData.internationalSource ?? undefined,
               nationalSource: entityData.nationalSource ?? undefined,
