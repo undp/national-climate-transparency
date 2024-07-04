@@ -41,6 +41,8 @@ import {
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { StoredData, UploadData } from '../../../Definitions/uploadDefinitions';
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
+import { ValidateEntity } from '../../../Enums/user.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -58,6 +60,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post, put } = useConnection();
   const ability = useAbilityContext();
+  const { userInfoState } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -67,6 +70,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
+  const [isValidateButtonDisabled, setIsValidateButtonDisabled] = useState(false);
 
   // Parent Selection State
 
@@ -121,11 +125,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // Initialization Logic
 
   const mtgRange = 30;
-  const yearsList: number[] = [];
-
-  for (let year = mtgStartYear; year <= mtgStartYear + mtgRange; year++) {
-    yearsList.push(year);
-  }
 
   const handleParentIdSelect = (id: string) => {
     setConnectedParentId(id);
@@ -140,6 +139,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       parentDescription: '',
     });
   };
+
+  useEffect(() => {
+    // check user permission for validate action and disable validate button
+    if (userInfoState?.validatePermission === ValidateEntity.CANNOT) {
+      setIsValidateButtonDisabled(true);
+    }
+  }, [userInfoState]);
 
   // Tracking Parent selection
 
@@ -518,7 +524,14 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      displayErrorMessage(error, `${entId} Validation Failed`);
+      if (error?.message) {
+        if (error.message === 'Permission Denied: Unable to Validate Activity') {
+          setIsValidateButtonDisabled(true);
+        }
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Validation Failed`);
+      }
     }
   };
 
@@ -1650,6 +1663,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                         onClick={() => {
                           validateEntity();
                         }}
+                        disabled={isValidateButtonDisabled}
                       >
                         {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
                       </Button>

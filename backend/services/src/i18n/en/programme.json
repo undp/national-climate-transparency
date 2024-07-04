@@ -11,6 +11,7 @@
     "cannotLinkNotRelatedProgrammes": "User is not allowed to attach the programme with id {}",
     "cannotUnlinkNotRelatedProgrammes": "User is not allowed to detach the programme with id {}",
     "cannotEditValidated": "The programme with id {} is validated and cannot be edited",
+    "permissionDeniedForValidate": "Permission Denied: Unable to Validate Programme",
     "deleteProgrammeSuccess": "Programme deleted successfully",
     "programmeDeletionFailed": "Programme deletion failed due to {}"
 

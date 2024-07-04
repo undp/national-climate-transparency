@@ -33,5 +33,7 @@
     "observer": "Observer",
     "sectors" : "Sectors",
     "sector" : "Sector",
-    "organisation" : "Organisation"
+    "organisation" : "Organisation",
+    "validatePermission" : "Validation Permission Granted",
+    "subRolePermission" : "Sub Role Manipulation Permission Granted"
 }

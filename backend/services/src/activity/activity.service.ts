@@ -34,6 +34,7 @@ import { ActionEntity } from "../entities/action.entity";
 import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 import { AchievementEntity } from "../entities/achievement.entity";
+import { ValidateEntity } from "src/enums/user.enum";
 
 @Injectable()
 export class ActivityService {
@@ -1034,6 +1035,16 @@ export class ActivityService {
 				this.helperService.formatReqMessagesString(
 					"activity.permissionDeniedForSector",
 					[activity.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		if (user.validatePermission===ValidateEntity.CANNOT) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.permissionDeniedForValidate",
+					[],
 				),
 				HttpStatus.FORBIDDEN
 			);

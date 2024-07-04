@@ -45,7 +45,7 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Create, User);
       can(Action.Update, User);
       can(Action.Delete, User);
-      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'organisationType']);
+      cannot(Action.Update, User, ['apiKey', 'password', 'email', 'organisationType']);
 
       can(Action.Read, ActionEntity);
       can(Action.Create, ActionEntity);
@@ -135,7 +135,16 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(
         Action.Update,
         User,
-        ['role', 'apiKey', 'password', 'email', 'organisationType', 'sector'],
+        [
+          'role',
+          'apiKey',
+          'password',
+          'email',
+          'organisationType',
+          'sector',
+          'validatePermission',
+          'subRolePermission',
+        ],
         {
           id: { $eq: user.id },
         }
@@ -185,7 +194,16 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(
         Action.Update,
         User,
-        ['role', 'apiKey', 'password', 'email', 'organisationType', 'sector'],
+        [
+          'role',
+          'apiKey',
+          'password',
+          'email',
+          'organisationType',
+          'sector',
+          'validatePermission',
+          'subRolePermission',
+        ],
         {
           id: { $eq: user.id },
         }

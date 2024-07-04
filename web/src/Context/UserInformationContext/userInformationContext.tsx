@@ -38,13 +38,27 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
       ? parseInt(localStorage.getItem('userState') as string)
       : 0,
     userSectors: localStorage.getItem('userSectors')?.split(',') ?? [],
+    validatePermission: localStorage.getItem('validatePermission')
+      ? (localStorage.getItem('validatePermission') as string)
+      : '0',
+    subRolePermission: localStorage.getItem('subRolePermission')
+      ? (localStorage.getItem('subRolePermission') as string)
+      : '0',
   };
 
   const [userInfoState, setUserInfoState] = useState<UserProps>(initialUserProps);
 
   const setUserInfo = (value: UserProps) => {
     const state = userInfoState?.userState === 1 ? userInfoState?.userState : 0;
-    const { id, userRole, companyName, userState = state, userSectors } = value;
+    const {
+      id,
+      userRole,
+      companyName,
+      userState = state,
+      userSectors,
+      validatePermission,
+      subRolePermission,
+    } = value;
     if (id) {
       setUserInfoState((prev) => ({ ...prev, id }));
       localStorage.setItem('userId', id);
@@ -65,6 +79,12 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
 
     setUserInfoState((prev) => ({ ...prev, userSectors }));
     localStorage.setItem('userSectors', userSectors + '');
+
+    setUserInfoState((prev) => ({ ...prev, validatePermission }));
+    localStorage.setItem('validatePermission', validatePermission + '');
+
+    setUserInfoState((prev) => ({ ...prev, subRolePermission }));
+    localStorage.setItem('subRolePermission', subRolePermission + '');
   };
 
   const IsAuthenticated = useCallback(
@@ -103,6 +123,8 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     localStorage.removeItem('companyName');
     localStorage.removeItem('userState');
     localStorage.removeItem('userSectors');
+    localStorage.removeItem('validatePermission');
+    localStorage.removeItem('subRolePermission');
     localStorage.removeItem('token');
     setUserInfoState(initialUserProps);
   };

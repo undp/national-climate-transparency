@@ -17,6 +17,7 @@
     "verifyProjectSuccess": "Project verified successfully",
     "projectVerificationFailed": "Project verification failed due to {}",
     "cannotEditValidated": "The project with id {} is validated and cannot be edited",
+    "permissionDeniedForValidate": "Permission Denied: Unable to Validate Project",
     "deleteProjectSuccess": "Project deleted successfully",
     "projectDeletionFailed": "Project delete failed due to {}"
 

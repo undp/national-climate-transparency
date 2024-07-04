@@ -16,6 +16,7 @@ import { Role, SubRole } from "../casl/role.enum";
 import { Organisation } from "../enums/organisation.enum";
 import { IsValidCountry } from "../util/validcountry.decorator";
 import { Sector } from "../enums/sector.enum";
+import { SubRoleManipulate, ValidateEntity } from "../enums/user.enum";
 
 export class UserDto {
   @IsNotEmpty()
@@ -87,4 +88,18 @@ export class UserDto {
   password: string;
 
   apiKey?: string;
+
+  @IsNotEmpty()
+  @ApiProperty({ enum: ValidateEntity })
+  @IsEnum(ValidateEntity, {
+    message: "Invalid Entity Validate Permission. Supported following type:" + Object.values(ValidateEntity),
+  })
+  validatePermission: ValidateEntity;
+
+  @IsNotEmpty()
+  @ApiProperty({ enum: SubRoleManipulate })
+  @IsEnum(SubRoleManipulate, {
+    message: "Invalid Sub Role Manipulate Permission. Supported following type:" + Object.values(SubRoleManipulate),
+  })
+  subRolePermission: SubRoleManipulate;
 }

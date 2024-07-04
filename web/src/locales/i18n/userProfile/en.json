@@ -10,6 +10,8 @@
     "organisation": "Organisation",
     "sector": "Sectors",
     "phoneNo": "Phone",
+    "validatePermission" : "Validation Permission Granted",
+    "subRolePermission" : "Sub Role Manipulation Permission Granted",
     "taxId": "VAT Registration #",
     "paymentId" : "Registration Payment ID",
     "website": "Website",

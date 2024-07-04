@@ -32,6 +32,7 @@ import { SupportEntity } from "../entities/support.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ActionEntity } from "../entities/action.entity";
+import { ValidateEntity } from "src/enums/user.enum";
 import { DeleteDto } from "src/dtos/delete.dto";
 import { Role } from "src/casl/role.enum";
 
@@ -778,6 +779,16 @@ export class ProgrammeService {
 				this.helperService.formatReqMessagesString(
 					"programme.permissionDeniedForSector",
 					[programme.programmeId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		if (user.validatePermission===ValidateEntity.CANNOT) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.permissionDeniedForValidate",
+					[],
 				),
 				HttpStatus.FORBIDDEN
 			);

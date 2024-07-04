@@ -8,5 +8,7 @@
     "actionAlreadyValidated": "The action with id {} is already validated",
     "verifyActionSuccess": "Action verified successfully",
     "actionVerificationFailed": "Action verification failed due to {}",
-    "cannotEditValidated": "The action with id {} is validated and cannot be edited"
+    "cannotEditValidated": "The action with id {} is validated and cannot be edited",
+    "permissionDeniedForSector": "User permission denied for sector",
+    "permissionDeniedForValidate": "Permission Denied: Unable to Validate Action"
 }
