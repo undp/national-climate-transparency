@@ -141,7 +141,7 @@ export class ActivityService {
 							EntityType.PROGRAMME,
 							programme.programmeId,
 							0,
-							(project) ? project.projectId : activity.activityId
+							(activity.parentType == EntityType.PROGRAMME) ? activity.activityId : project.projectId
 						);
 						await em.save<ProgrammeEntity>(programme);
 					}
@@ -154,7 +154,7 @@ export class ActivityService {
 							EntityType.ACTION,
 							action.actionId,
 							0,
-							(programme) ? programme.programmeId : activity.activityId
+							(activity.parentType == EntityType.ACTION) ? activity.activityId : programme.programmeId
 						);
 						await em.save<ActionEntity>(action);
 					}

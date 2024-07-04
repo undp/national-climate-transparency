@@ -98,7 +98,7 @@ export class ProgrammeController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Delete, ProgrammeEntity))
 	@Delete("delete")
-	deleteSupport(@Body() deleteDto: DeleteDto, @Request() req) {
+	deleteProgramme(@Body() deleteDto: DeleteDto, @Request() req) {
 		return this.programmeService.deleteProgramme(deleteDto, req.user);
 	}
 }

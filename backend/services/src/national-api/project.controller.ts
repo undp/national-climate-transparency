@@ -98,7 +98,7 @@ export class ProjectController {
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Delete, ProjectEntity))
 	@Delete("delete")
-	deleteSupport(@Body() deleteDto: DeleteDto, @Request() req) {
+	deleteProject(@Body() deleteDto: DeleteDto, @Request() req) {
 		return this.projectService.deleteProject(deleteDto, req.user);
 	}
 }

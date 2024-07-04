@@ -9,6 +9,8 @@
     "verifyActionSuccess": "Action verified successfully",
     "actionVerificationFailed": "Action verification failed due to {}",
     "cannotEditValidated": "The action with id {} is validated and cannot be edited",
-    "permissionDeniedForSector": "User permission denied for sector",
-    "permissionDeniedForValidate": "Permission Denied: Unable to Validate Action"
+    "permissionDeniedForValidate": "Permission Denied: Unable to Validate Action",
+    "permissionDeniedForSector": "User does not have the permission for the sector",
+    "deleteActionSuccess": "Action deleted successfully",
+    "actionDeletionFailed": "Action deletion failed due to {}"
 }
