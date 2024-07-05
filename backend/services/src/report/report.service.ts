@@ -12,7 +12,7 @@ import { ReportTwelveViewEntity } from "../entities/report.twelve.view.entity";
 import { Reports } from "../enums/shared.enum";
 import { DataExportService } from "../util/dataExport.service";
 import { HelperService } from "../util/helpers.service";
-import { EntityManager, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { ReportSixViewEntity } from "../entities/report.six.view.entity";
 import { DataExportReportSixDto } from "../dtos/data.export.reportSix.dto";
 import { ReportSevenViewEntity } from "../entities/report.seven.view.entity";
@@ -25,6 +25,7 @@ import { ReportTenViewEntity } from "../entities/report.ten.view.entity";
 import { ReportElevenViewEntity } from "../entities/report.eleven.view.entity";
 import { DataExportReportTenDto } from "../dtos/data.export.reportTen.dto";
 import { DataExportReportElevenDto } from "../dtos/data.export.reportEleven.dto";
+import { ReportViewEntity } from "../entities/report.view.entity";
 
 export class ReportService {
 	constructor(
@@ -37,6 +38,7 @@ export class ReportService {
 		@InjectRepository(ReportNineViewEntity) private reportNineViewRepo: Repository<ReportNineViewEntity>,
 		@InjectRepository(ReportTenViewEntity) private reportTenViewRepo: Repository<ReportTenViewEntity>,
 		@InjectRepository(ReportElevenViewEntity) private reportElevenViewRepo: Repository<ReportElevenViewEntity>,
+		@InjectRepository(ReportViewEntity) private reportViewRepo: Repository<ReportViewEntity>,
 		private helperService: HelperService,
 		private dataExportService: DataExportService,
 	) { }
