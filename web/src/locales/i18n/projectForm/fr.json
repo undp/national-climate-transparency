@@ -23,6 +23,7 @@
   "attachACTIVITY": "JOINDRE DES ACTIVITÉS",
   "activityList": "Liste des activités",
   "projectCreationSuccess": "Projet ajouté avec succès",
+  "projectDeleteSuccess": "Projet supprimé avec succès",
   "noProjectsMessage": "Aucune activité attachée",
   "projectUpdateSuccess": "Projet mis à jour avec succès"
 }
