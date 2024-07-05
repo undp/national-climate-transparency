@@ -417,6 +417,10 @@ export const EmissionForm: React.FC<Props> = ({
 
           getAvailableEmissionReports();
 
+          if (state === 'FINALIZED') {
+            setIsFinalized(true);
+          }
+
           if (index === 0) {
             revertToInit();
             setActiveYear(emissionYear);
