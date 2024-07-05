@@ -63,5 +63,7 @@
     "yearFetchingFailed": "Recherche de l'Année Échouée !",
     "fileNotSupported": "Fichier Non Supporté !",
     "emissionCreationSuccess": "Données d'Émission Enregistrées avec Succès",
+    "emissionUpdateSuccess": "Données d'émission mises à jour avec succès",
+    "emissionValidateSuccess": "Données d'émission validées avec succès",
     "emissionYearRequired": "Année d'Émission Requise !"
 }

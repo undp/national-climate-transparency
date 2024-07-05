@@ -63,5 +63,7 @@
     "yearFetchingFailed": "වසර සෙවීම අසාර්ථකයි!",
     "fileNotSupported": "ගොනුව අනුමත නොවේ!",
     "emissionCreationSuccess": "හුස්මීම දත්ත සාර්ථකව සුරකිණි",
+    "emissionUpdateSuccess": "හුස්මීම දත්ත සාර්ථකව යාවත්කාලීන කරන ලදී",
+    "emissionValidateSuccess": "හුස්මීම දත්ත සාර්ථකව වලංගු කරන ලදී",
     "emissionYearRequired": "හුස්මීම වසර අවශ්‍යයි!"
 }
