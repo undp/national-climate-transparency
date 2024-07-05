@@ -51,7 +51,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   const formTitle = getFormTitle('Support', method);
 
   const navigate = useNavigate();
-  const { post, put } = useConnection();
+  const { post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
   const { userInfoState } = useUserContext();
   const { entId } = useParams();
@@ -275,8 +275,32 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   // Entity Delete
 
-  const deleteEntity = () => {
-    console.log('Delete Clicked');
+  const deleteEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await del('national/supports/delete', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('supportDeleteSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/support');
+        }
+      }
+    } catch (error: any) {
+      if (error?.message) {
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Delete Failed`);
+      }
+    }
   };
 
   // State update for currency inputs

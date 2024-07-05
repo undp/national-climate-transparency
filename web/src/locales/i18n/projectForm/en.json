@@ -26,5 +26,6 @@
     "projectUpdateSuccess": "Project Updated Successfully",
     "projectValidateSuccess": "Project Validated Successfully",
     "projectUnvalidateSuccess": "Project Unvalidated Successfully",
+    "projectDeleteSuccess": "Project Deleted Successfully",
     "noProjectsMessage": "No Activities Attached"
   }
