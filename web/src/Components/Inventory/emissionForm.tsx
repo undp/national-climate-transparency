@@ -1,6 +1,6 @@
 import { Row, Col, DatePicker, Button, message, Collapse, InputNumber } from 'antd';
 import './emissionForm.scss';
-import { getCollapseIcon } from '../../Utils/utilServices';
+import { getCollapseIcon, parseToTwoDecimals } from '../../Utils/utilServices';
 import {
   AgrLevels,
   EmissionUnits,
@@ -224,12 +224,13 @@ export const EmissionForm: React.FC<Props> = ({
   // Handle Data Enter
 
   const setIndividualEntry = (
-    newValue: number | undefined,
+    enteredValue: number | undefined,
     section: string,
     levelTwo: any,
     levelThree: any,
     unit: EmissionUnits
   ) => {
+    const newValue = enteredValue ? parseToTwoDecimals(enteredValue) : undefined;
     switch (section) {
       case 'eqWithout':
         setEqWithout((prevState) => ({
@@ -404,7 +405,12 @@ export const EmissionForm: React.FC<Props> = ({
         if (response.status === 200 || response.status === 201) {
           message.open({
             type: 'success',
-            content: t('emissionCreationSuccess'),
+            content:
+              index === 0
+                ? t('emissionCreationSuccess')
+                : state === 'SAVED'
+                ? t('emissionUpdateSuccess')
+                : t('emissionValidateSuccess'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
@@ -446,6 +452,7 @@ export const EmissionForm: React.FC<Props> = ({
             picker="year"
             size="middle"
             placeholder="Select Emission Year"
+            autoFocus={index === 0 ? true : false}
             disabledDate={disabledDate}
           />
         </Col>
@@ -520,9 +527,8 @@ export const EmissionForm: React.FC<Props> = ({
                                 unit
                               )
                             }
-                            type="number"
                             min={0}
-                            step={0.01}
+                            decimalSeparator="."
                             controls={false}
                             className="input-emission"
                           />
@@ -586,9 +592,8 @@ export const EmissionForm: React.FC<Props> = ({
                                       unit
                                     )
                                   }
-                                  type="number"
                                   min={0}
-                                  step={0.01}
+                                  decimalSeparator="."
                                   controls={false}
                                   className="input-emission"
                                 />
@@ -615,9 +620,8 @@ export const EmissionForm: React.FC<Props> = ({
               onChange={(value) =>
                 setIndividualEntry(value ?? undefined, 'eqWithout', null, null, unit)
               }
-              type="number"
               min={0}
-              step={0.01}
+              decimalSeparator="."
               controls={false}
               className="input-emission"
             />
@@ -636,9 +640,8 @@ export const EmissionForm: React.FC<Props> = ({
               onChange={(value) =>
                 setIndividualEntry(value ?? undefined, 'eqWith', null, null, unit)
               }
-              type="number"
               min={0}
-              step={0.01}
+              decimalSeparator="."
               controls={false}
               className="input-emission"
             />
@@ -666,7 +669,7 @@ export const EmissionForm: React.FC<Props> = ({
             htmlType="submit"
             onClick={() => handleEmissionAction('FINALIZED')}
           >
-            {t('entityAction:finalize')}
+            {t('entityAction:validate')}
           </Button>
         </Col>
       </Row>
