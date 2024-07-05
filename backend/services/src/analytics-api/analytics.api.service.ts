@@ -147,16 +147,6 @@ export class AnalyticsService {
 	}
 
 	async getGhgMitigationForYear(year: number) {
-
-		if (year > 2050 || year < 2015) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"stat.yearNotValid",
-					[year]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
 		try {
 			const query = `
 				SELECT 
