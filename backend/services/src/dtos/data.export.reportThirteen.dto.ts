@@ -1,16 +1,15 @@
 import { DataExportDto } from "./data.export.dto";
 
 export class DataExportReportThirteenDto extends DataExportDto {
-	projectId;
-	titleOfProject;
-	description;
-	recipientEntities;
-	projectStatus;
-	supportReceivedOrNeeded;
-	transparency;
-	startYear;
-	endYear;
-	receivedAmount;
-	receivedAmountDomestic;
-	internationalSupportChannel;
+	activityId: string;
+	titleOfActivity: string;
+	description: string;
+	startYear: string;
+	endYear: string;
+	recipientEntities: string[];
+	supportChannel: string;
+	receivedAmountDomestic: number;
+	receivedAmount: number;
+	activityStatus: string;
+	additionalInfo: string;
 }
