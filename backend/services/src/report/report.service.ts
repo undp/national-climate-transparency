@@ -85,14 +85,20 @@ export class ReportService {
 					direction = SupportDirection.RECEIVED;
 					implementation = [ImpleMeans.FINANCE, ImpleMeans.TRANSP];
 					break;
-				default:
-					break;
 			}
+
+			let implementationCondition = '';
+
+			implementation.forEach((implementation, index) => {
+				implementationCondition = index > 0 ? 
+					`${implementationCondition} OR annex_three.meansOfImplementation = '${implementation}'` : 
+					`annex_three.meansOfImplementation = '${implementation}'`
+			});
 
 			return this.annexThreeViewRepo
 					   .createQueryBuilder("annex_three")
 					   .where("annex_three.direction = :direction", { direction: direction })
-					   .andWhere("annex_three.meansOfImplementation = :meansOfImplementation1 OR annex_three.meansOfImplementation = :meansOfImplementation2", { meansOfImplementation1: implementation[0], meansOfImplementation2: implementation[1] })
+					   .andWhere(implementationCondition)
 		}
 	}
 
