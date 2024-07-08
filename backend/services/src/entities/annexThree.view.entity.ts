@@ -98,7 +98,7 @@ ORDER BY
 	name: 'annex_three_view',
 	materialized: false,
 	expression: annexThreeReportSQL,
-	synchronize: true,
+	synchronize: false,
 })
 export class AnnexThreeViewEntity {
 
