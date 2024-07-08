@@ -19,6 +19,7 @@ import { DataExportReportTenDto } from "../dtos/data.export.reportTen.dto";
 import { DataExportReportElevenDto } from "../dtos/data.export.reportEleven.dto";
 import { AnnexThreeViewEntity } from "../entities/annexThree.view.entity";
 import { ImpleMeans } from "src/enums/activity.enum";
+import { SupportDirection } from "src/enums/support.enum";
 
 export class ReportService {
 	constructor(
@@ -48,7 +49,50 @@ export class ReportService {
 		if (reportNumber === Reports.FIVE) {
 				return this.reportFiveViewRepo.createQueryBuilder("reportFive");
 		} else {
-			return this.annexThreeViewRepo.createQueryBuilder();
+			let direction: SupportDirection;
+			let implementation: ImpleMeans[];
+
+			switch(reportNumber){
+				case Reports.SIX:
+					direction = SupportDirection.NEEDED;
+					implementation = [ImpleMeans.FINANCE];
+					break;
+				case Reports.SEVEN:
+					direction = SupportDirection.RECEIVED;
+					implementation = [ImpleMeans.FINANCE];
+					break;
+				case Reports.EIGHT:
+					direction = SupportDirection.NEEDED;
+					implementation = [ImpleMeans.TECH_DEV];
+					break;
+				case Reports.NINE:
+					direction = SupportDirection.RECEIVED;
+					implementation = [ImpleMeans.TECH_DEV];
+					break;
+				case Reports.TEN:
+					direction = SupportDirection.NEEDED;
+					implementation = [ImpleMeans.CAPACITY_BUILD];
+					break;
+				case Reports.ELEVEN:
+					direction = SupportDirection.RECEIVED;
+					implementation = [ImpleMeans.CAPACITY_BUILD];
+					break;
+				case Reports.TWELVE:
+					direction = SupportDirection.NEEDED;
+					implementation = [ImpleMeans.FINANCE, ImpleMeans.TRANSP];
+					break;
+				case Reports.THIRTEEN:
+					direction = SupportDirection.RECEIVED;
+					implementation = [ImpleMeans.FINANCE, ImpleMeans.TRANSP];
+					break;
+				default:
+					break;
+			}
+
+			return this.annexThreeViewRepo
+					   .createQueryBuilder("annex_three")
+					   .where("annex_three.direction = :direction", { direction: direction })
+					   .andWhere("annex_three.meansOfImplementation = :meansOfImplementation1 OR annex_three.meansOfImplementation = :meansOfImplementation2", { meansOfImplementation1: implementation[0], meansOfImplementation2: implementation[1] })
 		}
 	}
 

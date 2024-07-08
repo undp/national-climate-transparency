@@ -59,6 +59,7 @@ a ON a."actionId" = t."parentId" OR a."actionId" = p."actionId"
 export const annexThreeReportSQL = `
 SELECT
     s."supportId",
+	s."direction",
 	s."internationalSupportChannel",
 	s."internationalFinancialInstrument",
 	s."financingStatus",
@@ -94,7 +95,7 @@ ORDER BY
 `
 
 @ViewEntity({
-	name: 'annex_three_report_view',
+	name: 'annex_three_view',
 	materialized: false,
 	expression: annexThreeReportSQL,
 	synchronize: true,
@@ -109,6 +110,9 @@ export class AnnexThreeViewEntity {
 	activityId: string;
 
 	// From Support Entity
+
+	@ViewColumn()
+	direction: string;
 
 	@ViewColumn()
 	internationalSupportChannel: string;
