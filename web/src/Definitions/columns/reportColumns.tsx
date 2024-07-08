@@ -88,7 +88,7 @@ export const getReportSixColumns = (t: any) => {
     },
     { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
     {
-      title: t('amountCommonTitle'),
+      title: t('amountRequiredTitle'),
       children: [
         {
           title: t('usd'),
@@ -194,7 +194,7 @@ export const getReportSevenColumns = (t: any) => {
       ],
     },
     {
-      title: t('amountCommonTitle'),
+      title: t('amountReceivedTitle'),
       children: [
         {
           title: t('usd'),
@@ -553,7 +553,7 @@ export const getReportTwelveColumns = (t: any) => {
     },
     { title: t('supportChannel'), dataIndex: 'supportChannel', key: 'supportChannel', width: 100 },
     {
-      title: t('amountCommonTitle'),
+      title: t('amountRequiredTitle'),
       children: [
         {
           title: t('usd'),
@@ -612,7 +612,7 @@ export const getReportThirteenColumns = (t: any) => {
     },
     { title: t('supportChannel'), dataIndex: 'supportChannel', key: 'supportChannel', width: 100 },
     {
-      title: t('amountCommonTitle'),
+      title: t('amountReceivedTitle'),
       children: [
         {
           title: t('usd'),
