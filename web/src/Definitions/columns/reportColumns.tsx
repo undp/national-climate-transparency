@@ -7,7 +7,6 @@ import {
   ReportSevenRecord,
   ReportSixRecord,
   ReportThirteenRecord,
-  ReportTwelveRecord,
 } from '../reportIndividualDefinitions';
 
 export const getReportFiveColumns = (t: any) => {
@@ -72,7 +71,7 @@ export const getReportFiveColumns = (t: any) => {
 export const getReportSixColumns = (t: any) => {
   const reportSixColumns = [
     {
-      title: t('titleOfProject'),
+      title: t('titleOfActivity'),
       dataIndex: 'title',
       key: 'title',
       width: 250,
@@ -103,20 +102,7 @@ export const getReportSixColumns = (t: any) => {
     },
     { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
     { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
-    {
-      title: t('internationalSupportChannel'),
-      width: 150,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: ReportSixRecord) => {
-        return <ScrollableList listToShow={record.internationalSupportChannel}></ScrollableList>;
-      },
-    },
-    {
-      title: t('supportDirection'),
-      dataIndex: 'supportDirection',
-      key: 'supportDirection',
-      width: 1000,
-    },
+    { title: t('supportChannel'), dataIndex: 'supportChannel', key: 'supportChannel', width: 100 },
     {
       title: t('amountCommonTitle'),
       children: [
@@ -142,7 +128,7 @@ export const getReportSixColumns = (t: any) => {
 export const getReportSevenColumns = (t: any) => {
   const reportSevenColumns = [
     {
-      title: t('titleOfProject'),
+      title: t('titleOfActivity'),
       dataIndex: 'title',
       key: 'title',
       width: 250,
@@ -171,7 +157,7 @@ export const getReportSevenColumns = (t: any) => {
       width: 100,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: ReportSevenRecord) => {
-        return <ScrollableList listToShow={record.natImplementers}></ScrollableList>;
+        return <ScrollableList listToShow={record.nationalImplementingEntities}></ScrollableList>;
       },
     },
     {
@@ -179,7 +165,9 @@ export const getReportSevenColumns = (t: any) => {
       width: 100,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: ReportSevenRecord) => {
-        return <ScrollableList listToShow={record.intImplementers}></ScrollableList>;
+        return (
+          <ScrollableList listToShow={record.internationalImplementingEntities}></ScrollableList>
+        );
       },
     },
     {
@@ -219,14 +207,7 @@ export const getReportSevenColumns = (t: any) => {
         },
       ],
     },
-    {
-      title: t('internationalSupportChannel'),
-      width: 150,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: ReportSevenRecord) => {
-        return <ScrollableList listToShow={record.internationalSupportChannel}></ScrollableList>;
-      },
-    },
+    { title: t('supportChannel'), dataIndex: 'supportChannel', key: 'supportChannel', width: 100 },
     {
       title: t('financialInstrument'),
       dataIndex: 'financialInstrument',
@@ -247,7 +228,7 @@ export const getReportSevenColumns = (t: any) => {
 export const getReportEightColumns = (t: any) => {
   const reportEightColumns = [
     {
-      title: t('titleOfProject'),
+      title: t('titleOfActivity'),
       dataIndex: 'title',
       key: 'title',
       width: 250,
@@ -263,20 +244,7 @@ export const getReportEightColumns = (t: any) => {
       },
     },
     { title: t('type'), dataIndex: 'type', key: 'type', width: 150 },
-    {
-      title: t('techType'),
-      width: 100,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: ReportEightRecord) => {
-        return <ScrollableList listToShow={record.techType}></ScrollableList>;
-      },
-    },
-    {
-      title: t('supportDirection'),
-      dataIndex: 'supportDirection',
-      key: 'supportDirection',
-      width: 250,
-    },
+    { title: t('techType'), dataIndex: 'technologyType', key: 'technologyType', width: 150 },
     { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
     { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
   ];
@@ -287,7 +255,7 @@ export const getReportEightColumns = (t: any) => {
 export const getReportNineColumns = (t: any) => {
   const reportNineColumns = [
     {
-      title: t('titleOfProject'),
+      title: t('titleOfActivity'),
       dataIndex: 'title',
       key: 'title',
       width: 250,
@@ -303,14 +271,7 @@ export const getReportNineColumns = (t: any) => {
       },
     },
     { title: t('type'), dataIndex: 'type', key: 'type', width: 150 },
-    {
-      title: t('techType'),
-      width: 100,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: ReportNineRecord) => {
-        return <ScrollableList listToShow={record.techType}></ScrollableList>;
-      },
-    },
+    { title: t('techType'), dataIndex: 'technologyType', key: 'technologyType', width: 150 },
     {
       title: t('recipientEntities'),
       width: 100,
@@ -324,16 +285,10 @@ export const getReportNineColumns = (t: any) => {
       width: 100,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: ReportNineRecord) => {
-        return <ScrollableList listToShow={record.natImplementers}></ScrollableList>;
+        return <ScrollableList listToShow={record.nationalImplementingEntities}></ScrollableList>;
       },
     },
-    { title: t('projectStatus'), dataIndex: 'projectStatus', key: 'projectStatus', width: 150 },
-    {
-      title: t('supportDirection'),
-      dataIndex: 'supportDirection',
-      key: 'supportDirection',
-      width: 250,
-    },
+    { title: t('activityStatus'), dataIndex: 'status', key: 'status', width: 150 },
     { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
     { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
   ];
@@ -344,7 +299,7 @@ export const getReportNineColumns = (t: any) => {
 export const getReportTenColumns = (t: any) => {
   const reportTenColumns = [
     {
-      title: t('titleOfProject'),
+      title: t('titleOfActivity'),
       dataIndex: 'title',
       key: 'title',
       width: 150,
@@ -360,12 +315,6 @@ export const getReportTenColumns = (t: any) => {
       },
     },
     { title: t('type'), dataIndex: 'type', key: 'type', width: 150 },
-    {
-      title: t('supportDirection'),
-      dataIndex: 'supportDirection',
-      key: 'supportDirection',
-      width: 100,
-    },
     { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
     { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
   ];
@@ -376,7 +325,7 @@ export const getReportTenColumns = (t: any) => {
 export const getReportElevenColumns = (t: any) => {
   const reportElevenColumns = [
     {
-      title: t('titleOfProject'),
+      title: t('titleOfActivity'),
       dataIndex: 'title',
       key: 'title',
       width: 150,
@@ -405,7 +354,7 @@ export const getReportElevenColumns = (t: any) => {
       width: 100,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: ReportSevenRecord) => {
-        return <ScrollableList listToShow={record.natImplementers}></ScrollableList>;
+        return <ScrollableList listToShow={record.nationalImplementingEntities}></ScrollableList>;
       },
     },
     {
@@ -413,13 +362,15 @@ export const getReportElevenColumns = (t: any) => {
       width: 100,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: ReportSevenRecord) => {
-        return <ScrollableList listToShow={record.intImplementers}></ScrollableList>;
+        return (
+          <ScrollableList listToShow={record.internationalImplementingEntities}></ScrollableList>
+        );
       },
     },
     {
-      title: t('projectStatus'),
-      dataIndex: 'projectStatus',
-      key: 'projectStatus',
+      title: t('activityStatus'),
+      dataIndex: 'status',
+      key: 'status',
       width: 100,
     },
     {
@@ -438,25 +389,13 @@ export const getReportElevenColumns = (t: any) => {
 export const getReportTwelveColumns = (t: any) => {
   const reportTwelveColumns = [
     {
-      title: t('titleOfProject'),
+      title: t('titleOfActivity'),
       dataIndex: 'title',
       key: 'title',
       width: 150,
     },
-    { title: t('descriptionOfProject'), dataIndex: 'description', key: 'description', width: 150 },
-    { title: t('statusOfProject'), dataIndex: 'status', key: 'status', width: 100 },
-    {
-      title: t('supportDirection'),
-      dataIndex: 'supportDirection',
-      key: 'supportDirection',
-      width: 100,
-    },
-    {
-      title: t('isEnhancingTransparency'),
-      dataIndex: 'isEnhancingTransparency',
-      key: 'isEnhancingTransparency',
-      width: 100,
-    },
+    { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('activityStatus'), dataIndex: 'status', key: 'status', width: 100 },
     { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
     { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
     {
@@ -476,14 +415,7 @@ export const getReportTwelveColumns = (t: any) => {
         },
       ],
     },
-    {
-      title: t('internationalSupportChannel'),
-      width: 150,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: ReportTwelveRecord) => {
-        return <ScrollableList listToShow={record.internationalSupportChannel}></ScrollableList>;
-      },
-    },
+    { title: t('supportChannel'), dataIndex: 'supportChannel', key: 'supportChannel', width: 100 },
   ];
 
   return reportTwelveColumns;
@@ -492,12 +424,12 @@ export const getReportTwelveColumns = (t: any) => {
 export const getReportThirteenColumns = (t: any) => {
   const reportThirteenColumns = [
     {
-      title: t('titleOfProject'),
+      title: t('titleOfActivity'),
       dataIndex: 'title',
       key: 'title',
       width: 150,
     },
-    { title: t('descriptionOfProject'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
     {
       title: t('recipientEntities'),
       width: 150,
@@ -506,19 +438,7 @@ export const getReportThirteenColumns = (t: any) => {
         return <ScrollableList listToShow={record.recipientEntities}></ScrollableList>;
       },
     },
-    { title: t('statusOfProject'), dataIndex: 'projectStatus', key: 'projectStatus', width: 100 },
-    {
-      title: t('supportDirection'),
-      dataIndex: 'supportDirection',
-      key: 'supportDirection',
-      width: 100,
-    },
-    {
-      title: t('isEnhancingTransparency'),
-      dataIndex: 'isEnhancingTransparency',
-      key: 'isEnhancingTransparency',
-      width: 100,
-    },
+    { title: t('activityStatus'), dataIndex: 'status', key: 'status', width: 100 },
     { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
     { title: t('endYear'), dataIndex: 'endYear', key: 'endYear', width: 100 },
     {
@@ -538,14 +458,7 @@ export const getReportThirteenColumns = (t: any) => {
         },
       ],
     },
-    {
-      title: t('internationalSupportChannel'),
-      width: 150,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: ReportTwelveRecord) => {
-        return <ScrollableList listToShow={record.internationalSupportChannel}></ScrollableList>;
-      },
-    },
+    { title: t('supportChannel'), dataIndex: 'supportChannel', key: 'supportChannel', width: 100 },
   ];
 
   return reportThirteenColumns;

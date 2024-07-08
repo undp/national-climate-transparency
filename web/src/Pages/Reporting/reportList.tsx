@@ -38,6 +38,7 @@ import {
 } from '../../Definitions/reportBulkDefinitions';
 import { ReportType } from '../../Enums/report.enum';
 import { Col, Empty, Row, Select, SelectProps, Tag } from 'antd';
+import { ImplMeans } from '../../Enums/activity.enum';
 
 const { Option } = Select;
 type TagRender = SelectProps['tagRender'];
@@ -130,25 +131,26 @@ const reportList = () => {
       if (response) {
         const tempReportSixData: ReportSixRecord[] = [];
 
-        response.data.forEach((entry: any, index: number) => {
+        response.data.forEach((report: any, index: number) => {
           tempReportSixData.push({
             key: index,
-            title: entry.title,
-            description: entry.description,
-            objective: entry.objective,
-            sector: entry.sector,
-            subSectors: entry.subSectors ?? [],
-            type: entry.type,
-            natAnchor: entry.anchoredInNationalStrategy,
-            techDevelopment: entry.techDevelopment,
-            capacityBuilding: entry.capacityBuilding,
-            startYear: entry.startYear,
-            endYear: entry.endYear,
-            internationalSupportChannel: entry.internationalSupportChannel ?? [],
-            supportDirection: entry.supportReceivedOrNeeded,
-            receivedAmount: entry.receivedAmount,
-            receivedAmountDomestic: entry.receivedAmountDomestic,
-            financialInstrument: entry.financialInstrument,
+            activityId: report.activityId,
+            sector: report.sector,
+            subSectors: report.subSector,
+            titleOfActivity: report.title,
+            description: report.description,
+            requiredAmountDomestic: report.requiredAmountDomestic,
+            requiredAmount: report.requiredAmount,
+            startYear: report.startYear,
+            endYear: report.endYear,
+            financialInstrument: report.internationalFinancialInstrument,
+            type: report.type,
+            techDevelopment: report.meansOfImplementation === ImplMeans.TECH_DEV ? 'Yes' : 'No',
+            capacityBuilding:
+              report.meansOfImplementation === ImplMeans.CAPACITY_BUILD ? 'Yes' : 'No',
+            anchoredInNationalStrategy: report.anchoredInNationalStrategy ? 'Yes' : 'No',
+            additionalInfo: report.etfDescription,
+            supportChannel: report.internationalSupportChannel,
           });
         });
 
@@ -183,28 +185,30 @@ const reportList = () => {
       if (response) {
         const tempReportSevenData: ReportSevenRecord[] = [];
 
-        response.data.forEach((entry: any, index: number) => {
+        response.data.forEach((report: any, index: number) => {
           tempReportSevenData.push({
             key: index,
-            title: entry.title,
-            description: entry.description,
-            objective: entry.objective,
-            sector: entry.sector,
-            subSectors: entry.subSectors ?? [],
-            type: entry.type,
-            recipientEntities: entry.recipientEntities ?? [],
-            natImplementers: entry.nationalImplementingEntities ?? [],
-            intImplementers: entry.internationalImplementingEntities ?? [],
-            supportDirection: entry.supportReceivedOrNeeded,
-            techDevelopment: entry.techDevelopment,
-            capacityBuilding: entry.capacityBuilding,
-            startYear: entry.startYear,
-            endYear: entry.endYear,
-            receivedAmount: entry.receivedAmount,
-            receivedAmountDomestic: entry.receivedAmountDomestic,
-            internationalSupportChannel: entry.internationalSupportChannel ?? [],
-            financialInstrument: entry.financialInstrument,
-            financingStatus: entry.financingStatus,
+            activityId: report.activityId,
+            titleOfActivity: report.title,
+            description: report.description,
+            supportChannel: report.internationalSupportChannel,
+            recipientEntities: report.recipientEntities,
+            nationalImplementingEntities: report.nationalImplementingEntity,
+            internationalImplementingEntities: report.internationalImplementingEntity,
+            receivedAmount: report.receivedAmount,
+            receivedAmountDomestic: report.receivedAmountDomestic,
+            startYear: report.startYear,
+            endYear: report.endYear,
+            financialInstrument: report.internationalFinancialInstrument,
+            financingStatus: report.financingStatus,
+            type: report.type,
+            sector: report.sector,
+            subSectors: report.subSector,
+            techDevelopment: report.meansOfImplementation === ImplMeans.TECH_DEV ? 'Yes' : 'No',
+            capacityBuilding:
+              report.meansOfImplementation === ImplMeans.CAPACITY_BUILD ? 'Yes' : 'No',
+            activityStatus: report.status,
+            additionalInfo: report.etfDescription,
           });
         });
 
@@ -239,19 +243,19 @@ const reportList = () => {
       if (response) {
         const tempReportEightData: ReportEightRecord[] = [];
 
-        response.data.forEach((entry: any, index: number) => {
+        response.data.forEach((report: any, index: number) => {
           tempReportEightData.push({
             key: index,
-            title: entry.title,
-            description: entry.description,
-            objective: entry.objective,
-            sector: entry.sector,
-            subSectors: entry.subSectors ?? [],
-            type: entry.type,
-            techType: entry.technologyType ?? [],
-            supportDirection: entry.supportReceivedOrNeeded,
-            startYear: entry.startYear,
-            endYear: entry.endYear,
+            activityId: report.activityId,
+            sector: report.sector,
+            subSectors: report.subSector,
+            titleOfActivity: report.title,
+            description: report.description,
+            type: report.type,
+            technologyType: report.technologyType,
+            startYear: report.startYear,
+            endYear: report.endYear,
+            additionalInfo: report.etfDescription,
           });
         });
 
@@ -286,22 +290,23 @@ const reportList = () => {
       if (response) {
         const tempReportNineData: ReportNineRecord[] = [];
 
-        response.data.forEach((entry: any, index: number) => {
+        response.data.forEach((report: any, index: number) => {
           tempReportNineData.push({
             key: index,
-            title: entry.title,
-            description: entry.description,
-            objective: entry.objective,
-            sector: entry.sector,
-            subSectors: entry.subSectors ?? [],
-            type: entry.type,
-            techType: entry.technologyType ?? [],
-            recipientEntities: entry.recipientEntities ?? [],
-            natImplementers: entry.nationalImplementingEntities ?? [],
-            projectStatus: entry.projectStatus,
-            supportDirection: entry.supportReceivedOrNeeded,
-            startYear: entry.startYear,
-            endYear: entry.endYear,
+            activityId: report.activityId,
+            titleOfActivity: report.title,
+            description: report.description,
+            technologyType: report.technologyType,
+            startYear: report.startYear,
+            endYear: report.endYear,
+            recipientEntities: report.recipientEntities,
+            nationalImplementingEntities: report.nationalImplementingEntity,
+            internationalImplementingEntities: report.internationalImplementingEntity,
+            type: report.type,
+            sector: report.sector,
+            subSectors: report.subSector,
+            activityStatus: report.status,
+            additionalInfo: report.etfDescription,
           });
         });
 
@@ -336,18 +341,18 @@ const reportList = () => {
       if (response) {
         const tempReportTenData: ReportTenRecord[] = [];
 
-        response.data.forEach((entry: any, index: number) => {
+        response.data.forEach((report: any, index: number) => {
           tempReportTenData.push({
             key: index,
-            title: entry.title,
-            description: entry.description,
-            objective: entry.objective,
-            sector: entry.sector,
-            subSectors: entry.subSectors ?? [],
-            type: entry.type,
-            startYear: entry.startYear,
-            endYear: entry.endYear,
-            supportDirection: entry.supportReceivedOrNeeded,
+            activityId: report.activityId,
+            sector: report.sector,
+            subSectors: report.subSector,
+            titleOfActivity: report.title,
+            description: report.description,
+            type: report.type,
+            startYear: report.startYear,
+            endYear: report.endYear,
+            additionalInfo: report.etfDescription,
           });
         });
 
@@ -382,22 +387,22 @@ const reportList = () => {
       if (response) {
         const tempReportElevenData: ReportElevenRecord[] = [];
 
-        response.data.forEach((entry: any, index: number) => {
+        response.data.forEach((report: any, index: number) => {
           tempReportElevenData.push({
             key: index,
-            title: entry.title,
-            description: entry.description,
-            objective: entry.objective,
-            sector: entry.sector,
-            subSectors: entry.subSectors ?? [],
-            type: entry.type,
-            projectStatus: entry.projectStatus,
-            recipientEntities: entry.recipientEntities ?? [],
-            natImplementers: entry.nationalImplementingEntities ?? [],
-            intImplementers: entry.internationalImplementingEntities ?? [],
-            supportDirection: entry.supportReceivedOrNeeded,
-            startYear: entry.startYear,
-            endYear: entry.endYear,
+            activityId: report.activityId,
+            titleOfActivity: report.title,
+            description: report.description,
+            startYear: report.startYear,
+            endYear: report.endYear,
+            recipientEntities: report.recipientEntities,
+            nationalImplementingEntities: report.nationalImplementingEntity,
+            internationalImplementingEntities: report.internationalImplementingEntity,
+            type: report.type,
+            sector: report.sector,
+            subSectors: report.subSector,
+            activityStatus: report.status,
+            additionalInfo: report.etfDescription,
           });
         });
 
@@ -432,22 +437,20 @@ const reportList = () => {
       if (response) {
         const tempReportTwelveData: ReportTwelveRecord[] = [];
 
-        response.data.forEach((entry: any, index: number) => {
+        response.data.forEach((report: any, index: number) => {
           tempReportTwelveData.push({
             key: index,
-            title: entry.title,
-            description: entry.description,
-            objective: entry.objective,
-            status: entry.projectStatus,
-            supportDirection: entry.supportReceivedOrNeeded,
-            isEnhancingTransparency: entry.transparency,
-            startYear: entry.startYear,
-            endYear: entry.endYear,
-            fundUsd: entry.receivedAmount,
-            fundDomestic: entry.receivedAmountDomestic,
-            internationalSupportChannel:
-              entry.internationalSupportChannel?.split(',').map((item: string) => item.trim()) ??
-              [],
+            activityId: report.activityId,
+            titleOfActivity: report.title,
+            description: report.description,
+            startYear: report.startYear,
+            endYear: report.endYear,
+            recipientEntities: report.recipientEntities,
+            supportChannel: report.internationalSupportChannel,
+            requiredAmountDomestic: report.requiredAmountDomestic,
+            requiredAmount: report.requiredAmount,
+            activityStatus: report.status,
+            additionalInfo: report.etfDescription,
           });
         });
 
@@ -482,22 +485,20 @@ const reportList = () => {
       if (response) {
         const tempReportThirteenData: ReportThirteenRecord[] = [];
 
-        response.data.forEach((entry: any, index: number) => {
+        response.data.forEach((report: any, index: number) => {
           tempReportThirteenData.push({
             key: index,
-            title: entry.title,
-            description: entry.description,
-            recipientEntities: entry.recipientEntities ?? [],
-            projectStatus: entry.projectStatus,
-            supportDirection: entry.supportReceivedOrNeeded,
-            isEnhancingTransparency: entry.transparency,
-            startYear: entry.startYear,
-            endYear: entry.endYear,
-            fundUsd: entry.receivedAmount,
-            fundDomestic: entry.receivedAmountDomestic,
-            internationalSupportChannel:
-              entry.internationalSupportChannel?.split(',').map((item: string) => item.trim()) ??
-              [],
+            activityId: report.activityId,
+            titleOfActivity: report.title,
+            description: report.description,
+            startYear: report.startYear,
+            endYear: report.endYear,
+            recipientEntities: report.recipientEntities,
+            supportChannel: report.internationalSupportChannel,
+            receivedAmountDomestic: report.receivedAmountDomestic,
+            receivedAmount: report.receivedAmount,
+            activityStatus: report.status,
+            additionalInfo: report.etfDescription,
           });
         });
 
