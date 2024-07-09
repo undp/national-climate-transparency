@@ -38,13 +38,13 @@ export class GHGProjectionController {
 
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))
     @Get('/:projectionType/:projectionYear')
-    getEmissions(@Param('projectionType') projectionType: ProjectionType, @Param('projectionYear') projectionYear: string) {
+    getProjections(@Param('projectionType') projectionType: ProjectionType, @Param('projectionYear') projectionYear: string) {
       return this.projectionService.getProjectionByYear(projectionType, projectionYear);
     }
 
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))
-    @Get("/available/:projectionType")
-    getEmissionYears(@Param('projectionType') projectionType: ProjectionType) {
+    @Get("/summary/available/:projectionType")
+    getProjectionYears(@Param('projectionType') projectionType: ProjectionType) {
       return this.projectionService.getProjectionSummary(projectionType);
     }
     

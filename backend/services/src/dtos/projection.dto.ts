@@ -2,22 +2,23 @@ import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString, isString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProjectionType } from 'src/enums/projection.enum';
+import { GHGRecordState } from 'src/enums/ghg.state.enum';
 
 export class ProjectionProperties {
   @IsNotEmpty()
   @ApiPropertyOptional()
   @IsOptional()
-  withoutMeasures: number;
+  BAU: number;
 
   @IsNotEmpty()
   @ApiPropertyOptional()
   @IsOptional()
-  withMeasures: number;
+  ConditionalNDC: number;
 
   @IsNotEmpty()
   @ApiPropertyOptional()
   @IsOptional()
-  withAdditionalMeasures: number;
+  UnconditionalNDC: number;
 }
 
 export class ProjectionFuelCombustionActivities {
@@ -281,8 +282,10 @@ export class ProjectionDto {
     @Type(() => ProjectionProperties)
     totalCo2WithLand: ProjectionProperties;
   
-    @ApiPropertyOptional()
-    @IsString()
     @IsNotEmpty()
-    state: string;
+	@ApiProperty({ enum: GHGRecordState })
+	@IsEnum(GHGRecordState, {
+		message: "Invalid State. Supported following states:" + Object.values(GHGRecordState),
+	})
+	state: GHGRecordState;
 }

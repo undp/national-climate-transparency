@@ -1,6 +1,7 @@
 import { Entity, Column, Unique, PrimaryGeneratedColumn } from 'typeorm';
 import { GHGRecordState } from 'src/enums/ghg.state.enum';
 import { ProjectionAgricultureForestryOtherLandUse, ProjectionEnergyEmissions, ProjectionIndustrialProcessesProductUse, ProjectionOther, ProjectionProperties, ProjectionWaste } from 'src/dtos/projection.dto';
+import { ProjectionType } from 'src/enums/projection.enum';
 
 @Entity()
 @Unique(['year'])
@@ -11,7 +12,7 @@ export class ProjectionEntity {
   @Column({ nullable: false })
   year: string;
 
-  @Column({ nullable: false })
+  @Column({ type: "enum", enum: ProjectionType, nullable: false })
   projectionType: string;
 
   @Column({

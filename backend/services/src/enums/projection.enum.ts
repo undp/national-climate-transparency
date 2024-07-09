@@ -4,3 +4,8 @@ export enum ProjectionType {
     WITHOUT_MEASURES = "Without Measures",
 }
   
+export enum ProjectionCategories {
+    BAU = "BAU",
+    CONDITIONAL_NDC = "ConditionalNDC",
+    UNCONDITIONAL_NDC = "Unconditional NDC"
+}
