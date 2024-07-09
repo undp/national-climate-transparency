@@ -30,6 +30,10 @@ export class GhgEmissionsService {
             );
         }
 
+        if (!this.helperService.isValidYear(emissionDto.year)){
+            throw new HttpException('Invalid Emission Year Received', HttpStatus.BAD_REQUEST);
+        }
+
         const emission: EmissionEntity = this.toEmission(emissionDto);
         this.verifyEmissionValues(emission);
 
@@ -119,6 +123,11 @@ export class GhgEmissionsService {
     }
 
     getEmissionByYear = async (year: string) => {
+
+        if (!this.helperService.isValidYear(year)){
+            throw new HttpException('Invalid Emission Year Received', HttpStatus.BAD_REQUEST);
+        }
+
         return await this.emissionRepo.find({
             where: {
                 year: year

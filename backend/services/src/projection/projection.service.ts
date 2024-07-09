@@ -9,6 +9,7 @@ import { Role } from '../casl/role.enum';
 import { BaselineDto } from 'src/dtos/baseline.dto';
 import { ProjectionEntity } from 'src/entities/projection.entity';
 import { ProjectionDto } from 'src/dtos/projection.dto';
+import { ProjectionType } from 'src/enums/projection.enum';
 
 @Injectable()
 export class GhgProjectionService {
@@ -21,10 +22,23 @@ export class GhgProjectionService {
     ) { };
 
     async create(projectionDto: ProjectionDto, user: User) {
-        return projectionDto;
+
+      if (!this.helperService.isValidYear(projectionDto.year)){
+        throw new HttpException('Invalid Projection Year Received', HttpStatus.BAD_REQUEST);
+      }
+
+      return projectionDto;
     }
 
-    async getProjectionByYear(projectionType: string, projectionYear: string) {
+    async getProjectionByYear(projectionType: ProjectionType, projectionYear: string) {
+
+        if (!Object.values(ProjectionType).includes(projectionType)){
+          throw new HttpException('Invalid Projection Type Received', HttpStatus.BAD_REQUEST);
+        }
+
+        if (!this.helperService.isValidYear(projectionYear)){
+          throw new HttpException('Invalid Projection Year Received', HttpStatus.BAD_REQUEST);
+        }
         // return await this.emissionRepo.find({
         //     where: {
         //         projectionType: projectionType,
@@ -34,7 +48,11 @@ export class GhgProjectionService {
         return [projectionType, projectionYear]
     }
 
-    async getProjectionSummary(projectionType: string) {
+    async getProjectionSummary(projectionType: ProjectionType) {
+
+      if (!Object.values(ProjectionType).includes(projectionType)){
+        throw new HttpException('Invalid Projection Type Received', HttpStatus.BAD_REQUEST);
+      }
         // const emissions = await this.emissionRepo
         //     .createQueryBuilder("emission_entity")
         //     .select(["year", "state"])
@@ -52,6 +70,10 @@ export class GhgProjectionService {
         //     .getRawMany();
             
         // return emissions;
+
+        if (!this.helperService.isValidYear(baselineDto.projectionYear)){
+          throw new HttpException('Invalid Projection Year Received', HttpStatus.BAD_REQUEST);
+        }
 
         return baselineDto;
     }

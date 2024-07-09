@@ -1,14 +1,17 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { ProjectionType } from "src/enums/projection.enum";
 
 export class BaselineDto {
 
-	@IsString()
 	@IsNotEmpty()
-	@ApiProperty()
-	projectionType: string;
+	@ApiProperty({ enum: ProjectionType })
+	@IsEnum(ProjectionType, {
+		message: "Invalid Projection Type. Supported following status:" + Object.values(ProjectionType),
+	})
+	projectionType: ProjectionType;
 
-	@IsBoolean()
+	@IsString()
 	@IsNotEmpty()
 	@ApiProperty()
 	projectionYear: string;

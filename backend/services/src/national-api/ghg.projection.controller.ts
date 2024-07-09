@@ -15,6 +15,7 @@ import { GhgProjectionService } from "src/projection/projection.service";
 import { BaselineDto } from "src/dtos/baseline.dto";
 import { ProjectionEntity } from "src/entities/projection.entity";
 import { ProjectionDto } from "src/dtos/projection.dto";
+import { ProjectionType } from "src/enums/projection.enum";
 
 @ApiTags("Projections")
 @ApiBearerAuth()
@@ -25,6 +26,7 @@ export class GHGProjectionController {
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Create, ProjectionEntity))
     @Post("add")
     addEmission(@Body() projectionDto: ProjectionDto, @Request() req) {
+      console.log("came here")
         return this.projectionService.create(projectionDto, req.user);
     }
 
@@ -36,13 +38,13 @@ export class GHGProjectionController {
 
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))
     @Get('/:projectionType/:projectionYear')
-    getEmissions(@Param('projectionType') projectionType: string, @Param('projectionYear') projectionYear: string) {
+    getEmissions(@Param('projectionType') projectionType: ProjectionType, @Param('projectionYear') projectionYear: string) {
       return this.projectionService.getProjectionByYear(projectionType, projectionYear);
     }
 
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))
     @Get("/available/:projectionType")
-    getEmissionYears(@Param('projectionType') projectionType: string) {
+    getEmissionYears(@Param('projectionType') projectionType: ProjectionType) {
       return this.projectionService.getProjectionSummary(projectionType);
     }
     

@@ -19,6 +19,7 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { SupportEntity } from "../entities/support.entity";
 import { KpiEntity } from "../entities/kpi.entity";
 import { EmissionEntity } from "src/entities/emission.entity";
+import { ProjectionEntity } from "src/entities/projection.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -89,10 +90,10 @@ export class CaslAbilityFactory {
 				can(Action.Delete, EmissionEntity);
 
 				//Projection
-				can(Action.Read, ProjectEntity);
-				can(Action.Create, ProjectEntity);
-				can(Action.Update, ProjectEntity);
-				can(Action.Delete, ProjectEntity);
+				can(Action.Read, ProjectionEntity);
+				can(Action.Create, ProjectionEntity);
+				can(Action.Update, ProjectionEntity);
+				can(Action.Delete, ProjectionEntity);
 			}
 
 			if (user.role == Role.Admin) {
@@ -153,10 +154,10 @@ export class CaslAbilityFactory {
 				can(Action.Delete, EmissionEntity);
 
 				//Projection
-				can(Action.Read, ProjectEntity);
-				can(Action.Create, ProjectEntity);
-				can(Action.Update, ProjectEntity);
-				can(Action.Delete, ProjectEntity);
+				can(Action.Read, ProjectionEntity);
+				can(Action.Create, ProjectionEntity);
+				can(Action.Update, ProjectionEntity);
+				can(Action.Delete, ProjectionEntity);
 			}
 
 			if (user.role == Role.GovernmentUser) {
@@ -267,10 +268,10 @@ export class CaslAbilityFactory {
 				can(Action.Delete, EmissionEntity);
 
 				//Projection
-				can(Action.Read, ProjectEntity);
-				can(Action.Create, ProjectEntity);
-				can(Action.Update, ProjectEntity);
-				can(Action.Delete, ProjectEntity);
+				can(Action.Read, ProjectionEntity);
+				can(Action.Create, ProjectionEntity);
+				can(Action.Update, ProjectionEntity);
+				can(Action.Delete, ProjectionEntity);
 			}
 
 			if (user.role == Role.Observer) {
@@ -378,10 +379,10 @@ export class CaslAbilityFactory {
 				cannot(Action.Delete, EmissionEntity);
 
 				//Projection
-				can(Action.Read, ProjectEntity);
-				cannot(Action.Create, ProjectEntity);
-				cannot(Action.Update, ProjectEntity);
-				cannot(Action.Delete, ProjectEntity);
+				can(Action.Read, ProjectionEntity);
+				cannot(Action.Create, ProjectionEntity);
+				cannot(Action.Update, ProjectionEntity);
+				cannot(Action.Delete, ProjectionEntity);
 			}
 
 		}

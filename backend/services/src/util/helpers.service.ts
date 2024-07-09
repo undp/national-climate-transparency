@@ -538,6 +538,18 @@ public doesUserHaveSectorPermission(user: User, sectorScope: Sector) {
   return can;
 }
 
+public isValidYear(yearStr: string): boolean {
+  const yearRegex = /^\d{4}$/;
+
+  if (yearRegex.test(yearStr)) {
+      const year = parseInt(yearStr, 10);
+      if (year >= 1000 && year <= 9999) {
+          return true;
+      }
+  }
+  return false;
+}
+
   // public async uploadCompanyLogoS3(companyId: number, companyLogo: string) {
   // var AWS = require("aws-sdk");
   // const s3 = new AWS.S3();
