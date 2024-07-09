@@ -125,7 +125,7 @@ export const EmailTemplates = {
         <a href="{{home}}/resetPassword/{{requestId}}">Click here to reset the password</a>
         <br><br>
 
-        If you do not use {{countryName}} NDC Transparency System please ignore this email.
+        If you do not use {{countryName}} NDC Transparency System, please ignore this email.
 
         <br><br>
         Sincerely, <br>
