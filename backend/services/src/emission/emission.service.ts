@@ -9,7 +9,7 @@ import { FileHandlerInterface } from 'src/file-handler/filehandler.interface';
 import { EmissionDto } from 'src/dtos/emission.dto';
 import { User } from 'src/entities/user.entity';
 import { Role } from 'src/casl/role.enum';
-import { GHGEmissionRecordState } from 'src/enums/ghg.emission.state.enum';
+import { GHGRecordState } from 'src/enums/ghg.state.enum';
 
 @Injectable()
 export class GhgEmissionsService {
@@ -37,7 +37,7 @@ export class GhgEmissionsService {
         const result = await this.getEmissionByYear(emission.year);
 
         if (result && result.length > 0) {
-            if (result[0].state === GHGEmissionRecordState.FINALIZED) {
+            if (result[0].state === GHGRecordState.FINALIZED) {
                 throw new HttpException(
                     this.helperService.formatReqMessagesString("ghgInventory.cannotEditEmissionFinalized", []),
                     HttpStatus.FORBIDDEN

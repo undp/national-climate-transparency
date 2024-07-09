@@ -1,4 +1,4 @@
-export enum GHGEmissionRecordState {
+export enum GHGRecordState {
     SAVED = "SAVED",
     FINALIZED = "FINALIZED",
 }

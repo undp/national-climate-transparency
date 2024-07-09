@@ -6,11 +6,11 @@ import { FileHandlerModule } from "../file-handler/filehandler.module";
 import { UserModule } from "../user/user.module";
 import { AsyncOperationsModule } from '../async-operations/async-operations.module';
 import { GhgProjectionService } from "./projection.service";
-import { EmissionEntity } from "../entities/emission.entity";
+import { ProjectionEntity } from "src/entities/projection.entity";
 
 @Module({
   imports: [
-  TypeOrmModule.forFeature([EmissionEntity]),
+  TypeOrmModule.forFeature([ProjectionEntity]),
   CaslModule,
   UtilModule,
   FileHandlerModule,

@@ -5,7 +5,7 @@ import { EmissionAgricultureForestryOtherLandUse } from '../dtos/emission.agricu
 import { EmissionWaste } from '../dtos/emission.waste';
 import { EmissionOther } from '../dtos/emission.other';
 import { EmissionProperties } from '../dtos/emission.properties';
-import { GHGEmissionRecordState } from 'src/enums/ghg.emission.state.enum';
+import { GHGRecordState } from 'src/enums/ghg.state.enum';
 
 @Entity()
 @Unique(['year'])
@@ -43,10 +43,10 @@ export class EmissionEntity {
 
   @Column({
     type: 'enum',
-    enum: GHGEmissionRecordState,
+    enum: GHGRecordState,
     array: false,
   })
-  state: GHGEmissionRecordState;
+  state: GHGRecordState;
 
   @Column({ nullable: true })
   emissionDocument: string;

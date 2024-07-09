@@ -1,13 +1,14 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { instanceToPlain, plainToClass } from "class-transformer";
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, QueryFailedError, Repository } from 'typeorm';
-import { EmissionEntity } from '../entities/emission.entity';
+import { EntityManager, Repository } from 'typeorm';
 import { HelperService } from '../util/helpers.service';
 import { EmissionDto } from '../dtos/emission.dto';
 import { User } from '../entities/user.entity';
 import { Role } from '../casl/role.enum';
 import { BaselineDto } from 'src/dtos/baseline.dto';
+import { ProjectionEntity } from 'src/entities/projection.entity';
+import { ProjectionDto } from 'src/dtos/projection.dto';
 
 @Injectable()
 export class GhgProjectionService {
@@ -15,12 +16,12 @@ export class GhgProjectionService {
     constructor(
         private logger: Logger,
         @InjectEntityManager() private entityManager: EntityManager,
-        @InjectRepository(EmissionEntity) private emissionRepo: Repository<EmissionEntity>,
+        @InjectRepository(ProjectionEntity) private projectionRepo: Repository<ProjectionEntity>,
         private helperService: HelperService,
     ) { };
 
-    async create(emissionDto: EmissionDto, user: User) {
-        return emissionDto;
+    async create(projectionDto: ProjectionDto, user: User) {
+        return projectionDto;
     }
 
     async getProjectionByYear(projectionType: string, projectionYear: string) {
@@ -55,10 +56,10 @@ export class GhgProjectionService {
         return baselineDto;
     }
 
-    private toProjection(emissionDto: EmissionDto): EmissionEntity {
-        const data = instanceToPlain(emissionDto);
+    private toProjection(projectionDto: ProjectionDto): ProjectionEntity {
+        const data = instanceToPlain(projectionDto);
         this.logger.verbose("Converted emissionDto to Emission entity", JSON.stringify(data));
-        return plainToClass(EmissionEntity, data);
+        return plainToClass(ProjectionEntity, data);
     }
 
     private verifyProjectionValues(emissionData: any) {
