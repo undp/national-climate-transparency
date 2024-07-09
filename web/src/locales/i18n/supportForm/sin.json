@@ -6,12 +6,9 @@
   "selectActivityTitle": "ක්‍රියාවලිය තෝරන්න",
   "supportDirectionTitle": "සහායකය අවශ්‍ය හැකි හෝ ලබාදීම",
   "financeNatureTitle": "ජාතික හෝ ජාතික මුදල",
-  "intSupportChannelTitle": "ජාතික සහායක චැනලය",
-  "otherIntSupportChannel": "වෙනත් ජාතික සහායක චැනලය",
+  "supportChannelTitle": "සහායක චැනලය",
   "intFinancialInstrumentTitle": "ජාතික මුදල් වාර්තාව",
-  "otherIntFinanceInstrumentTitle": "වෙනත් ජාතික මුදල් වාර්තාව",
   "nationalFinanceInstrument": "ජාතික මුදල් වාර්තාව",
-  "otherNatFinanceInstrumentTitle": "වෙනත් ජාතික මුදල් වාර්තාව",
   "financeStatus": "මුදල් තත්ත්වය",
   "internationalSourceTitle": "ජාතික මුදල් ස්වභාවය",
   "nationalSourceTitle": "ජාතික මුදල් ස්වභාවය",
@@ -21,5 +18,6 @@
   "receivedLocalTitle": "ලබා ගත් මුදල (දිවයින වාර්තාව)",
   "exchangeRateTitle": "ගාස්තුව අනුවාදය (USD/දිවයින වාර්තාව)",
   "supportCreationSuccess": "සහායකය සාර්ථකව එකතු කරන ලදි",
-  "supportUpdateSuccess": "සහායකය සාර්ථකව යාවත්කාල කරන ලදි"
+  "supportUpdateSuccess": "සහායකය සාර්ථකව යාවත්කාල කරන ලදි",
+  "supportDeleteSuccess": "සහාය ඉවත් කිරීම සාර්ථකයි"
 }

@@ -6,6 +6,7 @@
     "programInfoTitle": "ක්‍රියාකාරකම් යටිතලයට යෙදුම් ලැයිස්තුව",
     "actionCreationSuccess": "ක්‍රියාකාරකම් සාර්ථකව එකතු විය",
     "actionUpdateSuccess": "ක්‍රියාකාරකම් වෙනස් කර ඇත",
+    "actionDeleteSuccess": "ක්‍රියාකාරකම් ඉවත් කිරීම සාර්ථකයි",
     "noProgramsMessage": "අදාල වෙනත් ක්‍රියාකාරකම් තුළ කිසිදු යෙදුම් නැත",
     "programmeList" : "යෙදුම් ලැයිස්තුව",
     "activityList" : "ක්‍රියාකාරකම් ලැයිස්තුව",

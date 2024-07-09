@@ -18,12 +18,8 @@
     "projectVerificationFailed": "Project verification failed due to {}",
     "cannotEditValidated": "The project with id {} is validated and cannot be edited",
     "permissionDeniedForValidate": "Permission Denied: Unable to Validate Project",
+    "permissionDeniedForSector": "User does not have the permission for the sector",
     "deleteProjectSuccess": "Project deleted successfully",
     "projectDeletionFailed": "Project delete failed due to {}"
-
-
-
-
-
 
 }

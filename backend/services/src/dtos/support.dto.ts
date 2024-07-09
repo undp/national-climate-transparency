@@ -34,22 +34,16 @@ export class SupportDto {
 	})
 	financeNature: FinanceNature;
 
-	@ValidateIf((c) => c.financeNature == FinanceNature.INTERNATIONAL)
 	@IsNotEmpty()
 	@IsEnum(IntSupChannel, {
 		each: true,
-		message: 'Invalid International Support Channel. Supported following types:' + Object.values(IntSupChannel)
+		message: 'Invalid Support Channel. Supported following types:' + Object.values(IntSupChannel)
 	})
 	@ApiProperty({
 		type: [String],
 		enum: Object.values(IntSupChannel),
 	})
 	internationalSupportChannel: IntSupChannel;
-
-	@IsNotEmpty()
-	@IsString()
-	@ApiProperty()
-	otherInternationalSupportChannel: string;
 
 	@ValidateIf((c) => c.financeNature == FinanceNature.INTERNATIONAL)
 	@IsNotEmpty()
@@ -63,11 +57,6 @@ export class SupportDto {
 	})
 	internationalFinancialInstrument: IntFinInstrument;
 
-	@IsNotEmpty()
-	@IsString()
-	@ApiProperty()
-	otherInternationalFinancialInstrument: string;
-
 	@ValidateIf((c) => c.financeNature == FinanceNature.NATIONAL)
 	@IsNotEmpty()
 	@IsEnum(NatFinInstrument, {
@@ -79,12 +68,6 @@ export class SupportDto {
 		enum: Object.values(NatFinInstrument),
 	})
 	nationalFinancialInstrument: NatFinInstrument;
-
-	@IsOptional()
-	@IsNotEmpty()
-	@IsString()
-	@ApiPropertyOptional()
-	otherNationalFinancialInstrument: string;
 
 	@ValidateIf((c) => c.direction == SupportDirection.RECEIVED)
 	@IsNotEmpty()
@@ -98,7 +81,7 @@ export class SupportDto {
 	})
 	financingStatus: FinancingStatus;
 
-	@ValidateIf((c) => c.internationalSource)
+	@ValidateIf((c) => c.internationalSource && c.financeNature == FinanceNature.INTERNATIONAL)
 	@IsArray()
 	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
@@ -113,6 +96,7 @@ export class SupportDto {
 	})
 	internationalSource: IntSource[];
 
+	@ValidateIf((c) => c.financeNature == FinanceNature.NATIONAL)
 	@IsOptional()
 	@IsNotEmpty()
 	@IsString()
@@ -135,6 +119,5 @@ export class SupportDto {
 	@IsNumber()
 	@ApiProperty()
   	exchangeRate: number;
-
-
+	
 }

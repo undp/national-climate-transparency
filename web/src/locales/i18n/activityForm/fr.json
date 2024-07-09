@@ -16,6 +16,7 @@
   "mitigationInfoTitle": "Résumé des résultats des activités",
   "activityCreationSuccess": "Activité ajoutée avec succès",
   "activityUpdateSuccess": "Activité mise à jour avec succès",
+  "activityDeleteSuccess": "Activité supprimé avec succès",
   "noSupportsMessage": "Aucun support attaché",
   "supportTableHeader": "Liste des supports sous l'activité",
   "mtgInfoTitle": "Informations sur la mitigation",

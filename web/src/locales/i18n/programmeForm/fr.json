@@ -15,6 +15,7 @@
   "projectList": "Liste des projets",
   "programmeCreationSuccess": "Programme ajouté avec succès",
   "programmeUpdateSuccess": "Programme mis à jour avec succès",
+  "programmeDeleteSuccess": "Programme supprimé avec succès",
   "noProjectsMessage": "Aucun projet attaché",
   "noSuchEntity": "Le programme demandé n'existe pas !",
   "activityInfoTitle": "Liste des activités directement liées sous le programme",

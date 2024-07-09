@@ -8,6 +8,7 @@
     "actionUpdateSuccess": "Action Updated Successfully",
     "actionValidateSuccess": "Action Validated Successfully",
     "actionUnvalidateSuccess": "Action Unvalidated Successfully",
+    "actionDeleteSuccess": "Action Deleted Successfully",
     "noProgramsMessage": "No Programmes Attached",
     "programmeList" : "Programme List",
     "activityList" : "Activity List",

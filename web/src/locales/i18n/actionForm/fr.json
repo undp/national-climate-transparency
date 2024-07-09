@@ -6,6 +6,7 @@
     "programInfoTitle": "Liste des programmes sous l'action",
     "actionCreationSuccess": "Action ajoutée avec succès",
     "actionUpdateSuccess": "Action mise à jour avec succès",
+    "actionDeleteSuccess": "Action supprimé avec succès",
     "noProgramsMessage": "Aucun programme attaché",
     "programmeList": "Liste des programmes",
     "activityList": "Liste des activités",

@@ -18,6 +18,7 @@
     "activityUpdateSuccess": "Activity Updated Successfully",
     "activityValidateSuccess": "Activity Validated Successfully",
     "activityUnvalidateSuccess": "Activity Unvalidated Successfully",
+    "activityDeleteSuccess": "Activity Deleted Successfully",
     "noSupportsMessage": "No Supports Attached",
     "supportTableHeader": "List of Support under the Activity",
     "mtgInfoTitle": "Mitigation  Information",

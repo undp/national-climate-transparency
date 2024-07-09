@@ -16,6 +16,7 @@
   "mitigationInfoTitle": "ක්‍රියාකාරකම් ප්‍රතිස්ථාපන සාරාංශ",
   "activityCreationSuccess": "ක්‍රියාකාරකම සාර්ථකව එකතු කරන ලදි",
   "activityUpdateSuccess": "ක්‍රියාකාරකම සාර්ථකව යාවත්කාලීන කරන ලදි",
+  "activityDeleteSuccess": "ක්‍රියාකාරකම ඉවත් කිරීම සාර්ථකයි",
   "noSupportsMessage": "සහායකයින් සම්බන්ධයෙන් නැත",
   "supportTableHeader": "ක්‍රියාකාරකම් සම්බන්ධය ලැයිස්තුව",
   "mtgInfoTitle": "හිරිකම සාරාංශ",

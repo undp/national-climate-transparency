@@ -27,7 +27,9 @@ import { AchievementEntity } from "../entities/achievement.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { KPIAction } from "../enums/shared.enum";
-import { ValidateEntity } from "src/enums/user.enum";
+import { ValidateEntity } from "../enums/user.enum";
+import { DeleteDto } from "../dtos/delete.dto";
+import { Role } from "../casl/role.enum";
 
 @Injectable()
 export class ActionService {
@@ -154,6 +156,35 @@ export class ActionService {
 		})
 	}
 
+	async findActionByIdWithAllLinkedChildren(actionId: string) {
+		return await this.actionRepo.createQueryBuilder('action')
+		.leftJoinAndSelect('action.programmes', 'programme')
+		.leftJoinAndSelect('programme.projects', 'project')
+		.leftJoinAndMapMany(
+			"action.activities",
+			ActivityEntity,
+			"actionActivity", // Unique alias for action activities
+			"actionActivity.parentType = :action AND actionActivity.parentId = :actionId",
+			{ action: EntityType.ACTION, actionId }
+		)
+		.leftJoinAndMapMany(
+			"programme.activities",
+			ActivityEntity,
+			"programmeActivity", // Unique alias for programme activities
+			"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
+			{ programme: EntityType.PROGRAMME }
+		)
+		.leftJoinAndMapMany(
+			"project.activities",
+			ActivityEntity,
+			"projectActivity", // Unique alias for project activities
+			"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
+			{ project: EntityType.PROJECT }
+		)
+		.where('action.actionId = :actionId', { actionId })
+		.getOne();
+	}
+
 	async findActionViewById(actionId: string) {
 		return await this.actionViewRepo.findOneBy({
 			id: actionId
@@ -207,7 +238,6 @@ export class ActionService {
 
 		return { haveChildren: haveChildren, programmeChildren: programmeChildren, projectChildren: projectChildren, activityChildren: activityChildren };
 	}
-
 
 	async updateAllValidatedChildrenStatus(actionId: string, entityManager: EntityManager) {
 
@@ -574,6 +604,84 @@ export class ActionService {
 			act
 		);
 	}
+
+		//MARK: Delete Programme
+		async deleteAction(deleteDto: DeleteDto, user: User) {
+			if (user.role !== Role.Admin && user.role !== Role.Root) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"user.userUnAUth",
+						[]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+	
+			const action = await this.findActionByIdWithAllLinkedChildren(deleteDto.entityId);
+			if (!action) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"action.actionNotFound",
+						[deleteDto.entityId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+	
+			if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"action.permissionDeniedForSector",
+						[action.actionId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+	
+			const actionKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, action.actionId);
+	
+			const actionKpiIds = actionKPIs.map(kpi => kpi.kpiId);
+	
+			const linkedActivityIds = action.activities?.map(activity => activity.activityId);
+
+	
+			const act = await this.entityManager
+				.transaction(async (em) => {
+	
+					// related parent and children entity un-validation happens when projects are unlinking
+					await this.linkUnlinkService.unlinkProgrammesFromAction(action.programmes, action, action.actionId, user, this.entityManager, [], true);
+					const result = await em.delete<ActionEntity>(ActionEntity, action.actionId);
+	
+					if (result.affected > 0) {
+						if (linkedActivityIds && linkedActivityIds.length > 0) {
+							await em.delete<ActivityEntity>(ActivityEntity, linkedActivityIds);
+						}
+	
+						if (actionKpiIds && actionKpiIds.length > 0) {
+							await em.delete<KpiEntity>(KpiEntity, actionKpiIds);
+						}
+					}
+					return result;
+				})
+				.catch((err: any) => {
+					console.log(err);
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"action.actionDeletionFailed",
+							[err]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				});
+	
+			await this.helperService.refreshMaterializedViews(this.entityManager);
+			return new DataResponseMessageDto(
+				HttpStatus.OK,
+				this.helperService.formatReqMessagesString("action.deleteActionSuccess", []),
+				null
+			);
+	
+		}
 
 	async validateAction(validateDto: ValidateDto, user: User) {
 		const action = await this.findActionById(validateDto.entityId);

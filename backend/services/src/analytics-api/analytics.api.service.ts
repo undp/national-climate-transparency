@@ -64,7 +64,7 @@ export class AnalyticsService {
 			// Extract sectors and counts into separate arrays
 			const sectors = result.map(row => row.sector);
 			const counts = result.map(row => row.count);
-			
+
 			// Get the latest time from the first row if result is not empty
 			const latestTime = result.length ? new Date(result[0].latestTime) : null;
 
@@ -130,7 +130,7 @@ export class AnalyticsService {
 			const supportReceived = results.supportReceived ? parseFloat(results.supportReceived) : 0;
 			const supportNeeded = results.supportNeeded ? parseFloat(results.supportNeeded) : 0;
 
-			const latestTime = results.latestTime ? new Date(results.latestTime).getTime() / 1000 : 0; 
+			const latestTime = results.latestTime ? new Date(results.latestTime).getTime() / 1000 : 0;
 
 			return new DataCountResponseDto({ supportReceived, supportNeeded }, latestTime);
 
@@ -147,16 +147,6 @@ export class AnalyticsService {
 	}
 
 	async getGhgMitigationForYear(year: number) {
-
-		if (year > 2050 || year < 2015) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"stat.yearNotValid",
-					[year]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
 		try {
 			const query = `
 				SELECT 
@@ -169,6 +159,8 @@ export class AnalyticsService {
 					AND (activity."mitigationTimeline" ->> 'startYear')::numeric <= ${year}
 				GROUP BY 
 					activity.sector
+				HAVING 
+						SUM((activity."mitigationTimeline" -> 'expected' -> 'expectedEmissionReductWithM' ->> (${year} - (activity."mitigationTimeline" ->> 'startYear')::int))::numeric) != 0
 				ORDER BY 
 					"latestTime" DESC;
 			`;
@@ -184,16 +176,16 @@ export class AnalyticsService {
 			// Convert latestTime to epoch if it's not null
 			const latestEpoch = latestTime ? Math.floor(latestTime.getTime() / 1000) : 0;
 
-			return new DataCountResponseDto({sectors, totals}, latestEpoch);
+			return new DataCountResponseDto({ sectors, totals }, latestEpoch);
 		} catch (err) {
 			console.log(err);
 			throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"common.unableToGetStats",
-						[]
-					),
-					HttpStatus.INTERNAL_SERVER_ERROR
-				);
+				this.helperService.formatReqMessagesString(
+					"common.unableToGetStats",
+					[]
+				),
+				HttpStatus.INTERNAL_SERVER_ERROR
+			);
 		}
 	}
 
@@ -217,6 +209,8 @@ export class AnalyticsService {
 						AND (activity."mitigationTimeline" ->> 'startYear')::numeric <= ${previousYear}
 					GROUP BY 
 						activity.sector
+					HAVING 
+    				SUM((activity."mitigationTimeline" -> 'actual' -> 'actualEmissionReduct' ->> (${previousYear} - (activity."mitigationTimeline" ->> 'startYear')::int))::numeric) != 0
 					ORDER BY 
 						"latestTime" DESC;
 			`;
@@ -231,7 +225,7 @@ export class AnalyticsService {
 			// Convert latestTime to epoch if it's not null
 			const latestEpoch = latestTime ? Math.floor(latestTime.getTime() / 1000) : 0;
 
-			return new DataCountResponseDto({sectors, totals}, latestEpoch);
+			return new DataCountResponseDto({ sectors, totals }, latestEpoch);
 		} catch (err) {
 			console.log(err);
 			throw new HttpException(

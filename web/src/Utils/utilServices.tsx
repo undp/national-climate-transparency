@@ -95,7 +95,7 @@ export const getArraySum = (values: number[]) => {
   return values.reduce((acc, value) => acc + value, 0);
 };
 
-const customRound = (value: number) => {
+export const customRound = (value: number) => {
   return Math.round(value * 100) / 100;
 };
 
@@ -135,4 +135,16 @@ export const getCollapseIcon = (isActive: boolean) => {
 
 export const parseNumber = (stringValue: string | undefined) => {
   return stringValue ? (stringValue === 'NaN' ? undefined : parseFloat(stringValue)) : undefined;
+};
+
+export const parseToTwoDecimals = (fullNumber: number) => {
+  const decimalSeparation = fullNumber.toString().split('.');
+  let structuredNumber;
+  if (decimalSeparation.length === 1) {
+    structuredNumber = decimalSeparation[0];
+  } else {
+    structuredNumber = `${decimalSeparation[0]}.${decimalSeparation[1].slice(0, 2)}`;
+  }
+
+  return parseFloat(structuredNumber);
 };

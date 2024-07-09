@@ -58,7 +58,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const formTitle = getFormTitle('Project', method);
 
   const navigate = useNavigate();
-  const { get, post, put } = useConnection();
+  const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
   const { userInfoState } = useUserContext();
   const { entId } = useParams();
@@ -792,8 +792,32 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Delete
 
-  const deleteEntity = () => {
-    console.log('Delete Clicked');
+  const deleteEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await del('national/projects/delete', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('projectDeleteSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/projects');
+        }
+      }
+    } catch (error: any) {
+      if (error?.message) {
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Delete Failed`);
+      }
+    }
   };
 
   // Add New KPI
