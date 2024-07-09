@@ -1710,19 +1710,21 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('entityAction:cancel')}
                   </Button>
                 </Col>
-                <Col>
-                  <Button
-                    type="default"
-                    size="large"
-                    block
-                    onClick={() => {
-                      deleteEntity();
-                    }}
-                    style={{ color: 'red', borderColor: 'red' }}
-                  >
-                    {t('entityAction:delete')}
-                  </Button>
-                </Col>
+                {ability.can(Action.Delete, ActivityEntity) && (
+                  <Col>
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      onClick={() => {
+                        deleteEntity();
+                      }}
+                      style={{ color: 'red', borderColor: 'red' }}
+                    >
+                      {t('entityAction:delete')}
+                    </Button>
+                  </Col>
+                )}
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button

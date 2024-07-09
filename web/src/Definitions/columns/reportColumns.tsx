@@ -140,7 +140,12 @@ export const getReportSixColumns = (t: any) => {
       key: 'capacityBuilding',
       width: 500,
     },
-    { title: t('natAnchor'), dataIndex: 'natAnchor', key: 'natAnchor', width: 1000 },
+    {
+      title: t('natAnchor'),
+      dataIndex: 'anchoredInNationalStrategy',
+      key: 'anchoredInNationalStrategy',
+      width: 1000,
+    },
     { title: t('supportChannel'), dataIndex: 'supportChannel', key: 'supportChannel', width: 100 },
     { title: t('additionalInfo'), dataIndex: 'additionalInfo', key: 'additionalInfo', width: 100 },
   ];
@@ -569,7 +574,7 @@ export const getReportTwelveColumns = (t: any) => {
         },
       ],
     },
-    { title: t('activityStatus'), dataIndex: 'status', key: 'status', width: 100 },
+    { title: t('activityStatus'), dataIndex: 'activityStatus', key: 'activityStatus', width: 100 },
     { title: t('additionalInfo'), dataIndex: 'additionalInfo', key: 'additionalInfo', width: 150 },
   ];
 
@@ -628,7 +633,7 @@ export const getReportThirteenColumns = (t: any) => {
         },
       ],
     },
-    { title: t('activityStatus'), dataIndex: 'status', key: 'status', width: 100 },
+    { title: t('activityStatus'), dataIndex: 'activityStatus', key: 'activityStatus', width: 100 },
     { title: t('additionalInfo'), dataIndex: 'additionalInfo', key: 'additionalInfo', width: 150 },
   ];
 
