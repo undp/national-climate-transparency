@@ -12,7 +12,6 @@ import { User } from "../entities/user.entity";
 import { Action } from "./action.enum";
 import { Role } from "./role.enum";
 import { EntitySubject } from "../entities/entity.subject";
-import { Organisation } from "../entities/organisation.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
@@ -88,6 +87,12 @@ export class CaslAbilityFactory {
 				can(Action.Create, EmissionEntity);
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
+
+				//Projection
+				can(Action.Read, ProjectEntity);
+				can(Action.Create, ProjectEntity);
+				can(Action.Update, ProjectEntity);
+				can(Action.Delete, ProjectEntity);
 			}
 
 			if (user.role == Role.Admin) {
@@ -146,6 +151,12 @@ export class CaslAbilityFactory {
 				can(Action.Create, EmissionEntity);
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
+
+				//Projection
+				can(Action.Read, ProjectEntity);
+				can(Action.Create, ProjectEntity);
+				can(Action.Update, ProjectEntity);
+				can(Action.Delete, ProjectEntity);
 			}
 
 			if (user.role == Role.GovernmentUser) {
@@ -255,6 +266,11 @@ export class CaslAbilityFactory {
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
 
+				//Projection
+				can(Action.Read, ProjectEntity);
+				can(Action.Create, ProjectEntity);
+				can(Action.Update, ProjectEntity);
+				can(Action.Delete, ProjectEntity);
 			}
 
 			if (user.role == Role.Observer) {
@@ -361,6 +377,11 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, EmissionEntity);
 				cannot(Action.Delete, EmissionEntity);
 
+				//Projection
+				can(Action.Read, ProjectEntity);
+				cannot(Action.Create, ProjectEntity);
+				cannot(Action.Update, ProjectEntity);
+				cannot(Action.Delete, ProjectEntity);
 			}
 
 		}
