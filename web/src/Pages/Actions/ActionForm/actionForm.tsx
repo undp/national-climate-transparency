@@ -148,7 +148,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   useEffect(() => {
     // check user permission for validate action and disable validate button
-    if (userInfoState?.validatePermission === ValidateEntity.CANNOT) {
+    if (
+      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
+      userInfoState?.userRole === Role.Observer
+    ) {
       setIsValidateButtonDisabled(true);
     }
   }, [userInfoState]);

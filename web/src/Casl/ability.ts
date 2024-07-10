@@ -144,6 +144,7 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
           'sector',
           'validatePermission',
           'subRolePermission',
+          'ghgInventoryPermission',
         ],
         {
           id: { $eq: user.id },
@@ -194,16 +195,7 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(
         Action.Update,
         User,
-        [
-          'role',
-          'apiKey',
-          'password',
-          'email',
-          'organisationType',
-          'sector',
-          'validatePermission',
-          'subRolePermission',
-        ],
+        ['role', 'apiKey', 'password', 'email', 'organisationType', 'sector'],
         {
           id: { $eq: user.id },
         }

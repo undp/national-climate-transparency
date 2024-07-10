@@ -23,5 +23,6 @@
     "GovernmentUser": "Government User",
     "Observer": "Observer",
     "validationPermission": "Validation Permission",
-    "subRolePermission": "Sub Role Manipulation Permission"
+    "subRolePermission": "Sub Role Manipulation Permission",
+    "ghgInventoryPermission" : "GHG Inventory Manipulation Permission"
 }

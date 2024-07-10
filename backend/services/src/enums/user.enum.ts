@@ -12,3 +12,8 @@ export enum SubRoleManipulate {
   CANNOT = '0',
   CAN = '1',
 }
+
+export enum GHGInventoryManipulate {
+  CANNOT = '0',
+  CAN = '1',
+}

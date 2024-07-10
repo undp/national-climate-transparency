@@ -6,6 +6,7 @@ export type UserProps = {
   userSectors: string[];
   validatePermission: string;
   subRolePermission: string;
+  ghgInventoryPermission: string;
 };
 
 export interface UserContextProps {

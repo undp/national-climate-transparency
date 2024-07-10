@@ -458,7 +458,7 @@ export class SupportService {
 			);
 		}
 
-		if (user.validatePermission===ValidateEntity.CANNOT) {
+		if (user.validatePermission===ValidateEntity.CANNOT || user.role===Role.Observer) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"support.permissionDeniedForValidate",
