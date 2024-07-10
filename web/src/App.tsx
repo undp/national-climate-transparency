@@ -36,14 +36,11 @@ import { ConnectionContextProvider } from './Context/ConnectionContext/connectio
 import { UserInformationContextProvider } from './Context/UserInformationContext/userInformationContext';
 import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
 import GhgEmissions from './Pages/Emissions/emissions';
-
-// message.config({
-//   duration: 60,
-// });
+import GhgProjections from './Pages/Projections/projections';
+import GhgConfigurations from './Pages/Configurations/configurations';
 
 const App = () => {
   const ability = defineAbility();
-  // const enableRegistration = process.env.REACT_APP_ENABLE_REGISTRATION || 'true';
   const { t } = useTranslation(['common']);
   if (localStorage.getItem('userRole') && localStorage.getItem('userId'))
     updateUserAbility(ability, {
@@ -111,6 +108,15 @@ const App = () => {
                   </Route>
                   <Route path="/emissions" element={<CustomLayout selectedKey="emissions" />}>
                     <Route index element={<GhgEmissions />} />
+                  </Route>
+                  <Route path="/projections" element={<CustomLayout selectedKey="projections" />}>
+                    <Route index element={<GhgProjections />} />
+                  </Route>
+                  <Route
+                    path="/configurations"
+                    element={<CustomLayout selectedKey="configurations" />}
+                  >
+                    <Route index element={<GhgConfigurations />} />
                   </Route>
                   <Route path="/reportings" element={<CustomLayout selectedKey="reportings" />}>
                     <Route index element={<ReportList />} />

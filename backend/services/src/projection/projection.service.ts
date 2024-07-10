@@ -4,11 +4,11 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { HelperService } from '../util/helpers.service';
 import { User } from '../entities/user.entity';
-import { BaselineDto } from 'src/dtos/baseline.dto';
-import { ProjectionEntity } from 'src/entities/projection.entity';
-import { ProjectionDto, ProjectionProperties } from 'src/dtos/projection.dto';
-import { ProjectionCategories, ProjectionType } from 'src/enums/projection.enum';
-import { GHGRecordState } from 'src/enums/ghg.state.enum';
+import { BaselineDto } from '../dtos/baseline.dto';
+import { ProjectionEntity } from '../entities/projection.entity';
+import { ProjectionDto, ProjectionProperties } from '../dtos/projection.dto';
+import { ProjectionCategories, ProjectionType } from '../enums/projection.enum';
+import { GHGRecordState } from '../enums/ghg.state.enum';
 
 @Injectable()
 export class GhgProjectionService {
