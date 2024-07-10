@@ -5,7 +5,7 @@
     "company": "Organisation",
     "companyRole": "Organisation Type",
     "status": "Status",
-    "role": "User Role",
+    "role": "User Permissions",
     "addUser": "Add User",
     "viewUsers": "View Users",
     "viewDesc": "View the users registered with the Carbon Registry based on your permissions",
