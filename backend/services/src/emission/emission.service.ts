@@ -2,13 +2,10 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { instanceToPlain, plainToClass } from "class-transformer";
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, QueryFailedError, Repository } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
 import { EmissionEntity } from 'src/entities/emission.entity';
 import { HelperService } from 'src/util/helpers.service';
-import { FileHandlerInterface } from 'src/file-handler/filehandler.interface';
 import { EmissionDto } from 'src/dtos/emission.dto';
 import { User } from 'src/entities/user.entity';
-import { Role } from 'src/casl/role.enum';
 import { GHGRecordState } from 'src/enums/ghg.state.enum';
 
 @Injectable()
@@ -19,16 +16,9 @@ export class GhgEmissionsService {
         @InjectEntityManager() private entityManager: EntityManager,
         @InjectRepository(EmissionEntity) private emissionRepo: Repository<EmissionEntity>,
         private helperService: HelperService,
-        private fileHandler: FileHandlerInterface,
     ) { };
 
     async create(emissionDto: EmissionDto, user: User) {
-        if (user.role === Role.Observer) {
-            throw new HttpException(
-                this.helperService.formatReqMessagesString("user.userUnAUth", []),
-                HttpStatus.FORBIDDEN
-            );
-        }
 
         if (!this.helperService.isValidYear(emissionDto.year)){
             throw new HttpException('Invalid Emission Year Received', HttpStatus.BAD_REQUEST);
@@ -49,12 +39,6 @@ export class GhgEmissionsService {
             }
 
             emission.id = result[0]?.id;
-            if (emissionDto.emissionDocument) {
-                emission.emissionDocument = await this.uploadDocument(
-                    emissionDto.year,
-                    emissionDto.emissionDocument
-                );
-            }
 
             savedEmission = await this.entityManager
                 .transaction(async (em) => {
@@ -70,7 +54,6 @@ export class GhgEmissionsService {
                             totalCo2WithoutLand: emission.totalCo2WithoutLand,
                             totalCo2WithLand: emission.totalCo2WithLand,
                             state: emission.state,
-                            emissionDocument: emission.emissionDocument,
                         });
                     return updatedData;
                 })
@@ -85,14 +68,6 @@ export class GhgEmissionsService {
                 });
 
             return { status: HttpStatus.OK, data: savedEmission };
-        }
-
-        if (emissionDto.emissionDocument) {
-            emission.emissionDocument = await this.uploadDocument(
-                emissionDto.year,
-                emissionDto.emissionDocument
-
-            );
         }
 
         savedEmission = await this.entityManager
@@ -139,61 +114,6 @@ export class GhgEmissionsService {
         const data = instanceToPlain(emissionDto);
         this.logger.verbose("Converted emissionDto to Emission entity", JSON.stringify(data));
         return plainToClass(EmissionEntity, data);
-    }
-
-    private fileExtensionMap = new Map([
-        ["vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx"],
-        ["vnd.ms-excel", "xls"],
-    ]);
-
-    getFileExtension = (file: string): string => {
-        let fileType = file.split(';')[0].split('/')[1];
-        fileType = this.fileExtensionMap.get(fileType);
-        return fileType;
-    }
-
-    async uploadDocument(year: string, data: string) {
-        let filetype;
-        try {
-            filetype = this.getFileExtension(data);
-            data = data.split(',')[1];
-            if (filetype == undefined) {
-                throw new HttpException(
-                    this.helperService.formatReqMessagesString(
-                        "programme.invalidDocumentUpload",
-                        []
-                    ),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
-        catch (Exception: any) {
-            throw new HttpException(
-                this.helperService.formatReqMessagesString(
-                    "programme.invalidDocumentUpload",
-                    []
-                ),
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-        // Get the current date and time
-        const currentDate = new Date();
-
-        const response: any = await this.fileHandler.uploadFile(
-            `documents/${year}_${currentDate.getTime()}.${filetype}`,
-            data
-        );
-        if (response) {
-            return response;
-        } else {
-            throw new HttpException(
-                this.helperService.formatReqMessagesString(
-                    "programme.docUploadFailed",
-                    []
-                ),
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
     }
 
     private verifyEmissionValues(emissionData: any) {

@@ -3,9 +3,7 @@ import { instanceToPlain, plainToClass } from "class-transformer";
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { HelperService } from '../util/helpers.service';
-import { EmissionDto } from '../dtos/emission.dto';
 import { User } from '../entities/user.entity';
-import { Role } from '../casl/role.enum';
 import { BaselineDto } from 'src/dtos/baseline.dto';
 import { ProjectionEntity } from 'src/entities/projection.entity';
 import { ProjectionDto } from 'src/dtos/projection.dto';
@@ -23,12 +21,6 @@ export class GhgProjectionService {
     ) { };
 
     async create(projectionDto: ProjectionDto, user: User) {
-      if (user.role === Role.Observer) {
-        throw new HttpException(
-            this.helperService.formatReqMessagesString("user.userUnAUth", []),
-            HttpStatus.FORBIDDEN
-        );
-      }
 
       if (!this.helperService.isValidYear(projectionDto.year)){
         throw new HttpException('Invalid Projection Year Received', HttpStatus.BAD_REQUEST);

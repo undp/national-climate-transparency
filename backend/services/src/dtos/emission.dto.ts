@@ -1,8 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsInt,
   IsNotEmpty,
-  IsOptional,
   IsString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -52,12 +50,6 @@ export class EmissionDto {
   @IsNotEmpty()
   @Type(() => EmissionProperties)
   totalCo2WithLand: EmissionProperties;
-
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  @IsNotEmpty()
-  emissionDocument?: string;
 
   @ApiPropertyOptional()
   @IsString()

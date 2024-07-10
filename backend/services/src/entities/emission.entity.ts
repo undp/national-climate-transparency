@@ -47,7 +47,4 @@ export class EmissionEntity {
     array: false,
   })
   state: GHGRecordState;
-
-  @Column({ nullable: true })
-  emissionDocument: string;
 }
