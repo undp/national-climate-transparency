@@ -37,9 +37,15 @@ export class GHGProjectionController {
     }
 
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))
-    @Get('/:projectionType/:projectionYear')
-    getProjections(@Param('projectionType') projectionType: ProjectionType, @Param('projectionYear') projectionYear: string) {
-      return this.projectionService.getProjectionByYear(projectionType, projectionYear);
+    @Get('/actual/:projectionType/:projectionYear')
+    getActualProjections(@Param('projectionType') projectionType: ProjectionType, @Param('projectionYear') projectionYear: string) {
+      return this.projectionService.getActualProjection(projectionType, projectionYear);
+    }
+
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))
+    @Get('/calculated/:projectionType/:projectionYear')
+    getPredictedProjections(@Param('projectionType') projectionType: ProjectionType, @Param('projectionYear') projectionYear: string) {
+      return this.projectionService.getCalculatedProjection(projectionType, projectionYear);
     }
 
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))

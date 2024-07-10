@@ -6,7 +6,7 @@ import { HelperService } from '../util/helpers.service';
 import { User } from '../entities/user.entity';
 import { BaselineDto } from 'src/dtos/baseline.dto';
 import { ProjectionEntity } from 'src/entities/projection.entity';
-import { ProjectionDto } from 'src/dtos/projection.dto';
+import { ProjectionDto, ProjectionProperties } from 'src/dtos/projection.dto';
 import { ProjectionCategories, ProjectionType } from 'src/enums/projection.enum';
 import { GHGRecordState } from 'src/enums/ghg.state.enum';
 
@@ -30,17 +30,17 @@ export class GhgProjectionService {
       this.verifyProjectionValues(projection);
 
       let savedProjection: ProjectionEntity;
-      const result = await this.getProjectionByYear(projection.projectionType, projection.year);
+      const result = await this.getActualProjection(projection.projectionType, projection.year);
 
-      if (result && result.length > 0) {
-          if (result[0].state === GHGRecordState.FINALIZED) {
+      if (result) {
+          if (result.state === GHGRecordState.FINALIZED) {
               throw new HttpException(
                   this.helperService.formatReqMessagesString("ghgInventory.cannotEditProjectionFinalized", []),
                   HttpStatus.FORBIDDEN
               );
           }
 
-          projection.id = result[0]?.id;
+          projection.id = result?.id;
 
           savedProjection = await this.entityManager
               .transaction(async (em) => {
@@ -90,7 +90,7 @@ export class GhgProjectionService {
       return { status: HttpStatus.CREATED, data: savedProjection };
     }
 
-    async getProjectionByYear(projectionType: string, projectionYear: string) {
+    async getActualProjection(projectionType: string, projectionYear: string) {
 
         if (!Object.values(ProjectionType).includes(projectionType as ProjectionType)){
           throw new HttpException('Invalid Projection Type Received', HttpStatus.BAD_REQUEST);
@@ -100,7 +100,7 @@ export class GhgProjectionService {
           throw new HttpException('Invalid Projection Year Received', HttpStatus.BAD_REQUEST);
         }
 
-        return await this.projectionRepo.find({
+        return await this.projectionRepo.findOne({
             where: {
                 projectionType: projectionType,
                 year: projectionYear
@@ -108,61 +108,116 @@ export class GhgProjectionService {
         });
     }
 
-    async getProjectionSummary(projectionType: ProjectionType) {
+    async getCalculatedProjection(projectionType: string, projectionYear: string) {
 
-        if (!Object.values(ProjectionType).includes(projectionType)){
-          throw new HttpException('Invalid Projection Type Received', HttpStatus.BAD_REQUEST);
-        }
-        const projectionSummary = await this.projectionRepo
-            .createQueryBuilder("projection_entity")
-            .select(["year", "state", '"isBaseline"'])
-            .where("projection_entity.projectionType = :pType", { pType: projectionType })
-            .getRawMany();
-            
-        return projectionSummary;
+      if (!Object.values(ProjectionType).includes(projectionType as ProjectionType)){
+        throw new HttpException('Invalid Projection Type Received', HttpStatus.BAD_REQUEST);
+      }
+
+      if (!this.helperService.isValidYear(projectionYear)){
+        throw new HttpException('Invalid Projection Year Received', HttpStatus.BAD_REQUEST);
+      }
+
+      const baselineYear = '2024'; // Set this later
+      const yearDifference = parseInt(projectionYear) - parseInt(baselineYear);
+
+      if (yearDifference < 0){
+        throw new HttpException(`Projection Year Cannot be lower than the baseline year ${baselineYear}`, HttpStatus.BAD_REQUEST);
+      }
+
+      const baselineProjection =  await this.projectionRepo.findOne({
+          where: {
+              projectionType: projectionType,
+              year: baselineYear,
+          },
+      });
+
+      const calculatedProjection = {
+        energyEmissions : {
+          fuelCombustionActivities: this.calculateSectionProjection(yearDifference, baselineProjection.energyEmissions.fuelCombustionActivities),
+          fugitiveEmissionsFromFuels: this.calculateSectionProjection(yearDifference, baselineProjection.energyEmissions.fugitiveEmissionsFromFuels),
+          carbonDioxideTransportStorage: this.calculateSectionProjection(yearDifference, baselineProjection.energyEmissions.carbonDioxideTransportStorage),
+        },
+        industrialProcessesProductUse : this.calculateSectionProjection(yearDifference, baselineProjection.industrialProcessesProductUse),
+        agricultureForestryOtherLandUse : this.calculateSectionProjection(yearDifference, baselineProjection.agricultureForestryOtherLandUse),
+        waste : this.calculateSectionProjection(yearDifference, baselineProjection.waste),
+        other : this.calculateSectionProjection(yearDifference, baselineProjection.other),
+        totalCo2WithoutLand : this.calculateProjection(yearDifference, baselineProjection.totalCo2WithoutLand),
+        totalCo2WithLand : this.calculateProjection(yearDifference, baselineProjection.totalCo2WithLand),
+      }
+
+      return calculatedProjection;
+  }
+
+  private calculateSectionProjection(yearDifference: number, sectionBaselineProjection: any){
+    let calculatedSectionProjection = {};
+    for (const [key, value] of Object.entries(sectionBaselineProjection)) {
+      calculatedSectionProjection[key] = this.calculateProjection(yearDifference, value as ProjectionProperties)
     }
 
-    async setBaselineYear(baselineDto: BaselineDto, user: User) {
-        // const emissions = await this.emissionRepo
-        //     .createQueryBuilder("emission_entity")
-        //     .select(["year", "state"])
-        //     .getRawMany();
-            
-        // return emissions;
+    return calculatedSectionProjection;
+  }
 
-        if (!this.helperService.isValidYear(baselineDto.projectionYear)){
-          throw new HttpException('Invalid Projection Year Received', HttpStatus.BAD_REQUEST);
-        }
+  private calculateProjection(yearDifference: number, baselineProperty: ProjectionProperties){
 
-        return baselineDto;
+    const growthRate: number = 2; // As a percentage would be 20% Per Year
+
+    return {
+      [ProjectionCategories.BAU] : baselineProperty.BAU * (Math.pow(growthRate, yearDifference)),
+      [ProjectionCategories.CONDITIONAL_NDC] : baselineProperty.ConditionalNDC * (Math.pow(growthRate, yearDifference)),
+      [ProjectionCategories.UNCONDITIONAL_NDC]: baselineProperty.UnconditionalNDC * (Math.pow(growthRate, yearDifference)),
     }
+  }
 
-    private toProjection(projectionDto: ProjectionDto): ProjectionEntity {
-        const data = instanceToPlain(projectionDto);
-        data.isBaseline = false;
-        this.logger.verbose("Converted projectionDto to Projection entity", JSON.stringify(data));
-        return plainToClass(ProjectionEntity, data);
-    }
+  async getProjectionSummary(projectionType: ProjectionType) {
 
-    private verifyProjectionValues(emissionData: any) {
-        const projectionProperties = [ProjectionCategories.BAU, ProjectionCategories.CONDITIONAL_NDC, ProjectionCategories.UNCONDITIONAL_NDC];
-        for (let key in emissionData) {
-          if (typeof emissionData[key] === 'object') {
-            if (!this.verifyProjectionValues(emissionData[key])) {
-              return false;
-            }
-          } else {
-            if (projectionProperties.includes(key as ProjectionCategories)) {
-              if (typeof emissionData[key] === 'string') {
-                throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidDataType", []), HttpStatus.BAD_REQUEST);
-              }
-              if (typeof emissionData[key] === 'number' && emissionData[key] < 0) {
-                throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.negativeValuesNotAllowed", []), HttpStatus.BAD_REQUEST);
-              }
-            }
-      
+      if (!Object.values(ProjectionType).includes(projectionType)){
+        throw new HttpException('Invalid Projection Type Received', HttpStatus.BAD_REQUEST);
+      }
+      const projectionSummary = await this.projectionRepo
+          .createQueryBuilder("projection_entity")
+          .select(["year", "state", '"isBaseline"'])
+          .where("projection_entity.projectionType = :pType", { pType: projectionType })
+          .getRawMany();
+          
+      return projectionSummary;
+  }
+
+  async setBaselineYear(baselineDto: BaselineDto, user: User) {
+
+      if (!this.helperService.isValidYear(baselineDto.projectionYear)){
+        throw new HttpException('Invalid Projection Year Received', HttpStatus.BAD_REQUEST);
+      }
+
+      return baselineDto;
+  }
+
+  private toProjection(projectionDto: ProjectionDto): ProjectionEntity {
+      const data = instanceToPlain(projectionDto);
+      data.isBaseline = false;
+      this.logger.verbose("Converted projectionDto to Projection entity", JSON.stringify(data));
+      return plainToClass(ProjectionEntity, data);
+  }
+
+  private verifyProjectionValues(emissionData: any) {
+      const projectionProperties = [ProjectionCategories.BAU, ProjectionCategories.CONDITIONAL_NDC, ProjectionCategories.UNCONDITIONAL_NDC];
+      for (let key in emissionData) {
+        if (typeof emissionData[key] === 'object') {
+          if (!this.verifyProjectionValues(emissionData[key])) {
+            return false;
           }
+        } else {
+          if (projectionProperties.includes(key as ProjectionCategories)) {
+            if (typeof emissionData[key] === 'string') {
+              throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidDataType", []), HttpStatus.BAD_REQUEST);
+            }
+            if (typeof emissionData[key] === 'number' && emissionData[key] < 0) {
+              throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.negativeValuesNotAllowed", []), HttpStatus.BAD_REQUEST);
+            }
+          }
+    
         }
-        return true;
-    }
+      }
+      return true;
+  }
 }
