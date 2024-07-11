@@ -304,10 +304,17 @@ export class UserService {
 			);
 		}
 
+		let isStateUpdate: boolean;
+
+		if (update.state && user.state != update.state) {
+			this.validateStateChange(user, requestingUser, update, remarks);
+			isStateUpdate = true;
+		}
+
 		if(userDto.role===Role.Root){
 			if(update.validatePermission===ValidateEntity.CANNOT || update.subRolePermission===SubRoleManipulate.CANNOT || update.ghgInventoryPermission===GHGInventoryManipulate.CANNOT){
 				throw new HttpException(
-					this.helperService.formatReqMessagesString("user.AllRootPermissionShouldBeTrue", []),
+					this.helperService.formatReqMessagesString("user.allRootPermissionShouldBeTrue", []),
 					HttpStatus.FORBIDDEN
 				);
 			}
@@ -317,12 +324,27 @@ export class UserService {
 		}
 
 		if(userDto.role===Role.Observer){
+			if(update.validatePermission===ValidateEntity.CAN || update.subRolePermission===SubRoleManipulate.CAN || update.ghgInventoryPermission===GHGInventoryManipulate.CAN){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.observerCannotHaveAnyPermissions", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
 			update.validatePermission=ValidateEntity.CANNOT;
 			update.subRolePermission=SubRoleManipulate.CANNOT;
 			update.ghgInventoryPermission=GHGInventoryManipulate.CANNOT;
 		}
 		if(userDto.role===Role.Admin){
+			if(update.subRolePermission===SubRoleManipulate.CAN){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.adminCannotHaveSubrolePermission", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
 			update.subRolePermission=SubRoleManipulate.CANNOT;
+			update.organisation=null;
+			update.sector=null;
+			update.subRole=null;
 		}
 
 		if(requestingUser.id===userDto.id){
@@ -349,13 +371,8 @@ export class UserService {
 			this.validateRoleAndSubRole(user.role, userDto.subRole);
 		}
 
-		this.validateSectorUpdate(userDto.sector, user.sector, requestingUser);
-
-		let isStateUpdate: boolean;
-
-		if (update.state && user.state != update.state) {
-			this.validateStateChange(user, requestingUser, update, remarks);
-			isStateUpdate = true;
+		if (userDto.sector && userDto.sector.length > 0) {
+			this.validateSectorUpdate(userDto.sector, user.sector, requestingUser);
 		}
 		
 

@@ -159,6 +159,9 @@ const AddUser = () => {
       formOneValues.validatePermission = validatePermission;
       formOneValues.subRolePermission = SubRoleManipulate.CANNOT;
       formOneValues.ghgInventoryPermission = ghgInventoryPermission;
+      formOneValues.subRole = null;
+      formOneValues.sector = null;
+      formOneValues.organisation = null;
     } else if (role === Role.Observer) {
       formOneValues.validatePermission = ValidateEntity.CANNOT;
       formOneValues.subRolePermission = SubRoleManipulate.CANNOT;
@@ -494,28 +497,34 @@ const AddUser = () => {
                       },
                     ]}
                   >
-                    <div className="validate-permissions">
-                      <RoleIcon
-                        icon={<CheckAll />}
-                        bg={validatePermitBGColor}
-                        color={validatePermitColor}
-                      />
-                      <div className="align">{t('addUser:validatePermission')}</div>
-                      <Checkbox
-                        onChange={onChangeValidatePermission}
-                        checked={validatePermission === ValidateEntity.CAN}
-                        disabled={
-                          role === Role.Root ||
-                          (isOwnProfile && role === Role.Admin) ||
-                          (isUpdate &&
-                            !ability.can(
-                              Action.Update,
-                              plainToClass(User, state?.record),
-                              'validatePermission'
-                            ))
-                        }
-                      ></Checkbox>
-                    </div>
+                    <Row>
+                      <Col span={3}>
+                        <RoleIcon
+                          icon={<CheckAll />}
+                          bg={validatePermitBGColor}
+                          color={validatePermitColor}
+                        />
+                      </Col>
+                      <Col span={15}>
+                        <div className="permissions">{t('addUser:validatePermission')}</div>
+                      </Col>
+                      <Col span={5}>
+                        <Checkbox
+                          onChange={onChangeValidatePermission}
+                          checked={validatePermission === ValidateEntity.CAN}
+                          disabled={
+                            role === Role.Root ||
+                            (isOwnProfile && role === Role.Admin) ||
+                            (isUpdate &&
+                              !ability.can(
+                                Action.Update,
+                                plainToClass(User, state?.record),
+                                'validatePermission'
+                              ))
+                          }
+                        ></Checkbox>
+                      </Col>
+                    </Row>
                   </Form.Item>
                 )}
                 {(role === Role.Root || role === Role.Admin || role === Role.GovernmentUser) && (
@@ -528,28 +537,34 @@ const AddUser = () => {
                       },
                     ]}
                   >
-                    <div className="ghgInventory-permissions">
-                      <RoleIcon
-                        icon={<CloudDownload />}
-                        bg={ghgInventoryPermitBGColor}
-                        color={ghgInventoryPermitColor}
-                      />
-                      <div className="align">{t('addUser:ghgInventoryPermission')}</div>
-                      <Checkbox
-                        onChange={onChangeGhgInventoryPermission}
-                        checked={ghgInventoryPermission === GHGInventoryManipulate.CAN}
-                        disabled={
-                          role === Role.Root ||
-                          (isOwnProfile && role === Role.Admin) ||
-                          (isUpdate &&
-                            !ability.can(
-                              Action.Update,
-                              plainToClass(User, state?.record),
-                              'ghgInventoryPermission'
-                            ))
-                        }
-                      ></Checkbox>
-                    </div>
+                    <Row>
+                      <Col span={3}>
+                        <RoleIcon
+                          icon={<CloudDownload />}
+                          bg={ghgInventoryPermitBGColor}
+                          color={ghgInventoryPermitColor}
+                        />
+                      </Col>
+                      <Col span={15}>
+                        <div className="permissions">{t('addUser:ghgInventoryPermission')}</div>
+                      </Col>
+                      <Col span={5}>
+                        <Checkbox
+                          onChange={onChangeGhgInventoryPermission}
+                          checked={ghgInventoryPermission === GHGInventoryManipulate.CAN}
+                          disabled={
+                            role === Role.Root ||
+                            (isOwnProfile && role === Role.Admin) ||
+                            (isUpdate &&
+                              !ability.can(
+                                Action.Update,
+                                plainToClass(User, state?.record),
+                                'ghgInventoryPermission'
+                              ))
+                          }
+                        ></Checkbox>
+                      </Col>
+                    </Row>
                   </Form.Item>
                 )}
                 {role === Role.GovernmentUser && (
@@ -562,27 +577,33 @@ const AddUser = () => {
                       },
                     ]}
                   >
-                    <div className="subRole-permissions">
-                      <RoleIcon
-                        icon={<Diagram3 />}
-                        bg={subRolePermitBGColor}
-                        color={subRolePermitColor}
-                      />
-                      <div className="align">{t('addUser:subRolePermission')}</div>
-                      <Checkbox
-                        onChange={onChangeSubRolePermission}
-                        checked={subRolePermission === SubRoleManipulate.CAN}
-                        disabled={
-                          role === Role.Root ||
-                          (isUpdate &&
-                            !ability.can(
-                              Action.Update,
-                              plainToClass(User, state?.record),
-                              'subRolePermission'
-                            ))
-                        }
-                      ></Checkbox>
-                    </div>
+                    <Row>
+                      <Col span={3}>
+                        <RoleIcon
+                          icon={<Diagram3 />}
+                          bg={subRolePermitBGColor}
+                          color={subRolePermitColor}
+                        />
+                      </Col>
+                      <Col span={15}>
+                        <div className="permissions">{t('addUser:subRolePermission')}</div>
+                      </Col>
+                      <Col span={5}>
+                        <Checkbox
+                          onChange={onChangeSubRolePermission}
+                          checked={subRolePermission === SubRoleManipulate.CAN}
+                          disabled={
+                            role === Role.Root ||
+                            (isUpdate &&
+                              !ability.can(
+                                Action.Update,
+                                plainToClass(User, state?.record),
+                                'subRolePermission'
+                              ))
+                          }
+                        ></Checkbox>
+                      </Col>
+                    </Row>
                   </Form.Item>
                 )}
               </div>
@@ -761,7 +782,9 @@ const AddUser = () => {
                 {(role === Role.GovernmentUser || role === Role.Observer) && (
                   <Form.Item
                     label={t('addUser:sectors')}
-                    initialValue={state?.record?.sector}
+                    initialValue={
+                      state?.record?.sector?.length > 0 ? state?.record?.sector : undefined
+                    }
                     name="sector"
                     rules={[
                       {
