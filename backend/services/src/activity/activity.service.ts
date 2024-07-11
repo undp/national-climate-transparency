@@ -1040,7 +1040,7 @@ export class ActivityService {
 			);
 		}
 
-		await this.helperService.doesUserHaveValidatePermission(user);
+		this.helperService.doesUserHaveValidatePermission(user);
 
 		activity.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(

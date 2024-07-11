@@ -705,7 +705,7 @@ export class ActionService {
 			);
 		}
 
-		await this.helperService.doesUserHaveValidatePermission(user);
+		this.helperService.doesUserHaveValidatePermission(user);
 
 
 		action.validated = validateDto.validateStatus;

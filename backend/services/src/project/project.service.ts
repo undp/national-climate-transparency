@@ -862,7 +862,7 @@ export class ProjectService {
 			);
 		}
 
-		await this.helperService.doesUserHaveValidatePermission(user);
+		this.helperService.doesUserHaveValidatePermission(user);
 
 		project.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(

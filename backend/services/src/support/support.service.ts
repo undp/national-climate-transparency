@@ -458,7 +458,7 @@ export class SupportService {
 			);
 		}
 
-		await this.helperService.doesUserHaveValidatePermission(user);
+		this.helperService.doesUserHaveValidatePermission(user);
 
 		support.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(

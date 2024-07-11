@@ -786,7 +786,7 @@ export class ProgrammeService {
 			);
 		}
 
-		await this.helperService.doesUserHaveValidatePermission(user);
+		this.helperService.doesUserHaveValidatePermission(user);
 
 		programme.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(
