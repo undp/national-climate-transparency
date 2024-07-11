@@ -44,6 +44,9 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     subRolePermission: localStorage.getItem('subRolePermission')
       ? (localStorage.getItem('subRolePermission') as string)
       : '0',
+    ghgInventoryPermission: localStorage.getItem('ghgInventoryPermission')
+      ? (localStorage.getItem('ghgInventoryPermission') as string)
+      : '0',
   };
 
   const [userInfoState, setUserInfoState] = useState<UserProps>(initialUserProps);
@@ -58,6 +61,7 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
       userSectors,
       validatePermission,
       subRolePermission,
+      ghgInventoryPermission,
     } = value;
     if (id) {
       setUserInfoState((prev) => ({ ...prev, id }));
@@ -85,6 +89,9 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
 
     setUserInfoState((prev) => ({ ...prev, subRolePermission }));
     localStorage.setItem('subRolePermission', subRolePermission + '');
+
+    setUserInfoState((prev) => ({ ...prev, ghgInventoryPermission }));
+    localStorage.setItem('ghgInventoryPermission', ghgInventoryPermission + '');
   };
 
   const IsAuthenticated = useCallback(
@@ -125,6 +132,7 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     localStorage.removeItem('userSectors');
     localStorage.removeItem('validatePermission');
     localStorage.removeItem('subRolePermission');
+    localStorage.removeItem('ghgInventoryPermission');
     localStorage.removeItem('token');
     setUserInfoState(initialUserProps);
   };

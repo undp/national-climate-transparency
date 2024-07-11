@@ -862,15 +862,7 @@ export class ProjectService {
 			);
 		}
 
-		if (user.validatePermission===ValidateEntity.CANNOT) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"project.permissionDeniedForValidate",
-					[],
-				),
-				HttpStatus.FORBIDDEN
-			);
-		}
+		this.helperService.doesUserHaveValidatePermission(user);
 
 		project.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(

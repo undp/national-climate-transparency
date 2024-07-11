@@ -43,6 +43,7 @@ import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { StoredData, UploadData } from '../../../Definitions/uploadDefinitions';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { ValidateEntity } from '../../../Enums/user.enum';
+import { Role } from '../../../Enums/role.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -142,7 +143,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   useEffect(() => {
     // check user permission for validate action and disable validate button
-    if (userInfoState?.validatePermission === ValidateEntity.CANNOT) {
+    if (
+      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
+      userInfoState?.userRole === Role.Observer
+    ) {
       setIsValidateButtonDisabled(true);
     }
   }, [userInfoState]);

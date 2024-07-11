@@ -24,7 +24,7 @@ import { nanoid } from "nanoid";
 import { ConfigService } from "@nestjs/config";
 import { Organisation, OrganisationType } from "../enums/organisation.enum";
 import { plainToClass } from "class-transformer";
-import { SubRoleManipulate, UserState, ValidateEntity } from "../enums/user.enum";
+import { GHGInventoryManipulate, SubRoleManipulate, UserState, ValidateEntity } from "../enums/user.enum";
 import { HelperService } from "../util/helpers.service";
 import { AsyncAction, AsyncOperationsInterface } from "../async-operations/async-operations.interface";
 import { PasswordHashService } from "../util/passwordHash.service";
@@ -109,7 +109,15 @@ export class UserService {
 	): Promise<User | DataResponseMessageDto | undefined> {
 		this.logger.verbose(`User create received  ${userDto.email}`);
 		userDto.email = userDto.email?.toLowerCase();
-
+		
+		if(userDto.role===Role.Observer){
+			userDto.validatePermission=ValidateEntity.CANNOT;
+			userDto.subRolePermission=SubRoleManipulate.CANNOT;
+			userDto.ghgInventoryPermission=GHGInventoryManipulate.CANNOT;
+		}
+		if(userDto.role===Role.Admin){
+			userDto.subRolePermission=SubRoleManipulate.CANNOT;
+		}
 
 		await this.validateUserCreatePayload(userDto)
 
@@ -239,6 +247,7 @@ export class UserService {
 				"state",
 				"validatePermission",
 				"subRolePermission",
+				"ghgInventoryPermission",
 			],
 			where: {
 				email: username,
@@ -295,24 +304,43 @@ export class UserService {
 			);
 		}
 
-		if(user.role===Role.Root){
-			if(update.validatePermission===ValidateEntity.CANNOT || update.subRolePermission===SubRoleManipulate.CANNOT){
+		if(userDto.role===Role.Root){
+			if(update.validatePermission===ValidateEntity.CANNOT || update.subRolePermission===SubRoleManipulate.CANNOT || update.ghgInventoryPermission===GHGInventoryManipulate.CANNOT){
 				throw new HttpException(
-					this.helperService.formatReqMessagesString("user.validateAndSubrolePermissionShouldBeTrue", []),
+					this.helperService.formatReqMessagesString("user.AllRootPermissionShouldBeTrue", []),
 					HttpStatus.FORBIDDEN
 				);
 			}
 			update.validatePermission=ValidateEntity.CAN;
 			update.subRolePermission=SubRoleManipulate.CAN;
+			update.ghgInventoryPermission=GHGInventoryManipulate.CAN;
+		}
+
+		if(userDto.role===Role.Observer){
+			update.validatePermission=ValidateEntity.CANNOT;
+			update.subRolePermission=SubRoleManipulate.CANNOT;
+			update.ghgInventoryPermission=GHGInventoryManipulate.CANNOT;
+		}
+		if(userDto.role===Role.Admin){
+			update.subRolePermission=SubRoleManipulate.CANNOT;
 		}
 
 		if(requestingUser.id===userDto.id){
-			if(requestingUser.subRole!==userDto.subRole && requestingUser.subRolePermission === SubRoleManipulate.CANNOT){
+			if(requestingUser.subRole !== userDto.subRole && (requestingUser.subRolePermission === SubRoleManipulate.CANNOT || requestingUser.role === Role.Observer)){
 					throw new HttpException(
 						this.helperService.formatReqMessagesString("user.subRolePermissionDenied", []),
 						HttpStatus.FORBIDDEN
 					);
 				}
+		}
+
+		if(requestingUser.id===userDto.id){
+			if(requestingUser.role===Role.Admin && (requestingUser.validatePermission!==userDto.validatePermission || requestingUser.ghgInventoryPermission !==userDto.ghgInventoryPermission)){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.adminCannotUpdateTheirOwnPermissions", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
 		}
 
 		if(requestingUser.role===Role.Root){

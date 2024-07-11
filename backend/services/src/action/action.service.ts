@@ -705,15 +705,8 @@ export class ActionService {
 			);
 		}
 
-		if (user.validatePermission===ValidateEntity.CANNOT) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"action.permissionDeniedForValidate",
-					[],
-				),
-				HttpStatus.FORBIDDEN
-			);
-		}
+		this.helperService.doesUserHaveValidatePermission(user);
+
 
 		action.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(

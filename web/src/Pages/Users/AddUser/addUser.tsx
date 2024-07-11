@@ -20,18 +20,24 @@ import ChangePasswordModel from '../../../Components/Models/changePasswordModel'
 import { Role } from '../../../Enums/role.enum';
 import { Sector } from '../../../Enums/sector.enum';
 import { Organisation } from '../../../Enums/organisation.enum';
-import { SubRoleManipulate, ValidateEntity } from '../../../Enums/user.enum';
+import {
+  GHGInventoryManipulate,
+  SubRoleManipulate,
+  ValidateEntity,
+} from '../../../Enums/user.enum';
 import { BankOutlined, ExperimentOutlined, KeyOutlined, StarOutlined } from '@ant-design/icons';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import ForceResetPasswordModel from '../../../Components/Models/ForceReset/forceResetPasswordModel';
 import { RoleIcon } from '../../../Components/common/RoleIcon/role.icon';
-import { CheckAll, Diagram3 } from 'react-bootstrap-icons';
+import { CheckAll, CloudDownload, Diagram3 } from 'react-bootstrap-icons';
 
 import {
   subRolePermitBGColor,
   subRolePermitColor,
   validatePermitBGColor,
   validatePermitColor,
+  ghgInventoryPermitBGColor,
+  ghgInventoryPermitColor,
 } from '../../../Styles/role.color.constants';
 
 const AddUser = () => {
@@ -61,6 +67,9 @@ const AddUser = () => {
   );
   const [subRolePermission, setSubRolePermission] = useState(
     state?.record?.subRolePermission || SubRoleManipulate.CANNOT
+  );
+  const [ghgInventoryPermission, setGhgInventoryPermission] = useState(
+    state?.record?.ghgInventoryPermission || GHGInventoryManipulate.CANNOT
   );
   const [isOwnProfile, setIsOwnProfile] = useState<boolean>(false);
 
@@ -113,6 +122,7 @@ const AddUser = () => {
       }
       values.validatePermission = validatePermission;
       values.subRolePermission = subRolePermission;
+      values.ghgInventoryPermission = ghgInventoryPermission;
 
       const response = await post('national/users/add', values);
       if (response.status === 200 || response.status === 201) {
@@ -144,9 +154,19 @@ const AddUser = () => {
     if (role === Role.Root) {
       formOneValues.validatePermission = ValidateEntity.CAN;
       formOneValues.subRolePermission = SubRoleManipulate.CAN;
+      formOneValues.ghgInventoryPermission = GHGInventoryManipulate.CAN;
+    } else if (role === Role.Admin) {
+      formOneValues.validatePermission = validatePermission;
+      formOneValues.subRolePermission = SubRoleManipulate.CANNOT;
+      formOneValues.ghgInventoryPermission = ghgInventoryPermission;
+    } else if (role === Role.Observer) {
+      formOneValues.validatePermission = ValidateEntity.CANNOT;
+      formOneValues.subRolePermission = SubRoleManipulate.CANNOT;
+      formOneValues.ghgInventoryPermission = GHGInventoryManipulate.CANNOT;
     } else {
       formOneValues.validatePermission = validatePermission;
       formOneValues.subRolePermission = subRolePermission;
+      formOneValues.ghgInventoryPermission = ghgInventoryPermission;
     }
 
     try {
@@ -157,6 +177,7 @@ const AddUser = () => {
         organisation: formOneValues?.organisation,
         validatePermission: formOneValues?.validatePermission,
         subRolePermission: formOneValues?.subRolePermission,
+        ghgInventoryPermission: formOneValues?.ghgInventoryPermission,
         sector: formOneValues?.sector,
         subRole: formOneValues?.subRole,
       };
@@ -184,6 +205,7 @@ const AddUser = () => {
             userSectors: userInfoState.userSectors,
             validatePermission: formOneValues?.validatePermission,
             subRolePermission: formOneValues?.subRolePermission,
+            ghgInventoryPermission: formOneValues?.ghgInventoryPermission,
           });
         }
         onNavigateToUserManagement();
@@ -282,6 +304,12 @@ const AddUser = () => {
 
   const onChangeSubRolePermission = (event: any) => {
     setSubRolePermission(event.target.checked ? SubRoleManipulate.CAN : SubRoleManipulate.CANNOT);
+  };
+
+  const onChangeGhgInventoryPermission = (event: any) => {
+    setGhgInventoryPermission(
+      event.target.checked ? GHGInventoryManipulate.CAN : GHGInventoryManipulate.CANNOT
+    );
   };
 
   useEffect(() => {
@@ -456,38 +484,75 @@ const AddUser = () => {
                     </Form.Item>
                   )}
                 </Skeleton>
-                <Form.Item
-                  initialValue={state?.record?.validatePermission}
-                  name="validatePermission"
-                  rules={[
-                    {
-                      required: false,
-                    },
-                  ]}
-                >
-                  <div className="validate-permissions">
-                    <RoleIcon
-                      icon={<CheckAll />}
-                      bg={validatePermitBGColor}
-                      color={validatePermitColor}
-                    />
-                    <div className="align">{t('addUser:validatePermission')}</div>
-                    <Checkbox
-                      onChange={onChangeValidatePermission}
-                      checked={validatePermission === ValidateEntity.CAN}
-                      disabled={
-                        role === Role.Root ||
-                        (isUpdate &&
-                          !ability.can(
-                            Action.Update,
-                            plainToClass(User, state?.record),
-                            'validatePermission'
-                          ))
-                      }
-                    ></Checkbox>
-                  </div>
-                </Form.Item>
-                {(role === Role.GovernmentUser || role === Role.Observer) && (
+                {(role === Role.Root || role === Role.Admin || role === Role.GovernmentUser) && (
+                  <Form.Item
+                    initialValue={state?.record?.validatePermission}
+                    name="validatePermission"
+                    rules={[
+                      {
+                        required: false,
+                      },
+                    ]}
+                  >
+                    <div className="validate-permissions">
+                      <RoleIcon
+                        icon={<CheckAll />}
+                        bg={validatePermitBGColor}
+                        color={validatePermitColor}
+                      />
+                      <div className="align">{t('addUser:validatePermission')}</div>
+                      <Checkbox
+                        onChange={onChangeValidatePermission}
+                        checked={validatePermission === ValidateEntity.CAN}
+                        disabled={
+                          role === Role.Root ||
+                          (isOwnProfile && role === Role.Admin) ||
+                          (isUpdate &&
+                            !ability.can(
+                              Action.Update,
+                              plainToClass(User, state?.record),
+                              'validatePermission'
+                            ))
+                        }
+                      ></Checkbox>
+                    </div>
+                  </Form.Item>
+                )}
+                {(role === Role.Root || role === Role.Admin || role === Role.GovernmentUser) && (
+                  <Form.Item
+                    initialValue={state?.record?.ghgInventoryPermission}
+                    name="ghgInventoryPermission"
+                    rules={[
+                      {
+                        required: false,
+                      },
+                    ]}
+                  >
+                    <div className="ghgInventory-permissions">
+                      <RoleIcon
+                        icon={<CloudDownload />}
+                        bg={ghgInventoryPermitBGColor}
+                        color={ghgInventoryPermitColor}
+                      />
+                      <div className="align">{t('addUser:ghgInventoryPermission')}</div>
+                      <Checkbox
+                        onChange={onChangeGhgInventoryPermission}
+                        checked={ghgInventoryPermission === GHGInventoryManipulate.CAN}
+                        disabled={
+                          role === Role.Root ||
+                          (isOwnProfile && role === Role.Admin) ||
+                          (isUpdate &&
+                            !ability.can(
+                              Action.Update,
+                              plainToClass(User, state?.record),
+                              'ghgInventoryPermission'
+                            ))
+                        }
+                      ></Checkbox>
+                    </div>
+                  </Form.Item>
+                )}
+                {role === Role.GovernmentUser && (
                   <Form.Item
                     initialValue={state?.record?.subRolePermission}
                     name="subRolePermission"
@@ -602,9 +667,10 @@ const AddUser = () => {
                       value={state?.record?.subRole}
                       size="large"
                       disabled={
-                        isOwnProfile &&
-                        isUpdate &&
-                        state?.record?.subRolePermission === SubRoleManipulate.CANNOT
+                        (isOwnProfile && role === Role.Observer) ||
+                        (isOwnProfile &&
+                          isUpdate &&
+                          state?.record?.subRolePermission === SubRoleManipulate.CANNOT)
                       }
                     >
                       <div className="department-radio-container">
@@ -648,9 +714,10 @@ const AddUser = () => {
                       value={state?.record?.subRole}
                       size="large"
                       disabled={
-                        isOwnProfile &&
-                        isUpdate &&
-                        state?.record?.subRolePermission === SubRoleManipulate.CANNOT
+                        (isOwnProfile && role === Role.Observer) ||
+                        (isOwnProfile &&
+                          isUpdate &&
+                          state?.record?.subRolePermission === SubRoleManipulate.CANNOT)
                       }
                     >
                       <div className="tec-rev-radio-container">

@@ -84,10 +84,21 @@
           flex-direction: row;
           color: rgba(58, 53, 65, 0.5) !important;
           justify-content: space-between;
-          margin-top: -15px;
+          margin-top: -30px;
           width: 75%;
           .align{
             padding-right: 15%;
+          }
+        }
+        .ghgInventory-permissions{
+          display: flex;
+          flex-direction: row;
+          color: rgba(58, 53, 65, 0.5) !important;
+          justify-content: space-between;
+          margin-top: -15px;
+          width: 75%;
+          .align{
+            padding-right: 5.5%;
           }
         }
       }

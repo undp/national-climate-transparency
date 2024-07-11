@@ -126,6 +126,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
           userSectors: response.data.sector,
           validatePermission: response.data.validatePermission,
           subRolePermission: response.data.subRolePermission,
+          ghgInventoryPermission: response.data.ghgInventoryPermission,
         });
         removeToken();
         setIsTokenExpired(false);

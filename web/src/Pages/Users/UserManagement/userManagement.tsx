@@ -42,6 +42,8 @@ import {
   validatePermitColor,
   subRolePermitBGColor,
   subRolePermitColor,
+  ghgInventoryPermitBGColor,
+  ghgInventoryPermitColor,
 } from '../../../Styles/role.color.constants';
 
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
@@ -53,11 +55,16 @@ import { UserData } from '../../../Definitions/userManagement.definitions';
 import { plainToClass } from 'class-transformer';
 import { Action } from '../../../Enums/action.enum';
 import { User } from '../../../Entities/user';
-import { PersonDash, PersonCheck, CheckAll, Diagram3 } from 'react-bootstrap-icons';
+import { PersonDash, PersonCheck, CheckAll, Diagram3, CloudDownload } from 'react-bootstrap-icons';
 import { UserManagementColumns } from '../../../Enums/user.management.columns.enum';
 import './userManagementComponent.scss';
 import '../../../Styles/common.table.scss';
-import { SubRoleManipulate, UserState, ValidateEntity } from '../../../Enums/user.enum';
+import {
+  GHGInventoryManipulate,
+  SubRoleManipulate,
+  UserState,
+  ValidateEntity,
+} from '../../../Enums/user.enum';
 import { Role } from '../../../Enums/role.enum';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
@@ -163,6 +170,7 @@ const UserManagement = () => {
     const role = item?.role;
     const validatePermission = item?.validatePermission;
     const subRolePermission = item?.subRolePermission;
+    const ghgInventoryPermission = item?.ghgInventoryPermission;
     let userName;
 
     switch (role) {
@@ -196,7 +204,7 @@ const UserManagement = () => {
         </Tooltip>
         <Tooltip placement="top" title={t('user:validationPermission')} showArrow={false}>
           <div>
-            {validatePermission === ValidateEntity.CAN ? (
+            {validatePermission === ValidateEntity.CAN && role !== Role.Observer ? (
               <RoleIcon
                 icon={<CheckAll />}
                 bg={validatePermitBGColor}
@@ -209,8 +217,21 @@ const UserManagement = () => {
         </Tooltip>
         <Tooltip placement="top" title={t('user:subRolePermission')} showArrow={false}>
           <div>
-            {subRolePermission === SubRoleManipulate.CAN ? (
+            {subRolePermission === SubRoleManipulate.CAN && role === Role.GovernmentUser ? (
               <RoleIcon icon={<Diagram3 />} bg={subRolePermitBGColor} color={subRolePermitColor} />
+            ) : (
+              <></>
+            )}
+          </div>
+        </Tooltip>
+        <Tooltip placement="top" title={t('user:ghgInventoryPermission')} showArrow={false}>
+          <div>
+            {ghgInventoryPermission === GHGInventoryManipulate.CAN && role !== Role.Observer ? (
+              <RoleIcon
+                icon={<CloudDownload />}
+                bg={ghgInventoryPermitBGColor}
+                color={ghgInventoryPermitColor}
+              />
             ) : (
               <></>
             )}
@@ -488,6 +509,7 @@ const UserManagement = () => {
             sector: availableUsers[i].sector,
             validatePermission: availableUsers[i].validatePermission,
             subRolePermission: availableUsers[i].subRolePermission,
+            ghgInventoryPermission: availableUsers[i].ghgInventoryPermission,
           });
         }
         setTableData(tempUsers);

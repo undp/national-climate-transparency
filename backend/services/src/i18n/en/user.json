@@ -44,5 +44,6 @@
   "incorrectSubRole": "Role {} cannot have the sub role {}",
   "adminCantHaveSubRole": "Role {} cannot have any sub roles",
   "subRolePermissionDenied": "Permission Denied: unable to change Sub Role",
-  "validateAndSubrolePermissionShouldTrue" : "Validate and Subrole permission should be true for Super Admin"
+  "AllRootPermissionShouldBeTrue" : "All permission should be true for Super Admin",
+  "adminCannotUpdateTheirOwnPermissions" : "Administrator can not update their own Permission levels"
 }

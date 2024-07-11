@@ -35,5 +35,6 @@
     "sector" : "Sector",
     "organisation" : "Organisation",
     "validatePermission" : "Validation Permission Granted",
-    "subRolePermission" : "Sub Role Manipulation Permission Granted"
+    "subRolePermission" : "Sub Role Manipulation Permission Granted",
+    "ghgInventoryPermission" : "GHG Inventory Manipulation Permission Granted"
 }
