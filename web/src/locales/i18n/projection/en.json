@@ -1,3 +1,6 @@
 {
-    "projectionTitle": "Projection"
+    "projectionTitle": "Projection",
+    "withMeasuresTitle": "With Measures",
+    "withAdditionalMeasuresTitle": "With Additional Measures",
+    "withoutMeasuresTitle": "Without Measures"
 }
