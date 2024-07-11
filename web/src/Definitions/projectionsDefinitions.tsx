@@ -3,6 +3,7 @@ import { ProjectionSections } from '../Enums/projection.enum';
 export type ProjectionTimeline = {
   key: string;
   topicId: string;
+  values: number[];
 };
 
 export type SectionOpen = {
@@ -73,10 +74,13 @@ export const getInitTimeline = () => {
 
   for (const section of Object.values(projectionSectionOrder)) {
     section.forEach((topicId) => {
-      initProjectionTimeline.push({
-        key: `${topicId}_edit_init`,
-        topicId: topicId,
-      });
+      if (!nonLeafSections.includes(topicId)) {
+        initProjectionTimeline.push({
+          key: `${topicId}_edit_init`,
+          topicId: topicId,
+          values: new Array(51).fill(0),
+        });
+      }
     });
   }
 

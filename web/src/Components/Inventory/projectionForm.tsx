@@ -35,9 +35,13 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
 
   const [isFinalized, setIsFinalized] = useState<boolean>();
 
+  // Editable Leaf State
+
+  const [allEditableData, setAllEditableData] = useState<ProjectionTimeline[]>(getInitTimeline());
+
   // Collapsing Control
 
-  const [allVisibleData, setAllVisibleData] = useState<ProjectionTimeline[]>(getInitTimeline());
+  const [allVisibleData, setAllVisibleData] = useState<ProjectionTimeline[]>([]);
   const [controlledVisibleData, setControlledVisibleData] = useState<ProjectionTimeline[]>([]);
 
   useEffect(() => {
@@ -48,6 +52,26 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     );
     setControlledVisibleData(filteredData);
   }, [isSectionOpen, allVisibleData]);
+
+  // All Visible Data Population with totals
+
+  useEffect(() => {
+    const tempVisibleTimeline: ProjectionTimeline[] = [];
+
+    for (const section of Object.values(projectionSectionOrder)) {
+      section.forEach((topicId) => {
+        tempVisibleTimeline.push({
+          key: `${topicId}_visible_init`,
+          topicId: topicId,
+          values: nonLeafSections.includes(topicId)
+            ? new Array(51).fill(0)
+            : allEditableData.find((entry) => entry.topicId === topicId)?.values ??
+              new Array(51).fill(0),
+        });
+      });
+    }
+    setAllVisibleData(tempVisibleTimeline);
+  }, [allEditableData]);
 
   // Column Definition
 
@@ -94,20 +118,29 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   // Editable Value Update
 
   const updateValue = (topicId: string, yearIndex: number, newValue: number) => {
-    console.log(topicId, yearIndex, newValue);
+    setAllEditableData((prevData) => {
+      return prevData.map((entry) => {
+        if (entry.topicId === topicId) {
+          const updatedValues = [...entry.values];
+          updatedValues[yearIndex] = newValue;
+          return { ...entry, values: updatedValues };
+        }
+        return entry;
+      });
+    });
   };
 
   for (let year = 2000; year <= 2050; year++) {
     projectionTimelineColumns.push({
       title: year.toString(),
-      dataIndex: year.toString(),
+      dataIndex: 'values',
       width: 80,
       align: 'center',
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: any) => {
+      render: (sectionValueArray: number[], record: any) => {
         const isNonLeaf: boolean = nonLeafSections.includes(record.topicId);
         return (
           <Input
+            value={sectionValueArray[year - 2000] ?? undefined}
             disabled={isNonLeaf}
             className={
               isNonLeaf
