@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   getInitTimeline,
+  nonLeafSections,
+  projectionSectionOrder,
   ProjectionTimeline,
   SectionOpen,
 } from '../../Definitions/projectionsDefinitions';
-import { getCollapseIcon } from '../../Utils/utilServices';
+import { getCollapseIcon, parseNumber, parseToTwoDecimals } from '../../Utils/utilServices';
 import { ProjectionSections } from '../../Enums/projection.enum';
 
 interface Props {
@@ -35,10 +37,19 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
 
   // Collapsing Control
 
-  const [availableData, setAvailableData] = useState<ProjectionTimeline[]>(
-    getInitTimeline(projectionType)
-  );
-  const [controlledData, setControlledData] = useState<ProjectionTimeline[]>([]);
+  const [allVisibleData, setAllVisibleData] = useState<ProjectionTimeline[]>(getInitTimeline());
+  const [controlledVisibleData, setControlledVisibleData] = useState<ProjectionTimeline[]>([]);
+
+  useEffect(() => {
+    const filteredData = allVisibleData.filter(
+      (item) =>
+        item.topicId.length === 1 ||
+        isSectionOpen[item.topicId.slice(0, 1) as ProjectionSections] === true
+    );
+    setControlledVisibleData(filteredData);
+  }, [isSectionOpen, allVisibleData]);
+
+  // Column Definition
 
   const projectionTimelineColumns: TableProps<ProjectionTimeline>['columns'] = [
     {
@@ -80,28 +91,35 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     },
   ];
 
-  useEffect(() => {
-    const filteredData = availableData.filter(
-      (item) =>
-        item.topicId.length === 1 ||
-        isSectionOpen[item.topicId.slice(0, 1) as ProjectionSections] === true
-    );
-    setControlledData(filteredData);
-  }, [isSectionOpen, availableData]);
+  // Editable Value Update
+
+  const updateValue = (topicId: string, yearIndex: number, newValue: number) => {
+    console.log(topicId, yearIndex, newValue);
+  };
 
   for (let year = 2000; year <= 2050; year++) {
     projectionTimelineColumns.push({
       title: year.toString(),
-      dataIndex: 'values',
+      dataIndex: year.toString(),
       width: 80,
       align: 'center',
-      render: (sectionValueArray: number[], record: any) => {
+      // eslint-disable-next-line no-unused-vars
+      render: (_: any, record: any) => {
+        const isNonLeaf: boolean = nonLeafSections.includes(record.topicId);
         return (
           <Input
-            value={sectionValueArray[year - 2000] ?? undefined}
-            className="input-box"
+            disabled={isNonLeaf}
+            className={
+              isNonLeaf
+                ? record.topicId.length === 1
+                  ? 'root-input-box'
+                  : record.topicId.length === 2
+                  ? 'l1-input-box'
+                  : 'l2-input-box'
+                : 'leaf-input-box'
+            }
             onChange={(e) => {
-              console.log(record.topicId, e.target.value);
+              updateValue(record.topicId, year - 2000, parseNumber(e.target.value) ?? 0);
             }}
           />
         );
@@ -114,7 +132,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
       <Row className="projection-timeline">
         <Col span={24}>
           <Table
-            dataSource={controlledData}
+            dataSource={controlledVisibleData}
             columns={projectionTimelineColumns}
             pagination={false}
           />

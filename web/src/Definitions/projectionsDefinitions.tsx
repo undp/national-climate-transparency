@@ -2,9 +2,7 @@ import { ProjectionSections } from '../Enums/projection.enum';
 
 export type ProjectionTimeline = {
   key: string;
-  projectionType: 'withMeasures' | 'withoutMeasures' | 'withAdditionalMeasures';
   topicId: string;
-  values: number[];
 };
 
 export type SectionOpen = {
@@ -19,6 +17,7 @@ export const projectionSectionOrder = {
   [ProjectionSections.ENERGY]: [
     '1',
     '1A',
+    '1A1',
     '1A2',
     '1A3',
     '1A3a',
@@ -55,18 +54,28 @@ export const projectionSectionOrder = {
   [ProjectionSections.OTHER]: ['5', '5A', '5B'],
 };
 
-export const getInitTimeline = (
-  projectionType: 'withMeasures' | 'withoutMeasures' | 'withAdditionalMeasures'
-) => {
+export const nonLeafSections: string[] = [
+  '1',
+  '1A',
+  '1A3',
+  '1B',
+  '1C',
+  '2',
+  '3',
+  '3A',
+  '3B',
+  '4',
+  '5',
+];
+
+export const getInitTimeline = () => {
   const initProjectionTimeline: ProjectionTimeline[] = [];
 
   for (const section of Object.values(projectionSectionOrder)) {
     section.forEach((topicId) => {
       initProjectionTimeline.push({
-        key: (initProjectionTimeline.length + 1).toString(),
-        projectionType: projectionType,
+        key: `${topicId}_edit_init`,
         topicId: topicId,
-        values: new Array(51).fill(0),
       });
     });
   }
