@@ -31,7 +31,7 @@ const GhgProjections = () => {
       <div className="title-bar">
         <div className="body-title">{t('projectionTitle')}</div>
       </div>
-      <div className="emission-section-card">
+      <div className="projection-section-card">
         <Tabs defaultActiveKey="1" centered items={items} />
       </div>
     </div>
