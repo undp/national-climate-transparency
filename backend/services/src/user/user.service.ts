@@ -111,11 +111,24 @@ export class UserService {
 		userDto.email = userDto.email?.toLowerCase();
 		
 		if(userDto.role===Role.Observer){
+			if(userDto.validatePermission===ValidateEntity.CAN || userDto.subRolePermission===SubRoleManipulate.CAN || userDto.ghgInventoryPermission===GHGInventoryManipulate.CAN){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.observerCannotHaveAnyPermissions", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
 			userDto.validatePermission=ValidateEntity.CANNOT;
 			userDto.subRolePermission=SubRoleManipulate.CANNOT;
 			userDto.ghgInventoryPermission=GHGInventoryManipulate.CANNOT;
 		}
+		
 		if(userDto.role===Role.Admin){
+			if(userDto.subRolePermission===SubRoleManipulate.CAN){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.adminCannotHaveSubrolePermission", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
 			userDto.subRolePermission=SubRoleManipulate.CANNOT;
 		}
 
