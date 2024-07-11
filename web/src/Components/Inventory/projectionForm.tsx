@@ -64,7 +64,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     {
       dataIndex: 'topicId',
       align: 'left',
-      width: 550,
+      width: 450,
       fixed: 'left',
       render: (colValue: any) => {
         return (
@@ -87,16 +87,24 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
         isSectionOpen[item.topicId.slice(0, 1) as ProjectionSections] === true
     );
     setControlledData(filteredData);
-  }, [isSectionOpen]);
+  }, [isSectionOpen, availableData]);
 
   for (let year = 2000; year <= 2050; year++) {
     projectionTimelineColumns.push({
       title: year.toString(),
-      dataIndex: year.toString(),
+      dataIndex: 'values',
       width: 80,
       align: 'center',
-      render: (colValue: any) => {
-        return <Input value={colValue} className="input-box" />;
+      render: (sectionValueArray: number[], record: any) => {
+        return (
+          <Input
+            value={sectionValueArray[year - 2000] ?? undefined}
+            className="input-box"
+            onChange={(e) => {
+              console.log(record.topicId, e.target.value);
+            }}
+          />
+        );
       },
     });
   }

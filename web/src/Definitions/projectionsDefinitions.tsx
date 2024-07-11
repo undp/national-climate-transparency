@@ -1,11 +1,11 @@
 import { ProjectionSections } from '../Enums/projection.enum';
 
-export interface ProjectionTimeline {
+export type ProjectionTimeline = {
   key: string;
   projectionType: 'withMeasures' | 'withoutMeasures' | 'withAdditionalMeasures';
   topicId: string;
-  [year: string]: any;
-}
+  values: number[];
+};
 
 export type SectionOpen = {
   [ProjectionSections.ENERGY]: boolean;
@@ -66,6 +66,7 @@ export const getInitTimeline = (
         key: (initProjectionTimeline.length + 1).toString(),
         projectionType: projectionType,
         topicId: topicId,
+        values: new Array(51).fill(0),
       });
     });
   }
