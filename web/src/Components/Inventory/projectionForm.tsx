@@ -2,7 +2,9 @@ import { Row, Col, Button, Table, TableProps, Input } from 'antd';
 import './projectionForm.scss';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ProjectionTimeline } from '../../Definitions/projectionsDefinitions';
+import { ProjectionTimeline, SectionOpen } from '../../Definitions/projectionsDefinitions';
+import { getCollapseIcon } from '../../Utils/utilServices';
+import { ProjectionSections } from '../../Enums/projection.enum';
 
 interface Props {
   index: number;
@@ -13,24 +15,48 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   // context Usage
   const { t } = useTranslation(['projection', 'entityAction']);
 
+  // Collapse State
+
+  const [isSectionOpen, setIsSectionOpen] = useState<SectionOpen>({
+    [ProjectionSections.ENERGY]: false,
+    [ProjectionSections.INDUSTRY]: false,
+    [ProjectionSections.AGR_FOR_OTH_LAND]: false,
+    [ProjectionSections.WASTE]: false,
+    [ProjectionSections.OTHER]: false,
+  });
+
   // Finalized State
 
   const [isFinalized, setIsFinalized] = useState<boolean>();
 
   const projectionTimelineColumns: TableProps<ProjectionTimeline>['columns'] = [
     {
-      title: 'Level',
-      dataIndex: 'topicLevel',
+      dataIndex: 'topicId',
       align: 'center',
       ellipsis: true,
-      width: 100,
+      width: 50,
+      render: (colValue: string) => {
+        if (colValue.length === 1) {
+          const currentSection: ProjectionSections = colValue as ProjectionSections;
+          return getCollapseIcon(isSectionOpen[currentSection], () => {
+            setIsSectionOpen((prevState) => ({
+              ...prevState,
+              [currentSection]: !prevState[currentSection],
+            }));
+          });
+        } else {
+          return null;
+        }
+      },
     },
     {
-      title: 'Topic',
-      dataIndex: 'topic',
+      dataIndex: 'topicId',
       align: 'left',
       width: 350,
       fixed: 'left',
+      render: (colValue: any) => {
+        return t(`${colValue}_title`);
+      },
     },
   ];
 
@@ -40,15 +66,18 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
       dataIndex: year.toString(),
       width: 80,
       align: 'center',
-      render: (colValue: any, record: any) => {
+      render: (colValue: any) => {
         return <Input value={colValue} className="input-box" />;
       },
     });
   }
 
   const expectedTimeline: ProjectionTimeline[] = [
-    { key: '0', topicLevel: 0, topic: 'Gfcgf' },
-    { key: '0', topicLevel: 0, topic: 'Gfcgf' },
+    { key: '1', projectionType: projectionType, topicId: '1' },
+    { key: '2', projectionType: projectionType, topicId: '2' },
+    { key: '3', projectionType: projectionType, topicId: '3' },
+    { key: '4', projectionType: projectionType, topicId: '4' },
+    { key: '5', projectionType: projectionType, topicId: '5' },
   ];
 
   return (
@@ -59,7 +88,6 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
             dataSource={expectedTimeline}
             columns={projectionTimelineColumns}
             pagination={false}
-            className="custom-scroll-table"
           />
         </Col>
       </Row>

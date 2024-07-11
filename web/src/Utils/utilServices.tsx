@@ -125,11 +125,17 @@ export const convertToMillions = (value: number) => {
   return numberInMills;
 };
 
-export const getCollapseIcon = (isActive: boolean) => {
+export const getCollapseIcon = (isActive: boolean, clicked?: any) => {
   return isActive ? (
-    <MinusCircleOutlined style={{ color: '#9155fd', fontSize: '14px' }} />
+    <MinusCircleOutlined
+      onClick={clicked ? clicked : undefined}
+      style={{ color: '#9155fd', fontSize: '14px' }}
+    />
   ) : (
-    <PlusCircleOutlined style={{ color: '#9155fd', fontSize: '14px' }} />
+    <PlusCircleOutlined
+      onClick={clicked ? clicked : undefined}
+      style={{ color: '#9155fd', fontSize: '14px' }}
+    />
   );
 };
 

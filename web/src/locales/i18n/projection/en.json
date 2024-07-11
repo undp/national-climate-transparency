@@ -2,5 +2,52 @@
     "projectionTitle": "Projection",
     "withMeasuresTitle": "With Measures",
     "withAdditionalMeasuresTitle": "With Additional Measures",
-    "withoutMeasuresTitle": "Without Measures"
+    "withoutMeasuresTitle": "Without Measures",
+
+    "1_title": "Energy",
+    "2_title": "Industrial Processes & Product Use",
+    "3_title": "Agriculture, Forestry, and Other Land Use",
+    "4_title": "Waste",
+    "5_title": "Other",
+
+    "1A_title": "Fuel Combustion Activities",
+    "1B_title": "Fugitive emissions from fuels",
+    "1C_title": "Carbon dioxide Transport and Storage",
+
+    "1A1_title": "Energy Industries",
+    "1A2_title": "Manufacturing Industries and Construction",
+    "1A3_title": "Transport",
+    "1A4_title": "Other Sectors",
+    "1A5_title": "Non-Specified",
+
+    "1B1_title": "Solid Fuels",
+    "1B2_title": "Oil and Natural Gas",
+    "1B3_title": "Other emissions from Energy Production",
+
+    "1C1_title": "Transport of CO2",
+    "1C2_title": "Injection and Storage",
+    "1C3_title": "Other",
+
+    "2A_title": "Mineral Industry",
+    "2B_title": "Chemical Industry",
+    "2C_title": "Metal Industry",
+    "2D_title": "Non-Energy Products from Fuels and Solvent Use",
+    "2E_title": "Electronics Industry",
+    "2F_title": "Product Uses as Substitutes for Ozone Depleting Substances",
+    "2G_title": "Other Product Manufacture and Use",
+    "2H_title": "Other",
+
+    "3A_title": "Livestock",
+    "3B_title": "Land",
+    "3C_title": "Aggregate sources and non-CO2 emissions sources on land",
+    "3D_title": "Other",
+
+    "4A_title": "Solid Waste Disposal",
+    "4B_title": "Biological Treatment of Solid Waste",
+    "4C_title": "Incineration and Open Burning of Waste",
+    "4D_title": "Wastewater Treatment and Discharge",
+    "4E_title": "Other",
+
+    "5A_title": "Indirect N2O emissions from the atmospheric deposition of nitrogen in NOx and NH3",
+    "5B_title": "Other"
 }
