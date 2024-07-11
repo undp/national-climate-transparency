@@ -8,5 +8,6 @@
     "invalidUsername": "Invalid Username !",
     "accountDeactivated": "Account Deactivated !",
     "incorrectPassword": "Invalid Password !",
-    "unableToGetStats": "Unable to retrieve the statistics for the charts."
+    "unableToGetStats": "Unable to retrieve the statistics for the charts.",
+    "permissionDeniedForValidate": "Permission Denied: Unable to Validate Action"
 }

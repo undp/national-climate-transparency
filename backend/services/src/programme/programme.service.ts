@@ -786,15 +786,7 @@ export class ProgrammeService {
 			);
 		}
 
-		if (user.validatePermission===ValidateEntity.CANNOT || user.role===Role.Observer) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"programme.permissionDeniedForValidate",
-					[],
-				),
-				HttpStatus.FORBIDDEN
-			);
-		}
+		await this.helperService.doesUserHaveValidatePermission(user);
 
 		programme.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(

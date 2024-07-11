@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Allrootpermissionstrue1720597399701 implements MigrationInterface {
+export class AllRootPermissionsTrue1720597399701 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         

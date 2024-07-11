@@ -1040,15 +1040,7 @@ export class ActivityService {
 			);
 		}
 
-		if (user.validatePermission===ValidateEntity.CANNOT || user.role===Role.Observer) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"activity.permissionDeniedForValidate",
-					[],
-				),
-				HttpStatus.FORBIDDEN
-			);
-		}
+		await this.helperService.doesUserHaveValidatePermission(user);
 
 		activity.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(

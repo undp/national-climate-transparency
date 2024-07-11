@@ -458,15 +458,7 @@ export class SupportService {
 			);
 		}
 
-		if (user.validatePermission===ValidateEntity.CANNOT || user.role===Role.Observer) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"support.permissionDeniedForValidate",
-					[],
-				),
-				HttpStatus.FORBIDDEN
-			);
-		}
+		await this.helperService.doesUserHaveValidatePermission(user);
 
 		support.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(
