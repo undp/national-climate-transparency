@@ -72,6 +72,9 @@
         .permissions{
           color: rgba(58, 53, 65, 0.5) !important;
         }
+        .permission-icon {
+          display: flex;
+        }
       }
       .details-part-two {
         .role-group {

@@ -499,11 +499,13 @@ const AddUser = () => {
                   >
                     <Row>
                       <Col span={3}>
-                        <RoleIcon
-                          icon={<CheckAll />}
-                          bg={validatePermitBGColor}
-                          color={validatePermitColor}
-                        />
+                        <div className="permission-icon">
+                          <RoleIcon
+                            icon={<CheckAll />}
+                            bg={validatePermitBGColor}
+                            color={validatePermitColor}
+                          />
+                        </div>
                       </Col>
                       <Col span={15}>
                         <div className="permissions">{t('addUser:validatePermission')}</div>
@@ -539,11 +541,13 @@ const AddUser = () => {
                   >
                     <Row>
                       <Col span={3}>
-                        <RoleIcon
-                          icon={<CloudDownload />}
-                          bg={ghgInventoryPermitBGColor}
-                          color={ghgInventoryPermitColor}
-                        />
+                        <div className="permission-icon">
+                          <RoleIcon
+                            icon={<CloudDownload />}
+                            bg={ghgInventoryPermitBGColor}
+                            color={ghgInventoryPermitColor}
+                          />
+                        </div>
                       </Col>
                       <Col span={15}>
                         <div className="permissions">{t('addUser:ghgInventoryPermission')}</div>
@@ -579,11 +583,13 @@ const AddUser = () => {
                   >
                     <Row>
                       <Col span={3}>
-                        <RoleIcon
-                          icon={<Diagram3 />}
-                          bg={subRolePermitBGColor}
-                          color={subRolePermitColor}
-                        />
+                        <div className="permission-icon">
+                          <RoleIcon
+                            icon={<Diagram3 />}
+                            bg={subRolePermitBGColor}
+                            color={subRolePermitColor}
+                          />
+                        </div>
                       </Col>
                       <Col span={15}>
                         <div className="permissions">{t('addUser:subRolePermission')}</div>
