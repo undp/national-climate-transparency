@@ -20,6 +20,12 @@
     "1A4_title": "Other Sectors",
     "1A5_title": "Non-Specified",
 
+    "1A3a_title": "Civil Aviation",
+    "1A3b_title": "Road Transportation",
+    "1A3c_title": "Railways",
+    "1A3d_title": "Water-borne Navigation",
+    "1A3e_title": "Other Transportation",
+
     "1B1_title": "Solid Fuels",
     "1B2_title": "Oil and Natural Gas",
     "1B3_title": "Other emissions from Energy Production",
@@ -41,6 +47,16 @@
     "3B_title": "Land",
     "3C_title": "Aggregate sources and non-CO2 emissions sources on land",
     "3D_title": "Other",
+
+    "3A1_title": "Enteric Fermentation",
+    "3A2_title": "Manure Management",
+    
+    "3B1_title": "Forest Land",
+    "3B2_title": "Cropland",
+    "3B3_title": "Grassland",
+    "3B4_title": "Wetlands",
+    "3B5_title": "Settlements",
+    "3B6_title": "Other Land",
 
     "4A_title": "Solid Waste Disposal",
     "4B_title": "Biological Treatment of Solid Waste",
