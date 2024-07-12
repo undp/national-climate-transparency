@@ -1,6 +1,6 @@
 import { Row, Col, Button, Table, TableProps, Input } from 'antd';
 import './projectionForm.scss';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   getInitTimeline,
@@ -9,7 +9,7 @@ import {
   ProjectionTimeline,
   SectionOpen,
 } from '../../Definitions/projectionsDefinitions';
-import { getCollapseIcon, parseNumber, parseToTwoDecimals } from '../../Utils/utilServices';
+import { getCollapseIcon, parseNumber } from '../../Utils/utilServices';
 import { ProjectionSections } from '../../Enums/projection.enum';
 
 interface Props {
@@ -42,15 +42,13 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   // Collapsing Control
 
   const [allVisibleData, setAllVisibleData] = useState<ProjectionTimeline[]>([]);
-  const [controlledVisibleData, setControlledVisibleData] = useState<ProjectionTimeline[]>([]);
 
-  useEffect(() => {
-    const filteredData = allVisibleData.filter(
+  const controlledVisibleData = useMemo(() => {
+    return allVisibleData.filter(
       (item) =>
         item.topicId.length === 1 ||
         isSectionOpen[item.topicId.slice(0, 1) as ProjectionSections] === true
     );
-    setControlledVisibleData(filteredData);
   }, [isSectionOpen, allVisibleData]);
 
   // All Visible Data Population with totals
@@ -118,15 +116,22 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   // Editable Value Update
 
   const updateValue = (topicId: string, yearIndex: number, newValue: number) => {
-    setAllEditableData((prevData) => {
-      return prevData.map((entry) => {
-        if (entry.topicId === topicId) {
-          const updatedValues = [...entry.values];
-          updatedValues[yearIndex] = newValue;
-          return { ...entry, values: updatedValues };
-        }
-        return entry;
-      });
+    setAllVisibleData((prevData) => {
+      const entryIndex = prevData.findIndex((entry) => entry.topicId === topicId);
+
+      if (entryIndex === -1) return prevData;
+
+      const updatedData = [...prevData];
+
+      const updatedValues = [...updatedData[entryIndex].values];
+      updatedValues[yearIndex] = newValue;
+
+      updatedData[entryIndex] = {
+        ...updatedData[entryIndex],
+        values: updatedValues,
+      };
+
+      return updatedData;
     });
   };
 
