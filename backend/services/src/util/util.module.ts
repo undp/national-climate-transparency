@@ -16,7 +16,7 @@ import { PasswordResetService } from "./passwordReset.service";
 import { User } from "../entities/user.entity";
 import { AsyncOperationsModule } from "../async-operations/async-operations.module";
 import { ConfigurationSettingsService } from "./configurationSettings.service";
-import { ConfigurationSettings } from "../entities/configuration.settings";
+import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
 import { Region } from "../entities/region.entity";
 import { PasswordHashService } from "./passwordHash.service";
 import { HttpUtilService } from "./http.util.service";
@@ -59,7 +59,7 @@ import { ActivityEntity } from "src/entities/activity.entity";
       Organisation,
       PasswordReset,
       User,
-      ConfigurationSettings,
+      ConfigurationSettingsEntity,
       Region,
 			ActionEntity,
 			ProgrammeEntity,
