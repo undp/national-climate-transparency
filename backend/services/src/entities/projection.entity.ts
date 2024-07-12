@@ -1,7 +1,7 @@
 import { Entity, Column, Unique, PrimaryGeneratedColumn } from 'typeorm';
 import { GHGRecordState } from 'src/enums/ghg.state.enum';
-import { ProjectionAgricultureForestryOtherLandUse, ProjectionEnergyEmissions, ProjectionIndustrialProcessesProductUse, ProjectionOther, ProjectionProperties, ProjectionWaste } from 'src/dtos/projection.dto';
 import { ProjectionType } from 'src/enums/projection.enum';
+import { ProjectionData } from 'src/dtos/projection.dto';
 
 @Entity()
 @Unique(['year'])
@@ -20,25 +20,7 @@ export class ProjectionEntity {
     array: false,
     nullable: true,
   })
-  energyEmissions?: ProjectionEnergyEmissions;
-
-  @Column('jsonb', { array: false, nullable: true })
-  industrialProcessesProductUse?: ProjectionIndustrialProcessesProductUse;
-
-  @Column('jsonb', { array: false, nullable: true })
-  agricultureForestryOtherLandUse?: ProjectionAgricultureForestryOtherLandUse;
-
-  @Column('jsonb', { array: false, nullable: true })
-  waste?: ProjectionWaste;
-
-  @Column('jsonb', { array: false, nullable: true })
-  other?: ProjectionOther;
-
-  @Column('jsonb', { array: false, nullable: true })
-  totalCo2WithoutLand?: ProjectionProperties;
-
-  @Column('jsonb', { array: false, nullable: true })
-  totalCo2WithLand?: ProjectionProperties;
+  projectionData?: ProjectionData;
 
   @Column({
     type: 'enum',
@@ -46,7 +28,4 @@ export class ProjectionEntity {
     array: false,
   })
   state: GHGRecordState;
-
-  @Column({ type: "boolean", default: false })
-	isBaseline: boolean;
 }

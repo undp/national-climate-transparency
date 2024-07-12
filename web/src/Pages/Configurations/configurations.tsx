@@ -2,7 +2,6 @@ import { Button, Col, Form, Input, Row, Tabs } from 'antd';
 import './configurations.scss';
 import { useTranslation } from 'react-i18next';
 import { BaselineForm } from '../../Components/Inventory/baselineForm';
-import { quarterColumnBps } from '../../Definitions/breakpoints/breakpoints';
 import { getValidationRules } from '../../Utils/validationRules';
 import { GWPGasses } from '../../Enums/configuration.enum';
 
