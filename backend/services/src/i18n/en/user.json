@@ -48,5 +48,6 @@
   "adminCannotUpdateTheirOwnPermissions" : "Administrator can not update their own Permission levels",
   "cannotSelfDeactivate" : "Can not Deactivate own user account",
   "observerCannotHaveAnyPermissions" : "Observer can not have true value for any permissions",
-  "adminCannotHaveSubrolePermission" : "Admin can not have true value for Subrole Manipulate Permission"
+  "adminCannotHaveSubrolePermission" : "Admin can not have true value for Subrole Manipulate Permission",
+  "onlyRootCanChangeRole" : "User have not permission to update user role"
 }

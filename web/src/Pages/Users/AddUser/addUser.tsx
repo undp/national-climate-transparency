@@ -183,10 +183,8 @@ const AddUser = () => {
         ghgInventoryPermission: formOneValues?.ghgInventoryPermission,
         sector: formOneValues?.sector,
         subRole: formOneValues?.subRole,
+        role: formOneValues?.role,
       };
-
-      if (ability.can(Action.Update, plainToClass(User, state?.record), 'role'))
-        values.role = formOneValues?.role;
 
       if (ability.can(Action.Update, plainToClass(User, state?.record), 'email'))
         values.email = formOneValues?.email;
