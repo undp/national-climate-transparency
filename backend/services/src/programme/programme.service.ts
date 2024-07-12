@@ -148,7 +148,10 @@ export class ProgrammeService {
 				const savedProgramme = await em.save<ProgrammeEntity>(programme);
 				if (savedProgramme) {
 
-					if (programmeDto.actionId && action && action.validated) {
+					// linking projects and updating paths of projects and activities
+					if (projects && projects.length > 0) {
+						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
+					} else if (programmeDto.actionId && action && action.validated) {
 						action.validated = false;
 						this.addEventLogEntry(
 							eventLog, 
@@ -159,12 +162,10 @@ export class ProgrammeService {
 							programme.programmeId
 						);
 						await em.save<ActionEntity>(action)
+						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(action.actionId, em);
 					}
+
 					await em.save<LogEntity>(eventLog);
-					// linking projects and updating paths of projects and activities
-					if (projects && projects.length > 0) {
-						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
-					}
 
 					if (programmeDto.kpis) {
 						await em.save<KpiEntity>(kpiList);
@@ -443,7 +444,7 @@ export class ProgrammeService {
 						await this.unlinkUpdatedProgrammeFromAction(programmeUpdate, user, em);
 						await this.linkUpdatedProgrammeToAction(programmeUpdateDto.actionId, programmeUpdate, user, em);
 					} else {
-						await this.updateAllValidatedChildrenAndParentStatus(programmeUpdate, em);
+						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProgrammeId(programmeUpdate, em, false);
 					}
 
 					// Save new KPIs
@@ -666,7 +667,7 @@ export class ProgrammeService {
 			);
 		}
 
-		const programmes = await this.findAllProgrammeByIds(linkProgrammesDto.programmes);
+		const programmes = await this.linkUnlinkService.findAllProgrammeByIds(linkProgrammesDto.programmes);
 
 		if (!programmes || programmes.length <= 0) {
 			throw new HttpException(
@@ -702,7 +703,7 @@ export class ProgrammeService {
 	//MARK: Unlink Programme
 	async unlinkProgrammesFromAction(unlinkProgrammesDto: UnlinkProgrammesDto, user: User) {
 
-		const programmes = await this.findAllProgrammeByIds([unlinkProgrammesDto.programme]);
+		const programmes = await this.linkUnlinkService.findAllProgrammeByIds([unlinkProgrammesDto.programme]);
 
 		if (!programmes || programmes.length <= 0) {
 			throw new HttpException(
@@ -765,6 +766,9 @@ export class ProgrammeService {
 
 	//MARK: Validate Programme
 	async validateProgramme(validateDto: ValidateDto, user: User) {
+
+		this.helperService.doesUserHaveValidatePermission(user);
+
 		const programme = await this.findProgrammeById(validateDto.entityId);
 		if (!programme) {
 			throw new HttpException(
@@ -786,7 +790,15 @@ export class ProgrammeService {
 			);
 		}
 
-		this.helperService.doesUserHaveValidatePermission(user);
+		if (validateDto.validateStatus && programme.action && !programme.action.validated) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.parentNotValidated",
+					[programme.action?.actionId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
 
 		programme.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(
@@ -801,6 +813,9 @@ export class ProgrammeService {
 			.transaction(async (em) => {
 				const savedProgramme = await em.save<ProgrammeEntity>(programme);
 				if (savedProgramme) {
+					if (!validateDto.validateStatus) {
+						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProgrammeId(programme, em, true);
+					}
 					await em.save<LogEntity>(eventLog);
 				}
 				return savedProgramme;
@@ -826,27 +841,27 @@ export class ProgrammeService {
 
 	}
 
-	async findAllProgrammeByIds(programmeIds: string[]) {
-		return await this.programmeRepo.createQueryBuilder('programme')
-			.leftJoinAndSelect('programme.action', 'action')
-			.leftJoinAndSelect('programme.projects', 'project')
-			.leftJoinAndMapMany(
-				"programme.activities",
-				ActivityEntity,
-				"programmeActivity", // Unique alias for programme activities
-				"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
-				{ programme: EntityType.PROGRAMME }
-			)
-			.leftJoinAndMapMany(
-				"project.activities",
-				ActivityEntity,
-				"projectActivity", // Unique alias for project activities
-				"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
-				{ project: EntityType.PROJECT }
-			)
-			.where('programme.programmeId IN (:...programmeIds)', { programmeIds })
-			.getMany();
-	}
+	// async findAllProgrammeByIds(programmeIds: string[]) {
+	// 	return await this.programmeRepo.createQueryBuilder('programme')
+	// 		.leftJoinAndSelect('programme.action', 'action')
+	// 		.leftJoinAndSelect('programme.projects', 'project')
+	// 		.leftJoinAndMapMany(
+	// 			"programme.activities",
+	// 			ActivityEntity,
+	// 			"programmeActivity", // Unique alias for programme activities
+	// 			"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
+	// 			{ programme: EntityType.PROGRAMME }
+	// 		)
+	// 		.leftJoinAndMapMany(
+	// 			"project.activities",
+	// 			ActivityEntity,
+	// 			"projectActivity", // Unique alias for project activities
+	// 			"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
+	// 			{ project: EntityType.PROJECT }
+	// 		)
+	// 		.where('programme.programmeId IN (:...programmeIds)', { programmeIds })
+	// 		.getMany();
+	// }
 
 	async findProgrammeById(programmeId: string) {
 		return await this.programmeRepo.createQueryBuilder('programme')
@@ -883,24 +898,6 @@ export class ProgrammeService {
 			.getOne();
 	}
 
-	async findAllLinkedProgrammesToActionByActionId(actionId: string, unlinkRequestProgrammeId: string | null) {
-		const queryBuilder = this.programmeRepo.createQueryBuilder('programme')
-			.select('programme.*') // Select all columns without any alias
-			.where('programme.actionId = :actionId', { actionId });
-
-		if (unlinkRequestProgrammeId !== null) {
-			queryBuilder.andWhere('programme.programmeId != :unlinkRequestProgrammeId', { unlinkRequestProgrammeId });
-		}
-
-		return await queryBuilder.getRawMany();
-	}
-
-	async findProgrammeViewById(programmeId: string) {
-		return await this.programmeViewRepo.findOneBy({
-			id: programmeId
-		})
-	}
-
 	async findAllProjectsByIds(projectIds: string[]) {
 		return await this.projectRepo.createQueryBuilder('project')
 			.leftJoinAndSelect('project.programme', 'programme')
@@ -929,90 +926,6 @@ export class ProgrammeService {
 			.getRawMany();
 	}
 
-	async updateAllValidatedChildrenAndParentStatus(programme: ProgrammeEntity, entityManager: EntityManager) {
-		const programmeId = programme.programmeId;
-		const action = programme.action;
-
-		const projectChildren: ProjectEntity[] =
-			await this.projectRepo.createQueryBuilder('project')
-				.where("subpath(project.path, 1, 1) = :programmeId AND project.validated IS TRUE", { programmeId })
-				.getMany();
-
-		const activityChildren: ActivityEntity[] =
-			await this.activityRepo.createQueryBuilder('activity')
-				.leftJoinAndSelect('activity.support', 'support')
-				.where("subpath(activity.path, 1, 1) = :programmeId AND activity.validated IS TRUE", { programmeId })
-				.getMany();
-
-		if ((projectChildren.length > 0) || (activityChildren.length > 0) || action) {
-
-			await entityManager
-				.transaction(async (em) => {
-					const logs = [];
-
-					if (action.validated) {
-						action.validated = false;
-						logs.push(this.buildLogEntity(
-							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							EntityType.ACTION,
-							action.actionId,
-							0,
-							programme.programmeId)
-						);
-						await em.save<ActionEntity>(action)
-					}
-
-					const projects = []
-					for (const project of projectChildren) {
-						project.validated = false;
-						logs.push(this.buildLogEntity(
-							LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							EntityType.PROJECT,
-							project.projectId,
-							0,
-							programme.programmeId)
-						);
-						projects.push(project)
-					}
-
-					await em.save<ProjectEntity>(projects);
-
-					const activities = []
-					for (const activity of activityChildren) {
-						activity.validated = false;
-
-						logs.push(this.buildLogEntity(
-							LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							EntityType.ACTIVITY,
-							activity.activityId,
-							0,
-							programme.programmeId)
-						);
-						activities.push(activity)
-
-						const supports = []
-						for (const support of activity.support) {
-							support.validated = false;
-
-							logs.push(this.buildLogEntity(
-								LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-								EntityType.SUPPORT,
-								support.supportId,
-								0,
-								programme.programmeId)
-							);
-							supports.push(support)
-						}
-
-						await em.save<SupportEntity>(supports);
-					}
-
-					await em.save<ActivityEntity>(activities);
-					await em.save<LogEntity>(logs);
-
-				});
-		}
-	}
 
 	private addEventLogEntry = (
 		eventLog: any[],
