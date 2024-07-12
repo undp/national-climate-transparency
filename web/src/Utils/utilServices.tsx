@@ -154,3 +154,12 @@ export const parseToTwoDecimals = (fullNumber: number) => {
 
   return parseFloat(structuredNumber);
 };
+
+export const arraySumAggregate = (numArrays: number[][], entryCount: number): number[] => {
+  try {
+    // eslint-disable-next-line no-unused-vars
+    return numArrays[0].map((_, i) => numArrays.reduce((sum, arr) => sum + arr[i], 0));
+  } catch {
+    return new Array(entryCount).fill(0);
+  }
+};

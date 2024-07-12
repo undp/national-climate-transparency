@@ -9,7 +9,7 @@ import {
   ProjectionTimeline,
   SectionOpen,
 } from '../../Definitions/projectionsDefinitions';
-import { getCollapseIcon, parseNumber } from '../../Utils/utilServices';
+import { arraySumAggregate, getCollapseIcon, parseNumber } from '../../Utils/utilServices';
 import { ProjectionSections } from '../../Enums/projection.enum';
 
 interface Props {
@@ -35,11 +35,11 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
 
   const [isFinalized, setIsFinalized] = useState<boolean>();
 
-  // Editable Leaf State
+  // Editable Leaf rows (38)
 
   const [allEditableData, setAllEditableData] = useState<ProjectionTimeline[]>(getInitTimeline());
 
-  // All available rows (48)
+  // All available rows (49)
 
   const [allVisibleData, setAllVisibleData] = useState<ProjectionTimeline[]>([]);
 
@@ -53,6 +53,54 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     );
   }, [isSectionOpen, allVisibleData]);
 
+  // Industry Section Sum
+
+  const industrySectionSum = useMemo(() => {
+    const sectionSum: number[][] = allEditableData
+      .filter((entry) => entry.topicId.startsWith('2'))
+      .map((entry) => entry.values);
+    return arraySumAggregate(sectionSum, 51);
+  }, [
+    allEditableData.filter((entry) => entry.topicId.startsWith('2')).map((entry) => entry.values),
+  ]);
+
+  // Waste Section Sum
+
+  const wasteSectionSum = useMemo(() => {
+    const sectionSum: number[][] = allEditableData
+      .filter((entry) => entry.topicId.startsWith('4'))
+      .map((entry) => entry.values);
+    return arraySumAggregate(sectionSum, 51);
+  }, [
+    allEditableData.filter((entry) => entry.topicId.startsWith('4')).map((entry) => entry.values),
+  ]);
+
+  // Other Section Sum
+
+  const otherSectionSum = useMemo(() => {
+    const sectionSum: number[][] = allEditableData
+      .filter((entry) => entry.topicId.startsWith('5'))
+      .map((entry) => entry.values);
+    return arraySumAggregate(sectionSum, 51);
+  }, [
+    allEditableData.filter((entry) => entry.topicId.startsWith('5')).map((entry) => entry.values),
+  ]);
+
+  // Sum Getter Function
+
+  const getSectionSum = (topicId: string) => {
+    switch (topicId) {
+      case '2':
+        return industrySectionSum;
+      case '4':
+        return wasteSectionSum;
+      case '5':
+        return otherSectionSum;
+      default:
+        return new Array(51).fill(0);
+    }
+  };
+
   // Memo to Cache All Visible Data with totals
 
   const tempVisibleTimeline = useMemo(() => {
@@ -64,7 +112,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
           key: `${topicId}_visible_init`,
           topicId: topicId,
           values: nonLeafSections.includes(topicId)
-            ? new Array(51).fill(0)
+            ? getSectionSum(topicId)
             : allEditableData.find((entry) => entry.topicId === topicId)?.values ??
               new Array(51).fill(0),
         });
@@ -125,7 +173,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   // Editable Value Update
 
   const updateValue = (topicId: string, yearIndex: number, newValue: number) => {
-    setAllVisibleData((prevData) => {
+    setAllEditableData((prevData) => {
       const entryIndex = prevData.findIndex((entry) => entry.topicId === topicId);
 
       if (entryIndex === -1) return prevData;
@@ -174,6 +222,10 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     });
   }
 
+  const submitProjection = (action: 'validate' | 'save') => {
+    console.log(allEditableData, allVisibleData);
+  };
+
   return (
     <div key={index} className="projection-form">
       <Row className="projection-timeline">
@@ -187,7 +239,13 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
       </Row>
       <Row gutter={20} className="action-row" justify={'end'}>
         <Col>
-          <Button disabled={isFinalized} type="primary" size="large" block onClick={console.log}>
+          <Button
+            disabled={isFinalized}
+            type="primary"
+            size="large"
+            block
+            onClick={() => submitProjection('validate')}
+          >
             {t('entityAction:submit')}
           </Button>
         </Col>
@@ -197,8 +255,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
             type="primary"
             size="large"
             block
-            htmlType="submit"
-            onClick={console.log}
+            onClick={() => submitProjection('validate')}
           >
             {t('entityAction:validate')}
           </Button>

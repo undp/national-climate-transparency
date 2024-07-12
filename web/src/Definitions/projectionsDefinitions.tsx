@@ -84,7 +84,5 @@ export const getInitTimeline = () => {
     });
   }
 
-  console.log(initProjectionTimeline.length);
-
   return initProjectionTimeline;
 };
