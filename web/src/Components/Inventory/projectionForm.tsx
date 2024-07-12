@@ -53,6 +53,50 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     );
   }, [isSectionOpen, allVisibleData]);
 
+  // Fuel Section Sum
+
+  const fuelSectionSum = useMemo(() => {
+    const sectionSum: number[][] = allEditableData
+      .filter((entry) => entry.topicId.startsWith('1A'))
+      .map((entry) => entry.values);
+    return arraySumAggregate(sectionSum, 51);
+  }, [
+    allEditableData.filter((entry) => entry.topicId.startsWith('1A')).map((entry) => entry.values),
+  ]);
+
+  // Fuel:Transport Section Sum
+
+  const transportSectionSum = useMemo(() => {
+    const sectionSum: number[][] = allEditableData
+      .filter((entry) => entry.topicId.startsWith('1A3'))
+      .map((entry) => entry.values);
+    return arraySumAggregate(sectionSum, 51);
+  }, [
+    allEditableData.filter((entry) => entry.topicId.startsWith('1A3')).map((entry) => entry.values),
+  ]);
+
+  // Fugitive Section Sum
+
+  const fugitiveSectionSum = useMemo(() => {
+    const sectionSum: number[][] = allEditableData
+      .filter((entry) => entry.topicId.startsWith('1B'))
+      .map((entry) => entry.values);
+    return arraySumAggregate(sectionSum, 51);
+  }, [
+    allEditableData.filter((entry) => entry.topicId.startsWith('1B')).map((entry) => entry.values),
+  ]);
+
+  // Carbon Section Sum
+
+  const carbonSectionSum = useMemo(() => {
+    const sectionSum: number[][] = allEditableData
+      .filter((entry) => entry.topicId.startsWith('1C'))
+      .map((entry) => entry.values);
+    return arraySumAggregate(sectionSum, 51);
+  }, [
+    allEditableData.filter((entry) => entry.topicId.startsWith('1C')).map((entry) => entry.values),
+  ]);
+
   // Industry Section Sum
 
   const industrySectionSum = useMemo(() => {
@@ -62,6 +106,28 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     return arraySumAggregate(sectionSum, 51);
   }, [
     allEditableData.filter((entry) => entry.topicId.startsWith('2')).map((entry) => entry.values),
+  ]);
+
+  // Livestock Section Sum
+
+  const livestockSectionSum = useMemo(() => {
+    const sectionSum: number[][] = allEditableData
+      .filter((entry) => entry.topicId.startsWith('3A'))
+      .map((entry) => entry.values);
+    return arraySumAggregate(sectionSum, 51);
+  }, [
+    allEditableData.filter((entry) => entry.topicId.startsWith('3A')).map((entry) => entry.values),
+  ]);
+
+  // Land Section Sum
+
+  const landSectionSum = useMemo(() => {
+    const sectionSum: number[][] = allEditableData
+      .filter((entry) => entry.topicId.startsWith('3B'))
+      .map((entry) => entry.values);
+    return arraySumAggregate(sectionSum, 51);
+  }, [
+    allEditableData.filter((entry) => entry.topicId.startsWith('3B')).map((entry) => entry.values),
   ]);
 
   // Waste Section Sum
@@ -90,8 +156,24 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
 
   const getSectionSum = (topicId: string) => {
     switch (topicId) {
+      case '1':
+        return arraySumAggregate([fuelSectionSum, fugitiveSectionSum, carbonSectionSum], 51);
+      case '1A':
+        return fuelSectionSum;
+      case '1A3':
+        return transportSectionSum;
+      case '1B':
+        return fugitiveSectionSum;
+      case '1C':
+        return carbonSectionSum;
       case '2':
         return industrySectionSum;
+      case '3':
+        return arraySumAggregate([livestockSectionSum, landSectionSum], 51);
+      case '3A':
+        return livestockSectionSum;
+      case '3B':
+        return landSectionSum;
       case '4':
         return wasteSectionSum;
       case '5':
