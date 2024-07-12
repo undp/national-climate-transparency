@@ -32,7 +32,7 @@ export class UserUpdateDto {
     @ValidateIf(
       (c) => ![Role.Root].includes(c.role)
     )
-    @IsOptional()
+    @IsNotEmpty()
     @ApiProperty({ enum: Role })
     @IsEnum(Role, {
       message: "Invalid role. Supported following roles:" + Object.values(Role),

@@ -316,6 +316,14 @@ export class UserService {
 				HttpStatus.NOT_FOUND
 			);
 		}
+		if(requestingUser.role !== Role.Root){
+			if(user.role !== userDto.role){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.onlyRootCanChangeRole", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
+		}
 
 		let isStateUpdate: boolean;
 
@@ -324,49 +332,63 @@ export class UserService {
 			isStateUpdate = true;
 		}
 
-		if(userDto.role===Role.Root){
-			if(update.validatePermission===ValidateEntity.CANNOT || update.subRolePermission===SubRoleManipulate.CANNOT || update.ghgInventoryPermission===GHGInventoryManipulate.CANNOT){
-				throw new HttpException(
-					this.helperService.formatReqMessagesString("user.allRootPermissionShouldBeTrue", []),
-					HttpStatus.FORBIDDEN
-				);
-			}
-			update.validatePermission=ValidateEntity.CAN;
-			update.subRolePermission=SubRoleManipulate.CAN;
-			update.ghgInventoryPermission=GHGInventoryManipulate.CAN;
-		}
+		switch (userDto.role) {
+			case Role.Root:
+				if (
+					update.validatePermission === ValidateEntity.CANNOT ||
+					update.subRolePermission === SubRoleManipulate.CANNOT ||
+					update.ghgInventoryPermission === GHGInventoryManipulate.CANNOT
+				) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString("user.allRootPermissionShouldBeTrue", []),
+						HttpStatus.FORBIDDEN
+					);
+				}
+				update.validatePermission = ValidateEntity.CAN;
+				update.subRolePermission = SubRoleManipulate.CAN;
+				update.ghgInventoryPermission = GHGInventoryManipulate.CAN;
+				break;
 
-		if(userDto.role===Role.Observer){
-			if(update.validatePermission===ValidateEntity.CAN || update.subRolePermission===SubRoleManipulate.CAN || update.ghgInventoryPermission===GHGInventoryManipulate.CAN){
-				throw new HttpException(
-					this.helperService.formatReqMessagesString("user.observerCannotHaveAnyPermissions", []),
-					HttpStatus.FORBIDDEN
-				);
-			}
-			update.validatePermission=ValidateEntity.CANNOT;
-			update.subRolePermission=SubRoleManipulate.CANNOT;
-			update.ghgInventoryPermission=GHGInventoryManipulate.CANNOT;
-		}
-		if(userDto.role===Role.Admin){
-			if(update.subRolePermission===SubRoleManipulate.CAN){
-				throw new HttpException(
-					this.helperService.formatReqMessagesString("user.adminCannotHaveSubrolePermission", []),
-					HttpStatus.FORBIDDEN
-				);
-			}
-			update.subRolePermission=SubRoleManipulate.CANNOT;
-			update.organisation=null;
-			update.sector=null;
-			update.subRole=null;
-		}
+			case Role.Admin:
+				if (update.subRolePermission === SubRoleManipulate.CAN) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString("user.adminCannotHaveSubrolePermission", []),
+						HttpStatus.FORBIDDEN
+					);
+				}
+				update.subRolePermission = SubRoleManipulate.CANNOT;
+				update.organisation = null;
+				update.sector = null;
+				update.subRole = null;
+				break;
 
-		if(requestingUser.id===userDto.id){
-			if(requestingUser.subRole !== userDto.subRole && (requestingUser.subRolePermission === SubRoleManipulate.CANNOT || requestingUser.role === Role.Observer)){
+			case Role.Observer:
+				if (
+					update.validatePermission === ValidateEntity.CAN ||
+					update.subRolePermission === SubRoleManipulate.CAN ||
+					update.ghgInventoryPermission === GHGInventoryManipulate.CAN
+				) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString("user.observerCannotHaveAnyPermissions", []),
+						HttpStatus.FORBIDDEN
+					);
+				}
+				update.validatePermission = ValidateEntity.CANNOT;
+				update.subRolePermission = SubRoleManipulate.CANNOT;
+				update.ghgInventoryPermission = GHGInventoryManipulate.CANNOT;
+				break;
+		}
+		  
+
+		if (requestingUser.role === Role.GovernmentUser || requestingUser.role === Role.Observer) {
+			if (requestingUser.id === userDto.id) {
+				if (requestingUser.subRole !== userDto.subRole && (requestingUser.subRolePermission === SubRoleManipulate.CANNOT || requestingUser.role === Role.Observer)) {
 					throw new HttpException(
 						this.helperService.formatReqMessagesString("user.subRolePermissionDenied", []),
 						HttpStatus.FORBIDDEN
 					);
 				}
+			}
 		}
 
 		if(requestingUser.id===userDto.id){
