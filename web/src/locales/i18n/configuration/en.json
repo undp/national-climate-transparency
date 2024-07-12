@@ -10,5 +10,9 @@
     "baselineYear": "Baseline Year",
     "co2": "Baseline CO2",
     "ch4": "Baseline CH4",
-    "n2o": "Baseline N2O"
+    "n2o": "Baseline N2O",
+
+    "gwp_co2": "CO2",
+    "gwp_ch4": "CH4",
+    "gwp_n2o": "N2O"
 }

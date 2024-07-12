@@ -181,8 +181,8 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
     });
   });
 
-  const submitProjection = (action: 'validate' | 'save') => {
-    console.log(allEditableData, allVisibleData, projectionType, action);
+  const saveBaseline = () => {
+    console.log(allEditableData, allVisibleData, projectionType);
   };
 
   return (
@@ -204,20 +204,9 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
             type="primary"
             size="large"
             block
-            onClick={() => submitProjection('validate')}
+            onClick={() => saveBaseline()}
           >
-            {t('entityAction:submit')}
-          </Button>
-        </Col>
-        <Col>
-          <Button
-            disabled={isFinalized}
-            type="primary"
-            size="large"
-            block
-            onClick={() => submitProjection('validate')}
-          >
-            {t('entityAction:validate')}
+            {t('entityAction:save')}
           </Button>
         </Col>
       </Row>
