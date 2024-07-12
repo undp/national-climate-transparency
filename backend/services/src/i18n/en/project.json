@@ -20,6 +20,7 @@
     "permissionDeniedForValidate": "Permission Denied: Unable to Validate Project",
     "permissionDeniedForSector": "User does not have the permission for the sector",
     "deleteProjectSuccess": "Project deleted successfully",
-    "projectDeletionFailed": "Project delete failed due to {}"
+    "projectDeletionFailed": "Project delete failed due to {}",
+    "parentNotValidated": "Parent programme with id {} should be validated."
 
 }

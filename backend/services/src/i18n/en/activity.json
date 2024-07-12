@@ -28,5 +28,6 @@
     "permissionDeniedForValidate": "Permission Denied: Unable to Validate Activity",
     "permissionDeniedForSector": "User does not have the permission for the sector",
     "deleteActivitySuccess": "Activity deleted successfully",
-    "activityDeletionFailed": "Activity delete failed due to {}"
+    "activityDeletionFailed": "Activity delete failed due to {}",
+    "parentNotValidated": "Parent entity should be validated."
 }

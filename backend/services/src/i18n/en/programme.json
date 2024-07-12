@@ -14,7 +14,7 @@
     "permissionDeniedForValidate": "Permission Denied: Unable to Validate Programme",
     "permissionDeniedForSector": "User does not have the permission for the sector",
     "deleteProgrammeSuccess": "Programme deleted successfully",
-    "programmeDeletionFailed": "Programme deletion failed due to {}"
-
+    "programmeDeletionFailed": "Programme deletion failed due to {}",
+    "parentNotValidated": "Parent action with id {} should be validated."
 
 }
