@@ -1,3 +1,14 @@
 {
-    "configurationTitle": "Configuration"
+    "configurationTitle": "Configuration",
+    "withMeasuresTitle": "With Measures",
+    "withAdditionalMeasuresTitle": "With Additional Measures",
+    "withoutMeasuresTitle": "Without Measures",
+    "gwpConfigurationTitle": "Global Warming Potential (GWP)",
+    "growthRateConfigurationTitle": "Projection Growth Rate",
+
+    "growthRate": "Growth Rate (%)",
+    "baselineYear": "Baseline Year",
+    "co2": "Baseline CO2",
+    "ch4": "Baseline CH4",
+    "n2o": "Baseline N2O"
 }
