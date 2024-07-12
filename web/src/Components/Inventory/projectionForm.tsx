@@ -39,9 +39,11 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
 
   const [allEditableData, setAllEditableData] = useState<ProjectionTimeline[]>(getInitTimeline());
 
-  // Collapsing Control
+  // All available rows (48)
 
   const [allVisibleData, setAllVisibleData] = useState<ProjectionTimeline[]>([]);
+
+  // Memo to Cache the visible data
 
   const controlledVisibleData = useMemo(() => {
     return allVisibleData.filter(
@@ -51,14 +53,14 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     );
   }, [isSectionOpen, allVisibleData]);
 
-  // All Visible Data Population with totals
+  // Memo to Cache All Visible Data with totals
 
-  useEffect(() => {
-    const tempVisibleTimeline: ProjectionTimeline[] = [];
+  const tempVisibleTimeline = useMemo(() => {
+    const timeline: ProjectionTimeline[] = [];
 
     for (const section of Object.values(projectionSectionOrder)) {
       section.forEach((topicId) => {
-        tempVisibleTimeline.push({
+        timeline.push({
           key: `${topicId}_visible_init`,
           topicId: topicId,
           values: nonLeafSections.includes(topicId)
@@ -68,8 +70,15 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
         });
       });
     }
-    setAllVisibleData(tempVisibleTimeline);
+
+    return timeline;
   }, [allEditableData]);
+
+  // Updating All Visible Data when the temp visible data changes
+
+  useEffect(() => {
+    setAllVisibleData(tempVisibleTimeline);
+  }, [tempVisibleTimeline]);
 
   // Column Definition
 
