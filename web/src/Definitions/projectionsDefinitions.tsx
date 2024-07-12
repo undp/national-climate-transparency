@@ -69,7 +69,7 @@ export const nonLeafSections: string[] = [
   '5',
 ];
 
-export const getInitTimeline = () => {
+export const getInitTimeline = (dbResponse?: any) => {
   const initProjectionTimeline: ProjectionTimeline[] = [];
 
   for (const section of Object.values(projectionSectionOrder)) {
@@ -78,7 +78,7 @@ export const getInitTimeline = () => {
         initProjectionTimeline.push({
           key: `${topicId}_edit_init`,
           topicId: topicId,
-          values: new Array(51).fill(0),
+          values: dbResponse?.[topicId] ?? new Array(51).fill(0),
         });
       }
     });

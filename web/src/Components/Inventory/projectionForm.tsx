@@ -24,7 +24,7 @@ interface Props {
 export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   // context Usage
   const { t } = useTranslation(['projection', 'entityAction']);
-  const { post } = useConnection();
+  const { get, post } = useConnection();
 
   // Collapse State
 
@@ -54,11 +54,26 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
 
   // Init Loading
 
+  const getProjection = async () => {
+    try {
+      const response = await get(`national/projections/actual/${projectionType}`);
+
+      if (response.status === 200 || response.status === 201) {
+        setAllEditableData(getInitTimeline(response.data.projectionData));
+        if (response.data.state === GHGRecordState.FINALIZED) {
+          setIsFinalized(true);
+        }
+      }
+    } catch (error) {
+      setAllEditableData(getInitTimeline());
+    }
+  };
+
   useEffect(() => {
     setIsLoading(true);
 
     setIsFinalized(false);
-    setAllEditableData(getInitTimeline); // Replace this with the corresponding BE call
+    getProjection();
 
     setIsLoading(false);
   }, []);
@@ -305,7 +320,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
         return (
           <Input
             value={sectionValueArray[year - 2000] ?? undefined}
-            disabled={isNonLeaf}
+            disabled={isNonLeaf || isFinalized}
             className={
               isNonLeaf
                 ? record.topicId.length === 1
@@ -365,28 +380,45 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
         </Col>
       </Row>
       <Row gutter={20} className="action-row" justify={'end'}>
-        <Col>
-          <Button
-            disabled={isFinalized}
-            type="primary"
-            size="large"
-            block
-            onClick={() => submitProjection(GHGRecordState.SAVED)}
-          >
-            {t('entityAction:submit')}
-          </Button>
-        </Col>
-        <Col>
-          <Button
-            disabled={isFinalized}
-            type="primary"
-            size="large"
-            block
-            onClick={() => submitProjection(GHGRecordState.FINALIZED)}
-          >
-            {t('entityAction:validate')}
-          </Button>
-        </Col>
+        {!isFinalized && (
+          <Col>
+            <Button
+              disabled={isFinalized}
+              type="primary"
+              size="large"
+              block
+              onClick={() => submitProjection(GHGRecordState.SAVED)}
+            >
+              {t('entityAction:submit')}
+            </Button>
+          </Col>
+        )}
+        {!isFinalized && (
+          <Col>
+            <Button
+              disabled={isFinalized}
+              type="primary"
+              size="large"
+              block
+              onClick={() => submitProjection(GHGRecordState.FINALIZED)}
+            >
+              {t('entityAction:validate')}
+            </Button>
+          </Col>
+        )}
+        {isFinalized && (
+          <Col>
+            <Button
+              disabled={!isFinalized}
+              type="primary"
+              size="large"
+              block
+              onClick={() => setIsFinalized(false)}
+            >
+              {t('entityAction:edit')}
+            </Button>
+          </Col>
+        )}
       </Row>
     </div>
   );
