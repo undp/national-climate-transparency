@@ -380,13 +380,15 @@ export class UserService {
 		}
 		  
 
-		if(requestingUser.id===userDto.id){
-			if(requestingUser.subRole !== userDto.subRole && (requestingUser.subRolePermission === SubRoleManipulate.CANNOT || requestingUser.role === Role.Observer)){
+		if (requestingUser.role === Role.GovernmentUser || requestingUser.role === Role.Observer) {
+			if (requestingUser.id === userDto.id) {
+				if (requestingUser.subRole !== userDto.subRole && (requestingUser.subRolePermission === SubRoleManipulate.CANNOT || requestingUser.role === Role.Observer)) {
 					throw new HttpException(
 						this.helperService.formatReqMessagesString("user.subRolePermissionDenied", []),
 						HttpStatus.FORBIDDEN
 					);
 				}
+			}
 		}
 
 		if(requestingUser.id===userDto.id){
