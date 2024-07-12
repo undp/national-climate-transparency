@@ -28,6 +28,7 @@ import {
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { ValidateEntity } from '../../../Enums/user.enum';
+import { Role } from '../../../Enums/role.enum';
 
 const { Option } = Select;
 
@@ -51,7 +52,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   const formTitle = getFormTitle('Support', method);
 
   const navigate = useNavigate();
-  const { post, put } = useConnection();
+  const { post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
   const { userInfoState } = useUserContext();
   const { entId } = useParams();
@@ -104,7 +105,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   useEffect(() => {
     // check user permission for validate action and disable validate button
-    if (userInfoState?.validatePermission === ValidateEntity.CANNOT) {
+    if (
+      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
+      userInfoState?.userRole === Role.Observer
+    ) {
       setIsValidateButtonDisabled(true);
     }
   }, [userInfoState]);
@@ -275,8 +279,32 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   // Entity Delete
 
-  const deleteEntity = () => {
-    console.log('Delete Clicked');
+  const deleteEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await del('national/supports/delete', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('supportDeleteSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/support');
+        }
+      }
+    } catch (error: any) {
+      if (error?.message) {
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Delete Failed`);
+      }
+    }
   };
 
   // State update for currency inputs
@@ -699,19 +727,21 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('entityAction:cancel')}
                 </Button>
               </Col>
-              <Col>
-                <Button
-                  type="default"
-                  size="large"
-                  block
-                  onClick={() => {
-                    deleteEntity();
-                  }}
-                  style={{ color: 'red', borderColor: 'red' }}
-                >
-                  {t('entityAction:delete')}
-                </Button>
-              </Col>
+              {ability.can(Action.Delete, SupportEntity) && (
+                <Col>
+                  <Button
+                    type="default"
+                    size="large"
+                    block
+                    onClick={() => {
+                      deleteEntity();
+                    }}
+                    style={{ color: 'red', borderColor: 'red' }}
+                  >
+                    {t('entityAction:delete')}
+                  </Button>
+                </Col>
+              )}
               <Col {...shortButtonBps}>
                 <Form.Item>
                   <Button

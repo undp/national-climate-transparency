@@ -43,6 +43,7 @@ import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { StoredData, UploadData } from '../../../Definitions/uploadDefinitions';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { ValidateEntity } from '../../../Enums/user.enum';
+import { Role } from '../../../Enums/role.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -58,7 +59,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const formTitle = getFormTitle('Activity', method);
 
   const navigate = useNavigate();
-  const { get, post, put } = useConnection();
+  const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
   const { userInfoState } = useUserContext();
   const { entId } = useParams();
@@ -142,7 +143,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   useEffect(() => {
     // check user permission for validate action and disable validate button
-    if (userInfoState?.validatePermission === ValidateEntity.CANNOT) {
+    if (
+      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
+      userInfoState?.userRole === Role.Observer
+    ) {
       setIsValidateButtonDisabled(true);
     }
   }, [userInfoState]);
@@ -537,8 +541,32 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Delete
 
-  const deleteEntity = () => {
-    console.log('Delete Clicked');
+  const deleteEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await del('national/activities/delete', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('activityDeleteSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/activities');
+        }
+      }
+    } catch (error: any) {
+      if (error?.message) {
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Delete Failed`);
+      }
+    }
   };
 
   // Update KPI ACH Values
@@ -1686,19 +1714,21 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('entityAction:cancel')}
                   </Button>
                 </Col>
-                <Col>
-                  <Button
-                    type="default"
-                    size="large"
-                    block
-                    onClick={() => {
-                      deleteEntity();
-                    }}
-                    style={{ color: 'red', borderColor: 'red' }}
-                  >
-                    {t('entityAction:delete')}
-                  </Button>
-                </Col>
+                {ability.can(Action.Delete, ActivityEntity) && (
+                  <Col>
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      onClick={() => {
+                        deleteEntity();
+                      }}
+                      style={{ color: 'red', borderColor: 'red' }}
+                    >
+                      {t('entityAction:delete')}
+                    </Button>
+                  </Col>
+                )}
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button

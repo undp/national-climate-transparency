@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { ArrayMinSize, IsArray, IsEmail, IsEnum, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, MaxLength, ValidateIf } from "class-validator";
 import { Role, SubRole } from "../casl/role.enum";
-import { SubRoleManipulate, UserState, ValidateEntity } from "../enums/user.enum";
+import { GHGInventoryManipulate, SubRoleManipulate, UserState, ValidateEntity } from "../enums/user.enum";
 import { Sector } from "../enums/sector.enum";
 import { Organisation } from "../enums/organisation.enum";
 
@@ -79,6 +79,9 @@ export class UserUpdateDto {
     @ApiPropertyOptional()
     remarks: string;
 
+    @ValidateIf(
+      (c) => ![Role.Observer].includes(c.role)
+    )
     @IsOptional()
     @ApiPropertyOptional({ enum: ValidateEntity })
     @IsEnum(ValidateEntity, {
@@ -86,11 +89,24 @@ export class UserUpdateDto {
     })
     validatePermission: ValidateEntity;
   
+    @ValidateIf(
+      (c) => ![Role.Root, Role.Admin, Role.Observer].includes(c.role)
+    )
     @IsOptional()
     @ApiPropertyOptional({ enum: SubRoleManipulate })
     @IsEnum(SubRoleManipulate, {
       message: "Invalid Sub Role Manipulate Permission. Supported following type:" + Object.values(SubRoleManipulate),
     })
     subRolePermission: SubRoleManipulate;
+
+    @ValidateIf(
+      (c) => ![Role.Observer].includes(c.role)
+    )
+    @IsOptional()
+    @ApiPropertyOptional({ enum: GHGInventoryManipulate })
+    @IsEnum(GHGInventoryManipulate, {
+      message: "Invalid GHG Inventory Manipulate Permission. Supported following type:" + Object.values(GHGInventoryManipulate),
+    })
+    ghgInventoryPermission: GHGInventoryManipulate;
 }
 

@@ -44,5 +44,9 @@
   "incorrectSubRole": "Role {} cannot have the sub role {}",
   "adminCantHaveSubRole": "Role {} cannot have any sub roles",
   "subRolePermissionDenied": "Permission Denied: unable to change Sub Role",
-  "validateAndSubrolePermissionShouldTrue" : "Validate and Subrole permission should be true for Super Admin"
+  "allRootPermissionShouldBeTrue" : "All permission should be true for Super Admin",
+  "adminCannotUpdateTheirOwnPermissions" : "Administrator can not update their own Permission levels",
+  "cannotSelfDeactivate" : "Can not Deactivate own user account",
+  "observerCannotHaveAnyPermissions" : "Observer can not have true value for any permissions",
+  "adminCannotHaveSubrolePermission" : "Admin can not have true value for Subrole Manipulate Permission"
 }

@@ -144,6 +144,7 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
           'sector',
           'validatePermission',
           'subRolePermission',
+          'ghgInventoryPermission',
         ],
         {
           id: { $eq: user.id },
@@ -154,31 +155,31 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Create, ActionEntity);
       can(Action.Validate, ActionEntity);
       can(Action.Update, ActionEntity);
-      can(Action.Delete, ActionEntity);
+      cannot(Action.Delete, ActionEntity);
 
       can(Action.Read, ProgrammeEntity);
       can(Action.Create, ProgrammeEntity);
       can(Action.Validate, ProgrammeEntity);
       can(Action.Update, ProgrammeEntity);
-      can(Action.Delete, ProgrammeEntity);
+      cannot(Action.Delete, ProgrammeEntity);
 
       can(Action.Read, ProjectEntity);
       can(Action.Create, ProjectEntity);
       can(Action.Validate, ProjectEntity);
       can(Action.Update, ProjectEntity);
-      can(Action.Delete, ProjectEntity);
+      cannot(Action.Delete, ProjectEntity);
 
       can(Action.Read, ActivityEntity);
       can(Action.Create, ActivityEntity);
       can(Action.Validate, ActivityEntity);
       can(Action.Update, ActivityEntity);
-      can(Action.Delete, ActivityEntity);
+      cannot(Action.Delete, ActivityEntity);
 
       can(Action.Read, SupportEntity);
       can(Action.Create, SupportEntity);
       can(Action.Validate, SupportEntity);
       can(Action.Update, SupportEntity);
-      can(Action.Delete, SupportEntity);
+      cannot(Action.Delete, SupportEntity);
     }
 
     if (user.role == Role.Observer) {
@@ -194,16 +195,7 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(
         Action.Update,
         User,
-        [
-          'role',
-          'apiKey',
-          'password',
-          'email',
-          'organisationType',
-          'sector',
-          'validatePermission',
-          'subRolePermission',
-        ],
+        ['role', 'apiKey', 'password', 'email', 'organisationType', 'sector'],
         {
           id: { $eq: user.id },
         }

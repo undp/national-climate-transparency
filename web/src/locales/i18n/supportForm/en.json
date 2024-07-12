@@ -20,5 +20,6 @@
     "supportCreationSuccess": "Support Added Successfully",
     "supportUpdateSuccess": "Support Updated Successfully",
     "supportValidateSuccess": "Support Validated Successfully",
-    "supportUnvalidateSuccess": "Support Unvalidated Successfully"
+    "supportUnvalidateSuccess": "Support Unvalidated Successfully",
+    "supportDeleteSuccess": "Support Deleted Successfully"
   }

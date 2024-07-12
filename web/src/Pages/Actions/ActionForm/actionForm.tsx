@@ -62,7 +62,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const formTitle = getFormTitle('Action', method);
 
   const navigate = useNavigate();
-  const { get, post, put } = useConnection();
+  const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
   const { userInfoState } = useUserContext();
   const { entId } = useParams();
@@ -148,7 +148,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   useEffect(() => {
     // check user permission for validate action and disable validate button
-    if (userInfoState?.validatePermission === ValidateEntity.CANNOT) {
+    if (
+      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
+      userInfoState?.userRole === Role.Observer
+    ) {
       setIsValidateButtonDisabled(true);
     }
   }, [userInfoState]);
@@ -758,8 +761,32 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Delete
 
-  const deleteEntity = () => {
-    console.log('Delete Clicked');
+  const deleteEntity = async () => {
+    try {
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await del('national/actions/delete', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('actionDeleteSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/actions');
+        }
+      }
+    } catch (error: any) {
+      if (error?.message) {
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Delete Failed`);
+      }
+    }
   };
 
   // Detach Programme
@@ -1466,19 +1493,21 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('entityAction:cancel')}
                   </Button>
                 </Col>
-                <Col>
-                  <Button
-                    type="default"
-                    size="large"
-                    block
-                    onClick={() => {
-                      deleteEntity();
-                    }}
-                    style={{ color: 'red', borderColor: 'red' }}
-                  >
-                    {t('entityAction:delete')}
-                  </Button>
-                </Col>
+                {ability.can(Action.Delete, ActionEntity) && (
+                  <Col>
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      onClick={() => {
+                        deleteEntity();
+                      }}
+                      style={{ color: 'red', borderColor: 'red' }}
+                    >
+                      {t('entityAction:delete')}
+                    </Button>
+                  </Col>
+                )}
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button

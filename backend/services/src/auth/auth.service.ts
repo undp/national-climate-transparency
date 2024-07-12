@@ -79,6 +79,7 @@ export class AuthService {
       user.email,
       user.validatePermission,
       user.subRolePermission,
+      user.ghgInventoryPermission,
     );
     const ability = this.caslAbilityFactory.createForUser(user);
     return {
@@ -93,6 +94,7 @@ export class AuthService {
       userState: user.state,
       validatePermission: user.validatePermission,
       subRolePermission: user.subRolePermission,
+      ghgInventoryPermission: user.ghgInventoryPermission,
     };
   }
 

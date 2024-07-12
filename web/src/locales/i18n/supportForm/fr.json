@@ -18,5 +18,6 @@
   "receivedLocalTitle": "Montant reçu (devise nationale)",
   "exchangeRateTitle": "Taux de change (USD/devise nationale)",
   "supportCreationSuccess": "Soutien ajouté avec succès",
-  "supportUpdateSuccess": "Soutien mis à jour avec succès"
+  "supportUpdateSuccess": "Soutien mis à jour avec succès",
+  "supportDeleteSuccess": "Soutien supprimé avec succès"
 }

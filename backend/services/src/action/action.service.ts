@@ -666,15 +666,7 @@ export class ActionService {
 
 	async validateAction(validateDto: ValidateDto, user: User) {
 
-		if (user.validatePermission===ValidateEntity.CANNOT) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"action.permissionDeniedForValidate",
-					[],
-				),
-				HttpStatus.FORBIDDEN
-			);
-		}
+		this.helperService.doesUserHaveValidatePermission(user);
 
 		const action = await this.findActionById(validateDto.entityId);
 		if (!action) {

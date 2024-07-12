@@ -499,15 +499,7 @@ export class SupportService {
 	//MARK: Validate Support
 	async validateSupport(validateDto: ValidateDto, user: User) {
 
-		if (user.validatePermission===ValidateEntity.CANNOT) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"support.permissionDeniedForValidate",
-					[],
-				),
-				HttpStatus.FORBIDDEN
-			);
-		}
+		this.helperService.doesUserHaveValidatePermission(user);
 
 		const support = await this.findSupportById(validateDto.entityId);
 		if (!support) {

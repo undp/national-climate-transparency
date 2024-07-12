@@ -888,15 +888,7 @@ export class ProjectService {
 	//MARK: Validate Project
 	async validateProject(validateDto: ValidateDto, user: User) {
 
-		if (user.validatePermission===ValidateEntity.CANNOT) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"project.permissionDeniedForValidate",
-					[],
-				),
-				HttpStatus.FORBIDDEN
-			);
-		}
+		this.helperService.doesUserHaveValidatePermission(user);
 
 		const project = await this.findProjectById(validateDto.entityId);
 		if (!project) {

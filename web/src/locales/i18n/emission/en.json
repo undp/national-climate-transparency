@@ -64,5 +64,7 @@
     "yearFetchingFailed": "Year Search Failed !",
     "fileNotSupported": "File Not Supported !",
     "emissionCreationSuccess": "Successfully Saved the Emission Data",
+    "emissionUpdateSuccess": "Successfully Updated the Emission Data",
+    "emissionValidateSuccess": "Successfully Validated the Emission Data",
     "emissionYearRequired": "Emission Year is Required !"
 }

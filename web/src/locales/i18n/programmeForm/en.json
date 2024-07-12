@@ -17,6 +17,7 @@
     "programmeUpdateSuccess": "Programme Updated Successfully",
     "programmeValidateSuccess": "Programme Validated Successfully",
     "programmeUnvalidateSuccess": "Programme Unvalidated Successfully",
+    "programmeDeleteSuccess": "Programme Deleted Successfully",
     "noProjectsMessage": "No Projects Attached",
     "noSuchEntity": "Requested Programme doesn't exist !",
     "activityInfoTitle": "List of Direct Linked Activities under the Programme",

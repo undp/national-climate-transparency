@@ -133,8 +133,8 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
     [send]
   );
   const del = useCallback(
-    (path: string, config?: AxiosRequestConfig) => {
-      return send('delete', path, config);
+    (path: string, data?: any, config?: AxiosRequestConfig) => {
+      return send('delete', path, data, config);
     },
     [send]
   );
