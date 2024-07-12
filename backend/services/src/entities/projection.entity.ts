@@ -4,13 +4,10 @@ import { ProjectionType } from 'src/enums/projection.enum';
 import { ProjectionData } from 'src/dtos/projection.dto';
 
 @Entity()
-@Unique(['year'])
+@Unique(['projectionType'])
 export class ProjectionEntity {
   @PrimaryGeneratedColumn()
   id: string;
-
-  @Column({ nullable: false })
-  year: string;
 
   @Column({ type: "enum", enum: ProjectionType, nullable: false })
   projectionType: string;

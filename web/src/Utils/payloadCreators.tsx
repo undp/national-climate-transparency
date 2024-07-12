@@ -7,6 +7,7 @@ import {
   OtherSection,
   WasteSection,
 } from '../Definitions/emissionDefinitions';
+import { projectionEmptyPayload, ProjectionTimeline } from '../Definitions/projectionsDefinitions';
 import {
   AgrLevels,
   EnergyLevels,
@@ -17,6 +18,8 @@ import {
   OtherLevels,
   WasteLevels,
 } from '../Enums/emission.enum';
+import { ProjectionLeafSection, ProjectionType } from '../Enums/projection.enum';
+import { GHGRecordState } from '../Enums/shared.enum';
 
 export const getEmissionCreatePayload = (
   year: string,
@@ -83,4 +86,26 @@ export const getEmissionCreatePayload = (
   };
 
   return tempPayload;
+};
+
+export const getProjectionCreatePayload = (
+  editableProjections: ProjectionTimeline[],
+  projectionType: ProjectionType,
+  state: GHGRecordState
+) => {
+  const payload = {
+    projectionType: projectionType,
+    projectionData: projectionEmptyPayload,
+    state: state,
+  };
+
+  Object.values(ProjectionLeafSection).forEach((value) => {
+    const editedRow = editableProjections.find((entry) => entry.topicId === value);
+
+    if (editedRow) {
+      payload.projectionData[value] = editedRow.values;
+    }
+  });
+
+  return payload;
 };

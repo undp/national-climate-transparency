@@ -1,4 +1,4 @@
-import { Row, Col, Button, Table, TableProps, Input } from 'antd';
+import { Row, Col, Button, Table, TableProps, Input, message } from 'antd';
 import './projectionForm.scss';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,16 +10,21 @@ import {
   SectionOpen,
 } from '../../Definitions/projectionsDefinitions';
 import { arraySumAggregate, getCollapseIcon, parseNumber } from '../../Utils/utilServices';
-import { ProjectionSections } from '../../Enums/projection.enum';
+import { ProjectionSections, ProjectionType } from '../../Enums/projection.enum';
+import { useConnection } from '../../Context/ConnectionContext/connectionContext';
+import { displayErrorMessage } from '../../Utils/errorMessageHandler';
+import { getProjectionCreatePayload } from '../../Utils/payloadCreators';
+import { GHGRecordState } from '../../Enums/shared.enum';
 
 interface Props {
   index: number;
-  projectionType: 'withMeasures' | 'withoutMeasures' | 'withAdditionalMeasures';
+  projectionType: ProjectionType;
 }
 
 export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   // context Usage
   const { t } = useTranslation(['projection', 'entityAction']);
+  const { post } = useConnection();
 
   // Collapse State
 
@@ -319,8 +324,32 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     });
   }
 
-  const submitProjection = (action: 'validate' | 'save') => {
-    console.log(allEditableData, allVisibleData, projectionType, action);
+  const submitProjection = async (state: GHGRecordState) => {
+    try {
+      const projectionCreatePayload = getProjectionCreatePayload(
+        allEditableData,
+        projectionType,
+        state
+      );
+
+      const response: any = await post('national/projections/add', projectionCreatePayload);
+
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content:
+            state === 'FINALIZED' ? t('projectionCreationSuccess') : t('projectionCreationSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+
+        if (state === 'FINALIZED') {
+          setIsFinalized(true);
+        }
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   return (
@@ -342,7 +371,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
             type="primary"
             size="large"
             block
-            onClick={() => submitProjection('validate')}
+            onClick={() => submitProjection(GHGRecordState.SAVED)}
           >
             {t('entityAction:submit')}
           </Button>
@@ -353,7 +382,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
             type="primary"
             size="large"
             block
-            onClick={() => submitProjection('validate')}
+            onClick={() => submitProjection(GHGRecordState.FINALIZED)}
           >
             {t('entityAction:validate')}
           </Button>
