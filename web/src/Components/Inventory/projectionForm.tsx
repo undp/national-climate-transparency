@@ -31,17 +31,32 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     [ProjectionSections.OTHER]: false,
   });
 
+  // General State
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   // Finalized State
 
   const [isFinalized, setIsFinalized] = useState<boolean>();
 
   // Editable Leaf rows (38)
 
-  const [allEditableData, setAllEditableData] = useState<ProjectionTimeline[]>(getInitTimeline());
+  const [allEditableData, setAllEditableData] = useState<ProjectionTimeline[]>([]);
 
   // All available rows (49)
 
   const [allVisibleData, setAllVisibleData] = useState<ProjectionTimeline[]>([]);
+
+  // Init Loading
+
+  useEffect(() => {
+    setIsLoading(true);
+
+    setIsFinalized(false);
+    setAllEditableData(getInitTimeline); // Replace this with the corresponding BE call
+
+    setIsLoading(false);
+  }, []);
 
   // Memo to Cache the visible data
 
@@ -305,7 +320,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   }
 
   const submitProjection = (action: 'validate' | 'save') => {
-    console.log(allEditableData, allVisibleData);
+    console.log(allEditableData, allVisibleData, projectionType, action);
   };
 
   return (
@@ -313,6 +328,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
       <Row className="projection-timeline">
         <Col span={24}>
           <Table
+            loading={isLoading}
             dataSource={controlledVisibleData}
             columns={projectionTimelineColumns}
             pagination={false}
