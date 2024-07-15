@@ -53,11 +53,6 @@ export class ProjectDto {
 	@ApiProperty()
 	endYear: number;
 
-	// @IsOptional()
-	// @IsNumber()
-	// @ApiPropertyOptional()
-	// expectedTimeFrame: number;
-
 	@IsArray()
 	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
