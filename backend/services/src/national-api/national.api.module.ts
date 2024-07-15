@@ -32,6 +32,8 @@ import { GhgEmissionModule } from 'src/emission/emission.module';
 import { GHGEmissionController } from './ghg.emission.controller';
 import { GhgProjectionModule } from 'src/projection/projection.module';
 import { GHGProjectionController } from './ghg.projection.controller';
+import { ResourcesController } from './resource.controller';
+import { SystemResourceModule } from 'src/system.resource/system.resources.module';
 
 
 @Module({
@@ -58,7 +60,8 @@ import { GHGProjectionController } from './ghg.projection.controller';
 		KpiModule,
 		ReportModule,
     GhgEmissionModule,
-    GhgProjectionModule,
+    GhgProjectionModule,,
+		SystemResourceModule
   ],
   controllers: [ 
     NationalAPIController, 
@@ -74,7 +77,8 @@ import { GHGProjectionController } from './ghg.projection.controller';
 		KpiController, 
 		ReportController,
     GHGEmissionController,
-    GHGProjectionController,
+    GHGProjectionController,,
+		ResourcesController
   ],
   providers: [
     NationalAPIService, 

@@ -251,7 +251,7 @@ export class ActivityService {
 
 		this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_UPDATED, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto);
 
-		const currentActivity = await this.findActivityById(activityUpdateDto.activityId);
+		const currentActivity = await this.linkUnlinkService.findActivityByIdWithSupports(activityUpdateDto.activityId);
 
 		if (!currentActivity) {
 			throw new HttpException(
