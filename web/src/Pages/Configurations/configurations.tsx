@@ -1,15 +1,19 @@
-import { Button, Col, Form, Input, Row, Tabs } from 'antd';
+import { Button, Col, Form, Input, message, Row, Tabs } from 'antd';
 import './configurations.scss';
 import { useTranslation } from 'react-i18next';
 import { BaselineForm } from '../../Components/Inventory/baselineForm';
 import { getValidationRules } from '../../Utils/validationRules';
 import { GWPGasses } from '../../Enums/configuration.enum';
+import { useConnection } from '../../Context/ConnectionContext/connectionContext';
+import { displayErrorMessage } from '../../Utils/errorMessageHandler';
+import { useEffect } from 'react';
 
 const GhgConfigurations = () => {
   // Page Context
 
   const [form] = Form.useForm();
   const { t } = useTranslation(['configuration']);
+  const { get, post } = useConnection();
 
   // Form Validation Rules
 
@@ -34,8 +38,47 @@ const GhgConfigurations = () => {
   ];
 
   const saveGWP = async (payload: any) => {
-    console.log('Clicked on Save GWP', payload);
+    try {
+      const gwpPayload = {
+        id: 'GWP',
+        settingValue: { gwp_ch4: payload.gwp_ch4, gwp_n2o: payload.gwp_n2o },
+      };
+
+      const response: any = await post('national/settings/update', gwpPayload);
+
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: t('gwpUpdateSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
+
+  // Init Loading
+
+  const getGWP = async () => {
+    try {
+      const response = await get('national/settings/GWP');
+
+      if (response.status === 200 || response.status === 201) {
+        form.setFieldsValue({
+          gwp_ch4: response.data.gwp_ch4,
+          gwp_n2o: response.data.gwp_n2o,
+        });
+      }
+    } catch (error) {
+      console.log(error, 'GWP Settings Not Found');
+    }
+  };
+
+  useEffect(() => {
+    getGWP();
+  }, []);
 
   return (
     <div className="content-container">
