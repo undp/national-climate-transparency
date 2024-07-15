@@ -21,6 +21,7 @@ import { SupportEntity } from "../entities/support.entity";
 import { KpiEntity } from "../entities/kpi.entity";
 import { EmissionEntity } from "src/entities/emission.entity";
 import { ConfigurationSettingsEntity } from "src/entities/configuration.settings.entity";
+import { SystemResourcesEntity } from "src/entities/systemResource.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -94,6 +95,11 @@ export class CaslAbilityFactory {
 				can(Action.Read, ConfigurationSettingsEntity);
 				can(Action.Create, ConfigurationSettingsEntity);
 				can(Action.Update, ConfigurationSettingsEntity);
+
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
+				can(Action.Create, SystemResourcesEntity);
+				can(Action.Delete, SystemResourcesEntity);
 			}
 
 			if (user.role == Role.Admin) {
