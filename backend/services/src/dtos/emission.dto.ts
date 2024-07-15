@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsEnum,
   IsNotEmpty,
   IsString,
 } from 'class-validator';
@@ -10,6 +11,7 @@ import { EmissionAgricultureForestryOtherLandUse } from './emission.agriculture.
 import { EmissionWaste } from './emission.waste';
 import { EmissionOther } from './emission.other';
 import { EmissionProperties } from './emission.properties';
+import { GHGRecordState } from 'src/enums/ghg.state.enum';
 
 export class EmissionDto {
   @ApiProperty()
@@ -50,9 +52,17 @@ export class EmissionDto {
   @IsNotEmpty()
   @Type(() => EmissionProperties)
   totalCo2WithLand: EmissionProperties;
+}
 
-  @ApiPropertyOptional()
-  @IsString()
+export class EmissionValidateDto {
+  @ApiProperty()
   @IsNotEmpty()
-  state: string;
+  year: string;
+
+  @IsNotEmpty()
+	@ApiProperty({ enum: GHGRecordState })
+	@IsEnum(GHGRecordState, {
+		message: "Invalid State. Supported following states:" + Object.values(GHGRecordState),
+	})
+	state: GHGRecordState;
 }

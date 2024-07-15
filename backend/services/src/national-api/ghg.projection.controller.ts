@@ -13,7 +13,7 @@ import { PoliciesGuardEx } from "src/casl/policy.guard";
 import { Action } from "src/casl/action.enum";
 import { GhgProjectionService } from "src/projection/projection.service";
 import { ProjectionEntity } from "src/entities/projection.entity";
-import { ProjectionDto } from "src/dtos/projection.dto";
+import { ProjectionDto, ProjectionValidateDto } from "src/dtos/projection.dto";
 import { ExtendedProjectionType, ProjectionType } from "src/enums/projection.enum";
 
 @ApiTags("Projections")
@@ -27,6 +27,12 @@ export class GHGProjectionController {
     addEmission(@Body() projectionDto: ProjectionDto, @Request() req) {
       console.log("came here")
         return this.projectionService.create(projectionDto, req.user);
+    }
+
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, ProjectionEntity))
+    @Post("validate")
+    validateEmission(@Body() projectionValidateDto: ProjectionValidateDto, @Request() req) {
+        return this.projectionService.validate(projectionValidateDto, req.user);
     }
 
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))

@@ -5,7 +5,7 @@ import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { HelperService } from '../util/helpers.service';
 import { User } from '../entities/user.entity';
 import { ProjectionEntity } from '../entities/projection.entity';
-import { ProjectionDto } from '../dtos/projection.dto';
+import { ProjectionDto, ProjectionValidateDto } from '../dtos/projection.dto';
 import { ExtendedProjectionType, ProjectionType } from '../enums/projection.enum';
 import { GHGRecordState } from '../enums/ghg.state.enum';
 
@@ -78,6 +78,48 @@ export class GhgProjectionService {
       return { status: HttpStatus.CREATED, data: savedProjection };
     }
 
+    async validate(projectionValidateDto: ProjectionValidateDto, user: User) {
+
+        const result = await this.getActualProjection(projectionValidateDto.projectionType);
+
+        if (result) {
+            if (result.state === GHGRecordState.FINALIZED && projectionValidateDto.state === GHGRecordState.FINALIZED) {
+                throw new HttpException(
+                    this.helperService.formatReqMessagesString("ghgInventory.projectionAlreadyValidated", []),
+                    HttpStatus.FORBIDDEN
+                );
+            }
+
+            if (result.state === GHGRecordState.SAVED && projectionValidateDto.state === GHGRecordState.SAVED) {
+                throw new HttpException(
+                    this.helperService.formatReqMessagesString("ghgInventory.projectionAlreadyUnvalidated", []),
+                    HttpStatus.FORBIDDEN
+                );
+            }
+
+            result.state = projectionValidateDto.state;
+
+            const savedProjection = await this.entityManager
+                .transaction(async (em) => {
+                    return await em.save<ProjectionEntity>(result);
+                })
+                .catch((err: any) => {
+                    console.log(err);
+                    throw new HttpException(
+                        this.helperService.formatReqMessagesString(
+                            "projection.projectionVerificationActionFailed",
+                            [err]
+                        ),
+                        HttpStatus.BAD_REQUEST
+                    );
+                });
+
+            return { status: HttpStatus.OK, data: savedProjection };
+        } else {
+            return { status: HttpStatus.NOT_FOUND, data: projectionValidateDto.projectionType };
+        }
+    }
+
     async getActualProjection(projectionType: string) {
 
         if (!Object.values(ProjectionType).includes(projectionType as ProjectionType)){
@@ -110,7 +152,7 @@ export class GhgProjectionService {
 
     private toProjection(projectionDto: ProjectionDto): ProjectionEntity {
         const data = instanceToPlain(projectionDto);
-        this.logger.verbose("Converted projectionDto to Projection entity", JSON.stringify(data));
+        data.state = GHGRecordState.SAVED;
         return plainToClass(ProjectionEntity, data);
     }
 }

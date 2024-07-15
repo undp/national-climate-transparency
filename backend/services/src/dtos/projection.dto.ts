@@ -288,6 +288,15 @@ export class ProjectionDto {
     @ValidateNested()
     @Type(() => ProjectionData)
     projectionData: ProjectionData;
+}
+
+export class ProjectionValidateDto {
+	@IsNotEmpty()
+	@ApiProperty({ enum: ProjectionType })
+	@IsEnum(ProjectionType, {
+		message: "Invalid Projection Type. Supported following status:" + Object.values(ProjectionType),
+	})
+	projectionType: ProjectionType;
   
     @IsNotEmpty()
 	@ApiProperty({ enum: GHGRecordState })

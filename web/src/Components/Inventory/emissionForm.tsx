@@ -45,6 +45,7 @@ import { getEmissionCreatePayload } from '../../Utils/payloadCreators';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import moment, { Moment } from 'moment';
+import { GHGRecordState } from '../../Enums/shared.enum';
 
 interface Props {
   index: number;
@@ -385,7 +386,7 @@ export const EmissionForm: React.FC<Props> = ({
 
   // Handle Submit
 
-  const handleEmissionAction = async (state: 'SAVED' | 'FINALIZED') => {
+  const handleEmissionAction = async () => {
     try {
       if (emissionYear) {
         const emissionCreatePayload = getEmissionCreatePayload(
@@ -396,8 +397,7 @@ export const EmissionForm: React.FC<Props> = ({
           wasteSection,
           otherSection,
           eqWith,
-          eqWithout,
-          state
+          eqWithout
         );
 
         const response: any = await post('national/emissions/add', emissionCreatePayload);
@@ -405,21 +405,12 @@ export const EmissionForm: React.FC<Props> = ({
         if (response.status === 200 || response.status === 201) {
           message.open({
             type: 'success',
-            content:
-              index === 0
-                ? t('emissionCreationSuccess')
-                : state === 'SAVED'
-                ? t('emissionUpdateSuccess')
-                : t('emissionValidateSuccess'),
+            content: index === 0 ? t('emissionCreationSuccess') : t('emissionUpdateSuccess'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
 
           getAvailableEmissionReports();
-
-          if (state === 'FINALIZED') {
-            setIsFinalized(true);
-          }
 
           if (index === 0) {
             revertToInit();
@@ -433,6 +424,36 @@ export const EmissionForm: React.FC<Props> = ({
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
+  };
+
+  // Handle Validate
+
+  const handleValidateAction = async (state: GHGRecordState) => {
+    try {
+      if (emissionYear) {
+        const emissionValidatePayload = {
+          year: emissionYear,
+          state: state,
+        };
+
+        const response: any = await post('national/emissions/validate', emissionValidatePayload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('emissionValidateSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          getAvailableEmissionReports();
+          setActiveYear(emissionYear);
+          setIsFinalized(state === GHGRecordState.FINALIZED);
+        }
       }
     } catch (error: any) {
       displayErrorMessage(error);
@@ -653,27 +674,31 @@ export const EmissionForm: React.FC<Props> = ({
         ))}
       </Row>
       <Row gutter={20} className="action-row" justify={'end'}>
+        {!isFinalized && (
+          <Col>
+            <Button
+              disabled={isFinalized}
+              type="primary"
+              size="large"
+              block
+              onClick={() => handleEmissionAction()}
+            >
+              {t('entityAction:submit')}
+            </Button>
+          </Col>
+        )}
         <Col>
           <Button
-            disabled={isFinalized}
-            type="primary"
-            size="large"
-            block
-            onClick={() => handleEmissionAction('SAVED')}
-          >
-            {t('entityAction:submit')}
-          </Button>
-        </Col>
-        <Col>
-          <Button
-            disabled={isFinalized || year === null}
+            disabled={year === null}
             type="primary"
             size="large"
             block
             htmlType="submit"
-            onClick={() => handleEmissionAction('FINALIZED')}
+            onClick={() =>
+              handleValidateAction(isFinalized ? GHGRecordState.SAVED : GHGRecordState.FINALIZED)
+            }
           >
-            {t('entityAction:validate')}
+            {isFinalized ? t('entityAction:unvalidate') : t('entityAction:validate')}
           </Button>
         </Col>
       </Row>

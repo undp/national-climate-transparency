@@ -364,28 +364,47 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     });
   }
 
-  const submitProjection = async (state: GHGRecordState) => {
+  // Handle Projection Save
+
+  const submitProjection = async () => {
     try {
-      const projectionCreatePayload = getProjectionCreatePayload(
-        allEditableData,
-        projectionType,
-        state
-      );
+      const projectionCreatePayload = getProjectionCreatePayload(allEditableData, projectionType);
 
       const response: any = await post('national/projections/add', projectionCreatePayload);
 
       if (response.status === 200 || response.status === 201) {
         message.open({
           type: 'success',
-          content:
-            state === 'FINALIZED' ? t('projectionCreationSuccess') : t('projectionCreationSuccess'),
+          content: t('projectionCreationSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
+  };
+
+  // Handle Projection Validation
+
+  const handleValidateAction = async (state: GHGRecordState) => {
+    try {
+      const projectionValidatePayload = {
+        projectionType: projectionType,
+        state: state,
+      };
+
+      const response: any = await post('national/projections/validate', projectionValidatePayload);
+
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: t('projectionValidateSuccess'),
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
 
-        if (state === 'FINALIZED') {
-          setIsFinalized(true);
-        }
+        setIsFinalized(state === GHGRecordState.FINALIZED);
       }
     } catch (error: any) {
       displayErrorMessage(error);
@@ -425,38 +444,24 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
               type="primary"
               size="large"
               block
-              onClick={() => submitProjection(GHGRecordState.SAVED)}
+              onClick={() => submitProjection()}
             >
               {t('entityAction:submit')}
             </Button>
           </Col>
         )}
-        {!isFinalized && (
-          <Col>
-            <Button
-              disabled={isFinalized}
-              type="primary"
-              size="large"
-              block
-              onClick={() => submitProjection(GHGRecordState.FINALIZED)}
-            >
-              {t('entityAction:validate')}
-            </Button>
-          </Col>
-        )}
-        {isFinalized && (
-          <Col>
-            <Button
-              disabled={!isFinalized}
-              type="primary"
-              size="large"
-              block
-              onClick={() => setIsFinalized(false)}
-            >
-              {t('entityAction:edit')}
-            </Button>
-          </Col>
-        )}
+        <Col>
+          <Button
+            type="primary"
+            size="large"
+            block
+            onClick={() =>
+              handleValidateAction(isFinalized ? GHGRecordState.SAVED : GHGRecordState.FINALIZED)
+            }
+          >
+            {isFinalized ? t('entityAction:unvalidate') : t('entityAction:validate')}
+          </Button>
+        </Col>
       </Row>
     </div>
   );

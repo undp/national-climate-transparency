@@ -20,7 +20,6 @@ import {
   WasteLevels,
 } from '../Enums/emission.enum';
 import { ProjectionLeafSection, ProjectionType } from '../Enums/projection.enum';
-import { GHGRecordState } from '../Enums/shared.enum';
 
 export const getEmissionCreatePayload = (
   year: string,
@@ -30,8 +29,7 @@ export const getEmissionCreatePayload = (
   wasteData: WasteSection,
   otherData: OtherSection,
   eqWith: EmissionData,
-  eqWithout: EmissionData,
-  state: string
+  eqWithout: EmissionData
 ) => {
   const tempPayload: EmissionPayload = {
     year: year,
@@ -83,7 +81,6 @@ export const getEmissionCreatePayload = (
     },
     totalCo2WithoutLand: eqWithout,
     totalCo2WithLand: eqWith,
-    state: state,
   };
 
   return tempPayload;
@@ -91,13 +88,11 @@ export const getEmissionCreatePayload = (
 
 export const getProjectionCreatePayload = (
   editableProjections: ProjectionTimeline[],
-  projectionType: ProjectionType,
-  state: GHGRecordState
+  projectionType: ProjectionType
 ) => {
   const payload = {
     projectionType: projectionType,
     projectionData: getEmptyPayload('Projection'),
-    state: state,
   };
 
   Object.values(ProjectionLeafSection).forEach((value) => {
