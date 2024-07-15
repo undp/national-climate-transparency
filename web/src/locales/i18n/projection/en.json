@@ -65,5 +65,12 @@
     "4E_title": "Other",
 
     "5A_title": "Indirect N2O emissions from the atmospheric deposition of nitrogen in NOx and NH3",
-    "5B_title": "Other"
+    "5B_title": "Other",
+
+    "projectionUpdateSuccess": "Successfully Saved the Projection Data",
+    "projectionValidateSuccess": "Successfully Validated the Projection Data",
+    "projectionUnvalidateSuccess": "Successfully Unvalidated the Projection Data",
+    "projectionRevertSuccess": "Successfully Reverted to Baseline Projection Data",
+
+    "baselineUpdateSuccess": "Successfully Saved the Baseline Data"
 }

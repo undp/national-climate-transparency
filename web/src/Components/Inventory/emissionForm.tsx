@@ -445,7 +445,10 @@ export const EmissionForm: React.FC<Props> = ({
         if (response.status === 200 || response.status === 201) {
           message.open({
             type: 'success',
-            content: t('emissionValidateSuccess'),
+            content:
+              state === GHGRecordState.FINALIZED
+                ? t('emissionValidateSuccess')
+                : t('emissionUnvalidateSuccess'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
@@ -683,7 +686,7 @@ export const EmissionForm: React.FC<Props> = ({
               block
               onClick={() => handleEmissionAction()}
             >
-              {t('entityAction:submit')}
+              {t('entityAction:update')}
             </Button>
           </Col>
         )}

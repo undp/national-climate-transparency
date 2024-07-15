@@ -2,7 +2,6 @@
     "emissionTitle": "Emission",
     
     "addNew": "Add New",
-    "upload": "Upload Emissions & Removals Document",
 
     "totalRowHeader" : "Total National Emissions and Removals",
 
@@ -62,9 +61,9 @@
     "5B_title": "Other",
 
     "yearFetchingFailed": "Year Search Failed !",
-    "fileNotSupported": "File Not Supported !",
     "emissionCreationSuccess": "Successfully Added the Emission Data",
-    "emissionUpdateSuccess": "Successfully Updated the Emission Data",
+    "emissionUpdateSuccess": "Successfully Saved the Emission Data",
     "emissionValidateSuccess": "Successfully Validated the Emission Data",
+    "emissionUnvalidateSuccess": "Successfully Unvalidated the Emission Data",
     "emissionYearRequired": "Emission Year is Required !"
 }

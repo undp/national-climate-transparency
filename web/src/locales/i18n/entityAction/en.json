@@ -11,6 +11,5 @@
     "back": "Back",
     "delete": "Delete",
     "apply": "Apply",
-    "submit": "Submit",
-    "finalize": "Finalize"
+    "revert": "Switch to Baseline"
 }

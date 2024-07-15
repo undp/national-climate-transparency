@@ -1,0 +1,20 @@
+{
+    "configurationTitle": "වින්‍යාසය",
+    "withMeasuresTitle": "මූලාශ්‍ර සමග",
+    "withAdditionalMeasuresTitle": "අමතර මූලාශ්‍ර සමග",
+    "withoutMeasuresTitle": "මූලාශ්‍ර රහිත",
+    "gwpConfigurationTitle": "ගෝලීය උණුසුම් වීමේ ඵලය (GWP)",
+    "growthRateConfigurationTitle": "ආක්තිත වර්ධන අනුපාතය",
+
+    "growthRate": "වර්ධන අනුපාතය (%)",
+    "baselineYear": "මූලික වසර",
+    "co2": "මූලික CO2",
+    "ch4": "මූලික CH4",
+    "n2o": "මූලික N2O",
+
+    "gwp_co2": "CO2",
+    "gwp_ch4": "CH4",
+    "gwp_n2o": "N2O",
+
+    "gwpUpdateSuccess": "GWP දත්ත සාර්ථකව සුරකින්න ලදි"
+}

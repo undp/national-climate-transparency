@@ -11,6 +11,5 @@
     "back": "Retour",
     "delete": "Supprimer",
     "apply": "Appliquer",
-    "submit": "soumettre",
-    "finalize": "finaliser"
+    "revert": "Revenir à la Référence"
 }

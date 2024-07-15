@@ -14,5 +14,7 @@
 
     "gwp_co2": "CO2",
     "gwp_ch4": "CH4",
-    "gwp_n2o": "N2O"
+    "gwp_n2o": "N2O",
+
+    "gwpUpdateSuccess": "Successfully Saved the GWP Data"
 }

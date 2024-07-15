@@ -259,7 +259,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
             block
             onClick={() => saveBaseline()}
           >
-            {t('entityAction:save')}
+            {t('entityAction:update')}
           </Button>
         </Col>
       </Row>
