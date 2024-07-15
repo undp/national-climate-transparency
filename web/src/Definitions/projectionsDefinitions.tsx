@@ -1,4 +1,5 @@
 import { ProjectionLeafSection, ProjectionSections } from '../Enums/projection.enum';
+import { BaselineTimeline } from './configurationDefinitions';
 
 export type ProjectionTimeline = {
   key: string;
@@ -87,47 +88,70 @@ export const getInitTimeline = (dbResponse?: any) => {
   return initProjectionTimeline;
 };
 
-export const projectionEmptyPayload = {
-  [ProjectionLeafSection.ENERGY_INDUSTRIES]: new Array(51).fill(0),
-  [ProjectionLeafSection.MANUFACTURING_CONSTRUCTION]: new Array(51).fill(0),
-  [ProjectionLeafSection.CIVIL_AVIATION]: new Array(51).fill(0),
-  [ProjectionLeafSection.ROAD_TRANSPORTATION]: new Array(51).fill(0),
-  [ProjectionLeafSection.RAILWAYS]: new Array(51).fill(0),
-  [ProjectionLeafSection.WATER_NAVIGATION]: new Array(51).fill(0),
-  [ProjectionLeafSection.OTHER_TRANSPORTATION]: new Array(51).fill(0),
-  [ProjectionLeafSection.OTHER_SECTORS]: new Array(51).fill(0),
-  [ProjectionLeafSection.NON_SPECIFIED]: new Array(51).fill(0),
-  [ProjectionLeafSection.SOLID_FUELS]: new Array(51).fill(0),
-  [ProjectionLeafSection.OIL_NATURAL_GAS]: new Array(51).fill(0),
-  [ProjectionLeafSection.OTHER_EMISSIONS]: new Array(51).fill(0),
-  [ProjectionLeafSection.TRANSPORT_CO2]: new Array(51).fill(0),
-  [ProjectionLeafSection.INJECTION_STORAGE]: new Array(51).fill(0),
-  [ProjectionLeafSection.OTHER_CO2]: new Array(51).fill(0),
+export const getInitBaseline = (dbResponse?: any) => {
+  const initBaselineTimeline: BaselineTimeline[] = [];
 
-  [ProjectionLeafSection.MINERAL_INDUSTRY]: new Array(51).fill(0),
-  [ProjectionLeafSection.CHEMICAL_INDUSTRY]: new Array(51).fill(0),
-  [ProjectionLeafSection.METAL_INDUSTRY]: new Array(51).fill(0),
-  [ProjectionLeafSection.NON_ENERGY_PRODUCTS]: new Array(51).fill(0),
-  [ProjectionLeafSection.ELECTRONICS_INDUSTRY]: new Array(51).fill(0),
-  [ProjectionLeafSection.SUBSTITUTES_OZONE]: new Array(51).fill(0),
-  [ProjectionLeafSection.OTHER_MANUFACTURE]: new Array(51).fill(0),
-  [ProjectionLeafSection.OTHER_INDUSTRIAL]: new Array(51).fill(0),
+  for (const section of Object.values(projectionSectionOrder)) {
+    section.forEach((topicId) => {
+      if (!nonLeafSections.includes(topicId)) {
+        initBaselineTimeline.push({
+          key: `${topicId}_edit_init`,
+          topicId: topicId,
+          values: dbResponse?.[topicId] ?? [0, 2000, 0, 0, 0],
+        });
+      }
+    });
+  }
 
-  [ProjectionLeafSection.ENTERIC_FERMENTATION]: new Array(51).fill(0),
-  [ProjectionLeafSection.MANURE_MANAGEMENT]: new Array(51).fill(0),
-  [ProjectionLeafSection.FOREST_LAND]: new Array(51).fill(0),
-  [ProjectionLeafSection.CROPLAND]: new Array(51).fill(0),
-  [ProjectionLeafSection.GRASSLAND]: new Array(51).fill(0),
-  [ProjectionLeafSection.WETLANDS]: new Array(51).fill(0),
-  [ProjectionLeafSection.SETTLEMENTS]: new Array(51).fill(0),
-  [ProjectionLeafSection.OTHER_LAND]: new Array(51).fill(0),
+  return initBaselineTimeline;
+};
 
-  [ProjectionLeafSection.SOLID_WASTE]: new Array(51).fill(0),
-  [ProjectionLeafSection.BIOLOGICAL_TREATMENT]: new Array(51).fill(0),
-  [ProjectionLeafSection.INCINERATION_BURNING]: new Array(51).fill(0),
-  [ProjectionLeafSection.WASTEWATER_TREATMENT]: new Array(51).fill(0),
-  [ProjectionLeafSection.OTHER_WASTE]: new Array(51).fill(0),
+export const getEmptyPayload = (method: 'Projection' | 'Growth Rate') => {
+  const defaultFillerValue = method === 'Projection' ? new Array(51).fill(0) : [0, 2000, 0, 0, 0];
+  const emptyPayload = {
+    [ProjectionLeafSection.ENERGY_INDUSTRIES]: [...defaultFillerValue],
+    [ProjectionLeafSection.MANUFACTURING_CONSTRUCTION]: [...defaultFillerValue],
+    [ProjectionLeafSection.CIVIL_AVIATION]: [...defaultFillerValue],
+    [ProjectionLeafSection.ROAD_TRANSPORTATION]: [...defaultFillerValue],
+    [ProjectionLeafSection.RAILWAYS]: [...defaultFillerValue],
+    [ProjectionLeafSection.WATER_NAVIGATION]: [...defaultFillerValue],
+    [ProjectionLeafSection.OTHER_TRANSPORTATION]: [...defaultFillerValue],
+    [ProjectionLeafSection.OTHER_SECTORS]: [...defaultFillerValue],
+    [ProjectionLeafSection.NON_SPECIFIED]: [...defaultFillerValue],
+    [ProjectionLeafSection.SOLID_FUELS]: [...defaultFillerValue],
+    [ProjectionLeafSection.OIL_NATURAL_GAS]: [...defaultFillerValue],
+    [ProjectionLeafSection.OTHER_EMISSIONS]: [...defaultFillerValue],
+    [ProjectionLeafSection.TRANSPORT_CO2]: [...defaultFillerValue],
+    [ProjectionLeafSection.INJECTION_STORAGE]: [...defaultFillerValue],
+    [ProjectionLeafSection.OTHER_CO2]: [...defaultFillerValue],
 
-  [ProjectionLeafSection.INDIRECT_N2O]: new Array(51).fill(0),
-  [ProjectionLeafSection.OTHER]: new Array(51).fill(0),
+    [ProjectionLeafSection.MINERAL_INDUSTRY]: [...defaultFillerValue],
+    [ProjectionLeafSection.CHEMICAL_INDUSTRY]: [...defaultFillerValue],
+    [ProjectionLeafSection.METAL_INDUSTRY]: [...defaultFillerValue],
+    [ProjectionLeafSection.NON_ENERGY_PRODUCTS]: [...defaultFillerValue],
+    [ProjectionLeafSection.ELECTRONICS_INDUSTRY]: [...defaultFillerValue],
+    [ProjectionLeafSection.SUBSTITUTES_OZONE]: [...defaultFillerValue],
+    [ProjectionLeafSection.OTHER_MANUFACTURE]: [...defaultFillerValue],
+    [ProjectionLeafSection.OTHER_INDUSTRIAL]: [...defaultFillerValue],
+
+    [ProjectionLeafSection.ENTERIC_FERMENTATION]: [...defaultFillerValue],
+    [ProjectionLeafSection.MANURE_MANAGEMENT]: [...defaultFillerValue],
+    [ProjectionLeafSection.FOREST_LAND]: [...defaultFillerValue],
+    [ProjectionLeafSection.CROPLAND]: [...defaultFillerValue],
+    [ProjectionLeafSection.GRASSLAND]: [...defaultFillerValue],
+    [ProjectionLeafSection.WETLANDS]: [...defaultFillerValue],
+    [ProjectionLeafSection.SETTLEMENTS]: [...defaultFillerValue],
+    [ProjectionLeafSection.OTHER_LAND]: [...defaultFillerValue],
+
+    [ProjectionLeafSection.SOLID_WASTE]: [...defaultFillerValue],
+    [ProjectionLeafSection.BIOLOGICAL_TREATMENT]: [...defaultFillerValue],
+    [ProjectionLeafSection.INCINERATION_BURNING]: [...defaultFillerValue],
+    [ProjectionLeafSection.WASTEWATER_TREATMENT]: [...defaultFillerValue],
+    [ProjectionLeafSection.OTHER_WASTE]: [...defaultFillerValue],
+
+    [ProjectionLeafSection.INDIRECT_N2O]: [...defaultFillerValue],
+    [ProjectionLeafSection.OTHER]: [...defaultFillerValue],
+  };
+
+  return emptyPayload;
 };

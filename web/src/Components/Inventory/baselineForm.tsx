@@ -1,26 +1,31 @@
-import { Row, Col, Button, Table, TableProps, Input } from 'antd';
+import { Row, Col, Button, Table, TableProps, Input, message, DatePicker } from 'antd';
 import './baselineForm.scss';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  getInitTimeline,
+  getInitBaseline,
   nonLeafSections,
   projectionSectionOrder,
   SectionOpen,
 } from '../../Definitions/projectionsDefinitions';
 import { getCollapseIcon, parseNumber } from '../../Utils/utilServices';
-import { ProjectionSections } from '../../Enums/projection.enum';
+import { ProjectionSections, ProjectionType } from '../../Enums/projection.enum';
 import { BaselineTimeline } from '../../Definitions/configurationDefinitions';
 import { GrowthRateProperties } from '../../Enums/configuration.enum';
+import { displayErrorMessage } from '../../Utils/errorMessageHandler';
+import { useConnection } from '../../Context/ConnectionContext/connectionContext';
+import { getBaselineSavePayload } from '../../Utils/payloadCreators';
+import moment from 'moment';
 
 interface Props {
   index: number;
-  projectionType: 'withMeasures' | 'withoutMeasures' | 'withAdditionalMeasures';
+  projectionType: ProjectionType;
 }
 
 export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
   // context Usage
   const { t } = useTranslation(['projection', 'entityAction']);
+  const { get, post } = useConnection();
 
   // Collapse State
 
@@ -36,10 +41,6 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Finalized State
-
-  const [isFinalized, setIsFinalized] = useState<boolean>();
-
   // Editable Leaf rows (38)
 
   const [allEditableData, setAllEditableData] = useState<BaselineTimeline[]>([]);
@@ -50,12 +51,21 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
 
   // Init Loading
 
+  const getBaseline = async () => {
+    try {
+      const response = await get(`national/settings/PROJECTIONS`);
+
+      if (response.status === 200 || response.status === 201) {
+        setAllEditableData(getInitBaseline(response.data.projectionData));
+      }
+    } catch (error) {
+      setAllEditableData(getInitBaseline());
+    }
+  };
+
   useEffect(() => {
     setIsLoading(true);
-
-    setIsFinalized(false);
-    setAllEditableData(getInitTimeline); // Replace this with the corresponding BE call
-
+    getBaseline();
     setIsLoading(false);
   }, []);
 
@@ -169,20 +179,50 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
       render: (sectionValueArray: number[], record: any) => {
         const isNonLeaf: boolean = nonLeafSections.includes(record.topicId);
         return !isNonLeaf ? (
-          <Input
-            value={sectionValueArray[locIndex] ?? undefined}
-            className={isNonLeaf ? undefined : 'leaf-input-box'}
-            onChange={(e) => {
-              updateValue(record.topicId, locIndex, parseNumber(e.target.value) ?? 0);
-            }}
-          />
+          value === 'baselineYear' ? (
+            <DatePicker
+              value={moment(sectionValueArray[locIndex], 'YYYY') ?? undefined}
+              onChange={(selectedYear) => {
+                updateValue(
+                  record.topicId,
+                  locIndex,
+                  parseNumber(selectedYear?.format('YYYY') ?? '2000') ?? 2000
+                );
+              }}
+              picker="year"
+              size="middle"
+            />
+          ) : (
+            <Input
+              value={sectionValueArray[locIndex] ?? undefined}
+              className={isNonLeaf ? undefined : 'leaf-input-box'}
+              onChange={(e) => {
+                updateValue(record.topicId, locIndex, parseNumber(e.target.value) ?? 0);
+              }}
+            />
+          )
         ) : null;
       },
     });
   });
 
-  const saveBaseline = () => {
-    console.log(allEditableData, allVisibleData, projectionType);
+  const saveBaseline = async () => {
+    try {
+      const baselinePayload = getBaselineSavePayload(allEditableData, projectionType);
+
+      const response: any = await post('national/settings/update', baselinePayload);
+
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: t('baselineUpdateSuccess'),
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
   };
 
   return (
@@ -199,13 +239,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
       </Row>
       <Row gutter={20} className="action-row" justify={'end'}>
         <Col>
-          <Button
-            disabled={isFinalized}
-            type="primary"
-            size="large"
-            block
-            onClick={() => saveBaseline()}
-          >
+          <Button type="primary" size="large" block onClick={() => saveBaseline()}>
             {t('entityAction:save')}
           </Button>
         </Col>

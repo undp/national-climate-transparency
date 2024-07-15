@@ -7,7 +7,7 @@ import {
   OtherSection,
   WasteSection,
 } from '../Definitions/emissionDefinitions';
-import { projectionEmptyPayload, ProjectionTimeline } from '../Definitions/projectionsDefinitions';
+import { ProjectionTimeline, getEmptyPayload } from '../Definitions/projectionsDefinitions';
 import {
   AgrLevels,
   EnergyLevels,
@@ -95,7 +95,7 @@ export const getProjectionCreatePayload = (
 ) => {
   const payload = {
     projectionType: projectionType,
-    projectionData: projectionEmptyPayload,
+    projectionData: getEmptyPayload('Projection'),
     state: state,
   };
 
@@ -104,6 +104,29 @@ export const getProjectionCreatePayload = (
 
     if (editedRow) {
       payload.projectionData[value] = editedRow.values;
+    }
+  });
+
+  return payload;
+};
+
+export const getBaselineSavePayload = (
+  editableProjections: ProjectionTimeline[],
+  projectionType: ProjectionType
+) => {
+  const payload = {
+    id: 'PROJECTIONS',
+    settingValue: {
+      projectionType: projectionType,
+      projectionData: getEmptyPayload('Growth Rate'),
+    },
+  };
+
+  Object.values(ProjectionLeafSection).forEach((value) => {
+    const editedRow = editableProjections.find((entry) => entry.topicId === value);
+
+    if (editedRow) {
+      payload.settingValue.projectionData[value] = editedRow.values;
     }
   });
 

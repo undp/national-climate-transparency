@@ -7,6 +7,7 @@ import { GWPGasses } from '../../Enums/configuration.enum';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import { useEffect } from 'react';
+import { ProjectionType } from '../../Enums/projection.enum';
 
 const GhgConfigurations = () => {
   // Page Context
@@ -23,17 +24,17 @@ const GhgConfigurations = () => {
     {
       key: '1',
       label: t('withMeasuresTitle'),
-      children: <BaselineForm index={1} projectionType="withMeasures" />,
+      children: <BaselineForm index={1} projectionType={ProjectionType.WITH_MEASURES} />,
     },
     {
       key: '2',
       label: t('withAdditionalMeasuresTitle'),
-      children: <BaselineForm index={1} projectionType="withAdditionalMeasures" />,
+      children: <BaselineForm index={1} projectionType={ProjectionType.WITH_ADDITIONAL_MEASURES} />,
     },
     {
       key: '3',
       label: t('withoutMeasuresTitle'),
-      children: <BaselineForm index={1} projectionType="withoutMeasures" />,
+      children: <BaselineForm index={1} projectionType={ProjectionType.WITHOUT_MEASURES} />,
     },
   ];
 
