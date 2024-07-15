@@ -11,4 +11,5 @@ export interface UserData {
   sector: string[];
   validatePermission: string;
   subRolePermission: string;
+  ghgInventoryPermission: string;
 }

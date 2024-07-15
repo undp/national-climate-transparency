@@ -1,17 +1,20 @@
 {
     "tableTwelve": "Tables Annex III -12",
+    "tableThirteen": "Tables Annex III -13",
+
     "nothingToExport": "Data not found for export",
-    "projectId": "Project No.",
-    "titleOfProject": "Title of Project",
+    "activityId": "Activity No.",
+    "titleOfActivity": "Title of Activity",
     "description": "Description",
     "startYear": "Start year",
-    "projectStatus": "Status",
+    "activityStatus": "Status",
     "endYear": "End year",
-    "transparency": "Contribution to Enhancing Transparency ",
-    "internationalSupportChannel": "Channel",
-    "supportReceivedOrNeeded": "Support Needed or Received",
+    "supportChannel": "Channel",
+    "recipientEntities": "Recipient entity / Ministry",
+    "additionalInfo": "Additional Information",
+
     "receivedAmount": "International Funds (USD)",
     "receivedAmountDomestic": "International Funds (XXD)",
-    "tableThirteen": "Tables Annex III -13",
-    "recipientEntities": "Recipient entity / Ministry"
+    "requiredAmount": "International Funds (USD)",
+    "requiredAmountDomestic": "International Funds (XXD)"
 }

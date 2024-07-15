@@ -1,8 +1,8 @@
 {
     "tableNine": "Tables Annex III -09",
     "nothingToExport": "Data not found for export",
-    "projectId": "Project No.",
-    "titleOfProject": "Title of Project",
+    "activityId": "Activity No.",
+    "titleOfActivity": "Title of Activity",
     "description": "Description",
     "sector": "Sector",
     "subSectors": "Subsector",
@@ -10,8 +10,11 @@
     "technologyType": "Technology",
     "recipientEntities": "Recipient entity / Ministry",
 	"nationalImplementingEntities": "National Implementing entity / agency",
+    "internationalImplementingEntities": "International Implementing entity / agency",
     "projectStatus": "Status",
     "supportReceivedOrNeeded": "Support Needed or Received",
     "startYear": "Start year",
-    "endYear": "End year"
+    "endYear": "End year",
+    "activityStatus": "Activity Status",
+    "additionalInfo": "Additional Information"
 }

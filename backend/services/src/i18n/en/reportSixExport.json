@@ -1,8 +1,8 @@
 {
     "tableSix": "Tables Annex III -06",
     "nothingToExport": "Data not found for export",
-    "projectId": "Project No.",
-    "titleOfProject": "Title of Project",
+    "activityId": "Activity No.",
+    "titleOfActivity": "Title of Activity",
     "description": "Description",
     "sector": "Sector",
     "subSectors": "Subsector",
@@ -14,8 +14,9 @@
 	"financingOnly": "For Financing (only)",
     "startYear": "Start year",
     "endYear": "End year",
-    "internationalSupportChannel": "Channel",
-    "receivedAmount": "International Funds (USD)",
-    "receivedAmountDomestic": "International Funds (XXD)",
-    "financialInstrument": "Financial Instrument"
+    "supportChannel": "Channel",
+    "requiredAmount": "International Funds (USD)",
+    "requiredAmountDomestic": "International Funds (XXD)",
+    "financialInstrument": "Financial Instrument",
+    "additionalInfo": "Additional Information"
 }

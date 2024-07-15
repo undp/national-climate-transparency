@@ -20,6 +20,7 @@ import { SupportEntity } from "../entities/support.entity";
 import { KpiEntity } from "../entities/kpi.entity";
 import { EmissionEntity } from "src/entities/emission.entity";
 import { ProjectionEntity } from "src/entities/projection.entity";
+import { ConfigurationSettingsEntity } from "src/entities/configuration.settings.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -94,6 +95,11 @@ export class CaslAbilityFactory {
 				can(Action.Create, ProjectionEntity);
 				can(Action.Update, ProjectionEntity);
 				can(Action.Delete, ProjectionEntity);
+
+				// Settings
+				can(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Create, ConfigurationSettingsEntity);
+				can(Action.Update, ConfigurationSettingsEntity);
 			}
 
 			if (user.role == Role.Admin) {
@@ -103,7 +109,7 @@ export class CaslAbilityFactory {
 				can(Action.Create, User);
 				can(Action.Update, User);
 				can(Action.Delete, User);
-				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
+				cannot(Action.Update, User, ['apiKey', 'password', 'email']);
 				cannot(Action.ForceResetPassword, User);
 
 				// Action
@@ -158,6 +164,11 @@ export class CaslAbilityFactory {
 				can(Action.Create, ProjectionEntity);
 				can(Action.Update, ProjectionEntity);
 				can(Action.Delete, ProjectionEntity);
+
+				// Settings
+				cannot(Action.Read, ConfigurationSettingsEntity);
+				cannot(Action.Create, ConfigurationSettingsEntity);
+				cannot(Action.Update, ConfigurationSettingsEntity);
 			}
 
 			if (user.role == Role.GovernmentUser) {
@@ -272,6 +283,11 @@ export class CaslAbilityFactory {
 				can(Action.Create, ProjectionEntity);
 				can(Action.Update, ProjectionEntity);
 				can(Action.Delete, ProjectionEntity);
+				// Settings
+				cannot(Action.Read, ConfigurationSettingsEntity);
+				cannot(Action.Create, ConfigurationSettingsEntity);
+				cannot(Action.Update, ConfigurationSettingsEntity);
+
 			}
 
 			if (user.role == Role.Observer) {
@@ -383,6 +399,11 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, ProjectionEntity);
 				cannot(Action.Update, ProjectionEntity);
 				cannot(Action.Delete, ProjectionEntity);
+				// Settings
+				cannot(Action.Read, ConfigurationSettingsEntity);
+				cannot(Action.Create, ConfigurationSettingsEntity);
+				cannot(Action.Update, ConfigurationSettingsEntity);
+
 			}
 
 		}

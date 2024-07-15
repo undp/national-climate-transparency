@@ -28,6 +28,7 @@ import {
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { ValidateEntity } from '../../../Enums/user.enum';
+import { Role } from '../../../Enums/role.enum';
 
 const { Option } = Select;
 
@@ -104,7 +105,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   useEffect(() => {
     // check user permission for validate action and disable validate button
-    if (userInfoState?.validatePermission === ValidateEntity.CANNOT) {
+    if (
+      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
+      userInfoState?.userRole === Role.Observer
+    ) {
       setIsValidateButtonDisabled(true);
     }
   }, [userInfoState]);
@@ -723,19 +727,21 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                   {t('entityAction:cancel')}
                 </Button>
               </Col>
-              <Col>
-                <Button
-                  type="default"
-                  size="large"
-                  block
-                  onClick={() => {
-                    deleteEntity();
-                  }}
-                  style={{ color: 'red', borderColor: 'red' }}
-                >
-                  {t('entityAction:delete')}
-                </Button>
-              </Col>
+              {ability.can(Action.Delete, SupportEntity) && (
+                <Col>
+                  <Button
+                    type="default"
+                    size="large"
+                    block
+                    onClick={() => {
+                      deleteEntity();
+                    }}
+                    style={{ color: 'red', borderColor: 'red' }}
+                  >
+                    {t('entityAction:delete')}
+                  </Button>
+                </Col>
+              )}
               <Col {...shortButtonBps}>
                 <Form.Item>
                   <Button

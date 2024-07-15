@@ -14,5 +14,6 @@
     "permissionDeniedForSector": "User does not have the permission for the sector",
     "deleteSupportSuccess": "Support deleted successfully",
     "permissionDeniedForValidate": "Permission Denied: Unable to Validate Support",
-    "supportDeleteFailed": "Support delete failed due to {}"
+    "supportDeleteFailed": "Support delete failed due to {}",
+    "parentNotValidated": "Parent activity with id {} should be validated."
 }

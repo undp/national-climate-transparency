@@ -37,22 +37,20 @@
     "status": "Status",
     "sector": "Sector(s) affected",
     "ghgsAffected": "Gases affected",
-    "startYear": "Start year of implementation",
+    "startYear": "Start year",
     "implementingEntities": "Implementing entity or entities",
     "ghgCommonTitle": "Estimates of GHG emission reductions (ktCO2eq)",
     "achievedGHGReduction": "Achieved",
     "expectedGHGReduction": "Expected",
 
-    "titleOfProject": "Name of Project",
-    "descriptionOfProject": "Objectives and description",
-    "statusOfProject": "Status of Project",
-    "endYear": "End year of implementation",
-    "amountCommonTitle": "Amount",
+    "titleOfActivity": "Name of Activity",
+    "endYear": "End year",
+    "amountReceivedTitle": "Amount Received",
+    "amountRequiredTitle": "Estimated Amount",
     "domestic": "Domestic currency",
     "usd": "USD",
-    "supportDirection": "Support Needed or Received",
     "isEnhancingTransparency": "Contributing to Enhancing Transparency",
-    "internationalSupportChannel": "Channel",
+    "supportChannel": "Channel",
 
     "recipientEntities": "Recipient entity",
     "techType": "Type of Technology",
@@ -63,11 +61,12 @@
     "techDevelopment": "Contribution to technology development and transfer objectives",
     "capacityBuilding": "Contribution to capacity building objectives",
 
-    "nationalImplementingEntities": "National implementing entity",
-    "internationalImplementingEntities": "International implementing entity",
+    "national": "National",
+    "international": "International",
     "financialInstrument": "Expected financial instrument",
     "financingStatus": "Status",
 
-    "projectStatus": "Status of Project"
-
+    "activityStatus": "Status of Activity",
+    "timeFrame": "Expected time frame",
+    "additionalInfo": "Additional Information"
 }

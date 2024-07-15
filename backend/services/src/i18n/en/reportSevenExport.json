@@ -1,8 +1,8 @@
 {
     "tableSeven": "Tables Annex III -07",
     "nothingToExport": "Data not found for export",
-    "projectId": "Project No.",
-    "titleOfProject": "Title of Project",
+    "activityId": "Activity No.",
+    "titleOfActivity": "Title of Activity",
     "description": "Description",
     "sector": "Sector",
     "subSectors": "Subsector",
@@ -10,15 +10,15 @@
     "recipientEntities": "Recipient entity / Ministry",
 	"nationalImplementingEntities": "National Implementing entity / agency",
     "internationalImplementingEntities": "International Implementing entity / agency",
-    "supportReceivedOrNeeded": "Support Needed or Received",
     "techDevelopment": "For technology development and transfer",
     "capacityBuilding": "Contribution to capacity building objectives",
-	"financingOnly": "For Financing (only)",
     "startYear": "Start year",
     "endYear": "End year",
-    "internationalSupportChannel": "Channel",
+    "supportChannel": "Channel",
     "receivedAmount": "International Funds (USD)",
     "receivedAmountDomestic": "International Funds (XXD)",
     "financialInstrument": "Financial Instrument",
-    "financingStatus": "Financing Status"
+    "financingStatus": "Financing Status",
+    "activityStatus": "Activity Status",
+    "additionalInfo": "Additional Information"
 }
