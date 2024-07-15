@@ -4,6 +4,15 @@ export enum ProjectionType {
     WITHOUT_MEASURES = "Without Measures",
 }
 
+export enum ExtendedProjectionType {
+    WITH_MEASURES = "With Measures",
+    WITH_ADDITIONAL_MEASURES = "With Additional Measures",
+    WITHOUT_MEASURES = "Without Measures",
+    BASELINE_WITH_MEASURES = "Baseline with Measures",
+    BASELINE_WITH_ADDITIONAL_MEASURES = "Baseline with Additional Measures",
+    BASELINE_WITHOUT_MEASURES = "Baseline without Measures",
+}
+
 export enum ProjectionLeafSection {
     ENERGY_INDUSTRIES = '1A1',
     MANUFACTURING_CONSTRUCTION = '1A2',

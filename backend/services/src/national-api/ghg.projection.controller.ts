@@ -14,7 +14,7 @@ import { Action } from "src/casl/action.enum";
 import { GhgProjectionService } from "src/projection/projection.service";
 import { ProjectionEntity } from "src/entities/projection.entity";
 import { ProjectionDto } from "src/dtos/projection.dto";
-import { ProjectionType } from "src/enums/projection.enum";
+import { ExtendedProjectionType, ProjectionType } from "src/enums/projection.enum";
 
 @ApiTags("Projections")
 @ApiBearerAuth()
@@ -33,6 +33,12 @@ export class GHGProjectionController {
     @Get('/actual/:projectionType')
     getActualProjections(@Param('projectionType') projectionType: ProjectionType) {
       return this.projectionService.getActualProjection(projectionType);
+    }
+
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))
+    @Get('/calculated/:projectionType')
+    getCalculatedProjections(@Param('projectionType') projectionType: ExtendedProjectionType) {
+      return this.projectionService.getCalculatedProjection(projectionType);
     }
     
 }

@@ -6,7 +6,7 @@ import { HelperService } from '../util/helpers.service';
 import { User } from '../entities/user.entity';
 import { ProjectionEntity } from '../entities/projection.entity';
 import { ProjectionDto } from '../dtos/projection.dto';
-import { ProjectionType } from '../enums/projection.enum';
+import { ExtendedProjectionType, ProjectionType } from '../enums/projection.enum';
 import { GHGRecordState } from '../enums/ghg.state.enum';
 
 @Injectable()
@@ -22,7 +22,6 @@ export class GhgProjectionService {
     async create(projectionDto: ProjectionDto, user: User) {
 
       const projection: ProjectionEntity = this.toProjection(projectionDto);
-      // this.verifyProjectionValues(projection);
 
       let savedProjection: ProjectionEntity;
       const result = await this.getActualProjection(projection.projectionType);
@@ -92,92 +91,26 @@ export class GhgProjectionService {
         });
     }
 
-  //   async getCalculatedProjection(projectionType: string, projectionYear: string) {
+    async getCalculatedProjection(projectionType: string) {
 
-  //     if (!Object.values(ProjectionType).includes(projectionType as ProjectionType)){
-  //       throw new HttpException('Invalid Projection Type Received', HttpStatus.BAD_REQUEST);
-  //     }
+        if (!Object.values(ExtendedProjectionType).includes(projectionType as ExtendedProjectionType)){
+            throw new HttpException('Invalid Baseline Projection Type Received', HttpStatus.BAD_REQUEST);
+        }
 
-  //     if (!this.helperService.isValidYear(projectionYear)){
-  //       throw new HttpException('Invalid Projection Year Received', HttpStatus.BAD_REQUEST);
-  //     }
+        if (Object.values(ProjectionType).includes(projectionType as ProjectionType)){
+            throw new HttpException('Invalid Baseline Projection Type Received', HttpStatus.BAD_REQUEST);
+        }
+  
+        return await this.projectionRepo.findOne({
+            where: {
+                projectionType: projectionType
+            },
+        });
+    }
 
-  //     const baselineYear = '2024'; // Set this later
-  //     const yearDifference = parseInt(projectionYear) - parseInt(baselineYear);
-
-  //     if (yearDifference < 0){
-  //       throw new HttpException(`Projection Year Cannot be lower than the baseline year ${baselineYear}`, HttpStatus.BAD_REQUEST);
-  //     }
-
-  //     const baselineProjection =  await this.projectionRepo.findOne({
-  //         where: {
-  //             projectionType: projectionType,
-  //             year: baselineYear,
-  //         },
-  //     });
-
-  //     const calculatedProjection = {
-  //       energyEmissions : {
-  //         fuelCombustionActivities: this.calculateSectionProjection(yearDifference, baselineProjection.energyEmissions.fuelCombustionActivities),
-  //         fugitiveEmissionsFromFuels: this.calculateSectionProjection(yearDifference, baselineProjection.energyEmissions.fugitiveEmissionsFromFuels),
-  //         carbonDioxideTransportStorage: this.calculateSectionProjection(yearDifference, baselineProjection.energyEmissions.carbonDioxideTransportStorage),
-  //       },
-  //       industrialProcessesProductUse : this.calculateSectionProjection(yearDifference, baselineProjection.industrialProcessesProductUse),
-  //       agricultureForestryOtherLandUse : this.calculateSectionProjection(yearDifference, baselineProjection.agricultureForestryOtherLandUse),
-  //       waste : this.calculateSectionProjection(yearDifference, baselineProjection.waste),
-  //       other : this.calculateSectionProjection(yearDifference, baselineProjection.other),
-  //       totalCo2WithoutLand : this.calculateProjection(yearDifference, baselineProjection.totalCo2WithoutLand),
-  //       totalCo2WithLand : this.calculateProjection(yearDifference, baselineProjection.totalCo2WithLand),
-  //     }
-
-  //     return calculatedProjection;
-  // }
-
-  // private calculateSectionProjection(yearDifference: number, sectionBaselineProjection: any){
-  //   let calculatedSectionProjection = {};
-  //   for (const [key, value] of Object.entries(sectionBaselineProjection)) {
-  //     calculatedSectionProjection[key] = this.calculateProjection(yearDifference, value as ProjectionProperties)
-  //   }
-
-  //   return calculatedSectionProjection;
-  // }
-
-  // private calculateProjection(yearDifference: number, baselineProperty: ProjectionProperties){
-
-  //   const growthRate: number = 2; // As a percentage would be 20% Per Year
-
-  //   return {
-  //     [ProjectionCategories.BAU] : baselineProperty.BAU * (Math.pow(growthRate, yearDifference)),
-  //     [ProjectionCategories.CONDITIONAL_NDC] : baselineProperty.ConditionalNDC * (Math.pow(growthRate, yearDifference)),
-  //     [ProjectionCategories.UNCONDITIONAL_NDC]: baselineProperty.UnconditionalNDC * (Math.pow(growthRate, yearDifference)),
-  //   }
-  // }
-
-  private toProjection(projectionDto: ProjectionDto): ProjectionEntity {
-      const data = instanceToPlain(projectionDto);
-      this.logger.verbose("Converted projectionDto to Projection entity", JSON.stringify(data));
-      return plainToClass(ProjectionEntity, data);
-  }
-
-  // private verifyProjectionValues(emissionData: any) {
-  //     const projectionProperties = [ProjectionCategories.BAU, ProjectionCategories.CONDITIONAL_NDC, ProjectionCategories.UNCONDITIONAL_NDC];
-  //     for (let key in emissionData) {
-  //       if (typeof emissionData[key] === 'object') {
-  //         if (!this.verifyProjectionValues(emissionData[key])) {
-  //           return false;
-  //         }
-  //       } else {
-  //         if (projectionProperties.includes(key as ProjectionCategories)) {
-  //           if (typeof emissionData[key] === 'string') {
-  //             throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidDataType", []), HttpStatus.BAD_REQUEST);
-  //           }
-  //           if (typeof emissionData[key] === 'number' && emissionData[key] < 0) {
-  //             throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.negativeValuesNotAllowed", []), HttpStatus.BAD_REQUEST);
-  //           }
-  //         }
-    
-  //       }
-  //     }
-  //     return true;
-  // }
+    private toProjection(projectionDto: ProjectionDto): ProjectionEntity {
+        const data = instanceToPlain(projectionDto);
+        this.logger.verbose("Converted projectionDto to Projection entity", JSON.stringify(data));
+        return plainToClass(ProjectionEntity, data);
+    }
 }

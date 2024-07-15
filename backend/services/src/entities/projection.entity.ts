@@ -1,6 +1,6 @@
 import { Entity, Column, Unique, PrimaryGeneratedColumn } from 'typeorm';
 import { GHGRecordState } from 'src/enums/ghg.state.enum';
-import { ProjectionType } from 'src/enums/projection.enum';
+import { ExtendedProjectionType } from 'src/enums/projection.enum';
 import { ProjectionData } from 'src/dtos/projection.dto';
 
 @Entity()
@@ -9,7 +9,7 @@ export class ProjectionEntity {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @Column({ type: "enum", enum: ProjectionType, nullable: false })
+  @Column({ type: "enum", enum: ExtendedProjectionType, nullable: false })
   projectionType: string;
 
   @Column({
