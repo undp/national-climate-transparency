@@ -201,7 +201,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
             />
           ) : (
             <InputNumber
-              value={sectionValueArray[locIndex] ?? undefined}
+              value={parseToTwoDecimals(sectionValueArray[locIndex] ?? 0)}
               onChange={(enteredValue) => {
                 updateValue(
                   record.topicId,

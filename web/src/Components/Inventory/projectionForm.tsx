@@ -337,7 +337,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
         const isNonLeaf: boolean = nonLeafSections.includes(record.topicId);
         return (
           <InputNumber
-            value={sectionValueArray[year - 2000] ?? undefined}
+            value={parseToTwoDecimals(sectionValueArray[year - 2000] ?? 0)}
             disabled={isNonLeaf || isFinalized}
             onChange={(enteredValue) => {
               updateValue(
