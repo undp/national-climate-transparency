@@ -7,6 +7,7 @@ import { HelperService } from 'src/util/helpers.service';
 import { EmissionDto, EmissionValidateDto } from 'src/dtos/emission.dto';
 import { User } from 'src/entities/user.entity';
 import { GHGRecordState } from 'src/enums/ghg.state.enum';
+import { GHGInventoryManipulate, ValidateEntity } from 'src/enums/user.enum';
 
 @Injectable()
 export class GhgEmissionsService {
@@ -28,7 +29,7 @@ export class GhgEmissionsService {
         this.verifyEmissionValues(emission);
 
         let savedEmission: EmissionEntity;
-        const result = await this.getEmissionByYear(emission.year);
+        const result = await this.getEmissionByYear(emission.year, user);
 
         if (result && result.length > 0) {
             if (result[0].state === GHGRecordState.FINALIZED) {
@@ -94,7 +95,11 @@ export class GhgEmissionsService {
             throw new HttpException('Invalid Emission Year Received', HttpStatus.BAD_REQUEST);
         }
 
-        const result = await this.getEmissionByYear(emissionValidateDto.year);
+        if (user.validatePermission === ValidateEntity.CANNOT){
+            throw new HttpException('User need to have Validate Permission', HttpStatus.FORBIDDEN);
+        }
+
+        const result = await this.getEmissionByYear(emissionValidateDto.year, user);
 
         if (result && result.length > 0) {
             if (result[0].state === GHGRecordState.FINALIZED && emissionValidateDto.state === GHGRecordState.FINALIZED) {
@@ -134,7 +139,12 @@ export class GhgEmissionsService {
         }
     }
 
-    async getEmissionReportSummary() {
+    async getEmissionReportSummary(user: User) {
+
+        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
+            throw new HttpException('User need to have GHG Inventory Access', HttpStatus.FORBIDDEN);
+        }
+        
         const emissions = await this.emissionRepo
             .createQueryBuilder("emission_entity")
             .select(["year", "state"])
@@ -143,7 +153,11 @@ export class GhgEmissionsService {
         return emissions;
     }
 
-    getEmissionByYear = async (year: string) => {
+    getEmissionByYear = async (year: string, user: User) => {
+
+        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
+            throw new HttpException('User need to have GHG Inventory Access', HttpStatus.FORBIDDEN);
+        }
 
         if (!this.helperService.isValidYear(year)){
             throw new HttpException('Invalid Emission Year Received', HttpStatus.BAD_REQUEST);

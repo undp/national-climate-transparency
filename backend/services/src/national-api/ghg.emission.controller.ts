@@ -37,14 +37,14 @@ export class GHGEmissionController {
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, EmissionEntity, true))
     @Get('/:year')
     getEmissions(@Param('year') year: string, @Request() req) {
-      return this.emissionService.getEmissionByYear(year);
+      return this.emissionService.getEmissionByYear(year, req.user);
     }
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, EmissionEntity, true))
     @Get("/summary/available")
-    getEmissionYears() {
-      return this.emissionService.getEmissionReportSummary();
+    getEmissionYears(@Request() req) {
+      return this.emissionService.getEmissionReportSummary(req.user);
     }
     
 }

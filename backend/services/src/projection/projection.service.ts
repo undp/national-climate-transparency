@@ -8,6 +8,7 @@ import { ProjectionEntity } from '../entities/projection.entity';
 import { ProjectionDto, ProjectionValidateDto } from '../dtos/projection.dto';
 import { ExtendedProjectionType, ProjectionType } from '../enums/projection.enum';
 import { GHGRecordState } from '../enums/ghg.state.enum';
+import { GHGInventoryManipulate, ValidateEntity } from 'src/enums/user.enum';
 
 @Injectable()
 export class GhgProjectionService {
@@ -21,66 +22,70 @@ export class GhgProjectionService {
 
     async create(projectionDto: ProjectionDto, user: User) {
 
-      const projection: ProjectionEntity = this.toProjection(projectionDto);
+        const projection: ProjectionEntity = this.toProjection(projectionDto);
 
-      let savedProjection: ProjectionEntity;
-      const result = await this.getActualProjection(projection.projectionType);
+        let savedProjection: ProjectionEntity;
+        const result = await this.getActualProjection(projection.projectionType, user);
 
-      if (result) {
-          if (result.state === GHGRecordState.FINALIZED) {
-              throw new HttpException(
-                  this.helperService.formatReqMessagesString("ghgInventory.cannotEditProjectionFinalized", []),
-                  HttpStatus.FORBIDDEN
-              );
-          }
+        if (result) {
+            if (result.state === GHGRecordState.FINALIZED) {
+                throw new HttpException(
+                    this.helperService.formatReqMessagesString("ghgInventory.cannotEditProjectionFinalized", []),
+                    HttpStatus.FORBIDDEN
+                );
+            }
 
-          projection.id = result?.id;
+            projection.id = result?.id;
 
-          savedProjection = await this.entityManager
-              .transaction(async (em) => {
-                  const updatedData = await em.update<ProjectionEntity>(ProjectionEntity, {
-                      id: projection.id,
-                  },
-                      {
-                        projectionData: projection.projectionData,
-                        state: projection.state,
-                      });
-                  return updatedData;
-              })
-              .catch((err: any) => {
-                  console.log(err);
-                  if (err instanceof QueryFailedError) {
-                      throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.projectionUpdateFailed", []), HttpStatus.BAD_REQUEST);
-                  } else {
-                      this.logger.error(`Projection updating error ${err}`);
-                  }
-                  return err;
-              });
+            savedProjection = await this.entityManager
+                .transaction(async (em) => {
+                    const updatedData = await em.update<ProjectionEntity>(ProjectionEntity, {
+                        id: projection.id,
+                    },
+                        {
+                            projectionData: projection.projectionData,
+                            state: projection.state,
+                        });
+                    return updatedData;
+                })
+                .catch((err: any) => {
+                    console.log(err);
+                    if (err instanceof QueryFailedError) {
+                        throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.projectionUpdateFailed", []), HttpStatus.BAD_REQUEST);
+                    } else {
+                        this.logger.error(`Projection updating error ${err}`);
+                    }
+                    return err;
+                });
 
-          return { status: HttpStatus.OK, data: savedProjection };
-      }
+            return { status: HttpStatus.OK, data: savedProjection };
+        }
 
-      savedProjection = await this.entityManager
-          .transaction(async (em) => {
-              const savedData = await em.save<ProjectionEntity>(projection);
-              return savedData;
-          })
-          .catch((err: any) => {
-              console.log(err);
-              if (err instanceof QueryFailedError) {
-                  throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.projectionSaveFailed", []), HttpStatus.BAD_REQUEST);
-              } else {
-                  this.logger.error(`Emission add error ${err}`);
-              }
-              return err;
-          });
+        savedProjection = await this.entityManager
+            .transaction(async (em) => {
+                const savedData = await em.save<ProjectionEntity>(projection);
+                return savedData;
+            })
+            .catch((err: any) => {
+                console.log(err);
+                if (err instanceof QueryFailedError) {
+                    throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.projectionSaveFailed", []), HttpStatus.BAD_REQUEST);
+                } else {
+                    this.logger.error(`Emission add error ${err}`);
+                }
+                return err;
+            });
 
-      return { status: HttpStatus.CREATED, data: savedProjection };
+        return { status: HttpStatus.CREATED, data: savedProjection };
     }
 
     async validate(projectionValidateDto: ProjectionValidateDto, user: User) {
 
-        const result = await this.getActualProjection(projectionValidateDto.projectionType);
+        if (user.validatePermission === ValidateEntity.CANNOT){
+            throw new HttpException('User need to have Validate Permission', HttpStatus.FORBIDDEN);
+        }
+
+        const result = await this.getActualProjection(projectionValidateDto.projectionType, user);
 
         if (result) {
             if (result.state === GHGRecordState.FINALIZED && projectionValidateDto.state === GHGRecordState.FINALIZED) {
@@ -120,7 +125,11 @@ export class GhgProjectionService {
         }
     }
 
-    async getActualProjection(projectionType: string) {
+    async getActualProjection(projectionType: string, user: User) {
+
+        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
+            throw new HttpException('User need to have GHG Inventory Access', HttpStatus.FORBIDDEN);
+        }
 
         if (!Object.values(ProjectionType).includes(projectionType as ProjectionType)){
           throw new HttpException('Invalid Projection Type Received', HttpStatus.BAD_REQUEST);
@@ -133,7 +142,11 @@ export class GhgProjectionService {
         });
     }
 
-    async getCalculatedProjection(projectionType: string) {
+    async getCalculatedProjection(projectionType: string, user: User) {
+
+        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
+            throw new HttpException('User need to have GHG Inventory Access', HttpStatus.FORBIDDEN);
+        }
 
         if (!Object.values(ExtendedProjectionType).includes(projectionType as ExtendedProjectionType)){
             throw new HttpException('Invalid Baseline Projection Type Received', HttpStatus.BAD_REQUEST);

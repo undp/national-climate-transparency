@@ -37,14 +37,14 @@ export class GHGProjectionController {
 
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))
     @Get('/actual/:projectionType')
-    getActualProjections(@Param('projectionType') projectionType: ProjectionType) {
-      return this.projectionService.getActualProjection(projectionType);
+    getActualProjections(@Param('projectionType') projectionType: ProjectionType, @Request() req) {
+      return this.projectionService.getActualProjection(projectionType, req.user);
     }
 
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProjectionEntity, true))
     @Get('/calculated/:projectionType')
-    getCalculatedProjections(@Param('projectionType') projectionType: ExtendedProjectionType) {
-      return this.projectionService.getCalculatedProjection(projectionType);
+    getCalculatedProjections(@Param('projectionType') projectionType: ExtendedProjectionType, @Request() req) {
+      return this.projectionService.getCalculatedProjection(projectionType, req.user);
     }
     
 }
