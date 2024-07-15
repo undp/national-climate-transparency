@@ -11,7 +11,7 @@ import {
 import { getCollapseIcon, parseNumber } from '../../Utils/utilServices';
 import { ProjectionSections, ProjectionType } from '../../Enums/projection.enum';
 import { BaselineTimeline } from '../../Definitions/configurationDefinitions';
-import { GrowthRateProperties } from '../../Enums/configuration.enum';
+import { ConfigurationSettingsType, GrowthRateProperties } from '../../Enums/configuration.enum';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { getBaselineSavePayload } from '../../Utils/payloadCreators';
@@ -38,6 +38,12 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
   });
 
   // General State
+  const baselineConfigType =
+    projectionType === ProjectionType.WITH_MEASURES
+      ? ConfigurationSettingsType.PROJECTIONS_WITH_MEASURES
+      : projectionType === ProjectionType.WITH_ADDITIONAL_MEASURES
+      ? ConfigurationSettingsType.PROJECTIONS_WITH_ADDITIONAL_MEASURES
+      : ConfigurationSettingsType.PROJECTIONS_WITHOUT_MEASURES;
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -53,10 +59,10 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
 
   const getBaseline = async () => {
     try {
-      const response = await get(`national/settings/PROJECTIONS`);
+      const response = await get(`national/settings/${baselineConfigType}`);
 
       if (response.status === 200 || response.status === 201) {
-        setAllEditableData(getInitBaseline(response.data.projectionData));
+        setAllEditableData(getInitBaseline(response.data));
       }
     } catch (error) {
       setAllEditableData(getInitBaseline());
@@ -208,7 +214,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
 
   const saveBaseline = async () => {
     try {
-      const baselinePayload = getBaselineSavePayload(allEditableData, projectionType);
+      const baselinePayload = getBaselineSavePayload(allEditableData, baselineConfigType);
 
       const response: any = await post('national/settings/update', baselinePayload);
 

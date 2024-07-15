@@ -8,6 +8,7 @@ import {
   WasteSection,
 } from '../Definitions/emissionDefinitions';
 import { ProjectionTimeline, getEmptyPayload } from '../Definitions/projectionsDefinitions';
+import { ConfigurationSettingsType } from '../Enums/configuration.enum';
 import {
   AgrLevels,
   EnergyLevels,
@@ -112,21 +113,21 @@ export const getProjectionCreatePayload = (
 
 export const getBaselineSavePayload = (
   editableProjections: ProjectionTimeline[],
-  projectionType: ProjectionType
+  baselineConfigType:
+    | ConfigurationSettingsType.PROJECTIONS_WITH_MEASURES
+    | ConfigurationSettingsType.PROJECTIONS_WITH_ADDITIONAL_MEASURES
+    | ConfigurationSettingsType.PROJECTIONS_WITHOUT_MEASURES
 ) => {
   const payload = {
-    id: 'PROJECTIONS',
-    settingValue: {
-      projectionType: projectionType,
-      projectionData: getEmptyPayload('Growth Rate'),
-    },
+    id: baselineConfigType,
+    settingValue: getEmptyPayload('Growth Rate'),
   };
 
   Object.values(ProjectionLeafSection).forEach((value) => {
     const editedRow = editableProjections.find((entry) => entry.topicId === value);
 
     if (editedRow) {
-      payload.settingValue.projectionData[value] = editedRow.values;
+      payload.settingValue[value] = editedRow.values;
     }
   });
 
