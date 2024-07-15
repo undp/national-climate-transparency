@@ -4,7 +4,11 @@
         overflow-x: auto;
 
         .leaf-input-box {
-            text-align: center;
+          width: fit-content;
+
+          .ant-input-number-input {
+              text-align: center;
+          }
         }
 
         .root-input-box {

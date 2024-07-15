@@ -1,4 +1,4 @@
-import { Row, Col, Button, Table, TableProps, Input, message } from 'antd';
+import { Row, Col, Button, Table, TableProps, message, InputNumber } from 'antd';
 import './projectionForm.scss';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,7 @@ import {
   ProjectionTimeline,
   SectionOpen,
 } from '../../Definitions/projectionsDefinitions';
-import { arraySumAggregate, getCollapseIcon, parseNumber } from '../../Utils/utilServices';
+import { arraySumAggregate, getCollapseIcon, parseToTwoDecimals } from '../../Utils/utilServices';
 import { ProjectionSections, ProjectionType } from '../../Enums/projection.enum';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
@@ -313,14 +313,24 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
     projectionTimelineColumns.push({
       title: year.toString(),
       dataIndex: 'values',
-      width: 80,
+      width: 150,
       align: 'center',
       render: (sectionValueArray: number[], record: any) => {
         const isNonLeaf: boolean = nonLeafSections.includes(record.topicId);
         return (
-          <Input
+          <InputNumber
             value={sectionValueArray[year - 2000] ?? undefined}
             disabled={isNonLeaf || isFinalized}
+            onChange={(enteredValue) => {
+              updateValue(
+                record.topicId,
+                year - 2000,
+                enteredValue ? parseToTwoDecimals(enteredValue) : 0
+              );
+            }}
+            min={0}
+            decimalSeparator="."
+            controls={false}
             className={
               isNonLeaf
                 ? record.topicId.length === 1
@@ -330,9 +340,6 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
                   : 'l2-input-box'
                 : 'leaf-input-box'
             }
-            onChange={(e) => {
-              updateValue(record.topicId, year - 2000, parseNumber(e.target.value) ?? 0);
-            }}
           />
         );
       },

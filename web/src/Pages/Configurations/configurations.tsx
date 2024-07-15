@@ -142,13 +142,7 @@ const GhgConfigurations = () => {
             <Col span={6}>
               <Row justify={'end'}>
                 <Col span={8}>
-                  <Button
-                    type="primary"
-                    size="large"
-                    block
-                    htmlType="submit"
-                    className="gwp-save-button"
-                  >
+                  <Button type="primary" block htmlType="submit" className="gwp-save-button">
                     {t('entityAction:save')}
                   </Button>
                 </Col>

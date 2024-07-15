@@ -1,4 +1,4 @@
-import { Row, Col, Button, Table, TableProps, Input, message, DatePicker } from 'antd';
+import { Row, Col, Button, Table, TableProps, message, DatePicker, InputNumber } from 'antd';
 import './baselineForm.scss';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,7 @@ import {
   projectionSectionOrder,
   SectionOpen,
 } from '../../Definitions/projectionsDefinitions';
-import { getCollapseIcon, parseNumber } from '../../Utils/utilServices';
+import { getCollapseIcon, parseNumber, parseToTwoDecimals } from '../../Utils/utilServices';
 import { ProjectionSections, ProjectionType } from '../../Enums/projection.enum';
 import { BaselineTimeline } from '../../Definitions/configurationDefinitions';
 import { ConfigurationSettingsType, GrowthRateProperties } from '../../Enums/configuration.enum';
@@ -157,6 +157,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
   // Editable Value Update
 
   const updateValue = (topicId: string, yearIndex: number, newValue: number) => {
+    console.log(newValue, 'hgvhg');
     setAllEditableData((prevData) => {
       const entryIndex = prevData.findIndex((entry) => entry.topicId === topicId);
 
@@ -199,12 +200,19 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
               size="middle"
             />
           ) : (
-            <Input
+            <InputNumber
               value={sectionValueArray[locIndex] ?? undefined}
-              className={isNonLeaf ? undefined : 'leaf-input-box'}
-              onChange={(e) => {
-                updateValue(record.topicId, locIndex, parseNumber(e.target.value) ?? 0);
+              onChange={(enteredValue) => {
+                updateValue(
+                  record.topicId,
+                  locIndex,
+                  enteredValue ? parseToTwoDecimals(enteredValue) : 0
+                );
               }}
+              min={0}
+              decimalSeparator="."
+              controls={false}
+              className={isNonLeaf ? undefined : 'leaf-input-box'}
             />
           )
         ) : null;
@@ -245,7 +253,12 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
       </Row>
       <Row gutter={20} className="action-row" justify={'end'}>
         <Col>
-          <Button type="primary" size="large" block onClick={() => saveBaseline()}>
+          <Button
+            type="primary"
+            style={{ height: '35px', width: '90px' }}
+            block
+            onClick={() => saveBaseline()}
+          >
             {t('entityAction:save')}
           </Button>
         </Col>
