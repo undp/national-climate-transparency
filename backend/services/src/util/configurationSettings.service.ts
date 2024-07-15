@@ -130,7 +130,8 @@ export class ConfigurationSettingsService {
 		const projectionArray = new Array(51).fill(0);
 
 		for (let year = baselineYear; year <= 2050; year++) {
-			projectionArray[year - 2000] = (co2 + (ch4*gwp_ch4) + (n2o*gwp_n2o))*Math.pow(growthRate, (year-baselineYear))
+			const projectionByYear = (co2 + (ch4*gwp_ch4) + (n2o*gwp_n2o))*Math.pow(growthRate, (year-baselineYear >= 10 ? 10 : year - baselineYear));
+			projectionArray[year - 2000] = parseFloat(projectionByYear.toFixed(2));
 		}
 
 		return projectionArray;

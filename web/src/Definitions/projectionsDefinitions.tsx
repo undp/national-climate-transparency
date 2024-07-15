@@ -1,4 +1,8 @@
-import { ProjectionLeafSection, ProjectionSections } from '../Enums/projection.enum';
+import {
+  ProjectionLeafSection,
+  ProjectionSections,
+  ProjectionType,
+} from '../Enums/projection.enum';
 import { BaselineTimeline } from './configurationDefinitions';
 
 export type ProjectionTimeline = {
@@ -154,4 +158,10 @@ export const getEmptyPayload = (method: 'Projection' | 'Growth Rate') => {
   };
 
   return emptyPayload;
+};
+
+export const projectionToBaseline = {
+  [ProjectionType.WITH_MEASURES]: 'Baseline with Measures',
+  [ProjectionType.WITH_ADDITIONAL_MEASURES]: 'Baseline with Additional Measures',
+  [ProjectionType.WITHOUT_MEASURES]: 'Baseline without Measures',
 };

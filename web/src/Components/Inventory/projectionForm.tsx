@@ -7,6 +7,7 @@ import {
   nonLeafSections,
   projectionSectionOrder,
   ProjectionTimeline,
+  projectionToBaseline,
   SectionOpen,
 } from '../../Definitions/projectionsDefinitions';
 import { arraySumAggregate, getCollapseIcon, parseToTwoDecimals } from '../../Utils/utilServices';
@@ -57,6 +58,23 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   const getProjection = async () => {
     try {
       const response = await get(`national/projections/actual/${projectionType}`);
+
+      if (response.status === 200 || response.status === 201) {
+        setAllEditableData(getInitTimeline(response.data.projectionData));
+        if (response.data.state === GHGRecordState.FINALIZED) {
+          setIsFinalized(true);
+        }
+      }
+    } catch (error) {
+      setAllEditableData(getInitTimeline());
+    }
+  };
+
+  const getBaselineProjection = async () => {
+    try {
+      const response = await get(
+        `national/projections/calculated/${projectionToBaseline[projectionType]}`
+      );
 
       if (response.status === 200 || response.status === 201) {
         setAllEditableData(getInitTimeline(response.data.projectionData));
@@ -387,6 +405,19 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
         </Col>
       </Row>
       <Row gutter={20} className="action-row" justify={'end'}>
+        {!isFinalized && (
+          <Col>
+            <Button
+              disabled={isFinalized}
+              type="primary"
+              size="large"
+              block
+              onClick={() => getBaselineProjection()}
+            >
+              {t('entityAction:revert')}
+            </Button>
+          </Col>
+        )}
         {!isFinalized && (
           <Col>
             <Button
