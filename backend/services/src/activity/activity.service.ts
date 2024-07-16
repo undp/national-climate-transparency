@@ -34,7 +34,6 @@ import { ActionEntity } from "../entities/action.entity";
 import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 import { AchievementEntity } from "../entities/achievement.entity";
-import { ValidateEntity } from "src/enums/user.enum";
 import { SupportEntity } from "src/entities/support.entity";
 
 @Injectable()
@@ -762,13 +761,6 @@ export class ActivityService {
 					
 
 					if (project && project.validated) {
-						// await this.linkUnlinkService.unvalidateProjects(
-						// 	[project],
-						// 	activity.activityId,
-						// 	LogEventType.PROJECT_UNVERIFIED_DUE_ATTACHMENT_DELETE,
-						// 	em
-						// )
-
 						project.validated = false;
 						eventLog.push(
 							this.buildLogEntity(
@@ -818,14 +810,6 @@ export class ActivityService {
 					}
 					
 					if (activity.parentType == EntityType.PROGRAMME && programme.validated) {
-						// await this.linkUnlinkService.unvalidateProgrammes(
-						// 	[programme],
-						// 	(activity.parentType == EntityType.PROGRAMME) ? activity.activityId : project.projectId,
-						// 	(activity.parentType == EntityType.PROGRAMME)
-						// 		? LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-						// 	em
-						// )
-
 						programme.validated = false;
 							eventLog.push(
 								this.buildLogEntity(
@@ -858,13 +842,6 @@ export class ActivityService {
 
 					}
 					if (activity.parentType == EntityType.ACTION && action.validated) {
-						// await this.linkUnlinkService.unvalidateAction(
-						// 	action,
-						// 	(activity.parentType == EntityType.ACTION) ? activity.activityId : programme.programmeId,
-						// 	(activity.parentType == EntityType.ACTION)
-						// 		? LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-						// 	em
-						// )
 						action.validated = false;
 								eventLog.push(
 									this.buildLogEntity(
@@ -923,17 +900,20 @@ export class ActivityService {
 			finalDocList = await this.uploadDocuments(addedDocs)
 		}
 
-		for (const currentDoc of currentDocs) {
-			const docToKeep = updatedDocList.find(doc => currentDoc.url == doc.url);
-			if (docToKeep) {
-				const doc = new DocumentEntityDto();
-				doc.createdTime = docToKeep.createdTime;
-				doc.title = docToKeep.title;
-				doc.updatedTime = docToKeep.updatedTime;
-				doc.url = docToKeep.url;
-				finalDocList.push(doc);
+		if (currentDocs) {
+			for (const currentDoc of currentDocs) {
+				const docToKeep = updatedDocList.find(doc => currentDoc.url == doc.url);
+				if (docToKeep) {
+					const doc = new DocumentEntityDto();
+					doc.createdTime = docToKeep.createdTime;
+					doc.title = docToKeep.title;
+					doc.updatedTime = docToKeep.updatedTime;
+					doc.url = docToKeep.url;
+					finalDocList.push(doc);
+				}
 			}
 		}
+		
 
 		return finalDocList;
 
