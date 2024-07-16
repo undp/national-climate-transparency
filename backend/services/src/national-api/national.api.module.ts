@@ -60,7 +60,7 @@ import { SystemResourceModule } from 'src/system.resource/system.resources.modul
 		KpiModule,
 		ReportModule,
     GhgEmissionModule,
-    GhgProjectionModule,,
+    GhgProjectionModule,
 		SystemResourceModule
   ],
   controllers: [ 
@@ -77,7 +77,7 @@ import { SystemResourceModule } from 'src/system.resource/system.resources.modul
 		KpiController, 
 		ReportController,
     GHGEmissionController,
-    GHGProjectionController,,
+    GHGProjectionController,
 		ResourcesController
   ],
   providers: [
