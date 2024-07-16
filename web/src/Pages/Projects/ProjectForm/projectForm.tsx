@@ -131,9 +131,14 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   // Initialization Logic
 
   const yearsList: number[] = [];
+  const endYearsList: number[] = [];
+
+  for (let year = 2013; year <= 2049; year++) {
+    yearsList.push(year);
+  }
 
   for (let year = 2013; year <= 2050; year++) {
-    yearsList.push(year);
+    endYearsList.push(year);
   }
 
   useEffect(() => {
@@ -1242,7 +1247,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                         setEndYear(value);
                       }}
                     >
-                      {yearsList.map((year) => (
+                      {endYearsList.map((year) => (
                         <Option key={year} value={year}>
                           {year}
                         </Option>
