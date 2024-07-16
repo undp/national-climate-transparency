@@ -9,7 +9,7 @@
 
         .upload-button {
             width: 120px;
-            height: 44px;
+            height: 43.6px;
             color: #3A3541;
             opacity: 0.8;
             border: 1px solid hsl(0, 7%, 75%);
@@ -50,7 +50,7 @@
         border-width: 1px;
         border-radius: 4px;
         padding: 10px;
-        height: 44px;
+        height: 43.6px;
 
         .title-column{
             white-space: nowrap;
@@ -72,6 +72,15 @@
         .icon-column{
             display: flex;
             justify-content: center;
+        }
+
+        .file-type-label{
+            display: flex;
+            justify-content: center;
+            border: 1px solid #9155FD;
+            border-width: 1px;
+            border-radius: 4px;
+            font-size: small;
         }
 
         .delete-icon {

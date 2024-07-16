@@ -1,6 +1,7 @@
 import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
 import { Buffer } from 'buffer';
+import { acceptedFileExtensions } from '../Definitions/uploadDefinitions';
 
 export const addCommSep = (value: any) => {
   return (
@@ -151,4 +152,18 @@ export const parseToTwoDecimals = (fullNumber: number) => {
 
 export const delay = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const getFileExtension = (fileTitle: string) => {
+  const fileParts = fileTitle.split('.');
+  if (fileParts.length > 0) {
+    const extension = fileParts[fileParts.length - 1].toLowerCase();
+    if (acceptedFileExtensions.includes(extension)) {
+      return extension;
+    } else {
+      return undefined;
+    }
+  } else {
+    return undefined;
+  }
 };

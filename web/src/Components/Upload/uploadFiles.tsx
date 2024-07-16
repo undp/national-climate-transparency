@@ -13,6 +13,8 @@ import './uploadFiles.scss';
 import { XOctagon } from 'react-bootstrap-icons';
 import { useTranslation } from 'react-i18next';
 import { AcceptedMimeTypes } from '../../Definitions/fileTypes';
+import { getFileExtension } from '../../Utils/utilServices';
+import { acceptedFileTypes } from '../../Definitions/uploadDefinitions';
 
 interface Props {
   isSingleColumn: boolean;
@@ -96,7 +98,7 @@ const UploadFileGrid: React.FC<Props> = ({
     fileList: documentList,
     showUploadList: false,
     beforeUpload,
-    accept: '.xlsx,.xls,.ppt,.pptx,.docx,.csv,.png,.jpg',
+    accept: acceptedFileTypes,
   };
 
   // Delete function for stored files
@@ -151,33 +153,42 @@ const UploadFileGrid: React.FC<Props> = ({
       {/* Section to show the already uploaded files */}
       {storedVisibleList.length > 0 ? (
         <Row gutter={[20, 20]} style={{ marginBottom: '25px' }}>
-          {storedVisibleList.map((file) => (
-            <Col key={file.key} span={isSingleColumn ? 12 : 8} className="file-column">
-              <Tooltip placement="topLeft" title={file.title} showArrow={false}>
-                <Row className="file-content" gutter={10}>
-                  <Col className="title-column" span={20}>
-                    {file.title}
-                  </Col>
-                  <Col className="icon-column" span={2}>
-                    {usedIn !== 'view' && (
-                      <DeleteOutlined
-                        className="delete-icon"
-                        onClick={() => handleDeleteClick(file.key)}
-                      />
+          {storedVisibleList.map((file) => {
+            const fileExtension = getFileExtension(file.title);
+            return (
+              <Col key={file.key} span={isSingleColumn ? 12 : 8} className="file-column">
+                <Tooltip placement="topLeft" title={file.title} showArrow={false}>
+                  <Row className="file-content" gutter={10}>
+                    <Col className="title-column" span={16}>
+                      {file.title}
+                    </Col>
+                    <Col span={1}></Col>
+                    <Col className="icon-column" span={2}>
+                      {usedIn !== 'view' && (
+                        <DeleteOutlined
+                          className="delete-icon"
+                          onClick={() => handleDeleteClick(file.key)}
+                        />
+                      )}
+                    </Col>
+                    <Col className="icon-column" span={2}>
+                      {usedIn !== 'create' && (
+                        <DownloadOutlined
+                          className="download-icon"
+                          onClick={() => handleDownloadClick(file)}
+                        />
+                      )}
+                    </Col>
+                    {fileExtension && (
+                      <Col className="title-column" span={3}>
+                        <div className="file-type-label">{fileExtension}</div>
+                      </Col>
                     )}
-                  </Col>
-                  <Col className="icon-column" span={2}>
-                    {usedIn !== 'create' && (
-                      <DownloadOutlined
-                        className="download-icon"
-                        onClick={() => handleDownloadClick(file)}
-                      />
-                    )}
-                  </Col>
-                </Row>
-              </Tooltip>
-            </Col>
-          ))}
+                  </Row>
+                </Tooltip>
+              </Col>
+            );
+          })}
         </Row>
       ) : usedIn === 'view' ? (
         <div className="no-documents-box">
