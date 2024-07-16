@@ -205,7 +205,6 @@ const faq = () => {
             setUploadedFiles={setUploadedGHGFiles}
             removedFiles={ghgFilesToRemove}
             setRemovedFiles={setGhgFilesToRemove}
-            setIsSaveButtonDisabled={console.log}
           ></UploadFileGrid>
         ) : (
           <div className="loading-resources">
@@ -257,7 +256,6 @@ const faq = () => {
             setUploadedFiles={setUploadedTemplateFiles}
             removedFiles={templateFilesToRemove}
             setRemovedFiles={setTemplateFilesToRemove}
-            setIsSaveButtonDisabled={console.log}
           ></UploadFileGrid>
         ) : (
           <div className="loading-resources">
