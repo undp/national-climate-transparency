@@ -20,7 +20,6 @@ import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { DeleteDto } from "src/dtos/delete.dto";
 import { Role } from "src/casl/role.enum";
-import { ValidateEntity } from "src/enums/user.enum";
 import { LinkUnlinkService } from "src/util/linkUnlink.service";
 
 @Injectable()

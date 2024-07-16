@@ -30,7 +30,6 @@ import { SupportEntity } from "../entities/support.entity";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ActionEntity } from "../entities/action.entity";
-import { ValidateEntity } from "src/enums/user.enum";
 import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 
@@ -132,22 +131,6 @@ export class ProjectService {
 			this.addEventLogEntry(eventLog, LogEventType.KPI_ADDED, EntityType.PROJECT, project.projectId, user.id, kpiList);
 		}
 
-		// let activities: any;
-		// if (projectDto.linkedActivities) {
-		// 	activities = await this.findAllActivitiesByIds(projectDto.linkedActivities);
-		// 	for (const activity of activities) {
-		// 		if (activity.parentId || activity.parentType) {
-		// 			throw new HttpException(
-		// 				this.helperService.formatReqMessagesString(
-		// 					"project.activityAlreadyLinked",
-		// 					[project.projectId]
-		// 				),
-		// 				HttpStatus.BAD_REQUEST
-		// 			);
-		// 		}
-		// 	}
-		// }
-
 		const proj = await this.entityManager
 			.transaction(async (em) => {
 				const savedProject = await em.save<ProjectEntity>(project);
@@ -189,10 +172,6 @@ export class ProjectService {
 						}
 					}
 					await em.save<LogEntity>(eventLog);
-					// // linking activities and updating paths of projects and activities
-					// if (activities && activities.length > 0) {
-					// 	await this.linkUnlinkService.linkActivitiesToParent(savedProject, activities, { parentType: EntityType.PROJECT, parentId: savedProject.projectId, activityIds: activities }, user, em);
-					// }
 
 					if (projectDto.kpis) {
 						await em.save<KpiEntity>(kpiList);
@@ -641,13 +620,6 @@ export class ProjectService {
 						await em.save<ProgrammeEntity>(programme);
 
 						if (action && action.validated) {
-							// await this.linkUnlinkService.unvalidateAction(
-							// 	project.programme?.action,
-							// 	project.programme?.programmeId,
-							// 	LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							// 	em
-							// )
-	
 							action.validated = false;
 							eventLog.push(
 								this.buildLogEntity(
@@ -961,7 +933,6 @@ export class ProjectService {
 		);
 
 	}
-
 
 	//MARK: Add Event Log Entry
 	private addEventLogEntry = (

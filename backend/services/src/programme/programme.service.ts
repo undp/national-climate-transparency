@@ -32,7 +32,6 @@ import { SupportEntity } from "../entities/support.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ActionEntity } from "../entities/action.entity";
-import { ValidateEntity } from "src/enums/user.enum";
 import { DeleteDto } from "src/dtos/delete.dto";
 import { Role } from "src/casl/role.enum";
 
@@ -840,28 +839,6 @@ export class ProgrammeService {
 		);
 
 	}
-
-	// async findAllProgrammeByIds(programmeIds: string[]) {
-	// 	return await this.programmeRepo.createQueryBuilder('programme')
-	// 		.leftJoinAndSelect('programme.action', 'action')
-	// 		.leftJoinAndSelect('programme.projects', 'project')
-	// 		.leftJoinAndMapMany(
-	// 			"programme.activities",
-	// 			ActivityEntity,
-	// 			"programmeActivity", // Unique alias for programme activities
-	// 			"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
-	// 			{ programme: EntityType.PROGRAMME }
-	// 		)
-	// 		.leftJoinAndMapMany(
-	// 			"project.activities",
-	// 			ActivityEntity,
-	// 			"projectActivity", // Unique alias for project activities
-	// 			"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
-	// 			{ project: EntityType.PROJECT }
-	// 		)
-	// 		.where('programme.programmeId IN (:...programmeIds)', { programmeIds })
-	// 		.getMany();
-	// }
 
 	async findProgrammeById(programmeId: string) {
 		return await this.programmeRepo.createQueryBuilder('programme')
