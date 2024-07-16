@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { RcFile, UploadFile } from 'antd/lib/upload/interface';
-import { Button, Col, Row, Tooltip, Upload, message } from 'antd';
+import { Button, Col, Grid, Row, Tooltip, Upload, message } from 'antd';
 import {
   CloseCircleOutlined,
   DeleteOutlined,
@@ -30,6 +30,8 @@ interface Props {
   setIsSaveButtonDisabled?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const { useBreakpoint } = Grid;
+
 const UploadFileGrid: React.FC<Props> = ({
   isSingleColumn,
   buttonText,
@@ -41,6 +43,7 @@ const UploadFileGrid: React.FC<Props> = ({
   setRemovedFiles,
   setIsSaveButtonDisabled,
 }) => {
+  const screens = useBreakpoint();
   const { t } = useTranslation(['uploadGrid']);
 
   // Upload Grid State
@@ -53,12 +56,24 @@ const UploadFileGrid: React.FC<Props> = ({
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [whichFile, setWhichFile] = useState<string>();
 
+  const [showFileExtension, setShowFileExtension] = useState<boolean>(true);
+
   // Hook to update the visible files shown after deleting
 
   useEffect(() => {
     const toShow = storedFiles.filter((item) => !removedFiles.includes(item.key));
     setStoredVisibleList(toShow);
   }, [removedFiles, storedFiles]);
+
+  //
+
+  useEffect(() => {
+    if (screens.xl) {
+      setShowFileExtension(true);
+    } else {
+      setShowFileExtension(false);
+    }
+  }, [screens]);
 
   // File Upload functionality
 
@@ -159,7 +174,7 @@ const UploadFileGrid: React.FC<Props> = ({
               <Col key={file.key} span={isSingleColumn ? 24 : 8} className="file-column">
                 <Tooltip placement="topLeft" title={file.title} showArrow={false}>
                   <Row className="file-content" gutter={10}>
-                    <Col className="title-column" span={16}>
+                    <Col className="title-column" span={showFileExtension ? 15 : 18}>
                       {file.title}
                     </Col>
                     <Col span={1}></Col>
@@ -179,7 +194,7 @@ const UploadFileGrid: React.FC<Props> = ({
                         />
                       )}
                     </Col>
-                    {fileExtension && (
+                    {showFileExtension && fileExtension && (
                       <Col className="title-column" span={3}>
                         <div className="file-type-label">{fileExtension}</div>
                       </Col>
