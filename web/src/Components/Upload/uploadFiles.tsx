@@ -174,7 +174,7 @@ const UploadFileGrid: React.FC<Props> = ({
               <Col key={file.key} span={isSingleColumn ? 24 : 8} className="file-column">
                 <Tooltip placement="topLeft" title={file.title} showArrow={false}>
                   <Row className="file-content" gutter={10}>
-                    <Col className="title-column" span={showFileExtension ? 15 : 18}>
+                    <Col className="title-column" span={showFileExtension ? 16 : 19}>
                       {file.title}
                     </Col>
                     <Col span={1}></Col>

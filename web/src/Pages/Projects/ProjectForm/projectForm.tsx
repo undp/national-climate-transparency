@@ -1204,7 +1204,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                         setStartYear(value);
                       }}
                     >
-                      {yearsList.map((year) => (
+                      {yearsList.slice(0, -1).map((year) => (
                         <Option key={year} value={year}>
                           {year}
                         </Option>
@@ -1242,7 +1242,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                         setEndYear(value);
                       }}
                     >
-                      {yearsList.map((year) => (
+                      {yearsList.slice(1).map((year) => (
                         <Option key={year} value={year}>
                           {year}
                         </Option>

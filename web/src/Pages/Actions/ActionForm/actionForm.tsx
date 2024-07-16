@@ -136,7 +136,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const userSectors = userInfoState?.userSectors ?? [];
   const yearsList: number[] = [];
 
-  for (let year = 2013; year <= 2050; year++) {
+  for (let year = 2013; year <= 2049; year++) {
     yearsList.push(year);
   }
 
