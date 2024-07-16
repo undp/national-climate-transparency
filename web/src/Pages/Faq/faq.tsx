@@ -9,12 +9,16 @@ import UploadFileGrid from '../../Components/Upload/uploadFiles';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import { delay } from '../../Utils/utilServices';
+import { Action } from '../../Enums/action.enum';
+import { useAbilityContext } from '../../Casl/Can';
+import { ResourceEntity } from '../../Entities/resourceEntity';
 
 const { Panel } = Collapse;
 
 const faq = () => {
   const { t } = useTranslation(['faq', 'entityAction']);
-  const { get, post, delete: del } = useConnection();
+  const { post, delete: del } = useConnection();
+  const ability = useAbilityContext();
 
   const [isGhgLoading, setIsGhgLoading] = useState<boolean>(false);
   const [isTemplateLoading, setIsTemplateLoading] = useState<boolean>(false);
@@ -163,12 +167,17 @@ const faq = () => {
             <div className="section-header">{t('ghgResourcesSection')}</div>
           </Col>
           <Col {...faqButtonBps}>
-            {!isGhgLoading && (
+            {!isGhgLoading && ability.can(Action.Update, ResourceEntity) && (
               <Button
                 type="primary"
                 size="large"
                 block
                 style={{ padding: 0 }}
+                disabled={
+                  isGhgEditEnabled
+                    ? uploadedGHGFiles.length === 0 && ghgFilesToRemove.length === 0
+                    : false
+                }
                 onClick={async () => {
                   if (isGhgEditEnabled) {
                     setIsGhgLoading(true);
@@ -210,11 +219,16 @@ const faq = () => {
             <div className="section-header">{t('docsAndTemplates')}</div>
           </Col>
           <Col {...faqButtonBps}>
-            {!isTemplateLoading && (
+            {!isTemplateLoading && ability.can(Action.Update, ResourceEntity) && (
               <Button
                 type="primary"
                 size="large"
                 block
+                disabled={
+                  isTemplateEditEnabled
+                    ? uploadedTemplateFiles.length === 0 && templateFilesToRemove.length === 0
+                    : false
+                }
                 style={{ padding: 0 }}
                 onClick={async () => {
                   if (isTemplateEditEnabled) {
