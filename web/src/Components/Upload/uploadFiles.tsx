@@ -156,7 +156,7 @@ const UploadFileGrid: React.FC<Props> = ({
           {storedVisibleList.map((file) => {
             const fileExtension = getFileExtension(file.title);
             return (
-              <Col key={file.key} span={isSingleColumn ? 12 : 8} className="file-column">
+              <Col key={file.key} span={isSingleColumn ? 24 : 8} className="file-column">
                 <Tooltip placement="topLeft" title={file.title} showArrow={false}>
                   <Row className="file-content" gutter={10}>
                     <Col className="title-column" span={16}>
