@@ -1,4 +1,4 @@
-import { Row, Col, DatePicker, Button, message, Collapse, InputNumber } from 'antd';
+import { Row, Col, DatePicker, Button, message, Collapse, InputNumber, Tooltip } from 'antd';
 import './emissionForm.scss';
 import { getCollapseIcon, parseToTwoDecimals } from '../../Utils/utilServices';
 import {
@@ -46,7 +46,6 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import moment, { Moment } from 'moment';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
-import { ValidateEntity } from '../../Enums/user.enum';
 
 interface Props {
   index: number;
@@ -68,9 +67,9 @@ export const EmissionForm: React.FC<Props> = ({
   getAvailableEmissionReports,
 }) => {
   // context Usage
-  const { t } = useTranslation(['emission', 'entityAction']);
+  const { t } = useTranslation(['emission', 'entityAction', 'error']);
   const { get, post } = useConnection();
-  const { userInfoState } = useUserContext();
+  const { isValidationAllowed } = useUserContext();
 
   // Year State
 
@@ -668,20 +667,22 @@ export const EmissionForm: React.FC<Props> = ({
           </Button>
         </Col>
         <Col>
-          <Button
-            disabled={
-              isFinalized ||
-              year === null ||
-              userInfoState?.validatePermission === ValidateEntity.CANNOT
-            }
-            type="primary"
-            size="large"
-            block
-            htmlType="submit"
-            onClick={() => handleEmissionAction('FINALIZED')}
+          <Tooltip
+            placement="topRight"
+            title={!isValidationAllowed ? t('error:validationPermissionRequired') : undefined}
+            showArrow={false}
           >
-            {t('entityAction:validate')}
-          </Button>
+            <Button
+              disabled={isFinalized || year === null || !isValidationAllowed}
+              type="primary"
+              size="large"
+              block
+              htmlType="submit"
+              onClick={() => handleEmissionAction('FINALIZED')}
+            >
+              {t('entityAction:validate')}
+            </Button>
+          </Tooltip>
         </Col>
       </Row>
     </div>

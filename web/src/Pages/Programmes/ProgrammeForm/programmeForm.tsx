@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
+import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
 import { DeleteOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
@@ -43,8 +43,6 @@ import {
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
-import { ValidateEntity } from '../../../Enums/user.enum';
-import { Role } from '../../../Enums/role.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -54,7 +52,13 @@ const inputFontSize = '13px';
 
 const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['programmeForm', 'detachPopup', 'formHeader', 'entityAction']);
+  const { t } = useTranslation([
+    'programmeForm',
+    'detachPopup',
+    'formHeader',
+    'entityAction',
+    'error',
+  ]);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Programme', method);
@@ -62,7 +66,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
-  const { userInfoState } = useUserContext();
+  const { isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -72,7 +76,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
-  const [isValidateButtonDisabled, setIsValidateButtonDisabled] = useState(false);
 
   // Parent Select state
 
@@ -143,16 +146,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   for (let year = 2013; year <= 2049; year++) {
     yearsList.push(year);
   }
-
-  useEffect(() => {
-    // check user permission for validate programme and disable validate button
-    if (
-      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
-      userInfoState?.userRole === Role.Observer
-    ) {
-      setIsValidateButtonDisabled(true);
-    }
-  }, [userInfoState]);
 
   useEffect(() => {
     // Initially Loading All Actions that can be parent
@@ -798,7 +791,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     } catch (error: any) {
       if (error?.message) {
         if (error.message === 'Permission Denied: Unable to Validate Programme') {
-          setIsValidateButtonDisabled(true);
+          setIsValidationAllowed(false);
         }
         displayErrorMessage(error);
       } else {
@@ -1648,17 +1641,25 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 {ability.can(Action.Validate, ProgrammeEntity) && (
                   <Col>
                     <Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() => {
-                          validateEntity();
-                        }}
-                        disabled={isValidateButtonDisabled}
+                      <Tooltip
+                        placement="topRight"
+                        title={
+                          !isValidationAllowed ? t('error:validationPermissionRequired') : undefined
+                        }
+                        showArrow={false}
                       >
-                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                      </Button>
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => {
+                            validateEntity();
+                          }}
+                          disabled={!isValidationAllowed}
+                        >
+                          {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                        </Button>
+                      </Tooltip>
                     </Form.Item>
                   </Col>
                 )}

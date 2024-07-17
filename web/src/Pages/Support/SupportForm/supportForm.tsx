@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
+import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
@@ -27,8 +27,6 @@ import {
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
-import { ValidateEntity } from '../../../Enums/user.enum';
-import { Role } from '../../../Enums/role.enum';
 import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 import { DeleteOutlined } from '@ant-design/icons';
 
@@ -48,7 +46,7 @@ type ParentData = {
 
 const SupportForm: React.FC<Props> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['supportForm', 'entityAction']);
+  const { t } = useTranslation(['supportForm', 'entityAction', 'error']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Support', method);
@@ -56,7 +54,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   const navigate = useNavigate();
   const { post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
-  const { userInfoState } = useUserContext();
+  const { isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -66,7 +64,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
-  const [isValidateButtonDisabled, setIsValidateButtonDisabled] = useState(false);
 
   // Form General State
 
@@ -112,18 +109,6 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       setIsNational(false);
     }
   };
-
-  // Initialization Logic
-
-  useEffect(() => {
-    // check user permission for validate action and disable validate button
-    if (
-      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
-      userInfoState?.userRole === Role.Observer
-    ) {
-      setIsValidateButtonDisabled(true);
-    }
-  }, [userInfoState]);
 
   useEffect(() => {
     // Fetching All Activities which can be the parent
@@ -284,7 +269,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     } catch (error: any) {
       if (error?.message) {
         if (error.message === 'Permission Denied: Unable to Validate Support') {
-          setIsValidateButtonDisabled(true);
+          setIsValidationAllowed(false);
         }
         displayErrorMessage(error);
       } else {
@@ -740,17 +725,25 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 {ability.can(Action.Validate, SupportEntity) && (
                   <Col>
                     <Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() => {
-                          validateEntity();
-                        }}
-                        disabled={isValidateButtonDisabled}
+                      <Tooltip
+                        placement="topRight"
+                        title={
+                          !isValidationAllowed ? t('error:validationPermissionRequired') : undefined
+                        }
+                        showArrow={false}
                       >
-                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                      </Button>
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => {
+                            validateEntity();
+                          }}
+                          disabled={!isValidationAllowed}
+                        >
+                          {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                        </Button>
+                      </Tooltip>
                     </Form.Item>
                   </Col>
                 )}
