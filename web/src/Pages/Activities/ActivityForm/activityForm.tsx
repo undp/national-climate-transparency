@@ -44,6 +44,8 @@ import { StoredData, UploadData } from '../../../Definitions/uploadDefinitions';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { ValidateEntity } from '../../../Enums/user.enum';
 import { Role } from '../../../Enums/role.enum';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
+import { DeleteOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -109,6 +111,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportData, setSupportData] = useState<SupportData[]>([]);
   const [supportCurrentPage, setCurrentPage] = useState<any>(1);
   const [supportPageSize, setPageSize] = useState<number>(10);
+
+  // Popup Definition
+
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
+
+  // Detach Entity Data
 
   // KPI State
 
@@ -540,6 +548,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   };
 
   // Entity Delete
+
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
 
   const deleteEntity = async () => {
     try {
@@ -989,6 +1001,21 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   return (
     <div className="content-container">
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('deletePrimaryMsg')} Action ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
+        }}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -1721,7 +1748,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       size="large"
                       block
                       onClick={() => {
-                        deleteEntity();
+                        deleteClicked();
                       }}
                       style={{ color: 'red', borderColor: 'red' }}
                     >

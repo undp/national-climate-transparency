@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -118,9 +118,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
   const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
-  // Detach Popup Visibility
+  // Popup Definition
 
   const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
+
+  // Detach Entity Data
+
   const [detachingEntityId, setDetachingEntityId] = useState<string>();
   const [detachingEntityType, setDetachingEntityType] = useState<'Project' | 'Activity'>();
 
@@ -805,6 +809,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Delete
 
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
   const deleteEntity = async () => {
     try {
       if (entId) {
@@ -1006,6 +1014,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   return (
     <div className="content-container">
       <ConfirmPopup
+        key={'detach_popup'}
         icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
@@ -1018,6 +1027,21 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         doAction={detachEntity}
         open={openDetachPopup}
         setOpen={setOpenDetachPopup}
+      />
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('deletePrimaryMsg')} Action ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
+        }}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
       />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
@@ -1656,7 +1680,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       size="large"
                       block
                       onClick={() => {
-                        deleteEntity();
+                        deleteClicked();
                       }}
                       style={{ color: 'red', borderColor: 'red' }}
                     >

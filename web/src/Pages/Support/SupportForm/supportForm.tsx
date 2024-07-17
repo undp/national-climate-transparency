@@ -29,6 +29,8 @@ import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { ValidateEntity } from '../../../Enums/user.enum';
 import { Role } from '../../../Enums/role.enum';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
+import { DeleteOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
@@ -69,6 +71,12 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   // Form General State
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+
+  // Popup Definition
+
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
+
+  // Detach Entity Data
 
   // Field Disabling state
 
@@ -279,6 +287,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   // Entity Delete
 
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
   const deleteEntity = async () => {
     try {
       if (entId) {
@@ -331,6 +343,21 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   return (
     <div className="content-container">
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('deletePrimaryMsg')} Action ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
+        }}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -734,7 +761,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                     size="large"
                     block
                     onClick={() => {
-                      deleteEntity();
+                      deleteClicked();
                     }}
                     style={{ color: 'red', borderColor: 'red' }}
                   >

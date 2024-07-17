@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -38,6 +38,7 @@ import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { ValidateEntity } from '../../../Enums/user.enum';
 import { Role } from '../../../Enums/role.enum';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -104,10 +105,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
   const [activityPageSize, setActivityPageSize] = useState<number>(10);
 
-  // Detach Popup Visibility
+  // Popup Definition
 
-  // const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
-  // const [detachingEntityId, setDetachingEntityId] = useState<string>();
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
 
   // Supports state
 
@@ -796,6 +796,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Delete
 
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
   const deleteEntity = async () => {
     try {
       if (entId) {
@@ -970,20 +974,21 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   return (
     <div className="content-container">
-      {/* <ConfirmPopup
-        icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
-          primaryMsg: `${t('detachPopup:primaryMsg')} Activity ${detachingEntityId}`,
-          secondaryMsg: t('detachPopup:secondaryMsg'),
-          cancelTitle: t('detachPopup:cancelTitle'),
-          actionTitle: t('detachPopup:actionTitle'),
+          primaryMsg: `${t('deletePrimaryMsg')} Action ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
         }}
-        actionRef={detachingEntityId}
-        doAction={detachEntity}
-        open={openDetachPopup}
-        setOpen={setOpenDetachPopup}
-      /> */}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -1707,7 +1712,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       size="large"
                       block
                       onClick={() => {
-                        deleteEntity();
+                        deleteClicked();
                       }}
                       style={{ color: 'red', borderColor: 'red' }}
                     >
