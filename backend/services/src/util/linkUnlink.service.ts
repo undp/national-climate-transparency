@@ -1100,7 +1100,7 @@ export class LinkUnlinkService {
 						);
 						await em.save<ActionEntity>(action)
 
-						await this.updateAllValidatedChildrenStatusByActionId(action.actionId, em, [programme.programmeId]);
+						await this.updateAllValidatedChildrenStatusByActionId(action.actionId, em, [programme.programmeId], excludeProjectIds, excludeActivityIds);
 
 					} else {
 						const projects = []
@@ -1182,20 +1182,7 @@ export class LinkUnlinkService {
 			await entityManager
 				.transaction(async (em) => {
 					const logs = [];
-
-					if (programme && programme.validated && !skipParentUpdate) {
-						programme.validated = false;
-						logs.push(this.buildLogEntity(
-							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							EntityType.PROGRAMME,
-							programme.programmeId,
-							0,
-							projectId)
-						);
-						await em.save<ProgrammeEntity>(programme);
-
-						await this.updateAllValidatedChildrenAndParentStatusByProgrammeId(programme, em, false, [projectId]);
-					}
+					const updatedActivityIds = []
 
 					const activities = []
 					for (const activity of activityChildren) {
@@ -1208,6 +1195,7 @@ export class LinkUnlinkService {
 							0,
 							projectId)
 						);
+						updatedActivityIds.push(activity.activityId)
 						activities.push(activity)
 
 						const supports = []
@@ -1225,6 +1213,19 @@ export class LinkUnlinkService {
 						}
 
 						await em.save<SupportEntity>(supports);
+					}
+					if (programme && programme.validated && !skipParentUpdate) {
+						programme.validated = false;
+						logs.push(this.buildLogEntity(
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.PROGRAMME,
+							programme.programmeId,
+							0,
+							projectId)
+						);
+						await em.save<ProgrammeEntity>(programme);
+
+						await this.updateAllValidatedChildrenAndParentStatusByProgrammeId(programme, em, false, [projectId], updatedActivityIds);
 					}
 
 					await em.save<ActivityEntity>(activities);
