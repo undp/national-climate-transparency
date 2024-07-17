@@ -8,12 +8,17 @@ import { useEffect, useState } from 'react';
 import TabPane from 'antd/lib/tabs/TabPane';
 import { LockOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { EmissionTabItem } from '../../Definitions/emissionDefinitions';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { GHGInventoryManipulate } from '../../Enums/user.enum';
+import { useNavigate } from 'react-router-dom';
 
 const GhgEmissions = () => {
   // Page Context
 
   const { t } = useTranslation(['emission']);
   const { get } = useConnection();
+  const { userInfoState } = useUserContext();
+  const navigate = useNavigate();
 
   // Years State for Tab Panel
 
@@ -24,6 +29,12 @@ const GhgEmissions = () => {
   // Active Tab State
 
   const [activeYear, setActiveYear] = useState<string>();
+
+  // Redirecting Invalid Users
+
+  if (userInfoState?.ghgInventoryPermission === GHGInventoryManipulate.CANNOT) {
+    navigate('/dashboard');
+  }
 
   // Getter of all available emission report years and their state
 

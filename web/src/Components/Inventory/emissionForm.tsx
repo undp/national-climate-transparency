@@ -45,6 +45,8 @@ import { getEmissionCreatePayload } from '../../Utils/payloadCreators';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import moment, { Moment } from 'moment';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { ValidateEntity } from '../../Enums/user.enum';
 
 interface Props {
   index: number;
@@ -68,6 +70,7 @@ export const EmissionForm: React.FC<Props> = ({
   // context Usage
   const { t } = useTranslation(['emission', 'entityAction']);
   const { get, post } = useConnection();
+  const { userInfoState } = useUserContext();
 
   // Year State
 
@@ -666,7 +669,11 @@ export const EmissionForm: React.FC<Props> = ({
         </Col>
         <Col>
           <Button
-            disabled={isFinalized || year === null}
+            disabled={
+              isFinalized ||
+              year === null ||
+              userInfoState?.validatePermission === ValidateEntity.CANNOT
+            }
             type="primary"
             size="large"
             block
