@@ -1055,7 +1055,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
-                <EntityIdCard calledIn="Programme" entId={entId}></EntityIdCard>
+                <EntityIdCard
+                  calledIn="Programme"
+                  entId={entId}
+                  isValidated={isValidated}
+                ></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
                 <Col {...quarterColumnBps}>

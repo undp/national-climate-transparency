@@ -368,7 +368,11 @@ const SupportForm: React.FC<Props> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
-                <EntityIdCard calledIn="Support" entId={entId}></EntityIdCard>
+                <EntityIdCard
+                  calledIn="Support"
+                  entId={entId}
+                  isValidated={isValidated}
+                ></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
