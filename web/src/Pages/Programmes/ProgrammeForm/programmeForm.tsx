@@ -715,7 +715,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       let response: any;
 
       if (method === 'create') {
-        response = await post('national/programmes/add', payload);
+        response = await post(
+          'national/programmes/add',
+          processOptionalFields(payload, 'programme')
+        );
       } else if (entId && method === 'update') {
         payload.programmeId = entId;
         response = await put(

@@ -218,7 +218,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       let response: any;
 
       if (method === 'create') {
-        response = await post('national/supports/add', payload);
+        response = await post('national/supports/add', processOptionalFields(payload, 'support'));
       } else if (method === 'update') {
         payload.supportId = entId;
         response = await put('national/supports/update', processOptionalFields(payload, 'support'));

@@ -953,7 +953,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       let response: any;
 
       if (method === 'create') {
-        response = await post('national/activities/add', payload);
+        response = await post(
+          'national/activities/add',
+          processOptionalFields(payload, 'activity')
+        );
 
         resolveKPIAchievements(response.data.activityId);
       } else if (method === 'update') {

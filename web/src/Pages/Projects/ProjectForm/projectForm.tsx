@@ -701,7 +701,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       let response: any;
 
       if (method === 'create') {
-        response = await post('national/projects/add', payload);
+        response = await post('national/projects/add', processOptionalFields(payload, 'project'));
       } else if (method === 'update') {
         payload.projectId = entId;
         response = await put('national/projects/update', processOptionalFields(payload, 'project'));
