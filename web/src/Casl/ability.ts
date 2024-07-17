@@ -17,6 +17,7 @@ import { ProgrammeEntity } from '../Entities/programme';
 import { ProjectEntity } from '../Entities/project';
 import { ActivityEntity } from '../Entities/activity';
 import { SupportEntity } from '../Entities/support';
+import { ResourceEntity } from '../Entities/resourceEntity';
 
 type Subjects = InferSubjects<typeof BaseEntity> | 'all';
 
@@ -76,6 +77,8 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Validate, SupportEntity);
       can(Action.Update, SupportEntity);
       can(Action.Delete, SupportEntity);
+
+      can(Action.Update, ResourceEntity);
     }
 
     if (user.role == Role.Admin) {
@@ -120,6 +123,8 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Validate, SupportEntity);
       can(Action.Update, SupportEntity);
       can(Action.Delete, SupportEntity);
+
+      cannot(Action.Update, ResourceEntity);
     }
 
     if (user.role == Role.GovernmentUser) {
@@ -180,6 +185,8 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       can(Action.Validate, SupportEntity);
       can(Action.Update, SupportEntity);
       cannot(Action.Delete, SupportEntity);
+
+      cannot(Action.Update, ResourceEntity);
     }
 
     if (user.role == Role.Observer) {
@@ -230,6 +237,8 @@ export const updateUserAbility = (ability: AppAbility, user: User) => {
       cannot(Action.Validate, SupportEntity);
       cannot(Action.Update, SupportEntity);
       cannot(Action.Delete, SupportEntity);
+
+      cannot(Action.Update, ResourceEntity);
     }
   }
 

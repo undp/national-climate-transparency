@@ -39,7 +39,7 @@ const Dashboard = () => {
 
   // Year State for the GHG MYG Chart 5
 
-  const [mtgYear, setMtgYear] = useState<number>(2015);
+  const [mtgYear, setMtgYear] = useState<number>(2013);
 
   // Individual Chart Data
 

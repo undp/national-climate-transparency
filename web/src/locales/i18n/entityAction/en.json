@@ -12,5 +12,6 @@
     "delete": "Delete",
     "apply": "Apply",
     "submit": "Submit",
-    "finalize": "Finalize"
+    "finalize": "Finalize",
+    "edit": "Edit"
 }
