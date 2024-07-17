@@ -163,6 +163,9 @@ export class CaslAbilityFactory {
 				cannot(Action.Read, ConfigurationSettingsEntity);
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
+
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
 			}
 
 			if (user.role == Role.GovernmentUser) {
@@ -277,6 +280,9 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
+
 			}
 
 			if (user.role == Role.Observer) {
@@ -388,6 +394,8 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
 			}
 
 		}

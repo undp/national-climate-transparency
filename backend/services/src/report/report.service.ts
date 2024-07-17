@@ -95,6 +95,8 @@ export class ReportService {
 					`annex_three.meansOfImplementation = '${implementation}'`
 			});
 
+			implementationCondition = `(${implementationCondition})`
+
 			return this.annexThreeViewRepo
 					   .createQueryBuilder("annex_three")
 					   .where("annex_three.direction = :direction", { direction: direction })
