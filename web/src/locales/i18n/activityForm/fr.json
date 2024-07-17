@@ -26,5 +26,7 @@
   "mtgComments": "Commentaires sur le projet",
   "mtgDocUploadOne": "Documentation de la méthodologie de mitigation",
   "mtgDocUploadTwo": "Documentation des résultats de la mitigation",
-  "mitigationTimelineTitle": "Chronologie de la mitigation"
+  "mitigationTimelineTitle": "Chronologie de la mitigation",
+  "deletePrimaryMsg": "Êtes-vous sûr de vouloir supprimer activité",
+  "deleteSecondaryMsg": "Vous ne pouvez pas annuler cette action"
 }

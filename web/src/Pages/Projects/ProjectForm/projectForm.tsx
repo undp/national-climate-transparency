@@ -979,7 +979,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
-          primaryMsg: `${t('deletePrimaryMsg')} Action ${entId}`,
+          primaryMsg: `${t('deletePrimaryMsg')} ${entId}`,
           secondaryMsg: t('deleteSecondaryMsg'),
           cancelTitle: t('entityAction:cancel'),
           actionTitle: t('entityAction:delete'),
