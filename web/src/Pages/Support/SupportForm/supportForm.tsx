@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message } from 'antd';
+import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
@@ -15,7 +15,7 @@ import {
 } from '../../../Enums/support.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle } from '../../../Utils/utilServices';
+import { delay, getFormTitle } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { SupportEntity } from '../../../Entities/support';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -71,6 +71,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   // Form General State
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+
+  // Spinner When Form Submit Occurs
+
+  const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 
   // Popup Definition
 
@@ -221,6 +225,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const handleSubmit = async (payload: any) => {
     try {
+      setWaitingForBE(true);
+
       payload.exchangeRate = parseFloat(payload.exchangeRate);
       payload.requiredAmount = parseFloat(payload.requiredAmount);
       payload.receivedAmount = parseFloat(payload.receivedAmount);
@@ -248,6 +254,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       }
     } catch (error: any) {
       displayErrorMessage(error);
+    } finally {
+      setWaitingForBE(false);
     }
   };
 
@@ -293,6 +301,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const deleteEntity = async () => {
     try {
+      setWaitingForBE(true);
+      await delay(1000);
+
       if (entId) {
         const payload = {
           entityId: entId,
@@ -361,431 +372,439 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      <div className="support-form">
-        <Form
-          form={form}
-          onFinish={handleSubmit}
-          layout="vertical"
-          onValuesChange={handleValuesChange}
-        >
-          <div className="form-section-card">
-            <div className="form-section-header">{t('generalInfoTitle')}</div>
-            {method !== 'create' && entId && (
-              <EntityIdCard calledIn="Support" entId={entId}></EntityIdCard>
-            )}
-            <Row gutter={gutterSize}>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('selectActivityTitle')}</label>}
-                  name="activityId"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size={'large'}
-                    style={{ fontSize: inputFontSize }}
-                    disabled={isView}
-                    showSearch
-                  >
-                    {parentList.map((parent) => (
-                      <Option key={parent.id} value={parent.id}>
-                        {parent.id}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('supportDirectionTitle')}</label>}
-                  name="direction"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size={'large'}
-                    style={{ fontSize: inputFontSize }}
-                    disabled={isView}
-                    showSearch
-                    onChange={(direction) => {
-                      form.setFieldsValue({
-                        financingStatus: undefined,
-                      });
-                      if (direction === 'Received') {
-                        setIsReceived(true);
-                      } else {
-                        setIsReceived(false);
-                      }
-                    }}
-                  >
-                    {Object.values(SupportDirection).map((support) => (
-                      <Option key={support} value={support}>
-                        {support}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('financeNatureTitle')}</label>}
-                  name="financeNature"
-                  rules={[validation.required]}
-                >
-                  <Select
-                    size={'large'}
-                    style={{ fontSize: inputFontSize }}
-                    disabled={isView}
-                    showSearch
-                    onChange={(nature) => {
-                      form.setFieldsValue({
-                        internationalFinancialInstrument: undefined,
-                        nationalFinancialInstrument: undefined,
-                        internationalSource: undefined,
-                        nationalSource: undefined,
-                      });
-                      renderNatureBasedFields(nature);
-                    }}
-                  >
-                    {Object.values(FinanceNature).map((nature) => (
-                      <Option key={nature} value={nature}>
-                        {nature}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('supportChannelTitle')}</label>}
-                  name="internationalSupportChannel"
-                  rules={[{ required: !isView, message: 'Required Field' }]}
-                >
-                  <Select
-                    size={'large'}
-                    style={{ fontSize: inputFontSize }}
-                    disabled={isView}
-                    showSearch
-                  >
-                    {Object.values(IntSupChannel).map((channel) => (
-                      <Option key={channel} value={channel}>
-                        {channel}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              {isInternational && (
+      {!waitingForBE ? (
+        <div className="support-form">
+          <Form
+            form={form}
+            onFinish={handleSubmit}
+            layout="vertical"
+            onValuesChange={handleValuesChange}
+          >
+            <div className="form-section-card">
+              <div className="form-section-header">{t('generalInfoTitle')}</div>
+              {method !== 'create' && entId && (
+                <EntityIdCard calledIn="Support" entId={entId}></EntityIdCard>
+              )}
+              <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={
-                      <label className="form-item-header">{t('intFinancialInstrumentTitle')}</label>
-                    }
-                    name="internationalFinancialInstrument"
-                    rules={[{ required: !isView && isInternational, message: 'Required Field' }]}
+                    label={<label className="form-item-header">{t('selectActivityTitle')}</label>}
+                    name="activityId"
+                    rules={[validation.required]}
                   >
                     <Select
-                      size="large"
+                      size={'large'}
                       style={{ fontSize: inputFontSize }}
                       disabled={isView}
                       showSearch
                     >
-                      {Object.values(IntFinInstrument).map((instrument) => (
-                        <Option key={instrument} value={instrument}>
-                          {instrument}
+                      {parentList.map((parent) => (
+                        <Option key={parent.id} value={parent.id}>
+                          {parent.id}
                         </Option>
                       ))}
                     </Select>
                   </Form.Item>
                 </Col>
-              )}
-              {isNational && (
                 <Col {...halfColumnBps}>
                   <Form.Item
-                    label={
-                      <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
-                    }
-                    name="nationalFinancialInstrument"
-                    rules={[{ required: !isView && isNational, message: 'Required Field' }]}
+                    label={<label className="form-item-header">{t('supportDirectionTitle')}</label>}
+                    name="direction"
+                    rules={[validation.required]}
                   >
                     <Select
-                      size="large"
+                      size={'large'}
                       style={{ fontSize: inputFontSize }}
                       disabled={isView}
                       showSearch
-                    >
-                      {Object.values(NatFinInstrument).map((instrument) => (
-                        <Option key={instrument} value={instrument}>
-                          {instrument}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-              )}
-              {isInternational && (
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={
-                      <label className="form-item-header">{t('internationalSourceTitle')}</label>
-                    }
-                    name="internationalSource"
-                  >
-                    <Select
-                      size="large"
-                      mode="multiple"
-                      style={{ fontSize: inputFontSize }}
-                      allowClear
-                      disabled={isView}
-                      showSearch
-                    >
-                      {Object.values(IntSource).map((source) => (
-                        <Option key={source} value={source}>
-                          {source}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-              )}
-              {isNational && (
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={<label className="form-item-header">{t('nationalSourceTitle')}</label>}
-                    name="nationalSource"
-                  >
-                    <Input
-                      className="form-input-box"
-                      disabled={isView}
-                      onChange={(e) => {
-                        if (e.target.value === '') {
-                          form.setFieldsValue({ nationalSource: undefined });
+                      onChange={(direction) => {
+                        form.setFieldsValue({
+                          financingStatus: undefined,
+                        });
+                        if (direction === 'Received') {
+                          setIsReceived(true);
+                        } else {
+                          setIsReceived(false);
                         }
                       }}
+                    >
+                      {Object.values(SupportDirection).map((support) => (
+                        <Option key={support} value={support}>
+                          {support}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('financeNatureTitle')}</label>}
+                    name="financeNature"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      size={'large'}
+                      style={{ fontSize: inputFontSize }}
+                      disabled={isView}
+                      showSearch
+                      onChange={(nature) => {
+                        form.setFieldsValue({
+                          internationalFinancialInstrument: undefined,
+                          nationalFinancialInstrument: undefined,
+                          internationalSource: undefined,
+                          nationalSource: undefined,
+                        });
+                        renderNatureBasedFields(nature);
+                      }}
+                    >
+                      {Object.values(FinanceNature).map((nature) => (
+                        <Option key={nature} value={nature}>
+                          {nature}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('supportChannelTitle')}</label>}
+                    name="internationalSupportChannel"
+                    rules={[{ required: !isView, message: 'Required Field' }]}
+                  >
+                    <Select
+                      size={'large'}
+                      style={{ fontSize: inputFontSize }}
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(IntSupChannel).map((channel) => (
+                        <Option key={channel} value={channel}>
+                          {channel}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={gutterSize}>
+                {isInternational && (
+                  <Col {...halfColumnBps}>
+                    <Form.Item
+                      label={
+                        <label className="form-item-header">
+                          {t('intFinancialInstrumentTitle')}
+                        </label>
+                      }
+                      name="internationalFinancialInstrument"
+                      rules={[{ required: !isView && isInternational, message: 'Required Field' }]}
+                    >
+                      <Select
+                        size="large"
+                        style={{ fontSize: inputFontSize }}
+                        disabled={isView}
+                        showSearch
+                      >
+                        {Object.values(IntFinInstrument).map((instrument) => (
+                          <Option key={instrument} value={instrument}>
+                            {instrument}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                )}
+                {isNational && (
+                  <Col {...halfColumnBps}>
+                    <Form.Item
+                      label={
+                        <label className="form-item-header">{t('nationalFinanceInstrument')}</label>
+                      }
+                      name="nationalFinancialInstrument"
+                      rules={[{ required: !isView && isNational, message: 'Required Field' }]}
+                    >
+                      <Select
+                        size="large"
+                        style={{ fontSize: inputFontSize }}
+                        disabled={isView}
+                        showSearch
+                      >
+                        {Object.values(NatFinInstrument).map((instrument) => (
+                          <Option key={instrument} value={instrument}>
+                            {instrument}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                )}
+                {isInternational && (
+                  <Col {...halfColumnBps}>
+                    <Form.Item
+                      label={
+                        <label className="form-item-header">{t('internationalSourceTitle')}</label>
+                      }
+                      name="internationalSource"
+                    >
+                      <Select
+                        size="large"
+                        mode="multiple"
+                        style={{ fontSize: inputFontSize }}
+                        allowClear
+                        disabled={isView}
+                        showSearch
+                      >
+                        {Object.values(IntSource).map((source) => (
+                          <Option key={source} value={source}>
+                            {source}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                )}
+                {isNational && (
+                  <Col {...halfColumnBps}>
+                    <Form.Item
+                      label={<label className="form-item-header">{t('nationalSourceTitle')}</label>}
+                      name="nationalSource"
+                    >
+                      <Input
+                        className="form-input-box"
+                        disabled={isView}
+                        onChange={(e) => {
+                          if (e.target.value === '') {
+                            form.setFieldsValue({ nationalSource: undefined });
+                          }
+                        }}
+                      />
+                    </Form.Item>
+                  </Col>
+                )}
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('financeStatus')}</label>}
+                    name="financingStatus"
+                    rules={[{ required: !isView && isReceived, message: 'Required Field' }]}
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      disabled={isView || !isReceived}
+                      showSearch
+                    >
+                      {Object.values(FinancingStatus).map((status) => (
+                        <Option key={status} value={status}>
+                          {status}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('exchangeRateTitle')}</label>}
+                    name="exchangeRate"
+                    rules={[validation.greaterThanZero, validation.required]}
+                  >
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      className="form-input-box"
+                      onChange={(event) => {
+                        const value = parseFloat(event.target.value);
+                        handleCurrencyChange(value, 'rate');
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === '-' || e.key === 'e' || e.key === '+') {
+                          e.preventDefault();
+                        }
+                      }}
+                      disabled={isView}
                     />
                   </Form.Item>
                 </Col>
-              )}
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('financeStatus')}</label>}
-                  name="financingStatus"
-                  rules={[{ required: !isView && isReceived, message: 'Required Field' }]}
-                >
-                  <Select
-                    size="large"
-                    style={{ fontSize: inputFontSize }}
-                    disabled={isView || !isReceived}
-                    showSearch
+              </Row>
+              <Row gutter={gutterSize}>
+                <Col {...quarterColumnBps}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('neededUSDTitle')}</label>}
+                    name="requiredAmount"
+                    rules={[validation.required]}
                   >
-                    {Object.values(FinancingStatus).map((status) => (
-                      <Option key={status} value={status}>
-                        {status}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col {...halfColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('exchangeRateTitle')}</label>}
-                  name="exchangeRate"
-                  rules={[validation.greaterThanZero, validation.required]}
-                >
-                  <Input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    className="form-input-box"
-                    onChange={(event) => {
-                      const value = parseFloat(event.target.value);
-                      handleCurrencyChange(value, 'rate');
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === '-' || e.key === 'e' || e.key === '+') {
-                        e.preventDefault();
-                      }
-                    }}
-                    disabled={isView}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={gutterSize}>
-              <Col {...quarterColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('neededUSDTitle')}</label>}
-                  name="requiredAmount"
-                  rules={[validation.required]}
-                >
-                  <Input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    className="form-input-box"
-                    onChange={(event) => {
-                      const value = parseFloat(event.target.value);
-                      handleCurrencyChange(value, 'needed');
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === '-' || e.key === 'e' || e.key === '+') {
-                        e.preventDefault();
-                      }
-                    }}
-                    disabled={isView}
-                  />
-                </Form.Item>
-              </Col>
-              <Col {...quarterColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header-small">{t('neededLocalTitle')}</label>}
-                  name="neededLocal"
-                >
-                  <Input type="number" className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-              <Col {...quarterColumnBps}>
-                <Form.Item
-                  label={<label className="form-item-header">{t('receivedUSDTitle')}</label>}
-                  name="receivedAmount"
-                  rules={[validation.required]}
-                >
-                  <Input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    className="form-input-box"
-                    onChange={(event) => {
-                      const value = parseFloat(event.target.value);
-                      handleCurrencyChange(value, 'received');
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === '-' || e.key === 'e' || e.key === '+') {
-                        e.preventDefault();
-                      }
-                    }}
-                    disabled={isView}
-                  />
-                </Form.Item>
-              </Col>
-              <Col {...quarterColumnBps}>
-                <Form.Item
-                  label={
-                    <label className="form-item-header-small">{t('receivedLocalTitle')}</label>
-                  }
-                  name="receivedLocal"
-                >
-                  <Input type="number" className="form-input-box" disabled />
-                </Form.Item>
-              </Col>
-            </Row>
-          </div>
-          {method === 'create' && (
-            <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col>
-                <Button
-                  type="default"
-                  size="large"
-                  block
-                  onClick={() => {
-                    navigate('/support');
-                  }}
-                >
-                  {t('entityAction:cancel')}
-                </Button>
-              </Col>
-              <Col {...shortButtonBps}>
-                <Form.Item>
-                  <Button type="primary" size="large" block htmlType="submit">
-                    {t('entityAction:add')}
-                  </Button>
-                </Form.Item>
-              </Col>
-            </Row>
-          )}
-          {method === 'view' && (
-            <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col>
-                <Button
-                  type="default"
-                  size="large"
-                  block
-                  onClick={() => {
-                    navigate('/support');
-                  }}
-                >
-                  {t('entityAction:back')}
-                </Button>
-              </Col>
-              {ability.can(Action.Validate, SupportEntity) && (
-                <Col>
-                  <Form.Item>
-                    <Button
-                      type="primary"
-                      size="large"
-                      block
-                      onClick={() => {
-                        validateEntity();
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      className="form-input-box"
+                      onChange={(event) => {
+                        const value = parseFloat(event.target.value);
+                        handleCurrencyChange(value, 'needed');
                       }}
-                      disabled={isValidateButtonDisabled}
-                    >
-                      {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                    </Button>
+                      onKeyDown={(e) => {
+                        if (e.key === '-' || e.key === 'e' || e.key === '+') {
+                          e.preventDefault();
+                        }
+                      }}
+                      disabled={isView}
+                    />
                   </Form.Item>
                 </Col>
-              )}
-            </Row>
-          )}
-          {method === 'update' && (
-            <Row className="sticky-footer" gutter={20} justify={'end'}>
-              <Col>
-                <Button
-                  type="default"
-                  size="large"
-                  block
-                  onClick={() => {
-                    navigate('/support');
-                  }}
-                >
-                  {t('entityAction:cancel')}
-                </Button>
-              </Col>
-              {ability.can(Action.Delete, SupportEntity) && (
+                <Col {...quarterColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header-small">{t('neededLocalTitle')}</label>
+                    }
+                    name="neededLocal"
+                  >
+                    <Input type="number" className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+                <Col {...quarterColumnBps}>
+                  <Form.Item
+                    label={<label className="form-item-header">{t('receivedUSDTitle')}</label>}
+                    name="receivedAmount"
+                    rules={[validation.required]}
+                  >
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      className="form-input-box"
+                      onChange={(event) => {
+                        const value = parseFloat(event.target.value);
+                        handleCurrencyChange(value, 'received');
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === '-' || e.key === 'e' || e.key === '+') {
+                          e.preventDefault();
+                        }
+                      }}
+                      disabled={isView}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col {...quarterColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header-small">{t('receivedLocalTitle')}</label>
+                    }
+                    name="receivedLocal"
+                  >
+                    <Input type="number" className="form-input-box" disabled />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </div>
+            {method === 'create' && (
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
                 <Col>
                   <Button
                     type="default"
                     size="large"
                     block
                     onClick={() => {
-                      deleteClicked();
+                      navigate('/support');
                     }}
-                    style={{ color: 'red', borderColor: 'red' }}
                   >
-                    {t('entityAction:delete')}
+                    {t('entityAction:cancel')}
                   </Button>
                 </Col>
-              )}
-              <Col {...shortButtonBps}>
-                <Form.Item>
+                <Col {...shortButtonBps}>
+                  <Form.Item>
+                    <Button type="primary" size="large" block htmlType="submit">
+                      {t('entityAction:add')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+            {method === 'view' && (
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
+                <Col>
                   <Button
-                    type="primary"
+                    type="default"
                     size="large"
                     block
-                    htmlType="submit"
-                    disabled={isSaveButtonDisabled}
+                    onClick={() => {
+                      navigate('/support');
+                    }}
                   >
-                    {t('entityAction:update')}
+                    {t('entityAction:back')}
                   </Button>
-                </Form.Item>
-              </Col>
-            </Row>
-          )}
-        </Form>
-      </div>
+                </Col>
+                {ability.can(Action.Validate, SupportEntity) && (
+                  <Col>
+                    <Form.Item>
+                      <Button
+                        type="primary"
+                        size="large"
+                        block
+                        onClick={() => {
+                          validateEntity();
+                        }}
+                        disabled={isValidateButtonDisabled}
+                      >
+                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                      </Button>
+                    </Form.Item>
+                  </Col>
+                )}
+              </Row>
+            )}
+            {method === 'update' && (
+              <Row className="sticky-footer" gutter={20} justify={'end'}>
+                <Col>
+                  <Button
+                    type="default"
+                    size="large"
+                    block
+                    onClick={() => {
+                      navigate('/support');
+                    }}
+                  >
+                    {t('entityAction:cancel')}
+                  </Button>
+                </Col>
+                {ability.can(Action.Delete, SupportEntity) && (
+                  <Col>
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      onClick={() => {
+                        deleteClicked();
+                      }}
+                      style={{ color: 'red', borderColor: 'red' }}
+                    >
+                      {t('entityAction:delete')}
+                    </Button>
+                  </Col>
+                )}
+                <Col {...shortButtonBps}>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      htmlType="submit"
+                      disabled={isSaveButtonDisabled}
+                    >
+                      {t('entityAction:update')}
+                    </Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+          </Form>
+        </div>
+      ) : (
+        <Spin className="loading-center" size="large" />
+      )}
     </div>
   );
 };
