@@ -230,7 +230,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             setInheritedKpiList(tempInheritedKpiList);
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -367,9 +367,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               setStoredRstFiles(tempFiles);
             }
           }
-        } catch (error: any) {
+        } catch {
           navigate('/activities');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -451,7 +450,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             setInheritedKpiList(tempInheritedKpiList);
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };

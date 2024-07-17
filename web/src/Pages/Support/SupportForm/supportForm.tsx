@@ -187,9 +187,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
             setIsValidated(entityData.validated ?? false);
           }
-        } catch (error: any) {
+        } catch {
           navigate('/support');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }

@@ -250,9 +250,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               expectedGHGReduction: entityData.migratedData?.expectedGHGReduction ?? 0,
             });
           }
-        } catch (error: any) {
+        } catch {
           navigate('/projects');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -304,7 +303,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             }
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -917,7 +916,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
           setInheritedKpiList(tempInheritedKpiList);
         }
       } catch (error: any) {
-        displayErrorMessage(error, t('kpiSearchFailed'));
+        console.log(error, t('kpiSearchFailed'));
       }
     }
   };

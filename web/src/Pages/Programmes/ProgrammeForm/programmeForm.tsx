@@ -258,9 +258,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               expectedReduct: entityData.expectedGHGReduction,
             });
           }
-        } catch (error: any) {
+        } catch {
           navigate('/programmes');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -312,7 +311,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             }
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -935,7 +934,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           setInheritedKpiList(tempInheritedKpiList);
         }
       } catch (error: any) {
-        displayErrorMessage(error, t('kpiSearchFailed'));
+        console.log(error, t('kpiSearchFailed'));
       }
     }
   };
