@@ -14,7 +14,8 @@ import { XOctagon } from 'react-bootstrap-icons';
 import { useTranslation } from 'react-i18next';
 import { AcceptedMimeTypes } from '../../Definitions/fileTypes';
 import { getFileExtension } from '../../Utils/utilServices';
-import { acceptedFileTypes } from '../../Definitions/uploadDefinitions';
+import { acceptedFileTypes, extensionColors } from '../../Definitions/uploadDefinitions';
+import { AcceptedFileExtensions } from '../../Enums/file.enum';
 
 interface Props {
   isSingleColumn: boolean;
@@ -196,7 +197,15 @@ const UploadFileGrid: React.FC<Props> = ({
                     </Col>
                     {showFileExtension && fileExtension && (
                       <Col className="title-column" span={3}>
-                        <div className="file-type-label">{fileExtension}</div>
+                        <div
+                          className="file-type-label"
+                          style={{
+                            color: extensionColors[fileExtension as AcceptedFileExtensions],
+                            borderColor: extensionColors[fileExtension as AcceptedFileExtensions],
+                          }}
+                        >
+                          {fileExtension}
+                        </div>
                       </Col>
                     )}
                   </Row>
