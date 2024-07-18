@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
+import { EntityManager, Repository } from "typeorm";
 import { BasicResponseDto } from "../dtos/basic.response.dto";
 import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
 import { ConfigurationSettingsType } from "../enums/configuration.settings.type.enum";
@@ -13,6 +13,7 @@ import { ExtendedProjectionType, ProjectionLeafSection } from "src/enums/project
 @Injectable()
 export class ConfigurationSettingsService {
 	constructor(
+		@InjectEntityManager() private entityManager: EntityManager,
 		@InjectRepository(ConfigurationSettingsEntity)
 		private configSettingsRepo: Repository<ConfigurationSettingsEntity>,
 		@InjectRepository(ProjectionEntity) private projectionRepo: Repository<ProjectionEntity>,
@@ -61,19 +62,30 @@ export class ConfigurationSettingsService {
 			}
 
 			// Save the setting
-			await this.configSettingsRepo.save(setting);
+			
 
 			// Updating the Baseline Projection
-			if ([ConfigurationSettingsType.PROJECTIONS_WITH_MEASURES, ConfigurationSettingsType.PROJECTIONS_WITH_ADDITIONAL_MEASURES, ConfigurationSettingsType.PROJECTIONS_WITHOUT_MEASURES].includes(type)){
 
-				const projectionType = type === ConfigurationSettingsType.PROJECTIONS_WITH_MEASURES 
-												? ExtendedProjectionType.BASELINE_WITH_MEASURES : (
-													type === ConfigurationSettingsType.PROJECTIONS_WITH_ADDITIONAL_MEASURES 
-													? ExtendedProjectionType.BASELINE_WITH_ADDITIONAL_MEASURES 
-													: ExtendedProjectionType.BASELINE_WITHOUT_MEASURES);
+			await this.entityManager
+				.transaction(async (em) => {
+					const savedSetting = await em.save<ConfigurationSettingsEntity>(setting);
 
-				await this.updateBaselineProjection(settingValue as ProjectionData, projectionType)
-			}
+					if (savedSetting){
+						if ([ConfigurationSettingsType.PROJECTIONS_WITH_MEASURES, ConfigurationSettingsType.PROJECTIONS_WITH_ADDITIONAL_MEASURES, ConfigurationSettingsType.PROJECTIONS_WITHOUT_MEASURES].includes(type)){
+
+							const projectionType = type === ConfigurationSettingsType.PROJECTIONS_WITH_MEASURES 
+															? ExtendedProjectionType.BASELINE_WITH_MEASURES : (
+																type === ConfigurationSettingsType.PROJECTIONS_WITH_ADDITIONAL_MEASURES 
+																? ExtendedProjectionType.BASELINE_WITH_ADDITIONAL_MEASURES 
+																: ExtendedProjectionType.BASELINE_WITHOUT_MEASURES);
+							
+							await this.updateBaselineProjection(settingValue as ProjectionData, projectionType)
+						}
+					}
+				})
+				.catch((err: any) => {
+					throw err;
+				});
 			
 			// Return success message
 			return new BasicResponseDto(
@@ -84,7 +96,6 @@ export class ConfigurationSettingsService {
 				)
 			);
 		} catch (err) {
-			console.error("Failed to update settings:", err);
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"common.settingsSaveFailedMsg",
@@ -96,12 +107,12 @@ export class ConfigurationSettingsService {
 	}
 
 	async updateBaselineProjection(baselineData: ProjectionData, projectionType: string) {
-		
+
 		const calculatedProjection = new ProjectionData();
 
-		Object.values(ProjectionLeafSection).forEach(async (value, locIndex) => {
+		for (const value of Object.values(ProjectionLeafSection)) {
 			calculatedProjection[value] = await this.buildProjectionArray(baselineData[value])
-		});
+		}
 
 		let baselineProjection = await this.projectionRepo.findOne({ where: { projectionType: projectionType } });
 
@@ -119,14 +130,28 @@ export class ConfigurationSettingsService {
 	}
 
 	private async buildProjectionArray(sectionConfig: number[]){
+
 		const growthRate = (sectionConfig[0] + 100)/100;
 		const baselineYear = sectionConfig[1];
 		const co2 = sectionConfig[2];
 		const ch4 = sectionConfig[3];
 		const n2o = sectionConfig[4];
 
-		const {gwp_ch4, gwp_n2o} = await this.getSetting(ConfigurationSettingsType.GWP);
+		let gwp_ch4 = 1; 
+		let gwp_n2o = 1;
+		
+		try {
+			const settings = await this.getSetting(ConfigurationSettingsType.GWP);
+			gwp_ch4 = settings.gwp_ch4;
+			gwp_n2o = settings.gwp_n2o;
+		} catch {
+			console.log('Using Default GWP Value of 1')
+		}
 
+		if (baselineYear < 2000 || baselineYear > 2050){
+			throw new HttpException('Year out of the [2000, 2050] period received', HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 		const projectionArray = new Array(51).fill(0);
 
 		for (let year = baselineYear; year <= 2050; year++) {
@@ -135,5 +160,6 @@ export class ConfigurationSettingsService {
 		}
 
 		return projectionArray;
+
 	}
 }
