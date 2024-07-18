@@ -1,6 +1,11 @@
 import { Table, TableProps, Input, Grid } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { ActualTimeline, ExpectedTimeline } from '../../Definitions/mtgTimeline.definition';
+import {
+  ActualRows,
+  ActualTimeline,
+  ExpectedRows,
+  ExpectedTimeline,
+} from '../../Definitions/mtgTimeline.definition';
 import './timeline.scss';
 import { useEffect, useState } from 'react';
 
@@ -98,17 +103,21 @@ const TimelineTable: React.FC<Props> = ({
     },
   ];
 
-  for (let year = mtgStartYear; year <= mtgStartYear + mtgRange; year++) {
+  for (let year = mtgStartYear; year <= Math.min(mtgStartYear + mtgRange, 2050); year++) {
     expectedTableColumns.push({
       title: year.toString(),
-      dataIndex: year.toString(),
+      dataIndex: 'values',
       width: 80,
       align: 'center',
       render: (colValue: any, record: any) => {
+        const isDisabled =
+          record.topic === ExpectedRows.ROW_FOUR[1] ||
+          record.topic === ExpectedRows.ROW_FIVE[1] ||
+          isView;
         return (
           <Input
-            value={colValue}
-            disabled={isView}
+            value={colValue[year - mtgStartYear]}
+            disabled={isDisabled}
             onChange={(event: any) => {
               const inputValue = event.target.value;
               const regex = /^\d*$/;
@@ -124,14 +133,15 @@ const TimelineTable: React.FC<Props> = ({
 
     actualTableColumns.push({
       title: year.toString(),
-      dataIndex: year.toString(),
+      dataIndex: 'values',
       width: 80,
       align: 'center',
       render: (colValue: any, record: any) => {
+        const isDisabled = record.topic === ActualRows.ROW_THREE[1] || isView;
         return (
           <Input
-            value={colValue}
-            disabled={isView}
+            value={colValue[year - mtgStartYear]}
+            disabled={isDisabled}
             onChange={(event: any) => {
               const inputValue = event.target.value;
               const regex = /^\d*$/;

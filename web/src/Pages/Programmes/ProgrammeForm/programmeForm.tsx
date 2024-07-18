@@ -504,7 +504,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               reductionMeasures: act.measure,
               status: act.status,
               natImplementor: act.nationalImplementingEntity ?? [],
-              ghgsAffected: act.ghgsAffected ?? [],
+              ghgsAffected: act.ghgsAffected,
               achievedReduction: act.achievedGHGReduction ?? 0,
               estimatedReduction: act.expectedGHGReduction ?? 0,
             });
@@ -583,10 +583,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     });
 
     activityData.forEach((act: ActivityData) => {
-      tempMigratedData.ghgsAffected = joinTwoArrays(
-        tempMigratedData.ghgsAffected,
-        act.ghgsAffected ?? []
-      );
+      if (act.ghgsAffected && !tempMigratedData.ghgsAffected.includes(act.ghgsAffected)) {
+        tempMigratedData.ghgsAffected.push(act.ghgsAffected);
+      }
 
       const actGHGAchievement = act.achievedReduction ?? 0;
       const actGHGExpected = act.estimatedReduction ?? 0;

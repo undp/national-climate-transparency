@@ -56,8 +56,8 @@ export class ActivityEntity implements EntitySubject {
 	@Column({ nullable: true })
 	etfDescription: string;
 
-	@Column("varchar", { array: true, nullable: true })
-	ghgsAffected: GHGS[];
+	@Column({ type: "enum", enum: GHGS, nullable: false })
+	ghgsAffected: string;
 
 	@Column({ type: 'double precision' })
 	achievedGHGReduction: number;
