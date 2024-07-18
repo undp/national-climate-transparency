@@ -40,6 +40,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   // General State
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isEdited, setIsEdited] = useState<boolean>(false);
 
   // Finalized State
 
@@ -308,6 +309,9 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   // Editable Value Update
 
   const updateValue = (topicId: string, yearIndex: number, newValue: number) => {
+    if (!isEdited) {
+      setIsEdited(true);
+    }
     setAllEditableData((prevData) => {
       const entryIndex = prevData.findIndex((entry) => entry.topicId === topicId);
 
@@ -379,6 +383,8 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
+
+        setIsEdited(false);
       }
     } catch (error: any) {
       displayErrorMessage(error);
@@ -430,7 +436,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
         {!isFinalized && (
           <Col>
             <Button
-              disabled={isFinalized}
+              disabled={isFinalized || isEdited}
               type="primary"
               size="large"
               block
@@ -440,6 +446,19 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
             </Button>
           </Col>
         )}
+        <Col>
+          <Button
+            disabled={isEdited}
+            type="primary"
+            size="large"
+            block
+            onClick={() =>
+              handleValidateAction(isFinalized ? GHGRecordState.SAVED : GHGRecordState.FINALIZED)
+            }
+          >
+            {isFinalized ? t('entityAction:unvalidate') : t('entityAction:validate')}
+          </Button>
+        </Col>
         {!isFinalized && (
           <Col>
             <Button
@@ -453,18 +472,6 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
             </Button>
           </Col>
         )}
-        <Col>
-          <Button
-            type="primary"
-            size="large"
-            block
-            onClick={() =>
-              handleValidateAction(isFinalized ? GHGRecordState.SAVED : GHGRecordState.FINALIZED)
-            }
-          >
-            {isFinalized ? t('entityAction:unvalidate') : t('entityAction:validate')}
-          </Button>
-        </Col>
       </Row>
     </div>
   );
