@@ -566,8 +566,6 @@ const reportList = () => {
     }
   };
 
-  // Get Report Five set
-
   // Function to Handle Table wise Pagination
 
   const handleTablePagination = (pagination: any, whichReport: ReportType) => {
