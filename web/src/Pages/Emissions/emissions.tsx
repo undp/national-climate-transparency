@@ -9,8 +9,7 @@ import TabPane from 'antd/lib/tabs/TabPane';
 import { LockOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { EmissionTabItem } from '../../Definitions/emissionDefinitions';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
-import { GHGInventoryManipulate } from '../../Enums/user.enum';
-import { useNavigate } from 'react-router-dom';
+import { Role } from '../../Enums/role.enum';
 
 const GhgEmissions = () => {
   // Page Context
@@ -18,7 +17,6 @@ const GhgEmissions = () => {
   const { t } = useTranslation(['emission']);
   const { get } = useConnection();
   const { userInfoState } = useUserContext();
-  const navigate = useNavigate();
 
   // Years State for Tab Panel
 
@@ -29,12 +27,6 @@ const GhgEmissions = () => {
   // Active Tab State
 
   const [activeYear, setActiveYear] = useState<string>();
-
-  // Redirecting Invalid Users
-
-  if (userInfoState?.ghgInventoryPermission === GHGInventoryManipulate.CANNOT) {
-    navigate('/dashboard');
-  }
 
   // Getter of all available emission report years and their state
 
@@ -97,24 +89,26 @@ const GhgEmissions = () => {
           onTabClick={(key: string) => setActiveYear(key)}
           destroyInactiveTabPane={true}
         >
-          <TabPane
-            tab={
-              <span>
-                <PlusCircleOutlined />
-                {t('addNew')}
-              </span>
-            }
-            key="addNew"
-          >
-            <EmissionForm
-              index={0}
-              year={null}
-              finalized={false}
-              availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
-              setActiveYear={setActiveYear}
-              getAvailableEmissionReports={getAvailableEmissionReports}
-            />
-          </TabPane>
+          {userInfoState?.userRole !== Role.Observer && (
+            <TabPane
+              tab={
+                <span>
+                  <PlusCircleOutlined />
+                  {t('addNew')}
+                </span>
+              }
+              key="addNew"
+            >
+              <EmissionForm
+                index={0}
+                year={null}
+                finalized={false}
+                availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
+                setActiveYear={setActiveYear}
+                getAvailableEmissionReports={getAvailableEmissionReports}
+              />
+            </TabPane>
+          )}
           {tabItems &&
             tabItems.map((tab: any) => (
               <TabPane

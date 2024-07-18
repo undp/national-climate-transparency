@@ -15,7 +15,6 @@ import { LayoutSiderProps } from '../../Definitions/props/layout.sider.definitio
 import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { Role } from '../../Enums/role.enum';
-import { GHGInventoryManipulate } from '../../Enums/user.enum';
 
 const { Sider } = Layout;
 
@@ -49,14 +48,10 @@ const LayoutSider = (props: LayoutSiderProps) => {
     getItem(t('nav:projects'), 'projects', <Layers />),
     getItem(t('nav:activities'), 'activities', <GraphUpArrow />),
     getItem(t('nav:support'), 'support', <Coin />),
+    getItem(t('nav:ghgInventory'), 'emissions', <CloudDownloadOutlined />),
+    getItem(t('nav:reporting'), 'reportings', <ClipboardMinus />),
+    getItem(t('nav:faq'), 'faqs', <Headset />),
   ];
-
-  if (userInfoState?.ghgInventoryPermission === GHGInventoryManipulate.CAN) {
-    items.push(getItem(t('nav:ghgInventory'), 'emissions', <CloudDownloadOutlined />));
-  }
-
-  items.push(getItem(t('nav:reporting'), 'reportings', <ClipboardMinus />));
-  items.push(getItem(t('nav:faq'), 'faqs', <Headset />));
 
   if (userInfoState?.userRole === Role.Root || userInfoState?.userRole === Role.Admin) {
     items.push(getItem(t('nav:users'), 'userManagement/viewAll', <UserOutlined />));
