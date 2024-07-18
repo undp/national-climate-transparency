@@ -1,0 +1,18 @@
+{
+    "tableNine": "Tables Annex III -09",
+    "nothingToExport": "Data not found for export",
+    "activityId": "Activity No.",
+    "titleOfActivity": "Name of Activity",
+    "description": "Activity description",
+    "sector": "Sector",
+    "subSectors": "Subsector",
+    "type": "Type of support",
+    "technologyType": "Type of technology",
+    "recipientEntities": "Recipient entity",
+	"nationalImplementingEntities": "National implementing entity",
+    "internationalImplementingEntities": "International implementing entity",
+    "startYear": "Start year",
+    "endYear": "End year",
+    "activityStatus": "Status of activity",
+    "additionalInfo": "Additional information"
+}

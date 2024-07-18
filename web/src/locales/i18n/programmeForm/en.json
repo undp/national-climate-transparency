@@ -17,10 +17,13 @@
     "programmeUpdateSuccess": "Programme Updated Successfully",
     "programmeValidateSuccess": "Programme Validated Successfully",
     "programmeUnvalidateSuccess": "Programme Unvalidated Successfully",
+    "programmeDeleteSuccess": "Programme Deleted Successfully",
     "noProjectsMessage": "No Projects Attached",
     "noSuchEntity": "Requested Programme doesn't exist !",
     "activityInfoTitle": "List of Direct Linked Activities under the Programme",
     "supportInfoTitle": "List of Direct Linked Supports under the Programme",
-    "activityList": "Activity List"
+    "activityList": "Activity List",
+    "deletePrimaryMsg": "Are you sure you want to remove the Programme",
+    "deleteSecondaryMsg": "You can’t undo this action"
   }
   

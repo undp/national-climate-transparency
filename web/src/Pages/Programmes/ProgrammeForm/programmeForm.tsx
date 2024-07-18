@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
+import { DeleteOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -9,7 +9,7 @@ import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { SubSector, NatImplementor, KPIAction } from '../../../Enums/shared.enum';
 import { ProgrammeStatus } from '../../../Enums/programme.enum';
-import { GraphUpArrow, Layers } from 'react-bootstrap-icons';
+import { Layers } from 'react-bootstrap-icons';
 import './programmeForm.scss';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
@@ -17,7 +17,7 @@ import { ActionSelectData } from '../../../Definitions/actionDefinitions';
 import { ProjectData } from '../../../Definitions/projectDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
+import { delay, getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
 import { ProgrammeMigratedData } from '../../../Definitions/programmeDefinitions';
 import { Action } from '../../../Enums/action.enum';
 import { ProgrammeEntity } from '../../../Entities/programme';
@@ -42,6 +42,7 @@ import {
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -51,14 +52,21 @@ const inputFontSize = '13px';
 
 const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['programmeForm', 'detachPopup', 'formHeader', 'entityAction']);
+  const { t } = useTranslation([
+    'programmeForm',
+    'detachPopup',
+    'formHeader',
+    'entityAction',
+    'error',
+  ]);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Programme', method);
 
   const navigate = useNavigate();
-  const { get, post, put } = useConnection();
+  const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
+  const { isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -98,8 +106,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
-  // Activity Attachment state
+  // Activity Attachment State:Activity link functions removed keeping original state
 
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
   const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
@@ -112,9 +121,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
   const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
-  // Detach Popup Visibility
+  // Popup Definition
 
   const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
+
+  // Detach Entity Data
+
   const [detachingEntityId, setDetachingEntityId] = useState<string>();
   const [detachingEntityType, setDetachingEntityType] = useState<'Project' | 'Activity'>();
 
@@ -130,7 +143,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const yearsList: number[] = [];
 
-  for (let year = 2013; year <= 2050; year++) {
+  for (let year = 2013; year <= 2049; year++) {
     yearsList.push(year);
   }
 
@@ -154,6 +167,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             title: action.title,
             instrumentType: action.instrumentType,
             sector: action.sector,
+            type: action.type,
           });
         });
         setActionList(tempActionData);
@@ -204,6 +218,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             // Populating Action owned data fields
             form.setFieldsValue({
               actionId: entityData.actionId,
+              type: entityData.type,
               instrumentType: entityData.instrumentType,
               title: entityData.title,
               description: entityData.description,
@@ -236,7 +251,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
             // Populating Migrated Fields (Will be overwritten when attachments change)
             setProgrammeMigratedData({
-              type: entityData.types ?? [],
               intImplementor: entityData.interNationalImplementor ?? [],
               recipientEntity: entityData.recipientEntity ?? [],
               ghgsAffected: entityData.ghgsAffected ?? [],
@@ -244,9 +258,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               expectedReduct: entityData.expectedGHGReduction,
             });
           }
-        } catch (error: any) {
+        } catch {
           navigate('/programmes');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -271,8 +284,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   id: kpi.kpiId,
                   name: kpi.name,
                   unit: kpi.kpiUnit,
-                  achieved: kpi.achieved ?? 0,
-                  expected: kpi.expected,
+                  achieved: parseFloat(kpi.achieved ?? 0),
+                  expected: parseFloat(kpi.expected ?? 0),
                   kpiAction: KPIAction.NONE,
                 });
               } else {
@@ -282,8 +295,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   id: kpi.kpiId,
                   name: kpi.name,
                   unit: kpi.kpiUnit,
-                  achieved: kpi.achieved ?? 0,
-                  expected: kpi.expected,
+                  achieved: parseFloat(kpi.achieved ?? 0),
+                  expected: parseFloat(kpi.expected ?? 0),
                   kpiAction: KPIAction.NONE,
                 });
               }
@@ -298,7 +311,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             }
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -380,7 +393,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   useEffect(() => {
     if (programmeMigratedData) {
       form.setFieldsValue({
-        type: programmeMigratedData.type,
         intImplementor: programmeMigratedData.intImplementor,
         recipientEntity: programmeMigratedData.recipientEntity,
         ghgsAffected: programmeMigratedData.ghgsAffected,
@@ -418,7 +430,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               key: index.toString(),
               projectId: prj.projectId,
               projectName: prj.title,
-              type: prj.type,
               internationalImplementingEntities: prj.internationalImplementingEntities ?? [],
               recipientEntities: prj.recipientEntities ?? [],
               ghgsAffected: prj.migratedData[0]?.ghgsAffected ?? [],
@@ -536,7 +547,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   useEffect(() => {
     const tempMigratedData: ProgrammeMigratedData = {
-      type: [],
       intImplementor: [],
       recipientEntity: [],
       ghgsAffected: [],
@@ -545,10 +555,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     };
 
     projectData.forEach((prj: ProjectData) => {
-      if (!tempMigratedData.type.includes(prj.type)) {
-        tempMigratedData.type.push(prj.type);
-      }
-
       tempMigratedData.intImplementor = joinTwoArrays(
         tempMigratedData.intImplementor,
         prj.internationalImplementingEntities ?? []
@@ -709,7 +715,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       let response: any;
 
       if (method === 'create') {
-        response = await post('national/programmes/add', payload);
+        response = await post(
+          'national/programmes/add',
+          processOptionalFields(payload, 'programme')
+        );
       } else if (entId && method === 'update') {
         payload.programmeId = entId;
         response = await put(
@@ -782,14 +791,54 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      displayErrorMessage(error, `${entId} Validation Failed`);
+      if (error?.message) {
+        if (error.message === 'Permission Denied: Unable to Validate Programme') {
+          setIsValidationAllowed(false);
+        }
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Validation Failed`);
+      }
     }
   };
 
   // Entity Delete
 
-  const deleteEntity = () => {
-    console.log('Delete Clicked');
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
+  const deleteEntity = async () => {
+    try {
+      setWaitingForBE(true);
+      await delay(1000);
+
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await del('national/programmes/delete', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('programmeDeleteSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/programmes');
+        }
+      }
+    } catch (error: any) {
+      if (error?.message) {
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Delete Failed`);
+      }
+    } finally {
+      setWaitingForBE(false);
+    }
   };
 
   // Add New KPI
@@ -805,13 +854,18 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
     setHandleKPI(true);
+    setIsSaveButtonDisabled(false);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
     if (inWhich === 'new') {
       setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
+      if (method === 'update') {
+        setIsSaveButtonDisabled(false);
+      }
     } else {
       setCreatedKpiList(createdKpiList.filter((obj) => obj.index !== kpiIndex));
+      setIsSaveButtonDisabled(false);
     }
     const updatedValues = {
       [`kpi_name_${kpiIndex}`]: undefined,
@@ -872,8 +926,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               id: kpi.kpiId,
               name: kpi.name,
               unit: kpi.kpiUnit,
-              achieved: kpi.achieved ?? 0,
-              expected: kpi.expected,
+              achieved: parseFloat(kpi.achieved ?? 0),
+              expected: parseFloat(kpi.expected ?? 0),
               kpiAction: KPIAction.NONE,
             });
 
@@ -883,7 +937,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           setInheritedKpiList(tempInheritedKpiList);
         }
       } catch (error: any) {
-        displayErrorMessage(error, t('kpiSearchFailed'));
+        console.log(error, t('kpiSearchFailed'));
       }
     }
   };
@@ -898,11 +952,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Detach Activity
 
-  const detachActivity = async (actId: string) => {
-    setDetachingEntityId(actId);
-    setDetachingEntityType('Activity');
-    setOpenDetachPopup(true);
-  };
+  // const detachActivity = async (actId: string) => {
+  //   setDetachingEntityId(actId);
+  //   setDetachingEntityType('Activity');
+  //   setOpenDetachPopup(true);
+  // };
 
   // Handle Detachment
 
@@ -924,7 +978,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Activity Column Definition
 
-  const activityTableColumns = getActivityTableColumns(isView, detachActivity);
+  const activityTableColumns = getActivityTableColumns();
 
   // Support Column Definition
 
@@ -960,6 +1014,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   return (
     <div className="content-container">
       <ConfirmPopup
+        key={'detach_popup'}
         icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
@@ -972,6 +1027,21 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         doAction={detachEntity}
         open={openDetachPopup}
         setOpen={setOpenDetachPopup}
+      />
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('deletePrimaryMsg')} ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
+        }}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
       />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
@@ -987,7 +1057,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
-                <EntityIdCard calledIn="Programme" entId={entId}></EntityIdCard>
+                <EntityIdCard
+                  calledIn="Programme"
+                  entId={entId}
+                  isValidated={isValidated}
+                ></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
                 <Col {...quarterColumnBps}>
@@ -1006,6 +1080,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                           instrumentType: actionList.find((action) => action.id === value)
                             ?.instrumentType,
                           sector: actionList.find((action) => action.id === value)?.sector,
+                          type: actionList.find((action) => action.id === value)?.type,
                         });
                         fetchParentKPIData(value);
                       }}
@@ -1026,7 +1101,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     <Select
                       size="large"
                       style={{ fontSize: inputFontSize }}
-                      mode="multiple"
                       disabled={true}
                     ></Select>
                   </Form.Item>
@@ -1327,7 +1401,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('activityInfoTitle')}</div>
                 </Col>
-                <Col {...attachButtonBps}>
+                {/* <Col {...attachButtonBps}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1344,7 +1418,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
                   ></AttachEntity>
-                </Col>
+                </Col> */}
               </Row>
               <Row>
                 <Col span={24}>
@@ -1528,7 +1602,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               </Row>
             </div>
             {method !== 'create' && (
-              <div className="form-section-card">
+              <div className="form-section-timelineCard">
                 <div className="form-section-header">{t('formHeader:updatesInfoTitle')}</div>
                 <UpdatesTimeline recordType={'programme'} recordId={entId} />
               </div>
@@ -1573,16 +1647,25 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 {ability.can(Action.Validate, ProgrammeEntity) && (
                   <Col>
                     <Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() => {
-                          validateEntity();
-                        }}
+                      <Tooltip
+                        placement="topRight"
+                        title={
+                          !isValidationAllowed ? t('error:validationPermissionRequired') : undefined
+                        }
+                        showArrow={false}
                       >
-                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                      </Button>
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => {
+                            validateEntity();
+                          }}
+                          disabled={!isValidationAllowed}
+                        >
+                          {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                        </Button>
+                      </Tooltip>
                     </Form.Item>
                   </Col>
                 )}
@@ -1602,19 +1685,21 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('entityAction:cancel')}
                   </Button>
                 </Col>
-                <Col>
-                  <Button
-                    type="default"
-                    size="large"
-                    block
-                    onClick={() => {
-                      deleteEntity();
-                    }}
-                    style={{ color: 'red', borderColor: 'red' }}
-                  >
-                    {t('entityAction:delete')}
-                  </Button>
-                </Col>
+                {ability.can(Action.Delete, ProgrammeEntity) && (
+                  <Col>
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      onClick={() => {
+                        deleteClicked();
+                      }}
+                      style={{ color: 'red', borderColor: 'red' }}
+                    >
+                      {t('entityAction:delete')}
+                    </Button>
+                  </Col>
+                )}
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button

@@ -13,22 +13,23 @@ import {
   Put,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { ApiKeyJwtAuthGuard } from "src/auth/guards/api-jwt-key.guard";
-import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import { ApiKeyJwtAuthGuard } from "../auth/guards/api-jwt-key.guard";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
-import { Action } from "src/casl/action.enum";
-import { CaslAbilityFactory } from "src/casl/casl-ability.factory";
-import { CheckPolicies } from "src/casl/policy.decorator";
-import { PoliciesGuard, PoliciesGuardEx } from "src/casl/policy.guard";
-import { Role } from "src/casl/role.enum";
-import { PasswordUpdateDto } from "src/dtos/password.update.dto";
-import { QueryDto } from "src/dtos/query.dto";
-import { UserDto } from "src/dtos/user.dto";
-import { UserUpdateDto } from "src/dtos/user.update.dto";
-import { User } from "src/entities/user.entity";
-import { UserService } from "src/user/user.service";
-import { CountryService } from "src/util/country.service";
-import { HelperService } from "src/util/helpers.service";
+import { Action } from "../casl/action.enum";
+import { CaslAbilityFactory } from "../casl/casl-ability.factory";
+import { CheckPolicies } from "../casl/policy.decorator";
+import { PoliciesGuard, PoliciesGuardEx } from "../casl/policy.guard";
+import { Role } from "../casl/role.enum";
+import { PasswordUpdateDto } from "../dtos/password.update.dto";
+import { QueryDto } from "../dtos/query.dto";
+import { UserDto } from "../dtos/user.dto";
+import { UserUpdateDto } from "../dtos/user.update.dto";
+import { User } from "../entities/user.entity";
+import { UserService } from "../user/user.service";
+import { CountryService } from "../util/country.service";
+import { HelperService } from "../util/helpers.service";
+import { PasswordForceResetDto } from "../dtos/password.forceReset.dto";
 
 @ApiTags("Users")
 @ApiBearerAuth()
@@ -77,17 +78,32 @@ export class UserController {
     return this.userService.update(user, req.abilityCondition, req.user);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, User, true))
-  // @CheckPolicies((ability, body) => ability.can(Action.Update, Object.assign(new User(), body)))
-  @Put("resetPassword")
-  resetPassword(@Body() reset: PasswordUpdateDto, @Request() req) {
-    return this.userService.resetPassword(
-      req.user.id,
-      reset,
-      req.abilityCondition
-    );
-  }
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, User, true))
+	// @CheckPolicies((ability, body) => ability.can(Action.Update, Object.assign(new User(), body)))
+	@Put("resetPassword")
+	resetPassword(@Body() reset: PasswordUpdateDto, @Request() req) {
+		return this.userService.resetPassword(
+			req.user,
+			req.user.id,
+			reset,
+			req.abilityCondition,
+			false
+		);
+	}
+
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.ForceResetPassword, User, true))
+	@Put("forceResetPassword")
+	forceResetPassword(@Body() forceReset: PasswordForceResetDto, @Request() req) {
+		return this.userService.resetPassword(
+			req.user,
+			forceReset.userId,
+			forceReset,
+			req.abilityCondition,
+			true
+		);
+	}
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, User, true))

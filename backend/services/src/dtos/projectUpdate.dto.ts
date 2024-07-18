@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max, ValidateNested, ValidateIf } from 'class-validator';
-import { ProjectStatus, ProjectType } from "../enums/project.enum";
+import { ProjectStatus } from "../enums/project.enum";
 import { IntImplementor, KPIAction, Recipient } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { KpiUnits } from "../enums/kpi.enum";
@@ -17,17 +17,6 @@ export class ProjectUpdateDto {
 	@IsOptional()
 	@ApiProperty()
 	programmeId: string;
-
-	@IsNotEmpty()
-	@IsEnum(ProjectType, {
-		each: true,
-		message: 'Invalid International Implementing Entity. Supported following entities:' + Object.values(ProjectType)
-	})
-	@ApiProperty({
-		type: [String],
-		enum: Object.values(ProjectType),
-	})
-	type: ProjectType;
 
 	@IsString()
 	@IsNotEmpty()
@@ -58,7 +47,7 @@ export class ProjectUpdateDto {
 	@IsNotEmpty()
 	@IsNumber()
 	@Min(2013)
-	@Max(2050)
+	@Max(2049)
 	@ApiProperty()
 	startYear: number;
 

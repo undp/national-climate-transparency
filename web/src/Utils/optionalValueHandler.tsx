@@ -18,7 +18,6 @@ const activityFormOptionals = [
 ];
 
 const supportFormOptionals = [
-  'otherNationalFinancialInstrument',
   'internationalSource',
   'nationalSource',
   'financingStatus',

@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { DataCountResponseDto } from "../dtos/data.count.response";
-import { ActionEntity } from "src/entities/action.entity";
+import { ActionEntity } from "../entities/action.entity";
 import { EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
-import { ProjectEntity } from "src/entities/project.entity";
-import { ActivityEntity } from "src/entities/activity.entity";
-import { FinanceNature, SupportDirection } from "src/enums/support.enum";
-import { HelperService } from "src/util/helpers.service";
+import { ProjectEntity } from "../entities/project.entity";
+import { ActivityEntity } from "../entities/activity.entity";
+import { FinanceNature, SupportDirection } from "../enums/support.enum";
+import { HelperService } from "../util/helpers.service";
 
 @Injectable()
 export class AnalyticsService {
@@ -20,9 +20,10 @@ export class AnalyticsService {
 	async getClimateActionChart(): Promise<DataCountResponseDto> {
 		try {
 			const queryBuilder = this.entityManager.createQueryBuilder()
-				.select('sector, COUNT("actionId") as count')
+				.select('sector, COUNT("actionId") as count, MAX(action.updatedTime) as "latestTime"')
 				.from(ActionEntity, 'action')
-				.groupBy('sector');
+				.groupBy('sector')
+				.orderBy('MAX(action.updatedTime)', 'DESC');
 
 			const result = await queryBuilder.getRawMany();
 
@@ -30,10 +31,22 @@ export class AnalyticsService {
 			const sectors = result.map(row => row.sector);
 			const counts = result.map(row => row.count);
 
-			return new DataCountResponseDto({ sectors, counts });
+			// Get the latest time from the first row if result is not empty
+			const latestTime = result.length ? new Date(result[0].latestTime) : null;
+
+			// Convert latestTime to epoch if it's not null
+			const latestEpoch = latestTime ? Math.floor(latestTime.getTime() / 1000) : 0;
+
+			return new DataCountResponseDto({ sectors, counts }, latestEpoch);
 		} catch (err) {
 			console.log(err);
-			// Handle error
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"common.unableToGetStats",
+					[]
+				),
+				HttpStatus.INTERNAL_SERVER_ERROR
+			);
 		}
 
 	}
@@ -41,9 +54,10 @@ export class AnalyticsService {
 	async getProjectSummaryChart(): Promise<DataCountResponseDto> {
 		try {
 			const queryBuilder = this.entityManager.createQueryBuilder()
-				.select('sector, COUNT("projectId") as count')
+				.select('sector, COUNT("projectId") as count, MAX(project.updatedTime) as "latestTime"')
 				.from(ProjectEntity, 'project')
-				.groupBy('sector');
+				.groupBy('sector')
+				.orderBy('MAX(project.updatedTime)', 'DESC');
 
 			const result = await queryBuilder.getRawMany();
 
@@ -51,10 +65,23 @@ export class AnalyticsService {
 			const sectors = result.map(row => row.sector);
 			const counts = result.map(row => row.count);
 
-			return new DataCountResponseDto({ sectors, counts });
+			// Get the latest time from the first row if result is not empty
+			const latestTime = result.length ? new Date(result[0].latestTime) : null;
+
+			// Convert latestTime to epoch if it's not null
+			const latestEpoch = latestTime ? Math.floor(latestTime.getTime() / 1000) : 0;
+
+
+			return new DataCountResponseDto({ sectors, counts }, latestEpoch);
 		} catch (err) {
 			console.log(err);
-			// Handle error
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"common.unableToGetStats",
+					[]
+				),
+				HttpStatus.INTERNAL_SERVER_ERROR
+			);
 		}
 	}
 
@@ -64,7 +91,8 @@ export class AnalyticsService {
 				.leftJoin('activity.support', 'support')
 				.select([
 					'COUNT(DISTINCT activity.activityId) as "totalActivities"',
-					'COUNT(DISTINCT CASE WHEN support.financeNature = :financeNature AND support.direction = :directionReceived THEN activity.activityId END) as "supportReceivedActivities"'
+					'COUNT(DISTINCT CASE WHEN support.financeNature = :financeNature AND support.direction = :directionReceived THEN activity.activityId END) as "supportReceivedActivities"',
+					'GREATEST(MAX(activity."updatedTime"), MAX(support."updatedTime")) as "latestTime"'
 				])
 				.setParameter('financeNature', FinanceNature.INTERNATIONAL)
 				.setParameter('directionReceived', SupportDirection.RECEIVED)
@@ -74,10 +102,18 @@ export class AnalyticsService {
 			const supportReceivedActivities = results.supportReceivedActivities ? parseInt(results.supportReceivedActivities) : 0;
 			const supportNeededActivities = totalActivities - supportReceivedActivities;
 
-			return new DataCountResponseDto({ supportReceivedActivities, supportNeededActivities });
+			const latestTime = results.latestTime ? new Date(results.latestTime).getTime() / 1000 : 0;
+
+			return new DataCountResponseDto({ supportReceivedActivities, supportNeededActivities }, latestTime);
 		} catch (err) {
 			console.log(err);
-			// Handle error
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"common.unableToGetStats",
+					[]
+				),
+				HttpStatus.INTERNAL_SERVER_ERROR
+			);
 		}
 	}
 
@@ -87,41 +123,46 @@ export class AnalyticsService {
 				.leftJoin('activity.support', 'support')
 				.select([
 					'sum(support."receivedAmount") as "supportReceived"', 'sum(support."requiredAmount") as "supportNeeded"',
+					'GREATEST(MAX(activity."updatedTime"), MAX(support."updatedTime")) as "latestTime"'
 				])
 				.getRawOne();
 
 			const supportReceived = results.supportReceived ? parseFloat(results.supportReceived) : 0;
 			const supportNeeded = results.supportNeeded ? parseFloat(results.supportNeeded) : 0;
 
-			return new DataCountResponseDto({ supportReceived, supportNeeded });
+			const latestTime = results.latestTime ? new Date(results.latestTime).getTime() / 1000 : 0;
+
+			return new DataCountResponseDto({ supportReceived, supportNeeded }, latestTime);
+
 		} catch (err) {
 			console.log(err);
-			// Handle error
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"common.unableToGetStats",
+					[]
+				),
+				HttpStatus.INTERNAL_SERVER_ERROR
+			);
 		}
 	}
 
 	async getGhgMitigationForYear(year: number) {
-
-		if (year > 2050 || year < 2015) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"stat.yearNotValid",
-					[year]
-				),
-				HttpStatus.BAD_REQUEST
-			);
-		}
 		try {
-			const index = year - 2015
 			const query = `
-			SELECT 
+				SELECT 
 					activity.sector,
-					SUM((activity."mitigationTimeline"->'expected'->'expectedEmissionReductWithM'->>${index})::numeric) AS total
-			FROM 
+					SUM((activity."mitigationTimeline"->'expected'->'expectedEmissionReductWithM'->>(${year} - (activity."mitigationTimeline" ->> 'startYear')::int))::numeric) AS total,
+					Max(activity."updatedTime") as "latestTime"
+				FROM 
 					activity
-				Where activity."mitigationTimeline" IS NOT NULL
-			GROUP BY 
-					activity.sector;
+				WHERE activity."mitigationTimeline" IS NOT NULL
+					AND (activity."mitigationTimeline" ->> 'startYear')::numeric <= ${year}
+				GROUP BY 
+					activity.sector
+				HAVING 
+						SUM((activity."mitigationTimeline" -> 'expected' -> 'expectedEmissionReductWithM' ->> (${year} - (activity."mitigationTimeline" ->> 'startYear')::int))::numeric) != 0
+				ORDER BY 
+					"latestTime" DESC;
 			`;
 
 			const result = await this.entityManager.query(query);
@@ -129,10 +170,22 @@ export class AnalyticsService {
 			const sectors = result.map(row => row.sector);
 			const totals = result.map(row => row.total);
 
-			return new DataCountResponseDto({sectors, totals});
+			// Get the latest time from the first row if result is not empty
+			const latestTime = result.length ? new Date(result[0].latestTime) : null;
+
+			// Convert latestTime to epoch if it's not null
+			const latestEpoch = latestTime ? Math.floor(latestTime.getTime() / 1000) : 0;
+
+			return new DataCountResponseDto({ sectors, totals }, latestEpoch);
 		} catch (err) {
 			console.log(err);
-			// Handle error
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"common.unableToGetStats",
+					[]
+				),
+				HttpStatus.INTERNAL_SERVER_ERROR
+			);
 		}
 	}
 
@@ -144,30 +197,44 @@ export class AnalyticsService {
 		// Calculate the previous year
 		const previousYear = currentYear - 1;
 
-		// Ensure the year is at least 2015
-		const year = previousYear < 2015 ? 2015 : previousYear;
-
 		try {
-			const index = year - 2015
 			const query = `
-			SELECT 
-					activity.sector,
-					SUM((activity."mitigationTimeline"->'actual'->'actualEmissionReduct'->>${index})::numeric) AS total
-			FROM 
-					activity
-				Where activity."mitigationTimeline" IS NOT NULL
-			GROUP BY 
-					activity.sector;
+				SELECT 
+						activity.sector,
+						SUM((activity."mitigationTimeline"->'actual'->'actualEmissionReduct'->>(${previousYear} - (activity."mitigationTimeline" ->> 'startYear')::int))::numeric) AS total,
+						Max(activity."updatedTime") as "latestTime"
+					FROM 
+						activity
+					WHERE activity."mitigationTimeline" IS NOT NULL
+						AND (activity."mitigationTimeline" ->> 'startYear')::numeric <= ${previousYear}
+					GROUP BY 
+						activity.sector
+					HAVING 
+    				SUM((activity."mitigationTimeline" -> 'actual' -> 'actualEmissionReduct' ->> (${previousYear} - (activity."mitigationTimeline" ->> 'startYear')::int))::numeric) != 0
+					ORDER BY 
+						"latestTime" DESC;
 			`;
 
 			const result = await this.entityManager.query(query);
 			const sectors = result.map(row => row.sector);
 			const totals = result.map(row => row.total);
 
-			return new DataCountResponseDto({sectors, totals});
+			// Get the latest time from the first row if result is not empty
+			const latestTime = result.length ? new Date(result[0].latestTime) : null;
+
+			// Convert latestTime to epoch if it's not null
+			const latestEpoch = latestTime ? Math.floor(latestTime.getTime() / 1000) : 0;
+
+			return new DataCountResponseDto({ sectors, totals }, latestEpoch);
 		} catch (err) {
 			console.log(err);
-			// Handle error
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"common.unableToGetStats",
+					[]
+				),
+				HttpStatus.INTERNAL_SERVER_ERROR
+			);
 		}
 	}
 

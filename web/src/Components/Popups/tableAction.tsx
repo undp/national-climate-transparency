@@ -48,7 +48,8 @@ export const actionMenuWithAttaching = (
         {
           text: t(`tableAction:${calledIn}Attach`),
           icon: <PlusOutlined style={{ color: '#9155FD' }} />,
-          isDisabled: !ability.can(Action.Update, entity),
+          // calledIn === 'project' used to prevent attaching activities
+          isDisabled: !ability.can(Action.Update, entity) || calledIn === 'project',
           click: () => {
             {
               setOpenAttaching(true);

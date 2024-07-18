@@ -29,3 +29,12 @@ export const TooltipColor = '#6ACDFF';
 
 export const InvestmentBGColor = 'rgba(151, 110, 215, 0.3)';
 export const InvestmentColor = '#9155FD';
+
+export const validatePermitBGColor = 'rgba(128, 255, 0, 0.12)';
+export const validatePermitColor = '#519E4F';
+
+export const subRolePermitBGColor = 'rgba(198, 144, 251, 0.12)';
+export const subRolePermitColor = '#9155fd';
+
+export const ghgInventoryPermitBGColor = 'rgba(176, 190, 197, 0.23)';
+export const ghgInventoryPermitColor = '#707070';

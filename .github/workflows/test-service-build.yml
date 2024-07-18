@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - '**'        # matches every branch
-      - '!develop'  
+      - '!staging'  
       - '!main'   # excludes master
     paths:
       - backend/**

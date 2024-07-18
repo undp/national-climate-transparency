@@ -26,5 +26,8 @@
     "projectUpdateSuccess": "Project Updated Successfully",
     "projectValidateSuccess": "Project Validated Successfully",
     "projectUnvalidateSuccess": "Project Unvalidated Successfully",
-    "noProjectsMessage": "No Activities Attached"
+    "projectDeleteSuccess": "Project Deleted Successfully",
+    "noProjectsMessage": "No Activities Attached",
+    "deletePrimaryMsg": "Are you sure you want to remove the Project",
+    "deleteSecondaryMsg": "You can’t undo this action"
   }

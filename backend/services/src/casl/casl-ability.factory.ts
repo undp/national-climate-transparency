@@ -17,8 +17,11 @@ import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
-import { SupportEntity } from "src/entities/support.entity";
-import { KpiEntity } from "src/entities/kpi.entity";
+import { SupportEntity } from "../entities/support.entity";
+import { KpiEntity } from "../entities/kpi.entity";
+import { EmissionEntity } from "src/entities/emission.entity";
+import { ConfigurationSettingsEntity } from "src/entities/configuration.settings.entity";
+import { SystemResourcesEntity } from "src/entities/systemResource.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -39,6 +42,7 @@ export class CaslAbilityFactory {
 				can(Action.Update, User);
 				can(Action.Delete, User);
 				cannot(Action.Update, User, ['apiKey', 'password', 'email']);
+				can(Action.ForceResetPassword, User);
 
 				// Action
 				can(Action.Read, ActionEntity);
@@ -80,6 +84,22 @@ export class CaslAbilityFactory {
 				can(Action.Create, KpiEntity);
 				can(Action.Update, KpiEntity);
 				can(Action.Delete, KpiEntity);
+
+				//Emission
+				can(Action.Read, EmissionEntity);
+				can(Action.Create, EmissionEntity);
+				can(Action.Update, EmissionEntity);
+				can(Action.Delete, EmissionEntity);
+
+				// Settings
+				can(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Create, ConfigurationSettingsEntity);
+				can(Action.Update, ConfigurationSettingsEntity);
+
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
+				can(Action.Create, SystemResourcesEntity);
+				can(Action.Delete, SystemResourcesEntity);
 			}
 
 			if (user.role == Role.Admin) {
@@ -89,7 +109,8 @@ export class CaslAbilityFactory {
 				can(Action.Create, User);
 				can(Action.Update, User);
 				can(Action.Delete, User);
-				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email']);
+				cannot(Action.Update, User, ['apiKey', 'password', 'email']);
+				cannot(Action.ForceResetPassword, User);
 
 				// Action
 				can(Action.Read, ActionEntity);
@@ -132,6 +153,19 @@ export class CaslAbilityFactory {
 				can(Action.Update, KpiEntity);
 				can(Action.Delete, KpiEntity);
 
+				//Emission
+				can(Action.Read, EmissionEntity);
+				can(Action.Create, EmissionEntity);
+				can(Action.Update, EmissionEntity);
+				can(Action.Delete, EmissionEntity);
+
+				// Settings
+				cannot(Action.Read, ConfigurationSettingsEntity);
+				cannot(Action.Create, ConfigurationSettingsEntity);
+				cannot(Action.Update, ConfigurationSettingsEntity);
+
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
 			}
 
 			if (user.role == Role.GovernmentUser) {
@@ -144,6 +178,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
 					id: { $eq: user.id },
 				});
+				cannot(Action.ForceResetPassword, User);
 
 				// ----------------------------- Action ------------------------------
 
@@ -234,6 +269,20 @@ export class CaslAbilityFactory {
 				can(Action.Update, KpiEntity);
 				can(Action.Delete, KpiEntity);
 
+				//Emission
+				can(Action.Read, EmissionEntity);
+				can(Action.Create, EmissionEntity);
+				can(Action.Update, EmissionEntity);
+				can(Action.Delete, EmissionEntity);
+
+				// Settings
+				cannot(Action.Read, ConfigurationSettingsEntity);
+				cannot(Action.Create, ConfigurationSettingsEntity);
+				cannot(Action.Update, ConfigurationSettingsEntity);
+
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
+
 			}
 
 			if (user.role == Role.Observer) {
@@ -244,6 +293,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
 					id: { $eq: user.id },
 				});
+				cannot(Action.ForceResetPassword, User);
 
 				// ----------------------------- Action ------------------------------
 
@@ -333,6 +383,19 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, KpiEntity);
 				cannot(Action.Delete, KpiEntity);
 
+				//Emission
+				can(Action.Read, EmissionEntity);
+				cannot(Action.Create, EmissionEntity);
+				cannot(Action.Update, EmissionEntity);
+				cannot(Action.Delete, EmissionEntity);
+
+				// Settings
+				cannot(Action.Read, ConfigurationSettingsEntity);
+				cannot(Action.Create, ConfigurationSettingsEntity);
+				cannot(Action.Update, ConfigurationSettingsEntity);
+
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
 			}
 
 		}

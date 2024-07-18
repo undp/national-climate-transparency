@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { KpiDto } from "../dtos/kpi.dto";
 import { HelperService } from "../util/helpers.service";
-import { EntityType } from "../enums/shared.enum";
+import { EntityType, Method } from "../enums/shared.enum";
 import { mitigationTimelineDto } from "../dtos/mitigationTimeline.dto";
 import { expectedMitigationTimelineProperties, actualMitigationTimelineProperties } from "../enums/mitigationTimeline.enum";
+import { ActivityDto } from "../dtos/activity.dto";
 
 @Injectable()
 export class PayloadValidator {
@@ -32,7 +33,7 @@ export class PayloadValidator {
 		}
 	}
 
-	validateMitigationTimelinePayload(mitigationTimelineDto: mitigationTimelineDto) {
+	validateMitigationTimelinePayload(mitigationTimelineDto: mitigationTimelineDto | ActivityDto, method: Method) {
 		const { mitigationTimeline } = mitigationTimelineDto;
 
 		if (!mitigationTimeline) {
@@ -64,13 +65,20 @@ export class PayloadValidator {
 				this.validateArraySum(actual, actual.total);
 			}
 		}
+
+		if(method === Method.CREATE){
+			const {startYear} = mitigationTimeline;
+			if(!startYear){
+				throw new HttpException('Mitigation timeline Start Year is missing', HttpStatus.BAD_REQUEST);
+			}
+		}
 	}
 
 	private validateArrayAndLength(data: any, propertiesEnum: any) {
 		for (const propertyName in propertiesEnum) {
 			const property = propertiesEnum[propertyName];
 			const array = data[propertyName];
-			const arraySize = 36;
+			const arraySize = 31;
 
 			if (!Array.isArray(array)) {
 				throw new HttpException(`Mitigation timeline ${property} array is missing`, HttpStatus.BAD_REQUEST);

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
+import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,7 +21,7 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle, getRounded } from '../../../Utils/utilServices';
+import { delay, getFormTitle, getRounded } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ActivityEntity } from '../../../Entities/activity';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -41,6 +41,9 @@ import {
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { StoredData, UploadData } from '../../../Definitions/uploadDefinitions';
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
+import { DeleteOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -50,14 +53,15 @@ const inputFontSize = '13px';
 
 const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['activityForm', 'formHeader', 'entityAction']);
+  const { t } = useTranslation(['activityForm', 'formHeader', 'entityAction', 'error']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Activity', method);
 
   const navigate = useNavigate();
-  const { get, post, put } = useConnection();
+  const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
+  const { isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -105,6 +109,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportCurrentPage, setCurrentPage] = useState<any>(1);
   const [supportPageSize, setPageSize] = useState<number>(10);
 
+  // Popup Definition
+
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
+
+  // Detach Entity Data
+
   // KPI State
 
   const [kpiCounter, setKpiCounter] = useState<number>(0);
@@ -116,14 +126,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [expectedTimeline, setExpectedTimeline] = useState<ExpectedTimeline[]>([]);
   const [actualTimeline, setActualTimeline] = useState<ActualTimeline[]>([]);
   const [isMtgButtonEnabled, setIsMtgButtonEnabled] = useState(false);
+  const [mtgStartYear, setMtgStartYear] = useState<number>(0);
 
   // Initialization Logic
 
-  const yearsList: number[] = [];
-
-  for (let year = 2015; year <= 2050; year++) {
-    yearsList.push(year);
-  }
+  const mtgRange = 30;
 
   const handleParentIdSelect = (id: string) => {
     setConnectedParentId(id);
@@ -137,42 +144,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       parentId: '',
       parentDescription: '',
     });
-  };
-
-  // MTG timeline Fields Mapping
-
-  const mtgFieldMapping = (longName: string) => {
-    switch (longName) {
-      case 'Baseline Emissions (without measures)':
-        return 'baselineEmissions';
-      case 'Activity Emissions (with measures)':
-        return 'activityEmissionsWithM';
-      case 'Activity Emissions (with additional measures)':
-        return 'activityEmissionsWithAM';
-      case 'Expected Emission Reductions (with measures)':
-        return 'expectedEmissionReductWithM';
-      case 'Expected Emission Reductions (with additional measures)':
-        return 'expectedEmissionReductWithAM';
-      case 'Baseline Actual Emissions':
-        return 'baselineActualEmissions';
-      case 'Activity Actual Emissions':
-        return 'activityActualEmissions';
-      case 'Actual Equivalent Emission Reductions':
-        return 'actualEmissionReduct';
-      default:
-        return '';
-    }
-  };
-
-  //MTG timeline create array from row
-
-  const mtgRowMapping = (row: { [year: string]: number }) => {
-    const arr = [];
-    for (let year = 2015; year <= 2050; year++) {
-      const value = row[year.toString()] || 0;
-      arr.push(value);
-    }
-    return arr;
   };
 
   // Tracking Parent selection
@@ -201,21 +172,26 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             tempMigratedData.description = response.data.description;
             tempMigratedData.affSectors = response.data.sector ?? undefined;
             tempMigratedData.startYear = response.data.startYear;
+            tempMigratedData.type = response.data.type;
           } else if (parentType === 'programme') {
             tempMigratedData.description = response.data.description;
             tempMigratedData.recipient = response.data.recipientEntity;
             tempMigratedData.affSectors = response.data.sector ?? undefined;
             tempMigratedData.affSubSectors = response.data.affectedSubSector;
             tempMigratedData.startYear = response.data.startYear;
+            tempMigratedData.type = response.data.type;
           } else {
             tempMigratedData.description = response.data.description;
             tempMigratedData.recipient = response.data.recipientEntities;
             tempMigratedData.affSectors = response.data.sector ?? undefined;
             tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
             tempMigratedData.startYear = response.data.startYear;
-            tempMigratedData.type = response.data.type;
             tempMigratedData.endYear = response.data.endYear;
             tempMigratedData.expectedTimeFrame = response.data.expectedTimeFrame;
+            tempMigratedData.type = response.data.programme?.action?.type;
+          }
+          if (method === 'create') {
+            setMtgStartYear(response.data.startYear);
           }
         } catch (error: any) {
           displayErrorMessage(error);
@@ -244,7 +220,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 name: kpi.name,
                 unit: kpi.kpiUnit,
                 achieved: 0,
-                expected: kpi.expected,
+                expected: parseFloat(kpi.expected ?? 0),
                 kpiAction: KPIAction.NONE,
               });
 
@@ -254,7 +230,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             setInheritedKpiList(tempInheritedKpiList);
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -391,9 +367,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               setStoredRstFiles(tempFiles);
             }
           }
-        } catch (error: any) {
+        } catch {
           navigate('/activities');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -465,7 +440,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
                     ?.achieved ?? 0
                 ),
-                expected: kpi.expected,
+                expected: parseFloat(kpi.expected ?? 0),
                 kpiAction: KPIAction.NONE,
               });
 
@@ -475,94 +450,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             setInheritedKpiList(tempInheritedKpiList);
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
     fetchCreatedKPIData();
-
-    //set mtg timeline data when it is null
-
-    const setDefaultTimelineValues = () => {
-      const tempExpectedEntries: ExpectedTimeline[] = [];
-      Object.entries(ExpectedRows).forEach(([key, value]) => {
-        const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-        for (let year = 2015; year <= 2050; year++) {
-          rowData[year.toString()] = 0;
-        }
-        tempExpectedEntries.push(rowData);
-      });
-
-      const tempActualEntries: ActualTimeline[] = [];
-      Object.entries(ActualRows).forEach(([key, value]) => {
-        const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-        for (let year = 2015; year <= 2050; year++) {
-          rowData[year.toString()] = 0;
-        }
-        tempActualEntries.push(rowData);
-      });
-
-      setExpectedTimeline(tempExpectedEntries);
-      setActualTimeline(tempActualEntries);
-    };
-
-    // Get mtg timeline data
-
-    const fetchMtgTimelineData = async () => {
-      if (method !== 'create' && entId) {
-        let response: any;
-        try {
-          response = await get(`national/activities/mitigation/${entId}`);
-
-          if (response.status === 200 || response.status === 201) {
-            const tempExpectedEntries: ExpectedTimeline[] = [];
-            Object.entries(ExpectedRows).forEach(([key, value]) => {
-              const rowData: ExpectedTimeline = {
-                key: key,
-                ghg: value[0],
-                topic: value[1],
-                total: response.data.expected.total[mtgFieldMapping(value[1])],
-              };
-              for (let year = 2015; year <= 2050; year++) {
-                rowData[year.toString()] =
-                  response.data.expected[mtgFieldMapping(value[1])][year - 2015];
-              }
-              tempExpectedEntries.push(rowData);
-            });
-
-            const tempActualEntries: ActualTimeline[] = [];
-            Object.entries(ActualRows).forEach(([key, value]) => {
-              const rowData: ActualTimeline = {
-                key: key,
-                ghg: value[0],
-                topic: value[1],
-                total: response.data.actual.total[mtgFieldMapping(value[1])],
-              };
-              for (let year = 2015; year <= 2050; year++) {
-                rowData[year.toString()] =
-                  response.data.actual[mtgFieldMapping(value[1])][year - 2015];
-              }
-              tempActualEntries.push(rowData);
-            });
-
-            setExpectedTimeline(tempExpectedEntries);
-            setActualTimeline(tempActualEntries);
-          } else {
-            setDefaultTimelineValues();
-          }
-        } catch (error) {
-          console.error('Error fetching timeline data:', error);
-          setDefaultTimelineValues();
-        }
-      }
-    };
-    fetchMtgTimelineData();
-
-    // Initializing mtg timeline data when in create mode
-
-    if (method === 'create') {
-      setDefaultTimelineValues();
-    }
   }, []);
 
   // Populating Form Migrated Fields, when migration data changes
@@ -607,164 +499,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Form Submit
-
-  const handleSubmit = async (payload: any) => {
-    try {
-      setWaitingForBE(true);
-
-      for (const key in payload) {
-        if (key.startsWith('kpi_exp') || key.startsWith('kpi_unit')) {
-          delete payload[key];
-        }
-      }
-
-      if (uploadedFiles.length > 0) {
-        if (method === 'create') {
-          payload.documents = [];
-          uploadedFiles.forEach((file) => {
-            payload.documents.push({ title: file.title, data: file.data });
-          });
-        } else if (method === 'update') {
-          payload.newDocuments = [];
-          uploadedFiles.forEach((file) => {
-            payload.newDocuments.push({ title: file.title, data: file.data });
-          });
-        }
-      }
-
-      if (filesToRemove.length > 0) {
-        payload.removedDocuments = [];
-        filesToRemove.forEach((removedFileKey) => {
-          payload.removedDocuments.push(
-            storedFiles.find((file) => file.key === removedFileKey)?.url
-          );
-        });
-      }
-
-      payload.achievedGHGReduction = parseFloat(payload.achievedGHGReduction);
-      payload.expectedGHGReduction = parseFloat(payload.expectedGHGReduction);
-
-      payload.mitigationInfo = {
-        mitigationMethodology: payload.mtgMethodName,
-        mitigationMethodologyDescription: payload.mtgMethodDesc,
-        mitigationCalcEntity: payload.mtgCalculateEntity,
-        comments: payload.mtgComments,
-        methodologyDocuments: [],
-        resultDocuments: [],
-      };
-
-      if (method === 'create') {
-        payload.mitigationTimeline = {
-          expected: {
-            baselineEmissions: mtgRowMapping(expectedTimeline[0]),
-            activityEmissionsWithM: mtgRowMapping(expectedTimeline[1]),
-            activityEmissionsWithAM: mtgRowMapping(expectedTimeline[2]),
-            expectedEmissionReductWithM: mtgRowMapping(expectedTimeline[3]),
-            expectedEmissionReductWithAM: mtgRowMapping(expectedTimeline[4]),
-            total: {
-              baselineEmissions: expectedTimeline[0].total,
-              activityEmissionsWithM: expectedTimeline[1].total,
-              activityEmissionsWithAM: expectedTimeline[2].total,
-              expectedEmissionReductWithM: expectedTimeline[3].total,
-              expectedEmissionReductWithAM: expectedTimeline[4].total,
-            },
-          },
-          actual: {
-            baselineActualEmissions: mtgRowMapping(actualTimeline[0]),
-            activityActualEmissions: mtgRowMapping(actualTimeline[1]),
-            actualEmissionReduct: mtgRowMapping(actualTimeline[2]),
-            total: {
-              baselineActualEmissions: actualTimeline[0].total,
-              activityActualEmissions: actualTimeline[1].total,
-              actualEmissionReduct: actualTimeline[2].total,
-            },
-          },
-        };
-      }
-
-      if (method === 'create') {
-        uploadedMthFiles.forEach((file) => {
-          payload.mitigationInfo.methodologyDocuments.push({ title: file.title, data: file.data });
-        });
-
-        uploadedRstFiles.forEach((file) => {
-          payload.mitigationInfo.resultDocuments.push({ title: file.title, data: file.data });
-        });
-      } else if (method === 'update') {
-        // Resolving Methodology Files
-
-        storedMthFiles.forEach((file) => {
-          if (!mthFilesToRemove.includes(file.key)) {
-            payload.mitigationInfo.methodologyDocuments.push({
-              createdTime: file.key,
-              title: file.title,
-              url: file.url,
-            });
-          }
-        });
-
-        uploadedMthFiles.forEach((file) => {
-          payload.mitigationInfo.methodologyDocuments.push({ title: file.title, data: file.data });
-        });
-
-        // Resolving Result Files
-
-        storedRstFiles.forEach((file) => {
-          if (!rstFilesToRemove.includes(file.key)) {
-            payload.mitigationInfo.resultDocuments.push({
-              createdTime: file.key,
-              title: file.title,
-              url: file.url,
-            });
-          }
-        });
-
-        uploadedRstFiles.forEach((file) => {
-          payload.mitigationInfo.resultDocuments.push({ title: file.title, data: file.data });
-        });
-      }
-
-      let response: any;
-
-      if (method === 'create') {
-        response = await post('national/activities/add', payload);
-
-        resolveKPIAchievements(response.data.activityId);
-      } else if (method === 'update') {
-        payload.activityId = entId;
-        response = await put(
-          'national/activities/update',
-          processOptionalFields(payload, 'activity')
-        );
-
-        resolveKPIAchievements(entId);
-      }
-
-      const successMsg =
-        method === 'create' ? t('activityCreationSuccess') : t('activityUpdateSuccess');
-
-      if (response.status === 200 || response.status === 201) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
-        });
-
-        message.open({
-          type: 'success',
-          content: successMsg,
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-        setWaitingForBE(false);
-        navigate('/activities');
-      }
-    } catch (error: any) {
-      displayErrorMessage(error);
-      setWaitingForBE(false);
-      navigate('/activities');
-    }
-  };
-
   // Entity Validate
 
   const validateEntity = async () => {
@@ -788,14 +522,54 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      displayErrorMessage(error, `${entId} Validation Failed`);
+      if (error?.message) {
+        if (error.message === 'Permission Denied: Unable to Validate Activity') {
+          setIsValidationAllowed(false);
+        }
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Validation Failed`);
+      }
     }
   };
 
   // Entity Delete
 
-  const deleteEntity = () => {
-    console.log('Delete Clicked');
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
+  const deleteEntity = async () => {
+    try {
+      setWaitingForBE(true);
+      await delay(1000);
+
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await del('national/activities/delete', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('activityDeleteSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/activities');
+        }
+      }
+    } catch (error: any) {
+      if (error?.message) {
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Delete Failed`);
+      }
+    } finally {
+      setWaitingForBE(false);
+    }
   };
 
   // Update KPI ACH Values
@@ -828,11 +602,134 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     setPageSize(pagination.pageSize);
   };
 
+  // Save Button Enable when form value change
+
+  const handleValuesChange = () => {
+    setIsSaveButtonDisabled(false);
+  };
+
+  // MTG timeline Fields Mapping
+
+  const mtgFieldMapping = (longName: string) => {
+    switch (longName) {
+      case 'Baseline Emissions (without measures)':
+        return 'baselineEmissions';
+      case 'Activity Emissions (with measures)':
+        return 'activityEmissionsWithM';
+      case 'Activity Emissions (with additional measures)':
+        return 'activityEmissionsWithAM';
+      case 'Expected Emission Reductions (with measures)':
+        return 'expectedEmissionReductWithM';
+      case 'Expected Emission Reductions (with additional measures)':
+        return 'expectedEmissionReductWithAM';
+      case 'Baseline Actual Emissions':
+        return 'baselineActualEmissions';
+      case 'Activity Actual Emissions':
+        return 'activityActualEmissions';
+      case 'Actual Equivalent Emission Reductions':
+        return 'actualEmissionReduct';
+      default:
+        return '';
+    }
+  };
+
+  //MTG timeline create array from row
+
+  const mtgRowMapping = (row: { [year: string]: number }) => {
+    const arr = [];
+    const endYear = mtgStartYear + mtgRange;
+    for (let year = mtgStartYear; year <= endYear; year++) {
+      const value = row[year.toString()] || 0;
+      arr.push(value);
+    }
+    return arr;
+  };
+
+  //set mtg timeline data to zero values (when it is or null or create mode)
+
+  const setDefaultTimelineValues = (startYear: number, range: number) => {
+    const endYear = startYear + range;
+    const tempExpectedEntries: ExpectedTimeline[] = [];
+    Object.entries(ExpectedRows).forEach(([key, value]) => {
+      const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
+      for (let year = startYear; year <= endYear; year++) {
+        rowData[year.toString()] = 0;
+      }
+      tempExpectedEntries.push(rowData);
+    });
+
+    const tempActualEntries: ActualTimeline[] = [];
+    Object.entries(ActualRows).forEach(([key, value]) => {
+      const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
+      for (let year = startYear; year <= endYear; year++) {
+        rowData[year.toString()] = 0;
+      }
+      tempActualEntries.push(rowData);
+    });
+
+    setExpectedTimeline(tempExpectedEntries);
+    setActualTimeline(tempActualEntries);
+  };
+
+  // Get mtg timeline data
+
+  const fetchMtgTimelineData = async () => {
+    if (method !== 'create' && entId) {
+      let response: any;
+      try {
+        response = await get(`national/activities/mitigation/${entId}`);
+
+        if (response.status === 200 || response.status === 201) {
+          setMtgStartYear(response.data.startYear);
+          const endYear = mtgStartYear + mtgRange;
+          const tempExpectedEntries: ExpectedTimeline[] = [];
+          Object.entries(ExpectedRows).forEach(([key, value]) => {
+            const rowData: ExpectedTimeline = {
+              key: key,
+              ghg: value[0],
+              topic: value[1],
+              total: response.data.expected.total[mtgFieldMapping(value[1])],
+            };
+            for (let year = mtgStartYear; year <= endYear; year++) {
+              rowData[year.toString()] =
+                response.data.expected[mtgFieldMapping(value[1])][year - mtgStartYear];
+            }
+            tempExpectedEntries.push(rowData);
+          });
+
+          const tempActualEntries: ActualTimeline[] = [];
+          Object.entries(ActualRows).forEach(([key, value]) => {
+            const rowData: ActualTimeline = {
+              key: key,
+              ghg: value[0],
+              topic: value[1],
+              total: response.data.actual.total[mtgFieldMapping(value[1])],
+            };
+            for (let year = mtgStartYear; year <= endYear; year++) {
+              rowData[year.toString()] =
+                response.data.actual[mtgFieldMapping(value[1])][year - mtgStartYear];
+            }
+            tempActualEntries.push(rowData);
+          });
+
+          setExpectedTimeline(tempExpectedEntries);
+          setActualTimeline(tempActualEntries);
+        } else {
+          setDefaultTimelineValues(mtgStartYear, mtgRange);
+        }
+      } catch (error) {
+        console.error('Error fetching timeline data:', error);
+        setDefaultTimelineValues(mtgStartYear, mtgRange);
+      }
+    }
+  };
+
   //MTG timeline calculate array sum from row
 
   const mtgCalculateArraySum = (row: any) => {
     let arrSum = 0;
-    for (let year = 2015; year <= 2050; year++) {
+    const endYear = mtgStartYear + mtgRange;
+    for (let year = mtgStartYear; year <= endYear; year++) {
       arrSum += row[year.toString()] || 0;
     }
     return arrSum;
@@ -924,14 +821,195 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Save Button Enable when form value change
+  // Initializing mtg timeline data
 
-  const handleValuesChange = () => {
-    setIsSaveButtonDisabled(false);
+  useEffect(() => {
+    fetchMtgTimelineData();
+
+    if (method === 'create') {
+      setDefaultTimelineValues(mtgStartYear, mtgRange);
+    }
+  }, [mtgStartYear]);
+
+  // Form Submit
+
+  const handleSubmit = async (payload: any) => {
+    try {
+      setWaitingForBE(true);
+
+      for (const key in payload) {
+        if (key.startsWith('kpi_exp') || key.startsWith('kpi_unit')) {
+          delete payload[key];
+        }
+      }
+
+      if (uploadedFiles.length > 0) {
+        if (method === 'create') {
+          payload.documents = [];
+          uploadedFiles.forEach((file) => {
+            payload.documents.push({ title: file.title, data: file.data });
+          });
+        } else if (method === 'update') {
+          payload.newDocuments = [];
+          uploadedFiles.forEach((file) => {
+            payload.newDocuments.push({ title: file.title, data: file.data });
+          });
+        }
+      }
+
+      if (filesToRemove.length > 0) {
+        payload.removedDocuments = [];
+        filesToRemove.forEach((removedFileKey) => {
+          payload.removedDocuments.push(
+            storedFiles.find((file) => file.key === removedFileKey)?.url
+          );
+        });
+      }
+
+      payload.achievedGHGReduction = parseFloat(payload.achievedGHGReduction);
+      payload.expectedGHGReduction = parseFloat(payload.expectedGHGReduction);
+
+      payload.mitigationInfo = {
+        mitigationMethodology: payload.mtgMethodName,
+        mitigationMethodologyDescription: payload.mtgMethodDesc,
+        mitigationCalcEntity: payload.mtgCalculateEntity,
+        comments: payload.mtgComments,
+        methodologyDocuments: [],
+        resultDocuments: [],
+      };
+
+      if (method === 'create') {
+        payload.mitigationTimeline = {
+          expected: {
+            baselineEmissions: mtgRowMapping(expectedTimeline[0]),
+            activityEmissionsWithM: mtgRowMapping(expectedTimeline[1]),
+            activityEmissionsWithAM: mtgRowMapping(expectedTimeline[2]),
+            expectedEmissionReductWithM: mtgRowMapping(expectedTimeline[3]),
+            expectedEmissionReductWithAM: mtgRowMapping(expectedTimeline[4]),
+            total: {
+              baselineEmissions: expectedTimeline[0].total,
+              activityEmissionsWithM: expectedTimeline[1].total,
+              activityEmissionsWithAM: expectedTimeline[2].total,
+              expectedEmissionReductWithM: expectedTimeline[3].total,
+              expectedEmissionReductWithAM: expectedTimeline[4].total,
+            },
+          },
+          actual: {
+            baselineActualEmissions: mtgRowMapping(actualTimeline[0]),
+            activityActualEmissions: mtgRowMapping(actualTimeline[1]),
+            actualEmissionReduct: mtgRowMapping(actualTimeline[2]),
+            total: {
+              baselineActualEmissions: actualTimeline[0].total,
+              activityActualEmissions: actualTimeline[1].total,
+              actualEmissionReduct: actualTimeline[2].total,
+            },
+          },
+          startYear: mtgStartYear,
+        };
+      }
+
+      if (method === 'create') {
+        uploadedMthFiles.forEach((file) => {
+          payload.mitigationInfo.methodologyDocuments.push({ title: file.title, data: file.data });
+        });
+
+        uploadedRstFiles.forEach((file) => {
+          payload.mitigationInfo.resultDocuments.push({ title: file.title, data: file.data });
+        });
+      } else if (method === 'update') {
+        // Resolving Methodology Files
+
+        storedMthFiles.forEach((file) => {
+          if (!mthFilesToRemove.includes(file.key)) {
+            payload.mitigationInfo.methodologyDocuments.push({
+              createdTime: file.key,
+              title: file.title,
+              url: file.url,
+            });
+          }
+        });
+
+        uploadedMthFiles.forEach((file) => {
+          payload.mitigationInfo.methodologyDocuments.push({ title: file.title, data: file.data });
+        });
+
+        // Resolving Result Files
+
+        storedRstFiles.forEach((file) => {
+          if (!rstFilesToRemove.includes(file.key)) {
+            payload.mitigationInfo.resultDocuments.push({
+              createdTime: file.key,
+              title: file.title,
+              url: file.url,
+            });
+          }
+        });
+
+        uploadedRstFiles.forEach((file) => {
+          payload.mitigationInfo.resultDocuments.push({ title: file.title, data: file.data });
+        });
+      }
+
+      let response: any;
+
+      if (method === 'create') {
+        response = await post(
+          'national/activities/add',
+          processOptionalFields(payload, 'activity')
+        );
+
+        resolveKPIAchievements(response.data.activityId);
+      } else if (method === 'update') {
+        payload.activityId = entId;
+        response = await put(
+          'national/activities/update',
+          processOptionalFields(payload, 'activity')
+        );
+
+        resolveKPIAchievements(entId);
+      }
+
+      const successMsg =
+        method === 'create' ? t('activityCreationSuccess') : t('activityUpdateSuccess');
+
+      if (response.status === 200 || response.status === 201) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        });
+
+        message.open({
+          type: 'success',
+          content: successMsg,
+          duration: 3,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+        setWaitingForBE(false);
+        navigate('/activities');
+      }
+    } catch (error: any) {
+      displayErrorMessage(error);
+      setWaitingForBE(false);
+      navigate('/activities');
+    }
   };
 
   return (
     <div className="content-container">
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('deletePrimaryMsg')} ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
+        }}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -946,7 +1024,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
-                <EntityIdCard calledIn="Activity" entId={entId}></EntityIdCard>
+                <EntityIdCard
+                  calledIn="Activity"
+                  entId={entId}
+                  isValidated={isValidated}
+                ></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
@@ -973,6 +1055,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('parentTypeTitle')}</label>}
                     name="parentType"
+                    rules={[validation.required]}
                   >
                     <Select
                       size="large"
@@ -1129,26 +1212,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     </Select>
                   </Form.Item>
                 </Col>
-                {parentType === 'project' && (
-                  <Col {...halfColumnBps}>
-                    <Form.Item
-                      label={
-                        <label className="form-item-header">
-                          {t('formHeader:supportTypeTitle')}
-                        </label>
-                      }
-                      name="supportType"
-                    >
-                      <Select
-                        size="large"
-                        style={{ fontSize: inputFontSize }}
-                        allowClear
-                        disabled
-                        showSearch
-                      ></Select>
-                    </Form.Item>
-                  </Col>
-                )}
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">{t('formHeader:supportTypeTitle')}</label>
+                    }
+                    name="supportType"
+                  >
+                    <Select size="large" style={{ fontSize: inputFontSize }} disabled></Select>
+                  </Form.Item>
+                </Col>
               </Row>
               <Row gutter={gutterSize}>
                 <Col {...quarterColumnBps}>
@@ -1553,39 +1626,43 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            <div className="form-section-card">
-              <Row>
-                <Col {...mtgTableHeaderBps} style={{ paddingTop: '6px' }}>
-                  <div className="form-section-header">{t('mitigationTimelineTitle')}</div>
-                </Col>
-                <Col {...mtgSaveButtonBps}>
-                  {method === 'update' && (
-                    <Button
-                      type="primary"
-                      size="large"
-                      block
-                      onClick={() => {
-                        MtgTimelineUpdate();
-                      }}
-                      disabled={!isMtgButtonEnabled}
-                    >
-                      {t('entityAction:update')}
-                    </Button>
-                  )}
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <TimelineTable
-                    expectedTimeline={expectedTimeline}
-                    actualTimeline={actualTimeline}
-                    loading={false}
-                    method={method}
-                    onValueEnter={onMtgValueEnter}
-                  />
-                </Col>
-              </Row>
-            </div>
+            {mtgStartYear !== 0 && mtgStartYear !== undefined && (
+              <div className="form-section-card">
+                <Row>
+                  <Col {...mtgTableHeaderBps} style={{ paddingTop: '6px' }}>
+                    <div className="form-section-header">{t('mitigationTimelineTitle')}</div>
+                  </Col>
+                  <Col {...mtgSaveButtonBps}>
+                    {method === 'update' && (
+                      <Button
+                        type="primary"
+                        size="large"
+                        block
+                        onClick={() => {
+                          MtgTimelineUpdate();
+                        }}
+                        disabled={!isMtgButtonEnabled}
+                      >
+                        {t('entityAction:update')}
+                      </Button>
+                    )}
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <TimelineTable
+                      expectedTimeline={expectedTimeline}
+                      actualTimeline={actualTimeline}
+                      loading={false}
+                      method={method}
+                      mtgStartYear={mtgStartYear}
+                      mtgRange={mtgRange}
+                      onValueEnter={onMtgValueEnter}
+                    />
+                  </Col>
+                </Row>
+              </div>
+            )}
             {method !== 'create' && (
               <div className="form-section-timelineCard">
                 <div className="form-section-header">{t('formHeader:updatesInfoTitle')}</div>
@@ -1632,16 +1709,25 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 {ability.can(Action.Validate, ActivityEntity) && (
                   <Col>
                     <Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() => {
-                          validateEntity();
-                        }}
+                      <Tooltip
+                        placement="topRight"
+                        title={
+                          !isValidationAllowed ? t('error:validationPermissionRequired') : undefined
+                        }
+                        showArrow={false}
                       >
-                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                      </Button>
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => {
+                            validateEntity();
+                          }}
+                          disabled={!isValidationAllowed}
+                        >
+                          {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                        </Button>
+                      </Tooltip>
                     </Form.Item>
                   </Col>
                 )}
@@ -1661,19 +1747,21 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('entityAction:cancel')}
                   </Button>
                 </Col>
-                <Col>
-                  <Button
-                    type="default"
-                    size="large"
-                    block
-                    onClick={() => {
-                      deleteEntity();
-                    }}
-                    style={{ color: 'red', borderColor: 'red' }}
-                  >
-                    {t('entityAction:delete')}
-                  </Button>
-                </Col>
+                {ability.can(Action.Delete, ActivityEntity) && (
+                  <Col>
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      onClick={() => {
+                        deleteClicked();
+                      }}
+                      style={{ color: 'red', borderColor: 'red' }}
+                    >
+                      {t('entityAction:delete')}
+                    </Button>
+                  </Col>
+                )}
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button

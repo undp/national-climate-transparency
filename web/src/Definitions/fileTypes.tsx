@@ -7,4 +7,5 @@ export const AcceptedMimeTypes: string[] = [
   'text/csv', // .csv
   'image/png', // .png
   'image/jpeg', // .jpg
+  'application/pdf', // .pdf
 ];

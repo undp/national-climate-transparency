@@ -45,7 +45,7 @@ export const EmailTemplates = {
     html: `
         Welcome {{name}}, <br><br>
 
-        Your account has been created for the {{countryName}} NDC Transparency System. You can access your account using the temporary
+        Your account has been created for the {{countryName}} NDC Transparency System. You can access your account using the
         Homepage: <a href="{{home}}">{{home}}</a> <br><br>
 
         User: {{email}} <br>
@@ -82,13 +82,30 @@ export const EmailTemplates = {
         `,
     text: "",
   },
-  CHANGE_PASSOWRD: {
-    id: "CHANGE_PASSOWRD",
+  CHANGE_PASSWORD: {
+    id: "CHANGE_PASSWORD",
     subject: "Your Password was Changed!",
     html: `
         Hi {{name}},<br><br>
         The password of your NDC Transparency System account was changed successfully. <br><br>
         If you do not use {{countryName}} NDC Transparency System, please ignore this email.
+
+        <br><br>
+        Sincerely, <br>
+        The {{countryName}} NDC Transparency System Team
+        `,
+    text: "",
+  },
+	FORCE_CHANGE_PASSWORD: {
+    id: "FORCE_CHANGE_PASSWORD",
+    subject: "Your Password was Changed by the Super Admin!",
+    html: `
+        Hi {{name}},<br><br>
+        Password of Your NDC Transparency System account has been changed by the Super Admin. <br><br>
+
+        Your new password: {{newPassword}}  <br><br>
+
+				Please enter your email and new password to access your NDC Transparency System account. 
 
         <br><br>
         Sincerely, <br>
@@ -108,7 +125,7 @@ export const EmailTemplates = {
         <a href="{{home}}/resetPassword/{{requestId}}">Click here to reset the password</a>
         <br><br>
 
-        If you do not use {{countryName}} NDC Transparency System please ignore this email.
+        If you do not use {{countryName}} NDC Transparency System, please ignore this email.
 
         <br><br>
         Sincerely, <br>

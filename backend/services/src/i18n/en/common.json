@@ -3,7 +3,17 @@
     "addAsyncActionQueueFailed": "{} functionality failed when adding to queue",
     "settingsSavedMsg": "Settings saved successfully",
     "settingsSaveFailedMsg": "Settings saving failed",
-    "invalidLogin": "Invalid login credentials",
     "cannotLinkedToValidated": "Cannot attached to {} with id {} as it is validated",
-    "cannotUnlinkedFromValidated": "Cannot detached from {} with id {} as it is validated"
+    "cannotUnlinkedFromValidated": "Cannot detached from {} with id {} as it is validated",
+    "invalidUsername": "Invalid Username !",
+    "accountDeactivated": "Account Deactivated !",
+    "incorrectPassword": "Invalid Password !",
+    "unableToGetStats": "Unable to retrieve the statistics for the charts.",
+    "permissionDeniedForValidate": "Permission Denied: Unable to Validate Action",
+    "invalidConfigType": "{} is not a valid Configuration Setting Type",
+    "configsNotFound": "Configuration settings not found",
+    "resourceCreatedSuccess": "Resource saved successfully",
+    "resourceNotFound": "Resource with id {} is not found",
+    "deleteResourceSuccess": "Resource deleted successfully",
+    "deleteResourceFailed": "Resource delete failed due to {}"
 }

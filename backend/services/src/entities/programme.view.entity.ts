@@ -4,7 +4,6 @@ export const programmeViewSQL = `
 WITH fullprj AS (
 	SELECT 
 			prj."projectId" AS id,
-			prj.type AS type,
 			prj."programmeId",
 			prj."internationalImplementingEntities",
 			prj."recipientEntities",
@@ -23,13 +22,13 @@ WITH fullprj AS (
 					project_view_entity
 	) p_v_e ON prj."projectId" = p_v_e.id
 	GROUP BY 
-			prj."projectId", prj.type, prj."programmeId", prj."internationalImplementingEntities", prj."recipientEntities"
+			prj."projectId", prj."programmeId", prj."internationalImplementingEntities", prj."recipientEntities"
 ),
 act AS (
 	SELECT 
 			a."parentId" AS "programmeId",
 			COALESCE(SUM(a."achievedGHGReduction"), 0) AS "achievedGHGReduction",
-	COALESCE(SUM(a."expectedGHGReduction"), 0) AS "expectedGHGReduction",
+			COALESCE(SUM(a."expectedGHGReduction"), 0) AS "expectedGHGReduction",
 			CUSTOM_ARRAY_AGG(a."ghgsAffected") FILTER (WHERE a."ghgsAffected" IS NOT NULL) AS "ghgsAffected"
 	FROM 
 			activity a
@@ -40,7 +39,6 @@ act AS (
 )
 SELECT 
 	p."programmeId" AS id,
-	CAST(ARRAY_AGG(DISTINCT fullprj.type) FILTER (WHERE fullprj.type IS NOT NULL) AS character varying[]) AS types,
 	CUSTOM_ARRAY_AGG(fullprj."internationalImplementingEntities") FILTER (WHERE fullprj."internationalImplementingEntities" IS NOT NULL) AS "internationalImplementingEntities",
 	CUSTOM_ARRAY_AGG(fullprj."recipientEntities") FILTER (WHERE fullprj."recipientEntities" IS NOT NULL) AS "recipientEntities",
 	COALESCE(SUM(fullprj."achievedGHGReduction"), 0) + COALESCE(act."achievedGHGReduction", 0) AS "achievedGHGReduction",
@@ -64,9 +62,6 @@ export class ProgrammeViewEntity {
 
 	@ViewColumn()
 	id: string;
-
-	@ViewColumn()
-	types: string[];
 
 	@ViewColumn()
 	internationalImplementingEntities: string[];

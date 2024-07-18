@@ -14,14 +14,17 @@ interface ListDataType {
 
 const ScrollableList: React.FC<Props> = ({ listToShow }) => {
   const options: ListDataType[] = [];
-  listToShow.map((item: string, index: number) =>
-    options.push({
-      key: index,
-      label: item.length > 15 ? `${item.slice(0, 15)}...` : item,
-      value: item,
-      color: '#F1E9FF',
-    })
-  );
+
+  if (listToShow && listToShow.length > 0) {
+    listToShow.map((item: string, index: number) =>
+      options.push({
+        key: index,
+        label: item.length > 15 ? `${item.slice(0, 15)}...` : item,
+        value: item,
+        color: '#F1E9FF',
+      })
+    );
+  }
 
   const fullList = () => {
     return (
@@ -40,7 +43,7 @@ const ScrollableList: React.FC<Props> = ({ listToShow }) => {
   return (
     <div>
       <Popover placement="bottom" trigger={'click'} showArrow={false} content={fullList()}>
-        <Row gutter={[30, 5]}>
+        <Row gutter={[30, 5]} style={{ maxWidth: '250px' }}>
           {options.map((listValue: any, index: number) => (
             <Col key={index} span={24}>
               <Tag color={listValue.color} className="table-full-width-tag">

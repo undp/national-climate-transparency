@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
-import { FinanceNature, FinancingStatus, IntFinInstrument, IntSource, IntSupChannel, NatFinInstrument, SupportDirection } from "src/enums/support.enum";
-import { IsTwoDecimalPoints } from "src/util/twoDecimalPointNumber.decorator";
+import { FinanceNature, FinancingStatus, IntFinInstrument, IntSource, IntSupChannel, NatFinInstrument, SupportDirection } from "../enums/support.enum";
+import { IsTwoDecimalPoints } from "../util/twoDecimalPointNumber.decorator";
 
 export class SupportUpdateDto {
 
@@ -37,22 +37,16 @@ export class SupportUpdateDto {
 	})
 	financeNature: FinanceNature;
 
-	@ValidateIf((c) => c.financeNature == FinanceNature.INTERNATIONAL)
 	@IsNotEmpty()
 	@IsEnum(IntSupChannel, {
 		each: true,
-		message: 'Invalid International Support Channel. Supported following types:' + Object.values(IntSupChannel)
+		message: 'Invalid Support Channel. Supported following types:' + Object.values(IntSupChannel)
 	})
 	@ApiProperty({
 		type: [String],
 		enum: Object.values(IntSupChannel),
 	})
 	internationalSupportChannel: IntSupChannel;
-
-	@IsNotEmpty()
-	@IsString()
-	@ApiProperty()
-	otherInternationalSupportChannel: string;
 
 	@ValidateIf((c) => c.financeNature == FinanceNature.INTERNATIONAL)
 	@IsNotEmpty()
@@ -66,11 +60,6 @@ export class SupportUpdateDto {
 	})
 	internationalFinancialInstrument: IntFinInstrument;
 
-	@IsNotEmpty()
-	@IsString()
-	@ApiProperty()
-	otherInternationalFinancialInstrument: string;
-
 	@ValidateIf((c) => c.financeNature == FinanceNature.NATIONAL)
 	@IsNotEmpty()
 	@IsEnum(NatFinInstrument, {
@@ -82,12 +71,6 @@ export class SupportUpdateDto {
 		enum: Object.values(NatFinInstrument),
 	})
 	nationalFinancialInstrument: NatFinInstrument;
-
-	@IsOptional()
-	@IsNotEmpty()
-	@IsString()
-	@ApiPropertyOptional()
-	otherNationalFinancialInstrument: string;
 
 	@ValidateIf((c) => c.direction == SupportDirection.RECEIVED)
 	@IsNotEmpty()
@@ -101,7 +84,7 @@ export class SupportUpdateDto {
 	})
 	financingStatus: FinancingStatus;
 
-	@ValidateIf((c) => c.internationalSource)
+	@ValidateIf((c) => c.internationalSource && c.financeNature == FinanceNature.INTERNATIONAL)
 	@IsArray()
 	@MaxLength(100, { each: true })
 	@IsNotEmpty({ each: true })
@@ -115,6 +98,7 @@ export class SupportUpdateDto {
 	})
 	internationalSource: IntSource[];
 
+	@ValidateIf((c) => c.financeNature == FinanceNature.NATIONAL)
 	@IsOptional()
 	@IsNotEmpty()
 	@IsString()
@@ -137,6 +121,5 @@ export class SupportUpdateDto {
 	@IsNumber()
 	@ApiProperty()
 	exchangeRate: number;
-
-
+	
 }

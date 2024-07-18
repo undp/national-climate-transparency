@@ -24,21 +24,22 @@ import { nanoid } from "nanoid";
 import { ConfigService } from "@nestjs/config";
 import { Organisation, OrganisationType } from "../enums/organisation.enum";
 import { plainToClass } from "class-transformer";
-import { HelperService } from "src/util/helpers.service";
-import { AsyncAction, AsyncOperationsInterface } from "src/async-operations/async-operations.interface";
-import { PasswordHashService } from "src/util/passwordHash.service";
-import { HttpUtilService } from "src/util/http.util.service";
-import { AsyncActionType } from "src/enums/async.action.type.enum";
-import { EmailTemplates } from "src/email-helper/email.template";
-import { PasswordUpdateDto } from "src/dtos/password.update.dto";
-import { BasicResponseDto } from "src/dtos/basic.response.dto";
-import { QueryDto } from "src/dtos/query.dto";
-import { DataListResponseDto } from "src/dtos/data.list.response";
-import { DataResponseMessageDto } from "src/dtos/data.response.message";
-import { API_KEY_SEPARATOR } from "src/constants";
-import { DataResponseDto } from "src/dtos/data.response.dto";
-import { UserState } from "src/enums/user.state.enum";
-import { Sector } from "src/enums/sector.enum";
+import { GHGInventoryManipulate, SubRoleManipulate, UserState, ValidateEntity } from "../enums/user.enum";
+import { HelperService } from "../util/helpers.service";
+import { AsyncAction, AsyncOperationsInterface } from "../async-operations/async-operations.interface";
+import { PasswordHashService } from "../util/passwordHash.service";
+import { HttpUtilService } from "../util/http.util.service";
+import { AsyncActionType } from "../enums/async.action.type.enum";
+import { EmailTemplates } from "../email-helper/email.template";
+import { PasswordUpdateDto } from "../dtos/password.update.dto";
+import { BasicResponseDto } from "../dtos/basic.response.dto";
+import { QueryDto } from "../dtos/query.dto";
+import { DataListResponseDto } from "../dtos/data.list.response";
+import { DataResponseMessageDto } from "../dtos/data.response.message";
+import { API_KEY_SEPARATOR } from "../constants";
+import { DataResponseDto } from "../dtos/data.response.dto";
+import { Sector } from "../enums/sector.enum";
+import { PasswordForceResetDto } from "../dtos/password.forceReset.dto";
 
 @Injectable()
 export class UserService {
@@ -108,7 +109,28 @@ export class UserService {
 	): Promise<User | DataResponseMessageDto | undefined> {
 		this.logger.verbose(`User create received  ${userDto.email}`);
 		userDto.email = userDto.email?.toLowerCase();
-
+		
+		if(userDto.role===Role.Observer){
+			if(userDto.validatePermission===ValidateEntity.CAN || userDto.subRolePermission===SubRoleManipulate.CAN || userDto.ghgInventoryPermission===GHGInventoryManipulate.CAN){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.observerCannotHaveAnyPermissions", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
+			userDto.validatePermission=ValidateEntity.CANNOT;
+			userDto.subRolePermission=SubRoleManipulate.CANNOT;
+			userDto.ghgInventoryPermission=GHGInventoryManipulate.CANNOT;
+		}
+		
+		if(userDto.role===Role.Admin){
+			if(userDto.subRolePermission===SubRoleManipulate.CAN){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.adminCannotHaveSubrolePermission", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
+			userDto.subRolePermission=SubRoleManipulate.CANNOT;
+		}
 
 		await this.validateUserCreatePayload(userDto)
 
@@ -229,12 +251,16 @@ export class UserService {
 				"email",
 				"password",
 				"role",
+				"subRole",
 				"apiKey",
 				"organisation",
 				"name",
 				"state",
 				"sector",
 				"state",
+				"validatePermission",
+				"subRolePermission",
+				"ghgInventoryPermission",
 			],
 			where: {
 				email: username,
@@ -282,7 +308,6 @@ export class UserService {
 		this.logger.verbose("User update received", abilityCondition);
 
 		userDto.email = userDto.email?.toLowerCase()
-
 		const { id, remarks, ...update } = userDto;
 		const user = await this.findById(id);
 		if (!user) {
@@ -291,16 +316,98 @@ export class UserService {
 				HttpStatus.NOT_FOUND
 			);
 		}
-
-		this.validateRoleAndSubRole(user.role, userDto.subRole);
-
-		this.validateSectorUpdate(userDto.sector, user.sector, requestingUser);
+		if(requestingUser.role !== Role.Root){
+			if(user.role !== userDto.role){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.onlyRootCanChangeRole", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
+		}
 
 		let isStateUpdate: boolean;
 
 		if (update.state && user.state != update.state) {
 			this.validateStateChange(user, requestingUser, update, remarks);
 			isStateUpdate = true;
+		}
+
+		switch (userDto.role) {
+			case Role.Root:
+				if (
+					update.validatePermission === ValidateEntity.CANNOT ||
+					update.subRolePermission === SubRoleManipulate.CANNOT ||
+					update.ghgInventoryPermission === GHGInventoryManipulate.CANNOT
+				) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString("user.allRootPermissionShouldBeTrue", []),
+						HttpStatus.FORBIDDEN
+					);
+				}
+				update.validatePermission = ValidateEntity.CAN;
+				update.subRolePermission = SubRoleManipulate.CAN;
+				update.ghgInventoryPermission = GHGInventoryManipulate.CAN;
+				break;
+
+			case Role.Admin:
+				if (update.subRolePermission === SubRoleManipulate.CAN) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString("user.adminCannotHaveSubrolePermission", []),
+						HttpStatus.FORBIDDEN
+					);
+				}
+				update.subRolePermission = SubRoleManipulate.CANNOT;
+				update.organisation = null;
+				update.sector = null;
+				update.subRole = null;
+				break;
+
+			case Role.Observer:
+				if (
+					update.validatePermission === ValidateEntity.CAN ||
+					update.subRolePermission === SubRoleManipulate.CAN ||
+					update.ghgInventoryPermission === GHGInventoryManipulate.CAN
+				) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString("user.observerCannotHaveAnyPermissions", []),
+						HttpStatus.FORBIDDEN
+					);
+				}
+				update.validatePermission = ValidateEntity.CANNOT;
+				update.subRolePermission = SubRoleManipulate.CANNOT;
+				update.ghgInventoryPermission = GHGInventoryManipulate.CANNOT;
+				break;
+		}
+		  
+
+		if (requestingUser.role === Role.GovernmentUser || requestingUser.role === Role.Observer) {
+			if (requestingUser.id === userDto.id) {
+				if (requestingUser.subRole !== userDto.subRole && (requestingUser.subRolePermission === SubRoleManipulate.CANNOT || requestingUser.role === Role.Observer)) {
+					throw new HttpException(
+						this.helperService.formatReqMessagesString("user.subRolePermissionDenied", []),
+						HttpStatus.FORBIDDEN
+					);
+				}
+			}
+		}
+
+		if(requestingUser.id===userDto.id){
+			if(requestingUser.role===Role.Admin && (requestingUser.validatePermission!==userDto.validatePermission || requestingUser.ghgInventoryPermission !==userDto.ghgInventoryPermission)){
+				throw new HttpException(
+					this.helperService.formatReqMessagesString("user.adminCannotUpdateTheirOwnPermissions", []),
+					HttpStatus.FORBIDDEN
+				);
+			}
+		}
+
+		if(requestingUser.role===Role.Root){
+			this.validateRoleAndSubRole(userDto.role, userDto.subRole);
+		}else{
+			this.validateRoleAndSubRole(user.role, userDto.subRole);
+		}
+
+		if (userDto.sector && userDto.sector.length > 0) {
+			this.validateSectorUpdate(userDto.sector, user.sector, requestingUser);
 		}
 		
 
@@ -338,16 +445,28 @@ export class UserService {
 	}
 
 	async resetPassword(
-		id: number,
-		passwordResetDto: PasswordUpdateDto,
-		abilityCondition: string
+		requestingUser: User,
+		userId: number,
+		passwordResetDto: PasswordUpdateDto | PasswordForceResetDto,
+		abilityCondition: string,
+		isForcedPasswordReset: boolean
 	) {
-		this.logger.verbose("User password reset received", id);
+		this.logger.verbose("User password reset received", userId);
+
+		if (isForcedPasswordReset && requestingUser.role != Role.Root) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.userUnAUth",
+					[]
+				),
+				HttpStatus.UNAUTHORIZED
+			);
+		}
 
 		const user = await this.userRepo
 			.createQueryBuilder()
 			.where(
-				`id = '${id}' ${abilityCondition
+				`id = '${userId}' ${abilityCondition
 					? " AND (" +
 					this.helperService.parseMongoQueryToSQL(abilityCondition) + ")"
 					: ""
@@ -356,22 +475,27 @@ export class UserService {
 			.addSelect(["User.password"])
 			.getOne();
 
-		passwordResetDto.oldPassword = this.passwordHashService.getPasswordHash(passwordResetDto.oldPassword);
+		if (!isForcedPasswordReset && this.isPasswordUpdateDto(passwordResetDto)) {
+			const oldPassword = this.passwordHashService.getPasswordHash(passwordResetDto.oldPassword);
+
+			if (!user || user.password != oldPassword) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"user.oldPasswordIncorrect",
+						[]
+					),
+					HttpStatus.UNAUTHORIZED
+				);
+			}
+		}
+		// keeping the text form password as it is needed for the email later
+		const newPassword = passwordResetDto.newPassword;
 		passwordResetDto.newPassword = this.passwordHashService.getPasswordHash(passwordResetDto.newPassword);
 
-		if (!user || user.password != passwordResetDto.oldPassword) {
-			throw new HttpException(
-				this.helperService.formatReqMessagesString(
-					"user.oldPasswordIncorrect",
-					[]
-				),
-				HttpStatus.UNAUTHORIZED
-			);
-		}
 		const result = await this.userRepo
 			.update(
 				{
-					id: id,
+					id: userId,
 				},
 				{
 					password: passwordResetDto.newPassword,
@@ -385,19 +509,20 @@ export class UserService {
 			const templateData = {
 				name: user.name,
 				countryName: this.configService.get("systemCountryName"),
+				newPassword: newPassword,
 			};
 			const action: AsyncAction = {
 				actionType: AsyncActionType.Email,
 				actionProps: {
-					emailType: EmailTemplates.CHANGE_PASSOWRD.id,
+					emailType: (isForcedPasswordReset) ? EmailTemplates.FORCE_CHANGE_PASSWORD.id : EmailTemplates.CHANGE_PASSWORD.id,
 					sender: user.email,
 					subject: this.helperService.getEmailTemplateMessage(
-						EmailTemplates.CHANGE_PASSOWRD["subject"],
+						(isForcedPasswordReset) ? EmailTemplates.FORCE_CHANGE_PASSWORD["subject"] : EmailTemplates.CHANGE_PASSWORD["subject"],
 						templateData,
 						true
 					),
 					emailBody: this.helperService.getEmailTemplateMessage(
-						EmailTemplates.CHANGE_PASSOWRD["html"],
+						(isForcedPasswordReset) ? EmailTemplates.FORCE_CHANGE_PASSWORD["html"] : EmailTemplates.CHANGE_PASSWORD["html"],
 						templateData,
 						false
 					),
@@ -416,6 +541,10 @@ export class UserService {
 			),
 			HttpStatus.INTERNAL_SERVER_ERROR
 		);
+	}
+
+	isPasswordUpdateDto(dto: PasswordUpdateDto | PasswordForceResetDto): dto is PasswordUpdateDto {
+		return (dto as PasswordUpdateDto).oldPassword !== undefined;
 	}
 
 	async regenerateApiKey(email, abilityCondition) {
@@ -530,7 +659,7 @@ export class UserService {
 
 		const templateData = {
 			name: user.name,
-			countryName: this.configService.get("systemCountry"),
+			countryName: this.configService.get("systemCountryName"),
 			remarks: userDto.remarks,
 			government: this.configService.get("systemCountryGovernmentName"),
 		};

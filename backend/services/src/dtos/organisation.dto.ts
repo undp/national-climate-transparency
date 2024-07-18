@@ -13,7 +13,7 @@ import {
 } from "class-validator";
 import { OrganisationType } from "../enums/organisation.enum";
 import { Sector } from "../enums/sector.enum";
-import { IsValidCountry } from "src/util/validcountry.decorator";
+import { IsValidCountry } from "../util/validcountry.decorator";
 
 export class OrganisationDto {
   organisationId: number; 

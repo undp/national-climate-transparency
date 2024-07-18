@@ -35,6 +35,7 @@ import Faq from './Pages/Faq/faq';
 import { ConnectionContextProvider } from './Context/ConnectionContext/connectionContext';
 import { UserInformationContextProvider } from './Context/UserInformationContext/userInformationContext';
 import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
+import GhgEmissions from './Pages/Emissions/emissions';
 
 // message.config({
 //   duration: 60,
@@ -66,7 +67,7 @@ const App = () => {
               <Routes>
                 <Route path="login" element={<Login />} />
                 <Route path="forgotPassword" element={<Login forgotPassword={true} />} />
-                <Route path="resetPassword/:requestid" element={<Login resetPassword={true} />} />
+                <Route path="resetPassword/:requestId" element={<Login resetPassword={true} />} />
                 <Route path="signUp" element={<SignUp />} />
                 <Route path="privacy" element={<PrivacyPolicy />} />
                 <Route path="help" element={<CarbonHelp />} />
@@ -96,25 +97,24 @@ const App = () => {
                     <Route path="edit/:entId" element={<ProjectForm method="update" />} />
                     <Route path="view/:entId" element={<ProjectForm method="view" />} />
                   </Route>
-
                   <Route path="/activities" element={<CustomLayout selectedKey="activities" />}>
                     <Route path="" element={<ActivityList />} />
                     <Route path="add" element={<ActivityForm method="create" />} />
                     <Route path="edit/:entId" element={<ActivityForm method="update" />} />
                     <Route path="view/:entId" element={<ActivityForm method="view" />} />
                   </Route>
-
                   <Route path="/support" element={<CustomLayout selectedKey="support" />}>
                     <Route path="" element={<SupportList />} />
                     <Route path="add" element={<SupportForm method="create" />} />
                     <Route path="edit/:entId" element={<SupportForm method="update" />} />
                     <Route path="view/:entId" element={<SupportForm method="view" />} />
                   </Route>
-
+                  <Route path="/emissions" element={<CustomLayout selectedKey="emissions" />}>
+                    <Route index element={<GhgEmissions />} />
+                  </Route>
                   <Route path="/reportings" element={<CustomLayout selectedKey="reportings" />}>
                     <Route index element={<ReportList />} />
                   </Route>
-
                   <Route path="/faqs" element={<CustomLayout selectedKey="faqs" />}>
                     <Route index element={<Faq />} />
                   </Route>

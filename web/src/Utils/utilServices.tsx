@@ -1,5 +1,7 @@
+import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
 import { Buffer } from 'buffer';
+import { acceptedFileExtensions } from '../Definitions/uploadDefinitions';
 
 export const addCommSep = (value: any) => {
   return (
@@ -94,7 +96,7 @@ export const getArraySum = (values: number[]) => {
   return values.reduce((acc, value) => acc + value, 0);
 };
 
-const customRound = (value: number) => {
+export const customRound = (value: number) => {
   return Math.round(value * 100) / 100;
 };
 
@@ -109,5 +111,59 @@ export const getRounded = (num: number | string): number => {
     }
   } else {
     return 0;
+  }
+};
+
+export const convertToMillions = (value: number) => {
+  const roundedNumber = getRounded(value);
+  let numberInMills = roundedNumber.toString();
+  if (roundedNumber > 1000000000) {
+    numberInMills = `${customRound(roundedNumber / 1000000000)} billion`;
+  } else if (roundedNumber > 1000000) {
+    numberInMills = `${customRound(roundedNumber / 1000000)} million`;
+  }
+
+  return numberInMills;
+};
+
+export const getCollapseIcon = (isActive: boolean) => {
+  return isActive ? (
+    <MinusCircleOutlined style={{ color: '#9155fd', fontSize: '14px' }} />
+  ) : (
+    <PlusCircleOutlined style={{ color: '#9155fd', fontSize: '14px' }} />
+  );
+};
+
+export const parseNumber = (stringValue: string | undefined) => {
+  return stringValue ? (stringValue === 'NaN' ? undefined : parseFloat(stringValue)) : undefined;
+};
+
+export const parseToTwoDecimals = (fullNumber: number) => {
+  const decimalSeparation = fullNumber.toString().split('.');
+  let structuredNumber;
+  if (decimalSeparation.length === 1) {
+    structuredNumber = decimalSeparation[0];
+  } else {
+    structuredNumber = `${decimalSeparation[0]}.${decimalSeparation[1].slice(0, 2)}`;
+  }
+
+  return parseFloat(structuredNumber);
+};
+
+export const delay = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const getFileExtension = (fileTitle: string) => {
+  const fileParts = fileTitle.split('.');
+  if (fileParts.length > 0) {
+    const extension = fileParts[fileParts.length - 1].toLowerCase();
+    if (acceptedFileExtensions.includes(extension)) {
+      return extension;
+    } else {
+      return undefined;
+    }
+  } else {
+    return undefined;
   }
 };

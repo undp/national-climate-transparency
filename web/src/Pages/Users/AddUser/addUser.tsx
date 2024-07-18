@@ -4,7 +4,7 @@ import { useConnection } from '../../../Context/ConnectionContext/connectionCont
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
 import { useAbilityContext } from '../../../Casl/Can';
 import { useEffect, useState } from 'react';
-import { Row, Col, Button, Form, Input, message, Skeleton, Radio, Select } from 'antd';
+import { Row, Col, Button, Form, Input, message, Skeleton, Radio, Select, Checkbox } from 'antd';
 import PhoneInput, {
   formatPhoneNumber,
   formatPhoneNumberIntl,
@@ -20,13 +20,72 @@ import ChangePasswordModel from '../../../Components/Models/changePasswordModel'
 import { Role } from '../../../Enums/role.enum';
 import { Sector } from '../../../Enums/sector.enum';
 import { Organisation } from '../../../Enums/organisation.enum';
+import {
+  GHGInventoryManipulate,
+  SubRoleManipulate,
+  ValidateEntity,
+} from '../../../Enums/user.enum';
 import { BankOutlined, ExperimentOutlined, KeyOutlined, StarOutlined } from '@ant-design/icons';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
+import ForceResetPasswordModel from '../../../Components/Models/ForceReset/forceResetPasswordModel';
+import { RoleIcon } from '../../../Components/common/RoleIcon/role.icon';
+import { CheckAll, CloudDownload, Diagram3 } from 'react-bootstrap-icons';
+
+import {
+  subRolePermitBGColor,
+  subRolePermitColor,
+  validatePermitBGColor,
+  validatePermitColor,
+  ghgInventoryPermitBGColor,
+  ghgInventoryPermitColor,
+} from '../../../Styles/role.color.constants';
 
 const AddUser = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['addUser', 'changePassword', 'userProfile']);
   const themeColor = '#9155fd';
+
+  const { post, put, get } = useConnection();
+  const [formOne] = Form.useForm();
+  const { state } = useLocation();
+  const { updateToken } = useConnection();
+  const { removeUserInfo } = useUserContext();
+  const { userInfoState, setUserInfo } = useUserContext();
+  const ability = useAbilityContext();
+
+  // General State
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<any>('');
+  const [countries, setCountries] = useState<[]>([]);
+  const [isCountryListLoading, setIsCountryListLoading] = useState(false);
+  const [role, setRole] = useState(state?.record?.role);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+  const [validatePermission, setValidatePermission] = useState(
+    state?.record?.validatePermission || ValidateEntity.CANNOT
+  );
+  const [subRolePermission, setSubRolePermission] = useState(
+    state?.record?.subRolePermission || SubRoleManipulate.CANNOT
+  );
+  const [ghgInventoryPermission, setGhgInventoryPermission] = useState(
+    state?.record?.ghgInventoryPermission || GHGInventoryManipulate.CANNOT
+  );
+  const [isOwnProfile, setIsOwnProfile] = useState<boolean>(false);
+
+  // Password Change Auth State
+
+  const [isForcePasswordReset, setIsForcePasswordReset] = useState<boolean>(true);
+
+  // Profile Password Change State
+
+  const [openPasswordChangeModal, setopenPasswordChangeModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Force Password Change State
+
+  const [forcePasswordChangeVisible, setForcePasswordChangeVisible] = useState<boolean>(false);
+  const [forcePasswordChangeRunning, setForcePasswordChangeRunning] = useState<boolean>(false);
 
   const onNavigateToUserManagement = () => {
     navigate('/userManagement/viewAll', { replace: true });
@@ -35,23 +94,6 @@ const AddUser = () => {
   const onNavigateToLogin = () => {
     navigate('/login', { replace: true });
   };
-
-  const { post, put, get } = useConnection();
-  const [formOne] = Form.useForm();
-  const { state } = useLocation();
-  const { updateToken } = useConnection();
-  const { removeUserInfo } = useUserContext();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isUpdate, setIsUpdate] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [openPasswordChangeModal, setopenPasswordChangeModal] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<any>('');
-  const { userInfoState } = useUserContext();
-  const ability = useAbilityContext();
-  const [countries, setCountries] = useState<[]>([]);
-  const [isCountryListLoading, setIsCountryListLoading] = useState(false);
-  const [role, setRole] = useState(state?.record?.role);
-  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
   const getCountryList = async () => {
     setIsCountryListLoading(true);
@@ -78,6 +120,10 @@ const AddUser = () => {
       } else {
         values.phoneNo = undefined;
       }
+      values.validatePermission = validatePermission;
+      values.subRolePermission = subRolePermission;
+      values.ghgInventoryPermission = ghgInventoryPermission;
+
       const response = await post('national/users/add', values);
       if (response.status === 200 || response.status === 201) {
         message.open({
@@ -104,18 +150,41 @@ const AddUser = () => {
     } else {
       formOneValues.phoneNo = undefined;
     }
+
+    if (role === Role.Root) {
+      formOneValues.validatePermission = ValidateEntity.CAN;
+      formOneValues.subRolePermission = SubRoleManipulate.CAN;
+      formOneValues.ghgInventoryPermission = GHGInventoryManipulate.CAN;
+    } else if (role === Role.Admin) {
+      formOneValues.validatePermission = validatePermission;
+      formOneValues.subRolePermission = SubRoleManipulate.CANNOT;
+      formOneValues.ghgInventoryPermission = ghgInventoryPermission;
+      formOneValues.subRole = null;
+      formOneValues.sector = null;
+      formOneValues.organisation = null;
+    } else if (role === Role.Observer) {
+      formOneValues.validatePermission = ValidateEntity.CANNOT;
+      formOneValues.subRolePermission = SubRoleManipulate.CANNOT;
+      formOneValues.ghgInventoryPermission = GHGInventoryManipulate.CANNOT;
+    } else {
+      formOneValues.validatePermission = validatePermission;
+      formOneValues.subRolePermission = subRolePermission;
+      formOneValues.ghgInventoryPermission = ghgInventoryPermission;
+    }
+
     try {
       const values: any = {
         id: state?.record?.id,
         name: formOneValues?.name,
         phoneNo: formOneValues?.phoneNo,
         organisation: formOneValues?.organisation,
+        validatePermission: formOneValues?.validatePermission,
+        subRolePermission: formOneValues?.subRolePermission,
+        ghgInventoryPermission: formOneValues?.ghgInventoryPermission,
         sector: formOneValues?.sector,
         subRole: formOneValues?.subRole,
+        role: formOneValues?.role,
       };
-
-      if (ability.can(Action.Update, plainToClass(User, state?.record), 'role'))
-        values.role = formOneValues?.role;
 
       if (ability.can(Action.Update, plainToClass(User, state?.record), 'email'))
         values.email = formOneValues?.email;
@@ -128,6 +197,18 @@ const AddUser = () => {
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
+        if (userInfoState) {
+          setUserInfo({
+            id: userInfoState.id,
+            userRole: userInfoState.userRole,
+            companyName: userInfoState.companyName,
+            userState: userInfoState.userState,
+            userSectors: userInfoState.userSectors,
+            validatePermission: formOneValues?.validatePermission,
+            subRolePermission: formOneValues?.subRolePermission,
+            ghgInventoryPermission: formOneValues?.ghgInventoryPermission,
+          });
+        }
         onNavigateToUserManagement();
         state.record = {};
         setLoading(false);
@@ -173,6 +254,32 @@ const AddUser = () => {
     }
   };
 
+  const forceResetPasswordAction = async (props: any) => {
+    setForcePasswordChangeRunning(true);
+    try {
+      const response = await put('national/users/forceResetPassword', {
+        userId: state?.record?.id,
+        newPassword: props.newPassword,
+      });
+
+      setForcePasswordChangeRunning(false);
+      setForcePasswordChangeVisible(false);
+
+      if (response.status === 200 || response.status === 201) {
+        message.open({
+          type: 'success',
+          content: t('changePassword:forcePasswordResetSuccess'),
+          duration: 5,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
+      }
+    } catch (error: any) {
+      setForcePasswordChangeRunning(false);
+      setForcePasswordChangeVisible(false);
+      displayErrorMessage(error);
+    }
+  };
+
   const onChangedPassword = () => {
     setErrorMsg('');
     setopenPasswordChangeModal(true);
@@ -189,13 +296,42 @@ const AddUser = () => {
   const onChangeuserRole = (event: any) => {
     const value = event.target.value;
     setRole(value);
-    formOne.setFieldsValue({ subRole: undefined });
+    formOne.setFieldValue('subRole', null);
+  };
+
+  const onChangeValidatePermission = (event: any) => {
+    setValidatePermission(event.target.checked ? ValidateEntity.CAN : ValidateEntity.CANNOT);
+  };
+
+  const onChangeSubRolePermission = (event: any) => {
+    setSubRolePermission(event.target.checked ? SubRoleManipulate.CAN : SubRoleManipulate.CANNOT);
+  };
+
+  const onChangeGhgInventoryPermission = (event: any) => {
+    setGhgInventoryPermission(
+      event.target.checked ? GHGInventoryManipulate.CAN : GHGInventoryManipulate.CANNOT
+    );
   };
 
   useEffect(() => {
     getCountryList();
-    setIsUpdate(state?.record ? true : false);
-    if (isUpdate) setIsSaveButtonDisabled(true);
+
+    if (state?.record) {
+      setIsUpdate(true);
+      setIsSaveButtonDisabled(true);
+
+      // Permission Setting for the Password Change
+      if (userInfoState?.id === state?.record?.id.toString()) {
+        setIsOwnProfile(true);
+      } else if (userInfoState?.userRole === Role.Root) {
+        setIsForcePasswordReset(true);
+      } else {
+        setIsOwnProfile(false);
+        setIsForcePasswordReset(false);
+      }
+    } else {
+      setIsUpdate(false);
+    }
   }, []);
 
   const handleValuesChange = () => {
@@ -208,15 +344,23 @@ const AddUser = () => {
         <div className="titles">
           <div className="main">{isUpdate ? t('addUser:editUser') : t('addUser:addNewUser')}</div>
         </div>
-        {isUpdate &&
-          userInfoState?.id === state?.record?.id.toString() &&
-          !ability.can(Action.Update, plainToClass(User, state?.record), 'email') && (
-            <div className="actions">
-              <Button className="mg-left-1" type="primary" onClick={onChangedPassword}>
-                {t('userProfile:changePassword')}
-              </Button>
-            </div>
-          )}
+        {isUpdate && (isOwnProfile || isForcePasswordReset) && (
+          <div className="actions">
+            <Button
+              className="mg-left-1"
+              type="primary"
+              onClick={
+                isOwnProfile
+                  ? onChangedPassword
+                  : isForcePasswordReset
+                  ? () => setForcePasswordChangeVisible(true)
+                  : undefined
+              }
+            >
+              {t('userProfile:changePassword')}
+            </Button>
+          </div>
+        )}
       </div>
       <div className="content-card user-content-card">
         <Form
@@ -341,25 +485,129 @@ const AddUser = () => {
                     </Form.Item>
                   )}
                 </Skeleton>
-                {(role === Role.GovernmentUser || role === Role.Observer) && (
+                {(role === Role.Root || role === Role.Admin || role === Role.GovernmentUser) && (
                   <Form.Item
-                    label={t('addUser:organisation')}
-                    initialValue={state?.record?.organisation}
-                    name="organisation"
+                    initialValue={state?.record?.validatePermission}
+                    name="validatePermission"
                     rules={[
                       {
-                        required: true,
-                        message: `${t('addUser:organisation')} ${t('isRequired')}`,
+                        required: false,
                       },
                     ]}
                   >
-                    <Select size="large" allowClear showSearch>
-                      {Object.values(Organisation).map((instrument) => (
-                        <Select.Option key={instrument} value={instrument}>
-                          {instrument}
-                        </Select.Option>
-                      ))}
-                    </Select>
+                    <Row>
+                      <Col span={3}>
+                        <div className="permission-icon">
+                          <RoleIcon
+                            icon={<CheckAll />}
+                            bg={validatePermitBGColor}
+                            color={validatePermitColor}
+                          />
+                        </div>
+                      </Col>
+                      <Col span={15}>
+                        <div className="permissions">{t('addUser:validatePermission')}</div>
+                      </Col>
+                      <Col span={5}>
+                        <Checkbox
+                          onChange={onChangeValidatePermission}
+                          checked={validatePermission === ValidateEntity.CAN}
+                          disabled={
+                            role === Role.Root ||
+                            (isOwnProfile && role === Role.Admin) ||
+                            (isUpdate &&
+                              !ability.can(
+                                Action.Update,
+                                plainToClass(User, state?.record),
+                                'validatePermission'
+                              ))
+                          }
+                        ></Checkbox>
+                      </Col>
+                    </Row>
+                  </Form.Item>
+                )}
+                {(role === Role.Root || role === Role.Admin || role === Role.GovernmentUser) && (
+                  <Form.Item
+                    initialValue={state?.record?.ghgInventoryPermission}
+                    name="ghgInventoryPermission"
+                    rules={[
+                      {
+                        required: false,
+                      },
+                    ]}
+                  >
+                    <Row>
+                      <Col span={3}>
+                        <div className="permission-icon">
+                          <RoleIcon
+                            icon={<CloudDownload />}
+                            bg={ghgInventoryPermitBGColor}
+                            color={ghgInventoryPermitColor}
+                          />
+                        </div>
+                      </Col>
+                      <Col span={15}>
+                        <div className="permissions">{t('addUser:ghgInventoryPermission')}</div>
+                      </Col>
+                      <Col span={5}>
+                        <Checkbox
+                          onChange={onChangeGhgInventoryPermission}
+                          checked={ghgInventoryPermission === GHGInventoryManipulate.CAN}
+                          disabled={
+                            role === Role.Root ||
+                            (isOwnProfile && role === Role.Admin) ||
+                            (isUpdate &&
+                              !ability.can(
+                                Action.Update,
+                                plainToClass(User, state?.record),
+                                'ghgInventoryPermission'
+                              ))
+                          }
+                        ></Checkbox>
+                      </Col>
+                    </Row>
+                  </Form.Item>
+                )}
+                {role === Role.GovernmentUser && (
+                  <Form.Item
+                    initialValue={state?.record?.subRolePermission}
+                    name="subRolePermission"
+                    rules={[
+                      {
+                        required: false,
+                      },
+                    ]}
+                  >
+                    <Row>
+                      <Col span={3}>
+                        <div className="permission-icon">
+                          <RoleIcon
+                            icon={<Diagram3 />}
+                            bg={subRolePermitBGColor}
+                            color={subRolePermitColor}
+                          />
+                        </div>
+                      </Col>
+                      <Col span={15}>
+                        <div className="permissions">{t('addUser:subRolePermission')}</div>
+                      </Col>
+                      <Col span={5}>
+                        <Checkbox
+                          onChange={onChangeSubRolePermission}
+                          checked={subRolePermission === SubRoleManipulate.CAN}
+                          disabled={
+                            role === Role.Root ||
+                            (isUpdate &&
+                              !ability.can(
+                                Action.Update,
+                                plainToClass(User, state?.record),
+                                'subRolePermission'
+                              ))
+                          }
+                        ></Checkbox>
+                      </Col>
+                    </Row>
                   </Form.Item>
                 )}
               </div>
@@ -444,8 +692,10 @@ const AddUser = () => {
                       value={state?.record?.subRole}
                       size="large"
                       disabled={
-                        isUpdate &&
-                        !ability.can(Action.Update, plainToClass(User, state?.record), 'subRole')
+                        (isOwnProfile && role === Role.Observer) ||
+                        (isOwnProfile &&
+                          isUpdate &&
+                          state?.record?.subRolePermission === SubRoleManipulate.CANNOT)
                       }
                     >
                       <div className="department-radio-container">
@@ -489,8 +739,10 @@ const AddUser = () => {
                       value={state?.record?.subRole}
                       size="large"
                       disabled={
-                        isUpdate &&
-                        !ability.can(Action.Update, plainToClass(User, state?.record), 'subRole')
+                        (isOwnProfile && role === Role.Observer) ||
+                        (isOwnProfile &&
+                          isUpdate &&
+                          state?.record?.subRolePermission === SubRoleManipulate.CANNOT)
                       }
                     >
                       <div className="tec-rev-radio-container">
@@ -512,8 +764,31 @@ const AddUser = () => {
                 )}
                 {(role === Role.GovernmentUser || role === Role.Observer) && (
                   <Form.Item
+                    label={t('addUser:organisation')}
+                    initialValue={state?.record?.organisation}
+                    name="organisation"
+                    rules={[
+                      {
+                        required: true,
+                        message: `${t('addUser:organisation')} ${t('isRequired')}`,
+                      },
+                    ]}
+                  >
+                    <Select size="large" allowClear showSearch>
+                      {Object.values(Organisation).map((instrument) => (
+                        <Select.Option key={instrument} value={instrument}>
+                          {instrument}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                )}
+                {(role === Role.GovernmentUser || role === Role.Observer) && (
+                  <Form.Item
                     label={t('addUser:sectors')}
-                    initialValue={state?.record?.sector}
+                    initialValue={
+                      state?.record?.sector?.length > 0 ? state?.record?.sector : undefined
+                    }
                     name="sector"
                     rules={[
                       {
@@ -570,6 +845,14 @@ const AddUser = () => {
         loadingBtn={isLoading}
         themeColor={themeColor}
       ></ChangePasswordModel>
+      <ForceResetPasswordModel
+        t={t}
+        themeColor={themeColor}
+        doPasswordReset={forceResetPasswordAction}
+        passwordChangeRunning={forcePasswordChangeRunning}
+        isModelVisible={forcePasswordChangeVisible}
+        setIsModelVisible={setForcePasswordChangeVisible}
+      ></ForceResetPasswordModel>
     </div>
   );
 };

@@ -1,7 +1,6 @@
-import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { FileHandlerInterface } from "../file-handler/filehandler.interface";
 import { HelperService } from "./helpers.service";
-import { EntityType } from "src/enums/shared.enum";
 
 @Injectable()
 export class FileUploadService {

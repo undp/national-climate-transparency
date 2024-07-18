@@ -1,12 +1,12 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsString, IsOptional, ValidateNested, IsNumber, Min, Max, isNotEmpty, ArrayMinSize, MaxLength, IsArray } from "class-validator";
-import { ActionStatus, InstrumentType, NatAnchor } from "../enums/action.enum";
+import { ActionStatus, ActionType, InstrumentType, NatAnchor } from "../enums/action.enum";
 import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
 import { KpiUpdateDto } from "./kpi.update.dto";
 import { KpiUnits } from "../enums/kpi.enum";
 import { Sector } from "../enums/sector.enum";
-import { KPIAction } from "src/enums/shared.enum";
+import { KPIAction } from "../enums/shared.enum";
 
 export class ActionUpdateDto {
 
@@ -41,6 +41,17 @@ export class ActionUpdateDto {
 	})
 	sector: Sector;
 
+	@IsNotEmpty()
+	@IsEnum(ActionType, {
+		each: true,
+		message: 'Invalid Action Type:' + Object.values(ActionType)
+	})
+	@ApiProperty({
+		type: [String],
+		enum: Object.values(ActionType),
+	})
+	type: ActionType;
+
 	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
 	@IsNotEmpty({ each: true })
@@ -64,7 +75,7 @@ export class ActionUpdateDto {
 	@IsNotEmpty()
 	@IsNumber()
 	@Min(2013)
-	@Max(2050)
+	@Max(2049)
 	@ApiProperty()
 	startYear: number;
 	

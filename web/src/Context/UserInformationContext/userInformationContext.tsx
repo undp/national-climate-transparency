@@ -2,6 +2,7 @@ import React, { useContext, useState, createContext, useCallback } from 'react';
 import { useConnection } from '../ConnectionContext/connectionContext';
 import jwt_decode from 'jwt-decode';
 import { UserContextProps, UserProps } from '../../Definitions/userContext.definition';
+import { GHGInventoryManipulate, ValidateEntity } from '../../Enums/user.enum';
 
 export const UserContext = createContext<UserContextProps>({
   setUserInfo: () => {},
@@ -11,6 +12,10 @@ export const UserContext = createContext<UserContextProps>({
   isTokenExpired: false,
   // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   setIsTokenExpired: (val: boolean) => {},
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  setIsGhgAllowed: (val: boolean) => {},
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  setIsValidationAllowed: (val: boolean) => {},
 });
 
 export const UserInformationContextProvider = ({ children }: React.PropsWithChildren) => {
@@ -38,13 +43,37 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
       ? parseInt(localStorage.getItem('userState') as string)
       : 0,
     userSectors: localStorage.getItem('userSectors')?.split(',') ?? [],
+    validatePermission: localStorage.getItem('validatePermission')
+      ? (localStorage.getItem('validatePermission') as string)
+      : '0',
+    subRolePermission: localStorage.getItem('subRolePermission')
+      ? (localStorage.getItem('subRolePermission') as string)
+      : '0',
+    ghgInventoryPermission: localStorage.getItem('ghgInventoryPermission')
+      ? (localStorage.getItem('ghgInventoryPermission') as string)
+      : '0',
   };
 
   const [userInfoState, setUserInfoState] = useState<UserProps>(initialUserProps);
+  const [isGhgAllowed, setIsGhgAllowed] = useState<boolean>(
+    initialUserProps.validatePermission === ValidateEntity.CAN
+  );
+  const [isValidationAllowed, setIsValidationAllowed] = useState<boolean>(
+    initialUserProps.ghgInventoryPermission === GHGInventoryManipulate.CAN
+  );
 
   const setUserInfo = (value: UserProps) => {
     const state = userInfoState?.userState === 1 ? userInfoState?.userState : 0;
-    const { id, userRole, companyName, userState = state, userSectors } = value;
+    const {
+      id,
+      userRole,
+      companyName,
+      userState = state,
+      userSectors,
+      validatePermission,
+      subRolePermission,
+      ghgInventoryPermission,
+    } = value;
     if (id) {
       setUserInfoState((prev) => ({ ...prev, id }));
       localStorage.setItem('userId', id);
@@ -65,6 +94,17 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
 
     setUserInfoState((prev) => ({ ...prev, userSectors }));
     localStorage.setItem('userSectors', userSectors + '');
+
+    setUserInfoState((prev) => ({ ...prev, validatePermission }));
+    setIsValidationAllowed(validatePermission === ValidateEntity.CAN);
+    localStorage.setItem('validatePermission', validatePermission + '');
+
+    setUserInfoState((prev) => ({ ...prev, subRolePermission }));
+    localStorage.setItem('subRolePermission', subRolePermission + '');
+
+    setUserInfoState((prev) => ({ ...prev, ghgInventoryPermission }));
+    setIsGhgAllowed(ghgInventoryPermission === GHGInventoryManipulate.CAN);
+    localStorage.setItem('ghgInventoryPermission', ghgInventoryPermission + '');
   };
 
   const IsAuthenticated = useCallback(
@@ -103,18 +143,28 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     localStorage.removeItem('companyName');
     localStorage.removeItem('userState');
     localStorage.removeItem('userSectors');
+    localStorage.removeItem('validatePermission');
+    localStorage.removeItem('subRolePermission');
+    localStorage.removeItem('ghgInventoryPermission');
+    localStorage.removeItem('token');
     setUserInfoState(initialUserProps);
+    setIsGhgAllowed(false);
+    setIsValidationAllowed(false);
   };
 
   return (
     <UserContext.Provider
       value={{
         userInfoState,
+        isGhgAllowed,
+        isValidationAllowed,
         setUserInfo,
         removeUserInfo,
         IsAuthenticated,
         isTokenExpired,
         setIsTokenExpired,
+        setIsGhgAllowed,
+        setIsValidationAllowed,
       }}
     >
       {children}
