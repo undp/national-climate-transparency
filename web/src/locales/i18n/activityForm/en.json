@@ -28,6 +28,8 @@
     "mtgComments": "Comments on the Project",
     "mtgDocUploadOne": "Mitigation Methodology Documentation",
     "mtgDocUploadTwo": "Mitigation Results Documentation",
-    "mitigationTimelineTitle" : "Mitigation Timeline"
+    "mitigationTimelineTitle" : "Mitigation Timeline",
+    "saveMtgFirst": "Please save the Mitigation timeline first",
+    "mtgUpdateSuccess": "Mitigation Timeline Successfully Updated"
   }
   

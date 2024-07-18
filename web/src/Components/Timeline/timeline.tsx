@@ -58,6 +58,7 @@ const TimelineTable: React.FC<Props> = ({
       align: 'center',
       ellipsis: true,
       width: 100,
+      fixed: 'left',
     },
     {
       title: t('catExpectedEmissionReduct'),
@@ -84,6 +85,7 @@ const TimelineTable: React.FC<Props> = ({
       align: 'center',
       ellipsis: true,
       width: 100,
+      fixed: 'left',
     },
     {
       title: t('catActualEmissionReduct'),

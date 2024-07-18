@@ -123,6 +123,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [isMtgButtonEnabled, setIsMtgButtonEnabled] = useState(false);
   const [mtgStartYear, setMtgStartYear] = useState<number>(0);
   const [selectedGhg, setSelectedGhg] = useState<GHGS>();
+  const [gwpSettings, setGwpSettings] = useState<{ CH4: number; N2O: number }>();
+  const [gwpValue, setGwpValue] = useState<number>(1);
 
   // Initialization Logic
 
@@ -283,6 +285,21 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   }, [parentType]);
 
   // Initializing Section
+
+  //fetch GWP settings
+
+  const fetchGwpSettings = async () => {
+    let response: any;
+    try {
+      response = await get(`national/settings/GWP`);
+
+      if (response.status === 200 || response.status === 201) {
+        setGwpSettings(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching GWP values:', error);
+    }
+  };
 
   useEffect(() => {
     // Initially Loading the underlying Activity data when not in create mode
@@ -470,6 +487,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchCreatedKPIData();
+    fetchGwpSettings();
   }, []);
 
   // Populating Form Migrated Fields, when migration data changes
@@ -744,19 +762,19 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     switch (entry.topic) {
       case expectedTimeline[1].topic:
         for (let index = 0; index < expectedTimeline[1].values.length; index++) {
-          expectedTimeline[3].values[index] = expectedTimeline[1].values[index] * 10;
+          expectedTimeline[3].values[index] = expectedTimeline[1].values[index] * gwpValue;
           expectedTimeline[3].total = mtgCalculateArraySum(expectedTimeline[3].values);
         }
         break;
       case expectedTimeline[2].topic:
         for (let index = 0; index < expectedTimeline[2].values.length; index++) {
-          expectedTimeline[4].values[index] = expectedTimeline[2].values[index] * 10;
+          expectedTimeline[4].values[index] = expectedTimeline[2].values[index] * gwpValue;
           expectedTimeline[4].total = mtgCalculateArraySum(expectedTimeline[4].values);
         }
         break;
       case actualTimeline[1].topic:
         for (let index = 0; index < actualTimeline[1].values.length; index++) {
-          actualTimeline[2].values[index] = actualTimeline[1].values[index] * 10;
+          actualTimeline[2].values[index] = actualTimeline[1].values[index] * gwpValue;
           actualTimeline[2].total = mtgCalculateArraySum(actualTimeline[2].values);
         }
         break;
@@ -838,7 +856,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         if (response.status === 200 || response.status === 201) {
           message.open({
             type: 'success',
-            content: 'Mitigation Timeline Successfully Updated  !',
+            content: t('mtgUpdateSuccess'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
@@ -847,7 +865,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      displayErrorMessage(error, `${entId} Mitigation Timeline Failed to Update !`);
+      displayErrorMessage(error, `${entId} Mitigation Timeline Failed to Update`);
     }
   };
 
@@ -859,11 +877,29 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     if (method === 'create') {
       setDefaultTimelineValues(mtgStartYear, mtgRange);
     }
+
+    if (selectedGhg !== undefined) {
+      switch (selectedGhg) {
+        case GHGS.CH:
+          setGwpValue(gwpSettings?.CH4 ?? 1);
+          break;
+        case GHGS.NO:
+          setGwpValue(gwpSettings?.N2O ?? 1);
+          break;
+        default:
+          setGwpValue(1);
+          break;
+      }
+    }
   }, [mtgStartYear, selectedGhg]);
 
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
+    if (method === 'update' && isMtgButtonEnabled) {
+      displayErrorMessage('', t('saveMtgFirst'));
+      return;
+    }
     try {
       setWaitingForBE(true);
 
