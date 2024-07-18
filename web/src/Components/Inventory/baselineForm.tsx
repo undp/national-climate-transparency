@@ -15,7 +15,7 @@ import { ConfigurationSettingsType, GrowthRateProperties } from '../../Enums/con
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { getBaselineSavePayload } from '../../Utils/payloadCreators';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 
 interface Props {
   index: number;
@@ -157,7 +157,6 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
   // Editable Value Update
 
   const updateValue = (topicId: string, yearIndex: number, newValue: number) => {
-    console.log(newValue, 'hgvhg');
     setAllEditableData((prevData) => {
       const entryIndex = prevData.findIndex((entry) => entry.topicId === topicId);
 
@@ -175,6 +174,10 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
 
       return updatedData;
     });
+  };
+
+  const disabledDate = (current: Moment | null): boolean => {
+    return current ? current.year() < 2000 || current.year() > 2050 : false;
   };
 
   Object.values(GrowthRateProperties).forEach((value, locIndex) => {
@@ -198,6 +201,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
               }}
               picker="year"
               size="middle"
+              disabledDate={disabledDate}
             />
           ) : (
             <InputNumber
