@@ -42,7 +42,7 @@
     "expectedGHGReduction": "Expected",
 
     "titleOfActivity": "Name of Activity",
-    "descriptionOfActivity": "Activity cescription",
+    "descriptionOfActivity": "Activity description",
     "startYear": "Start year",
     "endYear": "End year",
     "amountReceivedTitle": "Amount received (climate-specific)",
@@ -50,7 +50,7 @@
     "amountRequiredTitle": "Estimated amount (climate-specific)",
     "domestic": "Domestic currency",
     "usd": "USD",
-    "isEnhancingTransparency": "Contributing to Enhancing Transparency",
+    "isEnhancingTransparency": "Contributing to enhancing transparency",
     "techType": "Type of technology",
     "sector": "Sector",
     "subSectors": "Subsector",
@@ -68,5 +68,5 @@
     "activityStatus": "Status of activity",
     "expectedTimeFrame": "Expected time frame",
     "timeFrame": "Time frame",
-    "additionalInfo": "Additional Information"
+    "additionalInfo": "Additional information"
 }
