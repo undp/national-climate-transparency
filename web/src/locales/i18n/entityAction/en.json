@@ -10,5 +10,8 @@
     "unvalidate": "Unvalidate",
     "back": "Back",
     "delete": "Delete",
-    "apply": "Apply"
+    "apply": "Apply",
+    "submit": "Submit",
+    "finalize": "Finalize",
+    "edit": "Edit"
 }

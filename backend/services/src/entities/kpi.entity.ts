@@ -1,5 +1,5 @@
 import { EntityType } from '../enums/shared.enum';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, AfterLoad } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, AfterLoad, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { AchievementEntity } from './achievement.entity';
 import { KpiUnits } from '../enums/kpi.enum';
 
@@ -25,4 +25,10 @@ export class KpiEntity {
 
   @OneToMany(() => AchievementEntity, (achievementEntity) => achievementEntity.kpi)
   achievements?: AchievementEntity[];
+
+	@CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	createdTime: Date;
+
+	@UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	updatedTime: Date;
 }

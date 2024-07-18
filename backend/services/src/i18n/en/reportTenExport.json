@@ -1,13 +1,13 @@
 {
     "tableTen": "Tables Annex III -10",
     "nothingToExport": "Data not found for export",
-    "projectId": "Project No.",
-    "titleOfProject": "Title of Project",
-    "description": "Description",
+    "activityId": "Activity No.",
+    "titleOfActivity": "Name of Activity",
+    "description": "Activity description",
     "sector": "Sector",
     "subSectors": "Subsector",
-    "type": "Type of Support (NDC Component)",
-    "supportReceivedOrNeeded": "Support Needed or Received",
+    "type": "Type of support",
     "startYear": "Start year",
-    "endYear": "End year"
+    "endYear": "End year",
+    "additionalInfo": "Additional information"
 }

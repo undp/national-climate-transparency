@@ -7,6 +7,19 @@
         border-width: 0;
         background: #e8e8e8;
         color: #918e94;
+        overflow-x: auto;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+        
+        &::-webkit-scrollbar-track {
+            display: none;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            display: none;
+        }
     }
 
     .validated-chip {
@@ -14,8 +27,21 @@
         height: 28px;
         width: 90px;
         border-width: 0;
-        background-color: #e3f3fb;
-        color: #16B1FF;
+        background-color: rgba(#80ff00, 0.12);
+        color: #519E4F;
+        overflow-x: auto;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+        
+        &::-webkit-scrollbar-track {
+            display: none;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            display: none;
+        }
     }
     
   }

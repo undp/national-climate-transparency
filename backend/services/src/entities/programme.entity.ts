@@ -1,10 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+	UpdateDateColumn,
 } from "typeorm";
 import { SubSector } from "../enums/shared.enum";
 import { Sector } from "../enums/sector.enum";
@@ -71,4 +73,10 @@ export class ProgrammeEntity {
 
   @Column({ type: "boolean", default: false })
 	validated: boolean;
+
+	@CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	createdTime: Date;
+
+	@UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	updatedTime: Date;
 }

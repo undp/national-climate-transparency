@@ -13,7 +13,7 @@ import { HelperService } from "../util/helpers.service";
 import { JWTPayload } from "../dtos/jwt.payload";
 import { EmailTemplates } from "../email-helper/email.template";
 import { API_KEY_SEPARATOR } from "../constants";
-import { UserState } from "../enums/user.state.enum";
+import { UserState } from "../enums/user.enum";
 import { User } from "../entities/user.entity";
 
 @Injectable()
@@ -77,6 +77,9 @@ export class AuthService {
 			user.subRole,
 			user.sector,
       user.email,
+      user.validatePermission,
+      user.subRolePermission,
+      user.ghgInventoryPermission,
     );
     const ability = this.caslAbilityFactory.createForUser(user);
     return {
@@ -89,6 +92,9 @@ export class AuthService {
       ability: JSON.stringify(ability),
 			sector: user.sector,
       userState: user.state,
+      validatePermission: user.validatePermission,
+      subRolePermission: user.subRolePermission,
+      ghgInventoryPermission: user.ghgInventoryPermission,
     };
   }
 

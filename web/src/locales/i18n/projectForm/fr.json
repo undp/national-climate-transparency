@@ -23,6 +23,9 @@
   "attachACTIVITY": "JOINDRE DES ACTIVITÉS",
   "activityList": "Liste des activités",
   "projectCreationSuccess": "Projet ajouté avec succès",
+  "projectDeleteSuccess": "Projet supprimé avec succès",
   "noProjectsMessage": "Aucune activité attachée",
-  "projectUpdateSuccess": "Projet mis à jour avec succès"
+  "projectUpdateSuccess": "Projet mis à jour avec succès",
+  "deletePrimaryMsg": "Êtes-vous sûr de vouloir supprimer projet",
+  "deleteSecondaryMsg": "Vous ne pouvez pas annuler cette action"
 }

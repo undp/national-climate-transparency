@@ -12,6 +12,7 @@ import { getLogger } from "../server";
 import { LocationModule } from "../location/location.module";
 import { LocationInterface } from "../location/location.interface";
 import { Sector } from "../enums/sector.enum";
+import { GHGInventoryManipulate, SubRoleManipulate, ValidateEntity } from "src/enums/user.enum";
 
 const fs = require("fs");
 
@@ -218,6 +219,9 @@ export const handler: Handler = async (event) => {
     user.email = event["rootEmail"];
     user.name = "Root";
     user.role = Role.Root;
+    user.validatePermission = ValidateEntity.CAN;
+    user.subRolePermission = SubRoleManipulate.CAN;
+    user.ghgInventoryPermission = GHGInventoryManipulate.CAN;
     // user.organisationId = gov.organisationId;
 		// user.organisation = Organisation.Government
     user.country = event["systemCountryCode"];

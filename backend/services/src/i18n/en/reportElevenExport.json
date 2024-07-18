@@ -1,17 +1,17 @@
 {
     "tableEleven": "Tables Annex III -11",
     "nothingToExport": "Data not found for export",
-    "projectId": "Project No.",
-    "titleOfProject": "Title of Project",
-    "description": "Description",
+    "activityId": "Activity No.",
+    "titleOfActivity": "Name of Activity",
+    "description": "Activity description",
     "sector": "Sector",
     "subSectors": "Subsector",
-    "type": "Type of Support (NDC Component)",
-    "recipientEntities": "Recipient entity / Ministry",
-	"nationalImplementingEntities": "National Implementing entity / agency",
-    "internationalImplementingEntities": "International Implementing entity / agency",
-    "projectStatus": "Project status",
-    "supportReceivedOrNeeded": "Support Needed or Received",
+    "type": "Type of support",
+    "recipientEntities": "Recipient entity",
+	"nationalImplementingEntities": "National implementing entity",
+    "internationalImplementingEntities": "International implementing entity",
+    "activityStatus": "Status of activity",
     "startYear": "Start year",
-    "endYear": "End year"
+    "endYear": "End year",
+    "additionalInfo": "Additional information"
 }

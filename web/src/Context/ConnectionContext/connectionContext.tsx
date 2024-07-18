@@ -17,21 +17,6 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
   const [token, setToken] = useState<string>();
   const { serverURL, t, statServerUrl, children } = props;
 
-  useEffect(() => {
-    const timer = setInterval(async () => {
-      const newToken: any = await localStorage.getItem('token');
-      if (token !== newToken) {
-        setToken(newToken);
-      }
-    }, 3000);
-    if (token) {
-      clearTimeout(timer);
-    }
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [token]);
-
   const send = useCallback(
     (method: Methods, path: string, data?: any, config?: AxiosRequestConfig, extraUrl?: string) => {
       return new Promise((resolve, reject) => {
@@ -148,8 +133,8 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
     [send]
   );
   const del = useCallback(
-    (path: string, config?: AxiosRequestConfig) => {
-      return send('delete', path, config);
+    (path: string, data?: any, config?: AxiosRequestConfig) => {
+      return send('delete', path, data, config);
     },
     [send]
   );

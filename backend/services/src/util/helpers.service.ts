@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import e from "express";
 import { QueryDto } from "../dtos/query.dto";
 import { ProgrammeStage } from "../enums/programme-status.enum";
@@ -10,6 +10,8 @@ import { EntityManager } from "typeorm";
 import { SubpathDto } from "../dtos/subpath.dto";
 import { User } from "../entities/user.entity";
 import { Sector } from "../enums/sector.enum";
+import { ValidateEntity } from "src/enums/user.enum";
+import { Role } from "src/casl/role.enum";
 
 @Injectable()
 export class HelperService {
@@ -536,6 +538,18 @@ public doesUserHaveSectorPermission(user: User, sectorScope: Sector) {
     }
   }
   return can;
+}
+
+public doesUserHaveValidatePermission(user: User) {
+  if (user.validatePermission===ValidateEntity.CANNOT) {
+    throw new HttpException(
+      this.formatReqMessagesString(
+        "common.permissionDeniedForValidate",
+        [],
+      ),
+      HttpStatus.FORBIDDEN
+    );
+  }
 }
 
   // public async uploadCompanyLogoS3(companyId: number, companyLogo: string) {

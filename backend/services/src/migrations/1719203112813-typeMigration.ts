@@ -1,8 +1,6 @@
 import { reportFiveViewSQL } from "../entities/report.five.view.entity";
 import { actionViewSQL } from "../entities/action.view.entity";
 import { programmeViewSQL } from "../entities/programme.view.entity";
-import { reportSevenViewSQL } from "../entities/report.seven.view.entity";
-import { reportSixViewSQL } from "../entities/report.six.view.entity";
 import { MigrationInterface, QueryRunner } from "typeorm"
 
 export class TypeMigration1719203112813 implements MigrationInterface {
@@ -28,12 +26,6 @@ export class TypeMigration1719203112813 implements MigrationInterface {
             CREATE UNIQUE INDEX idx_action_view_entity_id ON action_view_entity(id);
             CREATE UNIQUE INDEX idx_report_five_view_entity_id ON report_five_view_entity(source, "actionId");`
         );
-
-        await queryRunner.query(`DROP VIEW IF EXISTS report_six_view_entity`); // Dropping Report 6 View
-        await queryRunner.query(`DROP VIEW IF EXISTS report_seven_view_entity`); // Dropping Report 7 View
-
-        await queryRunner.query("CREATE VIEW report_six_view_entity AS" + "\n" + reportSixViewSQL) // Creating Report 6 again
-        await queryRunner.query("CREATE VIEW report_seven_view_entity AS" + "\n" + reportSevenViewSQL) // Creating Report 7 again
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {

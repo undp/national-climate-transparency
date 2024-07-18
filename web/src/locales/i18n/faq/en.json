@@ -10,5 +10,8 @@
     "answer3": "Answer 3",
     "answer4": "Answer 4",
     "docsAndTemplates": "Documents and Templates",
-    "trainingVideos": "Training Videos"
+    "trainingVideos": "Training Videos",
+    "ghgResourcesSection": "GHG Inventory Resources",
+    "ghgSavedSuccessfully": "GHG Resources Updated Successfully",
+    "templateSavedSuccessfully": "Documents and Templates Updated Successfully"
 }

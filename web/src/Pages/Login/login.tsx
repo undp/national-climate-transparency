@@ -11,7 +11,7 @@ import { AbilityContext } from '../../Casl/Can';
 import { updateUserAbility } from '../../Casl/ability';
 import ForgotPassword from './forgotPassword';
 import ResetPassword from './resetPassword';
-import { UserState } from '../../Enums/user.state.enum';
+import { UserState } from '../../Enums/user.enum';
 import { AvailableLanguages } from '../../Definitions/languageDefinitions';
 import TransparencyLogo from '../../Components/logo/transparencyLogo';
 
@@ -124,6 +124,9 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
           companyName: response.data.companyName,
           userState: response.data.userState,
           userSectors: response.data.sector,
+          validatePermission: response.data.validatePermission,
+          subRolePermission: response.data.subRolePermission,
+          ghgInventoryPermission: response.data.ghgInventoryPermission,
         });
         removeToken();
         setIsTokenExpired(false);

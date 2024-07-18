@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
+import { DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -16,7 +16,7 @@ import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle, getRounded } from '../../../Utils/utilServices';
+import { delay, getFormTitle, getRounded } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ProjectEntity } from '../../../Entities/project';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -35,6 +35,8 @@ import {
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
+import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -50,14 +52,16 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     'detachPopup',
     'formHeader',
     'entityAction',
+    'error',
   ]);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Project', method);
 
   const navigate = useNavigate();
-  const { get, post, put } = useConnection();
+  const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
+  const { isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -99,10 +103,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
   const [activityPageSize, setActivityPageSize] = useState<number>(10);
 
-  // Detach Popup Visibility
+  // Popup Definition
 
-  // const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
-  // const [detachingEntityId, setDetachingEntityId] = useState<string>();
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
 
   // Supports state
 
@@ -247,9 +250,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
               expectedGHGReduction: entityData.migratedData?.expectedGHGReduction ?? 0,
             });
           }
-        } catch (error: any) {
+        } catch {
           navigate('/projects');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -301,7 +303,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             }
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -699,7 +701,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       let response: any;
 
       if (method === 'create') {
-        response = await post('national/projects/add', payload);
+        response = await post('national/projects/add', processOptionalFields(payload, 'project'));
       } else if (method === 'update') {
         payload.projectId = entId;
         response = await put('national/projects/update', processOptionalFields(payload, 'project'));
@@ -768,14 +770,54 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      displayErrorMessage(error, `${entId} Validation Failed`);
+      if (error?.message) {
+        if (error.message === 'Permission Denied: Unable to Validate Project') {
+          setIsValidationAllowed(false);
+        }
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Validation Failed`);
+      }
     }
   };
 
   // Entity Delete
 
-  const deleteEntity = () => {
-    console.log('Delete Clicked');
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
+  const deleteEntity = async () => {
+    try {
+      setWaitingForBE(true);
+      await delay(1000);
+
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await del('national/projects/delete', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('projectDeleteSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/projects');
+        }
+      }
+    } catch (error: any) {
+      if (error?.message) {
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Delete Failed`);
+      }
+    } finally {
+      setWaitingForBE(false);
+    }
   };
 
   // Add New KPI
@@ -791,13 +833,18 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
     setHandleKPI(true);
+    setIsSaveButtonDisabled(false);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
     if (inWhich === 'new') {
       setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
+      if (method === 'update') {
+        setIsSaveButtonDisabled(false);
+      }
     } else {
       setCreatedKpiList(createdKpiList.filter((obj) => obj.index !== kpiIndex));
+      setIsSaveButtonDisabled(false);
     }
     const updatedValues = {
       [`kpi_name_${kpiIndex}`]: undefined,
@@ -869,7 +916,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
           setInheritedKpiList(tempInheritedKpiList);
         }
       } catch (error: any) {
-        displayErrorMessage(error, t('kpiSearchFailed'));
+        console.log(error, t('kpiSearchFailed'));
       }
     }
   };
@@ -919,20 +966,21 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   return (
     <div className="content-container">
-      {/* <ConfirmPopup
-        icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
-          primaryMsg: `${t('detachPopup:primaryMsg')} Activity ${detachingEntityId}`,
-          secondaryMsg: t('detachPopup:secondaryMsg'),
-          cancelTitle: t('detachPopup:cancelTitle'),
-          actionTitle: t('detachPopup:actionTitle'),
+          primaryMsg: `${t('deletePrimaryMsg')} ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
         }}
-        actionRef={detachingEntityId}
-        doAction={detachEntity}
-        open={openDetachPopup}
-        setOpen={setOpenDetachPopup}
-      /> */}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -947,7 +995,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
-                <EntityIdCard calledIn="Project" entId={entId}></EntityIdCard>
+                <EntityIdCard
+                  calledIn="Project"
+                  entId={entId}
+                  isValidated={isValidated}
+                ></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
@@ -1153,7 +1205,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                         setStartYear(value);
                       }}
                     >
-                      {yearsList.map((year) => (
+                      {yearsList.slice(0, -1).map((year) => (
                         <Option key={year} value={year}>
                           {year}
                         </Option>
@@ -1191,7 +1243,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                         setEndYear(value);
                       }}
                     >
-                      {yearsList.map((year) => (
+                      {yearsList.slice(1).map((year) => (
                         <Option key={year} value={year}>
                           {year}
                         </Option>
@@ -1619,16 +1671,25 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 {ability.can(Action.Validate, ProjectEntity) && (
                   <Col>
                     <Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() => {
-                          validateEntity();
-                        }}
+                      <Tooltip
+                        placement="topRight"
+                        title={
+                          !isValidationAllowed ? t('error:validationPermissionRequired') : undefined
+                        }
+                        showArrow={false}
                       >
-                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                      </Button>
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => {
+                            validateEntity();
+                          }}
+                          disabled={!isValidationAllowed}
+                        >
+                          {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                        </Button>
+                      </Tooltip>
                     </Form.Item>
                   </Col>
                 )}
@@ -1648,19 +1709,21 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('entityAction:cancel')}
                   </Button>
                 </Col>
-                <Col>
-                  <Button
-                    type="default"
-                    size="large"
-                    block
-                    onClick={() => {
-                      deleteEntity();
-                    }}
-                    style={{ color: 'red', borderColor: 'red' }}
-                  >
-                    {t('entityAction:delete')}
-                  </Button>
-                </Col>
+                {ability.can(Action.Delete, ProjectEntity) && (
+                  <Col>
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      onClick={() => {
+                        deleteClicked();
+                      }}
+                      style={{ color: 'red', borderColor: 'red' }}
+                    >
+                      {t('entityAction:delete')}
+                    </Button>
+                  </Col>
+                )}
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button

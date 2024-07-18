@@ -18,6 +18,9 @@ import { HelperService } from "../util/helpers.service";
 import { EntityManager, Repository } from "typeorm";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
+import { DeleteDto } from "src/dtos/delete.dto";
+import { Role } from "src/casl/role.enum";
+import { LinkUnlinkService } from "src/util/linkUnlink.service";
 
 @Injectable()
 export class SupportService {
@@ -26,7 +29,8 @@ export class SupportService {
 		@InjectRepository(SupportEntity) private supportRepo: Repository<SupportEntity>,
 		private counterService: CounterService,
 		private helperService: HelperService,
-		private activityService: ActivityService
+		private activityService: ActivityService,
+		private linkUnlinkService: LinkUnlinkService
 	) { }
 
 	//MARK: Create Support
@@ -58,6 +62,8 @@ export class SupportService {
 			);
 		}
 
+		const activitySupports = await this.findSupportsByActivityId(activity.activityId);
+
 		let parentProject: ProjectEntity;
 		if (activity.parentType == EntityType.PROJECT) {
 			parentProject = await this.activityService.isProjectValid(activity.parentId, user);
@@ -76,6 +82,7 @@ export class SupportService {
 			.transaction(async (em) => {
 				const savedSupport = await em.save<SupportEntity>(support);
 				if (savedSupport) {
+					let unvalidateTree = false;
 
 					if (activity.validated) {
 						activity.validated = false;
@@ -88,22 +95,40 @@ export class SupportService {
 							support.supportId
 						);
 						await em.save<ActivityEntity>(activity);
-					}
 
-					if (parentProject && parentProject.validated) {
-						parentProject.validated = false;
-						this.addEventLogEntry(
-							eventLog, 
-							LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
-							EntityType.PROJECT, 
-							parentProject.projectId, 
-							0, 
-							activity.activityId
-						);
-						await em.save<ProjectEntity>(parentProject);
+						if (activitySupports && activitySupports.length > 0) {
+							const supportsList = []
+							for (const support of activitySupports) {
+								if (support.validated) {
+									support.validated = false;
+									supportsList.push(support);
+								}
+							}
+							em.save<SupportEntity>(supportsList);
+						}
+
+						if (parentProject && parentProject.validated) {
+							parentProject.validated = false;
+							this.addEventLogEntry(
+								eventLog, 
+								LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+								EntityType.PROJECT, 
+								parentProject.projectId, 
+								0, 
+								activity.activityId
+							);
+							unvalidateTree = true;
+							await em.save<ProjectEntity>(parentProject);
+						}
 					}
 
 					await em.save<LogEntity>(eventLog);
+
+					if (unvalidateTree) {
+						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProject(parentProject, em, true, [activity.activityId]);
+					} else {
+						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [support.supportId]);
+					}
 				}
 				return savedSupport;
 			})
@@ -160,17 +185,24 @@ export class SupportService {
 		);
 	}
 
-	//MARK: Find Support by Id
-	async findSupportById(supportId: string) {
+	//MARK: Find Support by Id with supports
+	async findSupportByIdWithActivity(supportId: string) {
 		return await this.supportRepo.createQueryBuilder('support')
 			.leftJoinAndSelect('support.activity', 'activity')
 			.where('support.supportId = :supportId', { supportId })
 			.getOne();
 	}
 
+	//MARK: Find Supports by Activity Id
+	async findSupportsByActivityId(activity: string) {
+		return await this.supportRepo.createQueryBuilder('support')
+			.where('support.activityId = :activity', { activity })
+			.getMany();
+	}
+
 	//MARK: Update Support
 	async updateSupport(supportUpdateDto: SupportUpdateDto, user: User) {
-		const currentSupport = await this.findSupportById(supportUpdateDto.supportId);
+		const currentSupport = await this.findSupportByIdWithActivity(supportUpdateDto.supportId);
 		if (!currentSupport) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -197,6 +229,9 @@ export class SupportService {
 		const activityList: ActivityEntity[] = [];
 		const projectList: ProjectEntity[] = [];
 
+		const updatedProjectIds = [];
+		const updatedActivityIds = [];
+
 		if (currentSupport.activity.validated) {
 			const currentActivity = currentSupport.activity;
 			currentActivity.validated = false;
@@ -209,22 +244,25 @@ export class SupportService {
 				currentSupport.supportId
 			);
 			activityList.push(currentActivity);
-		}
+			updatedActivityIds.push(currentActivity.activityId);
 
-		if (currentSupport.activity.parentType == EntityType.PROJECT) {
-			const currentParentProject = await this.activityService.isProjectValid(currentSupport.activity.parentId, user);
-			if (currentParentProject.validated) {
-				currentParentProject.validated = false;
-				this.addEventLogEntry(
-					eventLog, 
-					LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
-					EntityType.PROJECT, 
-					currentParentProject.projectId, 
-					0, 
-					currentSupport.supportId
-				);
-				projectList.push(currentParentProject);
+			if (currentActivity.parentType == EntityType.PROJECT) {
+				const currentParentProject = await this.activityService.isProjectValid(currentSupport.activity.parentId, user);
+				if (currentParentProject.validated) {
+					currentParentProject.validated = false;
+					this.addEventLogEntry(
+						eventLog, 
+						LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+						EntityType.PROJECT, 
+						currentParentProject.projectId, 
+						0, 
+						currentSupport.supportId
+					);
+					projectList.push(currentParentProject);
+					updatedProjectIds.push(currentParentProject.projectId);
+				}
 			}
+
 		}
 
 		if (supportUpdateDto.activityId != currentSupport.activity.activityId) {
@@ -268,33 +306,34 @@ export class SupportService {
 					currentSupport.supportId
 				);
 				activityList.push(activity);
-			}
-	
-			if (activity.parentType == EntityType.PROJECT) {
-				const newParentProject = await this.activityService.isProjectValid(activity.parentId, user);
-				if (newParentProject.validated) {
-					newParentProject.validated = false;
-					this.addEventLogEntry(
-						eventLog, 
-						LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
-						EntityType.PROJECT, 
-						newParentProject.projectId, 
-						0, 
-						activity.activityId
-					);
-					projectList.push(newParentProject);
+				updatedActivityIds.push(activity.activityId);
+
+				if (activity.parentType == EntityType.PROJECT) {
+					const newParentProject = await this.activityService.isProjectValid(activity.parentId, user);
+					if (newParentProject.validated) {
+						newParentProject.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+							EntityType.PROJECT, 
+							newParentProject.projectId, 
+							0, 
+							activity.activityId
+						);
+						projectList.push(newParentProject);
+						updatedProjectIds.push(newParentProject.projectId);
+					}
 				}
 			}
+	
+			
 		}
 
 		currentSupport.direction = supportUpdateDto.direction;
 		currentSupport.financeNature = supportUpdateDto.financeNature;
 		currentSupport.internationalSupportChannel = supportUpdateDto.internationalSupportChannel;
-		currentSupport.otherInternationalSupportChannel = supportUpdateDto.otherInternationalSupportChannel;
 		currentSupport.internationalFinancialInstrument = supportUpdateDto.internationalFinancialInstrument;
-		currentSupport.otherInternationalFinancialInstrument = supportUpdateDto.otherInternationalFinancialInstrument;
 		currentSupport.nationalFinancialInstrument = supportUpdateDto.nationalFinancialInstrument;
-		currentSupport.otherNationalFinancialInstrument = supportUpdateDto.otherNationalFinancialInstrument;
 		currentSupport.financingStatus = supportUpdateDto.financingStatus;
 		currentSupport.internationalSource = supportUpdateDto.internationalSource;
 		currentSupport.nationalSource = supportUpdateDto.nationalSource;
@@ -318,6 +357,21 @@ export class SupportService {
 					}
 
 					await em.save<LogEntity>(eventLog);
+
+					if (projectList && projectList.length > 0) {
+						for (const project of projectList) {
+							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProject(project, em, true, updatedActivityIds);
+						}
+						for (const activity of activityList) {
+							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [currentSupport.supportId]);
+						}
+					} else {
+						for (const activity of activityList) {
+							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [currentSupport.supportId]);
+						}
+						
+					}
+
 					
 				}
 				return savedSupport;
@@ -341,9 +395,113 @@ export class SupportService {
 		);
 	}
 
+	//MARK: Delete Support
+	async deleteSupport(deleteDto: DeleteDto, user: User) {
+
+		if (user.role !== Role.Admin && user.role !== Role.Root) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.userUnAUth",
+					[]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const support = await this.findSupportByIdWithActivity(deleteDto.entityId);
+		if (!support) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.supportNotFound",
+					[deleteDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, support.sector)) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.permissionDeniedForSector",
+					[support.supportId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+		
+		const eventLog = [];
+		const activity = support.activity;
+
+		const sup = await this.entityManager
+		.transaction(async (em) => {
+			const result = await em.delete<SupportEntity>(SupportEntity, support.supportId);
+			if (result.affected > 0) {
+				if (activity.validated) {
+					activity.validated = false;
+					this.addEventLogEntry(
+						eventLog, 
+						LogEventType.ACTIVITY_UNVERIFIED_DUE_ATTACHMENT_DELETE, 
+						EntityType.ACTIVITY, 
+						activity.activityId, 
+						0, 
+						support.supportId
+					);
+					await em.save<ActivityEntity>(activity);
+
+					if (activity.parentType == EntityType.PROJECT) {
+						const parentProject = await this.activityService.isProjectValid(activity.parentId, user);
+						if (parentProject.validated) {
+							parentProject.validated = false;
+							this.addEventLogEntry(
+								eventLog, 
+								LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+								EntityType.PROJECT, 
+								parentProject.projectId, 
+								0, 
+								activity.activityId
+							);
+							await em.save<ProjectEntity>(parentProject);
+
+							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProject(parentProject, em, true, [activity.activityId]);
+						} else {
+							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [support.supportId]);
+						}
+						
+					} else {
+						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [support.supportId]);
+					}
+				}
+				// Save event logs
+				await em.save<LogEntity>(eventLog);
+			}
+			return result;
+		})
+		.catch((err: any) => {
+			console.error(err);
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.supportDeleteFailed",
+					[err]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		});
+
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("support.deleteSupportSuccess", []),
+			null
+		);
+
+	}
+
 	//MARK: Validate Support
 	async validateSupport(validateDto: ValidateDto, user: User) {
-		const support = await this.findSupportById(validateDto.entityId);
+
+		this.helperService.doesUserHaveValidatePermission(user);
+
+		const support = await this.findSupportByIdWithActivity(validateDto.entityId);
 		if (!support) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -364,6 +522,16 @@ export class SupportService {
 			);
 		}
 
+		if (validateDto.validateStatus && support.activity && !support.activity.validated) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"support.parentNotValidated",
+					[support.activity?.activityId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
 		support.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(
 			(validateDto.validateStatus) ? LogEventType.SUPPORT_VERIFIED : LogEventType.SUPPORT_UNVERIFIED,
@@ -373,7 +541,7 @@ export class SupportService {
 			validateDto
 		)
 
-		const act = await this.entityManager
+		const sup = await this.entityManager
 			.transaction(async (em) => {
 				const savedSupport = await em.save<SupportEntity>(support);
 				if (savedSupport) {
@@ -397,10 +565,12 @@ export class SupportService {
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
 			this.helperService.formatReqMessagesString("support.verifySupportSuccess", []),
-			act
+			sup
 		);
 
 	}
+
+
 
 	private addEventLogEntry = (
 		eventLog: any[],

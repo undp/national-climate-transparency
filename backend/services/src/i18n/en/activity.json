@@ -24,5 +24,9 @@
     "activityAlreadyValidated": "The activity with id {} is already validated",
     "verifyActivitySuccess": "Activity verified successfully",
     "activityVerificationFailed": "Activity verification failed due to {}",
-    "cannotEditValidated": "The activity with id {} is validated and cannot be edited"
+    "cannotEditValidated": "The activity with id {} is validated and cannot be edited",
+    "permissionDeniedForSector": "User does not have the permission for the sector",
+    "deleteActivitySuccess": "Activity deleted successfully",
+    "activityDeletionFailed": "Activity delete failed due to {}",
+    "parentNotValidated": "Parent entity should be validated."
 }

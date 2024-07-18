@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
 import { DataExportQueryDto } from "../dtos/data.export.query.dto";
 import { DataExportReportFiveDto } from "../dtos/data.export.reportFive.dto";
 import { DataExportReportThirteenDto } from "../dtos/data.export.reportThirteen.dto";
@@ -7,36 +7,24 @@ import { DataExportReportTwelveDto } from "../dtos/data.export.reportTwelve.dto"
 import { DataListResponseDto } from "../dtos/data.list.response";
 import { QueryDto } from "../dtos/query.dto";
 import { ReportFiveViewEntity } from "../entities/report.five.view.entity";
-import { ReportThirteenViewEntity } from "../entities/report.thirteen.view.entity";
-import { ReportTwelveViewEntity } from "../entities/report.twelve.view.entity";
 import { Reports } from "../enums/shared.enum";
 import { DataExportService } from "../util/dataExport.service";
 import { HelperService } from "../util/helpers.service";
-import { EntityManager, Repository } from "typeorm";
-import { ReportSixViewEntity } from "../entities/report.six.view.entity";
+import { Repository } from "typeorm";
 import { DataExportReportSixDto } from "../dtos/data.export.reportSix.dto";
-import { ReportSevenViewEntity } from "../entities/report.seven.view.entity";
 import { DataExportReportSevenDto } from "../dtos/data.export.reportSeven.dto";
-import { ReportEightViewEntity } from "../entities/report.eight.view.entity";
 import { DataExportReportEightDto } from "../dtos/data.export.reportEight.dto";
-import { ReportNineViewEntity } from "../entities/report.nine.view.entity";
 import { DataExportReportNineDto } from "src/dtos/data.export.reportNine.dto";
-import { ReportTenViewEntity } from "../entities/report.ten.view.entity";
-import { ReportElevenViewEntity } from "../entities/report.eleven.view.entity";
 import { DataExportReportTenDto } from "../dtos/data.export.reportTen.dto";
 import { DataExportReportElevenDto } from "../dtos/data.export.reportEleven.dto";
+import { AnnexThreeViewEntity } from "../entities/annexThree.view.entity";
+import { ImpleMeans } from "src/enums/activity.enum";
+import { SupportDirection } from "src/enums/support.enum";
 
 export class ReportService {
 	constructor(
 		@InjectRepository(ReportFiveViewEntity) private reportFiveViewRepo: Repository<ReportFiveViewEntity>,
-		@InjectRepository(ReportTwelveViewEntity) private reportTwelveViewRepo: Repository<ReportTwelveViewEntity>,
-		@InjectRepository(ReportThirteenViewEntity) private reportThirteenViewRepo: Repository<ReportThirteenViewEntity>,
-		@InjectRepository(ReportSixViewEntity) private reportSixViewRepo: Repository<ReportSixViewEntity>,
-		@InjectRepository(ReportSevenViewEntity) private reportSevenViewRepo: Repository<ReportSevenViewEntity>,
-		@InjectRepository(ReportEightViewEntity) private reportEightViewRepo: Repository<ReportEightViewEntity>,
-		@InjectRepository(ReportNineViewEntity) private reportNineViewRepo: Repository<ReportNineViewEntity>,
-		@InjectRepository(ReportTenViewEntity) private reportTenViewRepo: Repository<ReportTenViewEntity>,
-		@InjectRepository(ReportElevenViewEntity) private reportElevenViewRepo: Repository<ReportElevenViewEntity>,
+		@InjectRepository(AnnexThreeViewEntity) private annexThreeViewRepo: Repository<AnnexThreeViewEntity>,
 		private helperService: HelperService,
 		private dataExportService: DataExportService,
 	) { }
@@ -58,38 +46,62 @@ export class ReportService {
 	}
 
 	getReportQueryBuilder(reportNumber: Reports) {
-		switch (reportNumber) {
-			case Reports.FIVE:
+		if (reportNumber === Reports.FIVE) {
 				return this.reportFiveViewRepo.createQueryBuilder("reportFive");
+		} else {
+			let direction: SupportDirection;
+			let implementation: ImpleMeans[];
 
-			case Reports.SIX:
-				return this.reportSixViewRepo.createQueryBuilder("reportSix");
+			switch(reportNumber){
+				case Reports.SIX:
+					direction = SupportDirection.NEEDED;
+					implementation = [ImpleMeans.FINANCE];
+					break;
+				case Reports.SEVEN:
+					direction = SupportDirection.RECEIVED;
+					implementation = [ImpleMeans.FINANCE];
+					break;
+				case Reports.EIGHT:
+					direction = SupportDirection.NEEDED;
+					implementation = [ImpleMeans.TECH_DEV];
+					break;
+				case Reports.NINE:
+					direction = SupportDirection.RECEIVED;
+					implementation = [ImpleMeans.TECH_DEV];
+					break;
+				case Reports.TEN:
+					direction = SupportDirection.NEEDED;
+					implementation = [ImpleMeans.CAPACITY_BUILD];
+					break;
+				case Reports.ELEVEN:
+					direction = SupportDirection.RECEIVED;
+					implementation = [ImpleMeans.CAPACITY_BUILD];
+					break;
+				case Reports.TWELVE:
+					direction = SupportDirection.NEEDED;
+					implementation = [ImpleMeans.FINANCE, ImpleMeans.TRANSP];
+					break;
+				case Reports.THIRTEEN:
+					direction = SupportDirection.RECEIVED;
+					implementation = [ImpleMeans.FINANCE, ImpleMeans.TRANSP];
+					break;
+			}
 
-			case Reports.SEVEN:
-				return this.reportSevenViewRepo.createQueryBuilder("reportSeven");
+			let implementationCondition = '';
 
-			case Reports.TEN:
-				return this.reportTenViewRepo.createQueryBuilder("reportTen");
+			implementation.forEach((implementation, index) => {
+				implementationCondition = index > 0 ? 
+					`${implementationCondition} OR annex_three.meansOfImplementation = '${implementation}'` : 
+					`annex_three.meansOfImplementation = '${implementation}'`
+			});
 
-			case Reports.ELEVEN:
-				return this.reportElevenViewRepo.createQueryBuilder("reportEleven");
+			implementationCondition = `(${implementationCondition})`
 
-			case Reports.EIGHT:
-				return this.reportEightViewRepo.createQueryBuilder("reportEight");
-
-			case Reports.NINE:
-				return this.reportNineViewRepo.createQueryBuilder("reportNine");
-
-			case Reports.TWELVE:
-				return this.reportTwelveViewRepo.createQueryBuilder("reportTwelve");
-
-			case Reports.THIRTEEN:
-				return this.reportThirteenViewRepo.createQueryBuilder("reportThirteen");
-
-			default:
-				break;
+			return this.annexThreeViewRepo
+					   .createQueryBuilder("annex_three")
+					   .where("annex_three.direction = :direction", { direction: direction })
+					   .andWhere(implementationCondition)
 		}
-
 	}
 
 	async downloadReportData(tableNumber: Reports, dataExportQueryDto: DataExportQueryDto) {
@@ -108,49 +120,49 @@ export class ReportService {
 					break;
 
 				case Reports.SIX:
-					prepData = this.prepareReportSixDataForExport(resp as ReportSixViewEntity[]);
+					prepData = this.prepareReportSixDataForExport(resp as AnnexThreeViewEntity[]);
 					localFileName = "reportSixExport.";
 					localTableNameKey = "reportSixExport.tableSix";
 					break;
 
 				case Reports.SEVEN:
-					prepData = this.prepareReportSevenDataForExport(resp as ReportSevenViewEntity[]);
+					prepData = this.prepareReportSevenDataForExport(resp as AnnexThreeViewEntity[]);
 					localFileName = "reportSevenExport.";
 					localTableNameKey = "reportSevenExport.tableSeven";
 					break;
 
 				case Reports.EIGHT:
-					prepData = this.prepareReportEightDataForExport(resp as ReportEightViewEntity[]);
+					prepData = this.prepareReportEightDataForExport(resp as AnnexThreeViewEntity[]);
 					localFileName = "reportEightExport.";
 					localTableNameKey = "reportEightExport.tableEight";
 					break;
 
 				case Reports.NINE:
-					prepData = this.prepareReportNineDataForExport(resp as ReportNineViewEntity[]);
+					prepData = this.prepareReportNineDataForExport(resp as AnnexThreeViewEntity[]);
 					localFileName = "reportNineExport.";
 					localTableNameKey = "reportNineExport.tableNine";
 					break;
 
 				case Reports.TEN:
-					prepData = this.prepareReportTenDataForExport(resp as ReportTenViewEntity[]);
+					prepData = this.prepareReportTenDataForExport(resp as AnnexThreeViewEntity[]);
 					localFileName = "reportTenExport.";
 					localTableNameKey = "reportTenExport.tableTen";
 					break;
 
 				case Reports.ELEVEN:
-					prepData = this.prepareReportElevenDataForExport(resp as ReportElevenViewEntity[]);
+					prepData = this.prepareReportElevenDataForExport(resp as AnnexThreeViewEntity[]);
 					localFileName = "reportElevenExport.";
 					localTableNameKey = "reportElevenExport.tableEleven";
 					break;
 
 				case Reports.TWELVE:
-					prepData = this.prepareReportTwelveDataForExport(resp as ReportTwelveViewEntity[]);
+					prepData = this.prepareReportTwelveDataForExport(resp as AnnexThreeViewEntity[]);
 					localFileName = "reportTwelveExport.";
 					localTableNameKey = "reportTwelveExport.tableTwelve";
 					break;
 
 				case Reports.THIRTEEN:
-					prepData = this.prepareReportThirteenDataForExport(resp as ReportThirteenViewEntity[]);
+					prepData = this.prepareReportThirteenDataForExport(resp as AnnexThreeViewEntity[]);
 					localFileName = "reportTwelveExport.";
 					localTableNameKey = "reportTwelveExport.tableThirteen";
 					break;
@@ -208,174 +220,180 @@ export class ReportService {
 		return exportData;
 	}
 
-	private prepareReportSixDataForExport(data: ReportSixViewEntity[]) {
+	private prepareReportSixDataForExport(data: AnnexThreeViewEntity[]) {
 		const exportData: DataExportReportSixDto[] = [];
 
 		for (const report of data) {
-			const dto: DataExportReportSixDto = new DataExportReportSixDto();
-			dto.projectId = report.projectId;
-			dto.titleOfProject = report.title;
-			dto.description = report.description;
-			dto.sector = report.sector;
-			dto.subSectors = report.subSectors;
-			dto.type = report.type;
-			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
-			dto.anchoredInNationalStrategy = report.anchoredInNationalStrategy;
-			dto.techDevelopment = report.techDevelopment;
-			dto.capacityBuilding = report.capacityBuilding;
-			// dto.financingOnly = report.financingOnly;
-			dto.startYear = report.startYear;
-			dto.endYear = report.endYear;
-			dto.receivedAmount = report.receivedAmount;
-			dto.receivedAmountDomestic = report.receivedAmountDomestic;
-			dto.internationalSupportChannel = report.internationalSupportChannel;
-			dto.financialInstrument = report.financialInstrument;
-
+			const dto: DataExportReportSixDto = {
+				activityId: report.activityId,
+				sector: report.sector,
+				subSectors: report.subSector,
+				titleOfActivity: report.title,
+				description: report.description,
+				requiredAmountDomestic: report.requiredAmountDomestic,
+				requiredAmount: report.requiredAmount,
+				startYear: report.startYear,
+				endYear: report.endYear,
+				financialInstrument: report.internationalFinancialInstrument,
+				type: report.type,
+				techDevelopment: report.meansOfImplementation === ImpleMeans.TECH_DEV ? 'Yes' : 'No',
+				capacityBuilding: report.meansOfImplementation === ImpleMeans.CAPACITY_BUILD ? 'Yes' : 'No',
+				anchoredInNationalStrategy: report.anchoredInNationalStrategy ? 'Yes' : 'No',
+				supportChannel: report.internationalSupportChannel,
+				additionalInfo: report.etfDescription,
+			};
 			exportData.push(dto);
 		}
 
 		return exportData;
 	}
 
-	private prepareReportSevenDataForExport(data: ReportSevenViewEntity[]) {
+	private prepareReportSevenDataForExport(data: AnnexThreeViewEntity[]) {
 		const exportData: DataExportReportSevenDto[] = [];
 
 		for (const report of data) {
-			const dto: DataExportReportSevenDto = new DataExportReportSevenDto();
-			dto.projectId = report.projectId;
-			dto.titleOfProject = report.title;
-			dto.description = report.description;
-			dto.sector = report.sector;
-			dto.subSectors = report.subSectors;
-			dto.type = report.type;
-			dto.recipientEntities = report.recipientEntities;
-			dto.nationalImplementingEntities = report.nationalImplementingEntities;
-			dto.internationalImplementingEntities = report.internationalImplementingEntities;
-			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
-			dto.techDevelopment = report.techDevelopment;
-			dto.capacityBuilding = report.capacityBuilding;
-			// dto.financingOnly = report.financingOnly;
-			dto.startYear = report.startYear;
-			dto.endYear = report.endYear;
-			dto.receivedAmount = report.receivedAmount;
-			dto.receivedAmountDomestic = report.receivedAmountDomestic;
-			dto.internationalSupportChannel = report.internationalSupportChannel;
-			dto.financialInstrument = report.financialInstrument;
-			dto.financingStatus = report.financingStatus;
-
+			const dto: DataExportReportSevenDto = {
+				activityId: report.activityId,
+				titleOfActivity: report.title,
+				description: report.description,
+				supportChannel: report.internationalSupportChannel,
+				recipientEntities: report.recipientEntities,
+				nationalImplementingEntities: report.nationalImplementingEntity,
+				internationalImplementingEntities: report.internationalImplementingEntity,
+				receivedAmountDomestic: report.receivedAmountDomestic,
+				receivedAmount: report.receivedAmount,
+				startYear: report.startYear,
+				endYear: report.endYear,
+				financialInstrument: report.internationalFinancialInstrument,
+				financingStatus: report.financingStatus,
+				type: report.type,
+				sector: report.sector,
+				subSectors: report.subSector,
+				techDevelopment: report.meansOfImplementation === ImpleMeans.TECH_DEV ? 'Yes' : 'No',
+				capacityBuilding: report.meansOfImplementation === ImpleMeans.CAPACITY_BUILD ? 'Yes' : 'No',
+				activityStatus: report.status,
+				additionalInfo: report.etfDescription,
+			  };
 			exportData.push(dto);
 		}
 
 		return exportData;
 	}
 
-	private prepareReportTenDataForExport(data: ReportTenViewEntity[]) {
-		const exportData: DataExportReportTenDto[] = [];
-
-		for (const report of data) {
-			const dto: DataExportReportTenDto = new DataExportReportTenDto();
-			dto.projectId = report.projectId;
-			dto.titleOfProject = report.title;
-			dto.description = report.description;
-			dto.sector = report.sector;
-			dto.subSectors = report.subSectors;
-			dto.type = report.type;
-			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
-			dto.startYear = report.startYear;
-			dto.endYear = report.endYear;
-
-			exportData.push(dto);
-		}
-
-		return exportData;
-	}
-
-	private prepareReportElevenDataForExport(data: ReportElevenViewEntity[]) {
-		const exportData: DataExportReportElevenDto[] = [];
-
-		for (const report of data) {
-			const dto: DataExportReportElevenDto = new DataExportReportElevenDto();
-			dto.projectId = report.projectId;
-			dto.titleOfProject = report.title;
-			dto.description = report.description;
-			dto.sector = report.sector;
-			dto.subSectors = report.subSectors;
-			dto.type = report.type;
-			dto.recipientEntities = report.recipientEntities;
-			dto.nationalImplementingEntities = report.nationalImplementingEntities;
-			dto.internationalImplementingEntities = report.internationalImplementingEntities;
-			dto.projectStatus = report.projectStatus;
-			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
-			dto.startYear = report.startYear;
-			dto.endYear = report.endYear;
-
-			exportData.push(dto);
-		}
-
-		return exportData;
-	}
-
-	private prepareReportEightDataForExport(data: ReportEightViewEntity[]) {
+	private prepareReportEightDataForExport(data: AnnexThreeViewEntity[]) {
 		const exportData: DataExportReportEightDto[] = [];
 
 		for (const report of data) {
-			const dto: DataExportReportEightDto = new DataExportReportEightDto();
-			dto.projectId = report.projectId;
-			dto.titleOfProject = report.title;
-			dto.description = report.description;
-			dto.sector = report.sector;
-			dto.subSectors = report.subSectors;
-			dto.type = report.type;
-			dto.technologyType = report.technologyType;
-			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
-			dto.startYear = report.startYear;
-			dto.endYear = report.endYear;
+			const dto: DataExportReportEightDto = {
+				activityId: report.activityId,
+				sector: report.sector,
+				subSectors: report.subSector,
+				titleOfActivity: report.title,
+				description: report.description,
+				type: report.type,
+				technologyType: report.technologyType,
+				startYear: report.startYear,
+				endYear: report.endYear,
+				additionalInfo: report.etfDescription,
+			}
+
 			exportData.push(dto);
 		}
 
 		return exportData;
 	}
 
-	private prepareReportNineDataForExport(data: ReportNineViewEntity[]) {
+	private prepareReportNineDataForExport(data: AnnexThreeViewEntity[]) {
 		const exportData: DataExportReportNineDto[] = [];
 
 		for (const report of data) {
-			const dto: DataExportReportNineDto = new DataExportReportNineDto();
-			dto.projectId = report.projectId;
-			dto.titleOfProject = report.title;
-			dto.description = report.description;
-			dto.sector = report.sector;
-			dto.subSectors = report.subSectors;
-			dto.type = report.type;
-			dto.technologyType = report.technologyType;
-			dto.recipientEntities = report.recipientEntities;
-			dto.nationalImplementingEntities = report.nationalImplementingEntities;
-			dto.projectStatus = report.projectStatus;
-			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
-			dto.startYear = report.startYear;
-			dto.endYear = report.endYear;
+			const dto: DataExportReportNineDto = {
+				activityId: report.activityId,
+				titleOfActivity: report.title,
+				description: report.description,
+				technologyType: report.technologyType,
+				startYear: report.startYear,
+				endYear: report.endYear,
+				recipientEntities: report.recipientEntities,
+				nationalImplementingEntities: report.nationalImplementingEntity,
+				internationalImplementingEntities: report.internationalImplementingEntity,
+				type: report.type,
+				sector: report.sector,
+				subSectors: report.subSector,
+				activityStatus: report.status,
+				additionalInfo: report.etfDescription,
+			}
+
 			exportData.push(dto);
 		}
 
 		return exportData;
 	}
 
-	private prepareReportTwelveDataForExport(data: ReportTwelveViewEntity[]) {
+	private prepareReportTenDataForExport(data: AnnexThreeViewEntity[]) {
+		const exportData: DataExportReportTenDto[] = [];
+
+		for (const report of data) {
+			const dto: DataExportReportTenDto = {
+				activityId: report.activityId,
+				sector: report.sector,
+				subSectors: report.subSector,
+				titleOfActivity: report.title,
+				description: report.description,
+				type: report.type,
+				startYear: report.startYear,
+				endYear: report.endYear,
+				additionalInfo: report.etfDescription,
+			}
+
+			exportData.push(dto);
+		}
+
+		return exportData;
+	}
+
+	private prepareReportElevenDataForExport(data: AnnexThreeViewEntity[]) {
+		const exportData: DataExportReportElevenDto[] = [];
+
+		for (const report of data) {
+			const dto: DataExportReportElevenDto = {
+				activityId: report.activityId,
+				titleOfActivity: report.title,
+				description: report.description,
+				startYear: report.startYear,
+				endYear: report.endYear,
+				recipientEntities: report.recipientEntities,
+				nationalImplementingEntities: report.nationalImplementingEntity,
+				internationalImplementingEntities: report.internationalImplementingEntity,
+				type: report.type,
+				sector: report.sector,
+				subSectors: report.subSector,
+				activityStatus: report.status,
+				additionalInfo: report.etfDescription,
+			}
+			exportData.push(dto);
+		}
+
+		return exportData;
+	}
+
+	private prepareReportTwelveDataForExport(data: AnnexThreeViewEntity[]) {
 		const exportData: DataExportReportTwelveDto[] = [];
 
 		for (const report of data) {
-			const dto: DataExportReportTwelveDto = new DataExportReportTwelveDto();
-			dto.projectId = report.projectId;
-			dto.titleOfProject = report.title;
-			dto.description = report.description;
-			dto.projectStatus = report.projectStatus;
-			dto.startYear = report.startYear;
-			dto.endYear = report.endYear;
-			dto.transparency = report.transparency;
-			dto.internationalSupportChannel = report.internationalSupportChannel;
-			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
-			dto.receivedAmount = report.receivedAmount;
-			dto.receivedAmountDomestic = report.receivedAmountDomestic;
+			const dto: DataExportReportTwelveDto = {
+				activityId: report.activityId,
+				titleOfActivity: report.title,
+				description: report.description,
+				startYear: report.startYear,
+				endYear: report.endYear,
+				recipientEntities: report.recipientEntities,
+				supportChannel: report.internationalSupportChannel,
+				requiredAmountDomestic: report.requiredAmountDomestic,
+				requiredAmount: report.requiredAmount,
+				activityStatus: report.status,
+				additionalInfo: report.etfDescription,
+			}
 
 			exportData.push(dto);
 		}
@@ -383,24 +401,23 @@ export class ReportService {
 		return exportData;
 	}
 
-	private prepareReportThirteenDataForExport(data: ReportThirteenViewEntity[]) {
+	private prepareReportThirteenDataForExport(data: AnnexThreeViewEntity[]) {
 		const exportData: DataExportReportThirteenDto[] = [];
 
 		for (const report of data) {
-			const dto: DataExportReportThirteenDto = new DataExportReportThirteenDto();
-			dto.projectId = report.projectId;
-			dto.titleOfProject = report.title;
-			dto.description = report.description;
-			dto.recipientEntities = report.recipientEntities;
-			dto.projectStatus = report.projectStatus;
-			dto.startYear = report.startYear;
-			dto.endYear = report.endYear;
-			dto.transparency = report.transparency;
-			dto.internationalSupportChannel = report.internationalSupportChannel;
-			dto.supportReceivedOrNeeded = report.supportReceivedOrNeeded;
-			dto.receivedAmount = report.receivedAmount;
-			dto.receivedAmountDomestic = report.receivedAmountDomestic;
-
+			const dto: DataExportReportThirteenDto = {
+				activityId: report.activityId,
+				titleOfActivity: report.title,
+				description: report.description,
+				startYear: report.startYear,
+				endYear: report.endYear,
+				recipientEntities: report.recipientEntities,
+				supportChannel: report.internationalSupportChannel,
+				receivedAmountDomestic: report.receivedAmountDomestic,
+				receivedAmount: report.receivedAmount,
+				activityStatus: report.status,
+				additionalInfo: report.etfDescription,
+			}
 			exportData.push(dto);
 		}
 

@@ -3,14 +3,12 @@ import { ConfigModule } from '@nestjs/config';
 import { NationalAPIController } from './national.api.controller';
 import { NationalAPIService } from './national.api.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-// import { CompanyController } from './company.controller';
 import { UserController } from './user.controller';
 import { AuthController } from './auth.controller';
 import { SettingsController } from './settings.controller';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
 import { CaslModule } from '../casl/casl.module';
-// import { OrganisationModule } from '../organisation/organisation.module';
 import { TypeOrmConfigService } from '../typeorm.config.service';
 import { UtilModule } from '../util/util.module';
 import configuration from '../configuration';
@@ -30,6 +28,10 @@ import { KpiModule } from 'src/kpi/kpi.module';
 import { KpiController } from './kpi.controller';
 import { ReportController } from './report.controller';
 import { ReportModule } from 'src/report/report.module';
+import { GhgEmissionModule } from 'src/emission/emission.module';
+import { GHGEmissionController } from './ghg.emission.controller';
+import { ResourcesController } from './resource.controller';
+import { SystemResourceModule } from 'src/system.resource/system.resources.module';
 
 
 @Module({
@@ -54,7 +56,9 @@ import { ReportModule } from 'src/report/report.module';
     LogModule,
 		SupportModule,
 		KpiModule,
-		ReportModule
+		ReportModule,
+    GhgEmissionModule,
+		SystemResourceModule
   ],
   controllers: [ 
     NationalAPIController, 
@@ -68,7 +72,9 @@ import { ReportModule } from 'src/report/report.module';
     LogController,
 		SupportController,
 		KpiController, 
-		ReportController
+		ReportController,
+    GHGEmissionController,
+		ResourcesController
   ],
   providers: [
     NationalAPIService, 

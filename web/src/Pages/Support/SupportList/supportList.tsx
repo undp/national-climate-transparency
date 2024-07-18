@@ -27,7 +27,7 @@ interface Item {
   direction: string;
   financeNature: string;
   internationalSupportChannel: string;
-  internationalFinancialInstrument: string;
+  financialInstrument: string;
   financingStatus: string;
   validationStatus: string;
   internationalSource: string[];
@@ -138,7 +138,10 @@ const supportList = () => {
             direction: unstructuredData[i].direction,
             financeNature: unstructuredData[i].financeNature,
             internationalSupportChannel: unstructuredData[i].internationalSupportChannel,
-            internationalFinancialInstrument: unstructuredData[i].internationalFinancialInstrument,
+            financialInstrument:
+              unstructuredData[i].financeNature === 'International'
+                ? unstructuredData[i].internationalFinancialInstrument
+                : unstructuredData[i].nationalFinancialInstrument,
             financingStatus: unstructuredData[i].financingStatus,
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             internationalSource: unstructuredData[i].internationalSource ?? [],
@@ -214,27 +217,27 @@ const supportList = () => {
     { title: t('supportId'), dataIndex: 'supportId', key: 'supportId', sorter: false },
     { title: t('activityId'), dataIndex: 'activityId', key: 'activityId', sorter: false },
     {
-      title: t('supportNeededORReceived'),
+      title: t('supportNeededOrReceived'),
       dataIndex: 'direction',
       key: 'direction',
       sorter: false,
     },
     {
-      title: t('internationalORNationalFinance'),
+      title: t('internationalOrNationalFinance'),
       dataIndex: 'financeNature',
       key: 'financeNature',
       sorter: false,
     },
     {
-      title: t('internationalChannelOFSupport'),
+      title: t('channelOfSupport'),
       dataIndex: 'internationalSupportChannel',
       key: 'internationalSupportChannel',
       sorter: false,
     },
     {
-      title: t('internationalFinancialInstrument'),
-      dataIndex: 'internationalFinancialInstrument',
-      key: 'internationalFinancialInstrument',
+      title: t('financialInstrument'),
+      dataIndex: 'financialInstrument',
+      key: 'financialInstrument',
       sorter: false,
     },
     {

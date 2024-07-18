@@ -27,6 +27,8 @@ import { AchievementEntity } from "../entities/achievement.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { KPIAction } from "../enums/shared.enum";
+import { DeleteDto } from "../dtos/delete.dto";
+import { Role } from "../casl/role.enum";
 
 @Injectable()
 export class ActionService {
@@ -65,7 +67,7 @@ export class ActionService {
 		// Checking for programmes having a  parent
 		let programmes: ProgrammeEntity[];
 		if (actionDto.linkedProgrammes) {
-			programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
+			programmes = await this.linkUnlinkService.findAllProgrammeByIds(actionDto.linkedProgrammes);
 			for (const programme of programmes) {
 				if (programme.action) {
 					throw new HttpException(
@@ -153,6 +155,35 @@ export class ActionService {
 		})
 	}
 
+	async findActionByIdWithAllLinkedChildren(actionId: string) {
+		return await this.actionRepo.createQueryBuilder('action')
+		.leftJoinAndSelect('action.programmes', 'programme')
+		.leftJoinAndSelect('programme.projects', 'project')
+		.leftJoinAndMapMany(
+			"action.activities",
+			ActivityEntity,
+			"actionActivity", // Unique alias for action activities
+			"actionActivity.parentType = :action AND actionActivity.parentId = :actionId",
+			{ action: EntityType.ACTION, actionId }
+		)
+		.leftJoinAndMapMany(
+			"programme.activities",
+			ActivityEntity,
+			"programmeActivity", // Unique alias for programme activities
+			"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
+			{ programme: EntityType.PROGRAMME }
+		)
+		.leftJoinAndMapMany(
+			"project.activities",
+			ActivityEntity,
+			"projectActivity", // Unique alias for project activities
+			"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
+			{ project: EntityType.PROJECT }
+		)
+		.where('action.actionId = :actionId', { actionId })
+		.getOne();
+	}
+
 	async findActionViewById(actionId: string) {
 		return await this.actionViewRepo.findOneBy({
 			id: actionId
@@ -160,27 +191,7 @@ export class ActionService {
 	}
 
 	// adding find method to action service to avoid a circular dependency with programme service
-	async findAllProgrammeByIds(programmeIds: string[]) {
-		return await this.programmeRepo.createQueryBuilder('programme')
-			.leftJoinAndSelect('programme.action', 'action')
-			.leftJoinAndSelect('programme.projects', 'project')
-			.leftJoinAndMapMany(
-				"programme.activities",
-				ActivityEntity,
-				"programmeActivity", // Unique alias for programme activities
-				"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
-				{ programme: EntityType.PROGRAMME }
-			)
-			.leftJoinAndMapMany(
-				"project.activities",
-				ActivityEntity,
-				"projectActivity", // Unique alias for project activities
-				"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
-				{ project: EntityType.PROJECT }
-			)
-			.where('programme.programmeId IN (:...programmeIds)', { programmeIds })
-			.getMany();
-	}
+
 
 	async findAllActionChildren(actionId: string) {
 
@@ -205,99 +216,6 @@ export class ActionService {
 		haveChildren = (programmeChildren.length > 0) || (projectChildren.length > 0) || (activityChildren.length > 0) ? true : false;
 
 		return { haveChildren: haveChildren, programmeChildren: programmeChildren, projectChildren: projectChildren, activityChildren: activityChildren };
-	}
-
-
-	async updateAllValidatedChildrenStatus(actionId: string, entityManager: EntityManager) {
-
-		const programmeChildren: ProgrammeEntity[] =
-			await this.programmeRepo.createQueryBuilder('programme')
-				.where('programme.actionId = :actionId AND programme.validated IS TRUE', { actionId })
-				.getMany();
-
-		const projectChildren: ProjectEntity[] =
-			await this.projectRepo.createQueryBuilder('project')
-				.where("subpath(project.path, 0, 1) = :actionId AND project.validated IS TRUE", { actionId })
-				.getMany();
-
-		const activityChildren: ActivityEntity[] =
-			await this.activityRepo.createQueryBuilder('activity')
-				.leftJoinAndSelect('activity.support', 'support')
-				.where("subpath(activity.path, 0, 1) = :actionId AND activity.validated IS TRUE", { actionId })
-				.getMany();
-
-		if ((programmeChildren.length > 0) || (projectChildren.length > 0) || (activityChildren.length > 0)) {
-
-			await entityManager
-				.transaction(async (em) => {
-					const logs = [];
-
-					const programmes = []
-					for (const programme of programmeChildren) {
-						// unvalidate programme
-					if (programme.validated) {
-						programme.validated = false;
-						logs.push(this.buildLogEntity(
-							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							EntityType.PROGRAMME,
-							programme.programmeId,
-							0,
-							actionId)
-						)
-					}
-						programmes.push(programme)
-					}
-
-					await em.save<ProgrammeEntity>(programmes);
-
-					const projects = []
-					for (const project of projectChildren) {
-						// unvalidate project
-					if (project.validated) {
-						project.validated = false;
-						logs.push(this.buildLogEntity(
-							LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							EntityType.PROJECT,
-							project.projectId,
-							0,
-							actionId)
-						)
-					}
-
-						projects.push(project)
-					}
-
-					await em.save<ProjectEntity>(projects);
-
-					const activities = []
-					for (const activity of activityChildren) {
-						// unvalidate activity
-					if (activity.validated) {
-						activity.validated = false;
-						logs.push(this.buildLogEntity(
-							LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							EntityType.ACTIVITY,
-							activity.activityId,
-							0,
-							actionId)
-						)
-					}
-						activities.push(activity)
-
-						// const supports = []
-						// for (const support of activity.support) {
-						// 	support.validated = false;
-						// 	supports.push(support)
-						// }
-
-						// await em.save<SupportEntity>(supports);
-					}
-
-					await em.save<ActivityEntity>(activities);
-					await em.save<LogEntity>(logs);
-
-				});
-		}
 	}
 
 	async getActionViewData(actionId: string) {
@@ -535,7 +453,7 @@ export class ActionService {
 					if (children.haveChildren && (actionUpdate.sector !== currentAction.sector)) {
 						await this.linkUnlinkService.updateActionChildrenSector(actionUpdate.actionId, children, actionUpdate.sector, em);
 					} else {
-						await this.updateAllValidatedChildrenStatus(actionUpdate.actionId, em);
+						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(actionUpdate.actionId, em);
 					}
 
 					// Save new KPIs
@@ -574,7 +492,88 @@ export class ActionService {
 		);
 	}
 
+		//MARK: Delete Action
+		async deleteAction(deleteDto: DeleteDto, user: User) {
+			if (user.role !== Role.Admin && user.role !== Role.Root) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"user.userUnAUth",
+						[]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+	
+			const action = await this.findActionByIdWithAllLinkedChildren(deleteDto.entityId);
+			if (!action) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"action.actionNotFound",
+						[deleteDto.entityId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+	
+			if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"action.permissionDeniedForSector",
+						[action.actionId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+	
+			const actionKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, action.actionId);
+	
+			const actionKpiIds = actionKPIs.map(kpi => kpi.kpiId);
+	
+			const linkedActivityIds = action.activities?.map(activity => activity.activityId);
+
+	
+			const act = await this.entityManager
+				.transaction(async (em) => {
+	
+					// related parent and children entity un-validation happens when projects are unlinking
+					await this.linkUnlinkService.unlinkProgrammesFromAction(action.programmes, action, action.actionId, user, this.entityManager, [], true);
+					const result = await em.delete<ActionEntity>(ActionEntity, action.actionId);
+	
+					if (result.affected > 0) {
+						if (linkedActivityIds && linkedActivityIds.length > 0) {
+							await em.delete<ActivityEntity>(ActivityEntity, linkedActivityIds);
+						}
+	
+						if (actionKpiIds && actionKpiIds.length > 0) {
+							await em.delete<KpiEntity>(KpiEntity, actionKpiIds);
+						}
+					}
+					return result;
+				})
+				.catch((err: any) => {
+					console.log(err);
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"action.actionDeletionFailed",
+							[err]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				});
+	
+			await this.helperService.refreshMaterializedViews(this.entityManager);
+			return new DataResponseMessageDto(
+				HttpStatus.OK,
+				this.helperService.formatReqMessagesString("action.deleteActionSuccess", []),
+				null
+			);
+	
+		}
+
 	async validateAction(validateDto: ValidateDto, user: User) {
+
+		this.helperService.doesUserHaveValidatePermission(user);
+
 		const action = await this.findActionById(validateDto.entityId);
 		if (!action) {
 			throw new HttpException(
@@ -609,6 +608,9 @@ export class ActionService {
 			.transaction(async (em) => {
 				const savedAction = await em.save<ActionEntity>(action);
 				if (savedAction) {
+					if (!validateDto.validateStatus) {
+						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(action.actionId, em);
+					}
 					// Save event logs
 					await em.save<LogEntity>(eventLog);
 				}
