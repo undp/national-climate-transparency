@@ -13,7 +13,7 @@ const EntityIdCard: React.FC<Props> = ({ calledIn, entId, isValidated }) => {
     <Row>
       <Col span={4}>
         <Tooltip
-          title={isValidated ? 'Validated Entity' : undefined}
+          title={isValidated ? `Validated ${calledIn}` : undefined}
           showArrow={false}
           placement="right"
         >
