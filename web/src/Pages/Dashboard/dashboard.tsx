@@ -39,7 +39,7 @@ const Dashboard = () => {
 
   // Year State for the GHG MYG Chart 5
 
-  const [mtgYear, setMtgYear] = useState<number>(2015);
+  const [mtgYear, setMtgYear] = useState<number>(2013);
 
   // Individual Chart Data
 
@@ -55,7 +55,7 @@ const Dashboard = () => {
 
   const yearsList: number[] = [];
 
-  for (let year = 2015; year <= 2050; year++) {
+  for (let year = 2013; year <= 2050; year++) {
     yearsList.push(year);
   }
 

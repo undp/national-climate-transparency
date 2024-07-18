@@ -1,7 +1,6 @@
-import { Button, Col, Form, Input, Row, Select, Spin, message } from 'antd';
+import { Button, Col, Form, Grid, Input, Row, Select, Spin, message } from 'antd';
 import { FC, Suspense, useContext, useEffect, useState } from 'react';
 import './login.scss';
-import countryLogo from '../../Assets/Images/mrvlogo.svg';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
@@ -12,8 +11,11 @@ import { AbilityContext } from '../../Casl/Can';
 import { updateUserAbility } from '../../Casl/ability';
 import ForgotPassword from './forgotPassword';
 import ResetPassword from './resetPassword';
-import { UserState } from '../../Enums/user.state.enum';
+import { UserState } from '../../Enums/user.enum';
 import { AvailableLanguages } from '../../Definitions/languageDefinitions';
+import TransparencyLogo from '../../Components/logo/transparencyLogo';
+
+const { useBreakpoint } = Grid;
 
 export interface LoginPageProps {
   forgotPassword?: boolean;
@@ -27,19 +29,72 @@ interface LoginProps {
 
 const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
   const { forgotPassword, resetPassword } = props;
-  const { post, updateToken, removeToken } = useConnection();
-  const { IsAuthenticated, setUserInfo, isTokenExpired, setIsTokenExpired } = useUserContext();
-  const { i18n, t } = useTranslation(['common', 'login']);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [showError, setShowError] = useState<boolean>(false);
+
   const navigate = useNavigate();
+  const screens = useBreakpoint();
   const ability = useContext(AbilityContext);
   const { state } = useLocation();
+  const { i18n, t } = useTranslation(['common', 'login']);
+  const { post, updateToken, removeToken } = useConnection();
+  const { IsAuthenticated, setUserInfo, isTokenExpired, setIsTokenExpired } = useUserContext();
+
+  // Login Page State
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showError, setShowError] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>();
+  const [fullScreen, setFullScreen] = useState<boolean>();
+
+  // Setting the chart Width
+
+  useEffect(() => {
+    if (screens.xxl) {
+      setFullScreen(true);
+    } else if (screens.xl) {
+      setFullScreen(true);
+    } else {
+      setFullScreen(false);
+    }
+  }, [screens]);
+
+  // Initialization Logic
+
+  useEffect(() => {
+    // Default Language Selection
+    const selectedLanguage = localStorage.getItem('i18nextLng') ?? 'en';
+    i18next.changeLanguage(selectedLanguage);
+
+    // Redirection to Dashboard if a valid auth token is available
+    if (IsAuthenticated()) {
+      navigate('/dashboard');
+    }
+
+    // Force Logout Message Population
+    const currentUserState: string | null = localStorage.getItem('userState');
+    if (currentUserState && currentUserState === UserState.SUSPENDED) {
+      message.open({
+        type: 'error',
+        content: t('login:deactivatedUserAccount'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+      localStorage.removeItem('userState');
+    }
+  }, []);
+
+  // Language Selection Handler
 
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
   };
+
+  // Forgot Password Handler
+
+  const onClickForgotPassword = () => {
+    navigate('/forgotPassword', { replace: true });
+  };
+
+  // Login Submit
 
   const onSubmit = async (values: LoginProps) => {
     const redirectLocation = state?.from?.pathname + state?.from?.search;
@@ -69,6 +124,9 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
           companyName: response.data.companyName,
           userState: response.data.userState,
           userSectors: response.data.sector,
+          validatePermission: response.data.validatePermission,
+          subRolePermission: response.data.subRolePermission,
+          ghgInventoryPermission: response.data.ghgInventoryPermission,
         });
         removeToken();
         setIsTokenExpired(false);
@@ -77,7 +135,6 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
           : navigate('/login');
       }
     } catch (error: any) {
-      console.log('Error in Login', error);
       setErrorMsg(error?.message);
       setShowError(true);
     } finally {
@@ -85,42 +142,12 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
     }
   };
 
-  useEffect(() => {
-    if (localStorage.getItem('i18nextLng')!.length > 2) {
-      i18next.changeLanguage('en');
-    }
-  }, []);
-
-  useEffect(() => {
-    if (IsAuthenticated()) {
-      navigate('/dashboard');
-    }
-  }, []);
-
-  useEffect(() => {
-    const currentUserState: string | null = localStorage.getItem('userState');
-
-    if (currentUserState && currentUserState === UserState.SUSPENDED) {
-      message.open({
-        type: 'error',
-        content: t('login:deactivatedUserAccount'),
-        duration: 3,
-        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-      });
-      localStorage.removeItem('userState');
-    }
-  }, []);
-
-  const onClickForgotPassword = () => {
-    navigate('/forgotPassword', { replace: true });
-  };
-
   return (
     <Suspense fallback={<Spin />}>
       {!IsAuthenticated() ? (
-        <div className="login-container">
-          <Row>
-            <Col md={24} lg={15} flex="auto">
+        <Row className="login-container">
+          {fullScreen && (
+            <Col xl={15} flex="auto">
               <div className="login-img-container container-image">
                 <div className="text-ctn">
                   <span>
@@ -130,191 +157,160 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                 </div>
               </div>
             </Col>
-            <Col md={24} lg={9} flex="auto">
-              <Row>
-                <Col lg={{ span: 18, offset: 4 }} md={{ span: 24 }} flex="auto">
-                  <Row>
-                    <Col lg={{ span: 9, offset: 15 }} md={{ span: 24 }} flex="auto">
-                      <div className="login-country-logo">
-                        <img
-                          src={countryLogo}
-                          alt="country-logo"
-                          onClick={() => {
-                            navigate('/');
-                          }}
-                        />
-                      </div>
-                      <div className="login-country-name">
-                        <div className="title">
-                          {'TRANSPARENCY'}
-                          <span className="title-sub">{'SYSTEM'}</span>
-                        </div>
-
-                        <span className="country-name">
-                          {process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}
-                        </span>
-                      </div>
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
-              {forgotPassword ? (
-                <ForgotPassword />
-              ) : resetPassword ? (
-                <ResetPassword />
-              ) : (
-                <>
-                  <Row>
-                    <Col lg={{ span: 18, offset: 3 }} md={24} flex="auto">
-                      <div className="login-text-contents">
-                        <span className="login-text-signin">
-                          {t('common:login')} <br />
-                          <span className="login-text-welcome">{t('login:welcome-back')}</span>
-                        </span>
-                      </div>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col lg={{ span: 18, offset: 3 }} md={{ span: 18 }} flex="fill">
-                      <div className="login-input-fields-container login-input-fields">
-                        <Form
-                          layout="vertical"
-                          onFinish={onSubmit}
-                          name="login-details"
-                          requiredMark={false}
-                        >
-                          <Form.Item
-                            name="email"
-                            label={`${t('common:email')}`}
-                            validateTrigger={'onSubmit'}
-                            rules={[
-                              ({ getFieldValue }) => ({
-                                validator() {
-                                  if (
-                                    getFieldValue('email') &&
-                                    !getFieldValue('email')
-                                      ?.trim()
-                                      .match(
-                                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                                      )
-                                  ) {
-                                    return Promise.reject('Please enter a valid email');
-                                  }
-                                  return Promise.resolve();
-                                },
-                              }),
-                              {
-                                required: true,
-                                message: 'Email cannot be empty',
-                              },
-                            ]}
-                          >
-                            <div className="login-input-email">
-                              <Input type="username" />
-                            </div>
-                          </Form.Item>
-                          <Form.Item
-                            name="password"
-                            validateTrigger={'onSubmit'}
-                            label={`${t('common:pwd')}`}
-                            rules={[
-                              {
-                                required: true,
-                                message: 'Password cannot be empty',
-                              },
-                            ]}
-                          >
-                            <div className="login-input-password">
-                              <Input.Password type="password" />
-                            </div>
-                          </Form.Item>
-                          {showError && (
-                            <div className="login-error-message-container">
-                              <ExclamationCircleOutlined
-                                style={{
-                                  color: 'rgba(255, 77, 79, 0.8)',
-                                  marginRight: '0.5rem',
-                                  fontSize: '1.1rem',
-                                }}
-                              />
-                              <span className="ant-form-item-explain-error">
-                                {errorMsg ? errorMsg : t('common:loginFailed')}
-                              </span>
-                            </div>
-                          )}
-                          <div className="login-forget-pwd-container">
-                            <span
-                              onClick={() => onClickForgotPassword()}
-                              className="login-forget-pwd-txt"
-                            >
-                              {t('login:forgot-pwd')}?
-                            </span>
-                          </div>
-                          <Form.Item>
-                            <div className="login-submit-btn-container">
-                              <Button
-                                type="primary"
-                                size="large"
-                                htmlType="submit"
-                                block
-                                loading={loading}
-                              >
-                                {t('common:login')}
-                              </Button>
-                            </div>
-                          </Form.Item>
-                          {isTokenExpired && !forgotPassword && !resetPassword && !showError && (
-                            <div className="logged-out-section">
-                              <div className="info-icon">
-                                <ExclamationCircleOutlined
-                                  style={{
-                                    color: 'rgba(255, 77, 79, 0.8)',
-                                    marginRight: '0.5rem',
-                                    fontSize: '1.1rem',
-                                  }}
-                                />
-                              </div>
-                              <div className="msg">{t('common:sessionExpiredErrorMsg')}</div>
-                            </div>
-                          )}
-                        </Form>
-                      </div>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <div className="login-language-selection-container">
-                      <span className="login-language-selection-txt">
-                        {t('common:language')}
-                        <span className="sep">{':'}</span>
-                        <Select
-                          placeholder="Search to Select"
-                          defaultValue={
-                            localStorage.getItem('i18nextLng') !== null
-                              ? localStorage.getItem('i18nextLng')
-                              : 'en'
-                          }
-                          placement="topRight"
-                          onChange={(lan: string) => handleLanguageChange(lan)}
-                          optionFilterProp="children"
-                          filterOption={(input, option) => (option?.label ?? '').includes(input)}
-                          filterSort={(optionA, optionB) =>
-                            (optionA?.label ?? '')
-                              .toLowerCase()
-                              .localeCompare((optionB?.label ?? '').toLowerCase())
-                          }
-                          options={AvailableLanguages}
-                        />
+          )}
+          <Col xl={{ span: 9 }} flex="auto">
+            <Row className="logo-row">
+              <Col span={12}>
+                <TransparencyLogo></TransparencyLogo>
+              </Col>
+            </Row>
+            {forgotPassword ? (
+              <ForgotPassword />
+            ) : resetPassword ? (
+              <ResetPassword />
+            ) : (
+              <div className="row-container">
+                <Row className="centred-row">
+                  <Col>
+                    <div className="login-text-contents">
+                      <span className="login-text-sign">
+                        {t('common:login')} <br />
+                        <span className="login-text-welcome">{t('login:welcome-back')}</span>
                       </span>
                     </div>
+                  </Col>
+                </Row>
+                <Form
+                  layout="vertical"
+                  onFinish={onSubmit}
+                  name="login-details"
+                  requiredMark={false}
+                >
+                  <Row className="centred-row">
+                    <Col span={24}>
+                      <Form.Item
+                        name="email"
+                        label={<label className="form-item-header">{t('common:email')}</label>}
+                        validateTrigger={'onSubmit'}
+                        rules={[
+                          ({ getFieldValue }) => ({
+                            validator() {
+                              if (
+                                getFieldValue('email') &&
+                                !getFieldValue('email')
+                                  ?.trim()
+                                  .match(
+                                    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                                  )
+                              ) {
+                                return Promise.reject('Please enter a valid email');
+                              }
+                              return Promise.resolve();
+                            },
+                          }),
+                          {
+                            required: true,
+                            message: 'Email cannot be empty',
+                          },
+                        ]}
+                      >
+                        <Input className="form-input-box" type="username" />
+                      </Form.Item>
+                    </Col>
                   </Row>
-                </>
-              )}
-            </Col>
-          </Row>
-        </div>
+                  <Row className="centred-row">
+                    <Col span={24}>
+                      <Form.Item
+                        name="password"
+                        validateTrigger={'onSubmit'}
+                        label={<label className="form-item-header">{t('common:pwd')}</label>}
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Password cannot be empty',
+                          },
+                        ]}
+                      >
+                        <Input.Password className="form-input-box" type="password" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  {showError && (
+                    <Row className="centred-row">
+                      <Col span={1}>
+                        <ExclamationCircleOutlined className="error-message-icon" />
+                      </Col>
+                      <Col span={23}>
+                        <span className="error-message-text">
+                          {errorMsg ? errorMsg : t('common:loginFailed')}
+                        </span>
+                      </Col>
+                    </Row>
+                  )}
+                  <Row className="centred-row">
+                    <Col span={24} className="forget-password">
+                      <span onClick={() => onClickForgotPassword()}>{t('login:forgot-pwd')}?</span>
+                    </Col>
+                  </Row>
+                  <Row className="centred-row">
+                    <Col span={24}>
+                      <Form.Item>
+                        <Button
+                          type="primary"
+                          size="large"
+                          htmlType="submit"
+                          block
+                          loading={loading}
+                        >
+                          {t('common:login')}
+                        </Button>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  {isTokenExpired && !forgotPassword && !resetPassword && !showError && (
+                    <Row className="centred-row">
+                      <Col span={1}>
+                        <ExclamationCircleOutlined className="error-message-icon" />
+                      </Col>
+                      <Col span={23}>
+                        <span className="expiry-message-text">
+                          {t('common:sessionExpiredErrorMsg')}
+                        </span>
+                      </Col>
+                    </Row>
+                  )}
+                </Form>
+                <Row className="language-row">
+                  <Col span={24} className="language-section">
+                    <Select
+                      placeholder="Search to Select"
+                      defaultValue={
+                        localStorage.getItem('i18nextLng') !== null
+                          ? localStorage.getItem('i18nextLng')
+                          : 'en'
+                      }
+                      placement="topRight"
+                      onChange={(lan: string) => handleLanguageChange(lan)}
+                      optionFilterProp="children"
+                      filterOption={(input, option) => (option?.label ?? '').includes(input)}
+                      filterSort={(optionA, optionB) =>
+                        (optionA?.label ?? '')
+                          .toLowerCase()
+                          .localeCompare((optionB?.label ?? '').toLowerCase())
+                      }
+                      options={AvailableLanguages}
+                    />
+                  </Col>
+                </Row>
+              </div>
+            )}
+          </Col>
+        </Row>
       ) : null}
     </Suspense>
   );
 };
 
 export default Login;
+
+// {t('common:language')}

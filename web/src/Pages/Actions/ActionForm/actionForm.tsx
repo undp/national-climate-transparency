@@ -1,10 +1,21 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
-import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { AppstoreOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
+import {
+  AppstoreOutlined,
+  DeleteOutlined,
+  DisconnectOutlined,
+  PlusCircleOutlined,
+} from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
-import { InstrumentType, ActionStatus, NatAnchor, Action } from '../../../Enums/action.enum';
+import {
+  InstrumentType,
+  ActionStatus,
+  NatAnchor,
+  Action,
+  ActionType,
+} from '../../../Enums/action.enum';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
@@ -14,9 +25,8 @@ import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
-import { getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
+import { delay, getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { GraphUpArrow } from 'react-bootstrap-icons';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { getActivityTableColumns } from '../../../Definitions/columns/activityColumns';
@@ -50,15 +60,21 @@ const inputFontSize = '13px';
 
 const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['actionForm', 'detachPopup', 'entityAction', 'formHeader']);
+  const { t } = useTranslation([
+    'actionForm',
+    'detachPopup',
+    'entityAction',
+    'formHeader',
+    'error',
+  ]);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Action', method);
 
   const navigate = useNavigate();
-  const { get, post, put } = useConnection();
+  const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
-  const { userInfoState } = useUserContext();
+  const { userInfoState, isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -80,7 +96,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
-  // Spinner When Form Submit Occurs
+  // Spinner For Form Submit
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 
@@ -94,8 +110,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
-  // Activity Attachment state
+  // Activity Attachment state: Activity link functions removed keeping original state
 
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
   const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
@@ -108,9 +125,13 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
   const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
-  // Detach Popup Visibility
+  // Popup Definition
 
   const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
+
+  // Detach Entity Data
+
   const [detachingEntityId, setDetachingEntityId] = useState<string>();
   const [detachingEntityType, setDetachingEntityType] = useState<'Programme' | 'Activity'>();
 
@@ -128,7 +149,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const userSectors = userInfoState?.userSectors ?? [];
   const yearsList: number[] = [];
 
-  for (let year = 2013; year <= 2050; year++) {
+  for (let year = 2013; year <= 2049; year++) {
     yearsList.push(year);
   }
 
@@ -180,6 +201,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               title: entityData.title,
               description: entityData.description,
               objective: entityData.objective,
+              type: entityData.type,
               sector: entityData.sector,
               instrumentType: entityData.instrumentType,
               status: entityData.status,
@@ -203,7 +225,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
             // Populating Migrated Fields (Will be overwritten when attachments change)
             setActionMigratedData({
-              type: entityData.migratedData?.types ?? [],
               ghgsAffected: entityData.migratedData?.ghgsAffected,
               estimatedInvestment: entityData.migratedData?.totalInvestment,
               achievedReduction: entityData.migratedData?.achievedGHGReduction,
@@ -211,9 +232,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               natImplementer: entityData.migratedData?.natImplementors ?? [],
             });
           }
-        } catch (error: any) {
+        } catch {
           navigate('/actions');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -236,8 +256,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 id: kpi.kpiId,
                 name: kpi.name,
                 unit: kpi.kpiUnit,
-                achieved: kpi.achieved ?? 0,
-                expected: kpi.expected,
+                achieved: parseFloat(kpi.achieved ?? 0),
+                expected: parseFloat(kpi.expected ?? 0),
                 kpiAction: KPIAction.NONE,
               });
               tempKpiCounter = tempKpiCounter + 1;
@@ -250,7 +270,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             }
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -332,7 +352,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   useEffect(() => {
     if (actionMigratedData) {
       form.setFieldsValue({
-        type: actionMigratedData.type,
         ghgsAffected: actionMigratedData.ghgsAffected,
         natImplementor: actionMigratedData.natImplementer,
         estimatedInvestment: actionMigratedData.estimatedInvestment,
@@ -499,7 +518,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     const tempMigratedData: ActionMigratedData = {
       natImplementer: [],
       estimatedInvestment: 0,
-      type: [],
       achievedReduction: 0,
       expectedReduction: 0,
       ghgsAffected: [],
@@ -510,8 +528,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         tempMigratedData.ghgsAffected,
         prg.ghgsAffected ?? []
       );
-
-      tempMigratedData.type = joinTwoArrays(tempMigratedData.type, prg.types ?? []);
 
       tempMigratedData.natImplementer = joinTwoArrays(
         tempMigratedData.natImplementer,
@@ -734,14 +750,54 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      displayErrorMessage(error, `${entId} Validation Failed`);
+      if (error?.message) {
+        if (error.message === 'Permission Denied: Unable to Validate Action') {
+          setIsValidationAllowed(false);
+        }
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Validation Failed`);
+      }
     }
   };
 
   // Entity Delete
 
-  const deleteEntity = () => {
-    console.log('Delete Clicked');
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
+  const deleteEntity = async () => {
+    try {
+      setWaitingForBE(true);
+      await delay(1000);
+
+      if (entId) {
+        const payload = {
+          entityId: entId,
+        };
+        const response: any = await del('national/actions/delete', payload);
+
+        if (response.status === 200 || response.status === 201) {
+          message.open({
+            type: 'success',
+            content: t('actionDeleteSuccess'),
+            duration: 3,
+            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+          });
+
+          navigate('/actions');
+        }
+      }
+    } catch (error: any) {
+      if (error?.message) {
+        displayErrorMessage(error);
+      } else {
+        displayErrorMessage(error, `${entId} Delete Failed`);
+      }
+    } finally {
+      setWaitingForBE(false);
+    }
   };
 
   // Detach Programme
@@ -754,11 +810,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Detach Activity
 
-  const detachActivity = async (actId: string) => {
-    setDetachingEntityId(actId);
-    setDetachingEntityType('Activity');
-    setOpenDetachPopup(true);
-  };
+  // const detachActivity = async (actId: string) => {
+  //   setDetachingEntityId(actId);
+  //   setDetachingEntityType('Activity');
+  //   setOpenDetachPopup(true);
+  // };
 
   // Handle Detachment
 
@@ -787,13 +843,18 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     setKpiCounter(kpiCounter + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
     setHandleKPI(true);
+    setIsSaveButtonDisabled(false);
   };
 
   const removeKPI = (kpiIndex: number, inWhich: 'created' | 'new') => {
     if (inWhich === 'new') {
       setNewKpiList(newKpiList.filter((obj) => obj.index !== kpiIndex));
+      if (method === 'update') {
+        setIsSaveButtonDisabled(false);
+      }
     } else {
       setCreatedKpiList(createdKpiList.filter((obj) => obj.index !== kpiIndex));
+      setIsSaveButtonDisabled(false);
     }
     const updatedValues = {
       [`kpi_name_${kpiIndex}`]: undefined,
@@ -842,7 +903,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Activity Column Definition
 
-  const activityTableColumns = getActivityTableColumns(isView, detachActivity);
+  const activityTableColumns = getActivityTableColumns();
 
   // Support Column Definition
 
@@ -878,6 +939,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   return (
     <div className="content-container">
       <ConfirmPopup
+        key={'detach_popup'}
         icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
@@ -890,6 +952,21 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         doAction={detachEntity}
         open={openDetachPopup}
         setOpen={setOpenDetachPopup}
+      />
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('deletePrimaryMsg')} ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
+        }}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
       />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
@@ -905,20 +982,32 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
-                <EntityIdCard calledIn="Action" entId={entId}></EntityIdCard>
+                <EntityIdCard
+                  calledIn="Action"
+                  entId={entId}
+                  isValidated={isValidated}
+                ></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('formHeader:typeHeader')}</label>}
                     name="type"
+                    rules={[validation.required]}
                   >
                     <Select
                       size="large"
                       style={{ fontSize: inputFontSize }}
-                      mode="multiple"
-                      disabled={true}
-                    ></Select>
+                      allowClear
+                      disabled={isView}
+                      showSearch
+                    >
+                      {Object.values(ActionType).map((aType) => (
+                        <Option key={aType} value={aType}>
+                          {aType}
+                        </Option>
+                      ))}
+                    </Select>
                   </Form.Item>
                 </Col>
                 <Col {...halfColumnBps}>
@@ -1177,7 +1266,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
                   <div className="form-section-header">{t('formHeader:activityInfoTitle')}</div>
                 </Col>
-                <Col {...attachButtonBps}>
+                {/* <Col {...attachButtonBps}>
                   <AttachEntity
                     isDisabled={isView}
                     content={{
@@ -1194,7 +1283,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     setIsSaveButtonDisabled={setIsSaveButtonDisabled}
                     icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
                   ></AttachEntity>
-                </Col>
+                </Col> */}
               </Row>
               <Row>
                 <Col span={24}>
@@ -1405,16 +1494,25 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 {ability.can(Action.Validate, ActionEntity) && (
                   <Col>
                     <Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() => {
-                          validateEntity();
-                        }}
+                      <Tooltip
+                        placement="topRight"
+                        title={
+                          !isValidationAllowed ? t('error:validationPermissionRequired') : undefined
+                        }
+                        showArrow={false}
                       >
-                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                      </Button>
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => {
+                            validateEntity();
+                          }}
+                          disabled={!isValidationAllowed}
+                        >
+                          {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                        </Button>
+                      </Tooltip>
                     </Form.Item>
                   </Col>
                 )}
@@ -1434,19 +1532,21 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                     {t('entityAction:cancel')}
                   </Button>
                 </Col>
-                <Col>
-                  <Button
-                    type="default"
-                    size="large"
-                    block
-                    onClick={() => {
-                      deleteEntity();
-                    }}
-                    style={{ color: 'red', borderColor: 'red' }}
-                  >
-                    {t('entityAction:delete')}
-                  </Button>
-                </Col>
+                {ability.can(Action.Delete, ActionEntity) && (
+                  <Col>
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      onClick={() => {
+                        deleteClicked();
+                      }}
+                      style={{ color: 'red', borderColor: 'red' }}
+                    >
+                      {t('entityAction:delete')}
+                    </Button>
+                  </Col>
+                )}
                 <Col {...shortButtonBps}>
                   <Form.Item>
                     <Button

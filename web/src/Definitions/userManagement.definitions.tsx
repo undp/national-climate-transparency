@@ -9,4 +9,7 @@ export interface UserData {
   role: string;
   subRole: string;
   sector: string[];
+  validatePermission: string;
+  subRolePermission: string;
+  ghgInventoryPermission: string;
 }

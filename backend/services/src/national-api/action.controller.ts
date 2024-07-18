@@ -7,6 +7,7 @@ import {
   Get,
   Param,
 	Put,
+	Delete,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ActionService } from "../action/action.service";
@@ -17,8 +18,9 @@ import { PoliciesGuardEx } from "../casl/policy.guard";
 import { ActionDto } from "../dtos/action.dto";
 import { ActionEntity } from "../entities/action.entity";
 import { QueryDto } from "../dtos/query.dto";
-import { ActionUpdateDto } from "src/dtos/actionUpdate.dto";
-import { ValidateDto } from "src/dtos/validate.dto";
+import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
+import { ValidateDto } from "../dtos/validate.dto";
+import { DeleteDto } from "src/dtos/delete.dto";
 
 @ApiTags("Actions")
 @ApiBearerAuth()
@@ -65,5 +67,13 @@ export class ActionController {
 	@Post("validateStatus")
 	validateActions(@Body() validateDto: ValidateDto, @Request() req) {
 			return this.actionService.validateAction(validateDto, req.user);
+	}
+
+	@ApiBearerAuth('api_key')
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Delete, ActionEntity))
+	@Delete("delete")
+	deleteAction(@Body() deleteDto: DeleteDto, @Request() req) {
+		return this.actionService.deleteAction(deleteDto, req.user);
 	}
 }

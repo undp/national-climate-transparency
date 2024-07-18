@@ -1,0 +1,20 @@
+{
+    "tableSix": "Tables Annex III -06",
+    "nothingToExport": "Data not found for export",
+    "activityId": "Activity No.",
+    "titleOfActivity": "Name of Activity",
+    "description": "Activity description",
+    "sector": "Sector",
+    "subSectors": "Subsector",
+    "type": "Type of support",
+    "anchoredInNationalStrategy": "Whether the activity is anchored in a national strategy and/or an NDC",
+    "techDevelopment": "Contribution to technology development and transfer objectives",
+    "capacityBuilding": "Contribution to capacity building objectives",
+    "startYear": "Start year",
+    "endYear": "End year",
+    "supportChannel": "Channel",
+    "requiredAmount": "Estimated amount (climate-specific) USD",
+    "requiredAmountDomestic": "Estimated amount (climate-specific) Domestic currency",
+    "financialInstrument": "Expected financial instrument",
+    "additionalInfo": "Additional Information"
+}

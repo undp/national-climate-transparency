@@ -10,5 +10,8 @@
     "unvalidate": "Invalider",
     "back": "Retour",
     "delete": "Supprimer",
-    "apply": "Appliquer"
+    "apply": "Appliquer",
+    "submit": "soumettre",
+    "finalize": "finaliser",
+    "edit": "modifier"
 }

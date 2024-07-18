@@ -5,6 +5,7 @@ import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
 import { KpiUnits } from "../enums/kpi.enum";
 import { Sector } from "../enums/sector.enum";
+import { ActionType } from "../enums/action.enum";
 
 export class ActionDto {
 
@@ -36,6 +37,17 @@ export class ActionDto {
 	})
 	sector: Sector;
 
+	@IsNotEmpty()
+	@IsEnum(ActionType, {
+		each: true,
+		message: 'Invalid Action Type:' + Object.values(ActionType)
+	})
+	@ApiProperty({
+		type: [String],
+		enum: Object.values(ActionType),
+	})
+	type: ActionType;
+
 	@IsArray()
 	@ArrayMinSize(1)
 	@MaxLength(100, { each: true })
@@ -60,7 +72,7 @@ export class ActionDto {
 	@IsNotEmpty()
 	@IsNumber()
 	@Min(2013)
-	@Max(2050)
+	@Max(2049)
 	@ApiProperty()
 	startYear: number;
 

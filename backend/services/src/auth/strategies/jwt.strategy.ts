@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JWTPayload } from '../../dtos/jwt.payload';
-import { UserState } from 'src/enums/user.state.enum';
+import { UserState } from 'src/enums/user.enum';
 import { UserService } from 'src/user/user.service';
 
 
@@ -25,6 +25,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (user.state !== UserState.ACTIVE) {
             throw new UnauthorizedException('user deactivated');
         }
-        return { id: jwtPayload.sub, companyName: jwtPayload.cn, role: jwtPayload.r, SubRole: jwtPayload.sr, name: jwtPayload.n, sector: jwtPayload.sc };
+        return { id: user.id, companyName: user.organisation, role: user.role, subRole: user.subRole, name: user.name, sector: user.sector, validatePermission: user.validatePermission, subRolePermission:user.subRolePermission, ghgInventoryPermission:user.ghgInventoryPermission };
     }
 }

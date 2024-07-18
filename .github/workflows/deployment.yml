@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "Transparency-New-Design"
+      - "staging"
     paths:
       - backend/**
       - web/**
@@ -62,7 +62,7 @@ jobs:
   backend-deploy:
     needs: changes
     if: needs.changes.outputs.backend-changes == 'true' || needs.changes.outputs.workflows-changes == 'true'
-    name: Carbon Registry Backend Deploy
+    name: Carbon Transparency Backend Deploy
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-'backend'
@@ -110,7 +110,7 @@ jobs:
   frontend-deploy:
     needs: changes
     if: needs.changes.outputs.frontend-changes == 'true' || needs.changes.outputs.workflows-changes == 'true' 
-    name: Carbon Registry Frontend Deploy
+    name: Carbon Transparency Frontend Deploy
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-'web'

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { EntityType } from "../enums/shared.enum";
 import { KpiUnits } from "../enums/kpi.enum";
 import { KPIAction } from "../enums/shared.enum";

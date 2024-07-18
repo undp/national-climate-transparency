@@ -23,6 +23,9 @@
   "attachACTIVITY": "ක්‍රියාවලියන් අමතන්න",
   "activityList": "ක්‍රියාත්මක ලැයිස්තුව",
   "projectCreationSuccess": "ව්‍යාපෘතිය සාදන ලදි",
+  "projectDeleteSuccess": "ව්‍යාපෘතිය ඉවත් කිරීම සාර්ථකයි",
   "noProjectsMessage": "අයිතියේ ක්‍රියාවලියන් සම්බන්ධ කළ නොහැක",
-  "projectUpdateSuccess": "ව්‍යාපෘතිය යාවත්කාල කරන ලදි"
+  "projectUpdateSuccess": "ව්‍යාපෘතිය යාවත්කාල කරන ලදි",
+  "deletePrimaryMsg": "ඔබට ඉවත් කිරීම අවශ්‍ය බව ඔබට විශ්වාසද",
+  "deleteSecondaryMsg": "ඔබට මෙම ක්‍රියාව අහෝසි කළ නොහැක."
 }

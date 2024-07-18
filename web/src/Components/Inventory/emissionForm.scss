@@ -1,0 +1,160 @@
+.emission-form {
+
+    .first-row {
+        
+        margin-top: 20px;
+        padding-left: 42px;
+        padding-right: 16px;
+
+        .year-picker-column {
+            height: 40px;
+            max-width: 260px;
+
+            .year-picker {
+                width: 100%;
+                min-height: 40px;                
+            }
+        }
+    }
+
+    .unit-row {
+        margin-top: 30px;
+        padding-left: 42px;
+        padding-right: 16px;
+        display: flex;
+        justify-content: flex-end;
+
+        .unit-div{
+            font-weight: 500;
+            color: #7e7e7e;
+            display: flex;
+            justify-content: center;
+        }
+    }
+
+    .total-row {
+        margin-top: 30px;
+        padding-left: 42px;
+        padding-right: 16px;
+        display: flex;
+        justify-content: flex-end;
+
+        .total-div{
+            font-size: 14px;
+            font-weight: 800;
+            color: #7e7e7e;
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+    }
+
+    .collapsing-row {
+        margin-top: 20px;
+        margin-bottom: 20px;
+
+        .sector-header-row {
+            display: flex;
+            justify-content: flex-end;
+    
+            .title-div{
+                font-size: 12px;
+                font-weight: 600;
+                color: #7e7e7e;
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+        }
+
+        .sector-sub-header-row {
+            padding-left: 26px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: flex-end;
+            border-bottom: 1px solid #e8e8e8;
+    
+            .title-div{
+                font-size: 12px;
+                font-weight: 600;
+                color: #7e7e7e;
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+        }
+
+        .input-number-row {
+            margin: 0;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            padding-left: 26px;
+            padding-right: 0px;
+            display: flex;
+            justify-content: flex-end;
+            border-bottom: 1px solid #e8e8e8;
+    
+            .title-div{
+                font-size: 12px;
+                font-weight: 500;
+                color: #7e7e7e;
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+    
+            .number-column {
+                display: flex;
+                justify-content: center;
+    
+                .input-emission {
+                    width: fit-content;
+
+                    .ant-input-number-input {
+                        text-align: center;
+                    }
+                }
+            }
+    
+        }
+    }
+
+    .input-number-row {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-left: 42px;
+        padding-right: 16px;
+        display: flex;
+        justify-content: flex-end;
+        border-bottom: 1px solid #e8e8e8;
+
+        .title-div{
+            font-size: 12px;
+            font-weight: 600;
+            color: #7e7e7e;
+            display: flex;
+            height: 100%;
+        }
+
+        .number-column {
+            display: flex;
+            justify-content: center;
+
+            .input-emission {
+                width: fit-content;
+
+                .ant-input-number-input {
+                    text-align: center;
+                }
+            }
+        }
+
+    }
+
+    .action-row {
+        margin-top: 40px;
+        padding-right: 16px;
+    }
+
+}

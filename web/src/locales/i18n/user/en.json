@@ -5,7 +5,7 @@
     "company": "Organisation",
     "companyRole": "Organisation Type",
     "status": "Status",
-    "role": "User Role",
+    "role": "User Permissions",
     "addUser": "Add User",
     "viewUsers": "View Users",
     "viewDesc": "View the users registered with the Carbon Registry based on your permissions",
@@ -17,5 +17,12 @@
     "filterByRole": "Filter By User Role",
     "filterByCompanyRole": "Filter by Organisation Type",
     "activateSuccessMsg" : "User has been activated successfully",
-    "deactivateSuccessMsg": "User has been deactivated successfully"
+    "deactivateSuccessMsg": "User has been deactivated successfully",
+    "Root": "Super Admin",
+    "Admin": "Administrator",
+    "GovernmentUser": "Government User",
+    "Observer": "Observer",
+    "validationPermission": "Validation Permission",
+    "subRolePermission": "Sub Role Manipulation Permission",
+    "ghgInventoryPermission" : "GHG Inventory Manipulation Permission"
 }

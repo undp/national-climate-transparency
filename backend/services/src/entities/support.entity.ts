@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import {
   SupportDirection,
   FinanceNature,
@@ -25,20 +25,11 @@ export class SupportEntity {
   @Column({ type: "enum", enum: IntSupChannel, nullable: true })
   internationalSupportChannel: string;
 
-	@Column()
-  otherInternationalSupportChannel: string;
-
   @Column({ type: "enum", enum: IntFinInstrument, nullable: true })
   internationalFinancialInstrument: string;
 
-	@Column()
-	otherInternationalFinancialInstrument: string;
-
   @Column({ type: "enum", enum: NatFinInstrument, nullable: true })
   nationalFinancialInstrument: string;
-
-  @Column({ nullable: true })
-  otherNationalFinancialInstrument: string;
 
   @Column({ type: "enum", enum: FinancingStatus, nullable: true })
   financingStatus: string;
@@ -49,19 +40,19 @@ export class SupportEntity {
   @Column({ nullable: true })
   nationalSource: string;
 
-  @Column({nullable: false, type: 'double precision' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   requiredAmount: number;
 
-  @Column({nullable: false, type: 'double precision' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   receivedAmount: number;
 
-  @Column({nullable: false, type: 'double precision' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   exchangeRate: number;
 
-	@Column({nullable: false, type: 'double precision' })
+	@Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   requiredAmountDomestic: number;
 
-  @Column({nullable: false, type: 'double precision' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   receivedAmountDomestic: number;
 
   @Column({ nullable: true })
@@ -69,10 +60,17 @@ export class SupportEntity {
 
   @ManyToOne(() => ActivityEntity, (activity) => activity.support, {
     nullable: false,
+		onDelete: 'CASCADE',
   })
   @JoinColumn([{ name: "activityId", referencedColumnName: "activityId" }])
   activity: ActivityEntity;
 
 	@Column({ type: "boolean", default: false })
 	validated: boolean;
+
+	@CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	createdTime: Date;
+
+	@UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	updatedTime: Date;
 }

@@ -1,58 +1,49 @@
-.report-table5 {
-  .content-card {
+.select-report-bar {
+    margin-bottom: 25px;
+
+    .report-selector {
+        width: 100%;
+
+        .ant-select-selector {
+            padding: 5px;
+            border-width: 1px;
+            border-radius: 10px !important;
+        }
+
+        .placeholder-label {
+            font-size: small;
+        }
+    }
+
+    .report-chip {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 34px;
+        width: 287px;
+        border-width: 0;
+        border-radius: 6px;
+        background-color: #e3f3fb;
+        color: #7d858a;
+        padding: 10px;
+        margin-left: 3px;
+        margin-right: 5px;
+        margin-bottom: 3px;
+        margin-top: 3px;
+
+        .report-label {
+            margin-right: 10px;
+            font-size: 13px;
+        }
+    }
+}
+
+.no-reports-selected {
+    background-color: #ffffff;
     border-radius: 10px;
     width: 100%;
-
-    .action-bar {
-      padding-top: 10px;
-      padding-bottom: 10px;
-
-      .title {
-        padding-top: 6px;
-        color: #3A3541;
-        opacity: 0.8;
-        font-weight: bold;
-      }
-
-      .subTitle {
-        font-weight: 500;
-        padding-left: 10px;
-        padding-bottom: 10px;
-        color: #3a3541CC;
-      }
-
-      button {
-        width: fit-content;
-      }
-    }
-  }
-
-  .table-actions-section {
-    width: 100%;
-    margin-bottom: 0px;
-    padding: 10px;
-
-    .export-action-row {
-      padding-top: 10px;
-      padding-bottom: 10px;
-      padding-right: 10px;
-      display: flex;
-      justify-content: flex-end;
-
-      @media (max-width: 992px) {
-        justify-content: flex-start;
-        padding-right: 0px;
-        padding-left: 25px;
-      }
-
-      .export-button {
-        @media (max-width: 576px) {
-          margin-bottom: 10px !important;
-        } 
-      }
-
-
-    }
-  }
-
+    height: 350px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

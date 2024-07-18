@@ -17,3 +17,10 @@ export enum NatAnchor {
   NDP = "NDP",
   OTHER = "Other",
 }
+
+export enum ActionType {
+  MITIGATION = "Mitigation",
+  ADAPTION = "Adaption",
+  CROSSCUT = "Cross-cutting",
+  ENABLING = "Enabling",
+}

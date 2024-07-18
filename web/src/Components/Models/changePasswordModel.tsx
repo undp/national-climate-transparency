@@ -62,7 +62,7 @@ const ChangePasswordModel: FC<ChangePasswordProps> = (props: ChangePasswordProps
             },
           ]}
         >
-          <Input.Password placeholder="" className="border-radius-5" />
+          <Input.Password className="password-input" />
         </Form.Item>
 
         <Form.Item
@@ -73,9 +73,20 @@ const ChangePasswordModel: FC<ChangePasswordProps> = (props: ChangePasswordProps
               required: true,
               message: `${t('changePassword:newPassword')} ${t('changePassword:isRequired')}`,
             },
+            ({ getFieldValue }) => ({
+              // eslint-disable-next-line no-unused-vars
+              validator(_, value) {
+                if (!value || getFieldValue('oldPassword') !== value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(
+                  new Error(t('changePassword:cannotEnterOldPassword').toString())
+                );
+              },
+            }),
           ]}
         >
-          <Input.Password placeholder="" className="border-radius-5" />
+          <Input.Password className="password-input" />
         </Form.Item>
 
         <Form.Item
@@ -102,7 +113,7 @@ const ChangePasswordModel: FC<ChangePasswordProps> = (props: ChangePasswordProps
             }),
           ]}
         >
-          <Input.Password placeholder="" className="border-radius-5" />
+          <Input.Password className="password-input" />
         </Form.Item>
 
         {errorMsg && <Alert className="error" message={errorMsg} type="error" showIcon />}

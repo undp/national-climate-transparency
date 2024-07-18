@@ -2,8 +2,8 @@ export class DataCountResponseDto {
   stats: any;
   lastUpdate: number;
 
-  constructor(stats: any) {
+  constructor(stats: any, lastUpdate: number) {
     this.stats = stats;
-    this.lastUpdate = Math.round(Date.now() / 1000);
+    this.lastUpdate = lastUpdate;
   }
 }

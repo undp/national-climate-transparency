@@ -6,12 +6,9 @@
     "selectActivityTitle": "Select Activity",
     "supportDirectionTitle": "Support Needed or Received",
     "financeNatureTitle": "International or National Finance",
-    "intSupportChannelTitle": "International Channel of Support",
-    "otherIntSupportChannel": "Other International Channel of Support ",
+    "supportChannelTitle": "Channel of Support",
     "intFinancialInstrumentTitle": "International Financial Instrument",
-    "otherIntFinanceInstrumentTitle": "Other International Financial Instrument",
     "nationalFinanceInstrument": "National Financial Instrument",
-    "otherNatFinanceInstrumentTitle": "Other National Financial Instrument",
     "financeStatus": "Financing Status ",
     "internationalSourceTitle": "International Source",
     "nationalSourceTitle": "National Source",
@@ -23,5 +20,8 @@
     "supportCreationSuccess": "Support Added Successfully",
     "supportUpdateSuccess": "Support Updated Successfully",
     "supportValidateSuccess": "Support Validated Successfully",
-    "supportUnvalidateSuccess": "Support Unvalidated Successfully"
+    "supportUnvalidateSuccess": "Support Unvalidated Successfully",
+    "supportDeleteSuccess": "Support Deleted Successfully",
+    "deletePrimaryMsg": "Are you sure you want to remove the Support",
+    "deleteSecondaryMsg": "You can’t undo this action"
   }

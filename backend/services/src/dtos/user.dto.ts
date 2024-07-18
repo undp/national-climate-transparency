@@ -13,9 +13,10 @@ import {
 	ValidateIf,
 } from "class-validator";
 import { Role, SubRole } from "../casl/role.enum";
-import { Organisation, OrganisationType } from "../enums/organisation.enum";
+import { Organisation } from "../enums/organisation.enum";
 import { IsValidCountry } from "../util/validcountry.decorator";
-import { Sector } from "src/enums/sector.enum";
+import { Sector } from "../enums/sector.enum";
+import { GHGInventoryManipulate, SubRoleManipulate, ValidateEntity } from "../enums/user.enum";
 
 export class UserDto {
   @IsNotEmpty()
@@ -87,4 +88,34 @@ export class UserDto {
   password: string;
 
   apiKey?: string;
+
+  @ValidateIf(
+    (c) => ![Role.Observer].includes(c.role)
+  )
+  @IsNotEmpty()
+  @ApiProperty({ enum: ValidateEntity })
+  @IsEnum(ValidateEntity, {
+    message: "Invalid Entity Validate Permission. Supported following type:" + Object.values(ValidateEntity),
+  })
+  validatePermission: ValidateEntity;
+
+  @ValidateIf(
+    (c) => ![Role.Root, Role.Admin, Role.Observer].includes(c.role)
+  )
+  @IsNotEmpty()
+  @ApiProperty({ enum: SubRoleManipulate })
+  @IsEnum(SubRoleManipulate, {
+    message: "Invalid Sub Role Manipulate Permission. Supported following type:" + Object.values(SubRoleManipulate),
+  })
+  subRolePermission: SubRoleManipulate;
+
+  @ValidateIf(
+    (c) => ![Role.Observer].includes(c.role)
+  )
+  @IsNotEmpty()
+  @ApiProperty({ enum: GHGInventoryManipulate })
+  @IsEnum(GHGInventoryManipulate, {
+    message: "Invalid GHG Inventory Manipulate Permission. Supported following type:" + Object.values(GHGInventoryManipulate),
+  })
+  ghgInventoryPermission: GHGInventoryManipulate;
 }

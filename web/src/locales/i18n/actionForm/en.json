@@ -8,6 +8,7 @@
     "actionUpdateSuccess": "Action Updated Successfully",
     "actionValidateSuccess": "Action Validated Successfully",
     "actionUnvalidateSuccess": "Action Unvalidated Successfully",
+    "actionDeleteSuccess": "Action Deleted Successfully",
     "noProgramsMessage": "No Programmes Attached",
     "programmeList" : "Programme List",
     "activityList" : "Activity List",
@@ -16,5 +17,7 @@
     "actionDescTitle": "Short Description of Action",
     "actionTitle": "Title of Action",
     "noSuchEntity": "Requested Action doesn't exist !",
-    "attachProgramme": "Attach Programmes"
+    "attachProgramme": "Attach Programmes",
+    "deletePrimaryMsg": "Are you sure you want to remove the Action",
+    "deleteSecondaryMsg": "You can’t undo this action"
 }

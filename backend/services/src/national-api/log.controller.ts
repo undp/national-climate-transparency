@@ -2,10 +2,10 @@ import { Body, Post, UseGuards, Request, Get, Controller } from "@nestjs/common"
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { LogService } from "../log/log.service";
-import { PoliciesGuardEx } from "src/casl/policy.guard";
-import { LogEntity } from "src/entities/log.entity";
+import { PoliciesGuardEx } from "../casl/policy.guard";
+import { LogEntity } from "../entities/log.entity";
 import { Action } from "../casl/action.enum";
-import { LogDto } from "src/dtos/log.dto";
+import { LogDto } from "../dtos/log.dto";
 
 @ApiTags("Log")
 @ApiBearerAuth()

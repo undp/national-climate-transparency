@@ -26,8 +26,9 @@ import { KpiService } from "../kpi/kpi.service";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { ProjectEntity } from "../entities/project.entity";
-import { SupportEntity } from "../entities/support.entity";
 import { KPIAction } from "../enums/shared.enum";
+import { DeleteDto } from "../dtos/delete.dto";
+import { Role } from "../casl/role.enum";
 
 @Injectable()
 export class ActionService {
@@ -66,7 +67,7 @@ export class ActionService {
 		// Checking for programmes having a  parent
 		let programmes: ProgrammeEntity[];
 		if (actionDto.linkedProgrammes) {
-			programmes = await this.findAllProgrammeByIds(actionDto.linkedProgrammes);
+			programmes = await this.linkUnlinkService.findAllProgrammeByIds(actionDto.linkedProgrammes);
 			for (const programme of programmes) {
 				if (programme.action) {
 					throw new HttpException(
@@ -94,7 +95,7 @@ export class ActionService {
 			action.documents = documents;
 
 		}
-		// adding event log
+		// Add event log entry
 		this.addEventLogEntry(eventLog, LogEventType.ACTION_CREATED, EntityType.ACTION, action.actionId, user.id, actionDto);
 
 		const kpiList = [];
@@ -104,6 +105,7 @@ export class ActionService {
 				const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
 				kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
 				kpi.creatorId = action.actionId;
+				kpi.expected = parseFloat(kpiItem.expected.toFixed(2));
 				kpiList.push(kpi);
 			}
 			// Add event log entry after the loop completes
@@ -153,6 +155,35 @@ export class ActionService {
 		})
 	}
 
+	async findActionByIdWithAllLinkedChildren(actionId: string) {
+		return await this.actionRepo.createQueryBuilder('action')
+		.leftJoinAndSelect('action.programmes', 'programme')
+		.leftJoinAndSelect('programme.projects', 'project')
+		.leftJoinAndMapMany(
+			"action.activities",
+			ActivityEntity,
+			"actionActivity", // Unique alias for action activities
+			"actionActivity.parentType = :action AND actionActivity.parentId = :actionId",
+			{ action: EntityType.ACTION, actionId }
+		)
+		.leftJoinAndMapMany(
+			"programme.activities",
+			ActivityEntity,
+			"programmeActivity", // Unique alias for programme activities
+			"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
+			{ programme: EntityType.PROGRAMME }
+		)
+		.leftJoinAndMapMany(
+			"project.activities",
+			ActivityEntity,
+			"projectActivity", // Unique alias for project activities
+			"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
+			{ project: EntityType.PROJECT }
+		)
+		.where('action.actionId = :actionId', { actionId })
+		.getOne();
+	}
+
 	async findActionViewById(actionId: string) {
 		return await this.actionViewRepo.findOneBy({
 			id: actionId
@@ -160,27 +191,7 @@ export class ActionService {
 	}
 
 	// adding find method to action service to avoid a circular dependency with programme service
-	async findAllProgrammeByIds(programmeIds: string[]) {
-		return await this.programmeRepo.createQueryBuilder('programme')
-			.leftJoinAndSelect('programme.action', 'action')
-			.leftJoinAndSelect('programme.projects', 'project')
-			.leftJoinAndMapMany(
-				"programme.activities",
-				ActivityEntity,
-				"programmeActivity", // Unique alias for programme activities
-				"programmeActivity.parentType = :programme AND programmeActivity.parentId = programme.programmeId",
-				{ programme: EntityType.PROGRAMME }
-			)
-			.leftJoinAndMapMany(
-				"project.activities",
-				ActivityEntity,
-				"projectActivity", // Unique alias for project activities
-				"projectActivity.parentType = :project AND projectActivity.parentId = project.projectId",
-				{ project: EntityType.PROJECT }
-			)
-			.where('programme.programmeId IN (:...programmeIds)', { programmeIds })
-			.getMany();
-	}
+
 
 	async findAllActionChildren(actionId: string) {
 
@@ -288,8 +299,7 @@ export class ActionService {
 		const actionUpdate: ActionEntity = plainToClass(ActionEntity, actionUpdateDto);
 		const eventLog = [];
 
-		// setting action to pending (Non-Validated) state
-		actionUpdate.validated = false;
+		this.addEventLogEntry(eventLog, LogEventType.ACTION_UPDATED, EntityType.ACTION, actionUpdate.actionId, user.id, actionUpdateDto);
 
 		const currentAction = await this.findActionById(actionUpdateDto.actionId);
 		if (!currentAction) {
@@ -320,6 +330,12 @@ export class ActionService {
 				),
 				HttpStatus.FORBIDDEN
 			);
+		}
+
+		// setting action to pending (Non-Validated) state
+		if (currentAction.validated) {
+			actionUpdate.validated = false;
+			this.addEventLogEntry(eventLog, LogEventType.ACTION_UNVERIFIED_DUE_UPDATE, EntityType.ACTION, actionUpdate.actionId, 0, actionUpdateDto);
 		}
 
 		// Finding children to update their sector value
@@ -374,7 +390,7 @@ export class ActionService {
 		const currentKpis = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, actionUpdate.actionId);
 
 		if (actionUpdateDto.kpis && actionUpdateDto.kpis.length > 0) {
-			
+
 			const addedKpis = actionUpdateDto.kpis.filter(kpi => !kpi.kpiId);
 
 			if (addedKpis && addedKpis.length > 0) {
@@ -383,6 +399,7 @@ export class ActionService {
 					const kpi: KpiEntity = plainToClass(KpiEntity, kpiItem);
 					kpi.kpiId = parseInt(await this.counterService.incrementCount(CounterType.KPI, 3));
 					kpi.creatorId = actionUpdateDto.actionId;
+					kpi.expected = parseFloat(kpiItem.expected.toFixed(2));
 					kpiList.push(kpi);
 				}
 			}
@@ -390,12 +407,13 @@ export class ActionService {
 			for (const currentKpi of currentKpis) {
 				const kpiToUpdate = actionUpdateDto.kpis.find(kpi => currentKpi.kpiId == kpi.kpiId);
 				if (kpiToUpdate) {
+					this.payloadValidator.validateKpiPayload(kpiToUpdate, EntityType.ACTION);
 					const kpi = new KpiEntity();
 					kpi.kpiId = kpiToUpdate.kpiId;
 					kpi.creatorId = kpiToUpdate.creatorId;
 					kpi.creatorType = kpiToUpdate.creatorType;
 					kpi.name = kpiToUpdate.name;
-					kpi.expected = kpiToUpdate.expected;
+					kpi.expected = parseFloat(kpiToUpdate.expected.toFixed(2));
 					kpi.kpiUnit = kpiToUpdate.kpiUnit;
 					kpiList.push(kpi);
 				} else {
@@ -417,14 +435,12 @@ export class ActionService {
 			}
 		}
 
-		this.addEventLogEntry(eventLog, LogEventType.ACTION_UPDATED, EntityType.ACTION, actionUpdate.actionId, user.id, actionUpdateDto);
-
-		if (actionUpdateDto.kpis && actionUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.UPDATED)) {
+		if (actionUpdateDto.kpis && actionUpdateDto.kpis.some(kpi => kpi.kpiAction === KPIAction.UPDATED)) {
 			// Add event log entry after the loop completes
 			this.addEventLogEntry(eventLog, LogEventType.KPI_UPDATED, EntityType.ACTION, actionUpdateDto.actionId, user.id, kpiList);
 		}
 
-		if (actionUpdateDto.kpis && actionUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.CREATED)) {
+		if (actionUpdateDto.kpis && actionUpdateDto.kpis.some(kpi => kpi.kpiAction === KPIAction.CREATED)) {
 			// Add event log entry after the loop completes
 			this.addEventLogEntry(eventLog, LogEventType.KPI_ADDED, EntityType.ACTION, actionUpdateDto.actionId, user.id, kpiList);
 		}
@@ -435,7 +451,9 @@ export class ActionService {
 				if (savedAction) {
 					// Update children sector
 					if (children.haveChildren && (actionUpdate.sector !== currentAction.sector)) {
-						await this.linkUnlinkService.updateActionChildrenSector(children, actionUpdate.sector, em);
+						await this.linkUnlinkService.updateActionChildrenSector(actionUpdate.actionId, children, actionUpdate.sector, em);
+					} else {
+						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(actionUpdate.actionId, em);
 					}
 
 					// Save new KPIs
@@ -474,7 +492,88 @@ export class ActionService {
 		);
 	}
 
+		//MARK: Delete Action
+		async deleteAction(deleteDto: DeleteDto, user: User) {
+			if (user.role !== Role.Admin && user.role !== Role.Root) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"user.userUnAUth",
+						[]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+	
+			const action = await this.findActionByIdWithAllLinkedChildren(deleteDto.entityId);
+			if (!action) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"action.actionNotFound",
+						[deleteDto.entityId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+	
+			if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"action.permissionDeniedForSector",
+						[action.actionId]
+					),
+					HttpStatus.FORBIDDEN
+				);
+			}
+	
+			const actionKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, action.actionId);
+	
+			const actionKpiIds = actionKPIs.map(kpi => kpi.kpiId);
+	
+			const linkedActivityIds = action.activities?.map(activity => activity.activityId);
+
+	
+			const act = await this.entityManager
+				.transaction(async (em) => {
+	
+					// related parent and children entity un-validation happens when projects are unlinking
+					await this.linkUnlinkService.unlinkProgrammesFromAction(action.programmes, action, action.actionId, user, this.entityManager, [], true);
+					const result = await em.delete<ActionEntity>(ActionEntity, action.actionId);
+	
+					if (result.affected > 0) {
+						if (linkedActivityIds && linkedActivityIds.length > 0) {
+							await em.delete<ActivityEntity>(ActivityEntity, linkedActivityIds);
+						}
+	
+						if (actionKpiIds && actionKpiIds.length > 0) {
+							await em.delete<KpiEntity>(KpiEntity, actionKpiIds);
+						}
+					}
+					return result;
+				})
+				.catch((err: any) => {
+					console.log(err);
+					throw new HttpException(
+						this.helperService.formatReqMessagesString(
+							"action.actionDeletionFailed",
+							[err]
+						),
+						HttpStatus.BAD_REQUEST
+					);
+				});
+	
+			await this.helperService.refreshMaterializedViews(this.entityManager);
+			return new DataResponseMessageDto(
+				HttpStatus.OK,
+				this.helperService.formatReqMessagesString("action.deleteActionSuccess", []),
+				null
+			);
+	
+		}
+
 	async validateAction(validateDto: ValidateDto, user: User) {
+
+		this.helperService.doesUserHaveValidatePermission(user);
+
 		const action = await this.findActionById(validateDto.entityId);
 		if (!action) {
 			throw new HttpException(
@@ -498,10 +597,10 @@ export class ActionService {
 
 		action.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(
-			(validateDto.validateStatus) ? LogEventType.ACTION_VERIFIED : LogEventType.ACTION_UNVERIFIED, 
-			EntityType.ACTION, 
-			action.actionId, 
-			user.id, 
+			(validateDto.validateStatus) ? LogEventType.ACTION_VERIFIED : LogEventType.ACTION_UNVERIFIED,
+			EntityType.ACTION,
+			action.actionId,
+			user.id,
 			validateDto
 		);
 
@@ -509,6 +608,9 @@ export class ActionService {
 			.transaction(async (em) => {
 				const savedAction = await em.save<ActionEntity>(action);
 				if (savedAction) {
+					if (!validateDto.validateStatus) {
+						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(action.actionId, em);
+					}
 					// Save event logs
 					await em.save<LogEntity>(eventLog);
 				}
