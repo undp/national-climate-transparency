@@ -4,17 +4,17 @@
 
     "nothingToExport": "Data not found for export",
     "activityId": "Activity No.",
-    "titleOfActivity": "Title of Activity",
-    "description": "Description",
+    "titleOfActivity": "Name of Activity",
+    "description": "Activity description",
     "startYear": "Start year",
-    "activityStatus": "Status",
+    "activityStatus": "Status of activity",
     "endYear": "End year",
     "supportChannel": "Channel",
-    "recipientEntities": "Recipient entity / Ministry",
-    "additionalInfo": "Additional Information",
+    "recipientEntities": "Recipient entity",
+    "additionalInfo": "Additional information",
 
-    "receivedAmount": "International Funds (USD)",
-    "receivedAmountDomestic": "International Funds (XXD)",
-    "requiredAmount": "International Funds (USD)",
-    "requiredAmountDomestic": "International Funds (XXD)"
+    "receivedAmount": "Amount USD",
+    "receivedAmountDomestic": "Amount Domestic currency",
+    "requiredAmount": "Amount USD",
+    "requiredAmountDomestic": "Amount Domestic currency"
 }

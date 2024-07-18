@@ -15,5 +15,7 @@
     "actionDescTitle": "Description courte de l'action",
     "actionTitle": "Titre de l'action",
     "noSuchEntity": "L'action demandée n'existe pas !",
-    "attachProgramme": "Joindre des programmes"
+    "attachProgramme": "Joindre des programmes",
+    "deletePrimaryMsg": "Êtes-vous sûr de vouloir supprimer l'action",
+    "deleteSecondaryMsg": "Vous ne pouvez pas annuler cette action"
 }

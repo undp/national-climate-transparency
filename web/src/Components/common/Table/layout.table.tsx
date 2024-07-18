@@ -8,6 +8,7 @@ interface Props {
   handleTableChange: (pagination: TablePaginationConfig, filters: any, sorter: any) => void;
   emptyMessage: string;
   handleHorizontalOverflow?: boolean;
+  addBorders?: boolean;
 }
 
 const LayoutTable: React.FC<Props> = ({
@@ -18,10 +19,12 @@ const LayoutTable: React.FC<Props> = ({
   handleTableChange,
   emptyMessage,
   handleHorizontalOverflow,
+  addBorders,
 }) => {
   return (
     <div style={{ overflowX: 'auto' }}>
       <Table
+        bordered={addBorders ?? false}
         dataSource={tableData}
         columns={columns}
         className="common-table-class"
