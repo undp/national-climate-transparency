@@ -230,7 +230,7 @@ export const EmissionForm: React.FC<Props> = ({
     levelThree: any,
     unit: EmissionUnits
   ) => {
-    const newValue = enteredValue ? parseToTwoDecimals(enteredValue) : undefined;
+    const newValue = enteredValue ? parseToTwoDecimals(enteredValue) : 0;
     switch (section) {
       case 'eqWithout':
         setEqWithout((prevState) => ({

@@ -136,7 +136,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const yearsList: number[] = [];
 
-  for (let year = 2013; year <= 2050; year++) {
+  for (let year = 2013; year <= 2049; year++) {
     yearsList.push(year);
   }
 

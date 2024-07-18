@@ -42,7 +42,7 @@ export class ProjectDto {
 	@IsNotEmpty()
 	@IsNumber()
 	@Min(2013)
-	@Max(2050)
+	@Max(2049)
 	@ApiProperty()
 	startYear: number;
 
@@ -52,11 +52,6 @@ export class ProjectDto {
 	@Max(2050)
 	@ApiProperty()
 	endYear: number;
-
-	// @IsOptional()
-	// @IsNumber()
-	// @ApiPropertyOptional()
-	// expectedTimeFrame: number;
 
 	@IsArray()
 	@ArrayMinSize(1)

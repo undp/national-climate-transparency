@@ -30,7 +30,6 @@ import { SupportEntity } from "../entities/support.entity";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ActionEntity } from "../entities/action.entity";
-import { ValidateEntity } from "src/enums/user.enum";
 import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 
@@ -132,26 +131,13 @@ export class ProjectService {
 			this.addEventLogEntry(eventLog, LogEventType.KPI_ADDED, EntityType.PROJECT, project.projectId, user.id, kpiList);
 		}
 
-		let activities: any;
-		if (projectDto.linkedActivities) {
-			activities = await this.findAllActivitiesByIds(projectDto.linkedActivities);
-			for (const activity of activities) {
-				if (activity.parentId || activity.parentType) {
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"project.activityAlreadyLinked",
-							[project.projectId]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				}
-			}
-		}
-
 		const proj = await this.entityManager
 			.transaction(async (em) => {
 				const savedProject = await em.save<ProjectEntity>(project);
 				if (savedProject) {
+					const updatedProgrammeIds = [];
+					let rootNodeType: EntityType;
+
 					if (projectDto.programmeId) {
 						const action = programme.action;
 						if (programme.validated) {
@@ -164,31 +150,40 @@ export class ProjectService {
 								0, 
 								project.projectId
 							);
+							updatedProgrammeIds.push(programme.programmeId);
+							rootNodeType = EntityType.PROGRAMME;
+
 							await em.save<ProgrammeEntity>(programme)
-						}
-		
-						if (action && action.validated) {
-							action.validated = false;
-							this.addEventLogEntry(
-								eventLog, 
-								LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
-								EntityType.ACTION, 
-								action.actionId, 
-								0, 
-								programme.programmeId
-							);
-							await em.save<ActionEntity>(action)
+
+							if (action && action.validated) {
+								action.validated = false;
+								this.addEventLogEntry(
+									eventLog, 
+									LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+									EntityType.ACTION, 
+									action.actionId, 
+									0, 
+									programme.programmeId
+								);
+								rootNodeType = EntityType.ACTION;
+
+								await em.save<ActionEntity>(action)
+							}
 						}
 					}
 					await em.save<LogEntity>(eventLog);
-					// linking activities and updating paths of projects and activities
-					if (activities && activities.length > 0) {
-						await this.linkUnlinkService.linkActivitiesToParent(savedProject, activities, { parentType: EntityType.PROJECT, parentId: savedProject.projectId, activityIds: activities }, user, em);
-					}
 
 					if (projectDto.kpis) {
 						await em.save<KpiEntity>(kpiList);
 					}
+
+					if (rootNodeType && rootNodeType == EntityType.ACTION) {
+						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(programme.action?.actionId, em, updatedProgrammeIds);
+					} else if (rootNodeType && rootNodeType == EntityType.PROGRAMME) {
+						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProgrammeId(programme, em, true)
+					}
+
+
 				}
 				return savedProject;
 			})
@@ -322,8 +317,6 @@ export class ProjectService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
-
-
 
 		if (!this.helperService.doesUserHaveSectorPermission(user, currentProject.sector)){
 			throw new HttpException(
@@ -480,7 +473,6 @@ export class ProjectService {
 			}
 		}
 
-
 		if (projectUpdateDto.kpis && projectUpdateDto.kpis.some(kpi => kpi.kpiAction===KPIAction.UPDATED)) {
 			// Add event log entry after the loop completes
 			this.addEventLogEntry(eventLog, LogEventType.KPI_UPDATED, EntityType.PROJECT, projectUpdate.projectId, user.id, kpiList);
@@ -516,7 +508,7 @@ export class ProjectService {
 						await this.linkUnlinkService.unlinkProjectsFromProgramme([projectUpdate], projectUpdate.projectId, user, em, achievementsToRemove, false);
 						await this.linkUnlinkService.linkProjectsToProgramme(programme, [projectUpdate], projectUpdateDto.programmeId, user, em);
 					} else {
-						await this.updateAllValidatedChildrenAndParentStatus(projectUpdate, em);
+						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProject(projectUpdate, em, false);
 					}
 
 					// Save new KPIs
@@ -597,6 +589,11 @@ export class ProjectService {
 
 		const proj = await this.entityManager
 			.transaction(async (em) => {
+				const programme = project.programme;
+				const action = programme?.action;
+				let rootNodeType: EntityType;
+				const updatedProgrammeIds = [];
+
 				const result = await em.delete<ProjectEntity>(ProjectEntity, project.projectId);
 				if (result.affected > 0) {
 					if (linkedActivityIds && linkedActivityIds.length > 0) {
@@ -607,27 +604,48 @@ export class ProjectService {
 						await em.delete<KpiEntity>(KpiEntity, projectKpiIds);
 					}
 
-					if (project.programme && project.programme.validated) {
-						await this.linkUnlinkService.unvalidateProgrammes(
-							[project.programme],
-							project.projectId,
-							LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_DELETE,
-							em
+					if (programme && programme.validated) {
+						programme.validated = false;
+						eventLog.push(
+							this.buildLogEntity(
+								LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_DELETE,
+								EntityType.PROGRAMME,
+								programme.programmeId,
+								0,
+								project.projectId
+							)
 						)
-					}
+						rootNodeType = EntityType.PROGRAMME;
+						updatedProgrammeIds.push(programme.programmeId);
+						await em.save<ProgrammeEntity>(programme);
 
-					if (project.programme?.action && project.programme?.action.validated) {
-						await this.linkUnlinkService.unvalidateAction(
-							project.programme?.action,
-							project.programme?.programmeId,
-							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							em
-						)
+						if (action && action.validated) {
+							action.validated = false;
+							eventLog.push(
+								this.buildLogEntity(
+									LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+									EntityType.ACTION,
+									action.actionId,
+									0,
+									programme.programmeId
+								)
+							)
+	
+							rootNodeType = EntityType.ACTION;
+	
+							await em.save<ActionEntity>(action);
+						} 
 					}
 
 					// Save event logs
 					if (eventLog.length > 0) {
 						await em.save<LogEntity>(eventLog);
+					}
+
+					if (rootNodeType && rootNodeType == EntityType.ACTION) {
+						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(action.actionId, em, updatedProgrammeIds, [project.projectId], linkedActivityIds)
+					} else if (rootNodeType && rootNodeType == EntityType.PROGRAMME) {
+						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProgrammeId(programme, em, true);
 					}
 				}
 				return result;
@@ -841,6 +859,9 @@ export class ProjectService {
 
 	//MARK: Validate Project
 	async validateProject(validateDto: ValidateDto, user: User) {
+
+		this.helperService.doesUserHaveValidatePermission(user);
+
 		const project = await this.findProjectById(validateDto.entityId);
 		if (!project) {
 			throw new HttpException(
@@ -862,7 +883,15 @@ export class ProjectService {
 			);
 		}
 
-		this.helperService.doesUserHaveValidatePermission(user);
+		if (validateDto.validateStatus && project.programme && !project.programme.validated) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"project.parentNotValidated",
+					[project.programme?.programmeId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
 
 		project.validated = validateDto.validateStatus;
 		const eventLog = this.buildLogEntity(
@@ -877,6 +906,9 @@ export class ProjectService {
 		.transaction(async (em) => {
 			const savedProject = await em.save<ProjectEntity>(project);
 			if (savedProject) {
+				if (!validateDto.validateStatus) {
+					await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProject(project, em, true);
+				}
 				// Save event logs
 				await em.save<LogEntity>(eventLog);
 			}
@@ -900,72 +932,6 @@ export class ProjectService {
 			proj
 		);
 
-	}
-
-	//MARK: Update linked validated entities
-	async updateAllValidatedChildrenAndParentStatus(project: ProjectEntity, entityManager: EntityManager) {
-		const projectId = project.projectId;
-		const programme = project.programme;
-
-		const activityChildren: ActivityEntity[] =
-			await this.activityRepo.createQueryBuilder('activity')
-				.leftJoinAndSelect('activity.support', 'support')
-				.where("subpath(activity.path, 2, 1) = :projectId AND activity.validated IS TRUE", { projectId })
-				.getMany();
-
-		if ((activityChildren.length > 0) || programme) {
-
-			await entityManager
-				.transaction(async (em) => {
-					const logs = [];
-
-					if (programme.validated) {
-						programme.validated = false;
-						logs.push(this.buildLogEntity(
-							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							EntityType.PROGRAMME,
-							programme.programmeId,
-							0,
-							projectId)
-						);
-						await em.save<ProgrammeEntity>(programme)
-					}
-
-					const activities = []
-					for (const activity of activityChildren) {
-						activity.validated = false;
-
-						logs.push(this.buildLogEntity(
-							LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-							EntityType.ACTIVITY,
-							activity.activityId,
-							0,
-							projectId)
-						);
-						activities.push(activity)
-
-						const supports = []
-						for (const support of activity.support) {
-							support.validated = false;
-
-							logs.push(this.buildLogEntity(
-								LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-								EntityType.SUPPORT,
-								support.supportId,
-								0,
-								projectId)
-							);
-							supports.push(support)
-						}
-
-						await em.save<SupportEntity>(supports);
-					}
-
-					await em.save<ActivityEntity>(activities);
-					await em.save<LogEntity>(logs);
-
-				});
-		}
 	}
 
 	//MARK: Add Event Log Entry

@@ -20,6 +20,8 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { SupportEntity } from "../entities/support.entity";
 import { KpiEntity } from "../entities/kpi.entity";
 import { EmissionEntity } from "src/entities/emission.entity";
+import { ConfigurationSettingsEntity } from "src/entities/configuration.settings.entity";
+import { SystemResourcesEntity } from "src/entities/systemResource.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -88,6 +90,16 @@ export class CaslAbilityFactory {
 				can(Action.Create, EmissionEntity);
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
+
+				// Settings
+				can(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Create, ConfigurationSettingsEntity);
+				can(Action.Update, ConfigurationSettingsEntity);
+
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
+				can(Action.Create, SystemResourcesEntity);
+				can(Action.Delete, SystemResourcesEntity);
 			}
 
 			if (user.role == Role.Admin) {
@@ -146,6 +158,14 @@ export class CaslAbilityFactory {
 				can(Action.Create, EmissionEntity);
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
+
+				// Settings
+				cannot(Action.Read, ConfigurationSettingsEntity);
+				cannot(Action.Create, ConfigurationSettingsEntity);
+				cannot(Action.Update, ConfigurationSettingsEntity);
+
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
 			}
 
 			if (user.role == Role.GovernmentUser) {
@@ -255,6 +275,14 @@ export class CaslAbilityFactory {
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
 
+				// Settings
+				cannot(Action.Read, ConfigurationSettingsEntity);
+				cannot(Action.Create, ConfigurationSettingsEntity);
+				cannot(Action.Update, ConfigurationSettingsEntity);
+
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
+
 			}
 
 			if (user.role == Role.Observer) {
@@ -361,6 +389,13 @@ export class CaslAbilityFactory {
 				cannot(Action.Update, EmissionEntity);
 				cannot(Action.Delete, EmissionEntity);
 
+				// Settings
+				cannot(Action.Read, ConfigurationSettingsEntity);
+				cannot(Action.Create, ConfigurationSettingsEntity);
+				cannot(Action.Update, ConfigurationSettingsEntity);
+
+				// Settings
+				can(Action.Read, SystemResourcesEntity);
 			}
 
 		}

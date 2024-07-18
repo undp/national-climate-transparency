@@ -1,3 +1,4 @@
 export enum ConfigurationSettingsType {
-  isTransferFrozen,
+	GWP = "GWP",
+	PROJECTIONS = "PROJECTIONS",
 }

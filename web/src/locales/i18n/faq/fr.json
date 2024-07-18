@@ -10,5 +10,8 @@
     "answer3": "Réponse 3",
     "answer4": "Réponse 4",
     "docsAndTemplates": "Documents et modèles",
-    "trainingVideos": "Vidéos de formation"
+    "trainingVideos": "Vidéos de formation",
+    "ghgResourcesSection": "Ressources de l'inventaire des GES",
+    "ghgSavedSuccessfully": "Ressources des GES mises à jour avec succès",
+    "templateSavedSuccessfully": "Documents et modèles mis à jour avec succès"
 }

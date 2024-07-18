@@ -383,24 +383,4 @@ export class KpiService {
 		return achievements;
 	}
 
-	// async findAllActivitiesInTree(rootNodeId: string, rootNodeType: EntityType) {
-	// 	const queryBuilder = this.activityRepo
-	// 		.createQueryBuilder()
-	// 		.where(
-	// 			this.helperService.generateSubPathSQL({
-	// 				match: rootNodeId,
-	// 				ltree: 'path',
-	// 				startLevel: 0,
-	// 				traverseDepth: 1,
-	// 			}),
-	// 		);
-
-	// 	const query = queryBuilder.getQueryAndParameters();
-	// 	console.log("Generated SQL Query:", query[0]);
-	// 	console.log("Query Parameters:", query[1]);
-
-	// 	const result = await queryBuilder.getMany();
-	// 	return result;
-	// }
-
 }

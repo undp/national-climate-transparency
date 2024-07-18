@@ -133,3 +133,19 @@ export const filterDropdownBps = {
   xl: { span: 3 },
   xxl: { span: 3 },
 };
+
+export const faqHeaderBps = {
+  sm: { span: 12 },
+  md: { span: 14 },
+  lg: { span: 17 },
+  xl: { span: 21 },
+  xxl: { span: 22 },
+};
+
+export const faqButtonBps = {
+  sm: { span: 12 },
+  md: { span: 10 },
+  lg: { span: 7 },
+  xl: { span: 3 },
+  xxl: { span: 2 },
+};

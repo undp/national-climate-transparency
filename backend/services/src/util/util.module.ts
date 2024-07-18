@@ -16,7 +16,7 @@ import { PasswordResetService } from "./passwordReset.service";
 import { User } from "../entities/user.entity";
 import { AsyncOperationsModule } from "../async-operations/async-operations.module";
 import { ConfigurationSettingsService } from "./configurationSettings.service";
-import { ConfigurationSettings } from "../entities/configuration.settings";
+import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
 import { Region } from "../entities/region.entity";
 import { PasswordHashService } from "./passwordHash.service";
 import { HttpUtilService } from "./http.util.service";
@@ -26,6 +26,10 @@ import { FileUploadService } from "./fileUpload.service";
 import { LinkUnlinkService } from "./linkUnlink.service";
 import { IsTwoDecimalPointsConstraint } from "./twoDecimalPointNumber.decorator";
 import { DataExportService } from "./dataExport.service";
+import { ActionEntity } from "src/entities/action.entity";
+import { ProgrammeEntity } from "src/entities/programme.entity";
+import { ProjectEntity } from "src/entities/project.entity";
+import { ActivityEntity } from "src/entities/activity.entity";
 
 @Module({
   imports: [
@@ -55,8 +59,12 @@ import { DataExportService } from "./dataExport.service";
       Organisation,
       PasswordReset,
       User,
-      ConfigurationSettings,
+      ConfigurationSettingsEntity,
       Region,
+			ActionEntity,
+			ProgrammeEntity,
+			ProjectEntity,
+			ActivityEntity
     ]),
     forwardRef(() => AsyncOperationsModule),
     FileHandlerModule,
