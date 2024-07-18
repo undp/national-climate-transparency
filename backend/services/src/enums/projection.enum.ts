@@ -47,6 +47,8 @@ export enum ProjectionLeafSection {
     WETLANDS = '3B4',
     SETTLEMENTS = '3B5',
     OTHER_LAND = '3B6',
+    AGG_SOURCE = '3C',
+    OTHER_AGR = '3D',
     
     SOLID_WASTE = '4A',
     BIOLOGICAL_TREATMENT = '4B',

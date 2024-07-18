@@ -223,7 +223,9 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
       case '2':
         return industrySectionSum;
       case '3':
-        return arraySumAggregate([livestockSectionSum, landSectionSum], 51);
+        const threeC = allEditableData.find((entry) => entry.topicId === '3C')?.values ?? [];
+        const threeD = allEditableData.find((entry) => entry.topicId === '3D')?.values ?? [];
+        return arraySumAggregate([livestockSectionSum, landSectionSum, threeC, threeD], 51);
       case '3A':
         return livestockSectionSum;
       case '3B':

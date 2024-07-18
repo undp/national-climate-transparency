@@ -228,6 +228,20 @@ export class ProjectionData {
     @IsNotEmpty()
     @ArrayMinSize(51)
     @ArrayMaxSize(51)
+    [ProjectionLeafSection.AGG_SOURCE]: number[];
+
+    @ApiProperty()
+    @IsArray()
+    @IsNotEmpty()
+    @ArrayMinSize(51)
+    @ArrayMaxSize(51)
+    [ProjectionLeafSection.OTHER_AGR]: number[];
+
+    @ApiProperty()
+    @IsArray()
+    @IsNotEmpty()
+    @ArrayMinSize(51)
+    @ArrayMaxSize(51)
     [ProjectionLeafSection.SOLID_WASTE]: number[];
 
     @ApiProperty()

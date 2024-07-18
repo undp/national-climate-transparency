@@ -55,6 +55,8 @@ export const projectionSectionOrder = {
     '3B4',
     '3B5',
     '3B6',
+    '3C',
+    '3D',
   ],
   [ProjectionSections.WASTE]: ['4', '4A', '4B', '4C', '4D', '4E'],
   [ProjectionSections.OTHER]: ['5', '5A', '5B'],
@@ -146,6 +148,8 @@ export const getEmptyPayload = (method: 'Projection' | 'Growth Rate') => {
     [ProjectionLeafSection.WETLANDS]: [...defaultFillerValue],
     [ProjectionLeafSection.SETTLEMENTS]: [...defaultFillerValue],
     [ProjectionLeafSection.OTHER_LAND]: [...defaultFillerValue],
+    [ProjectionLeafSection.AGG_SOURCE]: [...defaultFillerValue],
+    [ProjectionLeafSection.OTHER_AGR]: [...defaultFillerValue],
 
     [ProjectionLeafSection.SOLID_WASTE]: [...defaultFillerValue],
     [ProjectionLeafSection.BIOLOGICAL_TREATMENT]: [...defaultFillerValue],
