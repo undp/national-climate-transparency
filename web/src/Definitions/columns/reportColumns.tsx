@@ -86,26 +86,26 @@ export const getReportSixColumns = (t: any) => {
       key: 'titleOfActivity',
       width: 250,
     },
-    { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('descriptionOfActivity'), dataIndex: 'description', key: 'description', width: 150 },
     {
       title: t('amountRequiredTitle'),
       children: [
-        {
-          title: t('usd'),
-          dataIndex: 'requiredAmount',
-          key: 'requiredAmount',
-          width: 50,
-        },
         {
           title: t('domestic'),
           dataIndex: 'requiredAmountDomestic',
           key: 'requiredAmountDomestic',
           width: 50,
         },
+        {
+          title: t('usd'),
+          dataIndex: 'requiredAmount',
+          key: 'requiredAmount',
+          width: 50,
+        },
       ],
     },
     {
-      title: t('timeFrame'),
+      title: t('expectedTimeFrame'),
       children: [
         {
           title: t('startYear'),
@@ -122,7 +122,7 @@ export const getReportSixColumns = (t: any) => {
       ],
     },
     {
-      title: t('financialInstrument'),
+      title: t('expectedFinancialInstrument'),
       dataIndex: 'financialInstrument',
       key: 'financialInstrument',
       width: 100,
@@ -161,7 +161,7 @@ export const getReportSevenColumns = (t: any) => {
       key: 'titleOfActivity',
       width: 250,
     },
-    { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('descriptionOfActivity'), dataIndex: 'description', key: 'description', width: 150 },
     { title: t('supportChannel'), dataIndex: 'supportChannel', key: 'supportChannel', width: 100 },
     {
       title: t('recipientEntities'),
@@ -202,15 +202,15 @@ export const getReportSevenColumns = (t: any) => {
       title: t('amountReceivedTitle'),
       children: [
         {
-          title: t('usd'),
-          dataIndex: 'receivedAmount',
-          key: 'receivedAmount',
-          width: 50,
-        },
-        {
           title: t('domestic'),
           dataIndex: 'receivedAmountDomestic',
           key: 'receivedAmountDomestic',
+          width: 50,
+        },
+        {
+          title: t('usd'),
+          dataIndex: 'receivedAmount',
+          key: 'receivedAmount',
           width: 50,
         },
       ],
@@ -290,12 +290,12 @@ export const getReportEightColumns = (t: any) => {
       key: 'titleOfActivity',
       width: 250,
     },
-    { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('descriptionOfActivity'), dataIndex: 'description', key: 'description', width: 150 },
 
     { title: t('type'), dataIndex: 'type', key: 'type', width: 150 },
     { title: t('techType'), dataIndex: 'technologyType', key: 'technologyType', width: 150 },
     {
-      title: t('timeFrame'),
+      title: t('expectedTimeFrame'),
       children: [
         {
           title: t('startYear'),
@@ -325,7 +325,7 @@ export const getReportNineColumns = (t: any) => {
       key: 'titleOfActivity',
       width: 250,
     },
-    { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('descriptionOfActivity'), dataIndex: 'description', key: 'description', width: 150 },
     { title: t('techType'), dataIndex: 'technologyType', key: 'technologyType', width: 150 },
     {
       title: t('timeFrame'),
@@ -414,10 +414,10 @@ export const getReportTenColumns = (t: any) => {
       key: 'titleOfActivity',
       width: 150,
     },
-    { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('descriptionOfActivity'), dataIndex: 'description', key: 'description', width: 150 },
     { title: t('type'), dataIndex: 'type', key: 'type', width: 150 },
     {
-      title: t('timeFrame'),
+      title: t('expectedTimeFrame'),
       children: [
         {
           title: t('startYear'),
@@ -447,7 +447,7 @@ export const getReportElevenColumns = (t: any) => {
       key: 'titleOfActivity',
       width: 150,
     },
-    { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('descriptionOfActivity'), dataIndex: 'description', key: 'description', width: 150 },
     {
       title: t('timeFrame'),
       children: [
@@ -530,9 +530,9 @@ export const getReportTwelveColumns = (t: any) => {
       key: 'titleOfActivity',
       width: 150,
     },
-    { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('descriptionOfActivity'), dataIndex: 'description', key: 'description', width: 150 },
     {
-      title: t('timeFrame'),
+      title: t('expectedTimeFrame'),
       children: [
         {
           title: t('startYear'),
@@ -558,18 +558,18 @@ export const getReportTwelveColumns = (t: any) => {
     },
     { title: t('supportChannel'), dataIndex: 'supportChannel', key: 'supportChannel', width: 100 },
     {
-      title: t('amountRequiredTitle'),
+      title: t('amount'),
       children: [
-        {
-          title: t('usd'),
-          dataIndex: 'requiredAmount',
-          key: 'requiredAmount',
-          width: 50,
-        },
         {
           title: t('domestic'),
           dataIndex: 'requiredAmountDomestic',
           key: 'requiredAmountDomestic',
+          width: 50,
+        },
+        {
+          title: t('usd'),
+          dataIndex: 'requiredAmount',
+          key: 'requiredAmount',
           width: 50,
         },
       ],
@@ -589,7 +589,7 @@ export const getReportThirteenColumns = (t: any) => {
       key: 'titleOfActivity',
       width: 150,
     },
-    { title: t('description'), dataIndex: 'description', key: 'description', width: 150 },
+    { title: t('descriptionOfActivity'), dataIndex: 'description', key: 'description', width: 150 },
     {
       title: t('timeFrame'),
       children: [
@@ -617,18 +617,18 @@ export const getReportThirteenColumns = (t: any) => {
     },
     { title: t('supportChannel'), dataIndex: 'supportChannel', key: 'supportChannel', width: 100 },
     {
-      title: t('amountReceivedTitle'),
+      title: t('amount'),
       children: [
-        {
-          title: t('usd'),
-          dataIndex: 'receivedAmount',
-          key: 'receivedAmount',
-          width: 50,
-        },
         {
           title: t('domestic'),
           dataIndex: 'receivedAmountDomestic',
           key: 'receivedAmountDomestic',
+          width: 50,
+        },
+        {
+          title: t('usd'),
+          dataIndex: 'receivedAmount',
+          key: 'receivedAmount',
           width: 50,
         },
       ],
