@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
+import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,7 +21,7 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle, getRounded } from '../../../Utils/utilServices';
+import { delay, getFormTitle, getRounded } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ActivityEntity } from '../../../Entities/activity';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -42,8 +42,8 @@ import {
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { StoredData, UploadData } from '../../../Definitions/uploadDefinitions';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
-import { ValidateEntity } from '../../../Enums/user.enum';
-import { Role } from '../../../Enums/role.enum';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
+import { DeleteOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -53,7 +53,7 @@ const inputFontSize = '13px';
 
 const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['activityForm', 'formHeader', 'entityAction']);
+  const { t } = useTranslation(['activityForm', 'formHeader', 'entityAction', 'error']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Activity', method);
@@ -61,7 +61,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
-  const { userInfoState } = useUserContext();
+  const { isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -71,7 +71,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
-  const [isValidateButtonDisabled, setIsValidateButtonDisabled] = useState(false);
 
   // Parent Selection State
 
@@ -110,6 +109,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportCurrentPage, setCurrentPage] = useState<any>(1);
   const [supportPageSize, setPageSize] = useState<number>(10);
 
+  // Popup Definition
+
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
+
+  // Detach Entity Data
+
   // KPI State
 
   const [kpiCounter, setKpiCounter] = useState<number>(0);
@@ -147,16 +152,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       parentDescription: '',
     });
   };
-
-  useEffect(() => {
-    // check user permission for validate action and disable validate button
-    if (
-      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
-      userInfoState?.userRole === Role.Observer
-    ) {
-      setIsValidateButtonDisabled(true);
-    }
-  }, [userInfoState]);
 
   // Tracking Parent selection
 
@@ -242,7 +237,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             setInheritedKpiList(tempInheritedKpiList);
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -398,9 +393,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               setStoredRstFiles(tempFiles);
             }
           }
-        } catch (error: any) {
+        } catch {
           navigate('/activities');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -482,7 +476,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             setInheritedKpiList(tempInheritedKpiList);
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -557,7 +551,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     } catch (error: any) {
       if (error?.message) {
         if (error.message === 'Permission Denied: Unable to Validate Activity') {
-          setIsValidateButtonDisabled(true);
+          setIsValidationAllowed(false);
         }
         displayErrorMessage(error);
       } else {
@@ -568,8 +562,15 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Delete
 
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
   const deleteEntity = async () => {
     try {
+      setWaitingForBE(true);
+      await delay(1000);
+
       if (entId) {
         const payload = {
           entityId: entId,
@@ -593,6 +594,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       } else {
         displayErrorMessage(error, `${entId} Delete Failed`);
       }
+    } finally {
+      setWaitingForBE(false);
     }
   };
 
@@ -1019,7 +1022,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       let response: any;
 
       if (method === 'create') {
-        response = await post('national/activities/add', payload);
+        response = await post(
+          'national/activities/add',
+          processOptionalFields(payload, 'activity')
+        );
 
         resolveKPIAchievements(response.data.activityId);
       } else if (method === 'update') {
@@ -1058,6 +1064,21 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   return (
     <div className="content-container">
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('deletePrimaryMsg')} ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
+        }}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
@@ -1072,7 +1093,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
-                <EntityIdCard calledIn="Activity" entId={entId}></EntityIdCard>
+                <EntityIdCard
+                  calledIn="Activity"
+                  entId={entId}
+                  isValidated={isValidated}
+                ></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
@@ -1753,17 +1778,25 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 {ability.can(Action.Validate, ActivityEntity) && (
                   <Col>
                     <Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() => {
-                          validateEntity();
-                        }}
-                        disabled={isValidateButtonDisabled}
+                      <Tooltip
+                        placement="topRight"
+                        title={
+                          !isValidationAllowed ? t('error:validationPermissionRequired') : undefined
+                        }
+                        showArrow={false}
                       >
-                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                      </Button>
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => {
+                            validateEntity();
+                          }}
+                          disabled={!isValidationAllowed}
+                        >
+                          {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                        </Button>
+                      </Tooltip>
                     </Form.Item>
                   </Col>
                 )}
@@ -1790,7 +1823,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       size="large"
                       block
                       onClick={() => {
-                        deleteEntity();
+                        deleteClicked();
                       }}
                       style={{ color: 'red', borderColor: 'red' }}
                     >

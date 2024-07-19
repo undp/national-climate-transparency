@@ -94,6 +94,7 @@ const ReportCard: React.FC<Props> = ({
       <Row className="table-bar">
         <Col span={24}>
           <LayoutTable
+            addBorders={true}
             tableData={reportData}
             columns={columns}
             loading={loading}

@@ -1,7 +1,7 @@
 import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
 import { Buffer } from 'buffer';
-import { acceptedFileExtensions } from '../Definitions/uploadDefinitions';
+import { AcceptedFileExtensions } from '../Enums/file.enum';
 
 export const addCommSep = (value: any) => {
   return (
@@ -158,7 +158,7 @@ export const getFileExtension = (fileTitle: string) => {
   const fileParts = fileTitle.split('.');
   if (fileParts.length > 0) {
     const extension = fileParts[fileParts.length - 1].toLowerCase();
-    if (acceptedFileExtensions.includes(extension)) {
+    if (Object.values(AcceptedFileExtensions).includes(extension as AcceptedFileExtensions)) {
       return extension;
     } else {
       return undefined;
