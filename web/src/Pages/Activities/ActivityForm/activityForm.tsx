@@ -127,6 +127,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [actualTimeline, setActualTimeline] = useState<ActualTimeline[]>([]);
   const [isMtgButtonEnabled, setIsMtgButtonEnabled] = useState(false);
   const [mtgStartYear, setMtgStartYear] = useState<number>(0);
+  const [selectedGhg, setSelectedGhg] = useState<GHGS>();
+  const [gwpSettings, setGwpSettings] = useState<{ CH4: number; N2O: number }>();
+  const [gwpValue, setGwpValue] = useState<number>(1);
 
   // Initialization Logic
 
@@ -135,11 +138,15 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const handleParentIdSelect = (id: string) => {
     setConnectedParentId(id);
     setShouldFetchParentKpi(true);
+    if (id === undefined) {
+      setMtgStartYear(0);
+    }
   };
 
   const handleParentTypeSelect = (value: string) => {
     setParentType(value);
     setConnectedParentId(undefined);
+    setMtgStartYear(0);
     form.setFieldsValue({
       parentId: '',
       parentDescription: '',
@@ -274,6 +281,21 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Initializing Section
 
+  //fetch GWP settings
+
+  const fetchGwpSettings = async () => {
+    let response: any;
+    try {
+      response = await get(`national/settings/GWP`);
+
+      if (response.status === 200 || response.status === 201) {
+        setGwpSettings(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching GWP values:', error);
+    }
+  };
+
   useEffect(() => {
     // Initially Loading the underlying Activity data when not in create mode
 
@@ -328,6 +350,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             // Setting validation status
 
             setIsValidated(entityData.validated ?? false);
+
+            // Setting selected ghg
+
+            setSelectedGhg(entityData.ghgsAffected ?? undefined);
 
             // Setting up uploaded files
 
@@ -455,6 +481,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchCreatedKPIData();
+    fetchGwpSettings();
   }, []);
 
   // Populating Form Migrated Fields, when migration data changes
@@ -633,37 +660,36 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  //MTG timeline create array from row
-
-  const mtgRowMapping = (row: { [year: string]: number }) => {
-    const arr = [];
-    const endYear = mtgStartYear + mtgRange;
-    for (let year = mtgStartYear; year <= endYear; year++) {
-      const value = row[year.toString()] || 0;
-      arr.push(value);
-    }
-    return arr;
-  };
-
   //set mtg timeline data to zero values (when it is or null or create mode)
 
   const setDefaultTimelineValues = (startYear: number, range: number) => {
     const endYear = startYear + range;
     const tempExpectedEntries: ExpectedTimeline[] = [];
     Object.entries(ExpectedRows).forEach(([key, value]) => {
-      const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-      for (let year = startYear; year <= endYear; year++) {
-        rowData[year.toString()] = 0;
-      }
+      const expectedGhgValue =
+        key === 'ROW_ONE' || key === 'ROW_TWO' || key === 'ROW_THREE'
+          ? `kt${selectedGhg}`
+          : value[0];
+      const rowData: ExpectedTimeline = {
+        key: key,
+        ghg: expectedGhgValue,
+        topic: value[1],
+        total: 0,
+        values: new Array(Math.min(endYear, 2050) + 1 - startYear).fill(0),
+      };
       tempExpectedEntries.push(rowData);
     });
 
     const tempActualEntries: ActualTimeline[] = [];
     Object.entries(ActualRows).forEach(([key, value]) => {
-      const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-      for (let year = startYear; year <= endYear; year++) {
-        rowData[year.toString()] = 0;
-      }
+      const actualGhgValue = key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${selectedGhg}` : value[0];
+      const rowData: ActualTimeline = {
+        key: key,
+        ghg: actualGhgValue,
+        topic: value[1],
+        total: 0,
+        values: new Array(Math.min(endYear, 2050) + 1 - startYear).fill(0),
+      };
       tempActualEntries.push(rowData);
     });
 
@@ -681,34 +707,33 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
         if (response.status === 200 || response.status === 201) {
           setMtgStartYear(response.data.startYear);
-          const endYear = mtgStartYear + mtgRange;
           const tempExpectedEntries: ExpectedTimeline[] = [];
           Object.entries(ExpectedRows).forEach(([key, value]) => {
+            const expectedGhgValue =
+              key === 'ROW_ONE' || key === 'ROW_TWO' || key === 'ROW_THREE'
+                ? `kt${selectedGhg}`
+                : value[0];
             const rowData: ExpectedTimeline = {
               key: key,
-              ghg: value[0],
+              ghg: expectedGhgValue,
               topic: value[1],
               total: response.data.expected.total[mtgFieldMapping(value[1])],
+              values: response.data.expected[mtgFieldMapping(value[1])],
             };
-            for (let year = mtgStartYear; year <= endYear; year++) {
-              rowData[year.toString()] =
-                response.data.expected[mtgFieldMapping(value[1])][year - mtgStartYear];
-            }
             tempExpectedEntries.push(rowData);
           });
 
           const tempActualEntries: ActualTimeline[] = [];
           Object.entries(ActualRows).forEach(([key, value]) => {
+            const actualGhgValue =
+              key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${selectedGhg}` : value[0];
             const rowData: ActualTimeline = {
               key: key,
-              ghg: value[0],
+              ghg: actualGhgValue,
               topic: value[1],
               total: response.data.actual.total[mtgFieldMapping(value[1])],
+              values: response.data.actual[mtgFieldMapping(value[1])],
             };
-            for (let year = mtgStartYear; year <= endYear; year++) {
-              rowData[year.toString()] =
-                response.data.actual[mtgFieldMapping(value[1])][year - mtgStartYear];
-            }
             tempActualEntries.push(rowData);
           });
 
@@ -726,13 +751,37 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   //MTG timeline calculate array sum from row
 
-  const mtgCalculateArraySum = (row: any) => {
+  const mtgCalculateArraySum = (array: number[]) => {
     let arrSum = 0;
-    const endYear = mtgStartYear + mtgRange;
-    for (let year = mtgStartYear; year <= endYear; year++) {
-      arrSum += row[year.toString()] || 0;
+    for (let index = 0; index <= array.length; index++) {
+      arrSum += array[index] || 0;
     }
     return arrSum;
+  };
+
+  //Values convert to ktCO2e
+
+  const multiplyByGwpValue = (entry: any) => {
+    switch (entry.topic) {
+      case expectedTimeline[1].topic:
+        for (let index = 0; index < expectedTimeline[1].values.length; index++) {
+          expectedTimeline[3].values[index] = expectedTimeline[1].values[index] * gwpValue;
+          expectedTimeline[3].total = mtgCalculateArraySum(expectedTimeline[3].values);
+        }
+        break;
+      case expectedTimeline[2].topic:
+        for (let index = 0; index < expectedTimeline[2].values.length; index++) {
+          expectedTimeline[4].values[index] = expectedTimeline[2].values[index] * gwpValue;
+          expectedTimeline[4].total = mtgCalculateArraySum(expectedTimeline[4].values);
+        }
+        break;
+      case actualTimeline[1].topic:
+        for (let index = 0; index < actualTimeline[1].values.length; index++) {
+          actualTimeline[2].values[index] = actualTimeline[1].values[index] * gwpValue;
+          actualTimeline[2].total = mtgCalculateArraySum(actualTimeline[2].values);
+        }
+        break;
+    }
   };
 
   // Mtg Data Change
@@ -740,7 +789,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const onMtgValueEnter = (
     tableType: 'expected' | 'actual',
     rowId: string,
-    year: string,
+    year: any,
     value: string
   ) => {
     const newValue = value ? parseInt(value) : 0;
@@ -748,8 +797,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     if (tableType === 'expected') {
       const updatedTimeline = expectedTimeline.map((entry) => {
         if (entry.topic === rowId) {
-          entry[year] = newValue;
-          entry.total = mtgCalculateArraySum(entry);
+          entry.values[year - mtgStartYear] = newValue;
+          entry.total = mtgCalculateArraySum(entry.values);
+          multiplyByGwpValue(entry);
           return entry;
         }
         return entry;
@@ -758,8 +808,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     } else {
       const updatedTimeline = actualTimeline.map((entry) => {
         if (entry.topic === rowId) {
-          entry[year] = newValue;
-          entry.total = mtgCalculateArraySum(entry);
+          entry.values[year - mtgStartYear] = newValue;
+          entry.total = mtgCalculateArraySum(entry.values);
+          multiplyByGwpValue(entry);
           return entry;
         }
         return entry;
@@ -778,11 +829,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           activityId: entId,
           mitigationTimeline: {
             expected: {
-              baselineEmissions: mtgRowMapping(expectedTimeline[0]),
-              activityEmissionsWithM: mtgRowMapping(expectedTimeline[1]),
-              activityEmissionsWithAM: mtgRowMapping(expectedTimeline[2]),
-              expectedEmissionReductWithM: mtgRowMapping(expectedTimeline[3]),
-              expectedEmissionReductWithAM: mtgRowMapping(expectedTimeline[4]),
+              baselineEmissions: expectedTimeline[0].values,
+              activityEmissionsWithM: expectedTimeline[1].values,
+              activityEmissionsWithAM: expectedTimeline[2].values,
+              expectedEmissionReductWithM: expectedTimeline[3].values,
+              expectedEmissionReductWithAM: expectedTimeline[4].values,
               total: {
                 baselineEmissions: expectedTimeline[0].total,
                 activityEmissionsWithM: expectedTimeline[1].total,
@@ -792,9 +843,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               },
             },
             actual: {
-              baselineActualEmissions: mtgRowMapping(actualTimeline[0]),
-              activityActualEmissions: mtgRowMapping(actualTimeline[1]),
-              actualEmissionReduct: mtgRowMapping(actualTimeline[2]),
+              baselineActualEmissions: actualTimeline[0].values,
+              activityActualEmissions: actualTimeline[1].values,
+              actualEmissionReduct: actualTimeline[2].values,
               total: {
                 baselineActualEmissions: actualTimeline[0].total,
                 activityActualEmissions: actualTimeline[1].total,
@@ -808,7 +859,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         if (response.status === 200 || response.status === 201) {
           message.open({
             type: 'success',
-            content: 'Mitigation Timeline Successfully Updated  !',
+            content: t('mtgUpdateSuccess'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
@@ -817,7 +868,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      displayErrorMessage(error, `${entId} Mitigation Timeline Failed to Update !`);
+      displayErrorMessage(error, `${entId} Mitigation Timeline Failed to Update`);
     }
   };
 
@@ -829,11 +880,29 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     if (method === 'create') {
       setDefaultTimelineValues(mtgStartYear, mtgRange);
     }
-  }, [mtgStartYear]);
+
+    if (selectedGhg !== undefined) {
+      switch (selectedGhg) {
+        case GHGS.CH:
+          setGwpValue(gwpSettings?.CH4 ?? 1);
+          break;
+        case GHGS.NO:
+          setGwpValue(gwpSettings?.N2O ?? 1);
+          break;
+        default:
+          setGwpValue(1);
+          break;
+      }
+    }
+  }, [mtgStartYear, selectedGhg]);
 
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
+    if (method === 'update' && isMtgButtonEnabled) {
+      displayErrorMessage('', t('saveMtgFirst'));
+      return;
+    }
     try {
       setWaitingForBE(true);
 
@@ -881,11 +950,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       if (method === 'create') {
         payload.mitigationTimeline = {
           expected: {
-            baselineEmissions: mtgRowMapping(expectedTimeline[0]),
-            activityEmissionsWithM: mtgRowMapping(expectedTimeline[1]),
-            activityEmissionsWithAM: mtgRowMapping(expectedTimeline[2]),
-            expectedEmissionReductWithM: mtgRowMapping(expectedTimeline[3]),
-            expectedEmissionReductWithAM: mtgRowMapping(expectedTimeline[4]),
+            baselineEmissions: expectedTimeline[0].values,
+            activityEmissionsWithM: expectedTimeline[1].values,
+            activityEmissionsWithAM: expectedTimeline[2].values,
+            expectedEmissionReductWithM: expectedTimeline[3].values,
+            expectedEmissionReductWithAM: expectedTimeline[4].values,
             total: {
               baselineEmissions: expectedTimeline[0].total,
               activityEmissionsWithM: expectedTimeline[1].total,
@@ -895,9 +964,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             },
           },
           actual: {
-            baselineActualEmissions: mtgRowMapping(actualTimeline[0]),
-            activityActualEmissions: mtgRowMapping(actualTimeline[1]),
-            actualEmissionReduct: mtgRowMapping(actualTimeline[2]),
+            baselineActualEmissions: actualTimeline[0].values,
+            activityActualEmissions: actualTimeline[1].values,
+            actualEmissionReduct: actualTimeline[2].values,
             total: {
               baselineActualEmissions: actualTimeline[0].total,
               activityActualEmissions: actualTimeline[1].total,
@@ -1431,11 +1500,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   >
                     <Select
                       size="large"
-                      mode="multiple"
                       style={{ fontSize: inputFontSize }}
                       allowClear
-                      disabled={isView}
+                      disabled={method !== 'create'}
                       showSearch
+                      onChange={(value: GHGS) => setSelectedGhg(value)}
                     >
                       {Object.values(GHGS).map((ghg) => (
                         <Option key={ghg} value={ghg}>
@@ -1626,7 +1695,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            {mtgStartYear !== 0 && mtgStartYear !== undefined && (
+            {mtgStartYear !== 0 && mtgStartYear !== undefined && selectedGhg !== undefined && (
               <div className="form-section-card">
                 <Row>
                   <Col {...mtgTableHeaderBps} style={{ paddingTop: '6px' }}>

@@ -5,7 +5,7 @@ export type ActivityData = {
   reductionMeasures: string;
   status: string;
   natImplementor: string[];
-  ghgsAffected?: string[];
+  ghgsAffected?: string;
   achievedReduction?: number;
   estimatedReduction?: number;
   technologyType?: string;

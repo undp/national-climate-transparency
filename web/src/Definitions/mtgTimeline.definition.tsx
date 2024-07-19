@@ -3,7 +3,7 @@ export interface ExpectedTimeline {
   ghg: string;
   topic: string;
   total: number;
-  [key: string]: any;
+  values: number[];
 }
 
 export interface ActualTimeline {
@@ -11,7 +11,7 @@ export interface ActualTimeline {
   ghg: string;
   topic: string;
   total: number;
-  [key: string]: any;
+  values: number[];
 }
 
 export const ExpectedRows = {

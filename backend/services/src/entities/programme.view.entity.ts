@@ -29,7 +29,7 @@ act AS (
 			a."parentId" AS "programmeId",
 			COALESCE(SUM(a."achievedGHGReduction"), 0) AS "achievedGHGReduction",
 			COALESCE(SUM(a."expectedGHGReduction"), 0) AS "expectedGHGReduction",
-			CUSTOM_ARRAY_AGG(a."ghgsAffected") FILTER (WHERE a."ghgsAffected" IS NOT NULL) AS "ghgsAffected"
+			ARRAY_AGG(a."ghgsAffected") FILTER (WHERE a."ghgsAffected" IS NOT NULL)::character varying[] AS "ghgsAffected"
 	FROM 
 			activity a
 	WHERE 

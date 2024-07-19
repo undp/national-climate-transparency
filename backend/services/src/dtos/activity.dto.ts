@@ -119,20 +119,12 @@ export class ActivityDto {
 	)
 	documents: DocumentDto[];
 
-	@ValidateIf((c) => c.ghgsAffected)
-	@IsArray()
-	@ArrayMinSize(1)
-	@MaxLength(100, { each: true })
-	@IsNotEmpty({ each: true })
+	@IsNotEmpty()
+	@ApiProperty({ enum: GHGS })
 	@IsEnum(GHGS, {
-		each: true,
 		message: "Invalid GHG. Supported following types:" + Object.values(GHGS),
 	})
-	@ApiPropertyOptional({
-		type: [String],
-		enum: Object.values(GHGS),
-	})
-	ghgsAffected: GHGS[];
+	ghgsAffected: GHGS;
 
 	@IsNumber()
 	@ApiProperty()
