@@ -1,4 +1,4 @@
-import React, { useContext, useState, createContext, useCallback } from 'react';
+import React, { useContext, useState, createContext, useCallback, useEffect } from 'react';
 import { useConnection } from '../ConnectionContext/connectionContext';
 import jwt_decode from 'jwt-decode';
 import { UserContextProps, UserProps } from '../../Definitions/userContext.definition';
@@ -55,12 +55,13 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
   };
 
   const [userInfoState, setUserInfoState] = useState<UserProps>(initialUserProps);
-  const [isGhgAllowed, setIsGhgAllowed] = useState<boolean>(
-    initialUserProps.validatePermission === ValidateEntity.CAN
-  );
-  const [isValidationAllowed, setIsValidationAllowed] = useState<boolean>(
-    initialUserProps.ghgInventoryPermission === GHGInventoryManipulate.CAN
-  );
+  const [isGhgAllowed, setIsGhgAllowed] = useState<boolean>();
+  const [isValidationAllowed, setIsValidationAllowed] = useState<boolean>();
+
+  useEffect(() => {
+    setIsValidationAllowed(userInfoState.validatePermission === ValidateEntity.CAN);
+    setIsGhgAllowed(userInfoState.ghgInventoryPermission === GHGInventoryManipulate.CAN);
+  }, [userInfoState]);
 
   const setUserInfo = (value: UserProps) => {
     const state = userInfoState?.userState === 1 ? userInfoState?.userState : 0;
@@ -96,14 +97,14 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     localStorage.setItem('userSectors', userSectors + '');
 
     setUserInfoState((prev) => ({ ...prev, validatePermission }));
-    setIsValidationAllowed(validatePermission === ValidateEntity.CAN);
+    setIsValidationAllowed(validatePermission.toString() === ValidateEntity.CAN);
     localStorage.setItem('validatePermission', validatePermission + '');
 
     setUserInfoState((prev) => ({ ...prev, subRolePermission }));
     localStorage.setItem('subRolePermission', subRolePermission + '');
 
     setUserInfoState((prev) => ({ ...prev, ghgInventoryPermission }));
-    setIsGhgAllowed(ghgInventoryPermission === GHGInventoryManipulate.CAN);
+    setIsGhgAllowed(ghgInventoryPermission.toString() === GHGInventoryManipulate.CAN);
     localStorage.setItem('ghgInventoryPermission', ghgInventoryPermission + '');
   };
 

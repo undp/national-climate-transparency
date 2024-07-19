@@ -9,14 +9,13 @@ import TabPane from 'antd/lib/tabs/TabPane';
 import { LockOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { EmissionTabItem } from '../../Definitions/emissionDefinitions';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
-import { Role } from '../../Enums/role.enum';
 
 const GhgEmissions = () => {
   // Page Context
 
   const { t } = useTranslation(['emission']);
   const { get } = useConnection();
-  const { userInfoState } = useUserContext();
+  const { isGhgAllowed } = useUserContext();
 
   // Years State for Tab Panel
 
@@ -89,7 +88,7 @@ const GhgEmissions = () => {
           onTabClick={(key: string) => setActiveYear(key)}
           destroyInactiveTabPane={true}
         >
-          {userInfoState?.userRole !== Role.Observer && (
+          {isGhgAllowed && (
             <TabPane
               tab={
                 <span>

@@ -176,7 +176,7 @@ export class CaslAbilityFactory {
 				can(Action.Validate, ProjectionEntity);
 
 				// Settings
-				cannot(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Read, ConfigurationSettingsEntity);
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 
@@ -300,7 +300,7 @@ export class CaslAbilityFactory {
 				can(Action.Validate, ProjectionEntity);
 
 				// Settings
-				cannot(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Read, ConfigurationSettingsEntity);
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 
@@ -422,7 +422,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Validate, ProjectionEntity);
 
 				// Settings
-				cannot(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Read, ConfigurationSettingsEntity);
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 

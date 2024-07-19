@@ -1,4 +1,4 @@
-import { Row, Col, Button, Table, TableProps, message, InputNumber } from 'antd';
+import { Row, Col, Button, Table, TableProps, message, InputNumber, Tooltip } from 'antd';
 import './projectionForm.scss';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import { getProjectionCreatePayload } from '../../Utils/payloadCreators';
 import { GHGRecordState } from '../../Enums/shared.enum';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 
 interface Props {
   index: number;
@@ -26,6 +27,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
   // context Usage
   const { t } = useTranslation(['projection', 'entityAction']);
   const { get, post } = useConnection();
+  const { isValidationAllowed, isGhgAllowed } = useUserContext();
 
   // Collapse State
 
@@ -82,6 +84,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
         if (response.data.state === GHGRecordState.FINALIZED) {
           setIsFinalized(true);
         }
+        setIsEdited(true);
       }
     } catch (error) {
       setAllEditableData(getInitTimeline());
@@ -344,7 +347,7 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
         return (
           <InputNumber
             value={parseToTwoDecimals(sectionValueArray[year - 2000] ?? 0)}
-            disabled={isNonLeaf || isFinalized}
+            disabled={isNonLeaf || isFinalized || !isGhgAllowed}
             onChange={(enteredValue) => {
               updateValue(
                 record.topicId,
@@ -435,10 +438,10 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
         </Col>
       </Row>
       <Row gutter={20} className="action-row" justify={'end'}>
-        {!isFinalized && (
+        {!isFinalized && isGhgAllowed && (
           <Col>
             <Button
-              disabled={isFinalized || isEdited}
+              disabled={isFinalized}
               type="primary"
               size="large"
               block
@@ -448,23 +451,33 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
             </Button>
           </Col>
         )}
-        <Col>
-          <Button
-            disabled={isEdited}
-            type="primary"
-            size="large"
-            block
-            onClick={() =>
-              handleValidateAction(isFinalized ? GHGRecordState.SAVED : GHGRecordState.FINALIZED)
-            }
-          >
-            {isFinalized ? t('entityAction:unvalidate') : t('entityAction:validate')}
-          </Button>
-        </Col>
-        {!isFinalized && (
+        {isGhgAllowed && (
+          <Col>
+            <Tooltip
+              placement="topRight"
+              title={!isValidationAllowed ? t('error:validationPermissionRequired') : undefined}
+              showArrow={false}
+            >
+              <Button
+                disabled={isEdited || !isValidationAllowed}
+                type="primary"
+                size="large"
+                block
+                onClick={() =>
+                  handleValidateAction(
+                    isFinalized ? GHGRecordState.SAVED : GHGRecordState.FINALIZED
+                  )
+                }
+              >
+                {isFinalized ? t('entityAction:unvalidate') : t('entityAction:validate')}
+              </Button>
+            </Tooltip>
+          </Col>
+        )}
+        {!isFinalized && isGhgAllowed && (
           <Col>
             <Button
-              disabled={isFinalized}
+              disabled={isFinalized || !isEdited}
               type="primary"
               size="large"
               block

@@ -16,6 +16,8 @@ import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { getBaselineSavePayload } from '../../Utils/payloadCreators';
 import moment, { Moment } from 'moment';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { Role } from '../../Enums/role.enum';
 
 interface Props {
   index: number;
@@ -26,6 +28,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
   // context Usage
   const { t } = useTranslation(['projection', 'entityAction']);
   const { get, post } = useConnection();
+  const { userInfoState } = useUserContext();
 
   // Collapse State
 
@@ -202,6 +205,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
               picker="year"
               size="middle"
               disabledDate={disabledDate}
+              disabled={userInfoState?.userRole !== Role.Root}
             />
           ) : (
             <InputNumber
@@ -216,6 +220,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
               min={value === GrowthRateProperties.GR ? undefined : 0}
               decimalSeparator="."
               controls={false}
+              disabled={userInfoState?.userRole !== Role.Root}
               className={isNonLeaf ? undefined : 'leaf-input-box'}
             />
           )
@@ -255,18 +260,20 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
           />
         </Col>
       </Row>
-      <Row gutter={20} className="action-row" justify={'end'}>
-        <Col>
-          <Button
-            type="primary"
-            style={{ height: '35px', width: '90px' }}
-            block
-            onClick={() => saveBaseline()}
-          >
-            {t('entityAction:update')}
-          </Button>
-        </Col>
-      </Row>
+      {userInfoState?.userRole === Role.Root && (
+        <Row gutter={20} className="action-row" justify={'end'}>
+          <Col>
+            <Button
+              type="primary"
+              style={{ height: '35px', width: '90px' }}
+              block
+              onClick={() => saveBaseline()}
+            >
+              {t('entityAction:update')}
+            </Button>
+          </Col>
+        </Row>
+      )}
     </div>
   );
 };

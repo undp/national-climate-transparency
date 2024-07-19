@@ -8,6 +8,8 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import { useEffect } from 'react';
 import { ProjectionType } from '../../Enums/projection.enum';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { Role } from '../../Enums/role.enum';
 
 const GhgConfigurations = () => {
   // Page Context
@@ -15,6 +17,7 @@ const GhgConfigurations = () => {
   const [form] = Form.useForm();
   const { t } = useTranslation(['configuration']);
   const { get, post } = useConnection();
+  const { userInfoState } = useUserContext();
 
   // Form Validation Rules
 
@@ -115,6 +118,7 @@ const GhgConfigurations = () => {
                           e.preventDefault();
                         }
                       }}
+                      disabled={userInfoState?.userRole !== Role.Root}
                     />
                   </Form.Item>
                 </Col>
@@ -134,20 +138,23 @@ const GhgConfigurations = () => {
                           e.preventDefault();
                         }
                       }}
+                      disabled={userInfoState?.userRole !== Role.Root}
                     />
                   </Form.Item>
                 </Col>
               </Row>
             </Col>
-            <Col span={6}>
-              <Row justify={'end'}>
-                <Col span={8}>
-                  <Button type="primary" block htmlType="submit" className="gwp-save-button">
-                    {t('entityAction:update')}
-                  </Button>
-                </Col>
-              </Row>
-            </Col>
+            {userInfoState?.userRole === Role.Root && (
+              <Col span={6}>
+                <Row justify={'end'}>
+                  <Col span={8}>
+                    <Button type="primary" block htmlType="submit" className="gwp-save-button">
+                      {t('entityAction:update')}
+                    </Button>
+                  </Col>
+                </Row>
+              </Col>
+            )}
           </Row>
         </Form>
       </div>
