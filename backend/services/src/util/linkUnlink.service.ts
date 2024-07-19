@@ -100,14 +100,16 @@ export class LinkUnlinkService {
 								activities.push(activity);
 								updatedActivityIds.push(activity.activityId);
 
-								for (const support of activity.support) {
-									support.sector = action.sector;
+								if (activity.support && activity.support.length > 0) {
+									for (const support of activity.support) {
+										support.sector = action.sector;
 
-									// unvalidate the activity linked to programme
-									if (support.validated) {
-										support.validated = false;
+										// unvalidate the activity linked to programme
+										if (support.validated) {
+											support.validated = false;
+										}
+										supports.push(support);
 									}
-									supports.push(support);
 								}
 							}
 							await em.save<SupportEntity>(supports);
@@ -160,14 +162,16 @@ export class LinkUnlinkService {
 										activities.push(activity);
 										updatedActivityIds.push(activity.activityId);
 
-										for (const support of activity.support) {
-											support.sector = action.sector;
+										if (activity.support && activity.support.length > 0) {
+											for (const support of activity.support) {
+												support.sector = action.sector;
 
-											// unvalidate the activity linked to programme
-											if (support.validated) {
-												support.validated = false;
+												// unvalidate the activity linked to programme
+												if (support.validated) {
+													support.validated = false;
+												}
+												supports.push(support);
 											}
-											supports.push(support);
 										}
 									}
 									await em.save<SupportEntity>(supports);
@@ -272,15 +276,19 @@ export class LinkUnlinkService {
 								activities.push(activity);
 								updatedActivityIds.push(activity.activityId);
 
-								for (const support of activity.support) {
-									support.sector = action.sector;
-
-									// unvalidate the activity linked to programme
-									if (support.validated) {
-										support.validated = false;
+								if (activity.support && activity.support.length > 0) {
+									for (const support of activity.support) {
+										support.sector = action.sector;
+	
+										// unvalidate the activity linked to programme
+										if (support.validated) {
+											support.validated = false;
+										}
+										supports.push(support);
 									}
-									supports.push(support);
 								}
+
+								
 							}
 							await em.save<ActivityEntity>(activities)
 							await em.save<SupportEntity>(supports)
@@ -331,15 +339,19 @@ export class LinkUnlinkService {
 										activities.push(activity);
 										updatedActivityIds.push(activity.activityId);
 
-										for (const support of activity.support) {
-											support.sector = action.sector;
-		
-											// unvalidate the activity linked to programme
-											if (support.validated) {
-												support.validated = false;
+										if (activity.support && activity.support.length > 0) {
+											for (const support of activity.support) {
+												support.sector = action.sector;
+			
+												// unvalidate the activity linked to programme
+												if (support.validated) {
+													support.validated = false;
+												}
+												supports.push(support);
 											}
-											supports.push(support);
 										}
+
+										
 									}
 								}
 
@@ -1040,13 +1052,15 @@ export class LinkUnlinkService {
 						}
 						activities.push(activity)
 
-						const supports = []
-						for (const support of activity.support) {
-							support.validated = false;
-							supports.push(support)
-						}
+						if (activity.support && activity.support.length > 0) {
+							const supports = []
+							for (const support of activity.support) {
+								support.validated = false;
+								supports.push(support)
+							}
 
-						await em.save<SupportEntity>(supports);
+							await em.save<SupportEntity>(supports);
+						}
 					}
 
 					await em.save<ActivityEntity>(activities);
@@ -1131,21 +1145,23 @@ export class LinkUnlinkService {
 							);
 							activities.push(activity)
 
-							const supports = []
-							for (const support of activity.support) {
-								support.validated = false;
+							if (activity.support && activity.support.length > 0) {
+								const supports = []
+								for (const support of activity.support) {
+									support.validated = false;
 
-								logs.push(this.buildLogEntity(
-									LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-									EntityType.SUPPORT,
-									support.supportId,
-									0,
-									programme.programmeId)
-								);
-								supports.push(support)
+									logs.push(this.buildLogEntity(
+										LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+										EntityType.SUPPORT,
+										support.supportId,
+										0,
+										programme.programmeId)
+									);
+									supports.push(support)
+								}
+
+								await em.save<SupportEntity>(supports);
 							}
-
-							await em.save<SupportEntity>(supports);
 						}
 
 						await em.save<ActivityEntity>(activities);
@@ -1198,21 +1214,23 @@ export class LinkUnlinkService {
 						updatedActivityIds.push(activity.activityId)
 						activities.push(activity)
 
-						const supports = []
-						for (const support of activity.support) {
-							support.validated = false;
+						if (activity.support && activity.support.length > 0) {
+							const supports = []
+							for (const support of activity.support) {
+								support.validated = false;
 
-							logs.push(this.buildLogEntity(
-								LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-								EntityType.SUPPORT,
-								support.supportId,
-								0,
-								projectId)
-							);
-							supports.push(support)
+								logs.push(this.buildLogEntity(
+									LogEventType.SUPPORT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+									EntityType.SUPPORT,
+									support.supportId,
+									0,
+									projectId)
+								);
+								supports.push(support)
+							}
+
+							await em.save<SupportEntity>(supports);
 						}
-
-						await em.save<SupportEntity>(supports);
 					}
 					if (programme && programme.validated && !skipParentUpdate) {
 						programme.validated = false;
@@ -1248,13 +1266,16 @@ export class LinkUnlinkService {
 
 			await entityManager
 				.transaction(async (em) => {
-					const supports = []
-					for (const support of activity.support) {
-						support.validated = false;
-						supports.push(support)
+					if (activity.support && activity.support.length > 0) {
+						const supports = []
+						for (const support of activity.support) {
+							support.validated = false;
+							supports.push(support)
+						}
+
+						await em.save<SupportEntity>(supports);
 					}
 
-					await em.save<SupportEntity>(supports);
 
 				});
 		}
