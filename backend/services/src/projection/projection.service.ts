@@ -22,6 +22,12 @@ export class GhgProjectionService {
 
     async create(projectionDto: ProjectionDto, user: User) {
 
+        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.ghgPermissionDenied", []), HttpStatus.FORBIDDEN);
+        }
+
+        // Projection Type will be validated inside getActualProjection(projection.projectionType, user);
+
         const projection: ProjectionEntity = this.toProjection(projectionDto);
 
         let savedProjection: ProjectionEntity;
@@ -81,9 +87,15 @@ export class GhgProjectionService {
 
     async validate(projectionValidateDto: ProjectionValidateDto, user: User) {
 
-        if (user.validatePermission === ValidateEntity.CANNOT){
-            throw new HttpException('User need to have Validate Permission', HttpStatus.FORBIDDEN);
+        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.ghgPermissionDenied", []), HttpStatus.FORBIDDEN);
         }
+
+        if (user.validatePermission === ValidateEntity.CANNOT){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.validatePermissionDenied", []), HttpStatus.FORBIDDEN);
+        }
+
+        // Projection Type will be validated inside getActualProjection(projectionValidateDto.projectionType, user);
 
         const result = await this.getActualProjection(projectionValidateDto.projectionType, user);
 
@@ -127,12 +139,8 @@ export class GhgProjectionService {
 
     async getActualProjection(projectionType: string, user: User) {
 
-        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
-            throw new HttpException('User need to have GHG Inventory Access', HttpStatus.FORBIDDEN);
-        }
-
         if (!Object.values(ProjectionType).includes(projectionType as ProjectionType)){
-          throw new HttpException('Invalid Projection Type Received', HttpStatus.BAD_REQUEST);
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidProjectionType", []), HttpStatus.BAD_REQUEST);
         }
 
         return await this.projectionRepo.findOne({
@@ -144,16 +152,12 @@ export class GhgProjectionService {
 
     async getCalculatedProjection(projectionType: string, user: User) {
 
-        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
-            throw new HttpException('User need to have GHG Inventory Access', HttpStatus.FORBIDDEN);
-        }
-
         if (!Object.values(ExtendedProjectionType).includes(projectionType as ExtendedProjectionType)){
-            throw new HttpException('Invalid Baseline Projection Type Received', HttpStatus.BAD_REQUEST);
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidBaselineProjectionType", []), HttpStatus.BAD_REQUEST);
         }
 
         if (Object.values(ProjectionType).includes(projectionType as ProjectionType)){
-            throw new HttpException('Invalid Baseline Projection Type Received', HttpStatus.BAD_REQUEST);
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidBaselineProjectionType", []), HttpStatus.BAD_REQUEST);
         }
   
         return await this.projectionRepo.findOne({

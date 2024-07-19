@@ -21,9 +21,11 @@ export class GhgEmissionsService {
 
     async create(emissionDto: EmissionDto, user: User) {
 
-        if (!this.helperService.isValidYear(emissionDto.year)){
-            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidEmissionYear", []), HttpStatus.BAD_REQUEST);
+        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.ghgPermissionDenied", []), HttpStatus.FORBIDDEN);
         }
+
+        // Year Validation will be handled inside the getEmissionByYear(emission.year, user)
 
         const emission: EmissionEntity = this.toEmission(emissionDto);
         this.verifyEmissionValues(emission);
@@ -91,12 +93,16 @@ export class GhgEmissionsService {
 
     async validate(emissionValidateDto: EmissionValidateDto, user: User) {
 
-        if (!this.helperService.isValidYear(emissionValidateDto.year)){
-            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidEmissionYear", []), HttpStatus.BAD_REQUEST);
+        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.ghgPermissionDenied", []), HttpStatus.FORBIDDEN);
         }
 
         if (user.validatePermission === ValidateEntity.CANNOT){
             throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.validatePermissionDenied", []), HttpStatus.FORBIDDEN);
+        }
+
+        if (!this.helperService.isValidYear(emissionValidateDto.year)){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidEmissionYear", []), HttpStatus.BAD_REQUEST);
         }
 
         const result = await this.getEmissionByYear(emissionValidateDto.year, user);
@@ -140,10 +146,6 @@ export class GhgEmissionsService {
     }
 
     async getEmissionReportSummary(user: User) {
-
-        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
-            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.ghgPermissionDenied", []), HttpStatus.FORBIDDEN);
-        }
         
         const emissions = await this.emissionRepo
             .createQueryBuilder("emission_entity")
@@ -154,10 +156,6 @@ export class GhgEmissionsService {
     }
 
     getEmissionByYear = async (year: string, user: User) => {
-
-        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
-            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.ghgPermissionDenied", []), HttpStatus.FORBIDDEN);
-        }
 
         if (!this.helperService.isValidYear(year)){
             throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidEmissionYear", []), HttpStatus.BAD_REQUEST);
