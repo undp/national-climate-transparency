@@ -1,0 +1,20 @@
+{
+    "ghgPermissionDenied": "GHG Manipulation Permission required.",
+    "cannotEditEmissionFinalized": "Emission record finalized; cannot edit.",
+    "emissionUpdateFailed": "Failed to update emission record.",
+    "emissionSaveFailed": "Failed to save emission record.",
+    "validatePermissionDenied": "Permission denied for validation.",
+    "invalidEmissionYear": "Invalid emission year.",
+    "emissionAlreadyValidated": "Emission record already validated.",
+    "emissionAlreadyUnvalidated": "Emission record already unvalidated.",
+    "invalidDataType": "Invalid data type.",
+    "negativeValuesNotAllowed": "Negative values are not allowed.",
+    "cannotEditProjectionFinalized": "Projection record finalized; cannot edit.",
+    "projectionUpdateFailed": "Failed to update projection record.",
+    "projectionSaveFailed": "Failed to save projection record.",
+    "projectionAlreadyValidated": "Projection record already validated.",
+    "projectionAlreadyUnvalidated": "Projection record already unvalidated.",
+    "invalidProjectionType": "Invalid projection type.",
+    "invalidBaselineProjectionType": "Invalid baseline projection type.",
+    "invalidYearReceived": "Invalid year received."
+}
