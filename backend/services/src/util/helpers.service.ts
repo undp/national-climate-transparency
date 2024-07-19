@@ -10,8 +10,8 @@ import { EntityManager } from "typeorm";
 import { SubpathDto } from "../dtos/subpath.dto";
 import { User } from "../entities/user.entity";
 import { Sector } from "../enums/sector.enum";
-import { ValidateEntity } from "src/enums/user.enum";
-import { Role } from "src/casl/role.enum";
+import { ValidateEntity } from "../enums/user.enum";
+import { Role } from "../casl/role.enum";
 
 @Injectable()
 export class HelperService {
