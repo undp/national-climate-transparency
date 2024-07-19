@@ -20,7 +20,6 @@ import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { DeleteDto } from "src/dtos/delete.dto";
 import { Role } from "src/casl/role.enum";
-import { ValidateEntity } from "src/enums/user.enum";
 import { LinkUnlinkService } from "src/util/linkUnlink.service";
 
 @Injectable()
@@ -186,8 +185,8 @@ export class SupportService {
 		);
 	}
 
-	//MARK: Find Support by Id
-	async findSupportById(supportId: string) {
+	//MARK: Find Support by Id with supports
+	async findSupportByIdWithActivity(supportId: string) {
 		return await this.supportRepo.createQueryBuilder('support')
 			.leftJoinAndSelect('support.activity', 'activity')
 			.where('support.supportId = :supportId', { supportId })
@@ -203,7 +202,7 @@ export class SupportService {
 
 	//MARK: Update Support
 	async updateSupport(supportUpdateDto: SupportUpdateDto, user: User) {
-		const currentSupport = await this.findSupportById(supportUpdateDto.supportId);
+		const currentSupport = await this.findSupportByIdWithActivity(supportUpdateDto.supportId);
 		if (!currentSupport) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -247,7 +246,7 @@ export class SupportService {
 			activityList.push(currentActivity);
 			updatedActivityIds.push(currentActivity.activityId);
 
-			if (currentSupport.activity.parentType == EntityType.PROJECT) {
+			if (currentActivity.parentType == EntityType.PROJECT) {
 				const currentParentProject = await this.activityService.isProjectValid(currentSupport.activity.parentId, user);
 				if (currentParentProject.validated) {
 					currentParentProject.validated = false;
@@ -266,11 +265,9 @@ export class SupportService {
 
 		}
 
-		
-
 		if (supportUpdateDto.activityId != currentSupport.activity.activityId) {
 
-			const activity = await this.linkUnlinkService.findActivityByIdWithSupports(supportUpdateDto.activityId);
+			const activity = await this.activityService.findActivityById(supportUpdateDto.activityId);
 			if (!activity) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -365,6 +362,9 @@ export class SupportService {
 						for (const project of projectList) {
 							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProject(project, em, true, updatedActivityIds);
 						}
+						for (const activity of activityList) {
+							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [currentSupport.supportId]);
+						}
 					} else {
 						for (const activity of activityList) {
 							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [currentSupport.supportId]);
@@ -408,7 +408,7 @@ export class SupportService {
 			);
 		}
 
-		const support = await this.findSupportById(deleteDto.entityId);
+		const support = await this.findSupportByIdWithActivity(deleteDto.entityId);
 		if (!support) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -501,7 +501,7 @@ export class SupportService {
 
 		this.helperService.doesUserHaveValidatePermission(user);
 
-		const support = await this.findSupportById(validateDto.entityId);
+		const support = await this.findSupportByIdWithActivity(validateDto.entityId);
 		if (!support) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(

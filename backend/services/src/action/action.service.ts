@@ -27,10 +27,8 @@ import { AchievementEntity } from "../entities/achievement.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { ProjectEntity } from "../entities/project.entity";
 import { KPIAction } from "../enums/shared.enum";
-import { ValidateEntity } from "../enums/user.enum";
 import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
-import { SupportEntity } from "src/entities/support.entity";
 
 @Injectable()
 export class ActionService {
@@ -219,98 +217,6 @@ export class ActionService {
 
 		return { haveChildren: haveChildren, programmeChildren: programmeChildren, projectChildren: projectChildren, activityChildren: activityChildren };
 	}
-
-	// async updateAllValidatedChildrenStatus(actionId: string, entityManager: EntityManager) {
-
-	// 	const programmeChildren: ProgrammeEntity[] =
-	// 		await this.programmeRepo.createQueryBuilder('programme')
-	// 			.where('programme.actionId = :actionId AND programme.validated IS TRUE', { actionId })
-	// 			.getMany();
-
-	// 	const projectChildren: ProjectEntity[] =
-	// 		await this.projectRepo.createQueryBuilder('project')
-	// 			.where("subpath(project.path, 0, 1) = :actionId AND project.validated IS TRUE", { actionId })
-	// 			.getMany();
-
-	// 	const activityChildren: ActivityEntity[] =
-	// 		await this.activityRepo.createQueryBuilder('activity')
-	// 			.leftJoinAndSelect('activity.support', 'support')
-	// 			.where("subpath(activity.path, 0, 1) = :actionId AND activity.validated IS TRUE", { actionId })
-	// 			.getMany();
-
-	// 	if ((programmeChildren.length > 0) || (projectChildren.length > 0) || (activityChildren.length > 0)) {
-
-	// 		await entityManager
-	// 			.transaction(async (em) => {
-	// 				const logs = [];
-
-	// 				const programmes = []
-	// 				for (const programme of programmeChildren) {
-	// 					// unvalidate programme
-	// 				if (programme.validated) {
-	// 					programme.validated = false;
-	// 					logs.push(this.buildLogEntity(
-	// 						LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-	// 						EntityType.PROGRAMME,
-	// 						programme.programmeId,
-	// 						0,
-	// 						actionId)
-	// 					)
-	// 				}
-	// 					programmes.push(programme)
-	// 				}
-
-	// 				await em.save<ProgrammeEntity>(programmes);
-
-	// 				const projects = []
-	// 				for (const project of projectChildren) {
-	// 					// unvalidate project
-	// 				if (project.validated) {
-	// 					project.validated = false;
-	// 					logs.push(this.buildLogEntity(
-	// 						LogEventType.PROJECT_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-	// 						EntityType.PROJECT,
-	// 						project.projectId,
-	// 						0,
-	// 						actionId)
-	// 					)
-	// 				}
-
-	// 					projects.push(project)
-	// 				}
-
-	// 				await em.save<ProjectEntity>(projects);
-
-	// 				const activities = []
-	// 				for (const activity of activityChildren) {
-	// 					// unvalidate activity
-	// 				if (activity.validated) {
-	// 					activity.validated = false;
-	// 					logs.push(this.buildLogEntity(
-	// 						LogEventType.ACTIVITY_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-	// 						EntityType.ACTIVITY,
-	// 						activity.activityId,
-	// 						0,
-	// 						actionId)
-	// 					)
-	// 				}
-	// 					activities.push(activity)
-
-	// 					const supports = []
-	// 					for (const support of activity.support) {
-	// 						support.validated = false;
-	// 						supports.push(support)
-	// 					}
-
-	// 					await em.save<SupportEntity>(supports);
-	// 				}
-
-	// 				await em.save<ActivityEntity>(activities);
-	// 				await em.save<LogEntity>(logs);
-
-	// 			});
-	// 	}
-	// }
 
 	async getActionViewData(actionId: string) {
 

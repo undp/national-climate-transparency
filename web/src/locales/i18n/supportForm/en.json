@@ -21,5 +21,7 @@
     "supportUpdateSuccess": "Support Updated Successfully",
     "supportValidateSuccess": "Support Validated Successfully",
     "supportUnvalidateSuccess": "Support Unvalidated Successfully",
-    "supportDeleteSuccess": "Support Deleted Successfully"
+    "supportDeleteSuccess": "Support Deleted Successfully",
+    "deletePrimaryMsg": "Are you sure you want to remove the Support",
+    "deleteSecondaryMsg": "You can’t undo this action"
   }

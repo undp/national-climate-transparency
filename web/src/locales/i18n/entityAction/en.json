@@ -11,5 +11,6 @@
     "back": "Back",
     "delete": "Delete",
     "apply": "Apply",
-    "revert": "Load Baseline Data"
+    "revert": "Load Baseline Data",
+    "edit": "Edit"
 }

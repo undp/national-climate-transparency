@@ -95,6 +95,8 @@ export class ReportService {
 					`annex_three.meansOfImplementation = '${implementation}'`
 			});
 
+			implementationCondition = `(${implementationCondition})`
+
 			return this.annexThreeViewRepo
 					   .createQueryBuilder("annex_three")
 					   .where("annex_three.direction = :direction", { direction: direction })
@@ -237,8 +239,8 @@ export class ReportService {
 				techDevelopment: report.meansOfImplementation === ImpleMeans.TECH_DEV ? 'Yes' : 'No',
 				capacityBuilding: report.meansOfImplementation === ImpleMeans.CAPACITY_BUILD ? 'Yes' : 'No',
 				anchoredInNationalStrategy: report.anchoredInNationalStrategy ? 'Yes' : 'No',
+				supportChannel: report.internationalSupportChannel,
 				additionalInfo: report.etfDescription,
-				supportChannel: report.internationalSupportChannel
 			};
 			exportData.push(dto);
 		}
@@ -258,8 +260,8 @@ export class ReportService {
 				recipientEntities: report.recipientEntities,
 				nationalImplementingEntities: report.nationalImplementingEntity,
 				internationalImplementingEntities: report.internationalImplementingEntity,
-				receivedAmount: report.receivedAmount,
 				receivedAmountDomestic: report.receivedAmountDomestic,
+				receivedAmount: report.receivedAmount,
 				startYear: report.startYear,
 				endYear: report.endYear,
 				financialInstrument: report.internationalFinancialInstrument,

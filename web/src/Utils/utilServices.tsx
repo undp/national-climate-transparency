@@ -1,6 +1,7 @@
 import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
 import { Buffer } from 'buffer';
+import { AcceptedFileExtensions } from '../Enums/file.enum';
 
 export const addCommSep = (value: any) => {
   return (
@@ -161,5 +162,23 @@ export const arraySumAggregate = (numArrays: number[][], entryCount: number): nu
     return numArrays[0].map((_, i) => numArrays.reduce((sum, arr) => sum + arr[i], 0));
   } catch {
     return new Array(entryCount).fill(0);
+  }
+};
+
+export const delay = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const getFileExtension = (fileTitle: string) => {
+  const fileParts = fileTitle.split('.');
+  if (fileParts.length > 0) {
+    const extension = fileParts[fileParts.length - 1].toLowerCase();
+    if (Object.values(AcceptedFileExtensions).includes(extension as AcceptedFileExtensions)) {
+      return extension;
+    } else {
+      return undefined;
+    }
+  } else {
+    return undefined;
   }
 };

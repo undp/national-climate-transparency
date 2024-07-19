@@ -26,5 +26,7 @@
   "mtgComments": "ව්‍යාපෘති පිළිබඳ පරික්ෂාවන්",
   "mtgDocUploadOne": "හිරිකම ක්‍රමයේ විස්තරයේ පත්රය",
   "mtgDocUploadTwo": "හිරිකම සාරාංශ විස්තරයේ පත්රය",
-  "mitigationTimelineTitle" : "හිරිකම කාල දිරිමත්"
+  "mitigationTimelineTitle" : "හිරිකම කාල දිරිමත්",
+  "deletePrimaryMsg": "ඔබට ඉවත් කිරීම අවශ්‍ය බව ඔබට විශ්වාසද",
+  "deleteSecondaryMsg": "ඔබට මෙම ක්‍රියාව අහෝසි කළ නොහැක."
 }

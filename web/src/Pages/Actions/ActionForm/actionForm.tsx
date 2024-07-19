@@ -1,7 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
-import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { AppstoreOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
+import {
+  AppstoreOutlined,
+  DeleteOutlined,
+  DisconnectOutlined,
+  PlusCircleOutlined,
+} from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import {
@@ -20,7 +25,7 @@ import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
-import { getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
+import { delay, getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
@@ -46,7 +51,6 @@ import {
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
-import { ValidateEntity } from '../../../Enums/user.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -56,7 +60,13 @@ const inputFontSize = '13px';
 
 const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['actionForm', 'detachPopup', 'entityAction', 'formHeader']);
+  const { t } = useTranslation([
+    'actionForm',
+    'detachPopup',
+    'entityAction',
+    'formHeader',
+    'error',
+  ]);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Action', method);
@@ -64,7 +74,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
-  const { userInfoState } = useUserContext();
+  const { userInfoState, isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
@@ -74,7 +84,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
-  const [isValidateButtonDisabled, setIsValidateButtonDisabled] = useState(false);
 
   // Form General State
 
@@ -116,9 +125,13 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
   const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
-  // Detach Popup Visibility
+  // Popup Definition
 
   const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
+
+  // Detach Entity Data
+
   const [detachingEntityId, setDetachingEntityId] = useState<string>();
   const [detachingEntityType, setDetachingEntityType] = useState<'Programme' | 'Activity'>();
 
@@ -136,7 +149,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const userSectors = userInfoState?.userSectors ?? [];
   const yearsList: number[] = [];
 
-  for (let year = 2013; year <= 2050; year++) {
+  for (let year = 2013; year <= 2049; year++) {
     yearsList.push(year);
   }
 
@@ -145,16 +158,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   } else {
     userSectors.map((sector) => availableSectors.push(sector));
   }
-
-  useEffect(() => {
-    // check user permission for validate action and disable validate button
-    if (
-      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
-      userInfoState?.userRole === Role.Observer
-    ) {
-      setIsValidateButtonDisabled(true);
-    }
-  }, [userInfoState]);
 
   useEffect(() => {
     // Initially Loading Free Programmes and Activities that can be attached
@@ -229,9 +232,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               natImplementer: entityData.migratedData?.natImplementors ?? [],
             });
           }
-        } catch (error: any) {
+        } catch {
           navigate('/actions');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -268,7 +270,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             }
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -750,7 +752,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     } catch (error: any) {
       if (error?.message) {
         if (error.message === 'Permission Denied: Unable to Validate Action') {
-          setIsValidateButtonDisabled(true);
+          setIsValidationAllowed(false);
         }
         displayErrorMessage(error);
       } else {
@@ -761,8 +763,15 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Delete
 
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
   const deleteEntity = async () => {
     try {
+      setWaitingForBE(true);
+      await delay(1000);
+
       if (entId) {
         const payload = {
           entityId: entId,
@@ -786,6 +795,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       } else {
         displayErrorMessage(error, `${entId} Delete Failed`);
       }
+    } finally {
+      setWaitingForBE(false);
     }
   };
 
@@ -928,6 +939,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   return (
     <div className="content-container">
       <ConfirmPopup
+        key={'detach_popup'}
         icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
@@ -940,6 +952,21 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         doAction={detachEntity}
         open={openDetachPopup}
         setOpen={setOpenDetachPopup}
+      />
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('deletePrimaryMsg')} ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
+        }}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
       />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
@@ -955,7 +982,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
-                <EntityIdCard calledIn="Action" entId={entId}></EntityIdCard>
+                <EntityIdCard
+                  calledIn="Action"
+                  entId={entId}
+                  isValidated={isValidated}
+                ></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
@@ -1463,17 +1494,25 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 {ability.can(Action.Validate, ActionEntity) && (
                   <Col>
                     <Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() => {
-                          validateEntity();
-                        }}
-                        disabled={isValidateButtonDisabled}
+                      <Tooltip
+                        placement="topRight"
+                        title={
+                          !isValidationAllowed ? t('error:validationPermissionRequired') : undefined
+                        }
+                        showArrow={false}
                       >
-                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                      </Button>
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => {
+                            validateEntity();
+                          }}
+                          disabled={!isValidationAllowed}
+                        >
+                          {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                        </Button>
+                      </Tooltip>
                     </Form.Item>
                   </Col>
                 )}
@@ -1500,7 +1539,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                       size="large"
                       block
                       onClick={() => {
-                        deleteEntity();
+                        deleteClicked();
                       }}
                       style={{ color: 'red', borderColor: 'red' }}
                     >

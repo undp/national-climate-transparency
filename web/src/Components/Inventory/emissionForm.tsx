@@ -1,4 +1,4 @@
-import { Row, Col, DatePicker, Button, message, Collapse, InputNumber } from 'antd';
+import { Row, Col, DatePicker, Button, message, Collapse, InputNumber, Tooltip } from 'antd';
 import './emissionForm.scss';
 import { getCollapseIcon, parseToTwoDecimals } from '../../Utils/utilServices';
 import {
@@ -46,6 +46,8 @@ import { useConnection } from '../../Context/ConnectionContext/connectionContext
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
 import moment, { Moment } from 'moment';
 import { GHGRecordState } from '../../Enums/shared.enum';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { Role } from '../../Enums/role.enum';
 
 interface Props {
   index: number;
@@ -67,8 +69,13 @@ export const EmissionForm: React.FC<Props> = ({
   getAvailableEmissionReports,
 }) => {
   // context Usage
-  const { t } = useTranslation(['emission', 'entityAction']);
+  const { t } = useTranslation(['emission', 'entityAction', 'error']);
   const { get, post } = useConnection();
+  const { isValidationAllowed, userInfoState } = useUserContext();
+
+  // Viewer Permission
+
+  const isView = userInfoState?.userRole === Role.Observer ? true : false;
 
   // Year State
 
@@ -473,7 +480,7 @@ export const EmissionForm: React.FC<Props> = ({
         <Col span={6} className="year-picker-column">
           <DatePicker
             key={`date_picker_${index}`}
-            disabled={isYearFixed}
+            disabled={isYearFixed || isView}
             value={emissionYear ? moment(emissionYear, 'YYYY') : null}
             onChange={(value) => setEmissionYear(value ? value.format('YYYY') : undefined)}
             className="year-picker"
@@ -544,7 +551,7 @@ export const EmissionForm: React.FC<Props> = ({
                       {Object.values(EmissionUnits).map((unit) => (
                         <Col key={`${mainSection}_${unit}`} span={3} className="number-column">
                           <InputNumber
-                            disabled={isFinalized}
+                            disabled={isFinalized || isView}
                             value={getIndividualEntry(section.id, mainSection, null, unit)}
                             onChange={(value) =>
                               setIndividualEntry(
@@ -604,7 +611,7 @@ export const EmissionForm: React.FC<Props> = ({
                                 className="number-column"
                               >
                                 <InputNumber
-                                  disabled={isFinalized}
+                                  disabled={isFinalized || isView}
                                   value={getIndividualEntry(
                                     section.id,
                                     subSection.id,
@@ -643,7 +650,7 @@ export const EmissionForm: React.FC<Props> = ({
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`eqWithout_${unit}`} span={3} className="number-column">
             <InputNumber
-              disabled={isFinalized}
+              disabled={isFinalized || isView}
               value={eqWithout[unit]}
               onChange={(value) =>
                 setIndividualEntry(value ?? undefined, 'eqWithout', null, null, unit)
@@ -663,7 +670,7 @@ export const EmissionForm: React.FC<Props> = ({
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`eqWith_${unit}`} span={3} className="number-column">
             <InputNumber
-              disabled={isFinalized}
+              disabled={isFinalized || isView}
               value={eqWith[unit]}
               onChange={(value) =>
                 setIndividualEntry(value ?? undefined, 'eqWith', null, null, unit)

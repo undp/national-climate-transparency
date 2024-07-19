@@ -20,5 +20,7 @@
   "noSuchEntity": "Le programme demandé n'existe pas !",
   "activityInfoTitle": "Liste des activités directement liées sous le programme",
   "supportInfoTitle": "Liste des supports directement liés sous le programme",
-  "activityList": "Liste des activités"
+  "activityList": "Liste des activités",
+  "deletePrimaryMsg": "Êtes-vous sûr de vouloir supprimer programme",
+  "deleteSecondaryMsg": "Vous ne pouvez pas annuler cette action"
 }

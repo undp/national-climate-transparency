@@ -541,7 +541,7 @@ public doesUserHaveSectorPermission(user: User, sectorScope: Sector) {
 }
 
 public doesUserHaveValidatePermission(user: User) {
-  if (user.validatePermission===ValidateEntity.CANNOT || user.role===Role.Observer) {
+  if (user.validatePermission===ValidateEntity.CANNOT) {
     throw new HttpException(
       this.formatReqMessagesString(
         "common.permissionDeniedForValidate",

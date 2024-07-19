@@ -8,12 +8,15 @@ import { useEffect, useState } from 'react';
 import TabPane from 'antd/lib/tabs/TabPane';
 import { LockOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { EmissionTabItem } from '../../Definitions/emissionDefinitions';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { Role } from '../../Enums/role.enum';
 
 const GhgEmissions = () => {
   // Page Context
 
   const { t } = useTranslation(['emission']);
   const { get } = useConnection();
+  const { userInfoState } = useUserContext();
 
   // Years State for Tab Panel
 
@@ -86,24 +89,26 @@ const GhgEmissions = () => {
           onTabClick={(key: string) => setActiveYear(key)}
           destroyInactiveTabPane={true}
         >
-          <TabPane
-            tab={
-              <span>
-                <PlusCircleOutlined />
-                {t('addNew')}
-              </span>
-            }
-            key="addNew"
-          >
-            <EmissionForm
-              index={0}
-              year={null}
-              finalized={false}
-              availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
-              setActiveYear={setActiveYear}
-              getAvailableEmissionReports={getAvailableEmissionReports}
-            />
-          </TabPane>
+          {userInfoState?.userRole !== Role.Observer && (
+            <TabPane
+              tab={
+                <span>
+                  <PlusCircleOutlined />
+                  {t('addNew')}
+                </span>
+              }
+              key="addNew"
+            >
+              <EmissionForm
+                index={0}
+                year={null}
+                finalized={false}
+                availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
+                setActiveYear={setActiveYear}
+                getAvailableEmissionReports={getAvailableEmissionReports}
+              />
+            </TabPane>
+          )}
           {tabItems &&
             tabItems.map((tab: any) => (
               <TabPane
