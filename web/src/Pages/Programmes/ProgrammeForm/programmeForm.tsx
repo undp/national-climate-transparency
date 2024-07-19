@@ -108,10 +108,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Activity Attachment State:Activity link functions removed keeping original state
 
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
-  const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
 
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
@@ -129,7 +126,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Entity Data
 
   const [detachingEntityId, setDetachingEntityId] = useState<string>();
-  const [detachingEntityType, setDetachingEntityType] = useState<'Project' | 'Activity'>();
 
   // KPI State
 
@@ -189,14 +185,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             freeProjectIds.push(prj.projectId);
           });
           setAllProjectIdList(freeProjectIds);
-
-          const actResponse: any = await get('national/activities/link/eligible');
-
-          const freeActivityIds: string[] = [];
-          actResponse.data.forEach((act: any) => {
-            freeActivityIds.push(act.activityId);
-          });
-          setAllActivityIdList(freeActivityIds);
         } catch (error: any) {
           displayErrorMessage(error);
         }
@@ -379,7 +367,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             connectedActivityIds.push(act.activityId);
           });
           setAttachedActivityIds(connectedActivityIds);
-          setTempActivityIds(connectedActivityIds);
         } catch (error: any) {
           displayErrorMessage(error);
         }
@@ -472,9 +459,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     };
 
     const fetchActivityAttachmentData = async () => {
-      if (tempActivityIds.length > 0) {
+      if (attachedActivityIds.length > 0) {
         try {
-          tempActivityIds.forEach((activityId) => {
+          attachedActivityIds.forEach((activityId) => {
             activityPayload.filterOr.push({
               key: 'activityId',
               operation: '=',
@@ -541,7 +528,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
     setSupportCurrentPage(1);
     setSupportPageSize(10);
-  }, [tempActivityIds]);
+  }, [attachedActivityIds]);
 
   // Calculating migrated fields when attachment changes
 
@@ -608,27 +595,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
       if (toAttach.length > 0) {
         await post('national/projects/link', { programmeId: entId, projectIds: toAttach });
-      }
-    } catch (error: any) {
-      displayErrorMessage(error);
-    }
-  };
-
-  const resolveActivityAttachments = async (parentId: string) => {
-    const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
-    const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
-
-    try {
-      if (toDetach.length > 0) {
-        await post('national/activities/unlink', { activityIds: toDetach });
-      }
-
-      if (toAttach.length > 0) {
-        await post('national/activities/link', {
-          parentId: parentId,
-          parentType: 'programme',
-          activityIds: toAttach,
-        });
       }
     } catch (error: any) {
       displayErrorMessage(error);
@@ -731,11 +697,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         method === 'create' ? t('programmeCreationSuccess') : t('programmeUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
-        if (method === 'create') {
-          resolveActivityAttachments(response.data.programmeId);
-        } else if (entId && method === 'update') {
+        if (entId && method === 'update') {
           resolveProjectAttachments();
-          resolveActivityAttachments(entId);
         }
 
         await new Promise((resolve) => {
@@ -946,30 +909,15 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const detachProject = async (prjId: string) => {
     setDetachingEntityId(prjId);
-    setDetachingEntityType('Project');
     setOpenDetachPopup(true);
   };
-
-  // Detach Activity
-
-  // const detachActivity = async (actId: string) => {
-  //   setDetachingEntityId(actId);
-  //   setDetachingEntityType('Activity');
-  //   setOpenDetachPopup(true);
-  // };
 
   // Handle Detachment
 
   const detachEntity = async (entityId: string) => {
-    if (detachingEntityType === 'Project') {
-      const filteredIds = tempProjectIds.filter((id) => id !== entityId);
-      setTempProjectIds(filteredIds);
-      setIsSaveButtonDisabled(false);
-    } else if (detachingEntityType === 'Activity') {
-      const filteredIds = tempActivityIds.filter((id) => id !== entityId);
-      setTempActivityIds(filteredIds);
-      setIsSaveButtonDisabled(false);
-    }
+    const filteredIds = tempProjectIds.filter((id) => id !== entityId);
+    setTempProjectIds(filteredIds);
+    setIsSaveButtonDisabled(false);
   };
 
   // Column Definition
@@ -1018,7 +966,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
-          primaryMsg: `${t('detachPopup:primaryMsg')} ${detachingEntityType} ${detachingEntityId}`,
+          primaryMsg: `${t('detachPopup:primaryMsg')} Project ${detachingEntityId}`,
           secondaryMsg: t('detachPopup:secondaryMsg'),
           cancelTitle: t('detachPopup:cancelTitle'),
           actionTitle: t('detachPopup:actionTitle'),
@@ -1396,41 +1344,56 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            <div className="form-section-card">
-              <Row>
-                <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
-                  <div className="form-section-header">{t('activityInfoTitle')}</div>
-                </Col>
-                {/* <Col {...attachButtonBps}>
-                  <AttachEntity
-                    isDisabled={isView}
-                    content={{
-                      buttonName: t('formHeader:attachActivity'),
-                      attach: t('entityAction:attach'),
-                      contentTitle: t('formHeader:attachActivity'),
-                      listTitle: t('activityList'),
-                      cancel: t('entityAction:cancel'),
-                    }}
-                    options={allActivityIds}
-                    alreadyAttached={attachedActivityIds}
-                    currentAttachments={tempActivityIds}
-                    setCurrentAttachments={setTempActivityIds}
-                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
-                    icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
-                  ></AttachEntity>
-                </Col> */}
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <div style={{ overflowX: 'auto' }}>
+            {method !== 'create' && (
+              <div className="form-section-card">
+                <Row>
+                  <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
+                    <div className="form-section-header">{t('activityInfoTitle')}</div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <div style={{ overflowX: 'auto' }}>
+                      <LayoutTable
+                        tableData={activityData}
+                        columns={activityTableColumns}
+                        loading={false}
+                        pagination={{
+                          current: activityCurrentPage,
+                          pageSize: activityPageSize,
+                          total: activityData.length,
+                          showQuickJumper: true,
+                          pageSizeOptions: ['10', '20', '30'],
+                          showSizeChanger: true,
+                          style: { textAlign: 'center' },
+                          locale: { page: '' },
+                          position: ['bottomRight'],
+                        }}
+                        handleTableChange={handleActivityTableChange}
+                        emptyMessage={t('formHeader:noActivityMessage')}
+                      />{' '}
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            )}
+            {method !== 'create' && (
+              <div className="form-section-card">
+                <Row>
+                  <Col span={20}>
+                    <div className="form-section-header">{t('supportInfoTitle')}</div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
                     <LayoutTable
-                      tableData={activityData}
-                      columns={activityTableColumns}
+                      tableData={supportData}
+                      columns={supportTableColumns}
                       loading={false}
                       pagination={{
-                        current: activityCurrentPage,
-                        pageSize: activityPageSize,
-                        total: activityData.length,
+                        current: supportCurrentPage,
+                        pageSize: supportPageSize,
+                        total: supportData.length,
                         showQuickJumper: true,
                         pageSizeOptions: ['10', '20', '30'],
                         showSizeChanger: true,
@@ -1438,42 +1401,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                         locale: { page: '' },
                         position: ['bottomRight'],
                       }}
-                      handleTableChange={handleActivityTableChange}
-                      emptyMessage={t('formHeader:noActivityMessage')}
-                    />{' '}
-                  </div>
-                </Col>
-              </Row>
-            </div>
-            <div className="form-section-card">
-              <Row>
-                <Col span={20}>
-                  <div className="form-section-header">{t('supportInfoTitle')}</div>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <LayoutTable
-                    tableData={supportData}
-                    columns={supportTableColumns}
-                    loading={false}
-                    pagination={{
-                      current: supportCurrentPage,
-                      pageSize: supportPageSize,
-                      total: supportData.length,
-                      showQuickJumper: true,
-                      pageSizeOptions: ['10', '20', '30'],
-                      showSizeChanger: true,
-                      style: { textAlign: 'center' },
-                      locale: { page: '' },
-                      position: ['bottomRight'],
-                    }}
-                    handleTableChange={handleSupportTableChange}
-                    emptyMessage={t('formHeader:noSupportMessage')}
-                  />
-                </Col>
-              </Row>
-            </div>
+                      handleTableChange={handleSupportTableChange}
+                      emptyMessage={t('formHeader:noSupportMessage')}
+                    />
+                  </Col>
+                </Row>
+              </div>
+            )}
             <div className="form-section-card">
               <div className="form-section-header">{t('formHeader:mitigationInfoTitle')}</div>
               <Row gutter={gutterSize}>
