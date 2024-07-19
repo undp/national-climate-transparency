@@ -9,6 +9,8 @@ import { ProjectionData } from "src/dtos/projection.dto";
 import { ProjectionEntity } from "src/entities/projection.entity";
 import { GHGRecordState } from "src/enums/ghg.state.enum";
 import { ExtendedProjectionType, ProjectionLeafSection } from "src/enums/projection.enum";
+import { User } from "src/entities/user.entity";
+import { GHGInventoryManipulate } from "src/enums/user.enum";
 
 @Injectable()
 export class ConfigurationSettingsService {
@@ -48,9 +50,20 @@ export class ConfigurationSettingsService {
 			});
 	}
 
-	async updateSetting(type: ConfigurationSettingsType, settingValue: any) {
+	async updateSetting(type: ConfigurationSettingsType, settingValue: any, user: User) {
 
 		try {
+
+			if (
+			[
+				ConfigurationSettingsType.GWP, 
+				ConfigurationSettingsType.PROJECTIONS_WITHOUT_MEASURES, 
+				ConfigurationSettingsType.PROJECTIONS_WITH_ADDITIONAL_MEASURES, 
+				ConfigurationSettingsType.PROJECTIONS_WITH_MEASURES
+			].includes(type) && user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT) {
+				throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.ghgPermissionDenied", []), HttpStatus.FORBIDDEN);
+			}
+
 			let setting = await this.configSettingsRepo.findOne({ where: { id: type } });
 
 			if (setting) {
@@ -60,10 +73,7 @@ export class ConfigurationSettingsService {
 				setting.id = type;
 				setting.settingValue = settingValue;
 			}
-
-			// Save the setting
 			
-
 			// Updating the Baseline Projection
 
 			await this.entityManager
@@ -106,12 +116,13 @@ export class ConfigurationSettingsService {
 		}
 	}
 
-	async updateBaselineProjection(baselineData: ProjectionData, projectionType: string) {
+	private async updateBaselineProjection(baselineData: ProjectionData, projectionType: string) {
 
 		const calculatedProjection = new ProjectionData();
+		const maxProjectingYear = new Date().getFullYear() + 10;
 
 		for (const value of Object.values(ProjectionLeafSection)) {
-			calculatedProjection[value] = await this.buildProjectionArray(baselineData[value])
+			calculatedProjection[value] = await this.buildProjectionArray(baselineData[value], maxProjectingYear)
 		}
 
 		let baselineProjection = await this.projectionRepo.findOne({ where: { projectionType: projectionType } });
@@ -129,13 +140,17 @@ export class ConfigurationSettingsService {
 		await this.projectionRepo.save(baselineProjection);
 	}
 
-	private async buildProjectionArray(sectionConfig: number[]){
+	private async buildProjectionArray(sectionConfig: number[], maxProjectingYear: number){
 
 		const growthRate = (sectionConfig[0] + 100)/100;
 		const baselineYear = sectionConfig[1];
 		const co2 = sectionConfig[2];
 		const ch4 = sectionConfig[3];
 		const n2o = sectionConfig[4];
+
+		if (baselineYear < 2000 || baselineYear > 2050){
+			throw new HttpException('Year out of the [2000, 2050] period received', HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 
 		let gwp_ch4 = 1; 
 		let gwp_n2o = 1;
@@ -147,15 +162,12 @@ export class ConfigurationSettingsService {
 		} catch {
 			console.log('Using Default GWP Value of 1')
 		}
-
-		if (baselineYear < 2000 || baselineYear > 2050){
-			throw new HttpException('Year out of the [2000, 2050] period received', HttpStatus.INTERNAL_SERVER_ERROR);
-		}
 		
 		const projectionArray = new Array(51).fill(0);
+		const baselineProjection = (co2 + (ch4*gwp_ch4) + (n2o*gwp_n2o));
 
 		for (let year = baselineYear; year <= 2050; year++) {
-			const projectionByYear = (co2 + (ch4*gwp_ch4) + (n2o*gwp_n2o))*Math.pow(growthRate, (year-baselineYear >= 10 ? 10 : year - baselineYear));
+			const projectionByYear = baselineProjection*Math.pow(growthRate, (year >= (maxProjectingYear) ? (year - maxProjectingYear) : (year - baselineYear)));
 			projectionArray[year - 2000] = parseFloat(projectionByYear.toFixed(2));
 		}
 
