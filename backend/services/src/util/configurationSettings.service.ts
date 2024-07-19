@@ -150,7 +150,7 @@ export class ConfigurationSettingsService {
 		const maxProjectingYear = baselineYear < currentYear ? (currentYear + 10) : baselineYear + 10 < 2050 ? (baselineYear + 10) : 2050;
 
 		if (baselineYear < 2000 || baselineYear > 2050){
-			throw new HttpException('Year out of the [2000, 2050] period received', HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidYearReceived", []), HttpStatus.BAD_REQUEST);
 		}
 
 		let gwp_ch4 = 1; 

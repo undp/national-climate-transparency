@@ -189,7 +189,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
       render: (sectionValueArray: number[], record: any) => {
         const isNonLeaf: boolean = nonLeafSections.includes(record.topicId);
         return !isNonLeaf ? (
-          value === 'baselineYear' ? (
+          value === GrowthRateProperties.BASE_YEAR ? (
             <DatePicker
               value={moment(sectionValueArray[locIndex], 'YYYY') ?? undefined}
               onChange={(selectedYear) => {
@@ -213,7 +213,7 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
                   enteredValue ? parseToTwoDecimals(enteredValue) : 0
                 );
               }}
-              min={0}
+              min={value === GrowthRateProperties.GR ? undefined : 0}
               decimalSeparator="."
               controls={false}
               className={isNonLeaf ? undefined : 'leaf-input-box'}
