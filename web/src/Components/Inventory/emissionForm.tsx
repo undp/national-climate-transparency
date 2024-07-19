@@ -77,6 +77,10 @@ export const EmissionForm: React.FC<Props> = ({
 
   const isView = userInfoState?.userRole === Role.Observer ? true : false;
 
+  // Button Controls
+
+  const [isEdited, setIsEdited] = useState<boolean>(false);
+
   // Year State
 
   const [emissionYear, setEmissionYear] = useState<string>();
@@ -238,6 +242,9 @@ export const EmissionForm: React.FC<Props> = ({
     levelThree: any,
     unit: EmissionUnits
   ) => {
+    if (!isEdited) {
+      setIsEdited(true);
+    }
     const newValue = enteredValue ? parseToTwoDecimals(enteredValue) : 0;
     switch (section) {
       case 'eqWithout':
@@ -410,6 +417,7 @@ export const EmissionForm: React.FC<Props> = ({
         const response: any = await post('national/emissions/add', emissionCreatePayload);
 
         if (response.status === 200 || response.status === 201) {
+          setIsEdited(false);
           message.open({
             type: 'success',
             content: index === 0 ? t('emissionCreationSuccess') : t('emissionUpdateSuccess'),
@@ -687,7 +695,7 @@ export const EmissionForm: React.FC<Props> = ({
         {!isFinalized && (
           <Col>
             <Button
-              disabled={isFinalized}
+              disabled={isFinalized || !isEdited}
               type="primary"
               size="large"
               block
@@ -697,20 +705,30 @@ export const EmissionForm: React.FC<Props> = ({
             </Button>
           </Col>
         )}
-        <Col>
-          <Button
-            disabled={year === null}
-            type="primary"
-            size="large"
-            block
-            htmlType="submit"
-            onClick={() =>
-              handleValidateAction(isFinalized ? GHGRecordState.SAVED : GHGRecordState.FINALIZED)
-            }
-          >
-            {isFinalized ? t('entityAction:unvalidate') : t('entityAction:validate')}
-          </Button>
-        </Col>
+        {index !== 0 && (
+          <Col>
+            <Tooltip
+              placement="topRight"
+              title={!isValidationAllowed ? t('error:validationPermissionRequired') : undefined}
+              showArrow={false}
+            >
+              <Button
+                disabled={year === null || isEdited || !isValidationAllowed}
+                type="primary"
+                size="large"
+                block
+                htmlType="submit"
+                onClick={() =>
+                  handleValidateAction(
+                    isFinalized ? GHGRecordState.SAVED : GHGRecordState.FINALIZED
+                  )
+                }
+              >
+                {isFinalized ? t('entityAction:unvalidate') : t('entityAction:validate')}
+              </Button>
+            </Tooltip>
+          </Col>
+        )}
       </Row>
     </div>
   );
