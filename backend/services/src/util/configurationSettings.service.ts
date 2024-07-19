@@ -119,10 +119,10 @@ export class ConfigurationSettingsService {
 	private async updateBaselineProjection(baselineData: ProjectionData, projectionType: string) {
 
 		const calculatedProjection = new ProjectionData();
-		const maxProjectingYear = new Date().getFullYear() + 10;
+		const currentYear = new Date().getFullYear();
 
 		for (const value of Object.values(ProjectionLeafSection)) {
-			calculatedProjection[value] = await this.buildProjectionArray(baselineData[value], maxProjectingYear)
+			calculatedProjection[value] = await this.buildProjectionArray(baselineData[value], currentYear)
 		}
 
 		let baselineProjection = await this.projectionRepo.findOne({ where: { projectionType: projectionType } });
@@ -140,13 +140,14 @@ export class ConfigurationSettingsService {
 		await this.projectionRepo.save(baselineProjection);
 	}
 
-	private async buildProjectionArray(sectionConfig: number[], maxProjectingYear: number){
+	private async buildProjectionArray(sectionConfig: number[], currentYear: number){
 
 		const growthRate = (sectionConfig[0] + 100)/100;
 		const baselineYear = sectionConfig[1];
 		const co2 = sectionConfig[2];
 		const ch4 = sectionConfig[3];
 		const n2o = sectionConfig[4];
+		const maxProjectingYear = baselineYear < currentYear ? (currentYear + 10) : baselineYear + 10 < 2050 ? (baselineYear + 10) : 2050;
 
 		if (baselineYear < 2000 || baselineYear > 2050){
 			throw new HttpException('Year out of the [2000, 2050] period received', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -167,7 +168,7 @@ export class ConfigurationSettingsService {
 		const baselineProjection = (co2 + (ch4*gwp_ch4) + (n2o*gwp_n2o));
 
 		for (let year = baselineYear; year <= 2050; year++) {
-			const projectionByYear = baselineProjection*Math.pow(growthRate, (year >= (maxProjectingYear) ? (year - maxProjectingYear) : (year - baselineYear)));
+			const projectionByYear = baselineProjection*Math.pow(growthRate, (year >= maxProjectingYear ? (maxProjectingYear - baselineYear) : (year - baselineYear)));
 			projectionArray[year - 2000] = parseFloat(projectionByYear.toFixed(2));
 		}
 
