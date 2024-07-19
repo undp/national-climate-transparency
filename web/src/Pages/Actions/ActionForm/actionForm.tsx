@@ -77,6 +77,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const { userInfoState, isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
+  // First Rendering Check
+
+  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
+
   // Form Validation Rules
 
   const validation = getValidationRules(method);
@@ -344,6 +348,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         achievedReduct: actionMigratedData.achievedReduction,
         expectedReduct: actionMigratedData.expectedReduction,
       });
+    }
+    if (!firstRenderingCompleted) {
+      setFirstRenderingCompleted(true);
     }
   }, [actionMigratedData]);
 
@@ -918,7 +925,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && firstRenderingCompleted ? (
         <div className="action-form">
           <Form
             form={form}

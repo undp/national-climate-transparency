@@ -73,6 +73,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const validation = getValidationRules(method);
 
+  // First Rendering Check
+
+  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
+
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
@@ -386,6 +390,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         achievedReduct: programmeMigratedData.achievedReduct,
         expectedReduct: programmeMigratedData.expectedReduct,
       });
+    }
+    if (!firstRenderingCompleted) {
+      setFirstRenderingCompleted(true);
     }
   }, [programmeMigratedData]);
 
@@ -994,7 +1001,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && firstRenderingCompleted ? (
         <div className="programme-form">
           <Form
             form={form}

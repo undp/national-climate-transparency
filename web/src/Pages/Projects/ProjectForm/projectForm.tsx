@@ -67,6 +67,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   // Form Validation Rules
 
   const validation = getValidationRules(method);
+
+  // First Rendering Check
+
+  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
+
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
@@ -335,6 +340,9 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         achievedGHGReduction: projectMigratedData.achievedGHGReduction,
         expectedGHGReduction: projectMigratedData.expectedGHGReduction,
       });
+    }
+    if (!firstRenderingCompleted) {
+      setFirstRenderingCompleted(true);
     }
   }, [projectMigratedData]);
 
@@ -917,7 +925,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && firstRenderingCompleted ? (
         <div className="project-form">
           <Form
             form={form}
