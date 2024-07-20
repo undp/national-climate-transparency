@@ -11,7 +11,7 @@ interface Props {
 const EntityIdCard: React.FC<Props> = ({ calledIn, entId, isValidated }) => {
   return (
     <Row>
-      <Col span={4}>
+      <Col>
         <Tooltip
           title={isValidated ? `Validated ${calledIn}` : undefined}
           showArrow={false}
