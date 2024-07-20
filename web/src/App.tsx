@@ -49,11 +49,16 @@ const GhgConfigurations = lazy(() => import('./Pages/Configurations/configuratio
 const App = () => {
   const ability = defineAbility();
   const { t } = useTranslation(['common']);
-  if (localStorage.getItem('userRole') && localStorage.getItem('userId'))
+
+  // Setting up User Information Context
+
+  if (localStorage.getItem('userRole') && localStorage.getItem('userId')) {
     updateUserAbility(ability, {
       id: parseInt(localStorage.getItem('userId') as string),
       role: localStorage.getItem('userRole') as string,
     });
+  }
+
   return (
     <AbilityContext.Provider value={ability}>
       <ConnectionContextProvider
