@@ -1,7 +1,19 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { lazy } from 'react';
+
 import 'antd/dist/antd.min.css';
 import './Styles/theme.less';
 import './Styles/app.scss';
+
+import { AbilityContext } from './Casl/Can';
+import { defineAbility, updateUserAbility } from './Casl/ability';
+import { ConnectionContextProvider } from './Context/ConnectionContext/connectionContext';
+import { UserInformationContextProvider } from './Context/UserInformationContext/userInformationContext';
+import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
+
+// Eager Component Loading
+
 import Login from './Pages/Login/login';
 import PrivateRoute from './Components/PrivateRoute/privateRoute';
 import SignUp from './Pages/Signup/signup';
@@ -9,35 +21,31 @@ import CustomLayout from './Components/Layout/layout';
 import AddUser from './Pages/Users/AddUser/addUser';
 import UserManagement from './Pages/Users/UserManagement/userManagement';
 import Dashboard from './Pages/Dashboard/dashboard';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import Homepage from './Pages/Homepage/homepage';
 import PrivacyPolicy from './Pages/PrivacyPolicy/privacyPolicy';
 import CodeOfConduct from './Pages/CodeofConduct/codeofConduct';
 import CookiePolicy from './Pages/CookiePolicy/cookiePolicy';
 import TermsOfUse from './Pages/TermsofUse/termsofUse';
 import CarbonHelp from './Pages/Help/help';
-import UserProfile from './Pages/Users/UserProfile/UserProfile';
-import { AbilityContext } from './Casl/Can';
-import { defineAbility, updateUserAbility } from './Casl/ability';
-import { useTranslation } from 'react-i18next';
 import ActionList from './Pages/Actions/ActionList/actionList';
-import ActionForm from './Pages/Actions/ActionForm/actionForm';
 import ProgrammeList from './Pages/Programmes/ProgrammeList/programmeList';
-import ProgrammeForm from './Pages/Programmes/ProgrammeForm/programmeForm';
 import ProjectList from './Pages/Projects/ProjectList/projectList';
-import ProjectForm from './Pages/Projects/ProjectForm/projectForm';
 import ActivityList from './Pages/Activities/ActivityList/activityList';
-import ActivityForm from './Pages/Activities/ActivityForm/activityForm';
 import SupportList from './Pages/Support/SupportList/supportList';
-import SupportForm from './Pages/Support/SupportForm/supportForm';
 import ReportList from './Pages/Reporting/reportList';
 import Faq from './Pages/Faq/faq';
-import { ConnectionContextProvider } from './Context/ConnectionContext/connectionContext';
-import { UserInformationContextProvider } from './Context/UserInformationContext/userInformationContext';
-import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
-import GhgEmissions from './Pages/Emissions/emissions';
-import GhgProjections from './Pages/Projections/projections';
-import GhgConfigurations from './Pages/Configurations/configurations';
+import UserProfile from './Pages/Users/UserProfile/UserProfile';
+
+// Lazy Component Loading
+
+const ActionForm = lazy(() => import('./Pages/Actions/ActionForm/actionForm'));
+const ProgrammeForm = lazy(() => import('./Pages/Programmes/ProgrammeForm/programmeForm'));
+const ProjectForm = lazy(() => import('./Pages/Projects/ProjectForm/projectForm'));
+const ActivityForm = lazy(() => import('./Pages/Activities/ActivityForm/activityForm'));
+const SupportForm = lazy(() => import('./Pages/Support/SupportForm/supportForm'));
+const GhgEmissions = lazy(() => import('./Pages/Emissions/emissions'));
+const GhgProjections = lazy(() => import('./Pages/Projections/projections'));
+const GhgConfigurations = lazy(() => import('./Pages/Configurations/configurations'));
 
 const App = () => {
   const ability = defineAbility();
