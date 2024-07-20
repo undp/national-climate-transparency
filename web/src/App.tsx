@@ -10,7 +10,6 @@ import { AbilityContext } from './Casl/Can';
 import { defineAbility, updateUserAbility } from './Casl/ability';
 import { ConnectionContextProvider } from './Context/ConnectionContext/connectionContext';
 import { UserInformationContextProvider } from './Context/UserInformationContext/userInformationContext';
-import { SettingsContextProvider } from './Context/SettingsContext/settingsContext';
 
 // Eager Component Loading
 
@@ -67,90 +66,88 @@ const App = () => {
         }
       >
         <UserInformationContextProvider>
-          <SettingsContextProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="login" element={<Login />} />
-                <Route path="forgotPassword" element={<Login forgotPassword={true} />} />
-                <Route path="resetPassword/:requestId" element={<Login resetPassword={true} />} />
-                <Route path="signUp" element={<SignUp />} />
-                <Route path="privacy" element={<PrivacyPolicy />} />
-                <Route path="help" element={<CarbonHelp />} />
-                <Route path="codeconduct" element={<CodeOfConduct />} />
-                <Route path="cookie" element={<CookiePolicy />} />
-                <Route path="terms" element={<TermsOfUse />} />
-                <Route path="/" element={<Homepage />} />
-                <Route path="/" element={<PrivateRoute />}>
-                  <Route path="/dashboard" element={<CustomLayout selectedKey="dashboard" />}>
-                    <Route index element={<Dashboard />} />
-                  </Route>
-                  <Route path="/actions" element={<CustomLayout selectedKey="actions" />}>
-                    <Route path="" element={<ActionList />} />
-                    <Route path="add" element={<ActionForm method="create" />} />
-                    <Route path="edit/:entId" element={<ActionForm method="update" />} />
-                    <Route path="view/:entId" element={<ActionForm method="view" />} />
-                  </Route>
-                  <Route path="/programmes" element={<CustomLayout selectedKey="programmes" />}>
-                    <Route path="" element={<ProgrammeList />} />
-                    <Route path="add" element={<ProgrammeForm method="create" />} />
-                    <Route path="edit/:entId" element={<ProgrammeForm method="update" />} />
-                    <Route path="view/:entId" element={<ProgrammeForm method="view" />} />
-                  </Route>
-                  <Route path="/projects" element={<CustomLayout selectedKey="projects" />}>
-                    <Route path="" element={<ProjectList />} />
-                    <Route path="add" element={<ProjectForm method="create" />} />
-                    <Route path="edit/:entId" element={<ProjectForm method="update" />} />
-                    <Route path="view/:entId" element={<ProjectForm method="view" />} />
-                  </Route>
-                  <Route path="/activities" element={<CustomLayout selectedKey="activities" />}>
-                    <Route path="" element={<ActivityList />} />
-                    <Route path="add" element={<ActivityForm method="create" />} />
-                    <Route path="edit/:entId" element={<ActivityForm method="update" />} />
-                    <Route path="view/:entId" element={<ActivityForm method="view" />} />
-                  </Route>
-                  <Route path="/support" element={<CustomLayout selectedKey="support" />}>
-                    <Route path="" element={<SupportList />} />
-                    <Route path="add" element={<SupportForm method="create" />} />
-                    <Route path="edit/:entId" element={<SupportForm method="update" />} />
-                    <Route path="view/:entId" element={<SupportForm method="view" />} />
-                  </Route>
-                  <Route path="/emissions" element={<CustomLayout selectedKey="emissions" />}>
-                    <Route index element={<GhgEmissions />} />
-                  </Route>
-                  <Route path="/projections" element={<CustomLayout selectedKey="projections" />}>
-                    <Route index element={<GhgProjections />} />
-                  </Route>
-                  <Route
-                    path="/configurations"
-                    element={<CustomLayout selectedKey="configurations" />}
-                  >
-                    <Route index element={<GhgConfigurations />} />
-                  </Route>
-                  <Route path="/reportings" element={<CustomLayout selectedKey="reportings" />}>
-                    <Route index element={<ReportList />} />
-                  </Route>
-                  <Route path="/faqs" element={<CustomLayout selectedKey="faqs" />}>
-                    <Route index element={<Faq />} />
-                  </Route>
-                  <Route
-                    path="/userManagement"
-                    element={<CustomLayout selectedKey="userManagement/viewAll" />}
-                  >
-                    <Route path="viewAll" element={<UserManagement />} />
-                    <Route path="addUser" element={<AddUser />} />
-                    <Route path="updateUser" element={<AddUser />} />
-                  </Route>
-                  <Route
-                    path="/userProfile"
-                    element={<CustomLayout selectedKey="userManagement/viewAll" />}
-                  >
-                    <Route path="view" element={<UserProfile />} />
-                  </Route>
+          <BrowserRouter>
+            <Routes>
+              <Route path="login" element={<Login />} />
+              <Route path="forgotPassword" element={<Login forgotPassword={true} />} />
+              <Route path="resetPassword/:requestId" element={<Login resetPassword={true} />} />
+              <Route path="signUp" element={<SignUp />} />
+              <Route path="privacy" element={<PrivacyPolicy />} />
+              <Route path="help" element={<CarbonHelp />} />
+              <Route path="codeconduct" element={<CodeOfConduct />} />
+              <Route path="cookie" element={<CookiePolicy />} />
+              <Route path="terms" element={<TermsOfUse />} />
+              <Route path="/" element={<Homepage />} />
+              <Route path="/" element={<PrivateRoute />}>
+                <Route path="/dashboard" element={<CustomLayout selectedKey="dashboard" />}>
+                  <Route index element={<Dashboard />} />
                 </Route>
-                <Route path="/*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </BrowserRouter>
-          </SettingsContextProvider>
+                <Route path="/actions" element={<CustomLayout selectedKey="actions" />}>
+                  <Route path="" element={<ActionList />} />
+                  <Route path="add" element={<ActionForm method="create" />} />
+                  <Route path="edit/:entId" element={<ActionForm method="update" />} />
+                  <Route path="view/:entId" element={<ActionForm method="view" />} />
+                </Route>
+                <Route path="/programmes" element={<CustomLayout selectedKey="programmes" />}>
+                  <Route path="" element={<ProgrammeList />} />
+                  <Route path="add" element={<ProgrammeForm method="create" />} />
+                  <Route path="edit/:entId" element={<ProgrammeForm method="update" />} />
+                  <Route path="view/:entId" element={<ProgrammeForm method="view" />} />
+                </Route>
+                <Route path="/projects" element={<CustomLayout selectedKey="projects" />}>
+                  <Route path="" element={<ProjectList />} />
+                  <Route path="add" element={<ProjectForm method="create" />} />
+                  <Route path="edit/:entId" element={<ProjectForm method="update" />} />
+                  <Route path="view/:entId" element={<ProjectForm method="view" />} />
+                </Route>
+                <Route path="/activities" element={<CustomLayout selectedKey="activities" />}>
+                  <Route path="" element={<ActivityList />} />
+                  <Route path="add" element={<ActivityForm method="create" />} />
+                  <Route path="edit/:entId" element={<ActivityForm method="update" />} />
+                  <Route path="view/:entId" element={<ActivityForm method="view" />} />
+                </Route>
+                <Route path="/support" element={<CustomLayout selectedKey="support" />}>
+                  <Route path="" element={<SupportList />} />
+                  <Route path="add" element={<SupportForm method="create" />} />
+                  <Route path="edit/:entId" element={<SupportForm method="update" />} />
+                  <Route path="view/:entId" element={<SupportForm method="view" />} />
+                </Route>
+                <Route path="/emissions" element={<CustomLayout selectedKey="emissions" />}>
+                  <Route index element={<GhgEmissions />} />
+                </Route>
+                <Route path="/projections" element={<CustomLayout selectedKey="projections" />}>
+                  <Route index element={<GhgProjections />} />
+                </Route>
+                <Route
+                  path="/configurations"
+                  element={<CustomLayout selectedKey="configurations" />}
+                >
+                  <Route index element={<GhgConfigurations />} />
+                </Route>
+                <Route path="/reportings" element={<CustomLayout selectedKey="reportings" />}>
+                  <Route index element={<ReportList />} />
+                </Route>
+                <Route path="/faqs" element={<CustomLayout selectedKey="faqs" />}>
+                  <Route index element={<Faq />} />
+                </Route>
+                <Route
+                  path="/userManagement"
+                  element={<CustomLayout selectedKey="userManagement/viewAll" />}
+                >
+                  <Route path="viewAll" element={<UserManagement />} />
+                  <Route path="addUser" element={<AddUser />} />
+                  <Route path="updateUser" element={<AddUser />} />
+                </Route>
+                <Route
+                  path="/userProfile"
+                  element={<CustomLayout selectedKey="userManagement/viewAll" />}
+                >
+                  <Route path="view" element={<UserProfile />} />
+                </Route>
+              </Route>
+              <Route path="/*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
         </UserInformationContextProvider>
       </ConnectionContextProvider>
     </AbilityContext.Provider>
