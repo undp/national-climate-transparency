@@ -130,6 +130,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [selectedGhg, setSelectedGhg] = useState<GHGS>();
   const [gwpSettings, setGwpSettings] = useState<{ CH4: number; N2O: number }>();
   const [gwpValue, setGwpValue] = useState<number>(1);
+  const [mtgUnit, setMtgUnit] = useState<GHGS>(GHGS.CO);
 
   // Initialization Logic
 
@@ -660,6 +661,25 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
+  const gwpValueMapping = () => {
+    if (selectedGhg !== undefined) {
+      switch (selectedGhg) {
+        case GHGS.CH:
+          setGwpValue(gwpSettings?.CH4 ?? 1);
+          setMtgUnit(GHGS.CH);
+          break;
+        case GHGS.NO:
+          setGwpValue(gwpSettings?.N2O ?? 1);
+          setMtgUnit(GHGS.NO);
+          break;
+        default:
+          setGwpValue(1);
+          setMtgUnit(GHGS.CO);
+          break;
+      }
+    }
+  };
+
   //set mtg timeline data to zero values (when it is or null or create mode)
 
   const setDefaultTimelineValues = (startYear: number, range: number) => {
@@ -667,9 +687,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     const tempExpectedEntries: ExpectedTimeline[] = [];
     Object.entries(ExpectedRows).forEach(([key, value]) => {
       const expectedGhgValue =
-        key === 'ROW_ONE' || key === 'ROW_TWO' || key === 'ROW_THREE'
-          ? `kt${selectedGhg}`
-          : value[0];
+        key === 'ROW_ONE' || key === 'ROW_TWO' || key === 'ROW_THREE' ? `kt${mtgUnit}` : value[0];
       const rowData: ExpectedTimeline = {
         key: key,
         ghg: expectedGhgValue,
@@ -682,7 +700,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
     const tempActualEntries: ActualTimeline[] = [];
     Object.entries(ActualRows).forEach(([key, value]) => {
-      const actualGhgValue = key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${selectedGhg}` : value[0];
+      const actualGhgValue = key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${mtgUnit}` : value[0];
       const rowData: ActualTimeline = {
         key: key,
         ghg: actualGhgValue,
@@ -711,7 +729,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           Object.entries(ExpectedRows).forEach(([key, value]) => {
             const expectedGhgValue =
               key === 'ROW_ONE' || key === 'ROW_TWO' || key === 'ROW_THREE'
-                ? `kt${selectedGhg}`
+                ? `kt${mtgUnit}`
                 : value[0];
             const rowData: ExpectedTimeline = {
               key: key,
@@ -726,7 +744,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           const tempActualEntries: ActualTimeline[] = [];
           Object.entries(ActualRows).forEach(([key, value]) => {
             const actualGhgValue =
-              key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${selectedGhg}` : value[0];
+              key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${mtgUnit}` : value[0];
             const rowData: ActualTimeline = {
               key: key,
               ghg: actualGhgValue,
@@ -881,20 +899,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       setDefaultTimelineValues(mtgStartYear, mtgRange);
     }
 
-    if (selectedGhg !== undefined) {
-      switch (selectedGhg) {
-        case GHGS.CH:
-          setGwpValue(gwpSettings?.CH4 ?? 1);
-          break;
-        case GHGS.NO:
-          setGwpValue(gwpSettings?.N2O ?? 1);
-          break;
-        default:
-          setGwpValue(1);
-          break;
-      }
-    }
-  }, [mtgStartYear, selectedGhg]);
+    gwpValueMapping();
+  }, [mtgStartYear, selectedGhg, mtgUnit]);
 
   // Form Submit
 
