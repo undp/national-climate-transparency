@@ -2,14 +2,12 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { instanceToPlain, plainToClass } from "class-transformer";
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, QueryFailedError, Repository } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
 import { EmissionEntity } from 'src/entities/emission.entity';
 import { HelperService } from 'src/util/helpers.service';
-import { FileHandlerInterface } from 'src/file-handler/filehandler.interface';
-import { EmissionDto } from 'src/dtos/emission.dto';
+import { EmissionDto, EmissionValidateDto } from 'src/dtos/emission.dto';
 import { User } from 'src/entities/user.entity';
-import { Role } from 'src/casl/role.enum';
-import { GHGEmissionRecordState } from 'src/enums/ghg.emission.state.enum';
+import { GHGRecordState } from 'src/enums/ghg.state.enum';
+import { GHGInventoryManipulate, ValidateEntity } from 'src/enums/user.enum';
 
 @Injectable()
 export class GhgEmissionsService {
@@ -19,25 +17,24 @@ export class GhgEmissionsService {
         @InjectEntityManager() private entityManager: EntityManager,
         @InjectRepository(EmissionEntity) private emissionRepo: Repository<EmissionEntity>,
         private helperService: HelperService,
-        private fileHandler: FileHandlerInterface,
     ) { };
 
     async create(emissionDto: EmissionDto, user: User) {
-        if (user.role === Role.Observer) {
-            throw new HttpException(
-                this.helperService.formatReqMessagesString("user.userUnAUth", []),
-                HttpStatus.FORBIDDEN
-            );
+
+        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.ghgPermissionDenied", []), HttpStatus.FORBIDDEN);
         }
+
+        // Year Validation will be handled inside the getEmissionByYear(emission.year, user)
 
         const emission: EmissionEntity = this.toEmission(emissionDto);
         this.verifyEmissionValues(emission);
 
         let savedEmission: EmissionEntity;
-        const result = await this.getEmissionByYear(emission.year);
+        const result = await this.getEmissionByYear(emission.year, user);
 
         if (result && result.length > 0) {
-            if (result[0].state === GHGEmissionRecordState.FINALIZED) {
+            if (result[0].state === GHGRecordState.FINALIZED) {
                 throw new HttpException(
                     this.helperService.formatReqMessagesString("ghgInventory.cannotEditEmissionFinalized", []),
                     HttpStatus.FORBIDDEN
@@ -45,12 +42,6 @@ export class GhgEmissionsService {
             }
 
             emission.id = result[0]?.id;
-            if (emissionDto.emissionDocument) {
-                emission.emissionDocument = await this.uploadDocument(
-                    emissionDto.year,
-                    emissionDto.emissionDocument
-                );
-            }
 
             savedEmission = await this.entityManager
                 .transaction(async (em) => {
@@ -66,7 +57,6 @@ export class GhgEmissionsService {
                             totalCo2WithoutLand: emission.totalCo2WithoutLand,
                             totalCo2WithLand: emission.totalCo2WithLand,
                             state: emission.state,
-                            emissionDocument: emission.emissionDocument,
                         });
                     return updatedData;
                 })
@@ -81,14 +71,6 @@ export class GhgEmissionsService {
                 });
 
             return { status: HttpStatus.OK, data: savedEmission };
-        }
-
-        if (emissionDto.emissionDocument) {
-            emission.emissionDocument = await this.uploadDocument(
-                emissionDto.year,
-                emissionDto.emissionDocument
-
-            );
         }
 
         savedEmission = await this.entityManager
@@ -109,7 +91,62 @@ export class GhgEmissionsService {
         return { status: HttpStatus.CREATED, data: savedEmission };
     }
 
-    async getEmissionReportSummary() {
+    async validate(emissionValidateDto: EmissionValidateDto, user: User) {
+
+        if (user.ghgInventoryPermission === GHGInventoryManipulate.CANNOT){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.ghgPermissionDenied", []), HttpStatus.FORBIDDEN);
+        }
+
+        if (user.validatePermission === ValidateEntity.CANNOT){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.validatePermissionDenied", []), HttpStatus.FORBIDDEN);
+        }
+
+        if (!this.helperService.isValidYear(emissionValidateDto.year)){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidEmissionYear", []), HttpStatus.BAD_REQUEST);
+        }
+
+        const result = await this.getEmissionByYear(emissionValidateDto.year, user);
+
+        if (result && result.length > 0) {
+            if (result[0].state === GHGRecordState.FINALIZED && emissionValidateDto.state === GHGRecordState.FINALIZED) {
+                throw new HttpException(
+                    this.helperService.formatReqMessagesString("ghgInventory.emissionAlreadyValidated", []),
+                    HttpStatus.FORBIDDEN
+                );
+            }
+
+            if (result[0].state === GHGRecordState.SAVED && emissionValidateDto.state === GHGRecordState.SAVED) {
+                throw new HttpException(
+                    this.helperService.formatReqMessagesString("ghgInventory.emissionAlreadyUnvalidated", []),
+                    HttpStatus.FORBIDDEN
+                );
+            }
+
+            result[0].state = emissionValidateDto.state as GHGRecordState;
+
+            const savedEmission = await this.entityManager
+                .transaction(async (em) => {
+                    return await em.save<EmissionEntity>(result[0]);
+                })
+                .catch((err: any) => {
+                    console.log(err);
+                    throw new HttpException(
+                        this.helperService.formatReqMessagesString(
+                            "emission.emissionVerificationActionFailed",
+                            [err]
+                        ),
+                        HttpStatus.BAD_REQUEST
+                    );
+                });
+
+            return { status: HttpStatus.OK, data: savedEmission };
+        } else {
+            return { status: HttpStatus.NOT_FOUND, data: emissionValidateDto.year };
+        }
+    }
+
+    async getEmissionReportSummary(user: User) {
+        
         const emissions = await this.emissionRepo
             .createQueryBuilder("emission_entity")
             .select(["year", "state"])
@@ -118,7 +155,12 @@ export class GhgEmissionsService {
         return emissions;
     }
 
-    getEmissionByYear = async (year: string) => {
+    getEmissionByYear = async (year: string, user: User) => {
+
+        if (!this.helperService.isValidYear(year)){
+            throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidEmissionYear", []), HttpStatus.BAD_REQUEST);
+        }
+
         return await this.emissionRepo.find({
             where: {
                 year: year
@@ -128,63 +170,8 @@ export class GhgEmissionsService {
 
     private toEmission(emissionDto: EmissionDto): EmissionEntity {
         const data = instanceToPlain(emissionDto);
-        this.logger.verbose("Converted emissionDto to Emission entity", JSON.stringify(data));
+        data.state = GHGRecordState.SAVED;
         return plainToClass(EmissionEntity, data);
-    }
-
-    private fileExtensionMap = new Map([
-        ["vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx"],
-        ["vnd.ms-excel", "xls"],
-    ]);
-
-    getFileExtension = (file: string): string => {
-        let fileType = file.split(';')[0].split('/')[1];
-        fileType = this.fileExtensionMap.get(fileType);
-        return fileType;
-    }
-
-    async uploadDocument(year: string, data: string) {
-        let filetype;
-        try {
-            filetype = this.getFileExtension(data);
-            data = data.split(',')[1];
-            if (filetype == undefined) {
-                throw new HttpException(
-                    this.helperService.formatReqMessagesString(
-                        "programme.invalidDocumentUpload",
-                        []
-                    ),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                );
-            }
-        }
-        catch (Exception: any) {
-            throw new HttpException(
-                this.helperService.formatReqMessagesString(
-                    "programme.invalidDocumentUpload",
-                    []
-                ),
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-        // Get the current date and time
-        const currentDate = new Date();
-
-        const response: any = await this.fileHandler.uploadFile(
-            `documents/${year}_${currentDate.getTime()}.${filetype}`,
-            data
-        );
-        if (response) {
-            return response;
-        } else {
-            throw new HttpException(
-                this.helperService.formatReqMessagesString(
-                    "programme.docUploadFailed",
-                    []
-                ),
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
     }
 
     private verifyEmissionValues(emissionData: any) {

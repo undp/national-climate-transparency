@@ -48,7 +48,11 @@ const LayoutSider = (props: LayoutSiderProps) => {
     getItem(t('nav:projects'), 'projects', <Layers />),
     getItem(t('nav:activities'), 'activities', <GraphUpArrow />),
     getItem(t('nav:support'), 'support', <Coin />),
-    getItem(t('nav:ghgInventory'), 'emissions', <CloudDownloadOutlined />),
+    getItem(t('nav:ghgInventory'), '', <CloudDownloadOutlined />, [
+      getItem(t('nav:emissions'), 'emissions'),
+      getItem(t('nav:projections'), 'projections'),
+      getItem(t('nav:configurations'), 'configurations'),
+    ]),
     getItem(t('nav:reporting'), 'reportings', <ClipboardMinus />),
     getItem(t('nav:faq'), 'faqs', <Headset />),
   ];
@@ -86,7 +90,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
             </div>
           )}
         </div>
-        <div className="layout-sider-menu-container">
+        <div className="sider-menu-container">
           <Menu
             theme="light"
             selectedKeys={[selectedKey ? selectedKey : 'dashboard']}

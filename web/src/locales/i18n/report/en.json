@@ -4,7 +4,7 @@
     "exportAsCsv": "Export As CSV",
 
     "5Title": "5/CMA.3 - Annex II - Table 5",
-    "5SubTitle": "Mitigation Policies and Measures, Actions and Plans, including those with mitigation co-benefits resulting from adaption actions and economic diversification plans, related to implementing and achieving a nationally determined contribution under Article 4",
+    "5SubTitle": "Mitigation policies and measures, actions and plans, including those with mitigation co-benefits resulting from adaptation actions and economic diversification plans, related to implementing and achieving a nationally determined contribution under Article 4 of the Paris Agreement",
 
     "6Title": "5/CMA.3 - Annex III - Table 6",
     "6SubTitle": "Information  on financial support needed by developing country Parties under Article 9 of the Paris Agreement",
@@ -37,9 +37,12 @@
     "status": "Status",
     "ghgsAffected": "Gases affected",
     "implementingEntities": "Implementing entity",
-    "ghgCommonTitle": "Estimates of GHG emission reductions (ktCO2eq)",
+    "ghgCommonTitle": "Estimates of GHG emission reductions (kt CO2 eq)",
     "achievedGHGReduction": "Achieved",
     "expectedGHGReduction": "Expected",
+    "sectorsAffected": "Sector(s) affected",
+    "startYearOfImplementation": "Start year of implementation",
+    "fullImplementingEntities": "Implementing entity or entities",
 
     "titleOfActivity": "Name of Activity",
     "descriptionOfActivity": "Activity description",

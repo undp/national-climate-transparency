@@ -12,7 +12,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { PoliciesGuardEx } from "src/casl/policy.guard";
 import { Action } from "src/casl/action.enum";
 import { EmissionEntity } from "src/entities/emission.entity";
-import { EmissionDto } from "src/dtos/emission.dto";
+import { EmissionDto, EmissionValidateDto } from "src/dtos/emission.dto";
 import { GhgEmissionsService } from "src/emission/emission.service";
 
 @ApiTags("Emissions")
@@ -27,18 +27,24 @@ export class GHGEmissionController {
         return this.emissionService.create(emissionDto, req.user);
     }
 
+    @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, EmissionEntity))
+    @Post("validate")
+    validateEmission(@Body() emissionValidateDto: EmissionValidateDto, @Request() req) {
+        return this.emissionService.validate(emissionValidateDto, req.user);
+    }
+
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, EmissionEntity, true))
     @Get('/:year')
     getEmissions(@Param('year') year: string, @Request() req) {
-      return this.emissionService.getEmissionByYear(year);
+      return this.emissionService.getEmissionByYear(year, req.user);
     }
 
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, EmissionEntity, true))
     @Get("/summary/available")
-    getEmissionYears() {
-      return this.emissionService.getEmissionReportSummary();
+    getEmissionYears(@Request() req) {
+      return this.emissionService.getEmissionReportSummary(req.user);
     }
     
 }

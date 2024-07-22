@@ -1,0 +1,50 @@
+.baseline-form {
+    .baseline-timeline {
+        margin-top: 30px;
+        overflow-x: auto;
+
+        .leaf-input-box {
+          width: fit-content;
+
+          .ant-input-number-input {
+              text-align: center;
+          }
+        }
+
+        .root-input-box {
+          text-align: center;
+          background-color: #f0e8ff;
+        }
+
+        .l1-input-box {
+          text-align: center;
+          background-color: #ffdbdb;
+        }
+
+        .l2-input-box {
+          text-align: center;
+          background-color: #e3f3fb;
+        }
+
+        &::-webkit-scrollbar {
+            height: 8px;
+        }
+          
+        &::-webkit-scrollbar-track {
+          background: #f0e9fd;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+          background: #d5d0dd;
+        }
+        
+        &::-webkit-scrollbar-thumb:hover {
+          cursor: pointer;
+        }
+
+    }
+
+    .action-row {
+        margin-top: 40px;
+    }
+}

@@ -12,7 +12,6 @@ import { User } from "../entities/user.entity";
 import { Action } from "./action.enum";
 import { Role } from "./role.enum";
 import { EntitySubject } from "../entities/entity.subject";
-import { Organisation } from "../entities/organisation.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
@@ -20,6 +19,7 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { SupportEntity } from "../entities/support.entity";
 import { KpiEntity } from "../entities/kpi.entity";
 import { EmissionEntity } from "src/entities/emission.entity";
+import { ProjectionEntity } from "src/entities/projection.entity";
 import { ConfigurationSettingsEntity } from "src/entities/configuration.settings.entity";
 import { SystemResourcesEntity } from "src/entities/systemResource.entity";
 
@@ -90,6 +90,14 @@ export class CaslAbilityFactory {
 				can(Action.Create, EmissionEntity);
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
+				can(Action.Validate, EmissionEntity);
+
+				//Projection
+				can(Action.Read, ProjectionEntity);
+				can(Action.Create, ProjectionEntity);
+				can(Action.Update, ProjectionEntity);
+				can(Action.Delete, ProjectionEntity);
+				can(Action.Validate, ProjectionEntity);
 
 				// Settings
 				can(Action.Read, ConfigurationSettingsEntity);
@@ -158,9 +166,17 @@ export class CaslAbilityFactory {
 				can(Action.Create, EmissionEntity);
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
+				can(Action.Validate, EmissionEntity);
+
+				//Projection
+				can(Action.Read, ProjectionEntity);
+				can(Action.Create, ProjectionEntity);
+				can(Action.Update, ProjectionEntity);
+				can(Action.Delete, ProjectionEntity);
+				can(Action.Validate, ProjectionEntity);
 
 				// Settings
-				cannot(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Read, ConfigurationSettingsEntity);
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 
@@ -274,9 +290,17 @@ export class CaslAbilityFactory {
 				can(Action.Create, EmissionEntity);
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
+				can(Action.Validate, EmissionEntity);
+
+				//Projection
+				can(Action.Read, ProjectionEntity);
+				can(Action.Create, ProjectionEntity);
+				can(Action.Update, ProjectionEntity);
+				can(Action.Delete, ProjectionEntity);
+				can(Action.Validate, ProjectionEntity);
 
 				// Settings
-				cannot(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Read, ConfigurationSettingsEntity);
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 
@@ -388,9 +412,17 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, EmissionEntity);
 				cannot(Action.Update, EmissionEntity);
 				cannot(Action.Delete, EmissionEntity);
+				cannot(Action.Validate, EmissionEntity);
+
+				//Projection
+				can(Action.Read, ProjectionEntity);
+				cannot(Action.Create, ProjectionEntity);
+				cannot(Action.Update, ProjectionEntity);
+				cannot(Action.Delete, ProjectionEntity);
+				cannot(Action.Validate, ProjectionEntity);
 
 				// Settings
-				cannot(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Read, ConfigurationSettingsEntity);
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 
