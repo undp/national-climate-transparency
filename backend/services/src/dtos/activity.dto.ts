@@ -188,6 +188,7 @@ export class ActivityDto {
 				}
 			  },
 			  startYear: 2015,
+			  unit: GHGS.CO,
 		},
 	})
 	mitigationTimeline: any;

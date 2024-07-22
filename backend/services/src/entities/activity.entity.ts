@@ -98,6 +98,7 @@ export class ActivityEntity implements EntitySubject {
 			};
 		};
 		startYear: number;
+		unit: GHGS
 	};
 
 	@Column({ type: "enum", enum: Sector, nullable: true })

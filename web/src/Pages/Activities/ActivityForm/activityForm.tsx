@@ -663,19 +663,33 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const gwpValueMapping = () => {
     if (selectedGhg !== undefined && gwpSettings !== undefined) {
-      switch (selectedGhg) {
-        case GHGS.CH:
-          setGwpValue(gwpSettings?.CH4 ?? 1);
-          setMtgUnit(GHGS.CH);
-          break;
-        case GHGS.NO:
-          setGwpValue(gwpSettings?.N2O ?? 1);
-          setMtgUnit(GHGS.NO);
-          break;
-        default:
-          setGwpValue(1);
-          setMtgUnit(GHGS.CO);
-          break;
+      if (method === 'create') {
+        switch (selectedGhg) {
+          case GHGS.CH:
+            setGwpValue(gwpSettings?.CH4 ?? 1);
+            setMtgUnit(GHGS.CH);
+            break;
+          case GHGS.NO:
+            setGwpValue(gwpSettings?.N2O ?? 1);
+            setMtgUnit(GHGS.NO);
+            break;
+          default:
+            setGwpValue(1);
+            setMtgUnit(GHGS.CO);
+            break;
+        }
+      } else {
+        switch (mtgUnit) {
+          case GHGS.CH:
+            setGwpValue(gwpSettings?.CH4 ?? 1);
+            break;
+          case GHGS.NO:
+            setGwpValue(gwpSettings?.N2O ?? 1);
+            break;
+          default:
+            setGwpValue(1);
+            break;
+        }
       }
     }
   };
@@ -725,6 +739,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
         if (response.status === 200 || response.status === 201) {
           setMtgStartYear(response.data.startYear);
+          setMtgUnit(response.data.unit);
           const tempExpectedEntries: ExpectedTimeline[] = [];
           Object.entries(ExpectedRows).forEach(([key, value]) => {
             const expectedGhgValue =
@@ -893,12 +908,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // Initializing mtg timeline data
 
   useEffect(() => {
-    fetchMtgTimelineData();
-
     if (method === 'create') {
       setDefaultTimelineValues(mtgStartYear, mtgRange);
+    } else {
+      fetchMtgTimelineData();
     }
-
     gwpValueMapping();
   }, [mtgStartYear, selectedGhg, mtgUnit]);
 
@@ -980,6 +994,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             },
           },
           startYear: mtgStartYear,
+          unit: mtgUnit,
         };
       }
 
