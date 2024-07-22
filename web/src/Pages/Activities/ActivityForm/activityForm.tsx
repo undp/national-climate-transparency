@@ -662,7 +662,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   };
 
   const gwpValueMapping = () => {
-    if (selectedGhg !== undefined) {
+    if (selectedGhg !== undefined && gwpSettings !== undefined) {
       switch (selectedGhg) {
         case GHGS.CH:
           setGwpValue(gwpSettings?.CH4 ?? 1);
