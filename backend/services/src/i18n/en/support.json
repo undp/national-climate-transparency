@@ -9,6 +9,7 @@
     "updateSupportSuccess": "Support updated successfully",
     "supportAlreadyValidated": "The support with id {} is already validated",
     "verifySupportSuccess": "Support verified successfully",
+    "unverifySupportSuccess": "Support unverified successfully",
     "supportVerificationFailed": "Support verification failed due to {}",
     "cannotEditValidated": "The support with id {} is validated and cannot be edited",
     "permissionDeniedForSector": "User does not have the permission for the sector",

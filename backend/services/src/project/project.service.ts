@@ -928,7 +928,7 @@ export class ProjectService {
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString("project.verifyProjectSuccess", []),
+			this.helperService.formatReqMessagesString(validateDto.validateStatus === true ? "project.verifyProjectSuccess" : "project.unverifyProjectSuccess" , []),
 			proj
 		);
 
