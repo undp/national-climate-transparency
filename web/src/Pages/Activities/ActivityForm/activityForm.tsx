@@ -554,7 +554,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     } catch (error: any) {
       if (error?.message) {
-        if (error.message === 'Permission Denied: Unable to Validate Activity') {
+        if (error.message === 'Permission Denied: Unable to Validate or Unvalidate Entity') {
           setIsValidationAllowed(false);
         }
         displayErrorMessage(error);
