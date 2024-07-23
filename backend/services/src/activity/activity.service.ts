@@ -1304,7 +1304,7 @@ export class ActivityService {
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString("activity.verifyActivitySuccess", []),
+			this.helperService.formatReqMessagesString((validateDto.validateStatus) ? "activity.verifyActivitySuccess" : "activity.unverifyActivitySuccess" , []),
 			act
 		);
 

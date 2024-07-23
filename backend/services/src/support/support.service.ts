@@ -564,7 +564,7 @@ export class SupportService {
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString("support.verifySupportSuccess", []),
+			this.helperService.formatReqMessagesString((validateDto.validateStatus) ? "support.verifySupportSuccess" : "support.unverifySupportSuccess" , []),
 			sup
 		);
 
