@@ -834,7 +834,7 @@ export class ProgrammeService {
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString(validateDto.validateStatus === true ? "programme.verifyProgrammeSuccess" : "programme.unverifyProgrammeSuccess" , []),
+			this.helperService.formatReqMessagesString((validateDto.validateStatus) ? "programme.verifyProgrammeSuccess" : "programme.unverifyProgrammeSuccess" , []),
 			prog
 		);
 

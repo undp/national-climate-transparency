@@ -630,7 +630,7 @@ export class ActionService {
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString(validateDto.validateStatus === true ? "action.verifyActionSuccess" : "action.unverifyActionSuccess" , []),
+			this.helperService.formatReqMessagesString((validateDto.validateStatus) ? "action.verifyActionSuccess" : "action.unverifyActionSuccess" , []),
 			act
 		);
 
