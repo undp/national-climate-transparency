@@ -266,8 +266,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      if (error?.message) {
-        if (error.message === 'Permission Denied: Unable to Validate or Unvalidate Entity') {
+      if (error?.status) {
+        if (error.status === 403) {
           setIsValidationAllowed(false);
         }
         displayErrorMessage(error);
