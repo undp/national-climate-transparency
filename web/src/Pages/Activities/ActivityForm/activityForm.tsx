@@ -290,7 +290,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       response = await get(`national/settings/GWP`);
 
       if (response.status === 200 || response.status === 201) {
-        setGwpSettings(response.data);
+        setGwpSettings({
+          CH4: response.data.gwp_ch4,
+          N2O: response.data.gwp_n2o,
+        });
       }
     } catch (error) {
       console.error('Error fetching GWP values:', error);
@@ -1716,7 +1719,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            {mtgStartYear !== 0 && mtgStartYear !== undefined && selectedGhg !== undefined && (
+            {mtgStartYear !== 0 && mtgStartYear !== undefined && mtgUnit !== undefined && (
               <div className="form-section-card">
                 <Row>
                   <Col {...mtgTableHeaderBps} style={{ paddingTop: '6px' }}>
