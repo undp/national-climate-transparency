@@ -7,7 +7,7 @@ import {
   DisconnectOutlined,
   PlusCircleOutlined,
 } from '@ant-design/icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import {
   InstrumentType,
@@ -507,7 +507,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Calculating migrated fields when attachment changes
 
-  useEffect(() => {
+  const memoizedMigratedData = useMemo(() => {
     const tempMigratedData: ActionMigratedData = {
       natImplementer: [],
       estimatedInvestment: 0,
@@ -549,8 +549,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + actGHGExpected;
     });
 
-    setActionMigratedData(tempMigratedData);
+    return tempMigratedData;
   }, [programData, activityData]);
+
+  useEffect(() => {
+    setActionMigratedData(memoizedMigratedData);
+  }, [memoizedMigratedData]);
 
   // Attachment resolve before updating an already created action
 

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
 import { DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
@@ -511,7 +511,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Calculating migrated fields when attachment changes
 
-  useEffect(() => {
+  const memoizedMigratedData = useMemo(() => {
     const tempMigratedData: ProjectMigratedData = {
       techDevContribution: 'No',
       capBuildObjectives: 'No',
@@ -565,8 +565,12 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       tempMigratedData.neededLCL = tempMigratedData.neededLCL + neededLCL;
     });
 
-    setProjectMigratedData(tempMigratedData);
+    return tempMigratedData;
   }, [activityData, supportData]);
+
+  useEffect(() => {
+    setProjectMigratedData(memoizedMigratedData);
+  }, [memoizedMigratedData]);
 
   // Expected Time Frame Calculation
 
