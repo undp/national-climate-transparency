@@ -1,4 +1,4 @@
-import { Tabs } from 'antd';
+import { Empty, Tabs } from 'antd';
 import './emissions.scss';
 import { EmissionForm } from '../../Components/Inventory/emissionForm';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
@@ -8,18 +8,21 @@ import { useEffect, useState } from 'react';
 import TabPane from 'antd/lib/tabs/TabPane';
 import { LockOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { EmissionTabItem } from '../../Definitions/emissionDefinitions';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 
 const GhgEmissions = () => {
   // Page Context
 
   const { t } = useTranslation(['emission']);
   const { get } = useConnection();
+  const { isGhgAllowed } = useUserContext();
 
   // Years State for Tab Panel
 
   const [availableReports, setAvailableReports] =
     useState<{ year: string; state: 'SAVED' | 'FINALIZED' }[]>();
   const [tabItems, setTabItems] = useState<EmissionTabItem[]>();
+  const [dataExistToView, setDataExistToView] = useState<boolean>(false);
 
   // Active Tab State
 
@@ -32,6 +35,9 @@ const GhgEmissions = () => {
       const response: any = await get('national/emissions/summary/available');
       if (response.status === 200 || response.status === 201) {
         setAvailableReports(response.data);
+        if (response.data.length > 0) {
+          setDataExistToView(true);
+        }
       }
     } catch (error: any) {
       displayErrorMessage(error, t('yearFetchingFailed'));
@@ -80,45 +86,54 @@ const GhgEmissions = () => {
         <div className="body-title">{t('emissionTitle')}</div>
       </div>
       <div className="emission-section-card">
-        <Tabs
-          centered
-          activeKey={activeYear}
-          onTabClick={(key: string) => setActiveYear(key)}
-          destroyInactiveTabPane={true}
-        >
-          <TabPane
-            tab={
-              <span>
-                <PlusCircleOutlined />
-                {t('addNew')}
-              </span>
-            }
-            key="addNew"
+        {isGhgAllowed || (!isGhgAllowed && dataExistToView) ? (
+          <Tabs
+            centered
+            activeKey={activeYear}
+            onTabClick={(key: string) => setActiveYear(key)}
+            destroyInactiveTabPane={true}
           >
-            <EmissionForm
-              index={0}
-              year={null}
-              finalized={false}
-              availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
-              setActiveYear={setActiveYear}
-              getAvailableEmissionReports={getAvailableEmissionReports}
-            />
-          </TabPane>
-          {tabItems &&
-            tabItems.map((tab: any) => (
+            {isGhgAllowed && (
               <TabPane
                 tab={
                   <span>
-                    <span style={{ marginRight: '8px' }}>{tab.label}</span>
-                    <span>{tab.icon}</span>
+                    <PlusCircleOutlined />
+                    {t('addNew')}
                   </span>
                 }
-                key={tab.key}
+                key="addNew"
               >
-                {tab.content}
+                <EmissionForm
+                  index={0}
+                  year={null}
+                  finalized={false}
+                  availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
+                  setActiveYear={setActiveYear}
+                  getAvailableEmissionReports={getAvailableEmissionReports}
+                />
               </TabPane>
-            ))}
-        </Tabs>
+            )}
+            {tabItems &&
+              tabItems.map((tab: any) => (
+                <TabPane
+                  tab={
+                    <span>
+                      <span style={{ marginRight: '8px' }}>{tab.label}</span>
+                      <span>{tab.icon}</span>
+                    </span>
+                  }
+                  key={tab.key}
+                >
+                  {tab.content}
+                </TabPane>
+              ))}
+          </Tabs>
+        ) : (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={'No Emission Reports Available'}
+          />
+        )}
       </div>
     </div>
   );

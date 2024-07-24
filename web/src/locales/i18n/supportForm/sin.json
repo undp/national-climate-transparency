@@ -19,5 +19,7 @@
   "exchangeRateTitle": "ගාස්තුව අනුවාදය (USD/දිවයින වාර්තාව)",
   "supportCreationSuccess": "සහායකය සාර්ථකව එකතු කරන ලදි",
   "supportUpdateSuccess": "සහායකය සාර්ථකව යාවත්කාල කරන ලදි",
-  "supportDeleteSuccess": "සහාය ඉවත් කිරීම සාර්ථකයි"
+  "supportDeleteSuccess": "සහාය ඉවත් කිරීම සාර්ථකයි",
+  "deletePrimaryMsg": "ඔබට ඉවත් කිරීම අවශ්‍ය බව ඔබට විශ්වාසද",
+  "deleteSecondaryMsg": "ඔබට මෙම ක්‍රියාව අහෝසි කළ නොහැක."
 }

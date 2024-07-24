@@ -541,7 +541,7 @@ public doesUserHaveSectorPermission(user: User, sectorScope: Sector) {
 }
 
 public doesUserHaveValidatePermission(user: User) {
-  if (user.validatePermission===ValidateEntity.CANNOT || user.role===Role.Observer) {
+  if (user.validatePermission===ValidateEntity.CANNOT) {
     throw new HttpException(
       this.formatReqMessagesString(
         "common.permissionDeniedForValidate",
@@ -550,6 +550,18 @@ public doesUserHaveValidatePermission(user: User) {
       HttpStatus.FORBIDDEN
     );
   }
+}
+
+public isValidYear(yearStr: string): boolean {
+  const yearRegex = /^\d{4}$/;
+
+  if (yearRegex.test(yearStr)) {
+      const year = parseInt(yearStr, 10);
+      if (year >= 1000 && year <= 9999) {
+          return true;
+      }
+  }
+  return false;
 }
 
   // public async uploadCompanyLogoS3(companyId: number, companyLogo: string) {

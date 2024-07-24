@@ -30,6 +30,7 @@ import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
+import { ProjectionEntity } from "../entities/projection.entity";
 
 @Module({
   imports: [
@@ -64,7 +65,8 @@ import { ActivityEntity } from "../entities/activity.entity";
 			ActionEntity,
 			ProgrammeEntity,
 			ProjectEntity,
-			ActivityEntity
+			ActivityEntity,
+      ProjectionEntity
     ]),
     forwardRef(() => AsyncOperationsModule),
     FileHandlerModule,

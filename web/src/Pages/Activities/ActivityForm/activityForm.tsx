@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
+import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,7 +21,7 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { getFormTitle, getRounded } from '../../../Utils/utilServices';
+import { delay, getFormTitle, getRounded } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ActivityEntity } from '../../../Entities/activity';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -42,8 +42,8 @@ import {
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
 import { StoredData, UploadData } from '../../../Definitions/uploadDefinitions';
 import { useUserContext } from '../../../Context/UserInformationContext/userInformationContext';
-import { ValidateEntity } from '../../../Enums/user.enum';
-import { Role } from '../../../Enums/role.enum';
+import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
+import { DeleteOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -53,7 +53,7 @@ const inputFontSize = '13px';
 
 const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['activityForm', 'formHeader', 'entityAction']);
+  const { t } = useTranslation(['activityForm', 'formHeader', 'entityAction', 'error']);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Activity', method);
@@ -61,17 +61,20 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
-  const { userInfoState } = useUserContext();
+  const { isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
   // Form Validation Rules
 
   const validation = getValidationRules(method);
 
+  // First Rendering Check
+
+  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
+
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
-  const [isValidateButtonDisabled, setIsValidateButtonDisabled] = useState(false);
 
   // Parent Selection State
 
@@ -110,6 +113,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportCurrentPage, setCurrentPage] = useState<any>(1);
   const [supportPageSize, setPageSize] = useState<number>(10);
 
+  // Popup Definition
+
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
+
+  // Detach Entity Data
+
   // KPI State
 
   const [kpiCounter, setKpiCounter] = useState<number>(0);
@@ -122,6 +131,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [actualTimeline, setActualTimeline] = useState<ActualTimeline[]>([]);
   const [isMtgButtonEnabled, setIsMtgButtonEnabled] = useState(false);
   const [mtgStartYear, setMtgStartYear] = useState<number>(0);
+  const [selectedGhg, setSelectedGhg] = useState<GHGS>();
+  const [gwpSettings, setGwpSettings] = useState<{ CH4: number; N2O: number }>();
+  const [gwpValue, setGwpValue] = useState<number>(1);
+  const [mtgUnit, setMtgUnit] = useState<GHGS>(GHGS.CO);
 
   // Initialization Logic
 
@@ -130,26 +143,20 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const handleParentIdSelect = (id: string) => {
     setConnectedParentId(id);
     setShouldFetchParentKpi(true);
+    if (id === undefined) {
+      setMtgStartYear(0);
+    }
   };
 
   const handleParentTypeSelect = (value: string) => {
     setParentType(value);
     setConnectedParentId(undefined);
+    setMtgStartYear(0);
     form.setFieldsValue({
       parentId: '',
       parentDescription: '',
     });
   };
-
-  useEffect(() => {
-    // check user permission for validate action and disable validate button
-    if (
-      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
-      userInfoState?.userRole === Role.Observer
-    ) {
-      setIsValidateButtonDisabled(true);
-    }
-  }, [userInfoState]);
 
   // Tracking Parent selection
 
@@ -235,7 +242,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             setInheritedKpiList(tempInheritedKpiList);
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -278,6 +285,24 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   }, [parentType]);
 
   // Initializing Section
+
+  //fetch GWP settings
+
+  const fetchGwpSettings = async () => {
+    let response: any;
+    try {
+      response = await get(`national/settings/GWP`);
+
+      if (response.status === 200 || response.status === 201) {
+        setGwpSettings({
+          CH4: response.data.gwp_ch4,
+          N2O: response.data.gwp_n2o,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching GWP values:', error);
+    }
+  };
 
   useEffect(() => {
     // Initially Loading the underlying Activity data when not in create mode
@@ -334,6 +359,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
             setIsValidated(entityData.validated ?? false);
 
+            // Setting selected ghg
+
+            setSelectedGhg(entityData.ghgsAffected ?? undefined);
+
             // Setting up uploaded files
 
             if (entityData.documents?.length > 0) {
@@ -372,9 +401,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               setStoredRstFiles(tempFiles);
             }
           }
-        } catch (error: any) {
+        } catch {
           navigate('/activities');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -456,11 +484,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             setInheritedKpiList(tempInheritedKpiList);
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
     fetchCreatedKPIData();
+    fetchGwpSettings();
   }, []);
 
   // Populating Form Migrated Fields, when migration data changes
@@ -477,6 +506,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         endYear: activityMigratedData.endYear,
         expectedTimeFrame: activityMigratedData.expectedTimeFrame,
       });
+    }
+    if (!firstRenderingCompleted) {
+      setFirstRenderingCompleted(true);
     }
   }, [activityMigratedData]);
 
@@ -528,9 +560,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      if (error?.message) {
-        if (error.message === 'Permission Denied: Unable to Validate Activity') {
-          setIsValidateButtonDisabled(true);
+      if (error?.status) {
+        if (error.status === 403) {
+          setIsValidationAllowed(false);
         }
         displayErrorMessage(error);
       } else {
@@ -541,8 +573,15 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Delete
 
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
   const deleteEntity = async () => {
     try {
+      setWaitingForBE(true);
+      await delay(1000);
+
       if (entId) {
         const payload = {
           entityId: entId,
@@ -566,6 +605,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       } else {
         displayErrorMessage(error, `${entId} Delete Failed`);
       }
+    } finally {
+      setWaitingForBE(false);
     }
   };
 
@@ -630,16 +671,37 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  //MTG timeline create array from row
-
-  const mtgRowMapping = (row: { [year: string]: number }) => {
-    const arr = [];
-    const endYear = mtgStartYear + mtgRange;
-    for (let year = mtgStartYear; year <= endYear; year++) {
-      const value = row[year.toString()] || 0;
-      arr.push(value);
+  const gwpValueMapping = () => {
+    if (selectedGhg !== undefined && gwpSettings !== undefined) {
+      if (method === 'create') {
+        switch (selectedGhg) {
+          case GHGS.CH:
+            setGwpValue(gwpSettings?.CH4 ?? 1);
+            setMtgUnit(GHGS.CH);
+            break;
+          case GHGS.NO:
+            setGwpValue(gwpSettings?.N2O ?? 1);
+            setMtgUnit(GHGS.NO);
+            break;
+          default:
+            setGwpValue(1);
+            setMtgUnit(GHGS.CO);
+            break;
+        }
+      } else {
+        switch (mtgUnit) {
+          case GHGS.CH:
+            setGwpValue(gwpSettings?.CH4 ?? 1);
+            break;
+          case GHGS.NO:
+            setGwpValue(gwpSettings?.N2O ?? 1);
+            break;
+          default:
+            setGwpValue(1);
+            break;
+        }
+      }
     }
-    return arr;
   };
 
   //set mtg timeline data to zero values (when it is or null or create mode)
@@ -648,19 +710,28 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     const endYear = startYear + range;
     const tempExpectedEntries: ExpectedTimeline[] = [];
     Object.entries(ExpectedRows).forEach(([key, value]) => {
-      const rowData: ExpectedTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-      for (let year = startYear; year <= endYear; year++) {
-        rowData[year.toString()] = 0;
-      }
+      const expectedGhgValue =
+        key === 'ROW_ONE' || key === 'ROW_TWO' || key === 'ROW_THREE' ? `kt${mtgUnit}` : value[0];
+      const rowData: ExpectedTimeline = {
+        key: key,
+        ghg: expectedGhgValue,
+        topic: value[1],
+        total: 0,
+        values: new Array(Math.min(endYear, 2050) + 1 - startYear).fill(0),
+      };
       tempExpectedEntries.push(rowData);
     });
 
     const tempActualEntries: ActualTimeline[] = [];
     Object.entries(ActualRows).forEach(([key, value]) => {
-      const rowData: ActualTimeline = { key: key, ghg: value[0], topic: value[1], total: 0 };
-      for (let year = startYear; year <= endYear; year++) {
-        rowData[year.toString()] = 0;
-      }
+      const actualGhgValue = key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${mtgUnit}` : value[0];
+      const rowData: ActualTimeline = {
+        key: key,
+        ghg: actualGhgValue,
+        topic: value[1],
+        total: 0,
+        values: new Array(Math.min(endYear, 2050) + 1 - startYear).fill(0),
+      };
       tempActualEntries.push(rowData);
     });
 
@@ -678,34 +749,34 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
         if (response.status === 200 || response.status === 201) {
           setMtgStartYear(response.data.startYear);
-          const endYear = mtgStartYear + mtgRange;
+          setMtgUnit(response.data.unit);
           const tempExpectedEntries: ExpectedTimeline[] = [];
           Object.entries(ExpectedRows).forEach(([key, value]) => {
+            const expectedGhgValue =
+              key === 'ROW_ONE' || key === 'ROW_TWO' || key === 'ROW_THREE'
+                ? `kt${mtgUnit}`
+                : value[0];
             const rowData: ExpectedTimeline = {
               key: key,
-              ghg: value[0],
+              ghg: expectedGhgValue,
               topic: value[1],
               total: response.data.expected.total[mtgFieldMapping(value[1])],
+              values: response.data.expected[mtgFieldMapping(value[1])],
             };
-            for (let year = mtgStartYear; year <= endYear; year++) {
-              rowData[year.toString()] =
-                response.data.expected[mtgFieldMapping(value[1])][year - mtgStartYear];
-            }
             tempExpectedEntries.push(rowData);
           });
 
           const tempActualEntries: ActualTimeline[] = [];
           Object.entries(ActualRows).forEach(([key, value]) => {
+            const actualGhgValue =
+              key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${mtgUnit}` : value[0];
             const rowData: ActualTimeline = {
               key: key,
-              ghg: value[0],
+              ghg: actualGhgValue,
               topic: value[1],
               total: response.data.actual.total[mtgFieldMapping(value[1])],
+              values: response.data.actual[mtgFieldMapping(value[1])],
             };
-            for (let year = mtgStartYear; year <= endYear; year++) {
-              rowData[year.toString()] =
-                response.data.actual[mtgFieldMapping(value[1])][year - mtgStartYear];
-            }
             tempActualEntries.push(rowData);
           });
 
@@ -723,13 +794,37 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   //MTG timeline calculate array sum from row
 
-  const mtgCalculateArraySum = (row: any) => {
+  const mtgCalculateArraySum = (array: number[]) => {
     let arrSum = 0;
-    const endYear = mtgStartYear + mtgRange;
-    for (let year = mtgStartYear; year <= endYear; year++) {
-      arrSum += row[year.toString()] || 0;
+    for (let index = 0; index <= array.length; index++) {
+      arrSum += array[index] || 0;
     }
     return arrSum;
+  };
+
+  //Values convert to ktCO2e
+
+  const multiplyByGwpValue = (entry: any) => {
+    switch (entry.topic) {
+      case expectedTimeline[1].topic:
+        for (let index = 0; index < expectedTimeline[1].values.length; index++) {
+          expectedTimeline[3].values[index] = expectedTimeline[1].values[index] * gwpValue;
+          expectedTimeline[3].total = mtgCalculateArraySum(expectedTimeline[3].values);
+        }
+        break;
+      case expectedTimeline[2].topic:
+        for (let index = 0; index < expectedTimeline[2].values.length; index++) {
+          expectedTimeline[4].values[index] = expectedTimeline[2].values[index] * gwpValue;
+          expectedTimeline[4].total = mtgCalculateArraySum(expectedTimeline[4].values);
+        }
+        break;
+      case actualTimeline[1].topic:
+        for (let index = 0; index < actualTimeline[1].values.length; index++) {
+          actualTimeline[2].values[index] = actualTimeline[1].values[index] * gwpValue;
+          actualTimeline[2].total = mtgCalculateArraySum(actualTimeline[2].values);
+        }
+        break;
+    }
   };
 
   // Mtg Data Change
@@ -737,7 +832,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const onMtgValueEnter = (
     tableType: 'expected' | 'actual',
     rowId: string,
-    year: string,
+    year: any,
     value: string
   ) => {
     const newValue = value ? parseInt(value) : 0;
@@ -745,8 +840,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     if (tableType === 'expected') {
       const updatedTimeline = expectedTimeline.map((entry) => {
         if (entry.topic === rowId) {
-          entry[year] = newValue;
-          entry.total = mtgCalculateArraySum(entry);
+          entry.values[year - mtgStartYear] = newValue;
+          entry.total = mtgCalculateArraySum(entry.values);
+          multiplyByGwpValue(entry);
           return entry;
         }
         return entry;
@@ -755,8 +851,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     } else {
       const updatedTimeline = actualTimeline.map((entry) => {
         if (entry.topic === rowId) {
-          entry[year] = newValue;
-          entry.total = mtgCalculateArraySum(entry);
+          entry.values[year - mtgStartYear] = newValue;
+          entry.total = mtgCalculateArraySum(entry.values);
+          multiplyByGwpValue(entry);
           return entry;
         }
         return entry;
@@ -775,11 +872,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           activityId: entId,
           mitigationTimeline: {
             expected: {
-              baselineEmissions: mtgRowMapping(expectedTimeline[0]),
-              activityEmissionsWithM: mtgRowMapping(expectedTimeline[1]),
-              activityEmissionsWithAM: mtgRowMapping(expectedTimeline[2]),
-              expectedEmissionReductWithM: mtgRowMapping(expectedTimeline[3]),
-              expectedEmissionReductWithAM: mtgRowMapping(expectedTimeline[4]),
+              baselineEmissions: expectedTimeline[0].values,
+              activityEmissionsWithM: expectedTimeline[1].values,
+              activityEmissionsWithAM: expectedTimeline[2].values,
+              expectedEmissionReductWithM: expectedTimeline[3].values,
+              expectedEmissionReductWithAM: expectedTimeline[4].values,
               total: {
                 baselineEmissions: expectedTimeline[0].total,
                 activityEmissionsWithM: expectedTimeline[1].total,
@@ -789,9 +886,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               },
             },
             actual: {
-              baselineActualEmissions: mtgRowMapping(actualTimeline[0]),
-              activityActualEmissions: mtgRowMapping(actualTimeline[1]),
-              actualEmissionReduct: mtgRowMapping(actualTimeline[2]),
+              baselineActualEmissions: actualTimeline[0].values,
+              activityActualEmissions: actualTimeline[1].values,
+              actualEmissionReduct: actualTimeline[2].values,
               total: {
                 baselineActualEmissions: actualTimeline[0].total,
                 activityActualEmissions: actualTimeline[1].total,
@@ -805,7 +902,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         if (response.status === 200 || response.status === 201) {
           message.open({
             type: 'success',
-            content: 'Mitigation Timeline Successfully Updated  !',
+            content: t('mtgUpdateSuccess'),
             duration: 3,
             style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
           });
@@ -814,23 +911,28 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      displayErrorMessage(error, `${entId} Mitigation Timeline Failed to Update !`);
+      displayErrorMessage(error, `${entId} Mitigation Timeline Failed to Update`);
     }
   };
 
   // Initializing mtg timeline data
 
   useEffect(() => {
-    fetchMtgTimelineData();
-
     if (method === 'create') {
       setDefaultTimelineValues(mtgStartYear, mtgRange);
+    } else {
+      fetchMtgTimelineData();
     }
-  }, [mtgStartYear]);
+    gwpValueMapping();
+  }, [mtgStartYear, selectedGhg, mtgUnit]);
 
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
+    if (method === 'update' && isMtgButtonEnabled) {
+      displayErrorMessage('', t('saveMtgFirst'));
+      return;
+    }
     try {
       setWaitingForBE(true);
 
@@ -878,11 +980,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       if (method === 'create') {
         payload.mitigationTimeline = {
           expected: {
-            baselineEmissions: mtgRowMapping(expectedTimeline[0]),
-            activityEmissionsWithM: mtgRowMapping(expectedTimeline[1]),
-            activityEmissionsWithAM: mtgRowMapping(expectedTimeline[2]),
-            expectedEmissionReductWithM: mtgRowMapping(expectedTimeline[3]),
-            expectedEmissionReductWithAM: mtgRowMapping(expectedTimeline[4]),
+            baselineEmissions: expectedTimeline[0].values,
+            activityEmissionsWithM: expectedTimeline[1].values,
+            activityEmissionsWithAM: expectedTimeline[2].values,
+            expectedEmissionReductWithM: expectedTimeline[3].values,
+            expectedEmissionReductWithAM: expectedTimeline[4].values,
             total: {
               baselineEmissions: expectedTimeline[0].total,
               activityEmissionsWithM: expectedTimeline[1].total,
@@ -892,9 +994,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             },
           },
           actual: {
-            baselineActualEmissions: mtgRowMapping(actualTimeline[0]),
-            activityActualEmissions: mtgRowMapping(actualTimeline[1]),
-            actualEmissionReduct: mtgRowMapping(actualTimeline[2]),
+            baselineActualEmissions: actualTimeline[0].values,
+            activityActualEmissions: actualTimeline[1].values,
+            actualEmissionReduct: actualTimeline[2].values,
             total: {
               baselineActualEmissions: actualTimeline[0].total,
               activityActualEmissions: actualTimeline[1].total,
@@ -902,6 +1004,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             },
           },
           startYear: mtgStartYear,
+          unit: mtgUnit,
         };
       }
 
@@ -950,7 +1053,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       let response: any;
 
       if (method === 'create') {
-        response = await post('national/activities/add', payload);
+        response = await post(
+          'national/activities/add',
+          processOptionalFields(payload, 'activity')
+        );
 
         resolveKPIAchievements(response.data.activityId);
       } else if (method === 'update') {
@@ -989,10 +1095,25 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   return (
     <div className="content-container">
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('deletePrimaryMsg')} ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
+        }}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && firstRenderingCompleted ? (
         <div className="activity-form">
           <Form
             form={form}
@@ -1003,7 +1124,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
-                <EntityIdCard calledIn="Activity" entId={entId}></EntityIdCard>
+                <EntityIdCard
+                  calledIn="Activity"
+                  entId={entId}
+                  isValidated={isValidated}
+                ></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
@@ -1406,11 +1531,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   >
                     <Select
                       size="large"
-                      mode="multiple"
                       style={{ fontSize: inputFontSize }}
                       allowClear
-                      disabled={isView}
+                      disabled={method !== 'create'}
                       showSearch
+                      onChange={(value: GHGS) => setSelectedGhg(value)}
                     >
                       {Object.values(GHGS).map((ghg) => (
                         <Option key={ghg} value={ghg}>
@@ -1601,7 +1726,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            {mtgStartYear !== 0 && mtgStartYear !== undefined && (
+            {mtgStartYear !== 0 && mtgStartYear !== undefined && mtgUnit !== undefined && (
               <div className="form-section-card">
                 <Row>
                   <Col {...mtgTableHeaderBps} style={{ paddingTop: '6px' }}>
@@ -1684,17 +1809,25 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 {ability.can(Action.Validate, ActivityEntity) && (
                   <Col>
                     <Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() => {
-                          validateEntity();
-                        }}
-                        disabled={isValidateButtonDisabled}
+                      <Tooltip
+                        placement="topRight"
+                        title={
+                          !isValidationAllowed ? t('error:validationPermissionRequired') : undefined
+                        }
+                        showArrow={false}
                       >
-                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                      </Button>
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => {
+                            validateEntity();
+                          }}
+                          disabled={!isValidationAllowed}
+                        >
+                          {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                        </Button>
+                      </Tooltip>
                     </Form.Item>
                   </Col>
                 )}
@@ -1721,7 +1854,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       size="large"
                       block
                       onClick={() => {
-                        deleteEntity();
+                        deleteClicked();
                       }}
                       style={{ color: 'red', borderColor: 'red' }}
                     >

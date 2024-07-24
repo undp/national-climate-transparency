@@ -14,6 +14,8 @@
     "permissionDeniedForSector": "User does not have the permission for the sector",
     "deleteProgrammeSuccess": "Programme deleted successfully",
     "programmeDeletionFailed": "Programme deletion failed due to {}",
-    "parentNotValidated": "Parent action with id {} should be validated."
+    "parentNotValidated": "Parent action with id {} should be validated.",
+    "verifyProgrammeSuccess": "Programme verified successfully",
+    "unverifyProgrammeSuccess": "Programme unverified successfully"
 
 }

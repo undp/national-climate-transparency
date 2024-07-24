@@ -33,30 +33,22 @@
     margin-right: 10px;
   }
 
-  .layout-sider-menu-container {
-    background-color: $background-color;
-    padding-top: 12px;
-
-    .ant-menu-inline-collapsed {
-      .ant-menu-item-icon {
-        line-height: 46px !important;
-      }
-    }
-  }
-
   .layout-sider-div-container {
-    padding-top: 22px;
+    padding-top: 10px;
+    overflow-y: auto;
 
     .layout-sider-heading-container {
       display: flex;
       flex-direction: row;
       align-items: center;
-      padding: 0rem 2rem 0 1rem;
+      padding-top: 15px;
+      padding-right: 10px;
+      padding-left: 20px;
       cursor: pointer;
 
       .title {
         font-family: 'MuseoSans';
-        font-size: 15px;
+        font-size: 14px;
         color: $logo-text-color;
         font-weight: 700;
         margin-right: 5px;
@@ -65,7 +57,7 @@
       .title-sub {
         font-weight: 100 !important;
         font-family: 'MuseoSans';
-        font-size: 15px;
+        font-size: 14px;
         color: $logo-text-color;
       }
 
@@ -83,59 +75,37 @@
       }
     }
 
-    .ant-menu-item-selected {
-      background: linear-gradient(to right, $gradient-background-start, $gradient-background-end);
-      color: $dark-text-color;
-      border-top-right-radius: 22px;
-      border-bottom-right-radius: 22px;
+    .sider-menu-container {
 
-      a {
-        color: $dark-text-color;
-      }
-    }
+      display: flex;
+      overflow-y: auto;
+      max-height: 70vh;
+      padding-top: 10px;
+      padding-right: 8px;
 
-    .ant-menu-item::after {
-      border: none;
-    }
-
-    .ant-menu-submenu-selected {
-      .ant-menu-item::after {
-        border-left: 2px solid $primary-color;
-      }
-
-      .ant-menu-submenu-title {
+      .ant-menu-item-selected {
         background: linear-gradient(to right, $gradient-background-start, $gradient-background-end);
         color: $dark-text-color;
         border-top-right-radius: 22px;
         border-bottom-right-radius: 22px;
-
-        .ant-menu-submenu-arrow {
-          color: $dark-text-color;
-        }
-
-        a {
-          color: $dark-text-color;
-        }
       }
 
-      .ant-menu-item-selected {
-        background: none;
-        border-top-right-radius: 0px;
-        border-bottom-right-radius: 0px;
-
-        a {
-          color: $primary-color;
-        }
+      &::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: #f0e9fd;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: #d5d0dd;
+      }
+      
+      &::-webkit-scrollbar-thumb:hover {
+        cursor: pointer;
       }
     }
 
-    .ant-menu-item {
-      height: 44px;
-      padding-left: 1.3rem;
-    }
-
-    .ant-menu-submenu-title {
-      height: 44px;
-    }
   }
 }

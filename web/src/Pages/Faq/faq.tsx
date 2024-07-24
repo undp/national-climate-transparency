@@ -104,7 +104,7 @@ const faq = () => {
       const uploadedFiles =
         resourceCategory === SystemResourceCategory.FAQ ? uploadedTemplateFiles : uploadedGHGFiles;
 
-      uploadedFiles.forEach(async (file) => {
+      for (const file of uploadedFiles) {
         const payload = {
           resourceCategory: resourceCategory,
           resourceType: resourceType,
@@ -113,7 +113,7 @@ const faq = () => {
         };
 
         await post('national/resources/add', payload);
-      });
+      }
     } catch (error: any) {
       displayErrorMessage(error);
     }
@@ -124,9 +124,9 @@ const faq = () => {
       const removedFiles =
         resourceCategory === SystemResourceCategory.FAQ ? templateFilesToRemove : ghgFilesToRemove;
 
-      removedFiles.forEach(async (file) => {
+      for (const file of removedFiles) {
         await del(`national/resources/delete/${file}`);
-      });
+      }
     } catch (error: any) {
       displayErrorMessage(error);
     }

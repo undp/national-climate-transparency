@@ -1,7 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
-import { Row, Col, Input, Button, Form, Select, message, Spin } from 'antd';
-import { AppstoreOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
+import {
+  AppstoreOutlined,
+  DeleteOutlined,
+  DisconnectOutlined,
+  PlusCircleOutlined,
+} from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import {
@@ -20,7 +25,7 @@ import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
-import { getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
+import { delay, getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
@@ -46,7 +51,6 @@ import {
   shortButtonBps,
 } from '../../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
-import { ValidateEntity } from '../../../Enums/user.enum';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -56,7 +60,13 @@ const inputFontSize = '13px';
 
 const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['actionForm', 'detachPopup', 'entityAction', 'formHeader']);
+  const { t } = useTranslation([
+    'actionForm',
+    'detachPopup',
+    'entityAction',
+    'formHeader',
+    'error',
+  ]);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Action', method);
@@ -64,8 +74,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const navigate = useNavigate();
   const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
-  const { userInfoState } = useUserContext();
+  const { userInfoState, isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
+
+  // First Rendering Check
+
+  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
 
   // Form Validation Rules
 
@@ -74,7 +88,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
-  const [isValidateButtonDisabled, setIsValidateButtonDisabled] = useState(false);
 
   // Form General State
 
@@ -103,10 +116,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Activity Attachment state: Activity link functions removed keeping original state
 
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
-  const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
 
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
@@ -116,11 +126,14 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
   const [supportPageSize, setSupportPageSize] = useState<number>(10);
 
-  // Detach Popup Visibility
+  // Popup Definition
 
   const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
+  const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
+
+  // Detach Entity Data
+
   const [detachingEntityId, setDetachingEntityId] = useState<string>();
-  const [detachingEntityType, setDetachingEntityType] = useState<'Programme' | 'Activity'>();
 
   // KPI State
 
@@ -128,7 +141,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
   const [handleKPI, setHandleKPI] = useState<boolean>(false);
-  // const [kpiAction, setKpiAction] = useState<KPIAction>(KPIAction.NONE);
 
   // Initialization Logic
 
@@ -147,16 +159,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   }
 
   useEffect(() => {
-    // check user permission for validate action and disable validate button
-    if (
-      userInfoState?.validatePermission === ValidateEntity.CANNOT ||
-      userInfoState?.userRole === Role.Observer
-    ) {
-      setIsValidateButtonDisabled(true);
-    }
-  }, [userInfoState]);
-
-  useEffect(() => {
     // Initially Loading Free Programmes and Activities that can be attached
 
     const fetchFreeChildren = async () => {
@@ -169,14 +171,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             freeProgrammeIds.push(prg.programmeId);
           });
           setAllProgramIdList(freeProgrammeIds);
-
-          const actResponse: any = await get('national/activities/link/eligible');
-
-          const freeActivityIds: string[] = [];
-          actResponse.data.forEach((act: any) => {
-            freeActivityIds.push(act.activityId);
-          });
-          setAllActivityIdList(freeActivityIds);
         } catch (error: any) {
           displayErrorMessage(error);
         }
@@ -229,9 +223,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               natImplementer: entityData.migratedData?.natImplementors ?? [],
             });
           }
-        } catch (error: any) {
+        } catch {
           navigate('/actions');
-          displayErrorMessage(error, t('noSuchEntity'));
         }
         setIsSaveButtonDisabled(true);
       }
@@ -268,7 +261,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             }
           }
         } catch (error: any) {
-          displayErrorMessage(error, t('kpiSearchFailed'));
+          console.log(error, t('kpiSearchFailed'));
         }
       }
     };
@@ -336,7 +329,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             connectedActivityIds.push(act.activityId);
           });
           setAttachedActivityIds(connectedActivityIds);
-          setTempActivityIds(connectedActivityIds);
         } catch (error: any) {
           displayErrorMessage(error);
         }
@@ -356,6 +348,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         achievedReduct: actionMigratedData.achievedReduction,
         expectedReduct: actionMigratedData.expectedReduction,
       });
+    }
+    if (!firstRenderingCompleted) {
+      setFirstRenderingCompleted(true);
     }
   }, [actionMigratedData]);
 
@@ -439,9 +434,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     };
 
     const fetchActivityAttachmentData = async () => {
-      if (tempActivityIds.length > 0) {
+      if (attachedActivityIds.length > 0) {
         try {
-          tempActivityIds.forEach((activityId) => {
+          attachedActivityIds.forEach((activityId) => {
             activityPayload.filterOr.push({
               key: 'activityId',
               operation: '=',
@@ -467,7 +462,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               reductionMeasures: act.measure,
               status: act.status,
               natImplementor: act.nationalImplementingEntity ?? [],
-              ghgsAffected: act.ghgsAffected ?? [],
+              ghgsAffected: act.ghgsAffected,
               achievedReduction: act.achievedGHGReduction ?? 0,
               estimatedReduction: act.expectedGHGReduction ?? 0,
             });
@@ -508,7 +503,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     setSupportCurrentPage(1);
     setSupportPageSize(10);
-  }, [tempActivityIds]);
+  }, [attachedActivityIds]);
 
   // Calculating migrated fields when attachment changes
 
@@ -543,10 +538,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     });
 
     activityData.forEach((act: ActivityData) => {
-      tempMigratedData.ghgsAffected = joinTwoArrays(
-        tempMigratedData.ghgsAffected,
-        act.ghgsAffected ?? []
-      );
+      if (act.ghgsAffected && !tempMigratedData.ghgsAffected.includes(act.ghgsAffected)) {
+        tempMigratedData.ghgsAffected.push(act.ghgsAffected);
+      }
 
       const actGHGAchievement = act.achievedReduction ?? 0;
       const actGHGExpected = act.estimatedReduction ?? 0;
@@ -573,27 +567,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
       if (toAttach.length > 0) {
         await post('national/programmes/link', { actionId: entId, programmes: toAttach });
-      }
-    } catch (error: any) {
-      displayErrorMessage(error);
-    }
-  };
-
-  const resolveActivityAttachments = async (parentId: string) => {
-    const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
-    const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
-
-    try {
-      if (toDetach.length > 0) {
-        await post('national/activities/unlink', { activityIds: toDetach });
-      }
-
-      if (toAttach.length > 0) {
-        await post('national/activities/link', {
-          parentId: parentId,
-          parentType: 'action',
-          activityIds: toAttach,
-        });
       }
     } catch (error: any) {
       displayErrorMessage(error);
@@ -688,11 +661,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         method === 'create' ? t('actionCreationSuccess') : t('actionUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
-        if (method === 'create') {
-          resolveActivityAttachments(response.data.actionId);
-        } else if (entId && method === 'update') {
+        if (entId && method === 'update') {
           resolveProgrammeAttachments();
-          resolveActivityAttachments(entId);
         }
 
         await new Promise((resolve) => {
@@ -748,9 +718,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      if (error?.message) {
-        if (error.message === 'Permission Denied: Unable to Validate Action') {
-          setIsValidateButtonDisabled(true);
+      if (error?.status) {
+        if (error.status === 403) {
+          setIsValidationAllowed(false);
         }
         displayErrorMessage(error);
       } else {
@@ -761,8 +731,15 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Entity Delete
 
+  const deleteClicked = () => {
+    setOpenDeletePopup(true);
+  };
+
   const deleteEntity = async () => {
     try {
+      setWaitingForBE(true);
+      await delay(1000);
+
       if (entId) {
         const payload = {
           entityId: entId,
@@ -786,6 +763,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       } else {
         displayErrorMessage(error, `${entId} Delete Failed`);
       }
+    } finally {
+      setWaitingForBE(false);
     }
   };
 
@@ -793,30 +772,15 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const detachProgramme = async (prgId: string) => {
     setDetachingEntityId(prgId);
-    setDetachingEntityType('Programme');
     setOpenDetachPopup(true);
   };
-
-  // Detach Activity
-
-  // const detachActivity = async (actId: string) => {
-  //   setDetachingEntityId(actId);
-  //   setDetachingEntityType('Activity');
-  //   setOpenDetachPopup(true);
-  // };
 
   // Handle Detachment
 
   const detachEntity = async (entityId: string) => {
-    if (detachingEntityType === 'Programme') {
-      const filteredIds = tempProgramIds.filter((id) => id !== entityId);
-      setTempProgramIds(filteredIds);
-      setIsSaveButtonDisabled(false);
-    } else if (detachingEntityType === 'Activity') {
-      const filteredIds = tempActivityIds.filter((id) => id !== entityId);
-      setTempActivityIds(filteredIds);
-      setIsSaveButtonDisabled(false);
-    }
+    const filteredIds = tempProgramIds.filter((id) => id !== entityId);
+    setTempProgramIds(filteredIds);
+    setIsSaveButtonDisabled(false);
   };
 
   // Add New KPI
@@ -928,10 +892,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   return (
     <div className="content-container">
       <ConfirmPopup
+        key={'detach_popup'}
         icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
-          primaryMsg: `${t('detachPopup:primaryMsg')} ${detachingEntityType} ${detachingEntityId}`,
+          primaryMsg: `${t('detachPopup:primaryMsg')} Programme ${detachingEntityId}`,
           secondaryMsg: t('detachPopup:secondaryMsg'),
           cancelTitle: t('detachPopup:cancelTitle'),
           actionTitle: t('detachPopup:actionTitle'),
@@ -941,10 +906,25 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         open={openDetachPopup}
         setOpen={setOpenDetachPopup}
       />
+      <ConfirmPopup
+        key={'delete_popup'}
+        icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
+        isDanger={true}
+        content={{
+          primaryMsg: `${t('deletePrimaryMsg')} ${entId}`,
+          secondaryMsg: t('deleteSecondaryMsg'),
+          cancelTitle: t('entityAction:cancel'),
+          actionTitle: t('entityAction:delete'),
+        }}
+        actionRef={entId}
+        doAction={deleteEntity}
+        open={openDeletePopup}
+        setOpen={setOpenDeletePopup}
+      />
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && firstRenderingCompleted ? (
         <div className="action-form">
           <Form
             form={form}
@@ -955,7 +935,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
-                <EntityIdCard calledIn="Action" entId={entId}></EntityIdCard>
+                <EntityIdCard
+                  calledIn="Action"
+                  entId={entId}
+                  isValidated={isValidated}
+                ></EntityIdCard>
               )}
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
@@ -1230,41 +1214,56 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            <div className="form-section-card">
-              <Row>
-                <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
-                  <div className="form-section-header">{t('formHeader:activityInfoTitle')}</div>
-                </Col>
-                {/* <Col {...attachButtonBps}>
-                  <AttachEntity
-                    isDisabled={isView}
-                    content={{
-                      buttonName: t('formHeader:attachActivity'),
-                      attach: t('entityAction:attach'),
-                      contentTitle: t('formHeader:attachActivity'),
-                      listTitle: t('activityList'),
-                      cancel: t('entityAction:cancel'),
-                    }}
-                    options={allActivityIds}
-                    alreadyAttached={attachedActivityIds}
-                    currentAttachments={tempActivityIds}
-                    setCurrentAttachments={setTempActivityIds}
-                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
-                    icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
-                  ></AttachEntity>
-                </Col> */}
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <div style={{ overflowX: 'auto' }}>
+            {method !== 'create' && (
+              <div className="form-section-card">
+                <Row>
+                  <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
+                    <div className="form-section-header">{t('formHeader:activityInfoTitle')}</div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <div style={{ overflowX: 'auto' }}>
+                      <LayoutTable
+                        tableData={activityData}
+                        columns={activityTableColumns}
+                        loading={false}
+                        pagination={{
+                          current: activityCurrentPage,
+                          pageSize: activityPageSize,
+                          total: activityData.length,
+                          showQuickJumper: true,
+                          pageSizeOptions: ['10', '20', '30'],
+                          showSizeChanger: true,
+                          style: { textAlign: 'center' },
+                          locale: { page: '' },
+                          position: ['bottomRight'],
+                        }}
+                        handleTableChange={handleActivityTableChange}
+                        emptyMessage={t('formHeader:noActivityMessage')}
+                      />
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            )}
+            {method !== 'create' && (
+              <div className="form-section-card">
+                <Row>
+                  <Col span={20}>
+                    <div className="form-section-header">{t('formHeader:supportInfoTitle')}</div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
                     <LayoutTable
-                      tableData={activityData}
-                      columns={activityTableColumns}
+                      tableData={supportData}
+                      columns={supportTableColumns}
                       loading={false}
                       pagination={{
-                        current: activityCurrentPage,
-                        pageSize: activityPageSize,
-                        total: activityData.length,
+                        current: supportCurrentPage,
+                        pageSize: supportPageSize,
+                        total: supportData.length,
                         showQuickJumper: true,
                         pageSizeOptions: ['10', '20', '30'],
                         showSizeChanger: true,
@@ -1272,42 +1271,13 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                         locale: { page: '' },
                         position: ['bottomRight'],
                       }}
-                      handleTableChange={handleActivityTableChange}
-                      emptyMessage={t('formHeader:noActivityMessage')}
+                      handleTableChange={handleSupportTableChange}
+                      emptyMessage={t('formHeader:noSupportMessage')}
                     />
-                  </div>
-                </Col>
-              </Row>
-            </div>
-            <div className="form-section-card">
-              <Row>
-                <Col span={20}>
-                  <div className="form-section-header">{t('formHeader:supportInfoTitle')}</div>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <LayoutTable
-                    tableData={supportData}
-                    columns={supportTableColumns}
-                    loading={false}
-                    pagination={{
-                      current: supportCurrentPage,
-                      pageSize: supportPageSize,
-                      total: supportData.length,
-                      showQuickJumper: true,
-                      pageSizeOptions: ['10', '20', '30'],
-                      showSizeChanger: true,
-                      style: { textAlign: 'center' },
-                      locale: { page: '' },
-                      position: ['bottomRight'],
-                    }}
-                    handleTableChange={handleSupportTableChange}
-                    emptyMessage={t('formHeader:noSupportMessage')}
-                  />
-                </Col>
-              </Row>
-            </div>
+                  </Col>
+                </Row>
+              </div>
+            )}
             <div className="form-section-card">
               <div className="form-section-header">{t('formHeader:mitigationInfoTitle')}</div>
               <Row gutter={gutterSize}>
@@ -1463,17 +1433,25 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 {ability.can(Action.Validate, ActionEntity) && (
                   <Col>
                     <Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() => {
-                          validateEntity();
-                        }}
-                        disabled={isValidateButtonDisabled}
+                      <Tooltip
+                        placement="topRight"
+                        title={
+                          !isValidationAllowed ? t('error:validationPermissionRequired') : undefined
+                        }
+                        showArrow={false}
                       >
-                        {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
-                      </Button>
+                        <Button
+                          type="primary"
+                          size="large"
+                          block
+                          onClick={() => {
+                            validateEntity();
+                          }}
+                          disabled={!isValidationAllowed}
+                        >
+                          {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
+                        </Button>
+                      </Tooltip>
                     </Form.Item>
                   </Col>
                 )}
@@ -1500,7 +1478,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                       size="large"
                       block
                       onClick={() => {
-                        deleteEntity();
+                        deleteClicked();
                       }}
                       style={{ color: 'red', borderColor: 'red' }}
                     >

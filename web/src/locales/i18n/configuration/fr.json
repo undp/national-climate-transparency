@@ -1,0 +1,20 @@
+{
+    "configurationTitle": "Configuration",
+    "withMeasuresTitle": "Avec Mesures",
+    "withAdditionalMeasuresTitle": "Avec Mesures Supplémentaires",
+    "withoutMeasuresTitle": "Sans Mesures",
+    "gwpConfigurationTitle": "Potentiel de Réchauffement Global (PRG)",
+    "growthRateConfigurationTitle": "Taux de Croissance de la Projection",
+
+    "growthRate": "Taux de Croissance (%)",
+    "baselineYear": "Année de Référence",
+    "co2": "Référence CO2",
+    "ch4": "Référence CH4",
+    "n2o": "Référence N2O",
+
+    "gwp_co2": "CO2",
+    "gwp_ch4": "CH4",
+    "gwp_n2o": "N2O",
+
+    "gwpUpdateSuccess": "Les Données du PRG Ont Été Enregistrées avec Succès"
+}

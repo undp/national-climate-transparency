@@ -30,6 +30,8 @@ import { ReportController } from './report.controller';
 import { ReportModule } from '../report/report.module';
 import { GhgEmissionModule } from '../emission/emission.module';
 import { GHGEmissionController } from './ghg.emission.controller';
+import { GhgProjectionModule } from 'src/projection/projection.module';
+import { GHGProjectionController } from './ghg.projection.controller';
 import { ResourcesController } from './resource.controller';
 import { SystemResourceModule } from '../system.resource/system.resources.module';
 
@@ -58,6 +60,7 @@ import { SystemResourceModule } from '../system.resource/system.resources.module
 		KpiModule,
 		ReportModule,
     GhgEmissionModule,
+    GhgProjectionModule,
 		SystemResourceModule
   ],
   controllers: [ 
@@ -74,6 +77,7 @@ import { SystemResourceModule } from '../system.resource/system.resources.module
 		KpiController, 
 		ReportController,
     GHGEmissionController,
+    GHGProjectionController,
 		ResourcesController
   ],
   providers: [

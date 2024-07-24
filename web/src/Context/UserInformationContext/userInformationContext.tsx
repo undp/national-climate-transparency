@@ -1,7 +1,8 @@
-import React, { useContext, useState, createContext, useCallback } from 'react';
+import React, { useContext, useState, createContext, useCallback, useEffect } from 'react';
 import { useConnection } from '../ConnectionContext/connectionContext';
 import jwt_decode from 'jwt-decode';
 import { UserContextProps, UserProps } from '../../Definitions/userContext.definition';
+import { GHGInventoryManipulate, ValidateEntity } from '../../Enums/user.enum';
 
 export const UserContext = createContext<UserContextProps>({
   setUserInfo: () => {},
@@ -11,6 +12,10 @@ export const UserContext = createContext<UserContextProps>({
   isTokenExpired: false,
   // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   setIsTokenExpired: (val: boolean) => {},
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  setIsGhgAllowed: (val: boolean) => {},
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  setIsValidationAllowed: (val: boolean) => {},
 });
 
 export const UserInformationContextProvider = ({ children }: React.PropsWithChildren) => {
@@ -50,6 +55,13 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
   };
 
   const [userInfoState, setUserInfoState] = useState<UserProps>(initialUserProps);
+  const [isGhgAllowed, setIsGhgAllowed] = useState<boolean>();
+  const [isValidationAllowed, setIsValidationAllowed] = useState<boolean>();
+
+  useEffect(() => {
+    setIsValidationAllowed(userInfoState.validatePermission === ValidateEntity.CAN);
+    setIsGhgAllowed(userInfoState.ghgInventoryPermission === GHGInventoryManipulate.CAN);
+  }, [userInfoState]);
 
   const setUserInfo = (value: UserProps) => {
     const state = userInfoState?.userState === 1 ? userInfoState?.userState : 0;
@@ -85,12 +97,14 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     localStorage.setItem('userSectors', userSectors + '');
 
     setUserInfoState((prev) => ({ ...prev, validatePermission }));
+    setIsValidationAllowed(validatePermission.toString() === ValidateEntity.CAN);
     localStorage.setItem('validatePermission', validatePermission + '');
 
     setUserInfoState((prev) => ({ ...prev, subRolePermission }));
     localStorage.setItem('subRolePermission', subRolePermission + '');
 
     setUserInfoState((prev) => ({ ...prev, ghgInventoryPermission }));
+    setIsGhgAllowed(ghgInventoryPermission.toString() === GHGInventoryManipulate.CAN);
     localStorage.setItem('ghgInventoryPermission', ghgInventoryPermission + '');
   };
 
@@ -135,17 +149,23 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
     localStorage.removeItem('ghgInventoryPermission');
     localStorage.removeItem('token');
     setUserInfoState(initialUserProps);
+    setIsGhgAllowed(false);
+    setIsValidationAllowed(false);
   };
 
   return (
     <UserContext.Provider
       value={{
         userInfoState,
+        isGhgAllowed,
+        isValidationAllowed,
         setUserInfo,
         removeUserInfo,
         IsAuthenticated,
         isTokenExpired,
         setIsTokenExpired,
+        setIsGhgAllowed,
+        setIsValidationAllowed,
       }}
     >
       {children}

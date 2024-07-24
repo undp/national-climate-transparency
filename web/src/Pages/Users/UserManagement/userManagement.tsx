@@ -422,7 +422,6 @@ const UserManagement = () => {
       title: t('user:role'),
       dataIndex: 'role',
       key: UserManagementColumns.role,
-      sorter: true,
       align: 'left' as const,
       // eslint-disable-next-line no-unused-vars
       render: (item: any, itemObj: UserData) => {

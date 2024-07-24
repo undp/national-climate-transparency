@@ -14,5 +14,7 @@
     "actionObjectivesTitle": "ක්‍රියාකාරකම් ඉල්ලීම්",
     "actionDescTitle": "ක්‍රියාකාරකම් ශාඛාවක්",
     "actionTitle": "ක්‍රියාකාරකම් මාතෘකාව",
-    "noSuchEntity": "හැඳුනුම්පත් ක්‍රියාකාරකම් නොපවතී!"
+    "noSuchEntity": "හැඳුනුම්පත් ක්‍රියාකාරකම් නොපවතී!",
+    "deletePrimaryMsg": "ඔබට ඉවත් කිරීම අවශ්‍ය බව ඔබට විශ්වාසද",
+    "deleteSecondaryMsg": "ඔබට මෙම ක්‍රියාව අහෝසි කළ නොහැක."
 }

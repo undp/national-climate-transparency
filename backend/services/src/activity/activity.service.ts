@@ -1309,7 +1309,7 @@ export class ActivityService {
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString("activity.verifyActivitySuccess", []),
+			this.helperService.formatReqMessagesString((validateDto.validateStatus) ? "activity.verifyActivitySuccess" : "activity.unverifyActivitySuccess" , []),
 			act
 		);
 
@@ -1377,7 +1377,7 @@ export class ActivityService {
 	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto, user: User) {
 		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto, Method.UPDATE);
 		const { activityId, mitigationTimeline } = mitigationTimelineDto;
-		const activity = await this.findActivityById(activityId);
+		const activity = await this.linkUnlinkService.findActivityByIdWithSupports(activityId);
 
 		if (!activity) {
 			throw new HttpException(
@@ -1407,25 +1407,51 @@ export class ActivityService {
 			actual: mitigationTimeline.actual
 		};
 
+		const logs = [];
+		logs.push(
+			this.buildLogEntity(
+				LogEventType.MTG_UPDATED,
+				EntityType.ACTIVITY,
+				activity.activityId,
+				user.id,
+				mitigationTimelineDto
+			)
+		)
+
+		if (activity.validated) {
+			activity.validated = false;
+			logs.push(
+				this.buildLogEntity(
+					LogEventType.ACTIVITY_UNVERIFIED_DUE_MITIGATION_TIMELINE_UPDATE,
+					EntityType.ACTIVITY,
+					activity.activityId,
+					0,
+					activity.validated
+				)
+			)
+		}
+
 		const activ = await this.entityManager
 			.transaction(async (em) => {
 				await em
 					.createQueryBuilder()
 					.update(ActivityEntity)
-					.set({ mitigationTimeline: updatedMitigationTimeline})
+					.set({ mitigationTimeline: updatedMitigationTimeline, validated: activity.validated})
 					.where('activityId = :activityId', { activityId })
 					.execute();
 
-				const logEntity =
-					this.buildLogEntity(
-						LogEventType.MTG_UPDATED,
-						EntityType.ACTIVITY,
-						activity.activityId,
-						user.id,
-						mitigationTimelineDto
-					);
+				if (activity.support && activity.support.length > 0) {
+					const supportsList = []
+					for (const support of activity.support) {
+						if (support.validated) {
+							support.validated = false;
+							supportsList.push(support);
+						}
+					}
+					em.save<SupportEntity>(supportsList);
+				}
 
-				await em.save<LogEntity>(logEntity);
+				await em.save<LogEntity>(logs);
 				return activity;
 			})
 			.catch((err: any) => {

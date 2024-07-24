@@ -31,7 +31,8 @@ export class SettingsController {
   async updateSettings(@Body() settings: SettingsDto, @Request() req) {
     return await this.configurationSettingsService.updateSetting(
       settings.id,
-      settings.settingValue
+      settings.settingValue,
+      req.user
     );
   }
 
