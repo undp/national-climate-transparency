@@ -14,6 +14,8 @@ import ResetPassword from './resetPassword';
 import { UserState } from '../../Enums/user.enum';
 import { AvailableLanguages } from '../../Definitions/languageDefinitions';
 import TransparencyLogo from '../../Components/logo/transparencyLogo';
+import logoLarge from '../../Assets/Images/tran.png';
+import logoSmall from '../../Assets/Images/tran_small.png';
 
 const { useBreakpoint } = Grid;
 
@@ -45,13 +47,11 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
   const [errorMsg, setErrorMsg] = useState<string>();
   const [fullScreen, setFullScreen] = useState<boolean>();
 
-  const [loaded, setLoaded] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState<boolean>(false);
 
-  useEffect(() => {
-    const img = new Image();
-    img.src = require('../../Assets/Images/tran.png');
-    img.onload = () => setLoaded(true);
-  }, []);
+  const handleImageLoad = () => {
+    setImgLoaded(true);
+  };
 
   // Setting the chart Width
 
@@ -156,7 +156,18 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
         <Row className="login-container">
           {fullScreen && (
             <Col xl={15} flex="auto">
-              <div className={`login-img-container ${!loaded ? 'blurred-' : ''}container-image`}>
+              <div className="login-img-container">
+                <img
+                  className="login-img"
+                  style={{ display: `${imgLoaded ? 'block' : 'none'}` }}
+                  src={logoLarge}
+                  onLoad={handleImageLoad}
+                />
+                <img
+                  className="login-img"
+                  style={{ display: `${imgLoaded ? 'none' : 'block'}` }}
+                  src={logoSmall}
+                />
                 <div className="text-ctn">
                   <span>
                     {t('login:nationalNdc')} <br /> {t('login:creditMrv')} <br />
