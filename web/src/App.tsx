@@ -15,7 +15,6 @@ import { UserInformationContextProvider } from './Context/UserInformationContext
 
 import Login from './Pages/Login/login';
 import PrivateRoute from './Components/PrivateRoute/privateRoute';
-import SignUp from './Pages/Signup/signup';
 import CustomLayout from './Components/Layout/layout';
 import AddUser from './Pages/Users/AddUser/addUser';
 import UserManagement from './Pages/Users/UserManagement/userManagement';
@@ -76,7 +75,6 @@ const App = () => {
               <Route path="login" element={<Login />} />
               <Route path="forgotPassword" element={<Login forgotPassword={true} />} />
               <Route path="resetPassword/:requestId" element={<Login resetPassword={true} />} />
-              <Route path="signUp" element={<SignUp />} />
               <Route path="privacy" element={<PrivacyPolicy />} />
               <Route path="help" element={<CarbonHelp />} />
               <Route path="codeconduct" element={<CodeOfConduct />} />
