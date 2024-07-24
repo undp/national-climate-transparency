@@ -9,11 +9,11 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import { PoliciesGuardEx } from "src/casl/policy.guard";
-import { Action } from "src/casl/action.enum";
-import { EmissionEntity } from "src/entities/emission.entity";
-import { EmissionDto } from "src/dtos/emission.dto";
-import { GhgEmissionsService } from "src/emission/emission.service";
+import { PoliciesGuardEx } from "../casl/policy.guard";
+import { Action } from "../casl/action.enum";
+import { EmissionEntity } from "../entities/emission.entity";
+import { EmissionDto } from "../dtos/emission.dto";
+import { GhgEmissionsService } from "../emission/emission.service";
 
 @ApiTags("Emissions")
 @ApiBearerAuth()

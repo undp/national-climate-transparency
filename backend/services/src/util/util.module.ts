@@ -26,10 +26,10 @@ import { FileUploadService } from "./fileUpload.service";
 import { LinkUnlinkService } from "./linkUnlink.service";
 import { IsTwoDecimalPointsConstraint } from "./twoDecimalPointNumber.decorator";
 import { DataExportService } from "./dataExport.service";
-import { ActionEntity } from "src/entities/action.entity";
-import { ProgrammeEntity } from "src/entities/programme.entity";
-import { ProjectEntity } from "src/entities/project.entity";
-import { ActivityEntity } from "src/entities/activity.entity";
+import { ActionEntity } from "../entities/action.entity";
+import { ProgrammeEntity } from "../entities/programme.entity";
+import { ProjectEntity } from "../entities/project.entity";
+import { ActivityEntity } from "../entities/activity.entity";
 
 @Module({
   imports: [

@@ -527,7 +527,7 @@ export class ActionService {
 	
 			const actionKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, action.actionId);
 	
-			const actionKpiIds = actionKPIs.map(kpi => kpi.kpiId);
+			const actionKpiIds = actionKPIs?.map(kpi => kpi.kpiId);
 	
 			const linkedActivityIds = action.activities?.map(activity => activity.activityId);
 

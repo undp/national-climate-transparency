@@ -1,6 +1,6 @@
 import { Sector } from "../enums/sector.enum";
 import { Role, SubRole } from "../casl/role.enum"
-import { GHGInventoryManipulate, SubRoleManipulate, ValidateEntity } from "src/enums/user.enum";
+import { GHGInventoryManipulate, SubRoleManipulate, ValidateEntity } from "../enums/user.enum";
 
 export class JWTPayload {
     constructor(

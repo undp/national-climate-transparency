@@ -26,6 +26,10 @@ import { ProjectEntity } from "../entities/project.entity";
 import { ActivityUpdateDto } from "../dtos/activityUpdate.dto";
 import { DocumentEntityDto } from "../dtos/document.entity.dto";
 import { PayloadValidator } from "../validation/payload.validator";
+import { KpiService } from "../kpi/kpi.service";
+import { Role } from "../casl/role.enum";
+import { SupportEntity } from "../entities/support.entity";
+import { ValidateDto } from "../dtos/validate.dto";
 
 describe('ActivityService', () => {
 	let service: ActivityService;
@@ -39,6 +43,7 @@ describe('ActivityService', () => {
 	let actionServiceMock: Partial<ActionService>;
 	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
 	let payloadValidatorServiceMock: Partial<PayloadValidator>;
+	let kpiServiceMock: Partial<KpiService>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -60,6 +65,8 @@ describe('ActivityService', () => {
 			parseMongoQueryToSQLWithTable: jest.fn(),
 			generateWhereSQL: jest.fn(),
 			refreshMaterializedViews: jest.fn(),
+			doesUserHaveSectorPermission: jest.fn(),
+			doesUserHaveValidatePermission: jest.fn(),
 		};
 		fileUploadServiceMock = {
 			uploadDocument: jest.fn().mockResolvedValue('http://test.com/documents/action_documents/test.csv'),
@@ -67,6 +74,13 @@ describe('ActivityService', () => {
 		linkUnlinkServiceMock = {
 			linkActivitiesToParent: jest.fn(),
 			unlinkActivitiesFromParent: jest.fn(),
+			updateAllValidatedChildrenAndParentStatusByProject: jest.fn(),
+			findActivityByIdWithSupports: jest.fn(),
+			getParentIdFromPath: jest.fn(),
+			findProjectById: jest.fn(),
+			findProgrammeById: jest.fn(),
+			updateAllValidatedChildrenAndParentStatusByProgrammeId: jest.fn(),
+			updateAllValidatedChildrenStatusByActionId: jest.fn(),
 		};
 		programmeServiceMock = {
 			findProgrammeById: jest.fn()
@@ -76,6 +90,10 @@ describe('ActivityService', () => {
 		};
 		payloadValidatorServiceMock = {
 			validateMitigationTimelinePayload: jest.fn()
+		};
+		kpiServiceMock = {
+			getAchievementsOfParentEntity: jest.fn(),
+			findAchievementsByActivityId: jest.fn(),
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -121,6 +139,10 @@ describe('ActivityService', () => {
 					provide: PayloadValidator,
 					useValue: payloadValidatorServiceMock,
 				},
+				{
+					provide: KpiService,
+					useValue: kpiServiceMock,
+				},
 			],
 		}).compile();
 
@@ -140,6 +162,7 @@ describe('ActivityService', () => {
 
 			jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
 			jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("action.createActionSuccess");
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -293,6 +316,7 @@ describe('ActivityService', () => {
 
 			jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
 			jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("action.createActionSuccess");
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -350,6 +374,11 @@ describe('ActivityService', () => {
 			programme.programmeId = "P001";
 			programme.path = "A001";
 			programme.sector = Sector.Forestry;
+
+			const project = new ProjectEntity();
+			project.projectId = "J001";
+			project.path = "_._";
+			project.sector = Sector.Forestry;
 
 			const activityUpdateDto = new ActivityUpdateDto();
 			activityUpdateDto.title = "test updated";
@@ -451,11 +480,16 @@ describe('ActivityService', () => {
 				]
 				},
 				path: "A001.P001._",
-				sectors: [Sector.Forestry]
+				sector: Sector.Forestry
 			};
 
+			jest.spyOn(linkUnlinkServiceMock, "findActivityByIdWithSupports").mockResolvedValueOnce(activity);
 			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
 			jest.spyOn(programmeServiceMock, "findProgrammeById").mockResolvedValueOnce(programme);
+			jest.spyOn(projectServiceMock, "findProjectById").mockResolvedValueOnce(project);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+			jest.spyOn(linkUnlinkServiceMock, "getParentIdFromPath").mockReturnValueOnce({parentId : "J001", rootEntityType: EntityType.PROJECT});
+			jest.spyOn(linkUnlinkServiceMock, "getParentIdFromPath").mockReturnValueOnce({parentId : "P001", rootEntityType: EntityType.PROGRAMME});
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -463,7 +497,7 @@ describe('ActivityService', () => {
 				};
 				const savedAction = await callback(emMock);
 				expect(emMock.save).toHaveBeenNthCalledWith(1, activityUpdated);
-				expect(emMock.save).toHaveBeenCalledTimes(5);
+				expect(emMock.save).toHaveBeenCalledTimes(2);
 				return savedAction;
 			});
 
@@ -472,6 +506,9 @@ describe('ActivityService', () => {
 			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 			expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
 			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(1);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProject).toHaveBeenCalledTimes(1);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
 		});
 
 
@@ -574,7 +611,8 @@ describe('ActivityService', () => {
 			activity.sector = Sector.Energy;
 			activity.path = "_._.J001";
 
-			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
+			jest.spyOn(linkUnlinkServiceMock, "findActivityByIdWithSupports").mockResolvedValueOnce(activity);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(false);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -602,6 +640,11 @@ describe('ActivityService', () => {
 			const user = new User();
 			user.id = 2;
 			user.sector = [Sector.CrossCutting, Sector.Energy, Sector.Forestry]
+
+			const project = new ProjectEntity();
+			project.projectId = "J001";
+			project.path = "_._";
+			project.sector = Sector.Forestry;
 
 			const activityUpdateDto = new ActivityUpdateDto();
 			activityUpdateDto.activityId = "T0001"
@@ -646,8 +689,10 @@ describe('ActivityService', () => {
 			activity.sector = Sector.Energy;
 			activity.path = "_._.J001";
 
-			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
 			jest.spyOn(programmeServiceMock, "findProgrammeById").mockResolvedValueOnce(null);
+			jest.spyOn(projectServiceMock, "findProjectById").mockResolvedValueOnce(project);
+			jest.spyOn(linkUnlinkServiceMock, "findActivityByIdWithSupports").mockResolvedValueOnce(activity);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -725,6 +770,9 @@ describe('ActivityService', () => {
 
 			jest.spyOn(service, "findActivityById").mockResolvedValueOnce(activity);
 			jest.spyOn(projectServiceMock, "findProjectById").mockResolvedValueOnce(project);
+			jest.spyOn(linkUnlinkServiceMock, "findActivityByIdWithSupports").mockResolvedValueOnce(activity);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValueOnce(true);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValueOnce(false);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -741,7 +789,7 @@ describe('ActivityService', () => {
 				expect(error).toBeInstanceOf(HttpException);
 				expect(error.status).toBe(HttpStatus.FORBIDDEN);
 			}
-			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.cannotLinkToNotRelatedProject", ["J002"]);
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.cannotLinkToUnrelatedProject", ["J002"]);
 			
 			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(0);
 			expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
@@ -903,7 +951,7 @@ describe('ActivityService', () => {
 
 			const activity1 = new ActivityEntity();
 			activity1.activityId = '1';
-			activity1.sector = Sector.Industry;
+			activity1.sector = Sector.Agriculture;
 			activity1.parentId = "P1";
 			activity1.parentType = EntityType.PROGRAMME;
 
@@ -920,6 +968,8 @@ describe('ActivityService', () => {
 			activity3.parentType = EntityType.PROGRAMME;
 
 			jest.spyOn(service, 'findAllActivitiesByIds').mockResolvedValue([activity1, activity2, activity3]);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValueOnce(false);
+
 
 			try {
 				await service.unlinkActivitiesFromParents(unlinkActivitiesDto, user);
@@ -927,7 +977,7 @@ describe('ActivityService', () => {
 				expect(error).toBeInstanceOf(HttpException);
 				expect(error.status).toBe(HttpStatus.BAD_REQUEST);
 			}
-			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.cannotUnlinkNotRelatedActivity", ["2"]);
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.cannotUnlinkNotRelatedActivity", ["1"]);
 			expect(linkUnlinkServiceMock.unlinkActivitiesFromParent).toBeCalledTimes(0);
 			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(0);
 		});
@@ -980,8 +1030,10 @@ describe('ActivityService', () => {
 			activity3.parentType = EntityType.PROGRAMME;
 
 			jest.spyOn(service, 'findAllActivitiesByIds').mockResolvedValue([activity1, activity2, activity3]);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
 
 			const result = await service.unlinkActivitiesFromParents(unlinkActivitiesDto, user);
+			
 
 			// Assert the returned result
 			expect(result).toEqual(expect.any(DataResponseMessageDto));
@@ -992,4 +1044,385 @@ describe('ActivityService', () => {
 		});
 
 	})
+
+	describe('validateActivity', () => {
+		it('should throw ForbiddenException if user does not have validate permission', async () => {
+			const user = new User();
+			user.id = 2;
+
+			const validateDto = new ValidateDto();
+			validateDto.entityId = 'T001';
+			validateDto.validateStatus = true;
+	
+			jest.spyOn(helperServiceMock, 'doesUserHaveValidatePermission').mockImplementation(() => {
+				throw new HttpException("HTTP Forbidden", 403);
+			});
+
+			try {
+				await service.validateActivity(validateDto, user);
+			} catch (error) {
+				expect(error).toBeInstanceOf(HttpException);
+				expect(error.status).toBe(HttpStatus.FORBIDDEN);
+			}
+		});
+		it('should throw an error when parent is not validated', async () => {
+			const user = new User();
+			user.id = 2;
+	
+			const action = new ActionEntity();
+			action.actionId = 'A001';
+			action.sector = Sector.Forestry;
+			action.validated = false;
+
+			const validateDto = new ValidateDto();
+			validateDto.entityId = 'T001';
+			validateDto.validateStatus = true;
+	
+			const activity = new ActivityEntity();
+			activity.activityId = 'T001';
+			activity.parentId = 'A001';
+			activity.parentType = EntityType.ACTION;
+			activity.sector = Sector.Forestry;
+			activity.validated = false;
+	
+			jest.spyOn(linkUnlinkServiceMock, 'findActivityByIdWithSupports').mockResolvedValueOnce(activity);
+			jest.spyOn(service, 'getParentEntity').mockResolvedValue(action);
+			jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+	
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(activity),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.save).toHaveBeenCalledTimes(0);
+				return savedAction;
+			});
+
+			try {
+				await service.validateActivity(validateDto, user);
+			} catch (error) {
+				expect(error).toBeInstanceOf(HttpException);
+				expect(error.status).toBe(HttpStatus.FORBIDDEN);
+			}
+
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('activity.parentNotValidated', []);
+	
+		});
+
+		it('should validate the activity', async () => {
+			const user = new User();
+			user.id = 2;
+	
+			const action = new ActionEntity();
+			action.actionId = 'A001';
+			action.sector = Sector.Forestry;
+			action.validated = true;
+
+			const validateDto = new ValidateDto();
+			validateDto.entityId = 'T001';
+			validateDto.validateStatus = true;
+	
+			const activity = new ActivityEntity();
+			activity.activityId = 'T001';
+			activity.parentId = 'A001';
+			activity.parentType = EntityType.ACTION;
+			activity.sector = Sector.Forestry;
+			activity.validated = false;
+	
+			jest.spyOn(linkUnlinkServiceMock, 'findActivityByIdWithSupports').mockResolvedValueOnce(activity);
+			jest.spyOn(service, 'getParentEntity').mockResolvedValue(action);
+			jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+	
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(activity),
+				};
+				const savedActivity = await callback(emMock);
+				expect(emMock.save).toHaveBeenCalledTimes(2);
+				return savedActivity;
+			});
+	
+			await service.validateActivity(validateDto, user);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
+	
+		});
+
+		it('should unvalidate the activity', async () => {
+			const user = new User();
+			user.id = 2;
+	
+			const action = new ActionEntity();
+			action.actionId = 'A001';
+			action.sector = Sector.Forestry;
+			action.validated = true;
+
+			const validateDto = new ValidateDto();
+			validateDto.entityId = 'T001';
+			validateDto.validateStatus = false;
+	
+			const activity = new ActivityEntity();
+			activity.activityId = 'T001';
+			activity.parentId = 'A001';
+			activity.parentType = EntityType.ACTION;
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+	
+			jest.spyOn(linkUnlinkServiceMock, 'findActivityByIdWithSupports').mockResolvedValueOnce(activity);
+			jest.spyOn(service, 'getParentEntity').mockResolvedValue(action);
+			jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+	
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValueOnce(activity),
+				};
+				const savedActivity = await callback(emMock);
+				expect(emMock.save).toHaveBeenCalledTimes(2);
+				return savedActivity;
+			});
+	
+			await service.validateActivity(validateDto, user);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
+	
+		});
+	})
+
+	describe('deleteActivity', () => {
+		it('should throw ForbiddenException if user is not Admin or Root', async () => {
+			const user = { role: Role.GovernmentUser } as User;
+			const deleteDto = { entityId: '123' };
+
+			await expect(service.deleteActivity(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('user.userUnAUth', []);
+		});
+
+		it('should throw BadRequest if activity not found', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: '123' };
+			jest.spyOn(service, 'findActivityById').mockResolvedValue(null);
+
+			await expect(service.deleteActivity(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('activity.activityNotFound', ["123"]);
+		});
+
+		it('should throw Forbidden if user does not have sector permission', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: 'T001' };
+
+			const activity = new ActivityEntity();
+			activity.activityId = 'T001';
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+
+			jest.spyOn(service, 'findActivityById').mockResolvedValue(activity);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(false);
+
+			await expect(service.deleteActivity(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('activity.permissionDeniedForSector', ["T001"]);
+		});
+
+		it('should successfully delete activity and associated entities, parent action, Root node action', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: '123' };
+
+			const programme = new ProgrammeEntity;
+			programme.programmeId = 'P1'
+
+			const action = new ActionEntity();
+			action.actionId = 'A001';
+			action.sector = Sector.Forestry;
+			action.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'A001';
+			activity.parentType = EntityType.ACTION;
+			activity.activityId = "T1"
+
+			const support = new SupportEntity;
+			support.supportId = "S001";
+			support.activity = activity;
+
+			jest.spyOn(service, 'findActivityById').mockResolvedValue(activity);
+			jest.spyOn(service, 'getParentEntity').mockResolvedValue(action);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					delete: jest.fn().mockResolvedValueOnce({ affected: 1 }),
+					save: jest.fn().mockResolvedValueOnce(null),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.delete).toHaveBeenCalledTimes(1);
+				expect(emMock.save).toHaveBeenCalledTimes(2);
+				return savedAction;
+			});
+
+			const result = await service.deleteActivity(deleteDto, user);
+
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toBeCalledTimes(1);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProgrammeId).toBeCalledTimes(0);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProject).toBeCalledTimes(0);
+
+		});
+
+		it('should successfully delete activity and associated entities, parent programme, Root node Action', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: '123' };
+
+			const action = new ActionEntity();
+			action.actionId = 'A001';
+			action.sector = Sector.Forestry;
+			action.validated = true;
+
+			const programme = new ProgrammeEntity;
+			programme.programmeId = 'P1'
+			programme.validated = true;
+			programme.action = action
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'P1';
+			activity.parentType = EntityType.PROGRAMME;
+			activity.activityId = "T1"
+
+			const support = new SupportEntity;
+			support.supportId = "S001";
+			support.activity = activity;
+
+			jest.spyOn(service, 'findActivityById').mockResolvedValue(activity);
+			jest.spyOn(service, 'getParentEntity').mockResolvedValue(programme);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					delete: jest.fn().mockResolvedValueOnce({ affected: 1 }),
+					save: jest.fn().mockResolvedValueOnce(null),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.delete).toHaveBeenCalledTimes(1);
+				expect(emMock.save).toHaveBeenCalledTimes(3);
+				return savedAction;
+			});
+
+			const result = await service.deleteActivity(deleteDto, user);
+
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toBeCalledTimes(1);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProgrammeId).toBeCalledTimes(0);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProject).toBeCalledTimes(0);
+
+		});
+
+		it('should successfully delete activity and associated entities, parent programme, Root node programme', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: '123' };
+
+			const action = new ActionEntity();
+			action.actionId = 'A001';
+			action.sector = Sector.Forestry;
+			action.validated = false;
+
+			const programme = new ProgrammeEntity;
+			programme.programmeId = 'P1'
+			programme.validated = true;
+			programme.action = action
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'P1';
+			activity.parentType = EntityType.PROGRAMME;
+			activity.activityId = "T1"
+
+			const support = new SupportEntity;
+			support.supportId = "S001";
+			support.activity = activity;
+
+			jest.spyOn(service, 'findActivityById').mockResolvedValue(activity);
+			jest.spyOn(service, 'getParentEntity').mockResolvedValue(programme);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					delete: jest.fn().mockResolvedValueOnce({ affected: 1 }),
+					save: jest.fn().mockResolvedValueOnce(null),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.delete).toHaveBeenCalledTimes(1);
+				expect(emMock.save).toHaveBeenCalledTimes(2);
+				return savedAction;
+			});
+
+			const result = await service.deleteActivity(deleteDto, user);
+
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toBeCalledTimes(0);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProgrammeId).toBeCalledTimes(1);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProject).toBeCalledTimes(0);
+
+		});
+
+		it('should successfully delete activity and associated entities, parent project, Root node project', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: '123' };
+
+			const project = new ProjectEntity;
+			project.projectId = 'J1'
+			project.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J1';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+
+			const support = new SupportEntity;
+			support.supportId = "S001";
+			support.activity = activity;
+
+			jest.spyOn(service, 'findActivityById').mockResolvedValue(activity);
+			jest.spyOn(service, 'getParentEntity').mockResolvedValue(project);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					delete: jest.fn().mockResolvedValueOnce({ affected: 1 }),
+					save: jest.fn().mockResolvedValueOnce(null),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.delete).toHaveBeenCalledTimes(1);
+				expect(emMock.save).toHaveBeenCalledTimes(2);
+				return savedAction;
+			});
+
+			const result = await service.deleteActivity(deleteDto, user);
+
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toBeCalledTimes(0);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProgrammeId).toBeCalledTimes(0);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProject).toBeCalledTimes(1);
+
+		});
+
+		it('should handle transaction errors', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: '123' };
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J1';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+
+			jest.spyOn(service, 'findActivityById').mockResolvedValue(activity);
+
+
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				throw new Error('Transaction error');
+			});
+
+			await expect(service.deleteActivity(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+		});
+	});
 });

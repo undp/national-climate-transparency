@@ -32,8 +32,8 @@ import { SupportEntity } from "../entities/support.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ActionEntity } from "../entities/action.entity";
-import { DeleteDto } from "src/dtos/delete.dto";
-import { Role } from "src/casl/role.enum";
+import { DeleteDto } from "../dtos/delete.dto";
+import { Role } from "../casl/role.enum";
 
 @Injectable()
 export class ProgrammeService {
@@ -47,9 +47,7 @@ export class ProgrammeService {
 		private fileUploadService: FileUploadService,
 		private payloadValidator: PayloadValidator,
 		private linkUnlinkService: LinkUnlinkService,
-		@InjectRepository(ProgrammeViewEntity) private programmeViewRepo: Repository<ProgrammeViewEntity>, 
 		private kpiService: KpiService,
-		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
 	) { }
 
 	//MARK: Create Programme
@@ -517,20 +515,25 @@ export class ProgrammeService {
 
 		const programmeKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programme.programmeId);
 
-		const programmeKpiIds = programmeKPIs.map(kpi => kpi.kpiId);
+		const programmeKpiIds = programmeKPIs?.map(kpi => kpi.kpiId);
 
 		const linkedActivityIds = programme.activities?.map(activity => activity.activityId);
 
 		// creating project payload expected by unlinkProjectsFromProgramme method
-		for (const project of programme.projects) {
-			project.programme = programme;
+		if (programme.projects && programme.projects.length > 0) {
+			for (const project of programme.projects) {
+				project.programme = programme;
+			}
 		}
+		
 
 		const pro = await this.entityManager
 			.transaction(async (em) => {
 
 				// related parent and children entity un-validation happens when projects are unlinking
-				await this.linkUnlinkService.unlinkProjectsFromProgramme(programme.projects, null, user, this.entityManager, [], true);
+				if (programme.projects && programme.projects.length > 0) {
+					await this.linkUnlinkService.unlinkProjectsFromProgramme(programme.projects, null, user, this.entityManager, [], true);
+				}
 				const result = await em.delete<ProgrammeEntity>(ProgrammeEntity, programme.programmeId);
 
 				if (result.affected > 0) {

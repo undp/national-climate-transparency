@@ -12,16 +12,15 @@ import { User } from "../entities/user.entity";
 import { Action } from "./action.enum";
 import { Role } from "./role.enum";
 import { EntitySubject } from "../entities/entity.subject";
-import { Organisation } from "../entities/organisation.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { SupportEntity } from "../entities/support.entity";
 import { KpiEntity } from "../entities/kpi.entity";
-import { EmissionEntity } from "src/entities/emission.entity";
-import { ConfigurationSettingsEntity } from "src/entities/configuration.settings.entity";
-import { SystemResourcesEntity } from "src/entities/systemResource.entity";
+import { EmissionEntity } from "../entities/emission.entity";
+import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
+import { SystemResourcesEntity } from "../entities/systemResource.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 

@@ -34,7 +34,7 @@ import { ActionEntity } from "../entities/action.entity";
 import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 import { AchievementEntity } from "../entities/achievement.entity";
-import { SupportEntity } from "src/entities/support.entity";
+import { SupportEntity } from "../entities/support.entity";
 
 @Injectable()
 export class ActivityService {
@@ -419,7 +419,10 @@ export class ActivityService {
 				currentActivity.activityId,
 				EntityType.ACTIVITY
 			);
-			achievements.push(...achievementsToRemove);
+
+			if(achievementsToRemove && achievementsToRemove.length > 0) {
+				achievements.push(...achievementsToRemove);
+			}
 
 			switch (activityUpdateDto.parentType) {
 				case EntityType.ACTION: {
@@ -1112,7 +1115,9 @@ export class ActivityService {
 			}
 
 			const activityAchievements = await this.kpiService.findAchievementsByActivityId(activity.activityId);
-			achievements.push(...activityAchievements);
+			if(activityAchievements && activityAchievements.length > 0) {
+				achievements.push(...activityAchievements);
+			}
 		}
 
 		const proj = await this.linkUnlinkService.unlinkActivitiesFromParent(activities, unlinkActivitiesDto, user, this.entityManager, achievements);

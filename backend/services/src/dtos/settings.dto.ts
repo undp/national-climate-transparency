@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsString } from "class-validator";
-import { ConfigurationSettingsType } from "src/enums/configuration.settings.type.enum";
+import { ConfigurationSettingsType } from "../enums/configuration.settings.type.enum";
 
 export class SettingsDto {
 	@IsNotEmpty()
