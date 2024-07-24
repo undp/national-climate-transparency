@@ -45,6 +45,14 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
   const [errorMsg, setErrorMsg] = useState<string>();
   const [fullScreen, setFullScreen] = useState<boolean>();
 
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = require('../../Assets/Images/tran.png');
+    img.onload = () => setLoaded(true);
+  }, []);
+
   // Setting the chart Width
 
   useEffect(() => {
@@ -148,7 +156,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
         <Row className="login-container">
           {fullScreen && (
             <Col xl={15} flex="auto">
-              <div className="login-img-container container-image">
+              <div className={`login-img-container ${!loaded ? 'blurred-' : ''}container-image`}>
                 <div className="text-ctn">
                   <span>
                     {t('login:nationalNdc')} <br /> {t('login:creditMrv')} <br />
