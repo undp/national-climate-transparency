@@ -1719,7 +1719,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            {mtgStartYear !== 0 && mtgStartYear !== undefined && mtgUnit !== undefined && (
+            {mtgStartYear !== 0 && mtgStartYear !== undefined && selectedGhg !== undefined && (
               <div className="form-section-card">
                 <Row>
                   <Col {...mtgTableHeaderBps} style={{ paddingTop: '6px' }}>
