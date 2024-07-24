@@ -157,17 +157,18 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
           {fullScreen && (
             <Col xl={15} flex="auto">
               <div className="login-img-container">
-                <img
+                <img // Full Res Image to be shown after loaded
                   className="login-img"
                   style={{ display: `${imgLoaded ? 'block' : 'none'}` }}
                   src={logoLarge}
                   onLoad={handleImageLoad}
                 />
-                <img
+                <img // Reduced Image to be shown until the full image loads
                   className="login-img"
                   style={{ display: `${imgLoaded ? 'none' : 'block'}` }}
                   src={logoSmall}
                 />
+                <div className="gradient-overlay"></div>
                 <div className="text-ctn">
                   <span>
                     {t('login:nationalNdc')} <br /> {t('login:creditMrv')} <br />
