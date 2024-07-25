@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
 import { DeleteOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
@@ -539,7 +539,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Calculating migrated fields when attachment changes
 
-  useEffect(() => {
+  const memoizedMigratedData = useMemo(() => {
     const tempMigratedData: ProgrammeMigratedData = {
       intImplementor: [],
       recipientEntity: [],
@@ -585,8 +585,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + actGHGExpected;
     });
 
-    setProgrammeMigratedData(tempMigratedData);
+    return tempMigratedData;
   }, [projectData, activityData]);
+
+  useEffect(() => {
+    setProgrammeMigratedData(memoizedMigratedData);
+  }, [memoizedMigratedData]);
 
   // Attachment resolve before updating an already created programme
 

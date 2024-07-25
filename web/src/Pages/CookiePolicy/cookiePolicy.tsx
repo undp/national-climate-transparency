@@ -1,18 +1,12 @@
 import { Row, Col } from 'antd';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import sliderLogo from '../../Assets/Images/mrvlogo.svg';
 import './cookiePolicy.scss';
 import LayoutFooter from '../../Components/Footer/layout.footer';
 const CookiePolicy = () => {
-  // const { i18n, t } = useTranslation(['common', 'homepage']);
   const navigate = useNavigate();
-
-  // const handleLanguageChange = (lang: string) => {
-  //   i18n.changeLanguage(lang);
-  // };
 
   useEffect(() => {
     if (localStorage.getItem('i18nextLng')!.length > 2) {

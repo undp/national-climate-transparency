@@ -8,7 +8,6 @@ import { StoredData, UploadData } from '../../Definitions/uploadDefinitions';
 import UploadFileGrid from '../../Components/Upload/uploadFiles';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
-import { delay } from '../../Utils/utilServices';
 import { Action } from '../../Enums/action.enum';
 import { useAbilityContext } from '../../Casl/Can';
 import { ResourceEntity } from '../../Entities/resourceEntity';
@@ -68,10 +67,11 @@ const faq = () => {
       if (response.status === 200 || response.status === 201) {
         const resources: any = response.data;
 
-        // Setting up uploaded files
+        // Setting up stored files
+
+        const tempFiles: StoredData[] = [];
 
         if (resources?.length > 0) {
-          const tempFiles: StoredData[] = [];
           resources.forEach((resource: any) => {
             tempFiles.push({
               key: resource.id,
@@ -79,20 +79,23 @@ const faq = () => {
               url: resource.dataValue,
             });
           });
+        }
 
-          if (resourceCategory === SystemResourceCategory.GHG) {
-            setStoredGHGFiles(tempFiles);
-            setUploadedGHGFiles([]);
-            setGhgFilesToRemove([]);
-          } else if (resourceCategory === SystemResourceCategory.FAQ) {
-            setStoredTemplateFiles(tempFiles);
-            setUploadedTemplateFiles([]);
-            setTemplateFilesToRemove([]);
-          }
+        if (resourceCategory === SystemResourceCategory.GHG) {
+          setStoredGHGFiles(tempFiles);
+          setUploadedGHGFiles([]);
+          setGhgFilesToRemove([]);
+        } else if (resourceCategory === SystemResourceCategory.FAQ) {
+          setStoredTemplateFiles(tempFiles);
+          setUploadedTemplateFiles([]);
+          setTemplateFilesToRemove([]);
         }
       }
     } catch (error: any) {
       displayErrorMessage(error);
+    } finally {
+      setIsGhgLoading(false);
+      setIsTemplateLoading(false);
     }
   };
 
@@ -133,6 +136,8 @@ const faq = () => {
   };
 
   useEffect(() => {
+    setIsGhgLoading(true);
+    setIsTemplateLoading(true);
     getResource(SystemResourceCategory.FAQ, SystemResourceType.DOCUMENT);
     getResource(SystemResourceCategory.GHG, SystemResourceType.DOCUMENT);
   }, []);
@@ -183,9 +188,7 @@ const faq = () => {
                     setIsGhgLoading(true);
                     await deleteResource(SystemResourceCategory.GHG);
                     await setResource(SystemResourceCategory.GHG, SystemResourceType.DOCUMENT);
-                    await delay(2000);
                     await getResource(SystemResourceCategory.GHG, SystemResourceType.DOCUMENT);
-                    setIsGhgLoading(false);
                   }
                   setIsGhgEditEnabled(!isGhgEditEnabled);
                 }}
@@ -234,9 +237,7 @@ const faq = () => {
                     setIsTemplateLoading(true);
                     await deleteResource(SystemResourceCategory.FAQ);
                     await setResource(SystemResourceCategory.FAQ, SystemResourceType.DOCUMENT);
-                    await delay(2000);
                     await getResource(SystemResourceCategory.FAQ, SystemResourceType.DOCUMENT);
-                    setIsTemplateLoading(false);
                   }
                   setIsTemplateEditEnabled(!isTemplateEditEnabled);
                 }}
