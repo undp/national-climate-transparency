@@ -140,10 +140,6 @@ export class UserService {
 		let generatedPassword = this.helperService.generateRandomPassword();
 		u.password = this.passwordHashService.getPasswordHash(generatedPassword);
 
-		// if (userDto.role == Role.Admin && u.organisationType == OrganisationType.API) {
-		//   u.apiKey = await this.generateApiKey(userDto.email);
-		// }
-
 		const hostAddress = this.configService.get("host");
 
 		const templateData = {

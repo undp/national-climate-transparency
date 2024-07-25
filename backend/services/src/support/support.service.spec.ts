@@ -496,6 +496,7 @@ describe('SupportService', () => {
 
 			const validateDto = new ValidateDto();
 			validateDto.entityId = "S00001";
+			validateDto.validateStatus = true;
 
 			const support = new SupportEntity();
 			support.validated = false;
@@ -550,7 +551,7 @@ describe('SupportService', () => {
 
 			const result = await service.validateSupport(validateDto, user);
 			expect(result.statusCode).toEqual(HttpStatus.OK);
-			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("support.verifySupportSuccess", []);
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("support.unverifySupportSuccess", []);
 			expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 			expect(service.findSupportByIdWithActivity).toHaveBeenCalledTimes(1)
 			expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
@@ -784,7 +785,7 @@ describe('SupportService', () => {
 			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
-				throw new Error('Transaction error');
+				throw new Error('This is a test transaction error. This is expected');
 			});
 
 			await expect(service.deleteSupport(deleteDto, user))

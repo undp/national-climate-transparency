@@ -1655,7 +1655,7 @@ describe('ProgrammeService', () => {
 					jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
 		
 					entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
-						throw new Error('Transaction error');
+						throw new Error('This is a test transaction error. This is expected');
 					});
 		
 					await expect(service.deleteProgramme(deleteDto, user))
