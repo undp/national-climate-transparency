@@ -1,6 +1,19 @@
 @import '../../Assets/Fonts/fonts.scss';
 @import '../../Styles/variables.scss';
 
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+
 .login-container {
   height: 100vh;
   overflow-y: auto;
@@ -9,6 +22,11 @@
 
   .login-img {
     height: 100%;
+  }
+
+  .login-img-waiting {
+    height: 100%;
+    animation: pulse 3s ease-in-out infinite;
   }
 
   .gradient-overlay {

@@ -164,7 +164,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
                   onLoad={handleImageLoad}
                 />
                 <img // Reduced Image to be shown until the full image loads
-                  className="login-img"
+                  className="login-img-waiting"
                   style={{ display: `${imgLoaded ? 'none' : 'block'}` }}
                   src={logoSmall}
                 />
