@@ -344,7 +344,7 @@ describe('UserService', () => {
 			jest.spyOn(userRepoMock, 'findOneBy').mockResolvedValue(existingUser);
 		
 			await expect(service.update(userUpdateDto, '', requestingUser)).rejects.toThrow(HttpException);
-			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('user.adminCannotUpdateTheirOwnPermissionspppp', []);
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('user.adminCannotUpdateTheirOwnPermissions', []);
 		});
 
 
