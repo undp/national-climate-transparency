@@ -67,9 +67,13 @@ export class PayloadValidator {
 		}
 
 		if(method === Method.CREATE){
-			const {startYear} = mitigationTimeline;
+			const {startYear, unit} = mitigationTimeline;
 			if(!startYear){
 				throw new HttpException('Mitigation timeline Start Year is missing', HttpStatus.BAD_REQUEST);
+			}
+
+			if(!unit){
+				throw new HttpException('Mitigation timeline Unit is missing', HttpStatus.BAD_REQUEST);
 			}
 		}
 	}

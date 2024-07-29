@@ -247,6 +247,7 @@ const UserManagement = () => {
       const response = await put('national/users/update', {
         id: updatedUserRecord.id,
         state: updatedUserRecord.status,
+        role: updatedUserRecord.role,
         remarks,
       });
       if (response.status === 200) {
