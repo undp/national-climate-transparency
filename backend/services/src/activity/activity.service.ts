@@ -34,7 +34,7 @@ import { ActionEntity } from "../entities/action.entity";
 import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 import { AchievementEntity } from "../entities/achievement.entity";
-import { SupportEntity } from "src/entities/support.entity";
+import { SupportEntity } from "../entities/support.entity";
 import { ConfigurationSettingsService } from "../util/configurationSettings.service";
 import { ConfigurationSettingsType } from "src/enums/configuration.settings.type.enum";
 
