@@ -485,7 +485,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchCreatedKPIData();
-    fetchGwpSettings();
   }, []);
 
   // Populating Form Migrated Fields, when migration data changes
@@ -911,6 +910,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // Initializing mtg timeline data
 
   useEffect(() => {
+    fetchGwpSettings();
     if (method === 'create') {
       setDefaultTimelineValues(mtgStartYear, mtgRange);
     } else {
@@ -1719,7 +1719,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            {mtgStartYear !== 0 && mtgStartYear !== undefined && selectedGhg !== undefined && (
+            {mtgStartYear !== 0 && mtgStartYear && mtgUnit && (
               <div className="form-section-card">
                 <Row>
                   <Col {...mtgTableHeaderBps} style={{ paddingTop: '6px' }}>
