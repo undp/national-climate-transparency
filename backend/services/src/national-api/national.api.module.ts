@@ -18,22 +18,22 @@ import { ProgrammeModule } from '../programme/programme.module';
 import { ProgrammeController } from './programme.controller';
 import { ProjectController } from './project.controller';
 import { ProjectModule } from '../project/project.module';
-import { ActivityModule } from 'src/activity/activity.module';
+import { ActivityModule } from '../activity/activity.module';
 import { ActivityController } from './activity.controller';
 import { LogController } from './log.controller';
-import { LogModule } from 'src/log/log.module';
+import { LogModule } from '../log/log.module';
 import { SupportController } from './support.controller';
-import { SupportModule } from 'src/support/support.module';
-import { KpiModule } from 'src/kpi/kpi.module';
+import { SupportModule } from '../support/support.module';
+import { KpiModule } from '../kpi/kpi.module';
 import { KpiController } from './kpi.controller';
 import { ReportController } from './report.controller';
-import { ReportModule } from 'src/report/report.module';
-import { GhgEmissionModule } from 'src/emission/emission.module';
+import { ReportModule } from '../report/report.module';
+import { GhgEmissionModule } from '../emission/emission.module';
 import { GHGEmissionController } from './ghg.emission.controller';
 import { GhgProjectionModule } from 'src/projection/projection.module';
 import { GHGProjectionController } from './ghg.projection.controller';
 import { ResourcesController } from './resource.controller';
-import { SystemResourceModule } from 'src/system.resource/system.resources.module';
+import { SystemResourceModule } from '../system.resource/system.resources.module';
 
 
 @Module({

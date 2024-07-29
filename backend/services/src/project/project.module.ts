@@ -14,10 +14,10 @@ import { SupportEntity } from '../entities/support.entity';
 import { UtilModule } from '../util/util.module';
 import { FileHandlerModule } from '../file-handler/filehandler.module';
 import { ValidationModule } from '../validation/validation.module';
-import { ProgrammeModule } from 'src/programme/programme.module';
+import { ProgrammeModule } from '../programme/programme.module';
 import { ProjectService } from './project.service';
-import { ProjectViewEntity } from 'src/entities/project.view.entity';
-import { KpiModule } from 'src/kpi/kpi.module';
+import { ProjectViewEntity } from '../entities/project.view.entity';
+import { KpiModule } from '../kpi/kpi.module';
 
 @Module({
 	imports: [

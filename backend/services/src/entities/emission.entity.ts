@@ -5,7 +5,7 @@ import { EmissionAgricultureForestryOtherLandUse } from '../dtos/emission.agricu
 import { EmissionWaste } from '../dtos/emission.waste';
 import { EmissionOther } from '../dtos/emission.other';
 import { EmissionProperties } from '../dtos/emission.properties';
-import { GHGRecordState } from 'src/enums/ghg.state.enum';
+import { GHGRecordState } from '../enums/ghg.state.enum';
 
 @Entity()
 @Unique(['year'])

@@ -14,12 +14,12 @@ import { Repository } from "typeorm";
 import { DataExportReportSixDto } from "../dtos/data.export.reportSix.dto";
 import { DataExportReportSevenDto } from "../dtos/data.export.reportSeven.dto";
 import { DataExportReportEightDto } from "../dtos/data.export.reportEight.dto";
-import { DataExportReportNineDto } from "src/dtos/data.export.reportNine.dto";
+import { DataExportReportNineDto } from "../dtos/data.export.reportNine.dto";
 import { DataExportReportTenDto } from "../dtos/data.export.reportTen.dto";
 import { DataExportReportElevenDto } from "../dtos/data.export.reportEleven.dto";
 import { AnnexThreeViewEntity } from "../entities/annexThree.view.entity";
-import { ImpleMeans } from "src/enums/activity.enum";
-import { SupportDirection } from "src/enums/support.enum";
+import { ImpleMeans } from "../enums/activity.enum";
+import { SupportDirection } from "../enums/support.enum";
 
 export class ReportService {
 	constructor(

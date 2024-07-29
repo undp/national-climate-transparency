@@ -583,7 +583,7 @@ export class ProjectService {
 
 		const projectKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, project.projectId);
 
-		const projectKpiIds = projectKPIs.map(kpi => kpi.kpiId);
+		const projectKpiIds = projectKPIs?.map(kpi => kpi.kpiId);
 
 		const linkedActivityIds = project.activities?.map(activity => activity.activityId);
 

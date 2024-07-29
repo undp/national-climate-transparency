@@ -1,6 +1,6 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { EntitySubject } from "./entity.subject";
-import { SystemResourceCategory, SystemResourceType } from "src/enums/shared.enum";
+import { SystemResourceCategory, SystemResourceType } from "../enums/shared.enum";
 
 @Entity("system_resources")
 export class SystemResourcesEntity implements EntitySubject {

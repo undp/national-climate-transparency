@@ -11,7 +11,7 @@ import { EmissionAgricultureForestryOtherLandUse } from './emission.agriculture.
 import { EmissionWaste } from './emission.waste';
 import { EmissionOther } from './emission.other';
 import { EmissionProperties } from './emission.properties';
-import { GHGRecordState } from 'src/enums/ghg.state.enum';
+import { GHGRecordState } from '../enums/ghg.state.enum';
 
 export class EmissionDto {
   @ApiProperty()

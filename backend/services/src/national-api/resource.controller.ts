@@ -12,10 +12,10 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { Action } from "../casl/action.enum";
 import { PoliciesGuardEx } from "../casl/policy.guard";
-import { SystemResourcesService } from "src/system.resource/system.resources.service";
-import { SystemResourceDto } from "src/dtos/systemResourceDto";
-import { SystemResourcesEntity } from "src/entities/systemResource.entity";
-import { QueryDto } from "src/dtos/query.dto";
+import { SystemResourcesService } from "../system.resource/system.resources.service";
+import { SystemResourceDto } from "../dtos/systemResourceDto";
+import { SystemResourcesEntity } from "../entities/systemResource.entity";
+import { QueryDto } from "../dtos/query.dto";
 
 @ApiTags("Resources")
 @Controller("resources")
