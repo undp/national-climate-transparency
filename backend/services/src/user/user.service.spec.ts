@@ -13,7 +13,6 @@ import { UserDto } from '../dtos/user.dto';
 import { Role, SubRole } from '../casl/role.enum';
 import { SubRoleManipulate, ValidateEntity } from '../enums/user.enum';
 import { UserUpdateDto } from '../dtos/user.update.dto';
-import { Sector } from 'src/enums/sector.enum';
 
 describe('UserService', () => {
   let service: UserService;
@@ -184,7 +183,7 @@ describe('UserService', () => {
 			userDto.role = Role.Observer;
 		
 			jest.spyOn(service, 'findOne').mockResolvedValue(null);
-			jest.spyOn(entityManagerMock, 'transaction').mockImplementation(() => Promise.reject(new Error('Transaction failed')));
+			jest.spyOn(entityManagerMock, 'transaction').mockImplementation(() => Promise.reject(new Error('This is a test transaction error. This is expected')));
 		
 			await expect(service.create(userDto)).rejects.toThrow(HttpException);
 			expect(entityManagerMock.transaction).toHaveBeenCalled();
@@ -345,7 +344,7 @@ describe('UserService', () => {
 			jest.spyOn(userRepoMock, 'findOneBy').mockResolvedValue(existingUser);
 		
 			await expect(service.update(userUpdateDto, '', requestingUser)).rejects.toThrow(HttpException);
-			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('user.adminCannotUpdateTheirOwnPermissions', []);
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('user.adminCannotUpdateTheirOwnPermissionspppp', []);
 		});
 
 
