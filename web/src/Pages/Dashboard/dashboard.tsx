@@ -97,7 +97,7 @@ const Dashboard = () => {
             actionId: unstructuredData[i].actionId,
             title: unstructuredData[i].title,
             status: unstructuredData[i].status,
-            actionType: unstructuredData[i].migratedData[0]?.types ?? [],
+            actionType: unstructuredData[i].type,
             affectedSectors: unstructuredData[i].sector,
             nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? [],
             financeNeeded: Math.round(unstructuredData[i].migratedData[0]?.financeNeeded ?? 0),
