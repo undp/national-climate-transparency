@@ -70,6 +70,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
       width={240}
       className="layout-sider-container"
       breakpoint={collapsed ? undefined : 'lg'}
+      collapsedWidth={80}
       collapsed={collapsed}
     >
       <div className="layout-sider-div-container">
@@ -103,7 +104,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
       <div
         className="toggle-nav-btn"
         onClick={() => {
-          setCollapsed(!collapsed);
+          setCollapsed((prevState) => !prevState);
         }}
       >
         {collapsed ? <Icon.ArrowRight /> : <Icon.ArrowLeft />}
