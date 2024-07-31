@@ -25,7 +25,13 @@ import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
-import { delay, getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
+import {
+  delay,
+  doesUserHaveValidatePermission,
+  getFormTitle,
+  getRounded,
+  joinTwoArrays,
+} from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
@@ -751,7 +757,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     } catch (error: any) {
       if (error?.status) {
         if (error.status === 403) {
-          setIsValidationAllowed(false);
+          setIsValidationAllowed(await doesUserHaveValidatePermission(get));
         }
         displayErrorMessage(error);
       } else {

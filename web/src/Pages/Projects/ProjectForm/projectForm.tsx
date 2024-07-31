@@ -16,7 +16,12 @@ import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { delay, getFormTitle, getRounded } from '../../../Utils/utilServices';
+import {
+  delay,
+  doesUserHaveValidatePermission,
+  getFormTitle,
+  getRounded,
+} from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ProjectEntity } from '../../../Entities/project';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -772,7 +777,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     } catch (error: any) {
       if (error?.status) {
         if (error.status === 403) {
-          setIsValidationAllowed(false);
+          setIsValidationAllowed(await doesUserHaveValidatePermission(get));
         }
         displayErrorMessage(error);
       } else {

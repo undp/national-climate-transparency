@@ -17,7 +17,13 @@ import { ActionSelectData } from '../../../Definitions/actionDefinitions';
 import { ProjectData } from '../../../Definitions/projectDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { delay, getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
+import {
+  delay,
+  doesUserHaveValidatePermission,
+  getFormTitle,
+  getRounded,
+  joinTwoArrays,
+} from '../../../Utils/utilServices';
 import { ProgrammeMigratedData } from '../../../Definitions/programmeDefinitions';
 import { Action } from '../../../Enums/action.enum';
 import { ProgrammeEntity } from '../../../Entities/programme';
@@ -792,7 +798,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     } catch (error: any) {
       if (error?.status) {
         if (error.status === 403) {
-          setIsValidationAllowed(false);
+          setIsValidationAllowed(await doesUserHaveValidatePermission(get));
         }
         displayErrorMessage(error);
       } else {
