@@ -5,12 +5,14 @@ import { BasicResponseDto } from "../dtos/basic.response.dto";
 import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
 import { ConfigurationSettingsType } from "../enums/configuration.settings.type.enum";
 import { HelperService } from "./helpers.service";
-import { ProjectionData } from "src/dtos/projection.dto";
-import { ProjectionEntity } from "src/entities/projection.entity";
-import { GHGRecordState } from "src/enums/ghg.state.enum";
-import { ExtendedProjectionType, ProjectionLeafSection } from "src/enums/projection.enum";
-import { User } from "src/entities/user.entity";
-import { GHGInventoryManipulate } from "src/enums/user.enum";
+import { ProjectionData } from "../dtos/projection.dto";
+import { ProjectionEntity } from "../entities/projection.entity";
+import { GHGRecordState } from "../enums/ghg.state.enum";
+import { ExtendedProjectionType, ProjectionLeafSection } from "../enums/projection.enum";
+import { User } from "../entities/user.entity";
+import { GHGInventoryManipulate } from "../enums/user.enum";
+import { ActivityEntity } from "../entities/activity.entity";
+import { GHGS } from "../enums/shared.enum";
 
 @Injectable()
 export class ConfigurationSettingsService {
@@ -19,6 +21,7 @@ export class ConfigurationSettingsService {
 		@InjectRepository(ConfigurationSettingsEntity)
 		private configSettingsRepo: Repository<ConfigurationSettingsEntity>,
 		@InjectRepository(ProjectionEntity) private projectionRepo: Repository<ProjectionEntity>,
+		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
 		private helperService: HelperService
 	) { }
 
@@ -65,8 +68,12 @@ export class ConfigurationSettingsService {
 			}
 
 			let setting = await this.configSettingsRepo.findOne({ where: { id: type } });
+			let oldGwp: any;
 
 			if (setting) {
+				if(setting.id === ConfigurationSettingsType.GWP){
+					oldGwp = setting.settingValue;
+				}
 				setting.settingValue = settingValue;
 			} else {
 				setting = new ConfigurationSettingsEntity();
@@ -90,6 +97,8 @@ export class ConfigurationSettingsService {
 																: ExtendedProjectionType.BASELINE_WITHOUT_MEASURES);
 							
 							await this.updateBaselineProjection(settingValue as ProjectionData, projectionType)
+						} else if(type === ConfigurationSettingsType.GWP){
+							await this.updateMitigationTimeline(setting.settingValue, oldGwp, em);
 						}
 					}
 				})
@@ -173,6 +182,18 @@ export class ConfigurationSettingsService {
 		}
 
 		return projectionArray;
+
+	}
+
+	private async updateMitigationTimeline(newGwpValue: any, oldGwpValue: any, entityManager: EntityManager) {
+
+		if (newGwpValue.gwp_ch4 !== oldGwpValue.gwp_ch4) {
+			await entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_ch4}::INTEGER, '${GHGS.CH}');`);
+		}
+
+		if (newGwpValue.gwp_n2o !== oldGwpValue.gwp_n2o) {
+			await entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_n2o}::INTEGER, '${GHGS.NO}');`);
+		}
 
 	}
 }

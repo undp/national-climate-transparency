@@ -134,6 +134,10 @@ export class ActivityDto {
 	@ApiProperty()
 	expectedGHGReduction: number;
 
+	@IsNumber()
+	@ApiProperty()
+	startYear: number;
+
 	@IsOptional()
 	@ApiPropertyOptional()
 	@IsString()
@@ -159,36 +163,39 @@ export class ActivityDto {
 	})
 	mitigationInfo: any;
 
-	@IsOptional()
+	@ValidateIf((o) => o.startYear && o.ghgsAffected)
+	@IsNotEmpty({
+		message: "Mitigation timeline is required when startYear and ghgsAffected are provided."
+	})
 	@ApiPropertyOptional({
 		type: "object",
 		example: {
 			expected: {
-				baselineEmissions: [7,8,9,7],
-				activityEmissionsWithM: [7,8,9,7],
-				activityEmissionsWithAM: [7,8,9,7],
-				expectedEmissionReductWithM: [7,8,9,7],
-				expectedEmissionReductWithAM: [7,8,9,7],
+				baselineEmissions: [7, 8, 9, 7],
+				activityEmissionsWithM: [7, 8, 9, 7],
+				activityEmissionsWithAM: [7, 8, 9, 7],
+				expectedEmissionReductWithM: [7, 8, 9, 7],
+				expectedEmissionReductWithAM: [7, 8, 9, 7],
 				total: {
-					baselineEmissions:31,
-					activityEmissionsWithM:31,
-					activityEmissionsWithAM:31,
-					expectedEmissionReductWithM:31,
-					expectedEmissionReductWithAM:31,
+					baselineEmissions: 31,
+					activityEmissionsWithM: 31,
+					activityEmissionsWithAM: 31,
+					expectedEmissionReductWithM: 31,
+					expectedEmissionReductWithAM: 31,
 				}
-			  },
-			  actual: {
-				baselineActualEmissions: [7,8,9,7],
-				activityActualEmissions: [7,8,9,7],
-				actualEmissionReduct: [7,8,9,7],
+			},
+			actual: {
+				baselineActualEmissions: [7, 8, 9, 7],
+				activityActualEmissions: [7, 8, 9, 7],
+				actualEmissionReduct: [7, 8, 9, 7],
 				total: {
-					baselineActualEmissions:31,
-					activityActualEmissions:31,
-					actualEmissionReduct:31,
+					baselineActualEmissions: 31,
+					activityActualEmissions: 31,
+					actualEmissionReduct: 31,
 				}
-			  },
-			  startYear: 2015,
-			  unit: GHGS.CO,
+			},
+			startYear: 2015,
+			unit: GHGS.CO,
 		},
 	})
 	mitigationTimeline: any;

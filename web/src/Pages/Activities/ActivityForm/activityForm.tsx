@@ -21,7 +21,12 @@ import { SupportData } from '../../../Definitions/supportDefinitions';
 import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { delay, getFormTitle, getRounded } from '../../../Utils/utilServices';
+import {
+  delay,
+  doesUserHaveValidatePermission,
+  getFormTitle,
+  getRounded,
+} from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ActivityEntity } from '../../../Entities/activity';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -489,7 +494,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       }
     };
     fetchCreatedKPIData();
-    fetchGwpSettings();
   }, []);
 
   // Populating Form Migrated Fields, when migration data changes
@@ -562,7 +566,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     } catch (error: any) {
       if (error?.status) {
         if (error.status === 403) {
-          setIsValidationAllowed(false);
+          setIsValidationAllowed(await doesUserHaveValidatePermission(get));
         }
         displayErrorMessage(error);
       } else {
@@ -918,6 +922,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // Initializing mtg timeline data
 
   useEffect(() => {
+    fetchGwpSettings();
     if (method === 'create') {
       setDefaultTimelineValues(mtgStartYear, mtgRange);
     } else {
@@ -1726,7 +1731,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            {mtgStartYear !== 0 && mtgStartYear !== undefined && selectedGhg !== undefined && (
+            {mtgStartYear !== 0 && mtgStartYear && mtgUnit && (
               <div className="form-section-card">
                 <Row>
                   <Col {...mtgTableHeaderBps} style={{ paddingTop: '6px' }}>

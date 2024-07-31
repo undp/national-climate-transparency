@@ -185,3 +185,16 @@ export const getFileExtension = (fileTitle: string) => {
     return undefined;
   }
 };
+
+export const doesUserHaveValidatePermission = async (get: any): Promise<boolean> => {
+  try {
+    const response = await get('national/Users/profile');
+    if (response.data && response.data.user && response.data.user.validatePermission === false) {
+      return false;
+    } else {
+      return true;
+    }
+  } catch (exception) {
+    return true;
+  }
+};

@@ -1,0 +1,127 @@
+import { MigrationInterface, QueryRunner } from "typeorm";
+
+export class Updatemitigationtimelinebygwpvalue1722232902408 implements MigrationInterface {
+
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
+            CREATE OR REPLACE FUNCTION update_mitigation_timeline(gwp_value INTEGER, mtg_unit TEXT)
+            RETURNS VOID AS $$
+            DECLARE
+                batch_size INTEGER := 100;
+                offset INTEGER := 0;
+                record RECORD;
+                new_timeline JSONB;
+                temp_timeline JSONB;
+                activity_emissions_with_m JSONB;
+                expected_emission_reduct_with_m JSONB;
+                activity_emissions_with_am JSONB;
+                expected_emission_reduct_with_am JSONB;
+                activity_actual_emissions JSONB;
+                actual_emission_reduct JSONB;
+                total_expected_emission_reduct_with_m NUMERIC;
+                total_expected_emission_reduct_with_am NUMERIC;
+                total_actual_emission_reduct NUMERIC;
+            BEGIN
+                LOOP
+                    FOR record IN
+                        SELECT "activityId", "mitigationTimeline"
+                        FROM activity
+                        WHERE "mitigationTimeline"->>'unit' = mtg_unit
+                        ORDER BY "activityId"
+                        LIMIT batch_size
+                        OFFSET "offset"
+                    LOOP
+
+                        activity_emissions_with_m := record."mitigationTimeline"->'expected'->'activityEmissionsWithM';
+                        activity_emissions_with_am := record."mitigationTimeline"->'expected'->'activityEmissionsWithAM';
+                        activity_actual_emissions := record."mitigationTimeline"->'actual'->'activityActualEmissions';
+
+
+                        expected_emission_reduct_with_m := (
+                            SELECT jsonb_agg((value::numeric * gwp_value)::text::jsonb)
+                            FROM jsonb_array_elements(activity_emissions_with_m) AS value
+                        );
+                        expected_emission_reduct_with_am := (
+                            SELECT jsonb_agg((value::numeric * gwp_value)::text::jsonb)
+                            FROM jsonb_array_elements(activity_emissions_with_am) AS value
+                        );
+                        actual_emission_reduct := (
+                            SELECT jsonb_agg((value::numeric * gwp_value)::text::jsonb)
+                            FROM jsonb_array_elements(activity_actual_emissions) AS value
+                        );
+                        
+                        -- Calculate total values
+                        total_expected_emission_reduct_with_m := (
+                            SELECT COALESCE(SUM((value::numeric * gwp_value)), 0)
+                            FROM jsonb_array_elements(activity_emissions_with_m) AS value
+                        );
+                        total_expected_emission_reduct_with_am := (
+                            SELECT COALESCE(SUM((value::numeric * gwp_value)), 0)
+                            FROM jsonb_array_elements(activity_emissions_with_am) AS value
+                        );
+                        total_actual_emission_reduct := (
+                            SELECT COALESCE(SUM((value::numeric * gwp_value)), 0)
+                            FROM jsonb_array_elements(activity_actual_emissions) AS value
+                        );
+                        
+                        -- Update 'expectedEmissionReductWithM' field
+                        temp_timeline := jsonb_set(
+                            record."mitigationTimeline",
+                            '{expected,expectedEmissionReductWithM}'::text[],
+                            expected_emission_reduct_with_m,
+                            true
+                        );
+
+                        -- Update 'expectedEmissionReductWithAM' field
+                        temp_timeline := jsonb_set(
+                            temp_timeline,
+                            '{expected,expectedEmissionReductWithAM}'::text[],
+                            expected_emission_reduct_with_am,
+                            true
+                        );
+
+                        -- Update 'actualEmissionReduct' field
+                        temp_timeline := jsonb_set(
+                            temp_timeline,
+                            '{actual,actualEmissionReduct}'::text[],
+                            actual_emission_reduct,
+                            true
+                        );
+                        
+                        -- Update total values
+                        new_timeline := jsonb_set(
+                            temp_timeline,
+                            '{expected,total,expectedEmissionReductWithM}'::text[],
+                            to_jsonb(total_expected_emission_reduct_with_m),
+                            true
+                        );
+                        new_timeline := jsonb_set(
+                            new_timeline,
+                            '{expected,total,expectedEmissionReductWithAM}'::text[],
+                            to_jsonb(total_expected_emission_reduct_with_am),
+                            true
+                        );
+                        new_timeline := jsonb_set(
+                            new_timeline,
+                            '{actual,total,actualEmissionReduct}'::text[],
+                            to_jsonb(total_actual_emission_reduct),
+                            true
+                        );
+
+                        -- Update the row with the modified JSONB object
+                        UPDATE activity
+                        SET "mitigationTimeline" = new_timeline
+                        WHERE "activityId" = record."activityId";
+                    END LOOP;
+                    EXIT WHEN NOT FOUND;
+                    "offset" := "offset" + batch_size;
+                END LOOP;
+            END;
+            $$ LANGUAGE plpgsql;
+        `);
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+    }
+
+}

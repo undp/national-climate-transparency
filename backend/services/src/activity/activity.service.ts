@@ -10,7 +10,7 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { LogEntity } from "../entities/log.entity";
 import { User } from "../entities/user.entity";
 import { CounterType } from "../enums/counter.type.enum";
-import { LogEventType, EntityType, Method } from "../enums/shared.enum";
+import { LogEventType, EntityType, Method, GHGS } from "../enums/shared.enum";
 import { ProgrammeService } from "../programme/programme.service";
 import { ProjectService } from "../project/project.service";
 import { CounterService } from "../util/counter.service";
@@ -35,6 +35,8 @@ import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { SupportEntity } from "../entities/support.entity";
+import { ConfigurationSettingsService } from "../util/configurationSettings.service";
+import { ConfigurationSettingsType } from "../enums/configuration.settings.type.enum";
 
 @Injectable()
 export class ActivityService {
@@ -50,6 +52,7 @@ export class ActivityService {
 		private actionService: ActionService,
 		private kpiService: KpiService,
 		private payloadValidator: PayloadValidator,
+		private configurationSettingsService: ConfigurationSettingsService,
 	) { }
 
 	//MARK: Activity Create
@@ -121,8 +124,56 @@ export class ActivityService {
 		}
 
 		if (activityDto.mitigationTimeline) {
-			this.payloadValidator.validateMitigationTimelinePayload(activityDto, Method.CREATE);
+			const gwpSettings = await this.configurationSettingsService.getSetting(ConfigurationSettingsType.GWP);
+			let validUnit: GHGS;
+			let gwpValue: number;
+
+			switch (activityDto.ghgsAffected) {
+				case GHGS.NO:
+					validUnit = gwpSettings.gwp_n2o > 1 ? GHGS.NO : GHGS.CO;
+					gwpValue = gwpSettings.gwp_n2o > 1 ? gwpSettings.gwp_n2o : 1;
+					break;
+				case GHGS.CH:
+					validUnit = gwpSettings.gwp_ch4 > 1 ? GHGS.CH : GHGS.CO;
+					gwpValue = gwpSettings.gwp_ch4 > 1 ? gwpSettings.gwp_ch4 : 1;
+					break;
+				default:
+					validUnit = GHGS.CO;
+					gwpValue = 1;
+					break;
+			}
+
+			if(!activityDto.mitigationTimeline.startYear){
+				throw new HttpException('Mitigation timeline Start Year is missing', HttpStatus.BAD_REQUEST);
+			}
+
+			if(activityDto.startYear !== activityDto.mitigationTimeline.startYear) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"MTG Start year should be parent startYear",
+						[]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			if(!activityDto.mitigationTimeline.unit){
+				throw new HttpException('Mitigation timeline Unit is missing', HttpStatus.BAD_REQUEST);
+			}
+			
+			if (activityDto.mitigationTimeline.unit !== validUnit) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"Mitigation timeline unit should be ", [validUnit]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			this.payloadValidator.validateMitigationTimelinePayload(activityDto, gwpValue, activityDto.startYear);
+
 		}
+		
 
 		const activ = await this.entityManager
 			.transaction(async (em) => {
@@ -1375,7 +1426,6 @@ export class ActivityService {
 
 	//MARK: update mitigation timeline Data
 	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto, user: User) {
-		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto, Method.UPDATE);
 		const { activityId, mitigationTimeline } = mitigationTimelineDto;
 		const activity = await this.linkUnlinkService.findActivityByIdWithSupports(activityId);
 
@@ -1400,6 +1450,22 @@ export class ActivityService {
 		}
 
 		const currentMitigationTimeline = activity.mitigationTimeline;
+		const gwpSettings = await this.configurationSettingsService.getSetting(ConfigurationSettingsType.GWP);
+		let gwpValue: number;
+
+			switch (currentMitigationTimeline.unit) {
+				case GHGS.NO:
+					gwpValue = gwpSettings.gwp_n2o > 1 ? gwpSettings.gwp_n2o : 1;
+					break;
+				case GHGS.CH:
+					gwpValue = gwpSettings.gwp_ch4 > 1 ? gwpSettings.gwp_ch4 : 1;
+					break;
+				default:
+					gwpValue = 1;
+					break;
+			}
+		
+		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto, gwpValue, currentMitigationTimeline.startYear);
 
 		const updatedMitigationTimeline = {
 			...currentMitigationTimeline,
