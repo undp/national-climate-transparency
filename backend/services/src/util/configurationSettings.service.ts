@@ -97,8 +97,6 @@ export class ConfigurationSettingsService {
 																: ExtendedProjectionType.BASELINE_WITHOUT_MEASURES);
 							
 							await this.updateBaselineProjection(settingValue as ProjectionData, projectionType)
-						} else if(type === ConfigurationSettingsType.GWP){
-							await this.updateMitigationTimeline(setting.settingValue, oldGwp, em);
 						}
 					}
 				})
@@ -106,6 +104,9 @@ export class ConfigurationSettingsService {
 					throw err;
 				});
 			
+				if(type === ConfigurationSettingsType.GWP){
+					await this.updateMitigationTimeline(setting.settingValue, oldGwp);
+				}
 			// Return success message
 			return new BasicResponseDto(
 				HttpStatus.OK,
@@ -115,6 +116,7 @@ export class ConfigurationSettingsService {
 				)
 			);
 		} catch (err) {
+			console.log('Setting save failed due to', err);
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"common.settingsSaveFailedMsg",
@@ -185,15 +187,14 @@ export class ConfigurationSettingsService {
 
 	}
 
-	private async updateMitigationTimeline(newGwpValue: any, oldGwpValue: any, entityManager: EntityManager) {
+	private async updateMitigationTimeline(newGwpValue: any, oldGwpValue: any) {
 
-		if (newGwpValue.gwp_ch4 !== oldGwpValue.gwp_ch4) {
-			await entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_ch4}::INTEGER, '${GHGS.CH}');`);
+		if (oldGwpValue === undefined || newGwpValue.gwp_ch4 !== oldGwpValue.gwp_ch4) {
+			await this.entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_ch4}::INTEGER, '${GHGS.CH}');`);
 		}
 
-		if (newGwpValue.gwp_n2o !== oldGwpValue.gwp_n2o) {
-			await entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_n2o}::INTEGER, '${GHGS.NO}');`);
+		if (oldGwpValue === undefined || newGwpValue.gwp_n2o !== oldGwpValue.gwp_n2o) {
+			await this.entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_n2o}::INTEGER, '${GHGS.NO}');`);
 		}
-
 	}
 }

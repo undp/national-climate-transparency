@@ -35,8 +35,8 @@ import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { SupportEntity } from "../entities/support.entity";
-import { ConfigurationSettingsService } from "../util/configurationSettings.service";
 import { ConfigurationSettingsType } from "../enums/configuration.settings.type.enum";
+import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
 
 @Injectable()
 export class ActivityService {
@@ -52,7 +52,8 @@ export class ActivityService {
 		private actionService: ActionService,
 		private kpiService: KpiService,
 		private payloadValidator: PayloadValidator,
-		private configurationSettingsService: ConfigurationSettingsService,
+		@InjectRepository(ConfigurationSettingsEntity)
+		private configSettingsRepo: Repository<ConfigurationSettingsEntity>,	
 	) { }
 
 	//MARK: Activity Create
@@ -124,30 +125,33 @@ export class ActivityService {
 		}
 
 		if (activityDto.mitigationTimeline) {
-			const gwpSettings = await this.configurationSettingsService.getSetting(ConfigurationSettingsType.GWP);
-			let validUnit: GHGS;
-			let gwpValue: number;
+			const gwpSettingsRecord = await this.configSettingsRepo.findOneBy({ id: ConfigurationSettingsType.GWP });
+			let validUnit: GHGS = GHGS.CO;
+			let gwpValue: number = 1;
 
-			switch (activityDto.ghgsAffected) {
-				case GHGS.NO:
-					validUnit = gwpSettings.gwp_n2o > 1 ? GHGS.NO : GHGS.CO;
-					gwpValue = gwpSettings.gwp_n2o > 1 ? gwpSettings.gwp_n2o : 1;
-					break;
-				case GHGS.CH:
-					validUnit = gwpSettings.gwp_ch4 > 1 ? GHGS.CH : GHGS.CO;
-					gwpValue = gwpSettings.gwp_ch4 > 1 ? gwpSettings.gwp_ch4 : 1;
-					break;
-				default:
-					validUnit = GHGS.CO;
-					gwpValue = 1;
-					break;
+			if (gwpSettingsRecord) {
+				const gwpSettings = gwpSettingsRecord.settingValue;
+				switch (activityDto.ghgsAffected) {
+					case GHGS.NO:
+						validUnit = gwpSettings.gwp_n2o > 1 ? GHGS.NO : GHGS.CO;
+						gwpValue = gwpSettings.gwp_n2o > 1 ? gwpSettings.gwp_n2o : 1;
+						break;
+					case GHGS.CH:
+						validUnit = gwpSettings.gwp_ch4 > 1 ? GHGS.CH : GHGS.CO;
+						gwpValue = gwpSettings.gwp_ch4 > 1 ? gwpSettings.gwp_ch4 : 1;
+						break;
+					default:
+						validUnit = GHGS.CO;
+						gwpValue = 1;
+						break;
+				}
 			}
 
-			if(!activityDto.mitigationTimeline.startYear){
+			if (!activityDto.mitigationTimeline.startYear) {
 				throw new HttpException('Mitigation timeline Start Year is missing', HttpStatus.BAD_REQUEST);
 			}
 
-			if(activityDto.startYear !== activityDto.mitigationTimeline.startYear) {
+			if (activityDto.startYear !== activityDto.mitigationTimeline.startYear) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"MTG Start year should be parent startYear",
@@ -157,10 +161,10 @@ export class ActivityService {
 				);
 			}
 
-			if(!activityDto.mitigationTimeline.unit){
+			if (!activityDto.mitigationTimeline.unit) {
 				throw new HttpException('Mitigation timeline Unit is missing', HttpStatus.BAD_REQUEST);
 			}
-			
+
 			if (activityDto.mitigationTimeline.unit !== validUnit) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
@@ -1450,9 +1454,11 @@ export class ActivityService {
 		}
 
 		const currentMitigationTimeline = activity.mitigationTimeline;
-		const gwpSettings = await this.configurationSettingsService.getSetting(ConfigurationSettingsType.GWP);
-		let gwpValue: number;
+		const gwpSettingsRecord = await this.configSettingsRepo.findOneBy({ id: ConfigurationSettingsType.GWP });
+		let gwpValue: number = 1;
 
+		if (gwpSettingsRecord) {
+			const gwpSettings = gwpSettingsRecord.settingValue;
 			switch (currentMitigationTimeline.unit) {
 				case GHGS.NO:
 					gwpValue = gwpSettings.gwp_n2o > 1 ? gwpSettings.gwp_n2o : 1;
@@ -1464,6 +1470,7 @@ export class ActivityService {
 					gwpValue = 1;
 					break;
 			}
+		}
 		
 		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto, gwpValue, currentMitigationTimeline.startYear);
 

@@ -101,7 +101,7 @@ const GhgEmissions = () => {
       });
     }
 
-    tempTabItems.sort((a, b) => parseFloat(a.label) - parseFloat(b.label));
+    tempTabItems.sort((a, b) => parseFloat(a.key) - parseFloat(b.key));
     setTabItems(tempTabItems);
   }, [availableReports]);
 

@@ -540,7 +540,7 @@ const UserManagement = () => {
     }
 
     // Setting the Sort By Column
-    if (sorter.columnKey !== undefined) {
+    if (sorter.column !== undefined) {
       setSortField(sorter.field);
     } else {
       setSortField('id');
