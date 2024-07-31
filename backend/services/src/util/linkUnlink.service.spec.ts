@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EntityManager } from 'typeorm';
+import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 import { ProgrammeEntity } from '../entities/programme.entity';
 import { ProjectEntity } from '../entities/project.entity';
 import { User } from '../entities/user.entity';
@@ -13,21 +13,61 @@ import { LinkProjectsDto } from '../dtos/link.projects.dto';
 import { UnlinkProjectsDto } from '../dtos/unlink.projects.dto';
 import { LinkActivitiesDto } from '../dtos/link.activities.dto';
 import { ActivityEntity } from '../entities/activity.entity';
-import { UnlinkActivitiesDto } from 'src/dtos/unlink.activities.dto';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { SupportEntity } from '../entities/support.entity';
+import { AchievementEntity } from '../entities/achievement.entity';
 
 describe('LinkUnlinkService', () => {
 	let service: LinkUnlinkService;
 	let em: EntityManager;
 	let entityManagerMock: Partial<EntityManager>;
+	let programmeRepositoryMock: Partial<Repository<ProgrammeEntity>>;
+	let projectRepositoryMock: Partial<Repository<ProjectEntity>>;
+	let activityRepositoryMock: Partial<Repository<ActivityEntity>>;
 
 	beforeEach(async () => {
 		entityManagerMock = {
 			transaction: jest.fn(),
 		};
+
+		programmeRepositoryMock = {
+			save: jest.fn(),
+			createQueryBuilder: jest.fn(() => ({
+				where: jest.fn().mockReturnThis(),
+				getMany: jest.fn(),
+			})) as unknown as () => SelectQueryBuilder<ProgrammeEntity>,
+		};
+		projectRepositoryMock = {
+			save: jest.fn(),
+			createQueryBuilder: jest.fn(() => ({
+				where: jest.fn().mockReturnThis(),
+				getMany: jest.fn(),
+			})) as unknown as () => SelectQueryBuilder<ProjectEntity>,
+		};
+		activityRepositoryMock = {
+			save: jest.fn(),
+			createQueryBuilder: jest.fn(() => ({
+				where: jest.fn().mockReturnThis(),
+				getMany: jest.fn(),
+			})) as unknown as () => SelectQueryBuilder<ActivityEntity>,
+		};
+
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				LinkUnlinkService,
 				{ provide: EntityManager, useValue: entityManagerMock },
+				{
+					provide: getRepositoryToken(ProgrammeEntity),
+					useValue: programmeRepositoryMock,
+				},
+				{
+					provide: getRepositoryToken(ProjectEntity),
+					useValue: projectRepositoryMock,
+				},
+				{
+					provide: getRepositoryToken(ActivityEntity),
+					useValue: activityRepositoryMock,
+				},
 			],
 		}).compile();
 
@@ -36,31 +76,46 @@ describe('LinkUnlinkService', () => {
 	});
 
 	describe('linkUnlinkProgrammes', () => {
-		it('should link programmes to action and save logs', async () => {
-			const programme = new ProgrammeEntity;
-			programme.programmeId = "P1";
+		it('should link programme to action and save logs, acton not validated', async () => {
 
 			const user = new User();
 			user.sector = [Sector.Agriculture]
 
 			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = false
 
-			const programme1 = new ProgrammeEntity();
-			programme1.programmeId = '1';
-			programme1.action = null;
-			programme1.affectedSectors = [Sector.Agriculture];
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
 
-			const programme2 = new ProgrammeEntity();
-			programme2.programmeId = '2';
-			programme2.action = null;
-			programme2.affectedSectors = [Sector.Agriculture];
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "_.P001.J001"
 
-			const programme3 = new ProgrammeEntity();
-			programme3.programmeId = '3';
-			programme3.action = null;
-			programme3.affectedSectors = [Sector.Agriculture];
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = false;
+			project.activities = [activity];
+			project.path = "_.P001"
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.projects = [project];
 
 			const payload = new LinkProgrammesDto();
+
+			const updateAllValidatedChildrenStatusByActionIdMock = jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId');
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -68,12 +123,86 @@ describe('LinkUnlinkService', () => {
 				};
 				const updatedProgramme = await callback(emMock);
 
-				expect(programme1.action).toBe(action);
-				expect(programme1.path).toBe(action.actionId);
-				expect(programme2.action).toBe(action);
-				expect(programme2.path).toBe(action.actionId);
-				expect(programme3.action).toBe(action);
-				expect(programme3.path).toBe(action.actionId);
+				expect(programme.action).toBe(action);
+				expect(programme.path).toBe(action.actionId);
+				expect(project.path).toBe("A001.P001");
+				expect(activity.path).toBe("A001.P001.J001");
+
+				expect(programme.validated).toBe(false);
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(5);
+
+				return updatedProgramme;
+			});
+
+			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
+			await service.linkProgrammesToAction(action, [programme], payload, user, em);
+
+			expect(buildLogEntitySpy).toHaveBeenCalledWith(LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, payload);
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(updateAllValidatedChildrenStatusByActionIdMock).toBeCalledTimes(0);
+		});
+
+		it('should link programme to action and save logs, acton validated, action children should unvalidated', async () => {
+
+			const user = new User();
+			user.sector = [Sector.Agriculture]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = true
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "_.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = false;
+			project.activities = [activity];
+			project.path = "_.P001"
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.projects = [project];
+
+			const payload = new LinkProgrammesDto();
+
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgramme = await callback(emMock);
+
+				expect(programme.action).toBe(action);
+				expect(programme.path).toBe(action.actionId);
+				expect(project.path).toBe("A001.P001");
+				expect(activity.path).toBe("A001.P001.J001");
+
+				expect(action.validated).toBe(false);
+				expect(programme.validated).toBe(false);
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
 
 				expect(emMock.save).toHaveBeenCalledTimes(6);
 
@@ -81,34 +210,58 @@ describe('LinkUnlinkService', () => {
 			});
 
 			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
-			await service.linkProgrammesToAction(action, [programme1, programme2, programme3], payload, user, em);
+			await service.linkProgrammesToAction(action, [programme], payload, user, em);
 
-			expect(buildLogEntitySpy).toHaveBeenCalledWith(LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme1.programmeId, user.id, payload);
+			expect(buildLogEntitySpy).toHaveBeenCalledWith(LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, payload);
 			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(service.updateAllValidatedChildrenStatusByActionId).toBeCalledTimes(1);
 		});
 
-		it('should unlink programmes from action', async () => {
-			const unlinkProgrammesDto: UnlinkProgrammesDto = { programmes: ['1', '2', '3'] };
+		it('should unlink programme from action, with action kpi achievements, not action delete', async () => {
+			const unlinkProgrammesDto: UnlinkProgrammesDto = { programme: '1' };
 			const user = new User();
 			user.sector = [Sector.Agriculture]
 
-			const programme1 = new ProgrammeEntity();
-			programme1.programmeId = '1';
-			programme1.action = new ActionEntity();
-			programme1.path = 'path1';
-			programme1.affectedSectors = [Sector.Agriculture];
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = true;
 
-			const programme2 = new ProgrammeEntity();
-			programme2.programmeId = '2';
-			programme2.action = new ActionEntity();
-			programme2.path = 'path2';
-			programme2.affectedSectors = [Sector.Agriculture];
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
 
-			const programme3 = new ProgrammeEntity();
-			programme3.programmeId = '3';
-			programme3.action = new ActionEntity();
-			programme3.path = 'path3';
-			programme3.affectedSectors = [Sector.Agriculture];
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = false;
+			project.activities = [activity];
+			project.path = "A001.P001"
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.projects = [project];
+			programme.action = action;
+			programme.path = "A001";
+
+			const achievementsToRemove = [new AchievementEntity()]
+
+			const deleteAchievementsMock = jest.spyOn(service, "deleteAchievements").mockReturnValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -116,12 +269,16 @@ describe('LinkUnlinkService', () => {
 				};
 				const updatedProgrammes = await callback(emMock);
 
-				expect(programme1.action).toBeNull();
-				expect(programme1.path).toBe('');
-				expect(programme2.action).toBeNull();
-				expect(programme2.path).toBe('');
-				expect(programme3.action).toBeNull();
-				expect(programme3.path).toBe('');
+				expect(programme.action).toBeNull();
+				expect(programme.path).toBe('');
+				expect(project.path).toBe("_.P001");
+				expect(activity.path).toBe("_.P001.J001");
+
+				expect(action.validated).toBe(false);
+				expect(programme.validated).toBe(false);
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
 
 				expect(emMock.save).toHaveBeenCalledTimes(6);
 
@@ -129,41 +286,208 @@ describe('LinkUnlinkService', () => {
 			});
 
 			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
-			await service.unlinkProgrammesFromAction([programme1, programme2, programme3], unlinkProgrammesDto, user, em);
+			await service.unlinkProgrammesFromAction([programme], action, unlinkProgrammesDto, user, em, achievementsToRemove, false);
 
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_ACTION, EntityType.PROGRAMME, programme1.programmeId, user.id, unlinkProgrammesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_ACTION, EntityType.PROGRAMME, programme2.programmeId, user.id, unlinkProgrammesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_ACTION, EntityType.PROGRAMME, programme3.programmeId, user.id, unlinkProgrammesDto);
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, unlinkProgrammesDto);
 			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(deleteAchievementsMock).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(1);
+		});
+
+		it('should unlink programme from action, with action kpi achievements, is action delete', async () => {
+			const unlinkProgrammesDto: UnlinkProgrammesDto = { programme: '1' };
+			const user = new User();
+			user.sector = [Sector.Agriculture]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = true;
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001"
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.projects = [project];
+			programme.action = action;
+			programme.path = "A001";
+
+			const achievementsToRemove = [new AchievementEntity()]
+
+			const deleteAchievementsMock = jest.spyOn(service, "deleteAchievements").mockReturnValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(programme.action).toBeNull();
+				expect(programme.path).toBe('');
+				expect(project.path).toBe("_.P001");
+				expect(activity.path).toBe("_.P001.J001");
+
+				expect(programme.validated).toBe(false);
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(5);
+
+				return updatedProgrammes;
+			});
+
+			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
+			await service.unlinkProgrammesFromAction([programme], action, unlinkProgrammesDto, user, em, achievementsToRemove, true);
+
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, unlinkProgrammesDto);
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(deleteAchievementsMock).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(1);
+		});
+
+		it('should unlink programme from action, no action kpi achievements, is action delete', async () => {
+			const unlinkProgrammesDto: UnlinkProgrammesDto = { programme: '1' };
+			const user = new User();
+			user.sector = [Sector.Agriculture]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = true;
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001"
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.projects = [project];
+			programme.action = action;
+			programme.path = "A001";
+
+			const deleteAchievementsMock = jest.spyOn(service, "deleteAchievements").mockReturnValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(programme.action).toBeNull();
+				expect(programme.path).toBe('');
+				expect(project.path).toBe("_.P001");
+				expect(activity.path).toBe("_.P001.J001");
+
+				expect(programme.validated).toBe(false);
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(5);
+
+				return updatedProgrammes;
+			});
+
+			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
+			await service.unlinkProgrammesFromAction([programme], action, unlinkProgrammesDto, user, em, [], true);
+
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, unlinkProgrammesDto);
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(deleteAchievementsMock).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(1);
 		});
 	});
 
 	describe('linkUnlinkProjects', () => {
-
-		it('should link projects to programme', async () => {
-			const linkProjectsDto: LinkProjectsDto = { programmeId: '1', projectIds: ['1', '2', '3'] };
+		it('should link project to programme, project programme action verified', async () => {
+			const linkProjectsDto: LinkProjectsDto = { programmeId: 'P001', projectIds: ['J001'] };
 			const user = new User();
 			user.sector = [Sector.Agriculture]
 
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = true;
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "_._.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "_._"
+
 			const programme = new ProgrammeEntity();
-			programme.programmeId = "P1";
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.action = action;
+			programme.path = "A001";
 
-			const project1 = new ProjectEntity();
-			project1.projectId = '1';
-			project1.path = ""
-			project1.programme = null;
-
-			const project2 = new ProjectEntity();
-			project2.path = ""
-			project2.projectId = '2';
-			project2.programme = null;
-
-			const project3 = new ProjectEntity();
-			project3.projectId = '3';
-			project3.path = ""
-			project3.programme = null;
-
-			// jest.spyOn(service, 'findAllProjectsByIds').mockResolvedValue([project1, project2, project3]);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -171,12 +495,15 @@ describe('LinkUnlinkService', () => {
 				};
 				const updatedProjects = await callback(emMock);
 
-				expect(project1.programme).toBe(programme);
-				expect(project1.path).toBe("_.P1");
-				expect(project2.programme).toBe(programme);
-				expect(project2.path).toBe("_.P1");
-				expect(project3.programme).toBe(programme);
-				expect(project3.path).toBe("_.P1");
+				expect(project.programme).toBe(programme);
+				expect(project.path).toBe("A001.P001");
+				expect(activity.path).toBe("A001.P001.J001");
+
+				expect(action.validated).toBe(false);
+				expect(programme.validated).toBe(false);
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
 
 				expect(emMock.save).toHaveBeenCalledTimes(6);
 
@@ -184,38 +511,49 @@ describe('LinkUnlinkService', () => {
 			});
 
 			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
-			await service.linkProjectsToProgramme(programme, [project1, project2, project3], linkProjectsDto, user, em);
+			await service.linkProjectsToProgramme(programme, [project], linkProjectsDto, user, em);
 
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project1.projectId, user.id, linkProjectsDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project2.projectId, user.id, linkProjectsDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project3.projectId, user.id, linkProjectsDto);
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, linkProjectsDto);
 			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(0);
 		});
 
-
-		it('should unlink projects from programme', async () => {
-			const unlinkProjectsDto: UnlinkProjectsDto = { projects: ['1', '2', '3'] };
+		it('should link project to programme, project programme verified, programme not linked to action', async () => {
+			const linkProjectsDto: LinkProjectsDto = { programmeId: 'P001', projectIds: ['J001'] };
 			const user = new User();
 			user.sector = [Sector.Agriculture]
 
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "_._.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "_._"
+
 			const programme = new ProgrammeEntity();
-			programme.programmeId = "P1";
-			programme.affectedSectors = [Sector.Agriculture];
-			// jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.path = "";
 
-			const project1 = new ProjectEntity();
-			project1.projectId = '1';
-			project1.programme = programme;
-
-			const project2 = new ProjectEntity();
-			project2.projectId = '2';
-			project2.programme = programme;
-
-			const project3 = new ProjectEntity();
-			project3.projectId = '3';
-			project3.programme = programme;
-
-			// jest.spyOn(service, 'findAllProjectsByIds').mockResolvedValue([project1, project2, project3]);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -223,25 +561,403 @@ describe('LinkUnlinkService', () => {
 				};
 				const updatedProjects = await callback(emMock);
 
-				expect(project1.programme).toBe(null);
-				expect(project1.path).toBe("_._");
-				expect(project2.programme).toBe(null);
-				expect(project2.path).toBe("_._");
-				expect(project3.programme).toBe(null);
-				expect(project3.path).toBe("_._");
+				expect(project.programme).toBe(programme);
+				expect(project.path).toBe("_.P001");
+				expect(activity.path).toBe("_.P001.J001");
 
-				expect(emMock.save).toHaveBeenCalledTimes(6);
+				expect(programme.validated).toBe(false);
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(5);
 
 				return updatedProjects;
 			});
 
 			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
-			await service.unlinkProjectsFromProgramme([project1, project2, project3], unlinkProjectsDto, user, em);
+			await service.linkProjectsToProgramme(programme, [project], linkProjectsDto, user, em);
 
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.PROJECT, project1.projectId, user.id, unlinkProjectsDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.PROJECT, project2.projectId, user.id, unlinkProjectsDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.PROJECT, project3.projectId, user.id, unlinkProjectsDto);
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, linkProjectsDto);
 			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(1);
+		});
+
+		it('should unlink project from programme, with programme kpi achievements, project programme action verified, not programme delete', async () => {
+			const unlinkProjectsDto: UnlinkProjectsDto = { projects: ['J001'] };
+			const user = new User();
+			user.sector = [Sector.Agriculture]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = true;
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.action = action;
+			programme.path = "A001";
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+			project.programme = programme;
+
+			const achievementsToRemove = [new AchievementEntity()]
+
+			const deleteAchievementsMock = jest.spyOn(service, "deleteAchievements").mockReturnValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(project.programme).toBe(null);
+				expect(project.path).toBe("_._");
+				expect(activity.path).toBe("_._.J001");
+
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(5);
+
+				return updatedProgrammes;
+			});
+
+			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
+			await service.unlinkProjectsFromProgramme([project], unlinkProjectsDto, user, em, achievementsToRemove, false);
+
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, unlinkProjectsDto);
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(deleteAchievementsMock).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(0);
+		});
+
+		it('should unlink project from programme, with programme kpi achievements, project programme verified, not programme delete', async () => {
+			const unlinkProjectsDto: UnlinkProjectsDto = { projects: ['J001'] };
+			const user = new User();
+			user.sector = [Sector.Agriculture]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = false;
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.action = action;
+			programme.path = "A001";
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+			project.programme = programme;
+
+			const achievementsToRemove = [new AchievementEntity()]
+
+			const deleteAchievementsMock = jest.spyOn(service, "deleteAchievements").mockReturnValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(project.programme).toBe(null);
+				expect(project.path).toBe("_._");
+				expect(activity.path).toBe("_._.J001");
+
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(5);
+
+				return updatedProgrammes;
+			});
+
+			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
+			await service.unlinkProjectsFromProgramme([project], unlinkProjectsDto, user, em, achievementsToRemove, false);
+
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, unlinkProjectsDto);
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(deleteAchievementsMock).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(1);
+		});
+
+		it('should unlink project from programme, with programme kpi achievements, project programme verified, not programme delete', async () => {
+			const unlinkProjectsDto: UnlinkProjectsDto = { projects: ['J001'] };
+			const user = new User();
+			user.sector = [Sector.Agriculture]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = false;
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.action = action;
+			programme.path = "A001";
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+			project.programme = programme;
+
+			const achievementsToRemove = [new AchievementEntity()]
+
+			const deleteAchievementsMock = jest.spyOn(service, "deleteAchievements").mockReturnValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProject').mockResolvedValue(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(project.programme).toBe(null);
+				expect(project.path).toBe("_._");
+				expect(activity.path).toBe("_._.J001");
+
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(5);
+
+				return updatedProgrammes;
+			});
+
+			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
+			await service.unlinkProjectsFromProgramme([project], unlinkProjectsDto, user, em, achievementsToRemove, false);
+
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, unlinkProjectsDto);
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(deleteAchievementsMock).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProject).toHaveBeenCalledTimes(0);
+		});
+
+		it('should unlink project from programme, with programme kpi achievements, action project programme verified, is programme delete', async () => {
+			const unlinkProjectsDto: UnlinkProjectsDto = { projects: ['J001'] };
+			const user = new User();
+			user.sector = [Sector.Agriculture]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = true;
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.action = action;
+			programme.path = "A001";
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+			project.programme = programme;
+
+			const achievementsToRemove = [new AchievementEntity()]
+
+			const deleteAchievementsMock = jest.spyOn(service, "deleteAchievements").mockReturnValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProject').mockResolvedValue(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(project.programme).toBe(null);
+				expect(project.path).toBe("_._");
+				expect(activity.path).toBe("_._.J001");
+
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(5);
+
+				return updatedProgrammes;
+			});
+
+			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
+			await service.unlinkProjectsFromProgramme([project], unlinkProjectsDto, user, em, achievementsToRemove, true);
+
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, unlinkProjectsDto);
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(deleteAchievementsMock).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProject).toHaveBeenCalledTimes(1);
+		});
+
+		it('should unlink project from programme, with programme kpi achievements, project programme verified, is programme delete', async () => {
+			const unlinkProjectsDto: UnlinkProjectsDto = { projects: ['J001'] };
+			const user = new User();
+			user.sector = [Sector.Agriculture]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = false;
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
+			programme.action = action;
+			programme.path = "A001";
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+			project.programme = programme;
+
+			const achievementsToRemove = [new AchievementEntity()]
+
+			const deleteAchievementsMock = jest.spyOn(service, "deleteAchievements").mockReturnValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProject').mockResolvedValue(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(project.programme).toBe(null);
+				expect(project.path).toBe("_._");
+				expect(activity.path).toBe("_._.J001");
+
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(4);
+
+				return updatedProgrammes;
+			});
+
+			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
+			await service.unlinkProjectsFromProgramme([project], unlinkProjectsDto, user, em, achievementsToRemove, true);
+
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, unlinkProjectsDto);
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(deleteAchievementsMock).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProject).toHaveBeenCalledTimes(1);
 		});
 
 	});
@@ -249,32 +965,26 @@ describe('LinkUnlinkService', () => {
 
 	describe('linkUnlinkActivities', () => {
 
-		it('should link activities to programme', async () => {
-			const linkActivitiesDto: LinkActivitiesDto = { parentId: 'P1', parentType: EntityType.PROGRAMME, activityIds: ['1', '2', '3'] };
+		it('should link activities to programme, programme validated', async () => {
+			const linkActivitiesDto: LinkActivitiesDto = { parentId: 'P001', parentType: EntityType.PROGRAMME, activityIds: ['T001'] };
 			const user = new User();
 			user.sector = [Sector.Agriculture]
 
 			const programme = new ProgrammeEntity();
-			programme.programmeId = "P1";
-			programme.affectedSectors = [Sector.Agriculture, Sector.Energy];
+			programme.programmeId = "P001";
+			programme.sector = Sector.Agriculture;
+			programme.validated = true;
 
-			const activity1 = new ActivityEntity();
-			activity1.activityId = '1';
-			activity1.path = ""
-			activity1.parentId = null;
-			activity1.parentType = null;
+			const activity = new ActivityEntity();
+			activity.activityId = 'T001';
+			activity.path = ""
+			activity.parentId = null;
+			activity.parentType = null;
 
-			const activity2 = new ActivityEntity();
-			activity2.activityId = '2';
-			activity2.path = ""
-			activity2.parentId = null;
-			activity2.parentType = null;
-
-			const activity3 = new ActivityEntity();
-			activity3.activityId = '3';
-			activity3.path = ""
-			activity3.parentId = null;
-			activity3.parentType = null;
+			jest.spyOn(service, 'findProgrammeById').mockResolvedValue(programme);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProject').mockResolvedValue(null);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
@@ -282,286 +992,467 @@ describe('LinkUnlinkService', () => {
 				};
 				const updatedProjects = await callback(emMock);
 
-				expect(activity1.parentId).toBe("P1");
-				expect(activity1.parentType).toBe(EntityType.PROGRAMME);
-				expect(activity1.path).toBe("_.P1._");
-				expect(activity1.sectors).toEqual([Sector.Agriculture, Sector.Energy]);
-				
-				expect(activity2.parentId).toBe("P1");
-				expect(activity2.parentType).toBe(EntityType.PROGRAMME);
-				expect(activity2.path).toBe("_.P1._");
-				expect(activity2.sectors).toEqual([Sector.Agriculture, Sector.Energy]);
+				expect(activity.parentId).toBe("P001");
+				expect(activity.parentType).toBe(EntityType.PROGRAMME);
+				expect(activity.path).toBe("_.P001._");
+				expect(activity.sector).toEqual(Sector.Agriculture);
 
-				expect(activity3.parentId).toBe("P1");
-				expect(activity3.parentType).toBe(EntityType.PROGRAMME);
-				expect(activity3.path).toBe("_.P1._");
-				expect(activity3.sectors).toEqual([Sector.Agriculture, Sector.Energy]);
-
-
-				expect(emMock.save).toHaveBeenCalledTimes(6);
-
+				expect(emMock.save).toHaveBeenCalledTimes(3);
 				return updatedProjects;
 			});
 
 			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
-			await service.linkActivitiesToParent(programme, [activity1, activity2, activity3], linkActivitiesDto, user, em);
+			await service.linkActivitiesToParent(programme, [activity], linkActivitiesDto, user, em);
 
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activity1.activityId, user.id, linkActivitiesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activity2.activityId, user.id, linkActivitiesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activity2.activityId, user.id, linkActivitiesDto);
+			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activity.activityId, user.id, linkActivitiesDto.parentId);
 
 			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProject).toHaveBeenCalledTimes(0);
+
 		});
 
-		it('should link activities to project', async () => {
-			const linkActivitiesDto: LinkActivitiesDto = { parentId: 'J1', parentType: EntityType.PROJECT, activityIds: ['1', '2', '3'] };
+	});
+
+	describe('updateActionChildrenSector', () => {
+		it('should update action children sector', async () => {
 			const user = new User();
-			user.sector = [Sector.Agriculture]
-
-			const project = new ProjectEntity();
-			project.projectId = "J1";
-			project.sectors = [Sector.Agriculture, Sector.Energy];
-
-			const activity1 = new ActivityEntity();
-			activity1.activityId = '1';
-			activity1.path = ""
-			activity1.parentId = null;
-			activity1.parentType = null;
-
-			const activity2 = new ActivityEntity();
-			activity2.activityId = '2';
-			activity2.path = ""
-			activity2.parentId = null;
-			activity2.parentType = null;
-
-			const activity3 = new ActivityEntity();
-			activity3.activityId = '3';
-			activity3.path = ""
-			activity3.parentId = null;
-			activity3.parentType = null;
-
-			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
-				const emMock = {
-					save: jest.fn().mockResolvedValue([new ActivityEntity()]),
-				};
-				const updatedProjects = await callback(emMock);
-
-				expect(activity1.parentId).toBe("J1");
-				expect(activity1.parentType).toBe(EntityType.PROJECT);
-				expect(activity1.path).toBe("_._.J1");
-				expect(activity1.sectors).toEqual([Sector.Agriculture, Sector.Energy]);
-
-				expect(activity2.parentId).toBe("J1");
-				expect(activity2.parentType).toBe(EntityType.PROJECT);
-				expect(activity2.path).toBe("_._.J1");
-				expect(activity2.sectors).toEqual([Sector.Agriculture, Sector.Energy]);
-
-				expect(activity3.parentId).toBe("J1");
-				expect(activity3.parentType).toBe(EntityType.PROJECT);
-				expect(activity3.path).toBe("_._.J1");
-				expect(activity3.sectors).toEqual([Sector.Agriculture, Sector.Energy]);
-
-
-				expect(emMock.save).toHaveBeenCalledTimes(6);
-
-				return updatedProjects;
-			});
-
-			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
-			await service.linkActivitiesToParent(project, [activity1, activity2, activity3], linkActivitiesDto, user, em);
-
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROJECT, EntityType.ACTIVITY, activity1.activityId, user.id, linkActivitiesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROJECT, EntityType.ACTIVITY, activity2.activityId, user.id, linkActivitiesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_PROJECT, EntityType.ACTIVITY, activity2.activityId, user.id, linkActivitiesDto);
-
-			expect(entityManagerMock.transaction).toHaveBeenCalled();
-		});
-
-		it('should link activities to action', async () => {
-			const linkActivitiesDto: LinkActivitiesDto = { parentId: 'A1', parentType: EntityType.ACTION, activityIds: ['1', '2', '3'] };
-			const user = new User();
-			user.sector = [Sector.Agriculture]
+			user.sector = [Sector.Agriculture, Sector.Forestry]
 
 			const action = new ActionEntity();
-			action.actionId = "A1";
-
-			const activity1 = new ActivityEntity();
-			activity1.activityId = '1';
-			activity1.path = ""
-			activity1.parentId = null;
-			activity1.parentType = null;
-
-			const activity2 = new ActivityEntity();
-			activity2.activityId = '2';
-			activity2.path = ""
-			activity2.parentId = null;
-			activity2.parentType = null;
-
-			const activity3 = new ActivityEntity();
-			activity3.activityId = '3';
-			activity3.path = ""
-			activity3.parentId = null;
-			activity3.parentType = null;
-
-			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
-				const emMock = {
-					save: jest.fn().mockResolvedValue([new ActivityEntity()]),
-				};
-				const updatedProjects = await callback(emMock);
-
-				expect(activity1.parentId).toBe("A1");
-				expect(activity1.parentType).toBe(EntityType.ACTION);
-				expect(activity1.path).toBe("A1._._");
-				expect(activity2.parentId).toBe("A1");
-				expect(activity2.parentType).toBe(EntityType.ACTION);
-				expect(activity2.path).toBe("A1._._");
-				expect(activity3.parentId).toBe("A1");
-				expect(activity3.parentType).toBe(EntityType.ACTION);
-				expect(activity3.path).toBe("A1._._");
-
-				expect(emMock.save).toHaveBeenCalledTimes(6);
-
-				return updatedProjects;
-			});
-
-			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
-			await service.linkActivitiesToParent(action, [activity1, activity2, activity3], linkActivitiesDto, user, em);
-
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_ACTION, EntityType.ACTIVITY, activity1.activityId, user.id, linkActivitiesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_ACTION, EntityType.ACTIVITY, activity2.activityId, user.id, linkActivitiesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_ACTION, EntityType.ACTIVITY, activity2.activityId, user.id, linkActivitiesDto);
-
-			expect(entityManagerMock.transaction).toHaveBeenCalled();
-		});
-
-
-		it('should unlink activities from programme', async () => {
-			const unlinkActivitiesDto: UnlinkActivitiesDto = { activityIds: ['1', '2', '3'] };
-			const user = new User();
-			user.sector = [Sector.Agriculture]
+			action.actionId = "A001";
+			action.validated = false;
 
 			const programme = new ProgrammeEntity();
-			programme.programmeId = "P1";
-			programme.affectedSectors = [Sector.Agriculture];
-			// jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Forestry;
+			programme.validated = true;
+			programme.action = action;
+			programme.path = "A001";
 
-			const activity1 = new ActivityEntity();
-			activity1.activityId = '1';
-			activity1.parentType = EntityType.PROGRAMME;
-			activity1.parentId = "P1";
-			activity1.path = "_.P1._";
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
 
-			const activity2 = new ActivityEntity();
-			activity2.activityId = '1';
-			activity2.parentType = EntityType.PROGRAMME;
-			activity2.parentId = "P1";
-			activity2.path = "_.P1._";
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
 
-			const activity3 = new ActivityEntity();
-			activity3.activityId = '1';
-			activity3.parentType = EntityType.PROGRAMME;
-			activity3.parentId = "P1";
-			activity3.path = "_.P1._";
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+			project.programme = programme;
 
-			// jest.spyOn(service, 'findAllProjectsByIds').mockResolvedValue([project1, project2, project3]);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProject').mockResolvedValue(null);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
-					save: jest.fn().mockResolvedValue([new ActivityEntity()]),
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
 				};
-				const updatedProjects = await callback(emMock);
+				const updatedProgrammes = await callback(emMock);
 
-				expect(activity1.parentId).toBe(null);
-				expect(activity1.parentType).toBe(null);
-				expect(activity1.path).toBe("_._._");
-				expect(activity2.parentId).toBe(null);
-				expect(activity2.parentType).toBe(null);
-				expect(activity2.path).toBe("_._._");
-				expect(activity3.parentId).toBe(null);
-				expect(activity3.parentType).toBe(null);
-				expect(activity3.path).toBe("_._._");
+				expect(programme.sector).toBe(Sector.Agriculture);
+				expect(project.sector).toBe(Sector.Agriculture);
+				expect(activity.sector).toBe(Sector.Agriculture);
+				expect(support.sector).toBe(Sector.Agriculture);
 
-				expect(emMock.save).toHaveBeenCalledTimes(6);
+				expect(emMock.save).toHaveBeenCalledTimes(5);
 
-				return updatedProjects;
+				return updatedProgrammes;
 			});
 
-			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
-			await service.unlinkActivitiesFromParent([activity1, activity2, activity3], unlinkActivitiesDto, user, em);
+			await service.updateActionChildrenSector("A001", {
+				haveChildren: true,
+				programmeChildren: [programme],
+				projectChildren: [project],
+				activityChildren: [activity],
+			}, Sector.Agriculture, em);
 
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.ACTIVITY, activity1.activityId, user.id, unlinkActivitiesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.ACTIVITY, activity2.activityId, user.id, unlinkActivitiesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.UNLINKED_FROM_PROGRAMME, EntityType.ACTIVITY, activity3.activityId, user.id, unlinkActivitiesDto);
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(service.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(1);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toHaveBeenCalledTimes(0);
+			expect(service.updateAllValidatedChildrenAndParentStatusByProject).toHaveBeenCalledTimes(0);
+		});
+
+	});
+
+	describe('updateAllValidatedChildrenStatusByActionId', () => {
+		it('should update action children validation status', async () => {
+			const user = new User();
+			user.sector = [Sector.Agriculture, Sector.Forestry]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = false;
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Forestry;
+			programme.validated = true;
+			programme.path = "A001";
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+
+			const queryBuilderProgrammeMock: Partial<SelectQueryBuilder<ProgrammeEntity>> = {
+				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
+				getMany: jest.fn().mockResolvedValueOnce([programme]),
+			};
+
+			const queryBuilderProjectMock: Partial<SelectQueryBuilder<ProjectEntity>> = {
+				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
+				getMany: jest.fn().mockResolvedValueOnce([project]),
+			};
+
+			const queryBuilderActivityMock: Partial<SelectQueryBuilder<ActivityEntity>> = {
+				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
+				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				getMany: jest.fn().mockResolvedValueOnce([activity]),
+			};
+
+			jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(queryBuilderProgrammeMock as SelectQueryBuilder<ProgrammeEntity>);
+			jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(queryBuilderProjectMock as SelectQueryBuilder<ProjectEntity>);
+			jest.spyOn(activityRepositoryMock, 'createQueryBuilder').mockReturnValue(queryBuilderActivityMock as SelectQueryBuilder<ActivityEntity>);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(programme.validated).toBe(false);
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(5);
+
+				return updatedProgrammes;
+			});
+
+			await service.updateAllValidatedChildrenStatusByActionId("A001", em);
+
 			expect(entityManagerMock.transaction).toHaveBeenCalled();
 		});
 
 	});
 
-	it('should link activities from action and set activity sectors properly', async () => {
-		const linkActivitiesDto: LinkActivitiesDto = { parentId: 'A1', parentType: EntityType.ACTION, activityIds: ['1', '2', '3'] };
-		const user = new User();
-		user.sector = [Sector.Agriculture]
+	describe('updateAllValidatedChildrenAndParentStatusByProgrammeId', () => {
+		it('should update programme children validation status, not update parent', async () => {
+			const user = new User();
+			user.sector = [Sector.Agriculture, Sector.Forestry]
 
-		const action = {
-			actionId: "A1",
-			migratedData: {
-				sectorsAffected: [Sector.Agriculture, Sector.Energy]
-			}
-		};
-		
-		const activity1 = new ActivityEntity();
-			activity1.activityId = '1';
-			activity1.path = ""
-			activity1.parentId = null;
-			activity1.parentType = null;
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = false;
 
-			const activity2 = new ActivityEntity();
-			activity2.activityId = '2';
-			activity2.path = ""
-			activity2.parentId = null;
-			activity2.parentType = null;
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Forestry;
+			programme.validated = true;
+			programme.path = "A001";
 
-			const activity3 = new ActivityEntity();
-			activity3.activityId = '3';
-			activity3.path = ""
-			activity3.parentId = null;
-			activity3.parentType = null;
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+
+			const queryBuilderProjectMock: Partial<SelectQueryBuilder<ProjectEntity>> = {
+				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
+				getMany: jest.fn().mockResolvedValueOnce([project]),
+			};
+
+			const queryBuilderActivityMock: Partial<SelectQueryBuilder<ActivityEntity>> = {
+				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
+				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				getMany: jest.fn().mockResolvedValueOnce([activity]),
+			};
+
+			jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(queryBuilderProjectMock as SelectQueryBuilder<ProjectEntity>);
+			jest.spyOn(activityRepositoryMock, 'createQueryBuilder').mockReturnValue(queryBuilderActivityMock as SelectQueryBuilder<ActivityEntity>);
 
 			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 				const emMock = {
-					save: jest.fn().mockResolvedValue([new ActivityEntity()]),
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
 				};
-				const updatedProjects = await callback(emMock);
+				const updatedProgrammes = await callback(emMock);
 
-				expect(activity1.parentId).toBe("A1");
-				expect(activity1.parentType).toBe(EntityType.ACTION);
-				expect(activity1.path).toBe("A1._._");
-				expect(activity1.sectors).toEqual([Sector.Agriculture, Sector.Energy]);
+				expect(project.validated).toBe(false);
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
 
-				expect(activity2.parentId).toBe("A1");
-				expect(activity2.parentType).toBe(EntityType.ACTION);
-				expect(activity2.sectors).toEqual([Sector.Agriculture, Sector.Energy]);
-				expect(activity2.path).toBe("A1._._");
+				expect(emMock.save).toHaveBeenCalledTimes(4);
 
-				expect(activity3.parentId).toBe("A1");
-				expect(activity3.parentType).toBe(EntityType.ACTION);
-				expect(activity3.path).toBe("A1._._");
-				expect(activity3.sectors).toEqual([Sector.Agriculture, Sector.Energy]);
-
-				expect(emMock.save).toHaveBeenCalledTimes(6);
-
-				return updatedProjects;
+				return updatedProgrammes;
 			});
 
-			const buildLogEntitySpy = jest.spyOn(service, 'buildLogEntity');
-			await service.linkActivitiesToParent(action, [activity1, activity2, activity3], linkActivitiesDto, user, em);
-
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_ACTION, EntityType.ACTIVITY, activity1.activityId, user.id, linkActivitiesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_ACTION, EntityType.ACTIVITY, activity2.activityId, user.id, linkActivitiesDto);
-			expect(buildLogEntitySpy).toBeCalledWith(LogEventType.LINKED_TO_ACTION, EntityType.ACTIVITY, activity2.activityId, user.id, linkActivitiesDto);
+			await service.updateAllValidatedChildrenAndParentStatusByProgrammeId(programme, em, true);
 
 			expect(entityManagerMock.transaction).toHaveBeenCalled();
 		});
 
+		it('should update programme children validation status, update parent', async () => {
+			const user = new User();
+			user.sector = [Sector.Agriculture, Sector.Forestry]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = true;
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Forestry;
+			programme.validated = true;
+			programme.path = "A001";
+			programme.action = action;
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+
+			const queryBuilderProjectMock: Partial<SelectQueryBuilder<ProjectEntity>> = {
+				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
+				getMany: jest.fn().mockResolvedValueOnce([project]),
+			};
+
+			const queryBuilderActivityMock: Partial<SelectQueryBuilder<ActivityEntity>> = {
+				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
+				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				getMany: jest.fn().mockResolvedValueOnce([activity]),
+			};
+
+			jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(queryBuilderProjectMock as SelectQueryBuilder<ProjectEntity>);
+			jest.spyOn(activityRepositoryMock, 'createQueryBuilder').mockReturnValue(queryBuilderActivityMock as SelectQueryBuilder<ActivityEntity>);
+			jest.spyOn(service, 'updateAllValidatedChildrenStatusByActionId').mockResolvedValue(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(action.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(2);
+
+				return updatedProgrammes;
+			});
+
+			await service.updateAllValidatedChildrenAndParentStatusByProgrammeId(programme, em, false);
+
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(service.updateAllValidatedChildrenStatusByActionId).toBeCalledTimes(1)
+		});
+
+	});
+
+	describe('updateAllValidatedChildrenAndParentStatusByProject', () => {
+		it('should update project children validation status, not update parent', async () => {
+			const user = new User();
+			user.sector = [Sector.Agriculture, Sector.Forestry]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = false;
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Forestry;
+			programme.validated = true;
+			programme.path = "A001";
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+			project.programme = programme;
+
+			const queryBuilderActivityMock: Partial<SelectQueryBuilder<ActivityEntity>> = {
+				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
+				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				getMany: jest.fn().mockResolvedValueOnce([activity]),
+			};
+
+			jest.spyOn(activityRepositoryMock, 'createQueryBuilder').mockReturnValue(queryBuilderActivityMock as SelectQueryBuilder<ActivityEntity>);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(activity.validated).toBe(false);
+				expect(support.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(3);
+
+				return updatedProgrammes;
+			});
+
+			await service.updateAllValidatedChildrenAndParentStatusByProject(project, em, true);
+
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+		});
+
+		it('should update project children validation status, update parent', async () => {
+			const user = new User();
+			user.sector = [Sector.Agriculture, Sector.Forestry]
+
+			const action = new ActionEntity();
+			action.actionId = "A001";
+			action.validated = true;
+
+			const programme = new ProgrammeEntity();
+			programme.programmeId = 'P001';
+			programme.action = null;
+			programme.sector = Sector.Forestry;
+			programme.validated = true;
+			programme.path = "A001";
+			programme.action = action;
+
+			const support = new SupportEntity();
+			support.supportId = 'S001';
+			support.sector = Sector.Forestry;
+			support.validated = true;
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+			activity.sector = Sector.Forestry;
+			activity.validated = true;
+			activity.support = [support]
+			activity.path = "A001.P001.J001"
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.path = "A001.P001";
+			project.programme = programme;
+
+			const queryBuilderActivityMock: Partial<SelectQueryBuilder<ActivityEntity>> = {
+				where: jest.fn().mockReturnThis(),
+				andWhere: jest.fn().mockReturnThis(),
+				leftJoinAndSelect: jest.fn().mockReturnThis(),
+				getMany: jest.fn().mockResolvedValueOnce([activity]),
+			};
+
+			jest.spyOn(activityRepositoryMock, 'createQueryBuilder').mockReturnValue(queryBuilderActivityMock as SelectQueryBuilder<ActivityEntity>);
+			jest.spyOn(service, 'updateAllValidatedChildrenAndParentStatusByProgrammeId').mockResolvedValue(null);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					save: jest.fn().mockResolvedValue([new ProgrammeEntity()]),
+				};
+				const updatedProgrammes = await callback(emMock);
+
+				expect(programme.validated).toBe(false);
+
+				expect(emMock.save).toHaveBeenCalledTimes(4);
+
+				return updatedProgrammes;
+			});
+
+			await service.updateAllValidatedChildrenAndParentStatusByProject(project, em, false);
+
+			expect(entityManagerMock.transaction).toHaveBeenCalled();
+			expect(service.updateAllValidatedChildrenAndParentStatusByProgrammeId).toBeCalledTimes(1)
+		});
+
+	});
 
 });

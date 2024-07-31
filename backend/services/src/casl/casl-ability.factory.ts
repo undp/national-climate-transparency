@@ -18,10 +18,10 @@ import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { SupportEntity } from "../entities/support.entity";
 import { KpiEntity } from "../entities/kpi.entity";
-import { EmissionEntity } from "src/entities/emission.entity";
-import { ProjectionEntity } from "src/entities/projection.entity";
-import { ConfigurationSettingsEntity } from "src/entities/configuration.settings.entity";
-import { SystemResourcesEntity } from "src/entities/systemResource.entity";
+import { EmissionEntity } from "../entities/emission.entity";
+import { ProjectionEntity } from "../entities/projection.entity";
+import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
+import { SystemResourcesEntity } from "../entities/systemResource.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 

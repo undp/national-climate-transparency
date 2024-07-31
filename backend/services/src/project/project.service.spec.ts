@@ -9,11 +9,11 @@ import { CounterService } from "../util/counter.service";
 import { FileUploadService } from "../util/fileUpload.service";
 import { HelperService } from "../util/helpers.service";
 import { PayloadValidator } from "../validation/payload.validator";
-import { IntImplementor, Recipient, SubSector } from "../enums/shared.enum";
+import { EntityType, IntImplementor, Recipient, SubSector } from "../enums/shared.enum";
 import { DataResponseMessageDto } from "../dtos/data.response.message";
 import { ProjectDto } from "../dtos/project.dto";
 import { User } from "../entities/user.entity";
-import { ProjectStatus, ProjectType } from "../enums/project.enum";
+import { ProjectStatus } from "../enums/project.enum";
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { DocumentDto } from "../dtos/document.dto";
 import { KpiDto } from "../dtos/kpi.dto";
@@ -24,6 +24,9 @@ import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
 import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
 import { KpiService } from "../kpi/kpi.service";
 import { ActivityEntity } from "../entities/activity.entity";
+import { Role } from "../casl/role.enum";
+import { KpiEntity } from "../entities/kpi.entity";
+import { ActionEntity } from "../entities/action.entity";
 
 describe('ProjectService', () => {
 	let service: ProjectService;
@@ -74,6 +77,9 @@ describe('ProjectService', () => {
 		linkUnlinkServiceMock = {
 			linkProjectsToProgramme: jest.fn(),
 			unlinkProjectsFromProgramme: jest.fn(),
+			updateAllValidatedChildrenAndParentStatusByProject: jest.fn(),
+			updateAllValidatedChildrenAndParentStatusByProgrammeId: jest.fn(),
+			updateAllValidatedChildrenStatusByActionId: jest.fn(),
 		}
 
 		projectRepositoryMock = {
@@ -151,7 +157,6 @@ describe('ProjectService', () => {
 		const projectDto = new ProjectDto();
 		projectDto.title = "Project 4";
 		projectDto.description = "test description";
-		projectDto.type = ProjectType.MITIGATION;
 		projectDto.projectStatus = ProjectStatus.PLANNED;
 		projectDto.startYear = 2025;
 		projectDto.endYear = 2030;
@@ -162,7 +167,6 @@ describe('ProjectService', () => {
 		projectEntity.projectId = "J001";
 		projectEntity.title = "Project 4";
 		projectEntity.description = "test description";
-		projectEntity.type = ProjectType.MITIGATION;
 		projectEntity.projectStatus = ProjectStatus.PLANNED;
 		projectEntity.startYear = 2025;
 		projectEntity.endYear = 2030;
@@ -203,7 +207,6 @@ describe('ProjectService', () => {
 		const projectDto = new ProjectDto();
 		projectDto.title = "Project 4";
 		projectDto.description = "test description";
-		projectDto.type = ProjectType.MITIGATION;
 		projectDto.projectStatus = ProjectStatus.PLANNED;
 		projectDto.startYear = 2025;
 		projectDto.endYear = 2030;
@@ -215,7 +218,6 @@ describe('ProjectService', () => {
 		projectEntity.projectId = "J001";
 		projectEntity.title = "Project 4";
 		projectEntity.description = "test description";
-		projectEntity.type = ProjectType.MITIGATION;
 		projectEntity.projectStatus = ProjectStatus.PLANNED;
 		projectEntity.startYear = 2025;
 		projectEntity.endYear = 2030;
@@ -283,7 +285,6 @@ describe('ProjectService', () => {
 		const projectDto = new ProjectDto();
 		projectDto.title = "Project 4";
 		projectDto.description = "test description";
-		projectDto.type = ProjectType.MITIGATION;
 		projectDto.projectStatus = ProjectStatus.PLANNED;
 		projectDto.startYear = 2025;
 		projectDto.endYear = 2030;
@@ -297,7 +298,6 @@ describe('ProjectService', () => {
 		projectEntity.projectId = "J001";
 		projectEntity.title = "Project 4";
 		projectEntity.description = "test description";
-		projectEntity.type = ProjectType.MITIGATION;
 		projectEntity.projectStatus = ProjectStatus.PLANNED;
 		projectEntity.startYear = 2025;
 		projectEntity.endYear = 2030;
@@ -410,7 +410,7 @@ describe('ProjectService', () => {
 		project3.programme = programme;
 
 		jest.spyOn(service, 'findAllProjectsByIds').mockResolvedValue([project1, project2, project3]);
-		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
 		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockReturnValueOnce('project.cannotUnlinkNotRelatedProject');
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
@@ -436,7 +436,6 @@ describe('ProjectService', () => {
 		// Assert the returned result
 		expect(result).toEqual(expect.any(DataResponseMessageDto));
 		expect(result.statusCode).toEqual(HttpStatus.OK);
-		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("project.cannotUnlinkNotRelatedProject", []);
 		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalled();
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 	});
@@ -503,7 +502,6 @@ describe('ProjectService', () => {
 		projectDto.projectId = "J001";
 		projectDto.title = "Project 4";
 		projectDto.description = "test description";
-		projectDto.type = ProjectType.MITIGATION;
 		projectDto.projectStatus = ProjectStatus.PLANNED;
 		projectDto.startYear = 2025;
 		projectDto.endYear = 2030;
@@ -515,13 +513,11 @@ describe('ProjectService', () => {
 		projectEntity.title = "Project 4";
 		projectEntity.sector = Sector.Agriculture;
 		projectEntity.description = "test description";
-		projectEntity.type = ProjectType.MITIGATION;
 		projectEntity.projectStatus = ProjectStatus.PLANNED;
 		projectEntity.startYear = 2025;
 		projectEntity.endYear = 2030;
 		projectEntity.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectEntity.internationalImplementingEntities = [IntImplementor.NEFCO];
-		projectEntity.expectedTimeFrame = 25;
 		projectEntity.path = "";
 
 		const mockQueryBuilder = {
@@ -548,7 +544,6 @@ describe('ProjectService', () => {
 				query: jest.fn().mockResolvedValueOnce(projectEntity),
 			};
 			const savedProgramme = await callback(emMock);
-			expect(emMock.save).toHaveBeenNthCalledWith(1, projectEntity);
 			expect(emMock.save).toHaveBeenCalledTimes(2);
 			return savedProgramme;
 		});
@@ -559,6 +554,7 @@ describe('ProjectService', () => {
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(0);
 		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalledTimes(0);
+		expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProject).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 	});
@@ -573,7 +569,6 @@ describe('ProjectService', () => {
 		projectDto.projectId = "J001";
 		projectDto.title = "Project 4";
 		projectDto.description = "test description";
-		projectDto.type = ProjectType.MITIGATION;
 		projectDto.projectStatus = ProjectStatus.PLANNED;
 		projectDto.startYear = 2025;
 		projectDto.endYear = 2030;
@@ -585,7 +580,6 @@ describe('ProjectService', () => {
 		projectEntity.projectId = "J001";
 		projectEntity.title = "Project 4";
 		projectEntity.description = "test description";
-		projectEntity.type = ProjectType.MITIGATION;
 		projectEntity.projectStatus = ProjectStatus.PLANNED;
 		projectEntity.startYear = 2025;
 		projectEntity.endYear = 2030;
@@ -610,11 +604,9 @@ describe('ProjectService', () => {
 
 		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
 		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
-		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
-		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("project.cannotLinkToNotRelatedProgramme");
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
 
 		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
-		// jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
 
 
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
@@ -634,9 +626,9 @@ describe('ProjectService', () => {
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(1);
 		expect(linkUnlinkServiceMock.unlinkProjectsFromProgramme).toHaveBeenCalledTimes(0);
+		expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProject).toHaveBeenCalledTimes(0);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
-		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("project.cannotLinkToNotRelatedProgramme", ["J001"]);
 
 	});
 
@@ -653,7 +645,6 @@ describe('ProjectService', () => {
 		projectDto.projectId = "J001";
 		projectDto.title = "Project 4";
 		projectDto.description = "test description";
-		projectDto.type = ProjectType.MITIGATION;
 		projectDto.projectStatus = ProjectStatus.PLANNED;
 		projectDto.startYear = 2025;
 		projectDto.endYear = 2030;
@@ -664,7 +655,6 @@ describe('ProjectService', () => {
 		projectEntity.projectId = "J001";
 		projectEntity.title = "Project 4";
 		projectEntity.description = "test description";
-		projectEntity.type = ProjectType.MITIGATION;
 		projectEntity.projectStatus = ProjectStatus.PLANNED;
 		projectEntity.startYear = 2025;
 		projectEntity.endYear = 2030;
@@ -706,6 +696,7 @@ describe('ProjectService', () => {
 		expect(result.statusCode).toEqual(expectedResponse.statusCode);
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(0);
+		expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProject).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
 	});
@@ -720,25 +711,24 @@ describe('ProjectService', () => {
 		programme.sector = Sector.Agriculture;
 
 		const newProgramme = new ProgrammeEntity();
-		newProgramme.programmeId = "P001";
+		newProgramme.programmeId = "P002";
 		newProgramme.sector = Sector.Agriculture;
 
 		const projectDto = new ProjectUpdateDto();
 		projectDto.projectId = "J001";
 		projectDto.title = "Project 4";
 		projectDto.description = "test description";
-		projectDto.type = ProjectType.MITIGATION;
 		projectDto.projectStatus = ProjectStatus.PLANNED;
 		projectDto.startYear = 2025;
 		projectDto.endYear = 2030;
 		projectDto.recipientEntities = [Recipient.MIN_AGRI_CLIM_ENV, Recipient.OFF_PRESIDENT];
 		projectDto.internationalImplementingEntities = [IntImplementor.NEFCO];
+		projectDto.programmeId = "P002"
 
 		const projectEntity = new ProjectEntity();
 		projectEntity.projectId = "J001";
 		projectEntity.title = "Project 4";
 		projectEntity.description = "test description";
-		projectEntity.type = ProjectType.MITIGATION;
 		projectEntity.projectStatus = ProjectStatus.PLANNED;
 		projectEntity.startYear = 2025;
 		projectEntity.endYear = 2030;
@@ -759,8 +749,8 @@ describe('ProjectService', () => {
 		} as unknown as SelectQueryBuilder<ProjectEntity  >;
 
 		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
-		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(programme);
-		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+		jest.spyOn(programmeServiceMock, 'findProgrammeById').mockResolvedValue(newProgramme);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
 
 		const expectedResponse = new DataResponseMessageDto(200, "project.createProjectSuccess", projectEntity)
 		// jest.spyOn(service, 'findProjectWithLinkedProgrammeByProjectId').mockResolvedValue(projectEntity);
@@ -779,9 +769,243 @@ describe('ProjectService', () => {
 
 		expect(result.statusCode).toEqual(expectedResponse.statusCode);
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
-		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(0);
+		expect(linkUnlinkServiceMock.linkProjectsToProgramme).toHaveBeenCalledTimes(1);
+		expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProject).toHaveBeenCalledTimes(0);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(0);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1)
+	});
+
+	describe('deleteProject', () => {
+		it('should throw ForbiddenException if user is not Admin or Root', async () => {
+			const user = { role: Role.GovernmentUser } as User;
+			const deleteDto = { entityId: '123' };
+
+			await expect(service.deleteProject(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('user.userUnAUth', []);
+		});
+
+		it('should throw BadRequest if project not found', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: '123' };
+			jest.spyOn(service, 'findProjectWithParentAndChildren').mockResolvedValue(null);
+
+			await expect(service.deleteProject(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('project.projectNotFound', ["123"]);
+		});
+
+		it('should throw Forbidden if user does not have sector permission', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: 'J001' };
+
+			const project = new ProjectEntity();
+			project.projectId = 'J001';
+			project.sector = Sector.Forestry;
+			project.validated = true;
+
+			jest.spyOn(service, 'findProjectWithParentAndChildren').mockResolvedValue(project);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(false);
+
+			await expect(service.deleteProject(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('project.permissionDeniedForSector', ["J001"]);
+		});
+
+		it('should successfully delete project, associated entities and parent programme is not validated', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: 'J001' };
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+
+			const programme = new ProgrammeEntity;
+			programme.programmeId = 'P1'
+
+			const kpi1 = new KpiEntity();
+			kpi1.kpiId = 1;
+			kpi1.name = "KPI 1";
+			kpi1.creatorType = "programme";
+			kpi1.expected = 100;
+
+			const kpi2 = new KpiEntity();
+			kpi2.kpiId = 2;
+			kpi2.name = "KPI 2";
+			kpi2.creatorType = "programme";
+			kpi2.expected = 100;
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.programme = programme
+
+			const programmeKPIs = [kpi1, kpi2];
+
+			jest.spyOn(service, 'findProjectWithParentAndChildren').mockResolvedValue(project);
+			jest.spyOn(kpiServiceMock, "getKpisByCreatorTypeAndCreatorId").mockResolvedValue(programmeKPIs);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					delete: jest.fn().mockResolvedValueOnce({ affected: 1 }),
+				};
+				const savedProject = await callback(emMock);
+				expect(emMock.delete).toHaveBeenCalledTimes(3);
+				return savedProject;
+			});
+
+			const result = await service.deleteProject(deleteDto, user);
+
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProgrammeId).toBeCalledTimes(0);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toBeCalledTimes(0);
+
+		});
+
+		it('should successfully delete project, associated entities and parent programme validated, parent node programme', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: 'J001' };
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+
+			const programme = new ProgrammeEntity;
+			programme.programmeId = 'P1'
+			programme.validated = true;
+
+			const kpi1 = new KpiEntity();
+			kpi1.kpiId = 1;
+			kpi1.name = "KPI 1";
+			kpi1.creatorType = "programme";
+			kpi1.expected = 100;
+
+			const kpi2 = new KpiEntity();
+			kpi2.kpiId = 2;
+			kpi2.name = "KPI 2";
+			kpi2.creatorType = "programme";
+			kpi2.expected = 100;
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.programme = programme
+
+			const programmeKPIs = [kpi1, kpi2];
+
+			jest.spyOn(service, 'findProjectWithParentAndChildren').mockResolvedValue(project);
+			jest.spyOn(kpiServiceMock, "getKpisByCreatorTypeAndCreatorId").mockResolvedValue(programmeKPIs);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					delete: jest.fn().mockResolvedValueOnce({ affected: 1 }),
+					save: jest.fn().mockResolvedValueOnce(null),
+				};
+				const savedProject = await callback(emMock);
+				expect(emMock.delete).toHaveBeenCalledTimes(3);
+				return savedProject;
+			});
+
+			const result = await service.deleteProject(deleteDto, user);
+
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProgrammeId).toBeCalledTimes(1);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toBeCalledTimes(0);
+
+		});
+
+		it('should successfully delete project, associated entities and parent programme action validated, parent node action', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: 'J001' };
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'J001';
+			activity.parentType = EntityType.PROJECT;
+			activity.activityId = "T1"
+
+			const action = new ActionEntity;
+			action.actionId = 'A1'
+			action.validated = true;
+
+			const programme = new ProgrammeEntity;
+			programme.programmeId = 'P1'
+			programme.validated = true;
+			programme.action = action;
+
+			const kpi1 = new KpiEntity();
+			kpi1.kpiId = 1;
+			kpi1.name = "KPI 1";
+			kpi1.creatorType = "programme";
+			kpi1.expected = 100;
+
+			const kpi2 = new KpiEntity();
+			kpi2.kpiId = 2;
+			kpi2.name = "KPI 2";
+			kpi2.creatorType = "programme";
+			kpi2.expected = 100;
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+			project.activities = [activity];
+			project.programme = programme
+
+			const programmeKPIs = [kpi1, kpi2];
+
+			jest.spyOn(service, 'findProjectWithParentAndChildren').mockResolvedValue(project);
+			jest.spyOn(kpiServiceMock, "getKpisByCreatorTypeAndCreatorId").mockResolvedValue(programmeKPIs);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					delete: jest.fn().mockResolvedValueOnce({ affected: 1 }),
+					save: jest.fn().mockResolvedValueOnce(null),
+				};
+				const savedProject = await callback(emMock);
+				expect(emMock.delete).toHaveBeenCalledTimes(3);
+				return savedProject;
+			});
+
+			const result = await service.deleteProject(deleteDto, user);
+
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenAndParentStatusByProgrammeId).toBeCalledTimes(0);
+			expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toBeCalledTimes(1);
+
+		});
+
+		it('should handle transaction errors', async () => {
+			const user = { role: Role.Admin } as User;
+
+			const deleteDto = { entityId: '123' };
+
+			const project = new ProjectEntity;
+			project.projectId = 'J001'
+			project.sector = Sector.Forestry;
+			project.validated = true;
+
+			jest.spyOn(service, 'findProjectWithParentAndChildren').mockResolvedValue(project);
+
+
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				throw new Error('This is a test transaction error. This is expected');
+			});
+
+			await expect(service.deleteProject(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+		});
 	});
 
 })

@@ -6,7 +6,7 @@ import { FileHandlerModule } from "../file-handler/filehandler.module";
 import { UserModule } from "../user/user.module";
 import { AsyncOperationsModule } from '../async-operations/async-operations.module';
 import { GhgEmissionsService } from "./emission.service";
-import { EmissionEntity } from "src/entities/emission.entity";
+import { EmissionEntity } from "../entities/emission.entity";
 
 @Module({
   imports: [

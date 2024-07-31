@@ -1,7 +1,7 @@
 import { Entity, Column, Unique, PrimaryGeneratedColumn } from 'typeorm';
-import { GHGRecordState } from 'src/enums/ghg.state.enum';
-import { ExtendedProjectionType } from 'src/enums/projection.enum';
-import { ProjectionData } from 'src/dtos/projection.dto';
+import { GHGRecordState } from '../enums/ghg.state.enum';
+import { ExtendedProjectionType } from '../enums/projection.enum';
+import { ProjectionData } from '../dtos/projection.dto';
 
 @Entity()
 @Unique(['projectionType'])

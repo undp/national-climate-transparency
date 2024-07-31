@@ -34,19 +34,21 @@
   }
 
   .layout-sider-div-container {
-    padding-top: 22px;
+    padding-top: 10px;
     overflow-y: auto;
 
     .layout-sider-heading-container {
       display: flex;
       flex-direction: row;
       align-items: center;
-      padding: 0rem 2rem 0.5rem 1rem;
+      padding-top: 15px;
+      padding-right: 10px;
+      padding-left: 20px;
       cursor: pointer;
 
       .title {
         font-family: 'MuseoSans';
-        font-size: 15px;
+        font-size: 14px;
         color: $logo-text-color;
         font-weight: 700;
         margin-right: 5px;
@@ -55,7 +57,7 @@
       .title-sub {
         font-weight: 100 !important;
         font-family: 'MuseoSans';
-        font-size: 15px;
+        font-size: 14px;
         color: $logo-text-color;
       }
 
@@ -75,10 +77,10 @@
 
     .sider-menu-container {
 
-      display: flex;
       overflow-y: auto;
       max-height: 70vh;
-      padding-right: 20px;
+      padding-top: 10px;
+      padding-right: 8px;
 
       .ant-menu-item-selected {
         background: linear-gradient(to right, $gradient-background-start, $gradient-background-end);

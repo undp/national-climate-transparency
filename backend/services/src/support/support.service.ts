@@ -18,9 +18,9 @@ import { HelperService } from "../util/helpers.service";
 import { EntityManager, Repository } from "typeorm";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
-import { DeleteDto } from "src/dtos/delete.dto";
-import { Role } from "src/casl/role.enum";
-import { LinkUnlinkService } from "src/util/linkUnlink.service";
+import { DeleteDto } from "../dtos/delete.dto";
+import { Role } from "../casl/role.enum";
+import { LinkUnlinkService } from "../util/linkUnlink.service";
 
 @Injectable()
 export class SupportService {

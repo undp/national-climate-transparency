@@ -644,6 +644,7 @@ const UserManagement = () => {
                   setFilterVisible(false);
                   setSearchValue('');
                   setTempSearchValue('');
+                  setCurrentPage(1);
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >

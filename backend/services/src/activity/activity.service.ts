@@ -470,7 +470,10 @@ export class ActivityService {
 				currentActivity.activityId,
 				EntityType.ACTIVITY
 			);
-			achievements.push(...achievementsToRemove);
+
+			if(achievementsToRemove && achievementsToRemove.length > 0) {
+				achievements.push(...achievementsToRemove);
+			}
 
 			switch (activityUpdateDto.parentType) {
 				case EntityType.ACTION: {
@@ -1163,7 +1166,9 @@ export class ActivityService {
 			}
 
 			const activityAchievements = await this.kpiService.findAchievementsByActivityId(activity.activityId);
-			achievements.push(...activityAchievements);
+			if(activityAchievements && activityAchievements.length > 0) {
+				achievements.push(...activityAchievements);
+			}
 		}
 
 		const proj = await this.linkUnlinkService.unlinkActivitiesFromParent(activities, unlinkActivitiesDto, user, this.entityManager, achievements);

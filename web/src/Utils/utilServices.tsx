@@ -78,12 +78,15 @@ export const CustomFormatDate = (timestamp: number) => {
   const day = date.getDate();
   const month = date.toLocaleString('default', { month: 'long' });
   const year = date.getFullYear();
-  const hours = date.getHours();
+  let hours = date.getHours();
   const minutes = date.getMinutes();
+
+  const period = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
 
   const formattedTime = `${day} ${month} ${year} @ ${hours.toString().padStart(2, '0')}:${minutes
     .toString()
-    .padStart(2, '0')}`;
+    .padStart(2, '0')} ${period}`;
 
   return formattedTime;
 };

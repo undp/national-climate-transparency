@@ -91,9 +91,6 @@ const UserProfile = () => {
         </Col>
         <Col md={24} lg={16}>
           <Row justify="end">
-            <Button className="mg-left-1 btn-danger mg-bottom-1" onClick={() => signOut()}>
-              {t('userProfile:logOut')}
-            </Button>
             {userDetails && (
               <Button
                 className="mg-left-1 mg-bottom-1"
@@ -105,6 +102,9 @@ const UserProfile = () => {
                 {t('userProfile:edit')}
               </Button>
             )}
+            <Button className="mg-left-1 btn-danger mg-bottom-1" onClick={() => signOut()}>
+              {t('userProfile:logOut')}
+            </Button>
             <LanguageSelection i18n={i18n}></LanguageSelection>
           </Row>
         </Col>

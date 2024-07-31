@@ -48,7 +48,7 @@ export class ProjectDto {
 
 	@IsNotEmpty()
 	@IsNumber()
-	@Min(2013)
+	@Min(2014)
 	@Max(2050)
 	@ApiProperty()
 	endYear: number;

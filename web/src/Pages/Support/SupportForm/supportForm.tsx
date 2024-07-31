@@ -61,6 +61,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const validation = getValidationRules(method);
 
+  // First Rendering Check
+
+  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
+
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
@@ -194,6 +198,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       }
     };
     fetchData();
+
+    if (!firstRenderingCompleted) {
+      setFirstRenderingCompleted(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -356,7 +364,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && firstRenderingCompleted ? (
         <div className="support-form">
           <Form
             form={form}

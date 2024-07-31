@@ -22,7 +22,7 @@ import { UnlinkProjectsDto } from "../dtos/unlink.projects.dto";
 import { QueryDto } from "../dtos/query.dto";
 import { ProjectUpdateDto } from "../dtos/projectUpdate.dto";
 import { ValidateDto } from "../dtos/validate.dto";
-import { DeleteDto } from "src/dtos/delete.dto";
+import { DeleteDto } from "../dtos/delete.dto";
 
 @ApiTags("Projects")
 @ApiBearerAuth()

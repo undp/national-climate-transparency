@@ -10,7 +10,7 @@ import {
   WasteLevels,
 } from '../Enums/emission.enum';
 
-export type EmissionTabItem = { key: string; label: string; icon: any; content: any };
+export type EmissionTabItem = { key: string; label: any; children: any };
 
 export type SubSectionsDefinition = {
   id: EnergyLevels;
