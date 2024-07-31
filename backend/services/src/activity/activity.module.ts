@@ -21,6 +21,7 @@ import { ProgrammeModule } from '../programme/programme.module';
 import { ProjectModule } from '../project/project.module';
 import { ProgrammeViewEntity } from '../entities/programme.view.entity';
 import { KpiModule } from '../kpi/kpi.module';
+import { ConfigurationSettingsEntity } from 'src/entities/configuration.settings.entity';
 
 @Module({
 	imports: [
@@ -43,7 +44,8 @@ import { KpiModule } from '../kpi/kpi.module';
 					ActivityEntity,
 					SupportEntity,
 					ActionViewEntity,
-					ProgrammeViewEntity
+					ProgrammeViewEntity,
+					ConfigurationSettingsEntity,
 			]),
 			ActionModule,
 			ProgrammeModule,
