@@ -5,14 +5,14 @@ import { BasicResponseDto } from "../dtos/basic.response.dto";
 import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
 import { ConfigurationSettingsType } from "../enums/configuration.settings.type.enum";
 import { HelperService } from "./helpers.service";
-import { ProjectionData } from "src/dtos/projection.dto";
-import { ProjectionEntity } from "src/entities/projection.entity";
-import { GHGRecordState } from "src/enums/ghg.state.enum";
-import { ExtendedProjectionType, ProjectionLeafSection } from "src/enums/projection.enum";
-import { User } from "src/entities/user.entity";
-import { GHGInventoryManipulate } from "src/enums/user.enum";
-import { ActivityEntity } from "src/entities/activity.entity";
-import { GHGS } from "src/enums/shared.enum";
+import { ProjectionData } from "../dtos/projection.dto";
+import { ProjectionEntity } from "../entities/projection.entity";
+import { GHGRecordState } from "../enums/ghg.state.enum";
+import { ExtendedProjectionType, ProjectionLeafSection } from "../enums/projection.enum";
+import { User } from "../entities/user.entity";
+import { GHGInventoryManipulate } from "../enums/user.enum";
+import { ActivityEntity } from "../entities/activity.entity";
+import { GHGS } from "../enums/shared.enum";
 
 @Injectable()
 export class ConfigurationSettingsService {

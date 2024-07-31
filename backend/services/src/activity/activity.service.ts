@@ -36,7 +36,7 @@ import { Role } from "../casl/role.enum";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { SupportEntity } from "../entities/support.entity";
 import { ConfigurationSettingsService } from "../util/configurationSettings.service";
-import { ConfigurationSettingsType } from "src/enums/configuration.settings.type.enum";
+import { ConfigurationSettingsType } from "../enums/configuration.settings.type.enum";
 
 @Injectable()
 export class ActivityService {

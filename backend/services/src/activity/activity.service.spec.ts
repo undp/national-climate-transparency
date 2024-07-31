@@ -30,6 +30,7 @@ import { KpiService } from "../kpi/kpi.service";
 import { Role } from "../casl/role.enum";
 import { SupportEntity } from "../entities/support.entity";
 import { ValidateDto } from "../dtos/validate.dto";
+import { ConfigurationSettingsService } from "../util/configurationSettings.service";
 
 describe('ActivityService', () => {
 	let service: ActivityService;
@@ -44,6 +45,7 @@ describe('ActivityService', () => {
 	let linkUnlinkServiceMock: Partial<LinkUnlinkService>;
 	let payloadValidatorServiceMock: Partial<PayloadValidator>;
 	let kpiServiceMock: Partial<KpiService>;
+	let configurationSettingsServiceMock: Partial<ConfigurationSettingsService>;
 
 	const documentData = "data:text/csv;base64,IlJlcXVlc3QgSWQiLCJQcm="
 
@@ -95,6 +97,9 @@ describe('ActivityService', () => {
 			getAchievementsOfParentEntity: jest.fn(),
 			findAchievementsByActivityId: jest.fn(),
 		};
+		configurationSettingsServiceMock = {
+			updateSetting: jest.fn(),
+		};
 
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
@@ -142,6 +147,10 @@ describe('ActivityService', () => {
 				{
 					provide: KpiService,
 					useValue: kpiServiceMock,
+				},
+				{
+					provide: ConfigurationSettingsService,
+					useValue: configurationSettingsServiceMock,
 				},
 			],
 		}).compile();
