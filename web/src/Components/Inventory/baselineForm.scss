@@ -2,6 +2,7 @@
     .baseline-timeline {
         margin-top: 30px;
         overflow-x: auto;
+        overflow-y: hidden;
 
         .leaf-input-box {
           width: fit-content;
