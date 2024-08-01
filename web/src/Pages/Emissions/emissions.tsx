@@ -68,7 +68,7 @@ const GhgEmissions = () => {
                 index={0}
                 year={null}
                 finalized={false}
-                availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
+                availableYears={tabItems ? tabItems.map((item) => parseInt(item.key)) : []}
                 setActiveYear={setActiveYear}
                 getAvailableEmissionReports={getAvailableEmissionReports}
               />
@@ -91,7 +91,7 @@ const GhgEmissions = () => {
             <EmissionForm
               index={index + 1}
               year={report.year}
-              availableYears={tabItems ? tabItems.map((item) => parseInt(item.label)) : []}
+              availableYears={tabItems ? tabItems.map((item) => parseInt(item.key)) : []}
               setActiveYear={setActiveYear}
               finalized={report.state === 'FINALIZED' ? true : false}
               getAvailableEmissionReports={getAvailableEmissionReports}
