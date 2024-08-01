@@ -15,7 +15,6 @@ import { UserState } from '../../Enums/user.enum';
 import { AvailableLanguages } from '../../Definitions/languageDefinitions';
 import TransparencyLogo from '../../Components/logo/transparencyLogo';
 import logoLarge from '../../Assets/Images/tran.png';
-import logoSmall from '../../Assets/Images/tran_small.png';
 
 const { useBreakpoint } = Grid;
 
@@ -46,12 +45,6 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
   const [showError, setShowError] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>();
   const [fullScreen, setFullScreen] = useState<boolean>();
-
-  const [imgLoaded, setImgLoaded] = useState<boolean>(false);
-
-  const handleImageLoad = () => {
-    setImgLoaded(true);
-  };
 
   // Setting the chart Width
 
@@ -159,14 +152,7 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
               <div className="login-img-container">
                 <img // Full Res Image to be shown after loaded
                   className="login-img"
-                  style={{ display: `${imgLoaded ? 'block' : 'none'}` }}
                   src={logoLarge}
-                  onLoad={handleImageLoad}
-                />
-                <img // Reduced Image to be shown until the full image loads
-                  className="login-img-waiting"
-                  style={{ display: `${imgLoaded ? 'none' : 'block'}` }}
-                  src={logoSmall}
                 />
                 <div className="gradient-overlay"></div>
                 <div className="text-ctn">
