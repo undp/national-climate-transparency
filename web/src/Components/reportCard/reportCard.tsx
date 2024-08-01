@@ -45,7 +45,7 @@ const ReportCard: React.FC<Props> = ({
 
   return (
     <div className="report-card">
-      <Row className="title-bar">
+      <Row className="report-title-bar">
         <Col {...reportTitleBps}>
           <div className="title-row">
             <div className="title">{reportTitle}</div>
