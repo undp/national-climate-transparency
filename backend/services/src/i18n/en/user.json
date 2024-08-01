@@ -13,6 +13,7 @@
   "governmentUserAlreadyExist": "Government already exist for the country code {}",
   "companyCreateNotPermittedForTheCompanyRole": "Company create does not permitted for your company role",
   "companyUpdateFailed": "Company update failed. Please try again",
+  "userCreationFailed": "User creation failed. Please try again",
   "propValueAlreadyExist": "{} already exist",
   "taxIdExistAlready": "The organisation already exists with the given Tax ID",
   "paymentIdExistAlready": "The organisation already exists with the given Registration Payment ID",
@@ -35,5 +36,18 @@
   "resetEmailSent": "User found, An email was sent",
   "invalidCountry": "Country is invalid",
   "editUserSuccess": "The user account has been updated successfully",
-  "investerUserAuth": "Invester should be a project developer"
+  "investerUserAuth": "Invester should be a project developer",
+  "govCannotHaveDepUsers": "Government can only create users with Admin and Observer roles",
+  "departmentCanHaveOnlyDepUsers": "Department cannot create users with Admin and Observer roles",
+  "departmentDoesNotExist": "Department does not exist",
+  "orgDoesNotExist": "Organisation does not exist",
+  "incorrectSubRole": "Role {} cannot have the sub role {}",
+  "adminCantHaveSubRole": "Role {} cannot have any sub roles",
+  "subRolePermissionDenied": "Permission Denied: unable to change Sub Role",
+  "allRootPermissionShouldBeTrue" : "All permission should be true for Super Admin",
+  "adminCannotUpdateTheirOwnPermissions" : "Administrator can not update their own Permission levels",
+  "cannotSelfDeactivate" : "Can not Deactivate own user account",
+  "observerCannotHaveAnyPermissions" : "Observer can not have true value for any permissions",
+  "adminCannotHaveSubrolePermission" : "Admin can not have true value for Subrole Manipulate Permission",
+  "onlyRootCanChangeRole" : "User have not permission to update user role"
 }

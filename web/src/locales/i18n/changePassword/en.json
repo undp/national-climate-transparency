@@ -1,0 +1,13 @@
+{
+    "changePassword": "Change Password",
+    "forceChangePassword": "Set Password for User",
+    "oldPassword": "Old Password",
+    "newPassword": "New Password",
+    "confirmNewPassword":"Confirm New Password",
+    "setPassword":"SET PASSWORD",
+    "cancel":"CANCEL",
+    "isRequired": "is required",
+    "passwordsNotMatchedErr":"Passwords do not match",
+    "cannotEnterOldPassword": "Cannot Use the Old Password",
+    "forcePasswordResetSuccess":"Password Changed and User Informed"
+}

@@ -1,0 +1,98 @@
+.upload-files {
+
+    .upload-box {
+        opacity: 0.8;
+        padding: 15px;
+        border: 2px dashed #c4bbbb;
+        border-radius: 10px;
+        margin-bottom: 20px;
+
+        .upload-button {
+            width: 120px;
+            height: 43.6px;
+            color: #3A3541;
+            opacity: 0.8;
+            border: 1px solid hsl(0, 7%, 75%);
+        }
+
+    }
+
+    .no-documents-box {
+        opacity: 0.8;
+        padding: 10px;
+        border: 1px solid hsl(0, 7%, 75%);
+        height: 42px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .file-card {
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-width: 1px;
+        border-radius: 4px;
+        border-color: #d9d9d9;
+        position: relative;
+    }
+
+    .file-column {
+        height: 40px;
+    }
+
+    .file-content {
+        color: #3A3541;
+        opacity: 0.8;
+        border: 1px solid hsl(0, 7%, 75%);
+        border-width: 1px;
+        border-radius: 4px;
+        padding: 10px;
+        height: 43.6px;
+
+        .title-column{
+            white-space: nowrap;
+            overflow: hidden;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+            
+            &::-webkit-scrollbar-track {
+                display: none;
+            }
+            
+            &::-webkit-scrollbar-thumb {
+                display: none;
+            }
+        }
+
+        .icon-column{
+            display: flex;
+            justify-content: center;
+        }
+
+        .file-type-label{
+            display: flex;
+            justify-content: center;
+            border: 1px solid #9155FD;
+            border-width: 1px;
+            border-radius: 4px;
+            font-size: small;
+        }
+
+        .delete-icon {
+            cursor: pointer;
+        }
+    
+        .close-icon {
+            cursor: pointer;
+        }
+    
+        .download-icon {
+            cursor: pointer;
+        }
+    }
+}

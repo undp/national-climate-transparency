@@ -1,0 +1,13 @@
+{
+    "changePassword": "මුරපදය වෙනස් කරන්න",
+    "forceChangePassword": "පරිශීලකයා සඳහා මුරපදයක් සකසන්න",
+    "oldPassword": "පැරණි මුරපදය",
+    "newPassword": "නව මුරපදය",
+    "confirmNewPassword": "නව මුරපදය තහවුරු කරන්න",
+    "setPassword": "මුරපදය සකසන්න",
+    "cancel": "අවලංගු කරන්න",
+    "isRequired": "අවශ්ය වේ",
+    "passwordsNotMatchedErr": "මුරපද නොගැලපේ",
+    "cannotEnterOldPassword": "පැරණි මුරපදය භාවිතා කළ නොහැක",
+    "forcePasswordResetSuccess":"මුරපදය වෙනස් කර ඇත සහ පරිශීලකයාට දැනුම් දී ඇත"
+}

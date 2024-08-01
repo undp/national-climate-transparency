@@ -1,0 +1,72 @@
+.dashboard-page {
+
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-bottom: 30px;
+
+    .chart-title {
+        font-weight: 500;
+        color: #615d67;
+        margin-bottom: 20px;
+    }    
+
+    .chart-section-card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        width: 100%;
+        padding: 30px;
+        margin-bottom: 30px;
+        white-space: nowrap;
+        overflow: auto;
+    }
+
+    .chart-update-time {
+        margin-top: 20px;
+        .time-chip {
+            align-content: center;
+            height: 28px;
+            border-width: 0;
+            background-color: #e3f3fb;
+            color: #16B1FF;
+        }
+    }
+
+    .empty-chart-xxl {
+        height: 322px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .empty-chart-xl {
+        height: 242px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .empty-chart {
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loading-charts-spinner {
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .year-chip {
+        width: 55px;
+        text-align: center;
+        color: #615d67;
+        border-radius: 5px;
+    }
+}

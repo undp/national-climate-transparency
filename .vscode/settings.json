@@ -1,9 +1,20 @@
 {
     "cSpell.words": [
         "antd",
+        "Appstore",
+        "centered",
         "cmpt",
+        "donut",
+        "Kpis",
         "Popconfirm",
-        "Sider"
+        "Popover",
+        "Popups",
+        "Sider",
+        "typeorm",
+        "UNNEST",
+        "unvalidate",
+        "vars"
     ],
-    "compile-hero.disable-compile-files-on-did-save-code": true
+    "compile-hero.disable-compile-files-on-did-save-code": true,
+    "cSpell.language": "en-GB"
 }

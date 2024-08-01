@@ -1,0 +1,14 @@
+{
+  "viewTitle": "Liste des programmes",
+  "addButtonType": "AJOUTER un programme",
+  "searchBarText": "Rechercher par titre de programme",
+  "programmeId": "ID du programme",
+  "actionId": "ID de l'action",
+  "titleOfProgramme": "Titre du programme",
+  "programmeStatus": "Statut du programme",
+  "filterByProgrammeStatus": "Filtrer par statut du programme",
+  "attachProject": "Joindre des projets",
+  "projectList": "Liste des projets",
+  "projectLinkSuccess": "Projet(s) lié(s) avec succès",
+  "addProgramme": "Ajouter un programme"
+}

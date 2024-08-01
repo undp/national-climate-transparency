@@ -1,0 +1,20 @@
+{
+    "tableTwelve": "Tables Annex III -12",
+    "tableThirteen": "Tables Annex III -13",
+
+    "nothingToExport": "Data not found for export",
+    "activityId": "Activity No.",
+    "titleOfActivity": "Name of Activity",
+    "description": "Activity description",
+    "startYear": "Start year",
+    "activityStatus": "Status of activity",
+    "endYear": "End year",
+    "supportChannel": "Channel",
+    "recipientEntities": "Recipient entity",
+    "additionalInfo": "Additional information",
+
+    "receivedAmount": "Amount USD",
+    "receivedAmountDomestic": "Amount Domestic currency",
+    "requiredAmount": "Amount USD",
+    "requiredAmountDomestic": "Amount Domestic currency"
+}

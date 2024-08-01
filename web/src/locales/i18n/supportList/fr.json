@@ -1,0 +1,14 @@
+{
+  "viewTitle": "Liste des supports",
+  "addButtonType": "AJOUTER un support",
+  "searchBarText": "Rechercher par titre de support",
+  "supportId": "ID du support",
+  "activityId": "ID de l'activité",
+  "supportNeededOrReceived": "Support nécessaire ou reçu",
+  "internationalOrNationalFinance": "Financement international ou national",
+  "channelOfSupport": "Canal de support",
+  "financialInstrument": "Instrument financier",
+  "financingStatus": "Statut du financement",
+  "internationalSource": "Source internationale",
+  "filterBySupportDirection": "Filtrer par support nécessaire ou reçu"
+}

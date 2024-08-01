@@ -1,0 +1,19 @@
+{
+    "supportCreationFailed": "Support creation failed due to {}",
+    "createSupportSuccess": "Support created successfully",
+    "supportNotFound": "A support with id {} is not found",
+    "activityNotFound": "Activity not found",
+    "cannotUpdateNotRelatedSupport": "User is not allowed to update the support with id {}",
+    "cannotLinkToNotRelatedActivity": "User is not allowed to link the support to the activity with id {}",
+    "supportUpdateFailed": "Support update failed due to {}",
+    "updateSupportSuccess": "Support updated successfully",
+    "supportAlreadyValidated": "The support with id {} is already validated",
+    "verifySupportSuccess": "Support verified successfully",
+    "supportVerificationFailed": "Support verification failed due to {}",
+    "cannotEditValidated": "The support with id {} is validated and cannot be edited",
+    "permissionDeniedForSector": "User does not have the permission for the sector",
+    "deleteSupportSuccess": "Support deleted successfully",
+    "permissionDeniedForValidate": "Permission Denied: Unable to Validate Support",
+    "supportDeleteFailed": "Support delete failed due to {}",
+    "parentNotValidated": "Parent activity with id {} should be validated."
+}

@@ -1,0 +1,14 @@
+{
+  "viewTitle": "Programme List",
+  "addButtonType": "ADD Programme",
+  "searchBarText": "Search by Programme Title",
+  "programmeId": "Programme ID",
+  "actionId": "Action ID",
+  "titleOfProgramme": "Title of Programme",
+  "programmeStatus": "Programme Status",
+  "filterByProgrammeStatus": "Filter By Programme Status",
+  "attachProject": "Attach Projects",
+  "projectList" : "Project List",
+  "projectLinkSuccess": "Project/s Linked Successfully",
+  "addProgramme": "Add Programme"
+}

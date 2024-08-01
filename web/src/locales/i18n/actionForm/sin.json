@@ -1,0 +1,20 @@
+{
+    "addActionTitle":"නව ක්‍රියාකාරකම් එක් කරන්න",
+    "viewActionTitle":"ක්‍රියාකාරකම් බලන්න",
+    "editActionTitle":"ක්‍රියාකාරකම් සංස්කරණය කරන්න",
+    "generalInfoTitle": "පොදු ක්‍රියාකාරකම් තොරතුරු",
+    "programInfoTitle": "ක්‍රියාකාරකම් යටිතලයට යෙදුම් ලැයිස්තුව",
+    "actionCreationSuccess": "ක්‍රියාකාරකම් සාර්ථකව එකතු විය",
+    "actionUpdateSuccess": "ක්‍රියාකාරකම් වෙනස් කර ඇත",
+    "actionDeleteSuccess": "ක්‍රියාකාරකම් ඉවත් කිරීම සාර්ථකයි",
+    "noProgramsMessage": "අදාල වෙනත් ක්‍රියාකාරකම් තුළ කිසිදු යෙදුම් නැත",
+    "programmeList" : "යෙදුම් ලැයිස්තුව",
+    "activityList" : "ක්‍රියාකාරකම් ලැයිස්තුව",
+    "actionStatusTitle": "ක්‍රියාකාරකම් තත්වය",
+    "actionObjectivesTitle": "ක්‍රියාකාරකම් ඉල්ලීම්",
+    "actionDescTitle": "ක්‍රියාකාරකම් ශාඛාවක්",
+    "actionTitle": "ක්‍රියාකාරකම් මාතෘකාව",
+    "noSuchEntity": "හැඳුනුම්පත් ක්‍රියාකාරකම් නොපවතී!",
+    "deletePrimaryMsg": "ඔබට ඉවත් කිරීම අවශ්‍ය බව ඔබට විශ්වාසද",
+    "deleteSecondaryMsg": "ඔබට මෙම ක්‍රියාව අහෝසි කළ නොහැක."
+}

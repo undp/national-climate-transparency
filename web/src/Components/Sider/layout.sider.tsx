@@ -1,27 +1,23 @@
 import { useState } from 'react';
 import { Menu, Layout, MenuProps } from 'antd';
 import sliderLogo from '../../Assets/Images/mrvlogo.svg';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './layout.sider.scss';
 import * as Icon from 'react-bootstrap-icons';
 import {
   AppstoreOutlined,
+  CloudDownloadOutlined,
   DashboardOutlined,
-  HomeOutlined,
-  ShopOutlined,
-  UnorderedListOutlined,
   UserOutlined,
-  MoneyCollectOutlined,
-  BankOutlined,
-  CloudOutlined,
-  CompassOutlined,
-  PaperClipOutlined,
 } from '@ant-design/icons';
-import { LayoutSiderProps } from '@undp/carbon-library';
+import { ClipboardMinus, Coin, GraphUpArrow, Headset, Layers } from 'react-bootstrap-icons';
+import { LayoutSiderProps } from '../../Definitions/props/layout.sider.definitions';
 import { useTranslation } from 'react-i18next';
+import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { Role } from '../../Enums/role.enum';
+import { GHGInventoryManipulate } from '../../Enums/user.enum';
 
 const { Sider } = Layout;
-const { SubMenu } = Menu;
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -43,24 +39,30 @@ const LayoutSider = (props: LayoutSiderProps) => {
   const { selectedKey } = props;
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-  const { i18n, t } = useTranslation(['nav']);
+  const { userInfoState } = useUserContext();
+  const { t } = useTranslation(['nav']);
 
   const items: MenuItem[] = [
     getItem(t('nav:dashboard'), 'dashboard', <DashboardOutlined />),
-    getItem(t('nav:ghgInventory'), 'ghgInventory', <CloudOutlined />),
-    getItem(t('nav:ndcDetails'), 'ndcDetails/viewAll', <CompassOutlined />),
-    getItem(t('nav:programmes'), 'programmeManagement/viewAll', <AppstoreOutlined />),
-    getItem(t('nav:ndcActions'), 'ndcManagement/viewAll', <Icon.Clipboard2Data />),
-    getItem(t('nav:investments'), 'investmentManagement/viewAll', <Icon.Cash />),
-    // getItem(t('nav:support'), 'supportManagement/viewAll', <BankOutlined />),
-    getItem(t('nav:companies'), 'companyManagement/viewAll', <ShopOutlined />),
-    getItem(t('nav:users'), 'userManagement/viewAll', <UserOutlined />),
-    getItem(t('nav:reports'), 'reports', <PaperClipOutlined />),
-    // getItem('Team', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
+    getItem(t('nav:actions'), 'actions', <Icon.Clipboard2Data />),
+    getItem(t('nav:programmes'), 'programmes', <AppstoreOutlined />),
+    getItem(t('nav:projects'), 'projects', <Layers />),
+    getItem(t('nav:activities'), 'activities', <GraphUpArrow />),
+    getItem(t('nav:support'), 'support', <Coin />),
   ];
 
+  if (userInfoState?.ghgInventoryPermission === GHGInventoryManipulate.CAN) {
+    items.push(getItem(t('nav:ghgInventory'), 'emissions', <CloudDownloadOutlined />));
+  }
+
+  items.push(getItem(t('nav:reporting'), 'reportings', <ClipboardMinus />));
+  items.push(getItem(t('nav:faq'), 'faqs', <Headset />));
+
+  if (userInfoState?.userRole === Role.Root || userInfoState?.userRole === Role.Admin) {
+    items.push(getItem(t('nav:users'), 'userManagement/viewAll', <UserOutlined />));
+  }
+
   const onClick: MenuProps['onClick'] = (e) => {
-    console.log('click', e);
     navigate('/' + e.key);
   };
 
@@ -88,22 +90,10 @@ const LayoutSider = (props: LayoutSiderProps) => {
               <div className="country-name">{process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}</div>
             </div>
           )}
-          {collapsed && (
-            <div className="country-flag">
-              <img
-                alt="country flag"
-                src={
-                  process.env.REACT_APP_COUNTRY_FLAG_URL ||
-                  'https://mrv-common-dev.s3.amazonaws.com/flag.png'
-                }
-              />
-            </div>
-          )}
         </div>
         <div className="layout-sider-menu-container">
           <Menu
             theme="light"
-            //defaultSelectedKeys={[selectedKey ?? 'dashboard']}
             selectedKeys={[selectedKey ? selectedKey : 'dashboard']}
             mode="inline"
             onClick={onClick}

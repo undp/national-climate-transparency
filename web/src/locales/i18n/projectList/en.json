@@ -1,0 +1,14 @@
+{
+  "viewTitle": "Project List",
+  "addButtonType": "ADD ProJect",
+  "searchBarText": "Search by Project Title",
+  "projectId": "Project ID",
+  "programmeId": "Programme ID",
+  "titleOfProject": "Title of Project",
+  "projectStatus": "Project Status",
+  "filterByProjectStatus": "Filter By Project Status",
+  "attachActivity": "Attach Activities",
+  "activityList" : "Activity List",
+  "activityLinkSuccess": "Activity/s Linked Successfully",
+  "addProject": "Add Project"
+}

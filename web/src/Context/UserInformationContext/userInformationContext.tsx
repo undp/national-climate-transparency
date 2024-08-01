@@ -1,52 +1,78 @@
-import React, { useContext, useState, createContext, useCallback, useEffect } from 'react';
-import { UserContextProps, UserProps } from '@undp/carbon-library';
+import React, { useContext, useState, createContext, useCallback } from 'react';
 import { useConnection } from '../ConnectionContext/connectionContext';
 import jwt_decode from 'jwt-decode';
-import { useTranslation } from 'react-i18next';
+import { UserContextProps, UserProps } from '../../Definitions/userContext.definition';
+import { GHGInventoryManipulate, ValidateEntity } from '../../Enums/user.enum';
 
 export const UserContext = createContext<UserContextProps>({
   setUserInfo: () => {},
   removeUserInfo: () => {},
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   IsAuthenticated: (tkn?: any) => false,
   isTokenExpired: false,
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   setIsTokenExpired: (val: boolean) => {},
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  setIsGhgAllowed: (val: boolean) => {},
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  setIsValidationAllowed: (val: boolean) => {},
 });
 
 export const UserInformationContextProvider = ({ children }: React.PropsWithChildren) => {
   const { token } = useConnection();
-  const { i18n, t } = useTranslation(['common']);
+
   const [isTokenExpired, setIsTokenExpired] = useState<boolean>(false);
+
   const initialUserProps: UserProps = {
-    id: localStorage.getItem('userId') ? (localStorage.getItem('userId') as string) : '',
-    userRole: localStorage.getItem('userRole') ? (localStorage.getItem('userRole') as string) : '',
-    companyRole: localStorage.getItem('companyRole')
-      ? (localStorage.getItem('companyRole') as string)
+    id: localStorage.getItem('userId')
+      ? (localStorage.getItem('userId') as string)
+      : process.env.STORYBOOK_USER_ID
+      ? process.env.STORYBOOK_USER_ID
       : '',
-    companyId: localStorage.getItem('companyId')
-      ? parseInt(localStorage.getItem('companyId') as string)
-      : -1,
-    companyLogo: localStorage.getItem('companyLogo')
-      ? (localStorage.getItem('companyLogo') as string)
+    userRole: localStorage.getItem('userRole')
+      ? (localStorage.getItem('userRole') as string)
+      : process.env.STORYBOOK_USER_ROLE
+      ? process.env.STORYBOOK_USER_ROLE
       : '',
     companyName: localStorage.getItem('companyName')
       ? (localStorage.getItem('companyName') as string)
+      : process.env.STORYBOOK_COMPANY_NAME
+      ? process.env.STORYBOOK_COMPANY_NAME
       : '',
-    companyState: localStorage.getItem('companyState')
-      ? parseInt(localStorage.getItem('companyState') as string)
+    userState: localStorage.getItem('userState')
+      ? parseInt(localStorage.getItem('userState') as string)
       : 0,
+    userSectors: localStorage.getItem('userSectors')?.split(',') ?? [],
+    validatePermission: localStorage.getItem('validatePermission')
+      ? (localStorage.getItem('validatePermission') as string)
+      : '0',
+    subRolePermission: localStorage.getItem('subRolePermission')
+      ? (localStorage.getItem('subRolePermission') as string)
+      : '0',
+    ghgInventoryPermission: localStorage.getItem('ghgInventoryPermission')
+      ? (localStorage.getItem('ghgInventoryPermission') as string)
+      : '0',
   };
+
   const [userInfoState, setUserInfoState] = useState<UserProps>(initialUserProps);
+  const [isGhgAllowed, setIsGhgAllowed] = useState<boolean>(
+    initialUserProps.validatePermission === ValidateEntity.CAN
+  );
+  const [isValidationAllowed, setIsValidationAllowed] = useState<boolean>(
+    initialUserProps.ghgInventoryPermission === GHGInventoryManipulate.CAN
+  );
 
   const setUserInfo = (value: UserProps) => {
-    const state = userInfoState?.companyState === 1 ? userInfoState?.companyState : 0;
+    const state = userInfoState?.userState === 1 ? userInfoState?.userState : 0;
     const {
       id,
       userRole,
-      companyId,
-      companyRole,
-      companyLogo,
       companyName,
-      companyState = state,
+      userState = state,
+      userSectors,
+      validatePermission,
+      subRolePermission,
+      ghgInventoryPermission,
     } = value;
     if (id) {
       setUserInfoState((prev) => ({ ...prev, id }));
@@ -58,31 +84,27 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
       localStorage.setItem('userRole', userRole);
     }
 
-    if (companyId) {
-      setUserInfoState((prev) => ({ ...prev, companyId }));
-      localStorage.setItem('companyId', companyId + '');
-    }
-
-    if (companyLogo) {
-      setUserInfoState((prev) => ({ ...prev, companyLogo }));
-      localStorage.setItem('companyLogo', companyLogo);
-    } else {
-      setUserInfoState((prev) => ({ ...prev, companyLogo: '' }));
-      localStorage.setItem('companyLogo', '');
-    }
-
     if (companyName) {
       setUserInfoState((prev) => ({ ...prev, companyName }));
       localStorage.setItem('companyName', companyName);
     }
 
-    if (userRole) {
-      setUserInfoState((prev) => ({ ...prev, companyRole }));
-      localStorage.setItem('companyRole', companyRole);
-    }
+    setUserInfoState((prev) => ({ ...prev, userState }));
+    localStorage.setItem('userState', userState + '');
 
-    setUserInfoState((prev) => ({ ...prev, companyState }));
-    localStorage.setItem('companyState', companyState + '');
+    setUserInfoState((prev) => ({ ...prev, userSectors }));
+    localStorage.setItem('userSectors', userSectors + '');
+
+    setUserInfoState((prev) => ({ ...prev, validatePermission }));
+    setIsValidationAllowed(validatePermission === ValidateEntity.CAN);
+    localStorage.setItem('validatePermission', validatePermission + '');
+
+    setUserInfoState((prev) => ({ ...prev, subRolePermission }));
+    localStorage.setItem('subRolePermission', subRolePermission + '');
+
+    setUserInfoState((prev) => ({ ...prev, ghgInventoryPermission }));
+    setIsGhgAllowed(ghgInventoryPermission === GHGInventoryManipulate.CAN);
+    localStorage.setItem('ghgInventoryPermission', ghgInventoryPermission + '');
   };
 
   const IsAuthenticated = useCallback(
@@ -96,7 +118,9 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
         tokenVal = localStorage.getItem('token');
         if (tokenVal === '') {
           if (history.length !== 1) {
-            setIsTokenExpired(true);
+            setTimeout(() => {
+              setIsTokenExpired(true);
+            }, 0);
           }
         }
       }
@@ -116,23 +140,31 @@ export const UserInformationContextProvider = ({ children }: React.PropsWithChil
   const removeUserInfo = () => {
     localStorage.removeItem('userId');
     localStorage.removeItem('userRole');
-    localStorage.removeItem('companyId');
-    localStorage.removeItem('companyRole');
     localStorage.removeItem('companyName');
-    localStorage.removeItem('companyState');
-    localStorage.removeItem('companyLogo');
+    localStorage.removeItem('userState');
+    localStorage.removeItem('userSectors');
+    localStorage.removeItem('validatePermission');
+    localStorage.removeItem('subRolePermission');
+    localStorage.removeItem('ghgInventoryPermission');
+    localStorage.removeItem('token');
     setUserInfoState(initialUserProps);
+    setIsGhgAllowed(false);
+    setIsValidationAllowed(false);
   };
 
   return (
     <UserContext.Provider
       value={{
         userInfoState,
+        isGhgAllowed,
+        isValidationAllowed,
         setUserInfo,
         removeUserInfo,
         IsAuthenticated,
         isTokenExpired,
         setIsTokenExpired,
+        setIsGhgAllowed,
+        setIsValidationAllowed,
       }}
     >
       {children}

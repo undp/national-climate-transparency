@@ -1,0 +1,32 @@
+{
+    "programmeId": "Programme ID",
+    "actionId": "Action ID",
+    "programmeTitle": "Title of Programme",
+    "programmeType": "Type",
+    "programmeStatus": "Programme Status",
+    "subSectorAffected": "Sub-Sector Affected",
+    "investmentNeeds": " Estimated investment needs (USD)",
+
+    "projectId": "Project ID",
+    "projectName": "Project Name",
+
+    "activityIdTitle": "Activity ID",
+    "titleTitle": "Activity Title",
+    "redMeasuresTitle": "Reduction Measures",
+    "statusTitle": "Status",
+    "startYearHeader": "Start Year",
+    "endYearHeader": "End Year",
+    "timeFrameHeader": "Expected Time Frame",
+    "natImplementorTitle": "National Implementing Entity (s)",
+
+    "supportIdTitle": "Support ID",
+    "financeNatureTitle": "International or National Finance",
+    "directionTitle": "Support Needed or Received",
+    "finInstrumentTitle": "International or National Financial Instrument",
+    "neededUSDHeader": "Amount Needed (USD)",
+    "neededLCLHeader": "Amount Needed (Domestic)",
+    "recievedUSDHeader": "Amount Received (USD)",
+    "recievedLCLHeader":"Amount Received (Domestic)",
+    
+    "detach": "Detach"
+}

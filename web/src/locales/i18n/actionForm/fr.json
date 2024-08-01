@@ -1,0 +1,21 @@
+{
+    "addActionTitle": "Ajouter une nouvelle action",
+    "viewActionTitle": "Voir l'action",
+    "editActionTitle": "Modifier l'action",
+    "generalInfoTitle": "Informations générales sur l'action",
+    "programInfoTitle": "Liste des programmes sous l'action",
+    "actionCreationSuccess": "Action ajoutée avec succès",
+    "actionUpdateSuccess": "Action mise à jour avec succès",
+    "actionDeleteSuccess": "Action supprimé avec succès",
+    "noProgramsMessage": "Aucun programme attaché",
+    "programmeList": "Liste des programmes",
+    "activityList": "Liste des activités",
+    "actionStatusTitle": "Statut de l'action",
+    "actionObjectivesTitle": "Objectifs de l'action",
+    "actionDescTitle": "Description courte de l'action",
+    "actionTitle": "Titre de l'action",
+    "noSuchEntity": "L'action demandée n'existe pas !",
+    "attachProgramme": "Joindre des programmes",
+    "deletePrimaryMsg": "Êtes-vous sûr de vouloir supprimer l'action",
+    "deleteSecondaryMsg": "Vous ne pouvez pas annuler cette action"
+}

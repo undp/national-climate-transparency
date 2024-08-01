@@ -1,0 +1,11 @@
+{
+  "viewTitle": "Liste des activités",
+  "searchBarText": "Rechercher par titre d'activité",
+  "activityId": "ID de l'activité",
+  "parentId": "ID du type attaché",
+  "parentType": "Type attaché",
+  "titleOfActivity": "Titre de l'activité",
+  "activityStatus": "Statut de l'activité",
+  "addActivity": "Ajouter une activité",
+  "filterByActivityStatus": "Filtrer par statut de l'activité"
+}

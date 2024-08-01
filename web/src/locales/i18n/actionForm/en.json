@@ -1,0 +1,23 @@
+{
+    "addActionTitle":"Add New Action",
+    "viewActionTitle":"View Action",
+    "editActionTitle":"Edit Action",
+    "generalInfoTitle": "General Action Information",
+    "programInfoTitle": "List of Programme under the Action",
+    "actionCreationSuccess": "Action Added Successfully",
+    "actionUpdateSuccess": "Action Updated Successfully",
+    "actionValidateSuccess": "Action Validated Successfully",
+    "actionUnvalidateSuccess": "Action Unvalidated Successfully",
+    "actionDeleteSuccess": "Action Deleted Successfully",
+    "noProgramsMessage": "No Programmes Attached",
+    "programmeList" : "Programme List",
+    "activityList" : "Activity List",
+    "actionStatusTitle": "Action Status",
+    "actionObjectivesTitle": "Action Objectives",
+    "actionDescTitle": "Short Description of Action",
+    "actionTitle": "Title of Action",
+    "noSuchEntity": "Requested Action doesn't exist !",
+    "attachProgramme": "Attach Programmes",
+    "deletePrimaryMsg": "Are you sure you want to remove the Action",
+    "deleteSecondaryMsg": "You can’t undo this action"
+}

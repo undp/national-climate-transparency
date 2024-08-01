@@ -1,22 +1,29 @@
-import React, { FC, Suspense, useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './login.scss';
-import { Button, Col, Form, Input, Row, Spin } from 'antd';
+import { Button, Col, Form, Input, Row, message } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { userForgotPasswordProps } from '@undp/carbon-library';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-import i18next from 'i18next';
 import { useNavigate } from 'react-router-dom';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+
+export interface UserForgotPasswordProps {
+  email: string;
+}
 
 const ForgotPassword = () => {
   const { post } = useConnection();
   const navigate = useNavigate();
-  const { i18n, t } = useTranslation(['common', 'forgotPassword']);
+  const { t } = useTranslation(['common', 'forgotPassword']);
+
+  // Forgot Password Page State
+
   const [loading, setLoading] = useState<boolean>(false);
   const [emailSent, setEmailSent] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<boolean>(false);
 
-  const onSubmit = async (values: userForgotPasswordProps) => {
+  // Forgot Password form submit
+
+  const onSubmit = async (values: UserForgotPasswordProps) => {
     setLoading(true);
     try {
       const email = values.email.trim();
@@ -27,34 +34,45 @@ const ForgotPassword = () => {
       if (response.status === 200 || response.status === 201) {
         setEmailSent(true);
         setEmailError(false);
+
+        message.open({
+          type: 'success',
+          content: t('forgotPassword:emailSent'),
+          duration: 5,
+          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+        });
       }
     } catch (error: any) {
-      console.log('Error in sending resetting password', error);
       setEmailError(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const onClickBacktoSignIn = () => {
+  // Go Back to Sign in Page Handler
+
+  const onClickBackToSignIn = () => {
     navigate('/login', { replace: true });
   };
 
-  const onChangeEmail = () => {
+  // Email Change Handler
+
+  const handleEmailChange = () => {
+    setEmailError(false);
     setEmailSent(false);
   };
 
   return (
-    <div className="forgot-password-container">
-      <Row>
-        <Col lg={{ span: 18, offset: 3 }} md={24} flex="auto">
+    <div className="row-container">
+      <Row className="centred-row">
+        <Col>
           <div className="login-text-contents">
-            <span className="login-text-signin">{t('forgotPassword:forgot-pwd-title')}</span>
+            <span className="login-text-sign">{t('forgotPassword:forgot-pwd-title')}</span>
           </div>
         </Col>
       </Row>
-      <Row>
-        <Col lg={{ span: 18, offset: 3 }} md={24} flex="auto">
+      <Row className="centred-row">
+        <Col>
           <div className="note-container">
             <div className="note">
               <p>{t('forgotPassword:note-1')}</p>
@@ -62,81 +80,81 @@ const ForgotPassword = () => {
           </div>
         </Col>
       </Row>
-      <Row>
-        <Col lg={{ span: 18, offset: 3 }} md={{ span: 18 }} flex="fill">
-          <div className="forgot-input-fields-container login-input-fields">
-            <Form layout="vertical" onFinish={onSubmit} name="login-details" requiredMark={false}>
-              <Form.Item
-                name="email"
-                label={`${t('common:email')}`}
-                validateTrigger={'onSubmit'}
-                rules={[
-                  ({ getFieldValue }) => ({
-                    validator() {
-                      if (
-                        getFieldValue('email') &&
-                        !getFieldValue('email')
-                          ?.trim()
-                          .match(
-                            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                          )
-                      ) {
-                        return Promise.reject(`${t('common:email')} ${t('common:isInvalid')}`);
-                      }
-                      return Promise.resolve();
-                    },
-                  }),
-                  {
-                    required: true,
-                    message: `${t('common:email')} ${t('common:isRequired')}`,
+      <Form layout="vertical" onFinish={onSubmit} name="login-details" requiredMark={false}>
+        <Row className="centred-row">
+          <Col span={24}>
+            <Form.Item
+              name="email"
+              label={<label className="form-item-header">{t('common:email')}</label>}
+              validateTrigger={'onSubmit'}
+              rules={[
+                ({ getFieldValue }) => ({
+                  validator() {
+                    if (
+                      getFieldValue('email') &&
+                      !getFieldValue('email')
+                        ?.trim()
+                        .match(
+                          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                        )
+                    ) {
+                      return Promise.reject(`${t('common:email')} ${t('common:isInvalid')}`);
+                    }
+                    return Promise.resolve();
                   },
-                ]}
+                }),
+                {
+                  required: true,
+                  message: `${t('common:email')} ${t('common:isRequired')}`,
+                },
+              ]}
+            >
+              <Input
+                className="form-input-box"
+                onChange={() => handleEmailChange()}
+                type="username"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row className="centred-row">
+          <Col span={24}>
+            <Form.Item>
+              <Button
+                style={{ marginTop: '5px' }}
+                type="primary"
+                size="large"
+                htmlType="submit"
+                block
+                disabled={emailSent}
+                loading={loading}
               >
-                <div className="login-input-email">
-                  <Input onChange={() => onChangeEmail()} type="username" />
-                </div>
-              </Form.Item>
-              <Form.Item>
-                <div className="forgot-submit-btn-container">
-                  <Button
-                    type="primary"
-                    size="large"
-                    htmlType="submit"
-                    block
-                    disabled={emailSent}
-                    loading={loading}
-                  >
-                    {t('forgotPassword:submit')}
-                  </Button>
-                </div>
-                {emailSent && (
-                  <div className="email-success-msg">{t('forgotPassword:emailSent')}</div>
-                )}
-              </Form.Item>
-              {emailError && (
-                <div className="logged-out-section">
-                  <div className="info-icon">
-                    <ExclamationCircleOutlined
-                      style={{
-                        color: 'rgba(255, 77, 79, 0.8)',
-                        marginRight: '0.5rem',
-                        fontSize: '1.1rem',
-                      }}
-                    />
-                  </div>
-                  <div className="msg">{`${t('common:email')} ${t('common:isInvalid')}`}</div>
-                </div>
-              )}
-              <div className="bottom-forgot-password-section">
-                {t('common:backto')}&nbsp;
-                <span onClick={() => onClickBacktoSignIn()} className="backto-signin-txt">
-                  {t('common:signIn')}
-                </span>
-              </div>
-            </Form>
-          </div>
-        </Col>
-      </Row>
+                {t('forgotPassword:submit')}
+              </Button>
+            </Form.Item>
+          </Col>
+        </Row>
+        {emailError && (
+          <Row className="centred-row" style={{ marginBottom: '20px' }}>
+            <Col span={1}>
+              <ExclamationCircleOutlined className="error-message-icon" />
+            </Col>
+            <Col span={23}>
+              <span className="error-message-text">
+                {`${t('common:email')} ${t('common:isInvalid')}`}
+              </span>
+            </Col>
+          </Row>
+        )}
+        <Row className="centred-row">
+          <Col span={24}>
+            {t('common:backto')}{' '}
+            <span onClick={() => onClickBackToSignIn()} className="back-to-sign">
+              {t('common:signIn')}
+            </span>
+          </Col>
+        </Row>
+      </Form>
     </div>
   );
 };

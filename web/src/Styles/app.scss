@@ -24,6 +24,7 @@ body {
   }
 
   .PhoneInput {
+
     .PhoneInputInput:focus-visible,
     .PhoneInputInput:hover {
       flex: 1 1;
@@ -40,10 +41,89 @@ body {
   }
 }
 
-.layout-content-container .ant-btn-primary {
-  background-color: $primary-color !important;
-  color: #ffffff;
-  border: none;
+.form-section-card {
+  background-color: $outside-background-color;
+  border-radius: 10px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding-top: 45px;
+  padding-left: 60px;
+  padding-right: 30px;
+  padding-bottom: 30px;
+}
+
+.form-section-timelineCard {
+  background-color: $outside-background-color;
+  border-radius: 10px;
+  width: 100%;
+  max-height: 600px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  padding-top: 45px;
+  padding-left: 60px;
+  padding-right: 30px;
+  padding-bottom: 30px;
+}
+
+
+.layout-content-container {
+  .ant-btn-primary {
+    background-color: $primary-color !important;
+    color: #ffffff !important;
+    border: none;
+  }
+
+  .ant-btn-primary[disabled] {
+    border-color: #d9d9d9 !important; 
+    background: #f5f5f5 !important;
+    color: rgba(0, 0, 0, 0.25) !important; 
+  }
+}
+
+.title-container .main {
+  color: $primary-color !important;
+}
+
+.ant-upload-list-item-name {
+  color: $primary-color !important;
+}
+
+.ant-upload-list-item-thumbnail {
+  .anticon-file {
+    /* Change the icon color */
+    filter: hue-rotate(50deg);
+  }
+
+}
+
+.login-language-selection {
+  .ant-select-item {
+    color: $primary-color !important;
+  }
+
+  .ant-select-item-option-selected {
+    color: $primary-color !important;
+
+    .ant-select-item-option-content {
+      color: $primary-color !important;
+    }
+  }
+}
+
+.dashboard-main-container .stastics-and-charts-container .stastic-card-row .stastic-card-col .stastics-and-pie-card .mrv-total-programme-details .details .value {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-size: 1.6rem;
+  line-height: 22px;
+  padding-left: 0.125rem;
+  padding: 0;
+  color: $primary-color !important;
+}
+
+.investment-body .actions .actions-icon-container .action-icons {
+  color: $primary-color !important;
+  font-size: 16px;
 }
 
 .stastic-card-main-container .values-section .values-and-unit .value {
@@ -85,6 +165,7 @@ body {
     background-color: $background-color;
   }
 }
+
 .ant-menu-item {
   background-color: $background-color;
 }
@@ -109,8 +190,9 @@ body {
 .ant-select-selection-item {
   color: $common-input-color !important;
 }
+
 .ant-btn {
-  border-radius: 5px !important;
+  border-radius: 4px !important;
 }
 
 .ant-input-group-addon:first-child {
@@ -128,11 +210,12 @@ body {
   justify-content: space-between;
 }
 
-// .ant-radio-group-large .ant-radio-button-wrapper {
-//   font-size: 0.8rem;
-//   width: 25%;
-//   border-radius: 5px !important;
-// }
+.ant-radio-group-large .ant-radio-button-wrapper {
+  font-size: 0.8rem;
+  width: 25%;
+  border-radius: 5px !important;
+  color: #3A354180;
+}
 
 .ant-upload-list-picture .ant-upload-list-item-error,
 .ant-upload-list-picture-card .ant-upload-list-item-error {
@@ -151,7 +234,7 @@ body {
 
 .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
 .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
-  border-color: #d9d9d9 !important;
+  border-color: #ff4d4f !important;
 }
 
 .ant-input-group-wrapper-status-error .ant-input-group-addon {
@@ -163,19 +246,16 @@ body {
   color: $error-color;
 }
 
-.ant-table-thead
-  > tr
-  > th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before {
+.ant-table-thead>tr>th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before {
   background-color: transparent !important;
 }
 
-.ant-form-item-label > label {
+.ant-form-item-label>label {
   flex-direction: row-reverse !important;
   color: rgba(58, 53, 65, 0.5);
 }
 
-.ant-form-item-label
-  > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+.ant-form-item-label>label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
   margin-left: 0.2rem !important;
   color: $error-color !important;
 }
@@ -191,6 +271,7 @@ body {
     border-radius: 5px !important;
     padding: 0 1rem 0 1rem;
   }
+
   .PhoneInputInput {
     flex: 1 1;
     min-width: 0;
@@ -222,13 +303,13 @@ body {
   color: $common-filter-color;
 }
 
-.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-tail::after {
-  background-color: #9155fd;
-  width: 1.7px !important;
+.ant-steps-vertical>.ant-steps-item>.ant-steps-item-container>.ant-steps-item-tail {
+  padding: 38px 0 0px;
 }
 
 .layout-content-container {
   padding-bottom: 100px;
+
   .ant-btn-primary {
     background-color: $primary-purple;
     color: $dark-text-color;
@@ -243,6 +324,7 @@ body {
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
     min-width: 80px;
     box-shadow: none;
+    color: $border-default-btn;
     span {
       text-transform: uppercase;
     }
@@ -259,6 +341,7 @@ body {
   .title-bar {
     padding: 0px 0px 30px 0px;
   }
+
   .body-title {
     color: $primary-color;
     font-weight: 500;
@@ -276,45 +359,12 @@ body {
   background-color: $outside-background-color;
   border-radius: 10px;
   width: 100%;
+
   .action-bar {
-    padding: 1.6rem 1.3rem 1.6rem 1.3rem;
+    padding: 25px;
 
     button {
       width: fit-content;
-    }
-  }
-
-  .filter-section {
-    padding: 1.4rem 1.3rem 1.6rem 1.3rem;
-    display: flex;
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: end;
-
-    .search-bar {
-      display: flex;
-      flex-direction: row-reverse;
-    }
-
-    .filter-bar {
-      display: flex;
-      flex-direction: row-reverse;
-      margin-top: 0.8rem;
-      width: 5%;
-    }
-
-    .ant-input-affix-wrapper {
-      border-radius: 0.313rem 0 0 0.313rem !important;
-    }
-
-    .ant-input-search
-      > .ant-input-group
-      > .ant-input-group-addon:last-child
-      .ant-input-search-button {
-      padding-top: 0;
-      padding-bottom: 0;
-      border-radius: 0 0.313rem 0.313rem 0 !important;
     }
   }
 }
@@ -326,6 +376,30 @@ body {
 .table-actions-section {
   width: 100%;
   margin-bottom: 1rem;
+
+  .search-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 25px;
+
+    @media (max-width: 767px) {
+      margin-left: 25px;
+      margin-top: 0;
+      justify-content: flex-start;
+    }
+  }
+
+  .filter-bar {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+
+    @media (max-width: 767px) {
+      margin-top: 0;
+      justify-content: flex-start;
+    }
+  }
+
 }
 
 .action-menu {
@@ -338,7 +412,7 @@ body {
   }
 
   .anticon-edit {
-    color: $primary-color;
+    color: $primary-color !important;
   }
 
   .anticon-delete {
@@ -347,7 +421,7 @@ body {
 }
 
 .ant-dropdown-menu {
-  padding: 1rem 2rem 1rem 1rem !important;
+  padding: 1rem 1rem 1rem 1rem !important;
   border-radius: 5px;
 }
 
@@ -524,10 +598,50 @@ body {
     border: none;
   }
 
+  .ant-btn-primary[disabled] {
+    border-color: #d9d9d9 !important;
+    background: #f5f5f5 !important;
+  }
+
   .transfer-form {
     .ant-btn-primary {
       background: $primary-color;
       border-radius: $primary-color;
+      border: none;
+    }
+  }
+
+  .ant-btn-default {
+    color: $body-text-color;
+    border-color: $body-text-color;
+  }
+
+  .ant-btn-primary[disabled] {
+    border-color: #d9d9d9;
+    background: #f5f5f5;
+  }
+}
+
+.popup-danger {
+  .icon {
+    color: $error-color !important;
+  }
+
+  .ant-btn-primary {
+    background: $error-color !important;
+    border-radius: $error-color !important;
+    border: none;
+  }
+
+  .ant-btn-primary[disabled] {
+    border-color: #d9d9d9 !important;
+    background: #f5f5f5 !important;
+  }
+
+  .transfer-form {
+    .ant-btn-primary {
+      background: $error-color;
+      border-radius: $error-color;
       border: none;
     }
   }
@@ -582,7 +696,7 @@ body {
 .ant-tag-processing {
   color: $primary-color;
   background: rgba($color: #b9e2f4, $alpha: 0.4);
-  border-color: $primary-blue !important;
+  border-color: $primary-color !important;
 }
 
 .filter-section input {
@@ -636,17 +750,21 @@ body {
   .ant-row {
     align-items: unset;
   }
+
   padding: 0px 15px;
+
   .sub-text {
     margin-bottom: 35px;
     font-size: 0.9rem;
     font-weight: 500;
   }
+
   .label {
     text-align: left;
     font-size: 0.9rem;
     color: $body-text-color;
   }
+
   .seperator {
     font-size: 1.2rem;
     color: $line-colors;
@@ -656,11 +774,13 @@ body {
     margin-bottom: 0px;
     margin-top: 15px;
   }
+
   color: $body-text-color;
 
   label {
     font-size: 0.8rem;
   }
+
   .ant-radio-wrapper {
     font-size: 0.9rem;
   }
@@ -704,6 +824,7 @@ body {
   top: 50%;
   left: 50%;
 }
+
 .ant-tag-purple {
   color: #976ed7;
 }
@@ -825,4 +946,43 @@ body {
   vertical-align: super;
   margin-left: 5px;
   font-size: 10px;
+}
+
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: $primary-color;
+}
+
+.ant-tabs-tab:hover {
+  color: $primary-color;
+}
+
+.btnAddNewMainAct {
+  margin-bottom: 16;
+  width: 100%;
+  height: 45px;
+  border-radius: 10px;
+  border: 1px solid rgba(58, 53, 65, 0.5);
+  background: #fff;
+  color: $primary-color;
+  text-align: center;
+  font-family: Inter;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.btnAddNewMainAct:hover {
+  color: $primary-color;
+}
+
+.btnAddNewMainAct:disabled {
+  color: rgba(0, 0, 0, 0.25);
+  border-color: #d9d9d9;
+  background: #f5f5f5;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.ant-tabs-ink-bar {
+  background: $primary-color;
 }

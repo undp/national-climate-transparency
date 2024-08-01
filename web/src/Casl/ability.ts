@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import {
   AbilityBuilder,
   CreateAbility,
@@ -6,18 +7,17 @@ import {
   InferSubjects,
   MongoAbility,
 } from '@casl/ability';
-import {
-  Action,
-  BaseEntity,
-  Company,
-  CompanyRole,
-  ProgrammeCertify,
-  ProgrammeEntity,
-  ProgrammeStageMRV,
-  ProgrammeTransfer,
-  Role,
-  User,
-} from '@undp/carbon-library';
+import { BaseEntity } from '../Entities/baseEntity';
+import { Action } from '../Enums/action.enum';
+import { Role } from '../Enums/role.enum';
+import { User } from '../Entities/user';
+import { ActionEntity } from '../Entities/action';
+import { Organisation } from '../Entities/organisation';
+import { ProgrammeEntity } from '../Entities/programme';
+import { ProjectEntity } from '../Entities/project';
+import { ActivityEntity } from '../Entities/activity';
+import { SupportEntity } from '../Entities/support';
+import { ResourceEntity } from '../Entities/resourceEntity';
 
 type Subjects = InferSubjects<typeof BaseEntity> | 'all';
 
@@ -35,133 +35,210 @@ export const defineAbility = () => {
 export const updateUserAbility = (ability: AppAbility, user: User) => {
   const { can, cannot, rules } = new AbilityBuilder(createAppAbility);
   if (user) {
-    if (user.role === Role.Root) {
-      can(Action.Manage, 'all');
+    if (user.role == Role.Root) {
+      can(Action.Read, Organisation);
+      can(Action.Create, Organisation);
+      can(Action.Update, Organisation);
+      can(Action.Delete, Organisation);
+      cannot(Action.Update, Organisation, ['organisationType']);
 
-      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'companyRole', 'email'], {
-        id: { $eq: user.id },
-      });
-      cannot([Action.Update], User, { companyId: { $ne: user.companyId } });
-      cannot([Action.Update], Company);
-      can([Action.Delete], Company);
-      can([Action.Create], Company);
-      can(Action.Update, Company, { companyId: { $eq: user.companyId } });
-    } else if (
-      user.role === Role.Admin &&
-      (user.companyRole === CompanyRole.GOVERNMENT || user.companyRole === CompanyRole.MINISTRY)
-    ) {
-      can(Action.Manage, User, { role: { $ne: Role.Root } });
-      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'companyRole', 'email'], {
-        id: { $eq: user.id },
-      });
-      cannot([Action.Update, Action.Delete], User, { companyId: { $ne: user.companyId } });
-      can(Action.Update, Company, { companyId: { $eq: user.companyId } });
-      cannot(Action.Update, Company, { companyId: { $ne: user.companyId } });
-      cannot(Action.Update, Company, ['companyRole']);
-      can(Action.Delete, Company);
-      can(Action.Create, Company);
-      if (user.companyRole === CompanyRole.MINISTRY) {
-        cannot([Action.Update, Action.Delete], User, {
-          companyId: { $ne: user.companyId },
-        });
-        cannot(Action.Delete, Company, { companyRole: { $eq: user.companyRole } });
-        cannot(Action.Delete, Company, { companyId: { $eq: user.companyId } });
-      }
-    } else if (user.role === Role.Admin && user.companyRole !== CompanyRole.GOVERNMENT) {
-      if (user.companyRole === CompanyRole.MINISTRY) {
-        can(Action.Create, Company);
-      }
-      can(Action.Manage, User, { role: { $ne: Role.Root } });
-      cannot([Action.Update, Action.Delete, Action.Read], User, {
-        companyId: { $ne: user.companyId },
-      });
-      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'companyRole', 'email'], {
-        id: { $eq: user.id },
-      });
-
-      can(Action.Read, Company);
-      can(Action.Update, Company, { companyId: { $eq: user.companyId } });
-      cannot(Action.Update, Company, { companyId: { $ne: user.companyId } });
-      cannot(Action.Update, Company, ['companyRole']);
-      cannot(Action.Create, Company);
-    } else {
-      if (
-        user.companyRole === CompanyRole.GOVERNMENT ||
-        user.companyRole === CompanyRole.MINISTRY
-      ) {
-        can(Action.Read, User);
-      } else {
-        can(Action.Read, User, { companyId: { $eq: user.companyId } });
-      }
-      can(Action.Update, User, { id: { $eq: user.id } });
-      cannot(Action.Update, User, ['email', 'role', 'apiKey', 'password', 'companyRole']);
-      can(Action.Read, Company);
-    }
-
-    if (user.role === Role.Manager && user.companyRole === CompanyRole.GOVERNMENT) {
-      can([Action.Delete], Company);
-    }
-
-    if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.PROGRAMME_DEVELOPER) {
-      can(Action.Manage, ProgrammeTransfer);
-    }
-
-    if (user.role === Role.Admin && user.companyRole === CompanyRole.GOVERNMENT) {
-      can(Action.Approve, Company);
-      can(Action.Reject, Company);
-    }
-
-    if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.MINISTRY) {
-      can(Action.Manage, ProgrammeTransfer);
-      can(Action.Manage, ProgrammeEntity);
-      can(Action.Manage, ProgrammeEntity);
-    }
-
-    if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.GOVERNMENT) {
-      can(Action.Manage, ProgrammeTransfer);
-      can(Action.Manage, ProgrammeEntity);
-      can(Action.Manage, ProgrammeEntity);
-    }
-
-    if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.PROGRAMME_DEVELOPER) {
-      can(Action.Manage, ProgrammeTransfer);
-      can(Action.Manage, ProgrammeEntity);
-      can(Action.Manage, ProgrammeEntity);
-    }
-
-    if (user.role !== Role.ViewOnly && user.companyRole === CompanyRole.CERTIFIER) {
-      can(Action.Manage, ProgrammeCertify);
-    }
-
-    if (user.companyRole === CompanyRole.CERTIFIER) {
-      can(Action.Read, ProgrammeEntity, { currentStage: { $in: [ProgrammeStageMRV.Authorised] } });
-      can(Action.Read, ProgrammeEntity, { certifierId: { $elemMatch: { $eq: user.companyId } } });
-    } else if (user.companyRole === CompanyRole.PROGRAMME_DEVELOPER) {
-      can(Action.Read, ProgrammeEntity, { currentStage: { $eq: ProgrammeStageMRV.Authorised } });
-      can(Action.Read, ProgrammeEntity, { companyId: { $elemMatch: { $eq: user.companyId } } });
-    }
-
-    // cannot(Action.Delete, User, { id: { $eq: user.id } })
-    cannot(Action.Update, User, ['companyRole']);
-
-    cannot([Action.Delete], Company, { companyRole: { $eq: CompanyRole.GOVERNMENT } });
-
-    //MRV related permissions
-    cannot([Action.Delete], Company);
-
-    if (user.role === Role.Admin || user.role === Role.Root) {
+      can(Action.Read, User);
       can(Action.Create, User);
-    } else {
-      cannot(Action.Create, User);
-      cannot(Action.Update, User, { id: { $ne: user.id } });
-      cannot(Action.Delete, User, { id: { $ne: user.id } });
-      cannot(Action.Create, Company);
+      can(Action.Update, User);
+      can(Action.Delete, User);
+      cannot(Action.Update, User, ['apiKey', 'password', 'email', 'organisationType']);
+
+      can(Action.Read, ActionEntity);
+      can(Action.Create, ActionEntity);
+      can(Action.Validate, ActionEntity);
+      can(Action.Update, ActionEntity);
+      can(Action.Delete, ActionEntity);
+
+      can(Action.Read, ProgrammeEntity);
+      can(Action.Create, ProgrammeEntity);
+      can(Action.Validate, ProgrammeEntity);
+      can(Action.Update, ProgrammeEntity);
+      can(Action.Delete, ProgrammeEntity);
+
+      can(Action.Read, ProjectEntity);
+      can(Action.Create, ProjectEntity);
+      can(Action.Validate, ProjectEntity);
+      can(Action.Update, ProjectEntity);
+      can(Action.Delete, ProjectEntity);
+
+      can(Action.Read, ActivityEntity);
+      can(Action.Create, ActivityEntity);
+      can(Action.Validate, ActivityEntity);
+      can(Action.Update, ActivityEntity);
+      can(Action.Delete, ActivityEntity);
+
+      can(Action.Read, SupportEntity);
+      can(Action.Create, SupportEntity);
+      can(Action.Validate, SupportEntity);
+      can(Action.Update, SupportEntity);
+      can(Action.Delete, SupportEntity);
+
+      can(Action.Update, ResourceEntity);
     }
 
-    if (user.companyState === 0) {
-      cannot(Action.Create, 'all');
-      cannot(Action.Delete, 'all');
-      cannot(Action.Update, 'all');
+    if (user.role == Role.Admin) {
+      can(Action.Read, Organisation);
+      can(Action.Create, Organisation);
+      can(Action.Update, Organisation);
+      can(Action.Delete, Organisation);
+      cannot(Action.Update, Organisation, ['organisationType']);
+
+      can(Action.Read, User);
+      can(Action.Create, User);
+      can(Action.Update, User, { role: { $ne: Role.Root } });
+      can(Action.Delete, User);
+      cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email', 'organisationType']);
+
+      can(Action.Read, ActionEntity);
+      can(Action.Create, ActionEntity);
+      can(Action.Validate, ActionEntity);
+      can(Action.Update, ActionEntity);
+      can(Action.Delete, ActionEntity);
+
+      can(Action.Read, ProgrammeEntity);
+      can(Action.Create, ProgrammeEntity);
+      can(Action.Validate, ProgrammeEntity);
+      can(Action.Update, ProgrammeEntity);
+      can(Action.Delete, ProgrammeEntity);
+
+      can(Action.Read, ProjectEntity);
+      can(Action.Create, ProjectEntity);
+      can(Action.Validate, ProjectEntity);
+      can(Action.Update, ProjectEntity);
+      can(Action.Delete, ProjectEntity);
+
+      can(Action.Read, ActivityEntity);
+      can(Action.Create, ActivityEntity);
+      can(Action.Validate, ActivityEntity);
+      can(Action.Update, ActivityEntity);
+      can(Action.Delete, ActivityEntity);
+
+      can(Action.Read, SupportEntity);
+      can(Action.Create, SupportEntity);
+      can(Action.Validate, SupportEntity);
+      can(Action.Update, SupportEntity);
+      can(Action.Delete, SupportEntity);
+
+      cannot(Action.Update, ResourceEntity);
+    }
+
+    if (user.role == Role.GovernmentUser) {
+      can(Action.Read, Organisation);
+      cannot(Action.Create, Organisation);
+      cannot(Action.Update, Organisation);
+      cannot(Action.Delete, Organisation);
+
+      can(Action.Read, User);
+      cannot(Action.Create, User);
+      cannot(Action.Delete, User);
+      can(Action.Update, User, { id: { $eq: user.id } });
+      cannot(
+        Action.Update,
+        User,
+        [
+          'role',
+          'apiKey',
+          'password',
+          'email',
+          'organisationType',
+          'sector',
+          'validatePermission',
+          'subRolePermission',
+          'ghgInventoryPermission',
+        ],
+        {
+          id: { $eq: user.id },
+        }
+      );
+
+      can(Action.Read, ActionEntity);
+      can(Action.Create, ActionEntity);
+      can(Action.Validate, ActionEntity);
+      can(Action.Update, ActionEntity);
+      cannot(Action.Delete, ActionEntity);
+
+      can(Action.Read, ProgrammeEntity);
+      can(Action.Create, ProgrammeEntity);
+      can(Action.Validate, ProgrammeEntity);
+      can(Action.Update, ProgrammeEntity);
+      cannot(Action.Delete, ProgrammeEntity);
+
+      can(Action.Read, ProjectEntity);
+      can(Action.Create, ProjectEntity);
+      can(Action.Validate, ProjectEntity);
+      can(Action.Update, ProjectEntity);
+      cannot(Action.Delete, ProjectEntity);
+
+      can(Action.Read, ActivityEntity);
+      can(Action.Create, ActivityEntity);
+      can(Action.Validate, ActivityEntity);
+      can(Action.Update, ActivityEntity);
+      cannot(Action.Delete, ActivityEntity);
+
+      can(Action.Read, SupportEntity);
+      can(Action.Create, SupportEntity);
+      can(Action.Validate, SupportEntity);
+      can(Action.Update, SupportEntity);
+      cannot(Action.Delete, SupportEntity);
+
+      cannot(Action.Update, ResourceEntity);
+    }
+
+    if (user.role == Role.Observer) {
+      can(Action.Read, Organisation);
+      cannot(Action.Create, Organisation);
+      cannot(Action.Update, Organisation);
+      cannot(Action.Delete, Organisation);
+
+      can(Action.Read, User);
+      cannot(Action.Create, User);
+
+      can(Action.Update, User, { id: { $eq: user.id } });
+      cannot(
+        Action.Update,
+        User,
+        ['role', 'apiKey', 'password', 'email', 'organisationType', 'sector'],
+        {
+          id: { $eq: user.id },
+        }
+      );
+
+      can(Action.Read, ActionEntity);
+      cannot(Action.Create, ActionEntity);
+      cannot(Action.Validate, ActionEntity);
+      cannot(Action.Update, ActionEntity);
+      cannot(Action.Delete, ActionEntity);
+
+      can(Action.Read, ProgrammeEntity);
+      cannot(Action.Create, ProgrammeEntity);
+      cannot(Action.Validate, ProgrammeEntity);
+      cannot(Action.Update, ProgrammeEntity);
+      cannot(Action.Delete, ProgrammeEntity);
+
+      can(Action.Read, ProjectEntity);
+      cannot(Action.Create, ProjectEntity);
+      cannot(Action.Validate, ProjectEntity);
+      cannot(Action.Update, ProjectEntity);
+      cannot(Action.Delete, ProjectEntity);
+
+      can(Action.Read, ActivityEntity);
+      cannot(Action.Create, ActivityEntity);
+      cannot(Action.Validate, ActivityEntity);
+      cannot(Action.Update, ActivityEntity);
+      cannot(Action.Delete, ActivityEntity);
+
+      can(Action.Read, SupportEntity);
+      cannot(Action.Create, SupportEntity);
+      cannot(Action.Validate, SupportEntity);
+      cannot(Action.Update, SupportEntity);
+      cannot(Action.Delete, SupportEntity);
+
+      cannot(Action.Update, ResourceEntity);
     }
   }
 

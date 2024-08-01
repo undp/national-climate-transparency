@@ -1,0 +1,23 @@
+{
+    "actionType": "ප්‍රගති වර්ගය",
+    "sectorAffected": "ප්‍රදේශීය ක්‍රියාවලි",
+    "financeNeeded": "අපගේ අවශ්‍යතාවය (USD)",
+    "financeReceived": "ලබා ඇති මුදල (USD)",
+    "nationalImplementingEntity": "ජාතික අන්තර්ගත සංවිධානය(වාර්තා කරන ලද්දේ)",
+    "validationStatus": "වලංගුකරණ තත්වය",
+    "filterByValidationStatus": "වලංගුකරණ තත්වය අනුව පෙරහන් කරන්න",
+    "supportIdTitle": "සහයෝගය හැඳුනුම් අංකය",
+    "financeNatureTitle": "ජාතික හෝ ජාතික මුදල",
+    "directionTitle": "අවශ්‍ය/ලබා ඇත්තා",
+    "finInstrumentTitle": "මුදල් විදුලි මෙවලම",
+    "neededUSDHeader": "අනුමත අවශ්‍යතාවය (USD)",
+    "neededLCLHeader": "අනුමත අවශ්‍යතාවය (දේශීය)",
+    "receivedUSDHeader": "ලබා ඇති මුදල (USD)",
+    "receivedLCLHeader":"ලබා ඇති මුදල (දේශීය)",
+    "supportType": "සහයෝගයේ වර්ගය",
+    "recipientEntity": "විදුලි අංකය (අංක)",
+    "internationalImplementingEntity": "ජාතික අන්තර්ගත සංවිධානය(වාර්තා කරන ලද්දේ)",
+    "type": "වර්ගය",
+    "subSectorAffected": "උප ප්‍රදේශීය ක්‍රියාවලි",
+    "estimatedInvestment": "සදහා අනුමැතිය අවශ්‍යවන ලද්දේ (USD)"
+}

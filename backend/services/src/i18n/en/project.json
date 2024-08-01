@@ -1,0 +1,25 @@
+{
+    "programmeNotFound": "A programme with id {} is not found",
+    "projectNotFound": "A project with id {} is not found",
+    "projectCreationFailed": "Project creation failed due to {}",
+    "createProjectSuccess": "Project created successfully",
+    "projectAlreadyLinked": "Project with id {} is already attached to a programme",
+    "projectsNotFound": "Project(s) not found",
+    "projectIsNotLinked": "Project with id {} is not attached to any programme",
+    "projectsLinkedToProgramme": "Projects attached to programme successfully",
+    "projectsUnlinkedFromProgramme": "Projects detached from programme successfully",
+    "cannotUpdateNotRelatedProject": "User is not allowed to update the project with id {}",
+    "startYearCantBeLargerThanEndYear": "End year cannot be before start year",
+    "noDocumentsFound": "No documents found for the project",
+    "projectUpdateFailed": "Project update failed due to {}",
+    "updateProjectSuccess": "Project updated successfully",
+    "projectAlreadyValidated": "The project with id {} is already validated",
+    "verifyProjectSuccess": "Project verified successfully",
+    "projectVerificationFailed": "Project verification failed due to {}",
+    "cannotEditValidated": "The project with id {} is validated and cannot be edited",
+    "permissionDeniedForSector": "User does not have the permission for the sector",
+    "deleteProjectSuccess": "Project deleted successfully",
+    "projectDeletionFailed": "Project delete failed due to {}",
+    "parentNotValidated": "Parent programme with id {} should be validated."
+
+}

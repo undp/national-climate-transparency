@@ -1,161 +1,104 @@
-import { Body, Controller, Post, UseGuards, Request, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import {Programme,Action,AppAbility,CheckPolicies,PoliciesGuard, PoliciesGuardEx,ProgrammeDto,ProgrammeService,
-  QueryDto,ConstantUpdateDto,ApiKeyJwtAuthGuard,NDCActionDto,JwtAuthGuard,ProgrammeDocumentDto,DocumentAction,ProgrammeAuth,ProgrammeIssue,ProgrammeReject,
-  InvestmentRequestDto,Investment,InvestmentApprove,InvestmentCancel,InvestmentReject,NDCActionViewEntity,ProgrammeDocumentViewEntity, ProgrammeMitigationIssue} from "@undp/carbon-services-lib";
+import {
+	Controller,
+	UseGuards,
+	Request,
+	Post,
+	Body,
+	Get,
+	Param,
+	Put,
+	Delete,
+} from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
+import { Action } from "../casl/action.enum";
+import { PoliciesGuardEx } from "../casl/policy.guard";
+import { ProgrammeDto } from "../dtos/programme.dto";
+import { ProgrammeService } from "../programme/programme.service";
+import { ProgrammeEntity } from "../entities/programme.entity";
+import { LinkProgrammesDto } from "../dtos/link.programmes.dto";
+import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
+import { QueryDto } from "../dtos/query.dto";
+import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
+import { ValidateDto } from "../dtos/validate.dto";
+import { DeleteDto } from "src/dtos/delete.dto";
 
-
-@ApiTags('Programme')
+@ApiTags("Programmes")
 @ApiBearerAuth()
-@Controller('programme')
+@Controller("programmes")
 export class ProgrammeController {
+	constructor(
+		private readonly programmeService: ProgrammeService,
+	) { }
 
-    constructor(private programmeService: ProgrammeService) {
+	@ApiBearerAuth('api_key')
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Create, ProgrammeEntity))
+	@Post("add")
+	addProgramme(@Body() programmeDto: ProgrammeDto, @Request() req) {
+		return this.programmeService.createProgramme(programmeDto, req.user);
+	}
 
-    }
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeEntity, true))
+	@Post("query")
+	queryProgramme(@Body() query: QueryDto, @Request() req) {
+		console.log(req.abilityCondition);
+		return this.programmeService.query(query, req.abilityCondition);
+	}
 
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, PoliciesGuard)
-    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
-    @Post('create')
-    async addProgramme(@Body()programme: ProgrammeDto, @Request() req) {
-      global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-      return this.programmeService.create(programme, req.user) 
-    }
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeEntity, true))
+	@Get('/:id')
+	getProgrammeViewData(@Param('id') id: string, @Request() req) {
+		return this.programmeService.getProgrammeViewData(id, req.abilityCondition);
+	}
 
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, PoliciesGuard)
-    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Programme))
-    @Post('addNDCAction')
-    async addNDCAction(@Body()ndcAction: NDCActionDto, @Request() req) {
-      global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-      return this.programmeService.addNDCAction(ndcAction, req.user)
-    }
+	@ApiBearerAuth('api_key')
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeEntity))
+	@Put("update")
+	updateProgramme(@Body() programmeUpdateDto: ProgrammeUpdateDto, @Request() req) {
+		return this.programmeService.updateProgramme(programmeUpdateDto, req.user);
+	}
 
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, PoliciesGuard)
-    @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, DocumentAction))
-    @Post('addDocument')
-    async addDocument(@Body()docDto: ProgrammeDocumentDto, @Request() req) {
-      global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-      return this.programmeService.addDocument(docDto, req.user)
-    }
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeEntity, true))
+	@Get('link/eligible')
+	findEligibleProgrammesForLinking(@Request() req) {
+		return this.programmeService.findProgrammesEligibleForLinking();
+	}
 
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, PoliciesGuard)
-    @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, DocumentAction))
-    @Post('docAction')
-    async docAction(@Body()docAction: DocumentAction, @Request() req) {
-      return this.programmeService.docAction(docAction, req.user)
-    }
+	@ApiBearerAuth('api_key')
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeEntity))
+	@Post("link")
+	linkProgrammes(@Body() linkProgrammesDto: LinkProgrammesDto, @Request() req) {
+		return this.programmeService.linkProgrammesToAction(linkProgrammesDto, req.user);
+	}
 
+	@ApiBearerAuth('api_key')
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Update, ProgrammeEntity))
+	@Post("unlink")
+	unlinkProgrammes(@Body() unlinkProgrammesDto: UnlinkProgrammesDto, @Request() req) {
+		return this.programmeService.unlinkProgrammesFromAction(unlinkProgrammesDto, req.user);
+	}
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
-    // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
-    @Post('query')
-    async getAll(@Body()query: QueryDto, @Request() req) {
-      return this.programmeService.query(query, req.abilityCondition)
-    }
+	@ApiBearerAuth('api_key')
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Validate, ProgrammeEntity))
+	@Post("validateStatus")
+	validateProgrammes(@Body() validateDto: ValidateDto, @Request() req) {
+		return this.programmeService.validateProgramme(validateDto, req.user);
+	}
 
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, ProgrammeDocumentViewEntity, true))
-    // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
-    @Post('queryDocs')
-    async queryDocuments(@Body()query: QueryDto, @Request() req) {
-      return this.programmeService.queryDocuments(query, req.abilityCondition)
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, NDCActionViewEntity, true))
-    // @UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Read, User, true))
-    @Post('queryNdcActions')
-    async queryNdcActions(@Body()query: QueryDto, @Request() req) {
-      return this.programmeService.queryNdcActions(query, req.abilityCondition)
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, NDCActionViewEntity, true))
-    @Post('queryNdcDetails')
-    async queryNdcDetails(@Body()query: QueryDto, @Request() req) {
-      return this.programmeService.queryNdcDetails(query, req.abilityCondition)
-    }
-
-    // @ApiBearerAuth('api_key')
-    // @ApiBearerAuth()
-    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuard)
-    // @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Programme, true))
-    // @Get('getHistory')
-    // async getHistory(@Query('programmeId') programmeId: string, @Request() req) {
-    //     return this.programmeService.getProgrammeEvents(programmeId, req.user)
-    // }
-
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
-    @Post('updateConfigs')
-    async updateConfigs(@Body() config: ConstantUpdateDto) {
-        return this.programmeService.updateCustomConstants(config.type, config);
-    }
-
-    @ApiBearerAuth('api_key')
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
-    @Put('authProgramme')
-    async authProgramme(@Body() auth: ProgrammeAuth) {
-        return this.programmeService.authProgramme(auth);
-    }
-
-    @ApiBearerAuth('api_key')
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
-    @Put('issueCredit')
-    async issueCredit(@Body() issue: ProgrammeMitigationIssue,@Request() req) {
-        return this.programmeService.issueCredit(issue,req.abilityCondition);
-    }
-
-    @ApiBearerAuth('api_key')
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Programme))
-    @Put('rejectProgramme')
-    async rejectProgramme(@Body() rej: ProgrammeReject) {
-        return this.programmeService.rejectProgramme(rej,undefined);
-    }
-
-
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Update, Investment))
-    @Post('addInvestment')
-    async addInvestment(@Body() investment: InvestmentRequestDto, @Request() req) {
-        return this.programmeService.addInvestment(investment, req.user);
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Create, Investment))
-    @Post('investmentApprove')
-    async investmentApprove(@Body() body: InvestmentApprove, @Request() req) {
-        return this.programmeService.investmentApprove(body, req.user)
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Delete, Investment))
-    @Post('investmentReject')
-    async investmentReject(@Body() body: InvestmentReject, @Request() req) {
-        return this.programmeService.investmentReject(body, req.user)
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Delete, Investment))
-    @Post('investmentCancel')
-    async investmentCancel(@Body() body: InvestmentCancel, @Request() req) {
-        return this.programmeService.investmentCancel(body, req.user)
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(ApiKeyJwtAuthGuard, PoliciesGuardEx(true, Action.Read, Investment, true))
-    @Post('investmentQuery')
-    queryUser(@Body()query: QueryDto, @Request() req) {
-      console.log(req.abilityCondition)
-      return this.programmeService.queryInvestment(query, req.abilityCondition, req.user)
-    }
+	@ApiBearerAuth('api_key')
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, PoliciesGuardEx(true, Action.Delete, ProgrammeEntity))
+	@Delete("delete")
+	deleteProgramme(@Body() deleteDto: DeleteDto, @Request() req) {
+		return this.programmeService.deleteProgramme(deleteDto, req.user);
+	}
 }

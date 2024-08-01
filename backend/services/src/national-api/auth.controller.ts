@@ -9,12 +9,14 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { LoginDto } from "@undp/carbon-services-lib";
-import { AuthService } from "@undp/carbon-services-lib";
-import { ForgotPasswordDto } from "@undp/carbon-services-lib";
-import { PasswordResetDto } from "@undp/carbon-services-lib";
-import { PasswordResetService } from '@undp/carbon-services-lib';
-import { HelperService } from '@undp/carbon-services-lib';
+
+import { AuthService } from "../auth/auth.service";
+import { ForgotPasswordDto } from "../dtos/forgotPassword.dto";
+import { LoginDto } from "../dtos/login.dto";
+import { PasswordResetDto } from "../dtos/passwordReset.dto";
+import { User } from "../entities/user.entity";
+import { HelperService } from "../util/helpers.service";
+import { PasswordResetService } from "../util/passwordReset.service";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -27,16 +29,18 @@ export class AuthController {
 
   @Post("login")
   async login(@Body() login: LoginDto, @Request() req) {
-    const user = await this.authService.validateUser(
+    const validationResponse: {user: Omit<User, 'password'> | null; message: string} = 
+    await this.authService.validateUser(
       login.username,
       login.password
     );
-    if (user != null) {
+
+    if (validationResponse.user != null) {
       global.baseUrl = `${req.protocol}://${req.get("Host")}`;
-      return this.authService.login(user);
+      return this.authService.login(validationResponse.user);
     }
     throw new HttpException(this.helperService.formatReqMessagesString(
-      "common.invalidLogin",
+      `common.${validationResponse.message}`,
       []
     ), HttpStatus.UNAUTHORIZED);
   }

@@ -1,0 +1,15 @@
+{
+    "actionCreationFailed": "Action creation failed due to {}",
+    "createActionSuccess": "Action created successfully",
+    "docUploadFailed": "Document/s upload failed",
+    "unsupportedFileType": "Uploaded document/s type is not supported",
+    "noDocumentsFound": "No documents found for the action",
+    "actionNotFound": "An action with id {} is not found",
+    "actionAlreadyValidated": "The action with id {} is already validated",
+    "verifyActionSuccess": "Action verified successfully",
+    "actionVerificationFailed": "Action verification failed due to {}",
+    "cannotEditValidated": "The action with id {} is validated and cannot be edited",
+    "permissionDeniedForSector": "User does not have the permission for the sector",
+    "deleteActionSuccess": "Action deleted successfully",
+    "actionDeletionFailed": "Action deletion failed due to {}"
+}

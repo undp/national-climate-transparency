@@ -1,0 +1,14 @@
+{
+  "viewTitle": "Support List",
+  "addButtonType": "ADD support",
+  "searchBarText": "Search by Support Title",
+  "supportId": "Support ID",
+  "activityId": "Activity ID",
+  "supportNeededOrReceived": "Support Needed or Received",
+  "internationalOrNationalFinance": "International or National Finance",
+  "channelOfSupport": "Channel of Support",
+  "financialInstrument": "Financial Instrument",
+  "financingStatus": "Financing Status",
+  "internationalSource": "International Source",
+  "filterBySupportDirection": "Filter By Support Needed or Received"
+}

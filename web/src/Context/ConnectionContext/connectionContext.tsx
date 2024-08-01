@@ -1,34 +1,21 @@
-import React, { createContext, FC, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, FC, useCallback, useContext, useEffect, useState } from 'react';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ConnectionProps, ConnectionContextProviderProps, Methods } from '@undp/carbon-library';
+import jwt_decode from 'jwt-decode';
+import {
+  ConnectionContextProviderProps,
+  ConnectionProps,
+  Methods,
+} from '../../Definitions/connectionContext.definitions';
 
 const ConnectionContext = createContext<{
   connection?: ConnectionProps;
 }>({});
-import jwt_decode from 'jwt-decode';
-import { useTranslation } from 'react-i18next';
 
 export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
   props: ConnectionContextProviderProps
 ) => {
   const [token, setToken] = useState<string>();
-  const { i18n, t } = useTranslation(['common']);
-  const { serverURL, children } = props;
-
-  useEffect(() => {
-    const timer = setInterval(async () => {
-      const newToken: any = await localStorage.getItem('token');
-      if (token !== newToken) {
-        setToken(newToken);
-      }
-    }, 3000);
-    if (token) {
-      clearTimeout(timer);
-    }
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [token]);
+  const { serverURL, t, statServerUrl, children } = props;
 
   const send = useCallback(
     (method: Methods, path: string, data?: any, config?: AxiosRequestConfig, extraUrl?: string) => {
@@ -38,10 +25,15 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
         if (token) {
           headers = { authorization: `Bearer ${token.toString()}` };
         } else {
-          localStorage.getItem('token');
-          headers = {
-            authorization: `Bearer ${localStorage.getItem('token')}`,
-          };
+          if (localStorage.getItem('token')) {
+            headers = {
+              authorization: `Bearer ${localStorage.getItem('token')}`,
+            };
+          } else {
+            headers = {
+              authorization: `Bearer ${process.env.STORYBOOK_ACCESS_TOKEN}`,
+            };
+          }
         }
         axios({
           method,
@@ -81,7 +73,14 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
           .catch((e: any) => {
             if (e.response) {
               if (e.response.status) {
-                if (e.response.data.message === 'jwt expired') {
+                if (e.response.data.message === 'user deactivated') {
+                  localStorage.setItem('userState', '0');
+                }
+
+                if (
+                  e.response.data.message === 'jwt expired' ||
+                  e.response.data.message === 'user deactivated'
+                ) {
                   localStorage.removeItem('token');
                   window.location.reload();
                 }
@@ -122,8 +121,8 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
     [send]
   );
   const get = useCallback(
-    (path: string, config?: AxiosRequestConfig) => {
-      return send('get', path, undefined, config);
+    (path: string, config?: AxiosRequestConfig, extraUrl?: string) => {
+      return send('get', path, undefined, config, extraUrl);
     },
     [send]
   );
@@ -134,8 +133,8 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
     [send]
   );
   const del = useCallback(
-    (path: string, config?: AxiosRequestConfig) => {
-      return send('delete', path, config);
+    (path: string, data?: any, config?: AxiosRequestConfig) => {
+      return send('delete', path, data, config);
     },
     [send]
   );
@@ -157,8 +156,6 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
         localStorage.setItem('token', '');
         localStorage.removeItem('userRole');
         localStorage.removeItem('userId');
-        localStorage.removeItem('companyId');
-        localStorage.removeItem('companyRole');
       } else {
         const diff = exp * 1000 - Date.now();
         setTimeout(() => {
@@ -166,8 +163,6 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
           localStorage.setItem('token', '');
           localStorage.removeItem('userRole');
           localStorage.removeItem('userId');
-          localStorage.removeItem('companyId');
-          localStorage.removeItem('companyRole');
         }, diff);
         console.log(diff, 'Remaining Token expire time');
       }
@@ -181,7 +176,17 @@ export const ConnectionContextProvider: FC<ConnectionContextProviderProps> = (
   return (
     <ConnectionContext.Provider
       value={{
-        connection: { post, put, get, patch, delete: del, updateToken, token, removeToken },
+        connection: {
+          post,
+          put,
+          get,
+          patch,
+          delete: del,
+          updateToken,
+          token,
+          removeToken,
+          statServerUrl,
+        },
       }}
     >
       {children}

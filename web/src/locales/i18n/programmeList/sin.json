@@ -1,0 +1,14 @@
+{
+  "viewTitle": "ව්‍යාපෘති ලැයිස්තුව",
+  "addButtonType": "ව්‍යාපෘතියක් එකතු කරන්න",
+  "searchBarText": "ව්‍යාපෘතියේ මාතෘකාව මත සොයන්න",
+  "programmeId": "ව්‍යාපෘතියේ හැඳුනුම්පත",
+  "actionId": "ක්‍රියාවක් හැඳුනුම්පත",
+  "titleOfProgramme": "ව්‍යාපෘතියේ මාතෘකාව",
+  "programmeStatus": "ව්‍යාපෘතියේ තත්ත්වය",
+  "filterByProgrammeStatus": "ව්‍යාපෘතියේ තත්ත්වය පෙන්වන්න",
+  "attachProject": "ව්‍යාපෘතියට ව්‍යාපෘතියන් අමතන්න",
+  "projectList": "ව්‍යාපෘතිය ලැයිස්තුව",
+  "projectLinkSuccess": "ව්‍යාපෘතිය/එකතු කරන ලදි",
+  "addProgramme": "ව්‍යාපෘතිය එකතු කරන්න"
+}

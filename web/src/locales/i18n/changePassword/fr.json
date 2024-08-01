@@ -1,0 +1,13 @@
+{
+    "changePassword": "Changer le mot de passe",
+    "forceChangePassword": "Définir un mot de passe pour l'utilisateur",
+    "oldPassword": "Ancien mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "setPassword": "DÉFINIR LE MOT DE PASSE",
+    "cancel": "ANNULER",
+    "isRequired": "est requis",
+    "passwordsNotMatchedErr": "Les mots de passe ne correspondent pas",
+    "cannotEnterOldPassword": "Impossible d'utiliser l'ancien mot de passe",
+    "forcePasswordResetSuccess":"Mot de passe changé et utilisateur informé"
+}

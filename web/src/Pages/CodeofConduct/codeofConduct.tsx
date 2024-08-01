@@ -1,19 +1,19 @@
-import { Button, Col, Divider, Form, Input, message, Row, Select, Statistic } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { Col, Row } from 'antd';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import sliderLogo from '../../Assets/Images/mrvlogo.svg';
 import LayoutFooter from '../../Components/Footer/layout.footer';
 import './codeofConduct.scss';
-import { CcCircle } from 'react-bootstrap-icons';
+
 const CodeOfConduct = () => {
-  const { i18n, t } = useTranslation(['common', 'homepage']);
+  // const { i18n } = useTranslation(['common', 'homepage']);
   const navigate = useNavigate();
 
-  const handleLanguageChange = (lang: string) => {
-    i18n.changeLanguage(lang);
-  };
+  // const handleLanguageChange = (lang: string) => {
+  //   i18n.changeLanguage(lang);
+  // };
 
   useEffect(() => {
     if (localStorage.getItem('i18nextLng')!.length > 2) {
@@ -23,7 +23,7 @@ const CodeOfConduct = () => {
   return (
     <div className="code-container">
       <Row>
-        <Col md={24} lg={24}>
+        <Col span={24}>
           <div onClick={() => navigate('/')} className="code-header-container">
             <div className="logo">
               <img src={sliderLogo} alt="slider-logo" />
@@ -44,8 +44,8 @@ const CodeOfConduct = () => {
             <div className="codetitle">CONTRIBUTOR COVENANT CODE OF CONDUCT</div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">Our Pledge</div>
             <div className="code-body">
               We as members, contributors, and leaders pledge to make participation in our community
@@ -59,8 +59,8 @@ const CodeOfConduct = () => {
             </div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">Our Standards</div>
             <div className="code-body">
               <p>
@@ -102,8 +102,8 @@ const CodeOfConduct = () => {
             </div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">Enforcement Responsibilities</div>
             <div className="code-body">
               <p>
@@ -120,8 +120,8 @@ const CodeOfConduct = () => {
             </div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">Scope</div>
             <div className="code-body">
               <p>
@@ -134,8 +134,8 @@ const CodeOfConduct = () => {
             </div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">Enforcement</div>
             <div className="code-body">
               <p>
@@ -150,8 +150,8 @@ const CodeOfConduct = () => {
             </div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">Enforcement Guidelines</div>
             <div className="code-body">
               <p>
@@ -161,8 +161,8 @@ const CodeOfConduct = () => {
             </div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">1. Correction</div>
             <div className="code-body">
               <p>
@@ -177,8 +177,8 @@ const CodeOfConduct = () => {
             </div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">2. Warning</div>
             <div className="code-body">
               <p> Community Impact: A violation through a single incident or series of actions.</p>
@@ -193,8 +193,8 @@ const CodeOfConduct = () => {
             </div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">3. Temporary Ban</div>
             <div className="code-body">
               <p>
@@ -211,8 +211,8 @@ const CodeOfConduct = () => {
             </div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">4. Permanent Ban</div>
             <div className="code-body">
               <p>
@@ -227,8 +227,8 @@ const CodeOfConduct = () => {
             </div>
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row justify="center">
+          <Col span={20}>
             <div className="code-subtitle">Attribution</div>
             <div className="code-body">
               <p>

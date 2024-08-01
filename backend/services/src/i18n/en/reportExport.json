@@ -1,0 +1,21 @@
+{
+    "tableFive": "Tables Annex II -5",
+    "nothingToExport": "Data not found for export",
+    "source": "Type",
+    "actionId": "Action No.",
+    "programmeId": "Programme No.",
+    "projectId": "Project No.",
+    "titleOfAction": "Name of Action",
+    "titleOfProgramme": "Title of Programme",
+    "titleOfProject": "Title of Project",
+    "description": "Description",
+    "objective": "Objectives",
+    "instrumentType": "Type of instrument",
+    "status": "Status",
+    "sector": "Sector(s) affected",
+    "ghgsAffected": "Gases affected",
+    "startYear": "Start year of implementation",
+    "implementingEntities": "Implementing entity or entities",
+    "achievedGHGReduction": "Estimates of GHG emission reductions (ktCO2eq) Achieved",
+    "expectedGHGReduction": "Estimates of GHG emission reductions (ktCO2eq) Expected"
+}

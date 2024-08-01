@@ -1,0 +1,50 @@
+@import "../../../Styles/app.scss";
+
+body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+body .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
+  border-color: #ff4d4f !important;
+}
+
+.support-form {
+  
+  .form-item-header {
+    color: #3a3541;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .form-item-header-small {
+    color: #3a3541;
+    opacity: 0.8;
+    font-size: 13px;
+  }
+  
+  .form-section-header {
+    color: #3A3541;
+    opacity: 0.8;
+    margin-bottom: 25px;
+    font-weight: bold;
+  }
+  
+  .form-section-sub-header {
+    color: #3A3541;
+    opacity: 0.8;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .form-input-box {
+    font-size: 13px;
+    height: 40px;
+  }
+
+  .sticky-footer {
+    height: 60px;
+    background-color: #f4f5fa;
+    padding: 15px 2px;
+    position: sticky;
+    bottom: 0;
+  }
+}

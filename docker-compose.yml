@@ -21,6 +21,20 @@ services:
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - data:/data/postgres
+  migration:
+    build:
+      context: .
+      dockerfile: ./backend/services/Dockerfile
+    depends_on:
+      - dbmrv
+      - national
+    command: ['yarn', 'migration:run']
+    environment:
+      DB_HOST: dbmrv
+      DB_PORT: 5433
+      DB_USER: root
+      DB_PASSWORD: "<ANY PASSWORD>"
+      DB_NAME: "carbondev"
   national:
     build:
       context: .
@@ -52,6 +66,8 @@ services:
       SYSTEM_TYPE: CARBON_TRANSPARENCY_SYSTEM
       SYSTEM_SYNC: true
       SYNC_ENABLE: true
+      SYNC_ENDPOINT: 'http://192.168.1.43:3000'      
+      SYNC_API_TOKEN: ''
       BACKEND_HOST: http://localhost:9000
       SYSTEM_NAME: National NDC Transparency System
     volumes:
@@ -136,6 +152,7 @@ services:
         REACT_APP_BACKEND: http://localhost:9000
         REACT_APP_STAT_URL: http://localhost:9100
         REACT_APP_COUNTRY_NAME: "Antarctic Region"
+        REACT_APP_GOVERNMENT_MINISTRY: "Ministry Of Environment"
         REACT_APP_COUNTRY_FLAG_URL: "https://mrv-common-dev.s3.amazonaws.com/flag.png"
         COUNTRY_CODE: "NG"
         REACT_APP_MAP_TYPE: "None"
