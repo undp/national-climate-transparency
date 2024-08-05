@@ -512,6 +512,7 @@ export class ProgrammeService {
 				HttpStatus.FORBIDDEN
 			);
 		}
+		const action = programme.action;
 
 		const programmeKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programme.programmeId);
 
@@ -529,11 +530,24 @@ export class ProgrammeService {
 
 		const pro = await this.entityManager
 			.transaction(async (em) => {
+				const logs = [];
 
 				// related parent and children entity un-validation happens when projects are unlinking
 				if (programme.projects && programme.projects.length > 0) {
 					await this.linkUnlinkService.unlinkProjectsFromProgramme(programme.projects, null, user, this.entityManager, [], true);
-				}
+				} else if (action && action.validated) {
+					action.validated = false;
+					logs.push(this.buildLogEntity(
+						LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_DELETE,
+						EntityType.ACTION,
+						action.actionId,
+						0,
+						programme.programmeId)
+					)
+					await em.save<ActionEntity>(action)
+					await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(action.actionId, em, [], [], []);
+				} 
+
 				const result = await em.delete<ProgrammeEntity>(ProgrammeEntity, programme.programmeId);
 
 				if (result.affected > 0) {
@@ -543,6 +557,10 @@ export class ProgrammeService {
 
 					if (programmeKpiIds && programmeKpiIds.length > 0) {
 						await em.delete<KpiEntity>(KpiEntity, programmeKpiIds);
+					}
+					// Save event logs
+					if (logs.length > 0) {
+						await em.save<LogEntity>(logs);
 					}
 				}
 				return result;
