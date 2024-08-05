@@ -104,16 +104,24 @@
     }
   }
 
-  .image-container {
-    background-image: linear-gradient(to bottom,
-        rgba(255, 255, 255, 0.3) 2%,
-        rgba(22, 177, 255, 0.1) 10%),
-      url('../../Assets/Images/factory.webp');
+  // .image-container {
+  //   background-image: linear-gradient(to bottom,
+  //       rgba(255, 255, 255, 0.3) 2%,
+  //       rgba(22, 177, 255, 0.1) 10%),
+  //     url('../../Assets/Images/factory.webp');
+  //   background-image: linear-gradient(to bottom,
+  //       rgba(255, 255, 255, 0.3) 2%,
+  //       rgba(22, 177, 255, 0.1) 40%),
+  //     image-set('../../Assets/Images/factory.png'type('image/png'),
+  //       '../../Assets/Images/factory.webp'type('image/webp'));
+  //   background-size: cover;
+  // }
+
+    .image-container {
     background-image: linear-gradient(to bottom,
         rgba(255, 255, 255, 0.3) 2%,
         rgba(22, 177, 255, 0.1) 40%),
-      image-set('../../Assets/Images/factory.png'type('image/png'),
-        '../../Assets/Images/factory.webp'type('image/webp'));
+      url('../../Assets/Images/factory.webp');
     background-size: cover;
   }
 

@@ -14,7 +14,7 @@ import ResetPassword from './resetPassword';
 import { UserState } from '../../Enums/user.enum';
 import { AvailableLanguages } from '../../Definitions/languageDefinitions';
 import TransparencyLogo from '../../Components/logo/transparencyLogo';
-import logoLarge from '../../Assets/Images/tran.png';
+import logoLarge from '../../Assets/Images/tran.webp';
 
 const { useBreakpoint } = Grid;
 
