@@ -595,7 +595,7 @@ export class LinkUnlinkService {
 						if (action && action.validated) {
 							action.validated = false;
 							logs.push(this.buildLogEntity(
-								LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+								(isProgrammeDelete) ? LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
 								EntityType.ACTION,
 								action.actionId,
 								0,
