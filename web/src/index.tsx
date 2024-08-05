@@ -6,8 +6,8 @@ import { Loading } from './Components/Loading/loading';
 
 // Loading Login and Landing Page Images at Initial Loading
 
-import loginImage from './Assets/Images/tran.png';
-import landingImage from './Assets/Images/factory.png';
+import loginImage from './Assets/Images/tran.webp';
+import landingImage from './Assets/Images/factory.webp';
 
 const Root = () => {
   const [isImagesLoaded, setImagesLoaded] = useState(false);

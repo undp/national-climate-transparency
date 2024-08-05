@@ -144,25 +144,26 @@ export class ProgrammeService {
 			.transaction(async (em) => {
 				const savedProgramme = await em.save<ProgrammeEntity>(programme);
 				if (savedProgramme) {
+					await em.save<LogEntity>(eventLog);
 
 					// linking projects and updating paths of projects and activities
 					if (projects && projects.length > 0) {
 						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
 					} else if (programmeDto.actionId && action && action.validated) {
 						action.validated = false;
-						this.addEventLogEntry(
-							eventLog, 
-							LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
-							EntityType.ACTION, 
-							action.actionId, 
-							0, 
-							programme.programmeId
-						);
+						const saveUnvalidatedLog =
+							this.buildLogEntity(
+								LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+								EntityType.ACTION,
+								action.actionId,
+								0,
+								programme.programmeId
+							);
+						await em.save<LogEntity>(saveUnvalidatedLog);
 						await em.save<ActionEntity>(action)
 						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(action.actionId, em);
 					}
 
-					await em.save<LogEntity>(eventLog);
 
 					if (programmeDto.kpis) {
 						await em.save<KpiEntity>(kpiList);

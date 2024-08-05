@@ -22,6 +22,7 @@ const GhgEmissions = () => {
     useState<{ year: string; state: 'SAVED' | 'FINALIZED' }[]>();
   const [tabItems, setTabItems] = useState<EmissionTabItem[]>();
   const [dataExistToView, setDataExistToView] = useState<boolean>(false);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
 
   // Active Tab State
 
@@ -36,6 +37,7 @@ const GhgEmissions = () => {
         setAvailableReports(response.data);
         if (response.data.length > 0) {
           setDataExistToView(true);
+          setAvailableYears(response.data.map((report: any) => parseInt(report.year)));
         }
       }
     } catch (error: any) {
@@ -68,7 +70,7 @@ const GhgEmissions = () => {
                 index={0}
                 year={null}
                 finalized={false}
-                availableYears={tabItems ? tabItems.map((item) => parseInt(item.key)) : []}
+                availableYears={availableYears}
                 setActiveYear={setActiveYear}
                 getAvailableEmissionReports={getAvailableEmissionReports}
               />
@@ -91,7 +93,7 @@ const GhgEmissions = () => {
             <EmissionForm
               index={index + 1}
               year={report.year}
-              availableYears={tabItems ? tabItems.map((item) => parseInt(item.key)) : []}
+              availableYears={availableYears}
               setActiveYear={setActiveYear}
               finalized={report.state === 'FINALIZED' ? true : false}
               getAvailableEmissionReports={getAvailableEmissionReports}
@@ -103,7 +105,7 @@ const GhgEmissions = () => {
 
     tempTabItems.sort((a, b) => parseFloat(a.key) - parseFloat(b.key));
     setTabItems(tempTabItems);
-  }, [availableReports]);
+  }, [availableReports, availableYears]);
 
   return (
     <div className="content-container">
