@@ -1,5 +1,4 @@
 import { Table, TableProps, Input, Grid } from 'antd';
-import { useTranslation } from 'react-i18next';
 import {
   ActualRows,
   ActualTimeline,
