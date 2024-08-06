@@ -58,7 +58,13 @@ const inputFontSize = '13px';
 
 const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
-  const { t } = useTranslation(['activityForm', 'formHeader', 'entityAction', 'error']);
+  const { t } = useTranslation([
+    'activityForm',
+    'formHeader',
+    'entityAction',
+    'error',
+    'timelineTable',
+  ]);
 
   const isView: boolean = method === 'view' ? true : false;
   const formTitle = getFormTitle('Activity', method);
@@ -1763,6 +1769,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       mtgStartYear={mtgStartYear}
                       mtgRange={mtgRange}
                       onValueEnter={onMtgValueEnter}
+                      t={t}
                     />
                   </Col>
                 </Row>

@@ -22,6 +22,7 @@ interface Props {
     year: string,
     value: string
   ) => void;
+  t: any;
 }
 
 const { useBreakpoint } = Grid;
@@ -34,8 +35,8 @@ const TimelineTable: React.FC<Props> = ({
   mtgStartYear,
   mtgRange,
   onValueEnter,
+  t,
 }) => {
-  const { t } = useTranslation(['timelineTable']);
   const screens = useBreakpoint();
 
   const isView: boolean = method === 'view' ? true : false;
@@ -53,7 +54,7 @@ const TimelineTable: React.FC<Props> = ({
 
   const expectedTableColumns: TableProps<ExpectedTimeline>['columns'] = [
     {
-      title: t('ghg'),
+      title: t('timelineTable:ghg'),
       dataIndex: 'ghg',
       align: 'center',
       ellipsis: true,
@@ -61,14 +62,14 @@ const TimelineTable: React.FC<Props> = ({
       fixed: 'left',
     },
     {
-      title: t('catExpectedEmissionReduct'),
+      title: t('timelineTable:catExpectedEmissionReduct'),
       dataIndex: 'topic',
       align: 'left',
       width: 350,
       fixed: allowFixedLegend ? 'left' : undefined,
     },
     {
-      title: t('total'),
+      title: t('timelineTable:total'),
       dataIndex: 'total',
       align: 'center',
       width: 100,
@@ -80,7 +81,7 @@ const TimelineTable: React.FC<Props> = ({
 
   const actualTableColumns: TableProps<ActualTimeline>['columns'] = [
     {
-      title: t('ghg'),
+      title: t('timelineTable:ghg'),
       dataIndex: 'ghg',
       align: 'center',
       ellipsis: true,
@@ -88,14 +89,14 @@ const TimelineTable: React.FC<Props> = ({
       fixed: 'left',
     },
     {
-      title: t('catActualEmissionReduct'),
+      title: t('timelineTable:catActualEmissionReduct'),
       dataIndex: 'topic',
       align: 'left',
       width: 350,
       fixed: allowFixedLegend ? 'left' : undefined,
     },
     {
-      title: t('total'),
+      title: t('timelineTable:total'),
       dataIndex: 'total',
       align: 'center',
       width: 100,
