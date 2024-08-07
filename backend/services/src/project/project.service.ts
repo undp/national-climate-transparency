@@ -583,7 +583,7 @@ export class ProjectService {
 
 		const projectKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROJECT, project.projectId);
 
-		const projectKpiIds = projectKPIs.map(kpi => kpi.kpiId);
+		const projectKpiIds = projectKPIs?.map(kpi => kpi.kpiId);
 
 		const linkedActivityIds = project.activities?.map(activity => activity.activityId);
 
@@ -928,7 +928,7 @@ export class ProjectService {
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString("project.verifyProjectSuccess", []),
+			this.helperService.formatReqMessagesString((validateDto.validateStatus) ? "project.verifyProjectSuccess" : "project.unverifyProjectSuccess" , []),
 			proj
 		);
 

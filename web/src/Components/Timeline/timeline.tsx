@@ -1,6 +1,10 @@
 import { Table, TableProps, Input, Grid } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { ActualTimeline, ExpectedTimeline } from '../../Definitions/mtgTimeline.definition';
+import {
+  ActualRows,
+  ActualTimeline,
+  ExpectedRows,
+  ExpectedTimeline,
+} from '../../Definitions/mtgTimeline.definition';
 import './timeline.scss';
 import { useEffect, useState } from 'react';
 
@@ -17,6 +21,7 @@ interface Props {
     year: string,
     value: string
   ) => void;
+  t: any;
 }
 
 const { useBreakpoint } = Grid;
@@ -29,8 +34,8 @@ const TimelineTable: React.FC<Props> = ({
   mtgStartYear,
   mtgRange,
   onValueEnter,
+  t,
 }) => {
-  const { t } = useTranslation(['timelineTable']);
   const screens = useBreakpoint();
 
   const isView: boolean = method === 'view' ? true : false;
@@ -48,21 +53,22 @@ const TimelineTable: React.FC<Props> = ({
 
   const expectedTableColumns: TableProps<ExpectedTimeline>['columns'] = [
     {
-      title: t('ghg'),
+      title: t('timelineTable:ghg'),
       dataIndex: 'ghg',
       align: 'center',
       ellipsis: true,
       width: 100,
+      fixed: 'left',
     },
     {
-      title: t('catExpectedEmissionReduct'),
+      title: t('timelineTable:catExpectedEmissionReduct'),
       dataIndex: 'topic',
       align: 'left',
       width: 350,
       fixed: allowFixedLegend ? 'left' : undefined,
     },
     {
-      title: t('total'),
+      title: t('timelineTable:total'),
       dataIndex: 'total',
       align: 'center',
       width: 100,
@@ -74,21 +80,22 @@ const TimelineTable: React.FC<Props> = ({
 
   const actualTableColumns: TableProps<ActualTimeline>['columns'] = [
     {
-      title: t('ghg'),
+      title: t('timelineTable:ghg'),
       dataIndex: 'ghg',
       align: 'center',
       ellipsis: true,
       width: 100,
+      fixed: 'left',
     },
     {
-      title: t('catActualEmissionReduct'),
+      title: t('timelineTable:catActualEmissionReduct'),
       dataIndex: 'topic',
       align: 'left',
       width: 350,
       fixed: allowFixedLegend ? 'left' : undefined,
     },
     {
-      title: t('total'),
+      title: t('timelineTable:total'),
       dataIndex: 'total',
       align: 'center',
       width: 100,
@@ -98,17 +105,21 @@ const TimelineTable: React.FC<Props> = ({
     },
   ];
 
-  for (let year = mtgStartYear; year <= mtgStartYear + mtgRange; year++) {
+  for (let year = mtgStartYear; year <= Math.min(mtgStartYear + mtgRange, 2050); year++) {
     expectedTableColumns.push({
       title: year.toString(),
-      dataIndex: year.toString(),
+      dataIndex: 'values',
       width: 80,
       align: 'center',
       render: (colValue: any, record: any) => {
+        const isDisabled =
+          record.topic === ExpectedRows.ROW_FOUR[1] ||
+          record.topic === ExpectedRows.ROW_FIVE[1] ||
+          isView;
         return (
           <Input
-            value={colValue}
-            disabled={isView}
+            value={colValue[year - mtgStartYear]}
+            disabled={isDisabled}
             onChange={(event: any) => {
               const inputValue = event.target.value;
               const regex = /^\d*$/;
@@ -124,14 +135,15 @@ const TimelineTable: React.FC<Props> = ({
 
     actualTableColumns.push({
       title: year.toString(),
-      dataIndex: year.toString(),
+      dataIndex: 'values',
       width: 80,
       align: 'center',
       render: (colValue: any, record: any) => {
+        const isDisabled = record.topic === ActualRows.ROW_THREE[1] || isView;
         return (
           <Input
-            value={colValue}
-            disabled={isView}
+            value={colValue[year - mtgStartYear]}
+            disabled={isDisabled}
             onChange={(event: any) => {
               const inputValue = event.target.value;
               const regex = /^\d*$/;

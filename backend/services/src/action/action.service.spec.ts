@@ -27,8 +27,10 @@ import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { Sector } from "../enums/sector.enum";
 import { ValidateDto } from "../dtos/validate.dto";
-import { KPIAction } from "../enums/shared.enum";
+import { EntityType, KPIAction } from "../enums/shared.enum";
 import { AchievementEntity } from "../entities/achievement.entity";
+import { KpiEntity } from "../entities/kpi.entity";
+import { Role } from "../casl/role.enum";
 
 describe('ActionService', () => {
 	let service: ActionService;
@@ -112,6 +114,7 @@ describe('ActionService', () => {
 			generateWhereSQL: jest.fn(),
 			refreshMaterializedViews: jest.fn(),
 			doesUserHaveSectorPermission: jest.fn(),
+			doesUserHaveValidatePermission: jest.fn()
 		};
 		fileUploadServiceMock = {
 			uploadDocument: jest.fn().mockResolvedValue('http://test.com/documents/action_documents/test.csv'),
@@ -123,9 +126,13 @@ describe('ActionService', () => {
 
 		linkUnlinkServiceMock = {
 			linkProgrammesToAction: jest.fn(),
+			findAllProgrammeByIds: jest.fn(),
+			updateAllValidatedChildrenStatusByActionId: jest.fn(),
+			unlinkProgrammesFromAction: jest.fn(),
 		};
 		kpiServiceMock = {
 			getKpisByCreatorTypeAndCreatorId: jest.fn(),
+			findAchievementsByKpiIds: jest.fn(),
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -328,7 +335,7 @@ describe('ActionService', () => {
 
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce("2");
-		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
+		jest.spyOn(linkUnlinkServiceMock, 'findAllProgrammeByIds').mockResolvedValue([programme1, programme2, programme3]);
 		jest.spyOn(linkUnlinkServiceMock, 'linkProgrammesToAction').mockResolvedValue();
 		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
 
@@ -350,7 +357,7 @@ describe('ActionService', () => {
 		expect(result.statusCode).toEqual(expectedResponse.statusCode);
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
-		expect(service.findAllProgrammeByIds).toHaveBeenCalledTimes(1);
+		expect(linkUnlinkServiceMock.findAllProgrammeByIds).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
@@ -424,17 +431,17 @@ describe('ActionService', () => {
 	it('should throw an exception if user does not have sector permission', async () => {
 		const user = new User();
 		user.id = 2;
-	
+
 		const actionDto = new ActionDto();
 		actionDto.actionId = "A001";
 		actionDto.title = "test";
 		actionDto.sector = Sector.Energy;
-	
+
 		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(false);
 		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("activity.cannotCreateNotRelatedAction");
-	
+
 		await expect(service.createAction(actionDto, user)).rejects.toThrow(HttpException);
-	
+
 		expect(helperServiceMock.doesUserHaveSectorPermission).toHaveBeenCalledWith(user, actionDto.sector);
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("activity.cannotCreateNotRelatedAction", ["A001"]);
 	});
@@ -442,37 +449,37 @@ describe('ActionService', () => {
 	it('should throw an exception if linked programmes are already linked to an action', async () => {
 		const user = new User();
 		user.id = 2;
-	
+
 		const actionDto = new ActionDto();
 		actionDto.linkedProgrammes = ['P001'];
-	
+
 		const programme = new ProgrammeEntity();
 		programme.programmeId = 'P001';
 		programme.action = { id: 'A001' } as unknown as ActionEntity;
-	
+
 		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
-		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValueOnce([programme]);
+		jest.spyOn(linkUnlinkServiceMock, 'findAllProgrammeByIds').mockResolvedValueOnce([programme]);
 		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockResolvedValueOnce("action.programmeAlreadyLinked");
-	
+
 		await expect(service.createAction(actionDto, user)).rejects.toThrow(HttpException);
-	
-		expect(service.findAllProgrammeByIds).toHaveBeenCalledWith(actionDto.linkedProgrammes);
+
+		expect(linkUnlinkServiceMock.findAllProgrammeByIds).toHaveBeenCalledWith(actionDto.linkedProgrammes);
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith("action.programmeAlreadyLinked", ['P001']);
 	});
 
 	it('should refresh materialized views after successful action creation', async () => {
 		const user = new User();
 		user.id = 2;
-	
+
 		const actionDto = new ActionDto();
 		const actionEntity = new ActionEntity();
 		actionEntity.actionId = 'A001';
-	
+
 		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 		jest.spyOn(counterServiceMock, 'incrementCount').mockResolvedValueOnce('001');
-		jest.spyOn(service, 'findAllProgrammeByIds').mockResolvedValueOnce([]);
-	
+		jest.spyOn(linkUnlinkServiceMock, 'findAllProgrammeByIds').mockResolvedValueOnce([]);
+
 		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
 			const emMock = {
 				save: jest.fn().mockResolvedValueOnce(actionEntity),
@@ -480,9 +487,9 @@ describe('ActionService', () => {
 			const savedAction = await callback(emMock);
 			return savedAction;
 		});
-	
+
 		const result = await service.createAction(actionDto, user);
-	
+
 		expect(helperServiceMock.refreshMaterializedViews).toHaveBeenCalledWith(entityManagerMock);
 	});
 
@@ -831,7 +838,7 @@ describe('ActionService', () => {
 		} as unknown as SelectQueryBuilder<ActivityEntity>;
 
 
-		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);  
+		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
 		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
 		jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder1);
 		jest.spyOn(projectRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder2);
@@ -855,7 +862,7 @@ describe('ActionService', () => {
 
 		expect(entityManagerMock.transaction).toHaveBeenCalledTimes(1);
 		expect(fileUploadServiceMock.uploadDocument).toHaveBeenCalledTimes(1);
-		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(0)
+		expect(kpiServiceMock.getKpisByCreatorTypeAndCreatorId).toHaveBeenCalledTimes(1)
 		expect(helperServiceMock.refreshMaterializedViews).toBeCalledTimes(1);
 
 	})
@@ -879,6 +886,18 @@ describe('ActionService', () => {
 		kpiDto2.creatorType = "action";
 		kpiDto2.expected = 100;
 		kpiDto2.kpiAction = KPIAction.NONE;
+
+		const kpi1 = new KpiEntity();
+		kpi1.kpiId = 1;
+		kpi1.name = "KPI 1";
+		kpi1.creatorType = "action";
+		kpi1.expected = 100;
+
+		const kpi2 = new KpiEntity();
+		kpi2.kpiId = 2;
+		kpi2.name = "KPI 2";
+		kpi2.creatorType = "action";
+		kpi2.expected = 100;
 
 		const kpiAdded = new KpiUpdateDto();
 		kpiAdded.name = "KPI Added";
@@ -946,7 +965,7 @@ describe('ActionService', () => {
 
 
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(actionEntity);
-		jest.spyOn(kpiServiceMock, 'getKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpiDto1, kpiDto2]);
+		jest.spyOn(kpiServiceMock, 'getKpisByCreatorTypeAndCreatorId').mockResolvedValueOnce([kpi1, kpi2]);
 		jest.spyOn(kpiServiceMock, 'findAchievementsByKpiIds').mockResolvedValueOnce([achEntity]);
 		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValue(true);
 		jest.spyOn(programmeRepositoryMock, 'createQueryBuilder').mockReturnValue(mockQueryBuilder1);
@@ -961,8 +980,8 @@ describe('ActionService', () => {
 			};
 			const savedAction = await callback(emMock);
 			// expect(emMock.save).toHaveBeenNthCalledWith(1, actionUpdateEntity);
-			expect(emMock.save).toHaveBeenCalledTimes(5);
-			expect(emMock.remove).toHaveBeenCalledTimes(1);
+			expect(emMock.save).toHaveBeenCalledTimes(3);
+			expect(emMock.remove).toHaveBeenCalledTimes(2);
 			return savedAction;
 		});
 
@@ -979,20 +998,50 @@ describe('ActionService', () => {
 	it('should throw an exception if action is not found when user update action', async () => {
 		const user = new User();
 		user.id = 2;
-	
+
 		const actionUpdateDto = new ActionUpdateDto();
 		actionUpdateDto.actionId = 'A001';
-	
+
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(null);
 		jest.spyOn(helperServiceMock, 'formatReqMessagesString').mockReturnValue('action.actionNotFound');
-	
+
 		await expect(service.updateAction(actionUpdateDto, user)).rejects.toThrow(HttpException);
-	
+
 		expect(service.findActionById).toHaveBeenCalledWith('A001');
 		expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('action.actionNotFound', ['A001']);
 	});
 
-	it('should convert to pending if action is already validated', async () => {
+	it('should validate the action', async () => {
+		const user = new User();
+		user.id = 2;
+
+		const validateDto = new ValidateDto();
+		validateDto.entityId = 'A001';
+		validateDto.validateStatus = true;
+
+		const action = new ActionEntity();
+		action.actionId = 'A001';
+		action.sector = Sector.Forestry;
+		action.validated = false;
+
+		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(action);
+		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
+
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(action),
+			};
+			const savedAction = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedAction;
+		});
+
+		await service.validateAction(validateDto, user);
+		expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(0);
+
+	});
+
+	it('should unvalidate the action', async () => {
 		const user = new User();
 		user.id = 2;
 
@@ -1008,8 +1057,131 @@ describe('ActionService', () => {
 		jest.spyOn(service, 'findActionById').mockResolvedValueOnce(action);
 		jest.spyOn(helperServiceMock, 'doesUserHaveSectorPermission').mockReturnValueOnce(true);
 
-		await service.validateAction(validateDto, user);
+		entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+			const emMock = {
+				save: jest.fn().mockResolvedValueOnce(action),
+			};
+			const savedAction = await callback(emMock);
+			expect(emMock.save).toHaveBeenCalledTimes(2);
+			return savedAction;
+		});
 
+		await service.validateAction(validateDto, user);
+		expect(linkUnlinkServiceMock.updateAllValidatedChildrenStatusByActionId).toHaveBeenCalledTimes(1);
+
+	});
+
+	describe('deleteAction', () => {
+		it('should throw ForbiddenException if user is not Admin or Root', async () => {
+			const user = { role: Role.GovernmentUser } as User;
+			const deleteDto = { entityId: '123' };
+
+			await expect(service.deleteAction(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('user.userUnAUth', []);
+		});
+
+		it('should throw BadRequest if action not found', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: '123' };
+			jest.spyOn(service, 'findActionByIdWithAllLinkedChildren').mockResolvedValue(null);
+
+			await expect(service.deleteAction(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('action.actionNotFound', ["123"]);
+		});
+
+		it('should throw Forbidden if user does not have sector permission', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: 'A001' };
+			const action = new ActionEntity();
+			action.actionId = 'A001';
+			action.sector = Sector.Forestry;
+			action.validated = true;
+
+			jest.spyOn(service, 'findActionByIdWithAllLinkedChildren').mockResolvedValue(action);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(false);
+
+			await expect(service.deleteAction(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+			expect(helperServiceMock.formatReqMessagesString).toHaveBeenCalledWith('action.permissionDeniedForSector', ["A001"]);
+		});
+
+		it('should successfully delete action and associated entities', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: '123' };
+
+			const activity = new ActivityEntity;
+			activity.parentId = 'A001';
+			activity.parentType = EntityType.ACTION;
+			activity.activityId = "T1"
+
+			const programme = new ProgrammeEntity;
+			programme.programmeId = 'P1'
+
+			const kpi1 = new KpiEntity();
+			kpi1.kpiId = 1;
+			kpi1.name = "KPI 1";
+			kpi1.creatorType = "action";
+			kpi1.expected = 100;
+
+			const kpi2 = new KpiEntity();
+			kpi2.kpiId = 2;
+			kpi2.name = "KPI 2";
+			kpi2.creatorType = "action";
+			kpi2.expected = 100;
+
+			const action = new ActionEntity();
+			action.actionId = 'A001';
+			action.sector = Sector.Forestry;
+			action.validated = true;
+			action.activities = [activity];
+			action.programmes = [programme]
+
+			const actionKPIs = [kpi1, kpi2];
+
+			jest.spyOn(service, 'findActionByIdWithAllLinkedChildren').mockResolvedValue(action);
+			jest.spyOn(kpiServiceMock, "getKpisByCreatorTypeAndCreatorId").mockResolvedValue(actionKPIs);
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				const emMock = {
+					delete: jest.fn().mockResolvedValueOnce({ affected: 1 }),
+				};
+				const savedAction = await callback(emMock);
+				expect(emMock.delete).toHaveBeenCalledTimes(3);
+				return savedAction;
+			});
+
+			const result = await service.deleteAction(deleteDto, user);
+
+			expect(linkUnlinkServiceMock.unlinkProgrammesFromAction).toBeCalledTimes(1);
+
+		});
+
+		it('should handle transaction errors', async () => {
+			const user = { role: Role.Admin } as User;
+			const deleteDto = { entityId: '123' };
+			const action = new ActionEntity();
+			action.actionId = 'A001';
+			action.sector = Sector.Forestry;
+			action.validated = true;
+			jest.spyOn(service, 'findActionByIdWithAllLinkedChildren').mockResolvedValue(action);
+
+
+			jest.spyOn(helperServiceMock, "doesUserHaveSectorPermission").mockReturnValue(true);
+
+			entityManagerMock.transaction = jest.fn().mockImplementation(async (callback: any) => {
+				throw new Error('This is a test transaction error. This is expected');
+			});
+
+			await expect(service.deleteAction(deleteDto, user))
+				.rejects.toThrow(HttpException);
+
+		});
 	});
 });
 

@@ -15,7 +15,6 @@ import { LayoutSiderProps } from '../../Definitions/props/layout.sider.definitio
 import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
 import { Role } from '../../Enums/role.enum';
-import { GHGInventoryManipulate } from '../../Enums/user.enum';
 
 const { Sider } = Layout;
 
@@ -49,14 +48,14 @@ const LayoutSider = (props: LayoutSiderProps) => {
     getItem(t('nav:projects'), 'projects', <Layers />),
     getItem(t('nav:activities'), 'activities', <GraphUpArrow />),
     getItem(t('nav:support'), 'support', <Coin />),
+    getItem(t('nav:ghgInventory'), '', <CloudDownloadOutlined />, [
+      getItem(t('nav:emissions'), 'emissions'),
+      getItem(t('nav:projections'), 'projections'),
+      getItem(t('nav:configurations'), 'configurations'),
+    ]),
+    getItem(t('nav:reporting'), 'reportings', <ClipboardMinus />),
+    getItem(t('nav:faq'), 'faqs', <Headset />),
   ];
-
-  if (userInfoState?.ghgInventoryPermission === GHGInventoryManipulate.CAN) {
-    items.push(getItem(t('nav:ghgInventory'), 'emissions', <CloudDownloadOutlined />));
-  }
-
-  items.push(getItem(t('nav:reporting'), 'reportings', <ClipboardMinus />));
-  items.push(getItem(t('nav:faq'), 'faqs', <Headset />));
 
   if (userInfoState?.userRole === Role.Root || userInfoState?.userRole === Role.Admin) {
     items.push(getItem(t('nav:users'), 'userManagement/viewAll', <UserOutlined />));
@@ -71,6 +70,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
       width={240}
       className="layout-sider-container"
       breakpoint={collapsed ? undefined : 'lg'}
+      collapsedWidth={80}
       collapsed={collapsed}
     >
       <div className="layout-sider-div-container">
@@ -91,7 +91,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
             </div>
           )}
         </div>
-        <div className="layout-sider-menu-container">
+        <div className="sider-menu-container">
           <Menu
             theme="light"
             selectedKeys={[selectedKey ? selectedKey : 'dashboard']}
@@ -104,7 +104,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
       <div
         className="toggle-nav-btn"
         onClick={() => {
-          setCollapsed(!collapsed);
+          setCollapsed((prevState) => !prevState);
         }}
       >
         {collapsed ? <Icon.ArrowRight /> : <Icon.ArrowLeft />}

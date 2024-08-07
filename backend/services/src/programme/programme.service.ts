@@ -32,8 +32,8 @@ import { SupportEntity } from "../entities/support.entity";
 import { ValidateDto } from "../dtos/validate.dto";
 import { AchievementEntity } from "../entities/achievement.entity";
 import { ActionEntity } from "../entities/action.entity";
-import { DeleteDto } from "src/dtos/delete.dto";
-import { Role } from "src/casl/role.enum";
+import { DeleteDto } from "../dtos/delete.dto";
+import { Role } from "../casl/role.enum";
 
 @Injectable()
 export class ProgrammeService {
@@ -47,9 +47,7 @@ export class ProgrammeService {
 		private fileUploadService: FileUploadService,
 		private payloadValidator: PayloadValidator,
 		private linkUnlinkService: LinkUnlinkService,
-		@InjectRepository(ProgrammeViewEntity) private programmeViewRepo: Repository<ProgrammeViewEntity>, 
 		private kpiService: KpiService,
-		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
 	) { }
 
 	//MARK: Create Programme
@@ -146,25 +144,26 @@ export class ProgrammeService {
 			.transaction(async (em) => {
 				const savedProgramme = await em.save<ProgrammeEntity>(programme);
 				if (savedProgramme) {
+					await em.save<LogEntity>(eventLog);
 
 					// linking projects and updating paths of projects and activities
 					if (projects && projects.length > 0) {
 						await this.linkUnlinkService.linkProjectsToProgramme(savedProgramme, projects, programme.programmeId, user, em);
 					} else if (programmeDto.actionId && action && action.validated) {
 						action.validated = false;
-						this.addEventLogEntry(
-							eventLog, 
-							LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_CHANGE, 
-							EntityType.ACTION, 
-							action.actionId, 
-							0, 
-							programme.programmeId
-						);
+						const saveUnvalidatedLog =
+							this.buildLogEntity(
+								LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+								EntityType.ACTION,
+								action.actionId,
+								0,
+								programme.programmeId
+							);
+						await em.save<LogEntity>(saveUnvalidatedLog);
 						await em.save<ActionEntity>(action)
 						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(action.actionId, em);
 					}
 
-					await em.save<LogEntity>(eventLog);
 
 					if (programmeDto.kpis) {
 						await em.save<KpiEntity>(kpiList);
@@ -514,23 +513,42 @@ export class ProgrammeService {
 				HttpStatus.FORBIDDEN
 			);
 		}
+		const action = programme.action;
 
 		const programmeKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.PROGRAMME, programme.programmeId);
 
-		const programmeKpiIds = programmeKPIs.map(kpi => kpi.kpiId);
+		const programmeKpiIds = programmeKPIs?.map(kpi => kpi.kpiId);
 
 		const linkedActivityIds = programme.activities?.map(activity => activity.activityId);
 
 		// creating project payload expected by unlinkProjectsFromProgramme method
-		for (const project of programme.projects) {
-			project.programme = programme;
+		if (programme.projects && programme.projects.length > 0) {
+			for (const project of programme.projects) {
+				project.programme = programme;
+			}
 		}
+		
 
 		const pro = await this.entityManager
 			.transaction(async (em) => {
+				const logs = [];
 
 				// related parent and children entity un-validation happens when projects are unlinking
-				await this.linkUnlinkService.unlinkProjectsFromProgramme(programme.projects, null, user, this.entityManager, [], true);
+				if (programme.projects && programme.projects.length > 0) {
+					await this.linkUnlinkService.unlinkProjectsFromProgramme(programme.projects, null, user, this.entityManager, [], true);
+				} else if (action && action.validated) {
+					action.validated = false;
+					logs.push(this.buildLogEntity(
+						LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_DELETE,
+						EntityType.ACTION,
+						action.actionId,
+						0,
+						programme.programmeId)
+					)
+					await em.save<ActionEntity>(action)
+					await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(action.actionId, em, [], [], []);
+				} 
+
 				const result = await em.delete<ProgrammeEntity>(ProgrammeEntity, programme.programmeId);
 
 				if (result.affected > 0) {
@@ -540,6 +558,10 @@ export class ProgrammeService {
 
 					if (programmeKpiIds && programmeKpiIds.length > 0) {
 						await em.delete<KpiEntity>(KpiEntity, programmeKpiIds);
+					}
+					// Save event logs
+					if (logs.length > 0) {
+						await em.save<LogEntity>(logs);
 					}
 				}
 				return result;
@@ -834,7 +856,7 @@ export class ProgrammeService {
 
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString("programme.verifyProgrammeSuccess", []),
+			this.helperService.formatReqMessagesString((validateDto.validateStatus) ? "programme.verifyProgrammeSuccess" : "programme.unverifyProgrammeSuccess" , []),
 			prog
 		);
 

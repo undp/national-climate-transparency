@@ -1,7 +1,7 @@
 import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
 import { Buffer } from 'buffer';
-import { acceptedFileExtensions } from '../Definitions/uploadDefinitions';
+import { AcceptedFileExtensions } from '../Enums/file.enum';
 
 export const addCommSep = (value: any) => {
   return (
@@ -78,12 +78,15 @@ export const CustomFormatDate = (timestamp: number) => {
   const day = date.getDate();
   const month = date.toLocaleString('default', { month: 'long' });
   const year = date.getFullYear();
-  const hours = date.getHours();
+  let hours = date.getHours();
   const minutes = date.getMinutes();
+
+  const period = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
 
   const formattedTime = `${day} ${month} ${year} @ ${hours.toString().padStart(2, '0')}:${minutes
     .toString()
-    .padStart(2, '0')}`;
+    .padStart(2, '0')} ${period}`;
 
   return formattedTime;
 };
@@ -126,11 +129,17 @@ export const convertToMillions = (value: number) => {
   return numberInMills;
 };
 
-export const getCollapseIcon = (isActive: boolean) => {
+export const getCollapseIcon = (isActive: boolean, clicked?: any) => {
   return isActive ? (
-    <MinusCircleOutlined style={{ color: '#9155fd', fontSize: '14px' }} />
+    <MinusCircleOutlined
+      onClick={clicked ? clicked : undefined}
+      style={{ color: '#9155fd', fontSize: '14px' }}
+    />
   ) : (
-    <PlusCircleOutlined style={{ color: '#9155fd', fontSize: '14px' }} />
+    <PlusCircleOutlined
+      onClick={clicked ? clicked : undefined}
+      style={{ color: '#9155fd', fontSize: '14px' }}
+    />
   );
 };
 
@@ -150,6 +159,15 @@ export const parseToTwoDecimals = (fullNumber: number) => {
   return parseFloat(structuredNumber);
 };
 
+export const arraySumAggregate = (numArrays: number[][], entryCount: number): number[] => {
+  try {
+    // eslint-disable-next-line no-unused-vars
+    return numArrays[0].map((_, i) => numArrays.reduce((sum, arr) => sum + arr[i], 0));
+  } catch {
+    return new Array(entryCount).fill(0);
+  }
+};
+
 export const delay = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -158,12 +176,25 @@ export const getFileExtension = (fileTitle: string) => {
   const fileParts = fileTitle.split('.');
   if (fileParts.length > 0) {
     const extension = fileParts[fileParts.length - 1].toLowerCase();
-    if (acceptedFileExtensions.includes(extension)) {
+    if (Object.values(AcceptedFileExtensions).includes(extension as AcceptedFileExtensions)) {
       return extension;
     } else {
       return undefined;
     }
   } else {
     return undefined;
+  }
+};
+
+export const doesUserHaveValidatePermission = async (get: any): Promise<boolean> => {
+  try {
+    const response = await get('national/Users/profile');
+    if (response.data && response.data.user && response.data.user.validatePermission === false) {
+      return false;
+    } else {
+      return true;
+    }
+  } catch (exception) {
+    return true;
   }
 };

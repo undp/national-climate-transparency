@@ -24,7 +24,7 @@ import { QueryDto } from "../dtos/query.dto";
 import { ActivityUpdateDto } from "../dtos/activityUpdate.dto";
 import { ValidateDto } from "../dtos/validate.dto";
 import { EntityType } from "../enums/shared.enum";
-import { DeleteDto } from "src/dtos/delete.dto";
+import { DeleteDto } from "../dtos/delete.dto";
 
 @ApiTags("Activities")
 @ApiBearerAuth()

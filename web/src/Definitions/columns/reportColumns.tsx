@@ -29,7 +29,7 @@ export const getReportFiveColumns = (t: any) => {
       },
     },
     { title: t('status'), dataIndex: 'status', key: 'status', width: 100 },
-    { title: t('sector'), dataIndex: 'sector', key: 'sector', width: 150 },
+    { title: t('sectorsAffected'), dataIndex: 'sector', key: 'sector', width: 150 },
     {
       title: t('ghgsAffected'),
       width: 100,
@@ -38,9 +38,9 @@ export const getReportFiveColumns = (t: any) => {
         return <ScrollableList listToShow={record.ghgsAffected}></ScrollableList>;
       },
     },
-    { title: t('startYear'), dataIndex: 'startYear', key: 'startYear', width: 100 },
+    { title: t('startYearOfImplementation'), dataIndex: 'startYear', key: 'startYear', width: 100 },
     {
-      title: t('implementingEntities'),
+      title: t('fullImplementingEntities'),
       width: 150,
       // eslint-disable-next-line no-unused-vars
       render: (_: any, record: ReportFiveRecord) => {

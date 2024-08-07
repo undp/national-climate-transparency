@@ -20,7 +20,7 @@ import { ActionEntity } from "../entities/action.entity";
 import { QueryDto } from "../dtos/query.dto";
 import { ActionUpdateDto } from "../dtos/actionUpdate.dto";
 import { ValidateDto } from "../dtos/validate.dto";
-import { DeleteDto } from "src/dtos/delete.dto";
+import { DeleteDto } from "../dtos/delete.dto";
 
 @ApiTags("Actions")
 @ApiBearerAuth()

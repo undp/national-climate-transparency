@@ -33,5 +33,8 @@
     "observer": "අධ්‍යාපනයක්",
     "sectors" : "ක්‍රියාවලි",
     "sector" : "ක්‍රියාව",
-    "organisation" : "සංවිධානය"
+    "organisation" : "සංවිධානය",
+    "validatePermission" : "තහවුරු කිරීමේ අවසරය ලබා දෙන ලදී",
+    "subRolePermission" : "උප භූමිකාව වෙනස් කිරීමේ අවසරය ලබා දෙන ලදී",
+    "ghgInventoryPermission" : "GHG ගබඩාව වෙනස් කිරීමේ අවසරය ලබා දෙන ලදී"
 }

@@ -77,10 +77,10 @@
         .file-type-label{
             display: flex;
             justify-content: center;
-            border: 1px solid #9155FD;
-            border-width: 1px;
+            border: 1px solid;
             border-radius: 4px;
             font-size: small;
+            font-weight: 400;
         }
 
         .delete-icon {

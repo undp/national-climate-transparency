@@ -134,3 +134,8 @@ export enum KPIAction {
   CREATED = 'Created',
   UPDATED = 'Updated',
 }
+
+export enum GHGRecordState {
+  SAVED = 'SAVED',
+  FINALIZED = 'FINALIZED',
+}

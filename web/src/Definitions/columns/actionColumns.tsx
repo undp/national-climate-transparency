@@ -18,11 +18,10 @@ export const getActionTableColumns = (t: any) => {
     },
     {
       title: t('columnHeader:type'),
-      width: 100,
-      // eslint-disable-next-line no-unused-vars
-      render: (_: any, record: any) => {
-        return <ScrollableList listToShow={record.actionType}></ScrollableList>;
-      },
+      width: 120,
+      dataIndex: 'actionType',
+      key: 'actionType',
+      sorter: false,
     },
     {
       title: t('columnHeader:sectorAffected'),

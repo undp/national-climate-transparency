@@ -23,8 +23,8 @@ const Dashboard = () => {
   const screens = useBreakpoint();
   const { get, post, statServerUrl } = useConnection();
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [chartLoading, setChartLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [chartLoading, setChartLoading] = useState<boolean>(true);
 
   // Table Data State
 
@@ -97,7 +97,7 @@ const Dashboard = () => {
             actionId: unstructuredData[i].actionId,
             title: unstructuredData[i].title,
             status: unstructuredData[i].status,
-            actionType: unstructuredData[i].migratedData[0]?.types ?? [],
+            actionType: unstructuredData[i].type,
             affectedSectors: unstructuredData[i].sector,
             nationalImplementingEntity: unstructuredData[i].migratedData[0]?.natImplementors ?? [],
             financeNeeded: Math.round(unstructuredData[i].migratedData[0]?.financeNeeded ?? 0),
@@ -106,10 +106,10 @@ const Dashboard = () => {
         }
         setTableData(structuredData);
         setTotalRowRowCount(response.response.data.total);
-        setLoading(false);
       }
     } catch (error: any) {
       displayErrorMessage(error);
+    } finally {
       setLoading(false);
     }
   };
@@ -149,8 +149,6 @@ const Dashboard = () => {
   // Data Fetching at the Initial Loading
 
   useEffect(() => {
-    setChartLoading(true);
-
     const getClimateActionChartData = async () => {
       try {
         const response: any = await get('stats/analytics/actionsSummery', undefined, statServerUrl);
@@ -254,11 +252,11 @@ const Dashboard = () => {
         });
       } catch (error: any) {
         displayErrorMessage(error);
+      } finally {
+        setChartLoading(false);
       }
     };
     getRecentMitigationChartData();
-
-    setChartLoading(false);
   }, []);
 
   useEffect(() => {
@@ -280,7 +278,12 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-page">
-      {!chartLoading ? (
+      {chartLoading && (
+        <div className="loading-charts-spinner">
+          <Spin size="large" />
+        </div>
+      )}
+      {!chartLoading && (
         <div>
           <ChartInformation
             open={openChartInfo}
@@ -452,35 +455,33 @@ const Dashboard = () => {
             )}
           </Row>
         </div>
-      ) : (
-        <div className="loading-charts-spinner">
-          <Spin size="large" />
+      )}
+      {!loading && (
+        <div className="content-card">
+          <Row gutter={30}>
+            <Col span={24}>
+              <LayoutTable
+                tableData={tableData}
+                columns={columns}
+                loading={loading}
+                pagination={{
+                  total: totalRowCount,
+                  current: currentPage,
+                  pageSize: pageSize,
+                  showQuickJumper: true,
+                  pageSizeOptions: ['10', '20', '30'],
+                  showSizeChanger: true,
+                  style: { textAlign: 'center' },
+                  locale: { page: '' },
+                  position: ['bottomRight'],
+                }}
+                handleTableChange={handleTableChange}
+                emptyMessage={t('noActionsAvailable')}
+              />
+            </Col>
+          </Row>
         </div>
       )}
-      <div className="content-card">
-        <Row gutter={30}>
-          <Col span={24}>
-            <LayoutTable
-              tableData={tableData}
-              columns={columns}
-              loading={loading}
-              pagination={{
-                total: totalRowCount,
-                current: currentPage,
-                pageSize: pageSize,
-                showQuickJumper: true,
-                pageSizeOptions: ['10', '20', '30'],
-                showSizeChanger: true,
-                style: { textAlign: 'center' },
-                locale: { page: '' },
-                position: ['bottomRight'],
-              }}
-              handleTableChange={handleTableChange}
-              emptyMessage={t('noActionsAvailable')}
-            />
-          </Col>
-        </Row>
-      </div>
     </div>
   );
 };

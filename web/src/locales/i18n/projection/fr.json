@@ -1,0 +1,76 @@
+{
+    "projectionTitle": "Projection",
+    "withMeasuresTitle": "Avec Mesures",
+    "withAdditionalMeasuresTitle": "Avec Mesures Supplémentaires",
+    "withoutMeasuresTitle": "Sans Mesures",
+
+    "1_title": "Énergie",
+    "2_title": "Processus Industriels et Utilisation des Produits",
+    "3_title": "Agriculture, Foresterie et Autres Utilisations des Terres",
+    "4_title": "Déchets",
+    "5_title": "Autres",
+
+    "1A_title": "Activités de Combustion de Carburant",
+    "1B_title": "Émissions Fugitives des Carburants",
+    "1C_title": "Transport et Stockage de Dioxyde de Carbone",
+
+    "1A1_title": "Industries Énergétiques",
+    "1A2_title": "Industries Manufacturières et Construction",
+    "1A3_title": "Transport",
+    "1A4_title": "Autres Secteurs",
+    "1A5_title": "Non Spécifié",
+
+    "1A3a_title": "Aviation Civile",
+    "1A3b_title": "Transport Routier",
+    "1A3c_title": "Chemins de Fer",
+    "1A3d_title": "Navigation Maritime",
+    "1A3e_title": "Autre Transport",
+
+    "1B1_title": "Carburants Solides",
+    "1B2_title": "Pétrole et Gaz Naturel",
+    "1B3_title": "Autres Émissions de Production d'Énergie",
+
+    "1C1_title": "Transport de CO2",
+    "1C2_title": "Injection et Stockage",
+    "1C3_title": "Autre",
+
+    "2A_title": "Industrie Minérale",
+    "2B_title": "Industrie Chimique",
+    "2C_title": "Industrie Métallurgique",
+    "2D_title": "Produits Non Énergétiques à Partir de Carburants et Utilisation de Solvants",
+    "2E_title": "Industrie Électronique",
+    "2F_title": "Utilisations de Produits comme Substituts aux Substances Appauvrissant la Couche d'Ozone",
+    "2G_title": "Autres Fabrications et Utilisations de Produits",
+    "2H_title": "Autre",
+
+    "3A_title": "Élevage",
+    "3B_title": "Terres",
+    "3C_title": "Sources Agrégées et Sources d'Émissions Non-CO2 sur les Terres",
+    "3D_title": "Autre",
+
+    "3A1_title": "Fermentation Entérique",
+    "3A2_title": "Gestion des Fumiers",
+
+    "3B1_title": "Forêts",
+    "3B2_title": "Terres Cultivées",
+    "3B3_title": "Prairies",
+    "3B4_title": "Zones Humides",
+    "3B5_title": "Habitations",
+    "3B6_title": "Autres Terres",
+
+    "4A_title": "Élimination des Déchets Solides",
+    "4B_title": "Traitement Biologique des Déchets Solides",
+    "4C_title": "Incinération et Brûlage Ouvert des Déchets",
+    "4D_title": "Traitement et Rejet des Eaux Usées",
+    "4E_title": "Autre",
+
+    "5A_title": "Émissions Indirectes de N2O dues au Dépôt Atmosphérique de l'Azote dans le NOx et NH3",
+    "5B_title": "Autre",
+
+    "projectionUpdateSuccess": "Les Données de Projection Ont Été Enregistrées avec Succès",
+    "projectionValidateSuccess": "Les Données de Projection Ont Été Validées avec Succès",
+    "projectionUnvalidateSuccess": "Les Données de Projection Ont Été Invalidées avec Succès",
+    "projectionRevertSuccess": "Retour aux Données de Projection de Référence avec Succès",
+
+    "baselineUpdateSuccess": "Les Données de Référence Ont Été Enregistrées avec Succès"
+}

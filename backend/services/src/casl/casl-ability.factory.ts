@@ -12,16 +12,16 @@ import { User } from "../entities/user.entity";
 import { Action } from "./action.enum";
 import { Role } from "./role.enum";
 import { EntitySubject } from "../entities/entity.subject";
-import { Organisation } from "../entities/organisation.entity";
 import { ActionEntity } from "../entities/action.entity";
 import { ProgrammeEntity } from "../entities/programme.entity";
 import { ProjectEntity } from "../entities/project.entity";
 import { ActivityEntity } from "../entities/activity.entity";
 import { SupportEntity } from "../entities/support.entity";
 import { KpiEntity } from "../entities/kpi.entity";
-import { EmissionEntity } from "src/entities/emission.entity";
-import { ConfigurationSettingsEntity } from "src/entities/configuration.settings.entity";
-import { SystemResourcesEntity } from "src/entities/systemResource.entity";
+import { EmissionEntity } from "../entities/emission.entity";
+import { ProjectionEntity } from "../entities/projection.entity";
+import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
+import { SystemResourcesEntity } from "../entities/systemResource.entity";
 
 type Subjects = InferSubjects<typeof EntitySubject> | "all";
 
@@ -90,6 +90,14 @@ export class CaslAbilityFactory {
 				can(Action.Create, EmissionEntity);
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
+				can(Action.Validate, EmissionEntity);
+
+				//Projection
+				can(Action.Read, ProjectionEntity);
+				can(Action.Create, ProjectionEntity);
+				can(Action.Update, ProjectionEntity);
+				can(Action.Delete, ProjectionEntity);
+				can(Action.Validate, ProjectionEntity);
 
 				// Settings
 				can(Action.Read, ConfigurationSettingsEntity);
@@ -158,9 +166,17 @@ export class CaslAbilityFactory {
 				can(Action.Create, EmissionEntity);
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
+				can(Action.Validate, EmissionEntity);
+
+				//Projection
+				can(Action.Read, ProjectionEntity);
+				can(Action.Create, ProjectionEntity);
+				can(Action.Update, ProjectionEntity);
+				can(Action.Delete, ProjectionEntity);
+				can(Action.Validate, ProjectionEntity);
 
 				// Settings
-				cannot(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Read, ConfigurationSettingsEntity);
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 
@@ -175,7 +191,7 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, User);
 				cannot(Action.Delete, User);
 				can(Action.Update, User, { id: { $eq: user.id } });
-				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
+				cannot(Action.Update, User, ['apiKey', 'password', 'email'], {
 					id: { $eq: user.id },
 				});
 				cannot(Action.ForceResetPassword, User);
@@ -274,9 +290,17 @@ export class CaslAbilityFactory {
 				can(Action.Create, EmissionEntity);
 				can(Action.Update, EmissionEntity);
 				can(Action.Delete, EmissionEntity);
+				can(Action.Validate, EmissionEntity);
+
+				//Projection
+				can(Action.Read, ProjectionEntity);
+				can(Action.Create, ProjectionEntity);
+				can(Action.Update, ProjectionEntity);
+				can(Action.Delete, ProjectionEntity);
+				can(Action.Validate, ProjectionEntity);
 
 				// Settings
-				cannot(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Read, ConfigurationSettingsEntity);
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 
@@ -290,7 +314,7 @@ export class CaslAbilityFactory {
 				can(Action.Read, User);
 				cannot(Action.Create, User);
 				can(Action.Update, User, { id: { $eq: user.id } });
-				cannot(Action.Update, User, ['role', 'apiKey', 'password', 'email'], {
+				cannot(Action.Update, User, ['apiKey', 'password', 'email'], {
 					id: { $eq: user.id },
 				});
 				cannot(Action.ForceResetPassword, User);
@@ -388,9 +412,17 @@ export class CaslAbilityFactory {
 				cannot(Action.Create, EmissionEntity);
 				cannot(Action.Update, EmissionEntity);
 				cannot(Action.Delete, EmissionEntity);
+				cannot(Action.Validate, EmissionEntity);
+
+				//Projection
+				can(Action.Read, ProjectionEntity);
+				cannot(Action.Create, ProjectionEntity);
+				cannot(Action.Update, ProjectionEntity);
+				cannot(Action.Delete, ProjectionEntity);
+				cannot(Action.Validate, ProjectionEntity);
 
 				// Settings
-				cannot(Action.Read, ConfigurationSettingsEntity);
+				can(Action.Read, ConfigurationSettingsEntity);
 				cannot(Action.Create, ConfigurationSettingsEntity);
 				cannot(Action.Update, ConfigurationSettingsEntity);
 

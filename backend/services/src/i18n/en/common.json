@@ -9,7 +9,7 @@
     "accountDeactivated": "Account Deactivated !",
     "incorrectPassword": "Invalid Password !",
     "unableToGetStats": "Unable to retrieve the statistics for the charts.",
-    "permissionDeniedForValidate": "Permission Denied: Unable to Validate Action",
+    "permissionDeniedForValidate": "Permission Denied: Unable to Validate or Unvalidate Entity",
     "invalidConfigType": "{} is not a valid Configuration Setting Type",
     "configsNotFound": "Configuration settings not found",
     "resourceCreatedSuccess": "Resource saved successfully",

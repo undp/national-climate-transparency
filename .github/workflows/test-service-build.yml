@@ -27,6 +27,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Setup and run unit tests
+        run: |
+          cd backend/services
+          yarn install
+          yarn run test
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

@@ -1,13 +1,16 @@
 {
-  "dashboard": "ඩස්බෝර්ඩ්",
-  "actions": "ක්‍රියා කිරීම්",
-  "programmes": "ප්‍රාදේශීය",
-  "projects": "ප්‍රාදේශීය",
-  "activities": "ක්‍රියා කිරීම්",
+  "dashboard": "ප්‍රධාන පුවරුව",
+  "actions": "ක්‍රියාකාරකම්",
+  "programmes": "අත්පොත්",
+  "projects": "ව්‍යාපෘති",
+  "activities": "ක්‍රියාකාරකම්",
   "support": "සහාය",
-  "ghgInventory": "බුදු සහාය",
-  "reporting": "වාර්තාව",
-  "faq": "ප්‍රශ්න සන්නාම",
-  "companies": "සංවර්ධන",
-  "users": "පරිශීලකයන්"
+  "ghgInventory": "වායු ලැයිස්තුව",
+  "reporting": "වාර්තාගත කිරීම",
+  "faq": "නිතර අසන පැණ පිළිතුරු මෙනුව",
+  "companies": "සංවිධාන",
+  "users": "පරිශීලකයින්",
+  "emissions": "විමෝචන",
+  "projections": "ආක්තිත",
+  "configurations": "වින්‍යාසයන්"
 }
