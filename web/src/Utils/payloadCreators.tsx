@@ -7,6 +7,8 @@ import {
   OtherSection,
   WasteSection,
 } from '../Definitions/emissionDefinitions';
+import { ProjectionTimeline, getEmptyPayload } from '../Definitions/projectionsDefinitions';
+import { ConfigurationSettingsType } from '../Enums/configuration.enum';
 import {
   AgrLevels,
   EnergyLevels,
@@ -17,6 +19,7 @@ import {
   OtherLevels,
   WasteLevels,
 } from '../Enums/emission.enum';
+import { ProjectionLeafSection, ProjectionType } from '../Enums/projection.enum';
 
 export const getEmissionCreatePayload = (
   year: string,
@@ -26,8 +29,7 @@ export const getEmissionCreatePayload = (
   wasteData: WasteSection,
   otherData: OtherSection,
   eqWith: EmissionData,
-  eqWithout: EmissionData,
-  state: string
+  eqWithout: EmissionData
 ) => {
   const tempPayload: EmissionPayload = {
     year: year,
@@ -79,8 +81,50 @@ export const getEmissionCreatePayload = (
     },
     totalCo2WithoutLand: eqWithout,
     totalCo2WithLand: eqWith,
-    state: state,
   };
 
   return tempPayload;
+};
+
+export const getProjectionCreatePayload = (
+  editableProjections: ProjectionTimeline[],
+  projectionType: ProjectionType
+) => {
+  const payload = {
+    projectionType: projectionType,
+    projectionData: getEmptyPayload('Projection'),
+  };
+
+  Object.values(ProjectionLeafSection).forEach((value) => {
+    const editedRow = editableProjections.find((entry) => entry.topicId === value);
+
+    if (editedRow) {
+      payload.projectionData[value] = editedRow.values;
+    }
+  });
+
+  return payload;
+};
+
+export const getBaselineSavePayload = (
+  editableProjections: ProjectionTimeline[],
+  baselineConfigType:
+    | ConfigurationSettingsType.PROJECTIONS_WITH_MEASURES
+    | ConfigurationSettingsType.PROJECTIONS_WITH_ADDITIONAL_MEASURES
+    | ConfigurationSettingsType.PROJECTIONS_WITHOUT_MEASURES
+) => {
+  const payload = {
+    id: baselineConfigType,
+    settingValue: getEmptyPayload('Growth Rate'),
+  };
+
+  Object.values(ProjectionLeafSection).forEach((value) => {
+    const editedRow = editableProjections.find((entry) => entry.topicId === value);
+
+    if (editedRow) {
+      payload.settingValue[value] = editedRow.values;
+    }
+  });
+
+  return payload;
 };

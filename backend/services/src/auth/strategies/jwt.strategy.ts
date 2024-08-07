@@ -4,8 +4,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JWTPayload } from '../../dtos/jwt.payload';
-import { UserState } from 'src/enums/user.enum';
-import { UserService } from 'src/user/user.service';
+import { UserState } from '../../enums/user.enum';
+import { UserService } from '../../user/user.service';
 
 
 @Injectable()

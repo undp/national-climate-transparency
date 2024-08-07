@@ -15,7 +15,7 @@ import {
 } from '../../../Enums/support.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { getValidationRules } from '../../../Utils/validationRules';
-import { delay, getFormTitle } from '../../../Utils/utilServices';
+import { delay, doesUserHaveValidatePermission, getFormTitle } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { SupportEntity } from '../../../Entities/support';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -52,7 +52,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   const formTitle = getFormTitle('Support', method);
 
   const navigate = useNavigate();
-  const { post, put, delete: del } = useConnection();
+  const { get, post, put, delete: del } = useConnection();
   const ability = useAbilityContext();
   const { isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
@@ -60,6 +60,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   // Form Validation Rules
 
   const validation = getValidationRules(method);
+
+  // First Rendering Check
+
+  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
 
   // Entity Validation Status
 
@@ -194,6 +198,10 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       }
     };
     fetchData();
+
+    if (!firstRenderingCompleted) {
+      setFirstRenderingCompleted(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -266,9 +274,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      if (error?.message) {
-        if (error.message === 'Permission Denied: Unable to Validate Support') {
-          setIsValidationAllowed(false);
+      if (error?.status) {
+        if (error.status === 403) {
+          setIsValidationAllowed(await doesUserHaveValidatePermission(get));
         }
         displayErrorMessage(error);
       } else {
@@ -356,7 +364,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && firstRenderingCompleted ? (
         <div className="support-form">
           <Form
             form={form}

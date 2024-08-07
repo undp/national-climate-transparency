@@ -1,9 +1,16 @@
 {
-  "dashboard": "Tableau de bord",
+  "dashboard": "Tableau de Bord",
+  "actions": "Actions",
   "programmes": "Programmes",
-  "transfers": "Transferts",
+  "projects": "Projets",
+  "activities": "Activités",
+  "support": "Support",
+  "ghgInventory": "Inventaire des GES",
+  "reporting": "Rapports",
+  "faq": "Menu FAQ",
   "companies": "Organisations",
   "users": "Utilisateurs",
-  "viewAll": "Voir Tout",
-  "addNew": "Ajouter Nouveau"
+  "emissions": "Émissions",
+  "projections": "Projections",
+  "configurations": "Configurations"
 }

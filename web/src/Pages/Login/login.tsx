@@ -14,6 +14,7 @@ import ResetPassword from './resetPassword';
 import { UserState } from '../../Enums/user.enum';
 import { AvailableLanguages } from '../../Definitions/languageDefinitions';
 import TransparencyLogo from '../../Components/logo/transparencyLogo';
+import logoLarge from '../../Assets/Images/tran.webp';
 
 const { useBreakpoint } = Grid;
 
@@ -148,7 +149,12 @@ const Login: FC<LoginPageProps> = (props: LoginPageProps) => {
         <Row className="login-container">
           {fullScreen && (
             <Col xl={15} flex="auto">
-              <div className="login-img-container container-image">
+              <div className="login-img-container">
+                <img // Full Res Image to be shown after loaded
+                  className="login-img"
+                  src={logoLarge}
+                />
+                <div className="gradient-overlay"></div>
                 <div className="text-ctn">
                   <span>
                     {t('login:nationalNdc')} <br /> {t('login:creditMrv')} <br />

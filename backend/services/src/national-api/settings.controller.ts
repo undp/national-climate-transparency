@@ -16,7 +16,7 @@ import { PoliciesGuardEx } from "../casl/policy.guard";
 import { SettingsDto } from "../dtos/settings.dto";
 import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
 import { ConfigurationSettingsService } from "../util/configurationSettings.service";
-import { ConfigurationSettingsType } from "src/enums/configuration.settings.type.enum";
+import { ConfigurationSettingsType } from "../enums/configuration.settings.type.enum";
 
 @ApiTags("Settings")
 @Controller("settings")
@@ -31,7 +31,8 @@ export class SettingsController {
   async updateSettings(@Body() settings: SettingsDto, @Request() req) {
     return await this.configurationSettingsService.updateSetting(
       settings.id,
-      settings.settingValue
+      settings.settingValue,
+      req.user
     );
   }
 

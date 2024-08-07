@@ -22,7 +22,7 @@ import { UnlinkProgrammesDto } from "../dtos/unlink.programmes.dto";
 import { QueryDto } from "../dtos/query.dto";
 import { ProgrammeUpdateDto } from "../dtos/programmeUpdate.dto";
 import { ValidateDto } from "../dtos/validate.dto";
-import { DeleteDto } from "src/dtos/delete.dto";
+import { DeleteDto } from "../dtos/delete.dto";
 
 @ApiTags("Programmes")
 @ApiBearerAuth()

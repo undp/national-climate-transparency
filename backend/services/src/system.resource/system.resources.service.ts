@@ -1,16 +1,15 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Role } from "src/casl/role.enum";
-import { DataListResponseDto } from "src/dtos/data.list.response";
-import { DataResponseMessageDto } from "src/dtos/data.response.message";
-import { DeleteDto } from "src/dtos/delete.dto";
-import { QueryDto } from "src/dtos/query.dto";
-import { SystemResourceDto } from "src/dtos/systemResourceDto";
-import { SystemResourcesEntity } from "src/entities/systemResource.entity";
-import { User } from "src/entities/user.entity";
-import { SystemResourceCategory, SystemResourceType } from "src/enums/shared.enum";
-import { FileUploadService } from "src/util/fileUpload.service";
-import { HelperService } from "src/util/helpers.service";
+import { Role } from "../casl/role.enum";
+import { DataListResponseDto } from "../dtos/data.list.response";
+import { DataResponseMessageDto } from "../dtos/data.response.message";
+import { QueryDto } from "../dtos/query.dto";
+import { SystemResourceDto } from "../dtos/systemResourceDto";
+import { SystemResourcesEntity } from "../entities/systemResource.entity";
+import { User } from "../entities/user.entity";
+import { SystemResourceCategory, SystemResourceType } from "../enums/shared.enum";
+import { FileUploadService } from "../util/fileUpload.service";
+import { HelperService } from "../util/helpers.service";
 import { Repository } from "typeorm";
 
 @Injectable()

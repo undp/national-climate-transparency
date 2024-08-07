@@ -247,6 +247,7 @@ const UserManagement = () => {
       const response = await put('national/users/update', {
         id: updatedUserRecord.id,
         state: updatedUserRecord.status,
+        role: updatedUserRecord.role,
         remarks,
       });
       if (response.status === 200) {
@@ -422,7 +423,6 @@ const UserManagement = () => {
       title: t('user:role'),
       dataIndex: 'role',
       key: UserManagementColumns.role,
-      sorter: true,
       align: 'left' as const,
       // eslint-disable-next-line no-unused-vars
       render: (item: any, itemObj: UserData) => {
@@ -540,7 +540,7 @@ const UserManagement = () => {
     }
 
     // Setting the Sort By Column
-    if (sorter.columnKey !== undefined) {
+    if (sorter.column !== undefined) {
       setSortField(sorter.field);
     } else {
       setSortField('id');
@@ -644,6 +644,7 @@ const UserManagement = () => {
                   setFilterVisible(false);
                   setSearchValue('');
                   setTempSearchValue('');
+                  setCurrentPage(1);
                   setAppliedFilterValue({ ...tempFilterValue });
                 }}
               >

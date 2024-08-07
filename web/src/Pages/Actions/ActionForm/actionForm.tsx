@@ -7,7 +7,7 @@ import {
   DisconnectOutlined,
   PlusCircleOutlined,
 } from '@ant-design/icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import {
   InstrumentType,
@@ -25,7 +25,13 @@ import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
-import { delay, getFormTitle, getRounded, joinTwoArrays } from '../../../Utils/utilServices';
+import {
+  delay,
+  doesUserHaveValidatePermission,
+  getFormTitle,
+  getRounded,
+  joinTwoArrays,
+} from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
 import { SupportData } from '../../../Definitions/supportDefinitions';
@@ -77,6 +83,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const { userInfoState, isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
+  // First Rendering Check
+
+  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
+
   // Form Validation Rules
 
   const validation = getValidationRules(method);
@@ -112,10 +122,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Activity Attachment state: Activity link functions removed keeping original state
 
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  const [allActivityIds, setAllActivityIdList] = useState<string[]>([]);
   const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
-  const [tempActivityIds, setTempActivityIds] = useState<string[]>([]);
 
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
@@ -133,7 +140,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Detach Entity Data
 
   const [detachingEntityId, setDetachingEntityId] = useState<string>();
-  const [detachingEntityType, setDetachingEntityType] = useState<'Programme' | 'Activity'>();
 
   // KPI State
 
@@ -141,7 +147,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [createdKpiList, setCreatedKpiList] = useState<CreatedKpiData[]>([]);
   const [newKpiList, setNewKpiList] = useState<NewKpiData[]>([]);
   const [handleKPI, setHandleKPI] = useState<boolean>(false);
-  // const [kpiAction, setKpiAction] = useState<KPIAction>(KPIAction.NONE);
 
   // Initialization Logic
 
@@ -172,14 +177,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             freeProgrammeIds.push(prg.programmeId);
           });
           setAllProgramIdList(freeProgrammeIds);
-
-          const actResponse: any = await get('national/activities/link/eligible');
-
-          const freeActivityIds: string[] = [];
-          actResponse.data.forEach((act: any) => {
-            freeActivityIds.push(act.activityId);
-          });
-          setAllActivityIdList(freeActivityIds);
         } catch (error: any) {
           displayErrorMessage(error);
         }
@@ -338,7 +335,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             connectedActivityIds.push(act.activityId);
           });
           setAttachedActivityIds(connectedActivityIds);
-          setTempActivityIds(connectedActivityIds);
         } catch (error: any) {
           displayErrorMessage(error);
         }
@@ -358,6 +354,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         achievedReduct: actionMigratedData.achievedReduction,
         expectedReduct: actionMigratedData.expectedReduction,
       });
+    }
+    if (!firstRenderingCompleted) {
+      setFirstRenderingCompleted(true);
     }
   }, [actionMigratedData]);
 
@@ -441,9 +440,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     };
 
     const fetchActivityAttachmentData = async () => {
-      if (tempActivityIds.length > 0) {
+      if (attachedActivityIds.length > 0) {
         try {
-          tempActivityIds.forEach((activityId) => {
+          attachedActivityIds.forEach((activityId) => {
             activityPayload.filterOr.push({
               key: 'activityId',
               operation: '=',
@@ -469,7 +468,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               reductionMeasures: act.measure,
               status: act.status,
               natImplementor: act.nationalImplementingEntity ?? [],
-              ghgsAffected: act.ghgsAffected ?? [],
+              ghgsAffected: act.ghgsAffected,
               achievedReduction: act.achievedGHGReduction ?? 0,
               estimatedReduction: act.expectedGHGReduction ?? 0,
             });
@@ -510,11 +509,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
     setSupportCurrentPage(1);
     setSupportPageSize(10);
-  }, [tempActivityIds]);
+  }, [attachedActivityIds]);
 
   // Calculating migrated fields when attachment changes
 
-  useEffect(() => {
+  const memoizedMigratedData = useMemo(() => {
     const tempMigratedData: ActionMigratedData = {
       natImplementer: [],
       estimatedInvestment: 0,
@@ -545,10 +544,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     });
 
     activityData.forEach((act: ActivityData) => {
-      tempMigratedData.ghgsAffected = joinTwoArrays(
-        tempMigratedData.ghgsAffected,
-        act.ghgsAffected ?? []
-      );
+      if (act.ghgsAffected && !tempMigratedData.ghgsAffected.includes(act.ghgsAffected)) {
+        tempMigratedData.ghgsAffected.push(act.ghgsAffected);
+      }
 
       const actGHGAchievement = act.achievedReduction ?? 0;
       const actGHGExpected = act.estimatedReduction ?? 0;
@@ -557,8 +555,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + actGHGExpected;
     });
 
-    setActionMigratedData(tempMigratedData);
+    return tempMigratedData;
   }, [programData, activityData]);
+
+  useEffect(() => {
+    setActionMigratedData(memoizedMigratedData);
+  }, [memoizedMigratedData]);
 
   // Attachment resolve before updating an already created action
 
@@ -575,27 +577,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
       if (toAttach.length > 0) {
         await post('national/programmes/link', { actionId: entId, programmes: toAttach });
-      }
-    } catch (error: any) {
-      displayErrorMessage(error);
-    }
-  };
-
-  const resolveActivityAttachments = async (parentId: string) => {
-    const toAttach = tempActivityIds.filter((act) => !attachedActivityIds.includes(act));
-    const toDetach = attachedActivityIds.filter((act) => !tempActivityIds.includes(act));
-
-    try {
-      if (toDetach.length > 0) {
-        await post('national/activities/unlink', { activityIds: toDetach });
-      }
-
-      if (toAttach.length > 0) {
-        await post('national/activities/link', {
-          parentId: parentId,
-          parentType: 'action',
-          activityIds: toAttach,
-        });
       }
     } catch (error: any) {
       displayErrorMessage(error);
@@ -690,11 +671,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         method === 'create' ? t('actionCreationSuccess') : t('actionUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
-        if (method === 'create') {
-          resolveActivityAttachments(response.data.actionId);
-        } else if (entId && method === 'update') {
+        if (entId && method === 'update') {
           resolveProgrammeAttachments();
-          resolveActivityAttachments(entId);
         }
 
         await new Promise((resolve) => {
@@ -750,9 +728,9 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       }
     } catch (error: any) {
-      if (error?.message) {
-        if (error.message === 'Permission Denied: Unable to Validate Action') {
-          setIsValidationAllowed(false);
+      if (error?.status) {
+        if (error.status === 403) {
+          setIsValidationAllowed(await doesUserHaveValidatePermission(get));
         }
         displayErrorMessage(error);
       } else {
@@ -804,30 +782,15 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const detachProgramme = async (prgId: string) => {
     setDetachingEntityId(prgId);
-    setDetachingEntityType('Programme');
     setOpenDetachPopup(true);
   };
-
-  // Detach Activity
-
-  // const detachActivity = async (actId: string) => {
-  //   setDetachingEntityId(actId);
-  //   setDetachingEntityType('Activity');
-  //   setOpenDetachPopup(true);
-  // };
 
   // Handle Detachment
 
   const detachEntity = async (entityId: string) => {
-    if (detachingEntityType === 'Programme') {
-      const filteredIds = tempProgramIds.filter((id) => id !== entityId);
-      setTempProgramIds(filteredIds);
-      setIsSaveButtonDisabled(false);
-    } else if (detachingEntityType === 'Activity') {
-      const filteredIds = tempActivityIds.filter((id) => id !== entityId);
-      setTempActivityIds(filteredIds);
-      setIsSaveButtonDisabled(false);
-    }
+    const filteredIds = tempProgramIds.filter((id) => id !== entityId);
+    setTempProgramIds(filteredIds);
+    setIsSaveButtonDisabled(false);
   };
 
   // Add New KPI
@@ -943,7 +906,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
         isDanger={true}
         content={{
-          primaryMsg: `${t('detachPopup:primaryMsg')} ${detachingEntityType} ${detachingEntityId}`,
+          primaryMsg: `${t('detachPopup:primaryMsg')} Programme ${detachingEntityId}`,
           secondaryMsg: t('detachPopup:secondaryMsg'),
           cancelTitle: t('detachPopup:cancelTitle'),
           actionTitle: t('detachPopup:actionTitle'),
@@ -971,7 +934,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && firstRenderingCompleted ? (
         <div className="action-form">
           <Form
             form={form}
@@ -1261,41 +1224,56 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            <div className="form-section-card">
-              <Row>
-                <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
-                  <div className="form-section-header">{t('formHeader:activityInfoTitle')}</div>
-                </Col>
-                {/* <Col {...attachButtonBps}>
-                  <AttachEntity
-                    isDisabled={isView}
-                    content={{
-                      buttonName: t('formHeader:attachActivity'),
-                      attach: t('entityAction:attach'),
-                      contentTitle: t('formHeader:attachActivity'),
-                      listTitle: t('activityList'),
-                      cancel: t('entityAction:cancel'),
-                    }}
-                    options={allActivityIds}
-                    alreadyAttached={attachedActivityIds}
-                    currentAttachments={tempActivityIds}
-                    setCurrentAttachments={setTempActivityIds}
-                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
-                    icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
-                  ></AttachEntity>
-                </Col> */}
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <div style={{ overflowX: 'auto' }}>
+            {method !== 'create' && (
+              <div className="form-section-card">
+                <Row>
+                  <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
+                    <div className="form-section-header">{t('formHeader:activityInfoTitle')}</div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <div style={{ overflowX: 'auto' }}>
+                      <LayoutTable
+                        tableData={activityData}
+                        columns={activityTableColumns}
+                        loading={false}
+                        pagination={{
+                          current: activityCurrentPage,
+                          pageSize: activityPageSize,
+                          total: activityData.length,
+                          showQuickJumper: true,
+                          pageSizeOptions: ['10', '20', '30'],
+                          showSizeChanger: true,
+                          style: { textAlign: 'center' },
+                          locale: { page: '' },
+                          position: ['bottomRight'],
+                        }}
+                        handleTableChange={handleActivityTableChange}
+                        emptyMessage={t('formHeader:noActivityMessage')}
+                      />
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            )}
+            {method !== 'create' && (
+              <div className="form-section-card">
+                <Row>
+                  <Col span={20}>
+                    <div className="form-section-header">{t('formHeader:supportInfoTitle')}</div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
                     <LayoutTable
-                      tableData={activityData}
-                      columns={activityTableColumns}
+                      tableData={supportData}
+                      columns={supportTableColumns}
                       loading={false}
                       pagination={{
-                        current: activityCurrentPage,
-                        pageSize: activityPageSize,
-                        total: activityData.length,
+                        current: supportCurrentPage,
+                        pageSize: supportPageSize,
+                        total: supportData.length,
                         showQuickJumper: true,
                         pageSizeOptions: ['10', '20', '30'],
                         showSizeChanger: true,
@@ -1303,42 +1281,13 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                         locale: { page: '' },
                         position: ['bottomRight'],
                       }}
-                      handleTableChange={handleActivityTableChange}
-                      emptyMessage={t('formHeader:noActivityMessage')}
+                      handleTableChange={handleSupportTableChange}
+                      emptyMessage={t('formHeader:noSupportMessage')}
                     />
-                  </div>
-                </Col>
-              </Row>
-            </div>
-            <div className="form-section-card">
-              <Row>
-                <Col span={20}>
-                  <div className="form-section-header">{t('formHeader:supportInfoTitle')}</div>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <LayoutTable
-                    tableData={supportData}
-                    columns={supportTableColumns}
-                    loading={false}
-                    pagination={{
-                      current: supportCurrentPage,
-                      pageSize: supportPageSize,
-                      total: supportData.length,
-                      showQuickJumper: true,
-                      pageSizeOptions: ['10', '20', '30'],
-                      showSizeChanger: true,
-                      style: { textAlign: 'center' },
-                      locale: { page: '' },
-                      position: ['bottomRight'],
-                    }}
-                    handleTableChange={handleSupportTableChange}
-                    emptyMessage={t('formHeader:noSupportMessage')}
-                  />
-                </Col>
-              </Row>
-            </div>
+                  </Col>
+                </Row>
+              </div>
+            )}
             <div className="form-section-card">
               <div className="form-section-header">{t('formHeader:mitigationInfoTitle')}</div>
               <Row gutter={gutterSize}>

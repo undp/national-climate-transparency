@@ -53,15 +53,10 @@ export class ProjectUpdateDto {
 
 	@IsNotEmpty()
 	@IsNumber()
-	@Min(2013)
+	@Min(2014)
 	@Max(2050)
 	@ApiProperty()
 	endYear: number;
-
-	// @IsOptional()
-	// @IsNumber()
-	// @ApiPropertyOptional()
-	// expectedTimeFrame: number;
 
 	@IsArray()
 	@ArrayMinSize(1)
@@ -131,7 +126,7 @@ export class ProjectUpdateDto {
 				name: "KPI 1",
 				creatorType: "action",
 				expected: 100,
-				KPIAction: KPIAction.CREATED,       // To check KPI is Updated or not for Update Timeline
+				KPIAction: KPIAction.CREATED,       // To check KPI is Updated or not. this is for Update Timeline
 		}],
 			items: {
 				$ref: getSchemaPath(KpiUpdateDto),

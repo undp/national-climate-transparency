@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from '../typeorm.config.service';
 import { UtilModule } from '../util/util.module';
 import { SystemResourcesService } from './system.resources.service';
-import { SystemResourcesEntity } from 'src/entities/systemResource.entity';
+import { SystemResourcesEntity } from '../entities/systemResource.entity';
 
 @Module({
 	imports: [

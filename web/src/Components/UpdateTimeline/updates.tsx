@@ -111,6 +111,7 @@ const UpdatesTimeline: React.FC<UpdateProps> = ({ recordType, recordId }) => {
       case '51':
       case '52':
       case '53':
+      case '54':
         return (
           <span className="step-icon unverify-step">
             <Icon.FileEarmarkExcel />

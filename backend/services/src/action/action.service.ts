@@ -527,7 +527,7 @@ export class ActionService {
 	
 			const actionKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, action.actionId);
 	
-			const actionKpiIds = actionKPIs.map(kpi => kpi.kpiId);
+			const actionKpiIds = actionKPIs?.map(kpi => kpi.kpiId);
 	
 			const linkedActivityIds = action.activities?.map(activity => activity.activityId);
 
@@ -630,7 +630,7 @@ export class ActionService {
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString("action.verifyActionSuccess", []),
+			this.helperService.formatReqMessagesString((validateDto.validateStatus) ? "action.verifyActionSuccess" : "action.unverifyActionSuccess" , []),
 			act
 		);
 

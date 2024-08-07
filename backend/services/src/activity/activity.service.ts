@@ -10,7 +10,7 @@ import { ActivityEntity } from "../entities/activity.entity";
 import { LogEntity } from "../entities/log.entity";
 import { User } from "../entities/user.entity";
 import { CounterType } from "../enums/counter.type.enum";
-import { LogEventType, EntityType, Method } from "../enums/shared.enum";
+import { LogEventType, EntityType, Method, GHGS } from "../enums/shared.enum";
 import { ProgrammeService } from "../programme/programme.service";
 import { ProjectService } from "../project/project.service";
 import { CounterService } from "../util/counter.service";
@@ -34,7 +34,9 @@ import { ActionEntity } from "../entities/action.entity";
 import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 import { AchievementEntity } from "../entities/achievement.entity";
-import { SupportEntity } from "src/entities/support.entity";
+import { SupportEntity } from "../entities/support.entity";
+import { ConfigurationSettingsType } from "../enums/configuration.settings.type.enum";
+import { ConfigurationSettingsEntity } from "../entities/configuration.settings.entity";
 
 @Injectable()
 export class ActivityService {
@@ -50,6 +52,8 @@ export class ActivityService {
 		private actionService: ActionService,
 		private kpiService: KpiService,
 		private payloadValidator: PayloadValidator,
+		@InjectRepository(ConfigurationSettingsEntity)
+		private configSettingsRepo: Repository<ConfigurationSettingsEntity>,	
 	) { }
 
 	//MARK: Activity Create
@@ -121,8 +125,59 @@ export class ActivityService {
 		}
 
 		if (activityDto.mitigationTimeline) {
-			this.payloadValidator.validateMitigationTimelinePayload(activityDto, Method.CREATE);
+			const gwpSettingsRecord = await this.configSettingsRepo.findOneBy({ id: ConfigurationSettingsType.GWP });
+			let validUnit: GHGS = GHGS.CO;
+			let gwpValue: number = 1;
+
+			if (gwpSettingsRecord) {
+				const gwpSettings = gwpSettingsRecord.settingValue;
+				switch (activityDto.ghgsAffected) {
+					case GHGS.NO:
+						validUnit = gwpSettings.gwp_n2o > 1 ? GHGS.NO : GHGS.CO;
+						gwpValue = gwpSettings.gwp_n2o > 1 ? gwpSettings.gwp_n2o : 1;
+						break;
+					case GHGS.CH:
+						validUnit = gwpSettings.gwp_ch4 > 1 ? GHGS.CH : GHGS.CO;
+						gwpValue = gwpSettings.gwp_ch4 > 1 ? gwpSettings.gwp_ch4 : 1;
+						break;
+					default:
+						validUnit = GHGS.CO;
+						gwpValue = 1;
+						break;
+				}
+			}
+
+			if (!activityDto.mitigationTimeline.startYear) {
+				throw new HttpException('Mitigation timeline Start Year is missing', HttpStatus.BAD_REQUEST);
+			}
+
+			if (activityDto.startYear !== activityDto.mitigationTimeline.startYear) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"MTG Start year should be parent startYear",
+						[]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			if (!activityDto.mitigationTimeline.unit) {
+				throw new HttpException('Mitigation timeline Unit is missing', HttpStatus.BAD_REQUEST);
+			}
+
+			if (activityDto.mitigationTimeline.unit !== validUnit) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"Mitigation timeline unit should be ", [validUnit]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			this.payloadValidator.validateMitigationTimelinePayload(activityDto, gwpValue, activityDto.startYear);
+
 		}
+		
 
 		const activ = await this.entityManager
 			.transaction(async (em) => {
@@ -419,7 +474,10 @@ export class ActivityService {
 				currentActivity.activityId,
 				EntityType.ACTIVITY
 			);
-			achievements.push(...achievementsToRemove);
+
+			if(achievementsToRemove && achievementsToRemove.length > 0) {
+				achievements.push(...achievementsToRemove);
+			}
 
 			switch (activityUpdateDto.parentType) {
 				case EntityType.ACTION: {
@@ -1112,7 +1170,9 @@ export class ActivityService {
 			}
 
 			const activityAchievements = await this.kpiService.findAchievementsByActivityId(activity.activityId);
-			achievements.push(...activityAchievements);
+			if(activityAchievements && activityAchievements.length > 0) {
+				achievements.push(...activityAchievements);
+			}
 		}
 
 		const proj = await this.linkUnlinkService.unlinkActivitiesFromParent(activities, unlinkActivitiesDto, user, this.entityManager, achievements);
@@ -1304,7 +1364,7 @@ export class ActivityService {
 		await this.helperService.refreshMaterializedViews(this.entityManager);
 		return new DataResponseMessageDto(
 			HttpStatus.OK,
-			this.helperService.formatReqMessagesString("activity.verifyActivitySuccess", []),
+			this.helperService.formatReqMessagesString((validateDto.validateStatus) ? "activity.verifyActivitySuccess" : "activity.unverifyActivitySuccess" , []),
 			act
 		);
 
@@ -1370,9 +1430,8 @@ export class ActivityService {
 
 	//MARK: update mitigation timeline Data
 	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto, user: User) {
-		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto, Method.UPDATE);
 		const { activityId, mitigationTimeline } = mitigationTimelineDto;
-		const activity = await this.findActivityById(activityId);
+		const activity = await this.linkUnlinkService.findActivityByIdWithSupports(activityId);
 
 		if (!activity) {
 			throw new HttpException(
@@ -1395,6 +1454,25 @@ export class ActivityService {
 		}
 
 		const currentMitigationTimeline = activity.mitigationTimeline;
+		const gwpSettingsRecord = await this.configSettingsRepo.findOneBy({ id: ConfigurationSettingsType.GWP });
+		let gwpValue: number = 1;
+
+		if (gwpSettingsRecord) {
+			const gwpSettings = gwpSettingsRecord.settingValue;
+			switch (currentMitigationTimeline.unit) {
+				case GHGS.NO:
+					gwpValue = gwpSettings.gwp_n2o > 1 ? gwpSettings.gwp_n2o : 1;
+					break;
+				case GHGS.CH:
+					gwpValue = gwpSettings.gwp_ch4 > 1 ? gwpSettings.gwp_ch4 : 1;
+					break;
+				default:
+					gwpValue = 1;
+					break;
+			}
+		}
+		
+		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto, gwpValue, currentMitigationTimeline.startYear);
 
 		const updatedMitigationTimeline = {
 			...currentMitigationTimeline,
@@ -1402,25 +1480,51 @@ export class ActivityService {
 			actual: mitigationTimeline.actual
 		};
 
+		const logs = [];
+		logs.push(
+			this.buildLogEntity(
+				LogEventType.MTG_UPDATED,
+				EntityType.ACTIVITY,
+				activity.activityId,
+				user.id,
+				mitigationTimelineDto
+			)
+		)
+
+		if (activity.validated) {
+			activity.validated = false;
+			logs.push(
+				this.buildLogEntity(
+					LogEventType.ACTIVITY_UNVERIFIED_DUE_MITIGATION_TIMELINE_UPDATE,
+					EntityType.ACTIVITY,
+					activity.activityId,
+					0,
+					activity.validated
+				)
+			)
+		}
+
 		const activ = await this.entityManager
 			.transaction(async (em) => {
 				await em
 					.createQueryBuilder()
 					.update(ActivityEntity)
-					.set({ mitigationTimeline: updatedMitigationTimeline})
+					.set({ mitigationTimeline: updatedMitigationTimeline, validated: activity.validated})
 					.where('activityId = :activityId', { activityId })
 					.execute();
 
-				const logEntity =
-					this.buildLogEntity(
-						LogEventType.MTG_UPDATED,
-						EntityType.ACTIVITY,
-						activity.activityId,
-						user.id,
-						mitigationTimelineDto
-					);
+				if (activity.support && activity.support.length > 0) {
+					const supportsList = []
+					for (const support of activity.support) {
+						if (support.validated) {
+							support.validated = false;
+							supportsList.push(support);
+						}
+					}
+					em.save<SupportEntity>(supportsList);
+				}
 
-				await em.save<LogEntity>(logEntity);
+				await em.save<LogEntity>(logs);
 				return activity;
 			})
 			.catch((err: any) => {

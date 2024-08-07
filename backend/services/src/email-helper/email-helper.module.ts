@@ -3,7 +3,6 @@ import { AsyncOperationsModule } from '../async-operations/async-operations.modu
 import { UserModule } from '../user/user.module';
 import { UtilModule } from '../util/util.module';
 import { EmailHelperService } from './email-helper.service';
-// import { OrganisationModule } from 'src/organisation/organisation.module';
 
 @Module({
     providers: [EmailHelperService],
