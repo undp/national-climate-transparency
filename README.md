@@ -189,7 +189,6 @@ For integration, reference RESTful Web API Documentation documentation via Swagg
 * National API: `APP_URL`/national
 * Status API: `APP_URL`/stats
 
-
 <a name="resource"></a>
 
 ### Resource Requirements
