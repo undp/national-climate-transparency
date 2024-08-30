@@ -87,8 +87,6 @@ Change by environment variable `FILE_SERVICE`. Supported types are `LOCAL` (defa
             ├── stats-api           # Statistics API [NestJS module]
             ├── async-operations-handler   # Async Operations Handler [NestJS module]     
         ├── serverless.yml          # Service deployment scripts [Serverless + AWS Lambda]
-├── libs
-    ├── carbon-credit-calculator    # Implementation for the Carbon credit calculation library [Node module + Typescript]
 ├── web                             # System web frontend implementation [ReactJS]
 ├── .gitignore
 ├── docker-compose.yml              # Docker container definitions
@@ -117,7 +115,8 @@ Change by environment variable `FILE_SERVICE`. Supported types are `LOCAL` (defa
   * PostgresDB container
   * National service
   * Analytics service
-  * Replicator service
+  * Async Operations Handler service
+  * Migration service (This service will shutdown automatically once db migration script execution is completed)
   * React web server with Nginx.
 * Web frontend on <http://localhost:9030/>
 * API Endpoints,
@@ -162,10 +161,6 @@ aws lambda invoke \
 
 ## Modules
 
-### Carbon Credit Calculator
-
-Carbon credit calculation is implemented in a separate node module. [Please refer to this](./libs/carbon-credit-calculator/README.md) for more information.
-
 ### UNDP Platform for Voluntary Bilateral Cooperation
 
 UNDP Platform for Voluntary Bilateral Cooperation generation is implemented in a separate node module. [Please refer this](./modules/Platform%20for%20Voluntary%20Bilateral%20Cooperation/README.md) for more information.
@@ -183,7 +178,7 @@ Web frontend implemented using ReactJS framework. Please refer [getting started 
 * Languages (Current): English
 * Languages (In progress): French, Spanish
 
-For updating translations or adding new ones, reference <https://github.com/undp/carbon-registry/tree/main/web/public/Assets/i18n>
+For updating translations or adding new ones, reference <https://github.com/undp/climate-transparency/tree/main/web/public/locales/i18n>
 
 <a name="api"></a>
 
@@ -191,10 +186,9 @@ For updating translations or adding new ones, reference <https://github.com/undp
 
 For integration, reference RESTful Web API Documentation documentation via Swagger. To access
 
-* National API: `api.APP_URL`/national
-* Status API: `api.APP_URL`/stats
+* National API: `APP_URL`/national
+* Status API: `APP_URL`/stats
 
-Our [Data Dictionary](./Data%20Dictionary.csv) is available for field analysis.
 
 <a name="resource"></a>
 
