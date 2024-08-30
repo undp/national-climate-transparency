@@ -98,7 +98,7 @@ Change by environment variable `FILE_SERVICE`. Supported types are `LOCAL` (defa
         ├── src
             ├── national-api        # National API [NestJS module]      
             ├── stats-api           # Statistics API [NestJS module]
-            ├── shared              # Shared resources [NestJS module]     
+            ├── async-ops-handler   # Async Operations Handler [NestJS module]     
         ├── serverless.yml          # Service deployment scripts [Serverless + AWS Lambda]
 ├── libs
     ├── carbon-credit-calculator    # Implementation for the Carbon credit calculation library [Node module + Typescript]
@@ -141,7 +141,7 @@ Change by environment variable `FILE_SERVICE`. Supported types are `LOCAL` (defa
 
 <a name="local"></a>
 
-## Run Services Locally
+<!-- ## Run Services Locally
 
 * Setup postgreSQL locally and create a new database.
 * Update following DB configurations in the `.env.local` file (If the file does not exist please create a new `.env.local`)
@@ -151,8 +151,8 @@ Change by environment variable `FILE_SERVICE`. Supported types are `LOCAL` (defa
   * `DB_PASSWORD`
   * `DB_NAME` (default `carbondbdev`)
 * Move to folder `cd backend/service`
-* Run `yarn run sls:install`
-* Initial user data setup
+* Run `yarn run sls:install` -->
+<!-- * Initial user data setup
 
 ```sh
 serverless invoke local --stage=local --function setup --data '{"rootEmail": "<Root user email>","systemCountryCode": "<System country Alpha 2 code>", "name": "<System country name>", "logoBase64": "<System country logo base64>"}'
@@ -162,9 +162,9 @@ serverless invoke local --stage=local --function setup --data '{"rootEmail": "<R
   
 ```sh
 sls offline --stage=local
-```
+``` -->
 
-* Now all the system services are up and running. Swagger documentation will be available on <http://localhost:3000/local/national>
+* Now all the system services are up and running. Swagger documentation will be available on <http://localhost:9000/local/national>
 
 <a name="cloud"></a>
 
