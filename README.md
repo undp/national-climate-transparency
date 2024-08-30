@@ -141,8 +141,10 @@ Change by environment variable `FILE_SERVICE`. Supported types are `LOCAL` (defa
 
 <a name="local"></a>
 
-<!-- ## Run Services Locally
+* Swagger documentation will be available on <http://localhost:9000/local/national>
 
+ ## Run Services Locally
+<!--
 * Setup postgreSQL locally and create a new database.
 * Update following DB configurations in the `.env.local` file (If the file does not exist please create a new `.env.local`)
   * `DB_HOST` (default `localhost`)
@@ -164,7 +166,7 @@ serverless invoke local --stage=local --function setup --data '{"rootEmail": "<R
 sls offline --stage=local
 ``` -->
 
-* Now all the system services are up and running. Swagger documentation will be available on <http://localhost:9000/local/national>
+Follow same steps mentioned above to run the services locally using docker. 
 
 <a name="cloud"></a>
 
