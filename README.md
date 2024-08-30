@@ -98,7 +98,7 @@ Change by environment variable `FILE_SERVICE`. Supported types are `LOCAL` (defa
         ├── src
             ├── national-api        # National API [NestJS module]      
             ├── stats-api           # Statistics API [NestJS module]
-            ├── async-ops-handler   # Async Operations Handler [NestJS module]     
+            ├── async-operations-handler   # Async Operations Handler [NestJS module]     
         ├── serverless.yml          # Service deployment scripts [Serverless + AWS Lambda]
 ├── libs
     ├── carbon-credit-calculator    # Implementation for the Carbon credit calculation library [Node module + Typescript]
@@ -175,21 +175,21 @@ Follow same steps mentioned above to run the services locally using docker.
 * Execute to create all the required resources on the AWS.
 
 ```sh
-aws cloudformation deploy --template-file ./deployment/aws-formation.yml --stack-name carbon-registry-basic --parameter-overrides EnvironmentName=<stage> DBPassword=<password> --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation deploy --template-file ./deployment/aws-formation.yml --stack-name ndc-transparency-basic --parameter-overrides EnvironmentName=<stage> DBPassword=<password> --capabilities CAPABILITY_NAMED_IAM
 ```
 
 * Setup following Github Secrets to enable CI/CD
   * `AWS_ACCESS_KEY_ID`
   * `AWS_SECRET_ACCESS_KEY`
 * Run it manually to deploy all the lambda services immediately. It will create 2 lambda layers and following lambda functions,
-  * national-api: Handle all carbon registry user and program creation. Trigger by external http request.
-  * replicator: Replicate Ledger database entries in to Postgres database for analytics. Trigger by new record on the Kinesis stream.
+  * national-api: Handle all user and program creation. Trigger by external http request.
+  * async-operations-handler: Handle all async operations such as managing notification emails.
   * setup: Function to add initial system user data.
 * Create initial user data in the system by invoking setup lambda function by executing
 
 ```sh
 aws lambda invoke \
-    --function-name carbon-registry-services-dev-setup --cli-binary-format raw-in-base64-out\
+    --function-name ndc-transparency-services-dev-setup --cli-binary-format raw-in-base64-out\
     --payload '{"rootEmail": "<Root user email>","systemCountryCode": "<System country Alpha 2 code>", "name": "<System country name>", "logoBase64": "<System country logo base64>"}' \
     response.json
 ```
