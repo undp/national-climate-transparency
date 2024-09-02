@@ -17,8 +17,6 @@ The system has 3 key features, and to be uploaded by the third quarter of 2024.
 * **GHG Inventory:** Maintains a comprehensive inventory of greenhouse gas (GHG) emissions with ease. The system allows for accurate data collection (with Excel integration), automated calculations, and reporting, supporting informed decision-making.
 * **Reporting Module:** Pulls together data collected and managed across the above two modules into a format that is required for reporting to UNFCCCC. The standard codebase uses the recently approved Common Tabular Format and can be configured to any other format. 
 
-**The National MRV System can be interoperable with the [National Carbon Registry DPG](https://github.com/undp/carbon-registry)**
-
 ## Index
 Below contents are planned to be updated by the third quarter of 2024 based on user feedback and recent change in international requirements. 
 * [About](#about)
@@ -63,17 +61,6 @@ System services can deploy in 2 ways.
 
 All the external services access through a generic interface. It will decouple the system implementation from the external services and enable extendability to multiple services.
 
-#### Geo Location Service
-
-Currently implemented for 2 options.
-
-1. File based approach. User has to manually add the regions with the geo coordinates. [Sample File](./backend/services/regions.csv). To apply new file changes, replicator service needs to restart.
-2. [Mapbox](https://mapbox.com). Dynamically query geo coordinates from the Mapbox API.
-
-Can add more options by implementing [location interface](./backend/services/src/shared/location/location.interface.ts)
-
-Change by environment variable `LOCATION_SERVICE`. Supported types are `FILE` (default) and `MAPBOX`.
-
 #### File Service
 
 Implemented 2 options for static file hosting.
@@ -98,10 +85,8 @@ Change by environment variable `FILE_SERVICE`. Supported types are `LOCAL` (defa
         ├── src
             ├── national-api        # National API [NestJS module]      
             ├── stats-api           # Statistics API [NestJS module]
-            ├── shared              # Shared resources [NestJS module]     
+            ├── async-operations-handler   # Async Operations Handler [NestJS module]     
         ├── serverless.yml          # Service deployment scripts [Serverless + AWS Lambda]
-├── libs
-    ├── carbon-credit-calculator    # Implementation for the Carbon credit calculation library [Node module + Typescript]
 ├── web                             # System web frontend implementation [ReactJS]
 ├── .gitignore
 ├── docker-compose.yml              # Docker container definitions
@@ -113,7 +98,7 @@ Change by environment variable `FILE_SERVICE`. Supported types are `LOCAL` (defa
 ## Run Services As Containers
 
 * Update [docker compose file](./docker-compose.yml) env variables as required.
-  * Currently all the emails are disabled using env variable `IS_EMAIL_DISABLED`. When the emails are disabled email payload will be printed on the console. User account passwords needs to extract from this console log. Including root user account, search for a log line starting with `Password (temporary)` on national container (`docker logs -f undp-carbon-registry-national-1`).
+  * Currently all the emails are disabled using env variable `IS_EMAIL_DISABLED`. When the emails are disabled email payload will be printed on the console. User account passwords needs to extract from this console log. Including root user account, search for a log line starting with `Password (temporary)` on national container (`docker logs -f climate-transparency-national-1`).
   * Add / update following environment variables to enable email functionality.
     * `IS_EMAIL_DISABLED`=false
     * `SOURCE_EMAIL` (Sender email address)
@@ -122,49 +107,29 @@ Change by environment variable `FILE_SERVICE`. Supported types are `LOCAL` (defa
     * `SMTP_PASSWORD`
   * Use `DB_PASSWORD` env variable to change PostgreSQL database password
   * Configure system root account email by updating environment variable `ROOT EMAIL`. If the email service is enabled, on the first docker start, this email address will receive a new email with the root user password.
-  * By default frontend does not show map images on dashboard and programme view. To enable them please update `REACT_APP_MAP_TYPE` env variable to `Mapbox` and add new env variable `REACT_APP_MAPBOXGL_ACCESS_TOKEN` with [MapBox public access token](https://docs.mapbox.com/help/tutorials/get-started-tokens-api/) in web container.
 * Add user data
-  * Update [organisations.csv](./organisations.csv) file to add organisations.
   * Update [users.csv](./users.csv) file to add users.
-  * When updating files keep the header and replace existing dummy data with your data.
-  * These users and companies add to the system each docker restart.
+  * When updating file keep the header and replace existing dummy data with your data.
+  * These users will be added to the system each docker restart.
 * Run `docker-compose up -d --build`. This will build and start containers for following services:
   * PostgresDB container
   * National service
   * Analytics service
-  * Replicator service
+  * Async Operations Handler service
+  * Migration service (This service will shutdown automatically once db migration script execution is completed)
   * React web server with Nginx.
-* Web frontend on <http://localhost:3030/>
+* Web frontend on <http://localhost:9030/>
 * API Endpoints,
-  * <http://localhost:3000/national/>
-  * <http://localhost:3100/stats/>
+  * <http://localhost:9000/national/>
+  * <http://localhost:9100/stats/>
 
 <a name="local"></a>
 
-## Run Services Locally
+* Swagger documentation will be available on <http://localhost:9000/local/national>
 
-* Setup postgreSQL locally and create a new database.
-* Update following DB configurations in the `.env.local` file (If the file does not exist please create a new `.env.local`)
-  * `DB_HOST` (default `localhost`)
-  * `DB_PORT` (default `5432`)
-  * `DB_USER` (default `root`)
-  * `DB_PASSWORD`
-  * `DB_NAME` (default `carbondbdev`)
-* Move to folder `cd backend/service`
-* Run `yarn run sls:install`
-* Initial user data setup
+ ## Run Services Locally
 
-```sh
-serverless invoke local --stage=local --function setup --data '{"rootEmail": "<Root user email>","systemCountryCode": "<System country Alpha 2 code>", "name": "<System country name>", "logoBase64": "<System country logo base64>"}'
-```
-
-* Start all the services by executing
-  
-```sh
-sls offline --stage=local
-```
-
-* Now all the system services are up and running. Swagger documentation will be available on <http://localhost:3000/local/national>
+Follow same steps mentioned above to run the services locally using docker. 
 
 <a name="cloud"></a>
 
@@ -173,21 +138,21 @@ sls offline --stage=local
 * Execute to create all the required resources on the AWS.
 
 ```sh
-aws cloudformation deploy --template-file ./deployment/aws-formation.yml --stack-name carbon-registry-basic --parameter-overrides EnvironmentName=<stage> DBPassword=<password> --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation deploy --template-file ./deployment/aws-formation.yml --stack-name ndc-transparency-basic --parameter-overrides EnvironmentName=<stage> DBPassword=<password> --capabilities CAPABILITY_NAMED_IAM
 ```
 
 * Setup following Github Secrets to enable CI/CD
   * `AWS_ACCESS_KEY_ID`
   * `AWS_SECRET_ACCESS_KEY`
 * Run it manually to deploy all the lambda services immediately. It will create 2 lambda layers and following lambda functions,
-  * national-api: Handle all carbon registry user and program creation. Trigger by external http request.
-  * replicator: Replicate Ledger database entries in to Postgres database for analytics. Trigger by new record on the Kinesis stream.
+  * national-api: Handle all user and program creation. Trigger by external http request.
+  * async-operations-handler: Handle all async operations such as managing notification emails.
   * setup: Function to add initial system user data.
 * Create initial user data in the system by invoking setup lambda function by executing
 
 ```sh
 aws lambda invoke \
-    --function-name carbon-registry-services-dev-setup --cli-binary-format raw-in-base64-out\
+    --function-name ndc-transparency-services-dev-setup --cli-binary-format raw-in-base64-out\
     --payload '{"rootEmail": "<Root user email>","systemCountryCode": "<System country Alpha 2 code>", "name": "<System country name>", "logoBase64": "<System country logo base64>"}' \
     response.json
 ```
@@ -195,10 +160,6 @@ aws lambda invoke \
 <a name="modules"></a>
 
 ## Modules
-
-### Carbon Credit Calculator
-
-Carbon credit calculation is implemented in a separate node module. [Please refer to this](./libs/carbon-credit-calculator/README.md) for more information.
 
 ### UNDP Platform for Voluntary Bilateral Cooperation
 
@@ -217,7 +178,7 @@ Web frontend implemented using ReactJS framework. Please refer [getting started 
 * Languages (Current): English
 * Languages (In progress): French, Spanish
 
-For updating translations or adding new ones, reference <https://github.com/undp/carbon-registry/tree/main/web/public/Assets/i18n>
+For updating translations or adding new ones, reference <https://github.com/undp/climate-transparency/tree/main/web/public/locales/i18n>
 
 <a name="api"></a>
 
@@ -225,10 +186,8 @@ For updating translations or adding new ones, reference <https://github.com/undp
 
 For integration, reference RESTful Web API Documentation documentation via Swagger. To access
 
-* National API: `api.APP_URL`/national
-* Status API: `api.APP_URL`/stats
-
-Our [Data Dictionary](./Data%20Dictionary.csv) is available for field analysis.
+* National API: `APP_URL`/national
+* Status API: `APP_URL`/stats
 
 <a name="resource"></a>
 

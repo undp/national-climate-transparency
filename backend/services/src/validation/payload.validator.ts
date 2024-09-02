@@ -33,19 +33,21 @@ export class PayloadValidator {
 		}
 	}
 
-	validateMitigationTimelinePayload(mitigationTimelineDto: mitigationTimelineDto | ActivityDto, method: Method) {
+	validateMitigationTimelinePayload(mitigationTimelineDto: mitigationTimelineDto | ActivityDto, gwpValue: number, startYear: number) {
 		const { mitigationTimeline } = mitigationTimelineDto;
 
 		if (!mitigationTimeline) {
 			throw new HttpException('Mitigation timeline data is missing', HttpStatus.BAD_REQUEST);
 		}
 
-		const { expected, actual } = mitigationTimeline;
+		const { expected, actual} = mitigationTimeline;
 
 		if (!expected) {
 			throw new HttpException('Mitigation timeline Expected data is missing', HttpStatus.BAD_REQUEST);
 		} else {
-			this.validateArrayAndLength(expected, expectedMitigationTimelineProperties);
+			this.validateArrayAndLength(expected, expectedMitigationTimelineProperties, startYear);
+			this.validate_ktCO2e_Values(expected.activityEmissionsWithM,expected.expectedEmissionReductWithM, gwpValue,'expectedEmissionReductWithM');
+			this.validate_ktCO2e_Values(expected.activityEmissionsWithAM,expected.expectedEmissionReductWithAM, gwpValue,'expectedEmissionReductWithM');
 			if (!expected.total) {
 				throw new HttpException('Mitigation timeline Expected total data is missing', HttpStatus.BAD_REQUEST);
 			} else {
@@ -57,7 +59,8 @@ export class PayloadValidator {
 		if (!actual) {
 			throw new HttpException('Mitigation timeline Actual data is missing', HttpStatus.BAD_REQUEST);
 		} else {
-			this.validateArrayAndLength(actual, actualMitigationTimelineProperties);
+			this.validateArrayAndLength(actual, actualMitigationTimelineProperties, startYear);
+			this.validate_ktCO2e_Values(actual.activityActualEmissions,actual.actualEmissionReduct, gwpValue,'actualEmissionReduct');
 			if (!actual.total) {
 				throw new HttpException('Mitigation timeline Actual total data is missing', HttpStatus.BAD_REQUEST);
 			} else {
@@ -65,23 +68,20 @@ export class PayloadValidator {
 				this.validateArraySum(actual, actual.total);
 			}
 		}
-
-		if(method === Method.CREATE){
-			const {startYear} = mitigationTimeline;
-			if(!startYear){
-				throw new HttpException('Mitigation timeline Start Year is missing', HttpStatus.BAD_REQUEST);
-			}
-		}
 	}
 
-	private validateArrayAndLength(data: any, propertiesEnum: any) {
+	private validateArrayAndLength(data: any, propertiesEnum: any, startYear: number) {
 		for (const propertyName in propertiesEnum) {
 			const property = propertiesEnum[propertyName];
 			const array = data[propertyName];
-			const arraySize = 31;
+			let arraySize = 0;
 
 			if (!Array.isArray(array)) {
 				throw new HttpException(`Mitigation timeline ${property} array is missing`, HttpStatus.BAD_REQUEST);
+			}
+
+			for (let year = startYear; year <= Math.min(startYear + 30, 2050); year++) {
+				arraySize++;
 			}
 
 			if (array.length !== arraySize) {
@@ -121,6 +121,13 @@ export class PayloadValidator {
 			if (sum !== propertyTotal) {
 				throw new HttpException(`Sum of ${propertyName} array elements should equal its total value`, HttpStatus.BAD_REQUEST);
 			}
+		}
+	}
+
+	private validate_ktCO2e_Values(arr1: [number], arr2: [number], gwpvalue: number, arr2Name: string) {
+		for (let index = 0; index < arr1.length; index++) {
+			if (arr2[index] !== arr1[index] * gwpvalue)
+				throw new HttpException(`Element ${index + 1} in the ${arr2Name} array is incorrect according to the GWP value.`, HttpStatus.BAD_REQUEST);
 		}
 	}
 

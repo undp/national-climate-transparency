@@ -18,7 +18,7 @@ import { SupportService } from "../support/support.service";
 import { SupportDto } from "../dtos/support.dto";
 import { SupportEntity } from "../entities/support.entity";
 import { SupportUpdateDto } from "../dtos/supportUpdate.dto";
-import { DeleteDto } from "src/dtos/delete.dto";
+import { DeleteDto } from "../dtos/delete.dto";
 
 @ApiTags("Supports")
 @ApiBearerAuth()

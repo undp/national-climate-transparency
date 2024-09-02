@@ -40,19 +40,19 @@ export class SupportEntity {
   @Column({ nullable: true })
   nationalSource: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  @Column({ type: 'decimal', precision: 15, scale: 2, nullable: false })
   requiredAmount: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  @Column({ type: 'decimal', precision: 15, scale: 2, nullable: false })
   receivedAmount: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  @Column({ type: 'decimal', precision: 15, scale: 2, nullable: false })
   exchangeRate: number;
 
-	@Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+	@Column({ type: 'decimal', precision: 15, scale: 2, nullable: false })
   requiredAmountDomestic: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  @Column({ type: 'decimal', precision: 15, scale: 2, nullable: false })
   receivedAmountDomestic: number;
 
   @Column({ nullable: true })

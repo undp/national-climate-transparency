@@ -18,7 +18,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 export class LinkUnlinkService {
 
 	constructor(
-		@InjectRepository(ActionEntity) private actionRepo: Repository<ActionEntity>,
 		@InjectRepository(ProgrammeEntity) private programmeRepo: Repository<ProgrammeEntity>,
 		@InjectRepository(ProjectEntity) private projectRepo: Repository<ProjectEntity>,
 		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
@@ -194,7 +193,7 @@ export class LinkUnlinkService {
 						0,
 						programmeId)
 					)
-					await this.updateAllValidatedChildrenStatusByActionId(action.actionId, em, updatedProgrammeIds, updatedProjectIds, updatedProjectIds);
+					await this.updateAllValidatedChildrenStatusByActionId(action.actionId, em, updatedProgrammeIds, updatedProjectIds, updatedActivityIds);
 				}
 
 				await em.save<LogEntity>(logs);
@@ -463,42 +462,46 @@ export class LinkUnlinkService {
 					}
 				}
 
-				if (action && action.validated) {
-					action.validated = false;
+				logs.push(
+					this.buildLogEntity(LogEventType.PROJECT_LINKED, EntityType.PROGRAMME, programme.programmeId, user.id, payload)
+				)
+
+				let unvalidateActionTree = false;
+
+				if (programme.validated) {
+					programme.validated = false;
 					logs.push(this.buildLogEntity(
-						LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
-						EntityType.ACTION,
-						action.actionId,
+						LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
+						EntityType.PROGRAMME,
+						programme.programmeId,
 						0,
-						programme.programmeId)
+						payload)
 					)
-					await em.save<ActionEntity>(action)
-					await this.updateAllValidatedChildrenStatusByActionId(action.actionId, em, [], updatedProjectIds, updatedActivityIds);
-				} else {
-					if (programme.validated) {
-						programme.validated = false;
+					await em.save<ProgrammeEntity>(programme)
+
+					if (action && action.validated) {
+						action.validated = false;
 						logs.push(this.buildLogEntity(
-							LogEventType.PROGRAMME_UNVERIFIED_DUE_ATTACHMENT_CHANGE,
-							EntityType.PROGRAMME,
-							programme.programmeId,
+							LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+							EntityType.ACTION,
+							action.actionId,
 							0,
-							payload)
+							programme.programmeId)
 						)
-						await em.save<ProgrammeEntity>(programme)
-						await this.updateAllValidatedChildrenAndParentStatusByProgrammeId(programme, em, true, updatedProjectIds, updatedActivityIds);
+						await em.save<ActionEntity>(action);
+
+						unvalidateActionTree = true;
 					}
 				}
 
-				logs.push(
-					this.buildLogEntity(
-						LogEventType.PROJECT_LINKED,
-						EntityType.PROGRAMME,
-						programme.programmeId,
-						user.id,
-						payload
-					)
-				)
 				await em.save<LogEntity>(logs);
+
+				if (unvalidateActionTree) {
+					await this.updateAllValidatedChildrenStatusByActionId(action.actionId, em, [programme.programmeId], updatedProjectIds, updatedActivityIds);
+				} else {
+					await this.updateAllValidatedChildrenAndParentStatusByProgrammeId(programme, em, true, updatedProjectIds, updatedActivityIds);
+				}
+
 			});
 	}
 
@@ -592,7 +595,7 @@ export class LinkUnlinkService {
 						if (action && action.validated) {
 							action.validated = false;
 							logs.push(this.buildLogEntity(
-								LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
+								(isProgrammeDelete) ? LogEventType.ACTION_UNVERIFIED_DUE_ATTACHMENT_DELETE : LogEventType.ACTION_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE,
 								EntityType.ACTION,
 								action.actionId,
 								0,
@@ -868,8 +871,6 @@ export class LinkUnlinkService {
 		}
 
 		const query = queryBuilder.getQueryAndParameters();
-		console.log("Generated SQL Query:", query[0]);
-		console.log("Query Parameters:", query[1]);
 
 		const result = await queryBuilder.execute();
 		return result;

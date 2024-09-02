@@ -8,7 +8,7 @@ import { ActivityEntity } from '../entities/activity.entity';
 import { SupportEntity } from '../entities/support.entity';
 import { UtilModule } from '../util/util.module';
 import { SupportService } from './support.service';
-import { ActivityModule } from 'src/activity/activity.module';
+import { ActivityModule } from '../activity/activity.module';
 
 @Module({
 	imports: [

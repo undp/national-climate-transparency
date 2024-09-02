@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsString } from "class-validator";
-import { SystemResourceCategory, SystemResourceType } from "src/enums/shared.enum";
+import { SystemResourceCategory, SystemResourceType } from "../enums/shared.enum";
 
 export class SystemResourceDto {
 

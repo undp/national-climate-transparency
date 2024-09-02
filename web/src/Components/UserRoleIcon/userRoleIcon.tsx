@@ -1,13 +1,5 @@
-import {
-  BankOutlined,
-  ExperimentOutlined,
-  EyeOutlined,
-  KeyOutlined,
-  SearchOutlined,
-  StarOutlined,
-  ToolOutlined,
-} from '@ant-design/icons';
-import React, { FC } from 'react';
+import { BankOutlined, ExperimentOutlined, KeyOutlined, StarOutlined } from '@ant-design/icons';
+import { FC } from 'react';
 import {
   AdminBGColor,
   AdminColor,

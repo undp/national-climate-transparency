@@ -10,7 +10,7 @@ import {
   WasteLevels,
 } from '../Enums/emission.enum';
 
-export type EmissionTabItem = { key: string; label: string; icon: any; content: any };
+export type EmissionTabItem = { key: string; label: any; children: any };
 
 export type SubSectionsDefinition = {
   id: EnergyLevels;
@@ -83,10 +83,10 @@ export type OtherSection = {
 };
 
 export const emissionInitData = {
-  [EmissionUnits.CO2]: undefined,
-  [EmissionUnits.CH4]: undefined,
-  [EmissionUnits.N2O]: undefined,
-  [EmissionUnits.CO2EQ]: undefined,
+  [EmissionUnits.CO2]: 0,
+  [EmissionUnits.CH4]: 0,
+  [EmissionUnits.N2O]: 0,
+  [EmissionUnits.CO2EQ]: 0,
 };
 
 export const energySectionInit = {
@@ -230,10 +230,10 @@ export const emissionTotals = {
 
 export const processIndividualEmissionData = (receivedEmission: any) => {
   const tempEmission = {
-    [EmissionUnits.CO2]: receivedEmission[EmissionUnits.CO2] ?? undefined,
-    [EmissionUnits.CH4]: receivedEmission[EmissionUnits.CH4] ?? undefined,
-    [EmissionUnits.N2O]: receivedEmission[EmissionUnits.N2O] ?? undefined,
-    [EmissionUnits.CO2EQ]: receivedEmission[EmissionUnits.CO2EQ] ?? undefined,
+    [EmissionUnits.CO2]: receivedEmission[EmissionUnits.CO2] ?? 0,
+    [EmissionUnits.CH4]: receivedEmission[EmissionUnits.CH4] ?? 0,
+    [EmissionUnits.N2O]: receivedEmission[EmissionUnits.N2O] ?? 0,
+    [EmissionUnits.CO2EQ]: receivedEmission[EmissionUnits.CO2EQ] ?? 0,
   };
 
   return tempEmission;
@@ -390,5 +390,4 @@ export type EmissionPayload = {
   };
   totalCo2WithoutLand: any;
   totalCo2WithLand: any;
-  state: any;
 };
