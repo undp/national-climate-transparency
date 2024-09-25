@@ -46,7 +46,7 @@ This codebase aims to fulfill the [Digital Public Goods standard](https://digita
 
 ## System Architecture
 
-Coming soon...
+![alt text](./documention/imgs/Transparency%20System%20architecture.svg)
 
 <a name="deployment"></a>
 
@@ -178,7 +178,7 @@ Web frontend implemented using ReactJS framework. Please refer [getting started 
 * Languages (Current): English
 * Languages (In progress): French, Spanish
 
-For updating translations or adding new ones, reference <https://github.com/undp/climate-transparency/tree/main/web/public/locales/i18n>
+For updating translations or adding new ones, reference <https://github.com/undp/national-climate-transparency/tree/main/web/src/locales/i18n>
 
 <a name="api"></a>
 
