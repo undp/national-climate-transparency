@@ -39,6 +39,7 @@ const TimelineTable: React.FC<Props> = ({
   const screens = useBreakpoint();
 
   const isView: boolean = method === 'view' ? true : false;
+
   const [allowFixedLegend, setAllowFixedLegend] = useState<boolean>(false);
 
   useEffect(() => {
@@ -58,7 +59,6 @@ const TimelineTable: React.FC<Props> = ({
       align: 'center',
       ellipsis: true,
       width: 100,
-      fixed: 'left',
     },
     {
       title: t('timelineTable:catExpectedEmissionReduct'),
@@ -85,7 +85,6 @@ const TimelineTable: React.FC<Props> = ({
       align: 'center',
       ellipsis: true,
       width: 100,
-      fixed: 'left',
     },
     {
       title: t('timelineTable:catActualEmissionReduct'),
