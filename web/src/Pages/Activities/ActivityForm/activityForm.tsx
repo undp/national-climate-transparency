@@ -703,10 +703,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const findUnit = (ghg: GHGS | undefined) => {
     if (ghg) {
-      const mtgUnit = [GHGS.CH, GHGS.NO].includes(ghg) ? ghg : GHGS.CO;
+      const mtgUnit = [GHGS.CO, GHGS.CH, GHGS.NO].includes(ghg) ? ghg : GHGS.COE;
       return mtgUnit;
     } else {
-      return GHGS.CO;
+      return GHGS.COE;
     }
   };
 
@@ -753,7 +753,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // Get mtg timeline data
 
   const fetchMtgTimelineData = async () => {
-    if (method !== 'create' && entId) {
+    if (method !== 'create' && entId && selectedGhg) {
       let response: any;
       try {
         response = await get(`national/activities/mitigation/${entId}`);
@@ -761,7 +761,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         if (response.status === 200 || response.status === 201) {
           setMtgStartYear(response.data.startYear);
 
-          const mtgUnit = response.data.unit;
+          const mtgUnit = findUnit(selectedGhg);
 
           const tempExpectedEntries: ExpectedTimeline[] = [];
           const tempActualEntries: ActualTimeline[] = [];
@@ -982,7 +982,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         resultDocuments: [],
       };
 
-      if (method === 'create') {
+      if (method === 'create' && selectedGhg) {
         payload.mitigationTimeline = {
           expected: {
             baselineEmissions: expectedTimeline[0].values,
@@ -1009,7 +1009,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             },
           },
           startYear: mtgStartYear,
-          unit: findUnit(selectedGhg),
+          unit: [GHGS.CH, GHGS.NO].includes(selectedGhg) ? selectedGhg : GHGS.CO,
         };
       }
 
