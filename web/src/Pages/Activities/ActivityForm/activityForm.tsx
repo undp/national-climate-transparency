@@ -22,10 +22,12 @@ import { ActivityMigratedData, ParentData } from '../../../Definitions/activityD
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
 import {
+  calculateArraySum,
   delay,
   doesUserHaveValidatePermission,
   getFormTitle,
   getRounded,
+  subtractTwoArrays,
 } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ActivityEntity } from '../../../Entities/activity';
@@ -311,7 +313,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         });
       }
     } catch (error) {
-      console.error('Error fetching GWP values:', error);
+      console.log('Error fetching GWP values:', error);
     }
   };
 
@@ -802,41 +804,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  //MTG timeline calculate array sum from row
-
-  const mtgCalculateArraySum = (array: number[]) => {
-    let arrSum = 0;
-    for (let index = 0; index <= array.length; index++) {
-      arrSum += array[index] || 0;
-    }
-    return arrSum;
-  };
-
-  //Values convert to ktCO2e
-
-  const multiplyByGwpValue = (entry: any) => {
-    switch (entry.topic) {
-      case expectedTimeline[1].topic:
-        for (let index = 0; index < expectedTimeline[1].values.length; index++) {
-          expectedTimeline[3].values[index] = expectedTimeline[1].values[index] * gwpValue;
-          expectedTimeline[3].total = mtgCalculateArraySum(expectedTimeline[3].values);
-        }
-        break;
-      case expectedTimeline[2].topic:
-        for (let index = 0; index < expectedTimeline[2].values.length; index++) {
-          expectedTimeline[4].values[index] = expectedTimeline[2].values[index] * gwpValue;
-          expectedTimeline[4].total = mtgCalculateArraySum(expectedTimeline[4].values);
-        }
-        break;
-      case actualTimeline[1].topic:
-        for (let index = 0; index < actualTimeline[1].values.length; index++) {
-          actualTimeline[2].values[index] = actualTimeline[1].values[index] * gwpValue;
-          actualTimeline[2].total = mtgCalculateArraySum(actualTimeline[2].values);
-        }
-        break;
-    }
-  };
-
   // Mtg Data Change
 
   const onMtgValueEnter = (
@@ -851,23 +818,50 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       const updatedTimeline = expectedTimeline.map((entry) => {
         if (entry.topic === rowId) {
           entry.values[year - mtgStartYear] = newValue;
-          entry.total = mtgCalculateArraySum(entry.values);
-          multiplyByGwpValue(entry);
+          entry.total = calculateArraySum(entry.values);
           return entry;
         }
         return entry;
       });
+
+      // Updating calculated values
+      if (rowId === updatedTimeline[0].topic || rowId === updatedTimeline[1].topic) {
+        updatedTimeline[3].values = subtractTwoArrays(
+          updatedTimeline[0].values,
+          updatedTimeline[1].values,
+          gwpValue
+        );
+        updatedTimeline[3].total = calculateArraySum(updatedTimeline[3].values);
+      }
+
+      if (rowId === updatedTimeline[0].topic || rowId === updatedTimeline[2].topic) {
+        updatedTimeline[4].values = subtractTwoArrays(
+          updatedTimeline[0].values,
+          updatedTimeline[2].values,
+          gwpValue
+        );
+        updatedTimeline[4].total = calculateArraySum(updatedTimeline[4].values);
+      }
+
       setExpectedTimeline(updatedTimeline);
     } else {
       const updatedTimeline = actualTimeline.map((entry) => {
         if (entry.topic === rowId) {
           entry.values[year - mtgStartYear] = newValue;
-          entry.total = mtgCalculateArraySum(entry.values);
-          multiplyByGwpValue(entry);
+          entry.total = calculateArraySum(entry.values);
           return entry;
         }
         return entry;
       });
+
+      // Updating calculated values
+      updatedTimeline[2].values = subtractTwoArrays(
+        updatedTimeline[0].values,
+        updatedTimeline[1].values,
+        gwpValue
+      );
+      updatedTimeline[2].total = calculateArraySum(updatedTimeline[2].values);
+
       setActualTimeline(updatedTimeline);
     }
     setIsMtgButtonEnabled(true);
