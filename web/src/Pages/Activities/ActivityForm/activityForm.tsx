@@ -15,7 +15,13 @@ import {
   ExpectedTimeline,
 } from '../../../Definitions/mtgTimeline.definition';
 import { ActivityStatus, ImplMeans, Measure, TechnologyType } from '../../../Enums/activity.enum';
-import { GHGS, IntImplementor, KPIAction, NatImplementor } from '../../../Enums/shared.enum';
+import {
+  GHGS,
+  IntImplementor,
+  KPIAction,
+  NatImplementor,
+  Recipient,
+} from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
@@ -80,10 +86,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // Form Validation Rules
 
   const validation = getValidationRules(method);
-
-  // First Rendering Check
-
-  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
 
   // Entity Validation Status
 
@@ -170,136 +172,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     });
   };
 
-  // Tracking Parent selection
-
-  useEffect(() => {
-    const fetchConnectedParent = async () => {
-      const tempMigratedData: ActivityMigratedData = {
-        description: undefined,
-        type: undefined,
-        recipient: undefined,
-        affSectors: undefined,
-        affSubSectors: undefined,
-        startYear: undefined,
-        endYear: undefined,
-        expectedTimeFrame: undefined,
-      };
-
-      if (
-        (parentType === 'action' || parentType === 'programme' || parentType === 'project') &&
-        connectedParentId
-      ) {
-        try {
-          const response: any = await get(`national/${parentType}s/${connectedParentId}`);
-
-          if (parentType === 'action') {
-            tempMigratedData.description = response.data.description;
-            tempMigratedData.affSectors = response.data.sector ?? undefined;
-            tempMigratedData.startYear = response.data.startYear;
-            tempMigratedData.type = response.data.type;
-          } else if (parentType === 'programme') {
-            tempMigratedData.description = response.data.description;
-            tempMigratedData.recipient = response.data.recipientEntity;
-            tempMigratedData.affSectors = response.data.sector ?? undefined;
-            tempMigratedData.affSubSectors = response.data.affectedSubSector;
-            tempMigratedData.startYear = response.data.startYear;
-            tempMigratedData.type = response.data.type;
-          } else {
-            tempMigratedData.description = response.data.description;
-            tempMigratedData.recipient = response.data.recipientEntities;
-            tempMigratedData.affSectors = response.data.sector ?? undefined;
-            tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
-            tempMigratedData.startYear = response.data.startYear;
-            tempMigratedData.endYear = response.data.endYear;
-            tempMigratedData.expectedTimeFrame = response.data.expectedTimeFrame;
-            tempMigratedData.type = response.data.programme?.action?.type;
-          }
-          if (method === 'create') {
-            setMtgStartYear(response.data.startYear);
-          }
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-      setActivityMigratedData(tempMigratedData);
-    };
-    fetchConnectedParent();
-
-    const fetchParentKPIData = async () => {
-      if (typeof connectedParentId === 'undefined') {
-        setInheritedKpiList([]);
-      } else if (method !== 'view' && parentType && connectedParentId && shouldFetchParentKpi) {
-        try {
-          const response: any = await get(
-            `national/kpis/entities/${parentType}/${connectedParentId}`
-          );
-          if (response.status === 200 || response.status === 201) {
-            const tempInheritedKpiList: CreatedKpiData[] = [];
-            let tempKpiCounter = kpiCounter;
-            response.data.forEach((kpi: any) => {
-              tempInheritedKpiList.push({
-                index: tempKpiCounter,
-                creator: kpi.creatorId,
-                id: kpi.kpiId,
-                name: kpi.name,
-                unit: kpi.kpiUnit,
-                achieved: 0,
-                expected: parseFloat(kpi.expected ?? 0),
-                kpiAction: KPIAction.NONE,
-              });
-
-              tempKpiCounter = tempKpiCounter + 1;
-            });
-            setKpiCounter(tempKpiCounter);
-            setInheritedKpiList(tempInheritedKpiList);
-          }
-        } catch (error: any) {
-          console.log(error, t('kpiSearchFailed'));
-        }
-      }
-    };
-    fetchParentKPIData();
-  }, [connectedParentId]);
-
-  // Loading All Entities that can be parent on Parent Type select
-
-  useEffect(() => {
-    const fetchNonValidatedParents = async () => {
-      if (parentType === 'action' || parentType === 'programme' || parentType === 'project') {
-        try {
-          const payload = {
-            sort: {
-              key: `${parentType}Id`,
-              order: 'ASC',
-            },
-          };
-          const response: any = await post(`national/${parentType}s/query`, payload);
-
-          const tempParentData: ParentData[] = [];
-          response.data.forEach((parent: any) => {
-            tempParentData.push({
-              id:
-                parentType === 'action'
-                  ? parent.actionId
-                  : parentType === 'programme'
-                  ? parent.programmeId
-                  : parent.projectId,
-              title: parent.title,
-            });
-          });
-          setParentList(tempParentData);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-    };
-    fetchNonValidatedParents();
-  }, [parentType]);
-
-  // Initializing Section
-
-  //fetch GWP settings
-
   const fetchGwpSettings = async () => {
     let response: any;
     try {
@@ -315,217 +187,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       console.log('Error fetching GWP values:', error);
     }
   };
-
-  useEffect(() => {
-    // Initially Loading the underlying Activity data when not in create mode
-
-    const fetchData = async () => {
-      if (method !== 'create' && entId) {
-        let response: any;
-        try {
-          response = await get(`national/activities/${entId}`);
-
-          if (response.status === 200 || response.status === 201) {
-            const entityData: any = response.data;
-
-            // Populating Action owned data fields
-            form.setFieldsValue({
-              title: entityData.title,
-              description: entityData.description,
-              status: entityData.status,
-              measure: entityData.measure ?? undefined,
-              nationalImplementingEntity: entityData.nationalImplementingEntity ?? undefined,
-              internationalImplementingEntity:
-                entityData.internationalImplementingEntity ?? undefined,
-              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy ?? undefined,
-              meansOfImplementation: entityData.meansOfImplementation ?? undefined,
-              technologyType: entityData.technologyType ?? undefined,
-              etfDescription: entityData.etfDescription ?? undefined,
-              comment: entityData.comment ?? undefined,
-              ghgsAffected: entityData.ghgsAffected ?? undefined,
-              achievedGHGReduction: entityData.achievedGHGReduction,
-              expectedGHGReduction: entityData.expectedGHGReduction,
-            });
-
-            // Populating Mitigation data fields
-            form.setFieldsValue({
-              mtgMethodName: entityData.mitigationInfo?.mitigationMethodology ?? undefined,
-              mtgMethodDesc:
-                entityData.mitigationInfo?.mitigationMethodologyDescription ?? undefined,
-              mtgCalculateEntity: entityData.mitigationInfo?.mitigationCalcEntity ?? undefined,
-              mtgComments: entityData.mitigationInfo?.comments ?? undefined,
-            });
-
-            // Parent Data Update
-
-            if (entityData.parentType) {
-              form.setFieldsValue({
-                parentType: entityData.parentType,
-                parentId: entityData.parentId,
-              });
-              setParentType(entityData.parentType ?? undefined);
-              setConnectedParentId(entityData.parentId ?? undefined);
-            }
-
-            // Setting validation status
-
-            setIsValidated(entityData.validated ?? false);
-
-            // Setting selected ghg
-
-            setSelectedGhg(entityData.ghgsAffected ?? undefined);
-
-            // Setting up uploaded files
-
-            if (entityData.documents?.length > 0) {
-              const tempFiles: { key: string; title: string; url: string }[] = [];
-              entityData.documents.forEach((document: any) => {
-                tempFiles.push({
-                  key: document.createdTime,
-                  title: document.title,
-                  url: document.url,
-                });
-              });
-              setStoredFiles(tempFiles);
-            }
-
-            if (entityData.mitigationInfo?.methodologyDocuments?.length > 0) {
-              const tempFiles: { key: string; title: string; url: string }[] = [];
-              entityData.mitigationInfo?.methodologyDocuments.forEach((document: any) => {
-                tempFiles.push({
-                  key: document.createdTime,
-                  title: document.title,
-                  url: document.url,
-                });
-              });
-              setStoredMthFiles(tempFiles);
-            }
-
-            if (entityData.mitigationInfo?.resultDocuments?.length > 0) {
-              const tempFiles: { key: string; title: string; url: string }[] = [];
-              entityData.mitigationInfo?.resultDocuments.forEach((document: any) => {
-                tempFiles.push({
-                  key: document.createdTime,
-                  title: document.title,
-                  url: document.url,
-                });
-              });
-              setStoredRstFiles(tempFiles);
-            }
-          }
-        } catch {
-          navigate('/activities');
-        }
-        setIsSaveButtonDisabled(true);
-      }
-    };
-    fetchData();
-
-    // Initially Loading the underlying Support data when not in create mode
-
-    const fetchSupportData = async () => {
-      if (method !== 'create') {
-        try {
-          const tempSupportData: SupportData[] = [];
-
-          const payload = {
-            filterAnd: [
-              {
-                key: 'activityId',
-                operation: '=',
-                value: entId,
-              },
-            ],
-            sort: {
-              key: 'supportId',
-              order: 'ASC',
-            },
-          };
-
-          const response: any = await post('national/supports/query', payload);
-
-          response.data.forEach((sup: any, index: number) => {
-            tempSupportData.push({
-              key: index.toString(),
-              supportId: sup.supportId,
-              financeNature: sup.financeNature,
-              direction: sup.direction,
-              finInstrument:
-                sup.financeNature === 'International'
-                  ? sup.internationalFinancialInstrument
-                  : sup.nationalFinancialInstrument,
-              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-              recievedUSD: getRounded(sup.receivedAmount ?? 0),
-              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
-            });
-          });
-          setSupportData(tempSupportData);
-        } catch {
-          setSupportData([]);
-        }
-      }
-    };
-    fetchSupportData();
-
-    const fetchCreatedKPIData = async () => {
-      if (method !== 'create' && entId) {
-        try {
-          const response: any = await get(`national/kpis/entities/activity/${entId}`);
-          if (response.status === 200 || response.status === 201) {
-            const tempInheritedKpiList: CreatedKpiData[] = [];
-            let tempKpiCounter = kpiCounter;
-            response.data.forEach((kpi: any) => {
-              tempInheritedKpiList.push({
-                index: tempKpiCounter,
-                creator: kpi.creatorId,
-                id: kpi.kpiId,
-                name: kpi.name,
-                unit: kpi.kpiUnit,
-                achieved: parseFloat(
-                  kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
-                    ?.achieved ?? 0
-                ),
-                expected: parseFloat(kpi.expected ?? 0),
-                kpiAction: KPIAction.NONE,
-              });
-
-              tempKpiCounter = tempKpiCounter + 1;
-            });
-            setKpiCounter(tempKpiCounter);
-            setInheritedKpiList(tempInheritedKpiList);
-          }
-        } catch (error: any) {
-          console.log(error, t('kpiSearchFailed'));
-        }
-      }
-    };
-    fetchCreatedKPIData();
-
-    // Fetch GWP Settings
-
-    fetchGwpSettings();
-  }, []);
-
-  // Populating Form Migrated Fields, when migration data changes
-
-  useEffect(() => {
-    if (activityMigratedData) {
-      form.setFieldsValue({
-        parentDescription: activityMigratedData.description,
-        supportType: activityMigratedData.type,
-        recipient: activityMigratedData.recipient,
-        sector: activityMigratedData.affSectors,
-        affSubSectors: activityMigratedData.affSubSectors,
-        startYear: activityMigratedData.startYear,
-        endYear: activityMigratedData.endYear,
-        expectedTimeFrame: activityMigratedData.expectedTimeFrame,
-      });
-    }
-    if (!firstRenderingCompleted) {
-      setFirstRenderingCompleted(true);
-    }
-  }, [activityMigratedData]);
 
   // KPI Achievement Resolve
 
@@ -921,16 +582,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Initializing mtg timeline data
-
-  useEffect(() => {
-    if (method === 'create') {
-      setDefaultTimelineValues();
-    } else {
-      fetchMtgTimelineData();
-    }
-  }, [mtgStartYear, selectedGhg]);
-
   // Form Submit
 
   const handleSubmit = async (payload: any) => {
@@ -1098,6 +749,346 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
+  // DB Queries
+
+  const fetchConnectedParent = async () => {
+    const tempMigratedData: ActivityMigratedData = {
+      description: undefined,
+      type: undefined,
+      affSectors: undefined,
+      affSubSectors: undefined,
+      startYear: undefined,
+      endYear: undefined,
+      expectedTimeFrame: undefined,
+    };
+
+    if (
+      (parentType === 'action' || parentType === 'programme' || parentType === 'project') &&
+      connectedParentId
+    ) {
+      try {
+        const response: any = await get(`national/${parentType}s/${connectedParentId}`);
+
+        if (parentType === 'action') {
+          tempMigratedData.description = response.data.description;
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
+          tempMigratedData.startYear = response.data.startYear;
+          tempMigratedData.type = response.data.type;
+        } else if (parentType === 'programme') {
+          tempMigratedData.description = response.data.description;
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
+          tempMigratedData.affSubSectors = response.data.affectedSubSector;
+          tempMigratedData.startYear = response.data.startYear;
+          tempMigratedData.type = response.data.type;
+        } else {
+          tempMigratedData.description = response.data.description;
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
+          tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
+          tempMigratedData.startYear = response.data.startYear;
+          tempMigratedData.endYear = response.data.endYear;
+          tempMigratedData.expectedTimeFrame = response.data.expectedTimeFrame;
+          tempMigratedData.type = response.data.programme?.action?.type;
+        }
+        if (method === 'create') {
+          setMtgStartYear(response.data.startYear);
+        }
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
+    }
+    setActivityMigratedData(tempMigratedData);
+  };
+
+  const fetchParentKPIData = async () => {
+    if (typeof connectedParentId === 'undefined') {
+      setInheritedKpiList([]);
+    } else if (method !== 'view' && parentType && connectedParentId && shouldFetchParentKpi) {
+      try {
+        const response: any = await get(
+          `national/kpis/entities/${parentType}/${connectedParentId}`
+        );
+        if (response.status === 200 || response.status === 201) {
+          const tempInheritedKpiList: CreatedKpiData[] = [];
+          let tempKpiCounter = kpiCounter;
+          response.data.forEach((kpi: any) => {
+            tempInheritedKpiList.push({
+              index: tempKpiCounter,
+              creator: kpi.creatorId,
+              id: kpi.kpiId,
+              name: kpi.name,
+              unit: kpi.kpiUnit,
+              achieved: 0,
+              expected: parseFloat(kpi.expected ?? 0),
+              kpiAction: KPIAction.NONE,
+            });
+
+            tempKpiCounter = tempKpiCounter + 1;
+          });
+          setKpiCounter(tempKpiCounter);
+          setInheritedKpiList(tempInheritedKpiList);
+        }
+      } catch (error: any) {
+        console.log(error, t('kpiSearchFailed'));
+      }
+    }
+  };
+
+  const fetchNonValidatedParents = async () => {
+    if (parentType === 'action' || parentType === 'programme' || parentType === 'project') {
+      try {
+        const payload = {
+          sort: {
+            key: `${parentType}Id`,
+            order: 'ASC',
+          },
+        };
+        const response: any = await post(`national/${parentType}s/query`, payload);
+
+        const tempParentData: ParentData[] = [];
+        response.data.forEach((parent: any) => {
+          tempParentData.push({
+            id:
+              parentType === 'action'
+                ? parent.actionId
+                : parentType === 'programme'
+                ? parent.programmeId
+                : parent.projectId,
+            title: parent.title,
+          });
+        });
+        setParentList(tempParentData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
+    }
+  };
+
+  const fetchActivityData = async () => {
+    if (method !== 'create' && entId) {
+      let response: any;
+      try {
+        response = await get(`national/activities/${entId}`);
+
+        if (response.status === 200 || response.status === 201) {
+          const entityData: any = response.data;
+
+          // Populating Action owned data fields
+          form.setFieldsValue({
+            title: entityData.title,
+            description: entityData.description,
+            status: entityData.status,
+            measure: entityData.measure ?? undefined,
+            nationalImplementingEntity: entityData.nationalImplementingEntity ?? undefined,
+            internationalImplementingEntity:
+              entityData.internationalImplementingEntity ?? undefined,
+            anchoredInNationalStrategy: entityData.anchoredInNationalStrategy ?? undefined,
+            meansOfImplementation: entityData.meansOfImplementation ?? undefined,
+            technologyType: entityData.technologyType ?? undefined,
+            etfDescription: entityData.etfDescription ?? undefined,
+            comment: entityData.comment ?? undefined,
+            ghgsAffected: entityData.ghgsAffected ?? undefined,
+            achievedGHGReduction: entityData.achievedGHGReduction,
+            expectedGHGReduction: entityData.expectedGHGReduction,
+            recipientEntities: entityData.recipientEntities ?? [],
+          });
+
+          // Populating Mitigation data fields
+          form.setFieldsValue({
+            mtgMethodName: entityData.mitigationInfo?.mitigationMethodology ?? undefined,
+            mtgMethodDesc: entityData.mitigationInfo?.mitigationMethodologyDescription ?? undefined,
+            mtgCalculateEntity: entityData.mitigationInfo?.mitigationCalcEntity ?? undefined,
+            mtgComments: entityData.mitigationInfo?.comments ?? undefined,
+          });
+
+          // Parent Data Update
+
+          if (entityData.parentType) {
+            form.setFieldsValue({
+              parentType: entityData.parentType,
+              parentId: entityData.parentId,
+            });
+            setParentType(entityData.parentType ?? undefined);
+            setConnectedParentId(entityData.parentId ?? undefined);
+          }
+
+          // Setting validation status
+
+          setIsValidated(entityData.validated ?? false);
+
+          // Setting selected ghg
+
+          setSelectedGhg(entityData.ghgsAffected ?? undefined);
+
+          // Setting up uploaded files
+
+          if (entityData.documents?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.documents.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredFiles(tempFiles);
+          }
+
+          if (entityData.mitigationInfo?.methodologyDocuments?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.mitigationInfo?.methodologyDocuments.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredMthFiles(tempFiles);
+          }
+
+          if (entityData.mitigationInfo?.resultDocuments?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.mitigationInfo?.resultDocuments.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredRstFiles(tempFiles);
+          }
+        }
+      } catch {
+        navigate('/activities');
+      }
+      setIsSaveButtonDisabled(true);
+    }
+  };
+
+  const fetchSupportData = async () => {
+    if (method !== 'create') {
+      try {
+        const tempSupportData: SupportData[] = [];
+
+        const payload = {
+          filterAnd: [
+            {
+              key: 'activityId',
+              operation: '=',
+              value: entId,
+            },
+          ],
+          sort: {
+            key: 'supportId',
+            order: 'ASC',
+          },
+        };
+
+        const response: any = await post('national/supports/query', payload);
+
+        response.data.forEach((sup: any, index: number) => {
+          tempSupportData.push({
+            key: index.toString(),
+            supportId: sup.supportId,
+            financeNature: sup.financeNature,
+            direction: sup.direction,
+            finInstrument:
+              sup.financeNature === 'International'
+                ? sup.internationalFinancialInstrument
+                : sup.nationalFinancialInstrument,
+            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+            recievedUSD: getRounded(sup.receivedAmount ?? 0),
+            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+          });
+        });
+        setSupportData(tempSupportData);
+      } catch {
+        setSupportData([]);
+      }
+    }
+  };
+
+  const fetchCreatedKPIData = async () => {
+    if (method !== 'create' && entId) {
+      try {
+        const response: any = await get(`national/kpis/entities/activity/${entId}`);
+        if (response.status === 200 || response.status === 201) {
+          const tempInheritedKpiList: CreatedKpiData[] = [];
+          let tempKpiCounter = kpiCounter;
+          response.data.forEach((kpi: any) => {
+            tempInheritedKpiList.push({
+              index: tempKpiCounter,
+              creator: kpi.creatorId,
+              id: kpi.kpiId,
+              name: kpi.name,
+              unit: kpi.kpiUnit,
+              achieved: parseFloat(
+                kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
+                  ?.achieved ?? 0
+              ),
+              expected: parseFloat(kpi.expected ?? 0),
+              kpiAction: KPIAction.NONE,
+            });
+
+            tempKpiCounter = tempKpiCounter + 1;
+          });
+          setKpiCounter(tempKpiCounter);
+          setInheritedKpiList(tempInheritedKpiList);
+        }
+      } catch (error: any) {
+        console.log(error, t('kpiSearchFailed'));
+      }
+    }
+  };
+
+  // Dynamic Updates
+
+  // Initializing mtg timeline data
+
+  useEffect(() => {
+    if (method === 'create') {
+      setDefaultTimelineValues();
+    } else {
+      fetchMtgTimelineData();
+    }
+  }, [mtgStartYear, selectedGhg]);
+
+  // Tracking Parent selection
+
+  useEffect(() => {
+    fetchConnectedParent();
+    fetchParentKPIData();
+  }, [connectedParentId]);
+
+  // Loading All Entities that can be parent on Parent Type select
+
+  useEffect(() => {
+    fetchNonValidatedParents();
+  }, [parentType]);
+
+  // Populating Form Migrated Fields, when migration data changes
+
+  useEffect(() => {
+    if (activityMigratedData) {
+      form.setFieldsValue({
+        parentDescription: activityMigratedData.description,
+        supportType: activityMigratedData.type,
+        sector: activityMigratedData.affSectors,
+        affSubSectors: activityMigratedData.affSubSectors,
+        startYear: activityMigratedData.startYear,
+        endYear: activityMigratedData.endYear,
+        expectedTimeFrame: activityMigratedData.expectedTimeFrame,
+      });
+    }
+  }, [activityMigratedData]);
+
+  useEffect(() => {
+    fetchActivityData();
+    fetchSupportData();
+    fetchCreatedKPIData();
+    fetchGwpSettings();
+  }, []);
+
   return (
     <div className="content-container">
       <ConfirmPopup
@@ -1118,7 +1109,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE && firstRenderingCompleted ? (
+      {!waitingForBE ? (
         <div className="activity-form">
           <Form
             form={form}
@@ -1384,25 +1375,31 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 )}
               </Row>
               <Row gutter={gutterSize}>
-                {(parentType === 'programme' || parentType === 'project') && (
-                  <Col {...halfColumnBps}>
-                    <Form.Item
-                      label={
-                        <label className="form-item-header">
-                          {t('formHeader:recipientEntityHeader')}
-                        </label>
-                      }
-                      name="recipient"
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:recipientEntityHeader')}
+                      </label>
+                    }
+                    name="recipientEntities"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      mode="multiple"
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      disabled={isView}
+                      showSearch
                     >
-                      <Select
-                        mode="multiple"
-                        size="large"
-                        style={{ fontSize: inputFontSize }}
-                        disabled
-                      ></Select>
-                    </Form.Item>
-                  </Col>
-                )}
+                      {Object.values(Recipient).map((recipient) => (
+                        <Option key={recipient} value={recipient}>
+                          {recipient}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
                 {parentType === 'project' && (
                   <Col {...halfColumnBps}>
                     <Form.Item
