@@ -1,9 +1,8 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max, ValidateNested, ValidateIf } from 'class-validator';
 import { ProjectStatus } from "../enums/project.enum";
-import { IntImplementor, KPIAction, Recipient } from "../enums/shared.enum";
+import { IntImplementor, KPIAction } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
-import { KpiUnits } from "../enums/kpi.enum";
 import { KpiUpdateDto } from "./kpi.update.dto";
 
 export class ProjectUpdateDto {
@@ -58,19 +57,19 @@ export class ProjectUpdateDto {
 	@ApiProperty()
 	endYear: number;
 
-	@IsArray()
-	@ArrayMinSize(1)
-	@MaxLength(100, { each: true })
-	@IsNotEmpty({ each: true })
-	@IsEnum(Recipient, {
-		each: true,
-		message: 'Invalid Recipient Entity. Supported following entities:' + Object.values(Recipient)
-	})
-	@ApiProperty({
-		type: [String],
-		enum: Object.values(Recipient),
-	})
-	recipientEntities: Recipient[];
+	// @IsArray()
+	// @ArrayMinSize(1)
+	// @MaxLength(100, { each: true })
+	// @IsNotEmpty({ each: true })
+	// @IsEnum(Recipient, {
+	// 	each: true,
+	// 	message: 'Invalid Recipient Entity. Supported following entities:' + Object.values(Recipient)
+	// })
+	// @ApiProperty({
+	// 	type: [String],
+	// 	enum: Object.values(Recipient),
+	// })
+	// recipientEntities: Recipient[];
 
 	@ValidateIf((c) => c.internationalImplementingEntities)
 	@IsArray()
@@ -122,7 +121,7 @@ export class ProjectUpdateDto {
 			type: "array",
 			example: [{
 				kpiId: "1",
-				kpiUnit: KpiUnits.GWp_INSTALLED,
+				kpiUnit: "mWp-installed",
 				name: "KPI 1",
 				creatorType: "action",
 				expected: 100,

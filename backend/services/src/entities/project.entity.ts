@@ -4,6 +4,7 @@ import { Recipient, IntImplementor } from "../enums/shared.enum";
 import { ProgrammeEntity } from "./programme.entity";
 import { ActivityEntity } from "./activity.entity";
 import { Sector } from "../enums/sector.enum";
+import { ActionType } from "../enums/action.enum";
 
 @Entity('project')
 export class ProjectEntity {
@@ -31,8 +32,8 @@ export class ProjectEntity {
   @Column({ nullable: true })
   expectedTimeFrame: number;
 
-  @Column("varchar", { array: true, nullable: false })
-  recipientEntities: Recipient[];
+  // @Column("varchar", { array: true, nullable: false })
+  // recipientEntities: Recipient[];
 
   @Column("varchar", { array: true, nullable: true })
   internationalImplementingEntities: IntImplementor[];
@@ -45,6 +46,9 @@ export class ProjectEntity {
 
 	@Column({ type: "enum", enum: Sector, nullable: true })
   sector: Sector;
+
+  @Column({ type: "enum", enum: ActionType,nullable: false })
+  type: string;
 
   @Column({ type: "ltree" })
   path: string;

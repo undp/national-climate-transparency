@@ -22,5 +22,6 @@ export enum ActionType {
   MITIGATION = "Mitigation",
   ADAPTION = "Adaption",
   CROSSCUT = "Cross-cutting",
-  ENABLING = "Enabling",
+  TRANSPARENCY = "Transparency",
+  OTHER = "Other",
 }

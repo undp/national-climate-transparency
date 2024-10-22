@@ -10,10 +10,10 @@ Select
 	t."etfDescription",
 	t."internationalImplementingEntity",
 	t."nationalImplementingEntity",
+	t."recipientEntities",
 	t."status",
 	t."technologyType",
 	j."timeFrame",
-	j."recipientEntities",
 	j."endYear",
 	p."subSector",
 	a."type",
@@ -30,8 +30,7 @@ LEFT JOIN
 			"startYear",
 			"endYear",
 			"programmeId",
-			"expectedTimeFrame" as "timeFrame",
-			"recipientEntities"
+			"expectedTimeFrame" as "timeFrame"
 		FROM project
 	) 
 j ON j."projectId" = t."parentId"

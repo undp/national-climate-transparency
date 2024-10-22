@@ -32,7 +32,7 @@ export class ProgrammeViewDto {
 
   nationalImplementor: NatImplementor[];
 
-  investment: number;
+  // investment: number;
 
   documents: DocumentDto[];
 

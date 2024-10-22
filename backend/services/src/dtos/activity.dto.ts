@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
 import { ArrayMinSize, IsArray, IsBoolean, IsEnum, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
 import { ActivityStatus, ImpleMeans, Measure, SupportType, TechnologyType } from "../enums/activity.enum";
-import { EntityType, GHGS, IntImplementor, NatImplementor } from "../enums/shared.enum";
+import { EntityType, GHGS, IntImplementor, NatImplementor, Recipient } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { Type } from "class-transformer";
 
@@ -76,7 +76,21 @@ export class ActivityDto {
 		type: [String],
 		enum: Object.values(IntImplementor),
 	})
-	internationalImplementingEntity: IntImplementor[]
+	internationalImplementingEntity: IntImplementor[];
+
+	@IsArray()
+	@ArrayMinSize(1)
+	@MaxLength(100, { each: true })
+	@IsNotEmpty({ each: true })
+	@IsEnum(Recipient, {
+		each: true,
+		message: 'Invalid Recipient Entity. Supported following entities:' + Object.values(Recipient)
+	})
+	@ApiProperty({
+		type: [String],
+		enum: Object.values(Recipient),
+	})
+	recipientEntities: Recipient[];
 
 	@IsOptional()
 	@IsBoolean()
