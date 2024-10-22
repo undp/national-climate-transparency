@@ -1,15 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
-import { DeleteOutlined, DisconnectOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import { useNavigate, useParams } from 'react-router-dom';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
-import AttachEntity from '../../../Components/Popups/attach';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import { SubSector, NatImplementor, KPIAction } from '../../../Enums/shared.enum';
 import { ProgrammeStatus } from '../../../Enums/programme.enum';
-import { Layers } from 'react-bootstrap-icons';
 import './programmeForm.scss';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
@@ -22,9 +20,7 @@ import {
   doesUserHaveValidatePermission,
   getFormTitle,
   getRounded,
-  joinTwoArrays,
 } from '../../../Utils/utilServices';
-import { ProgrammeMigratedData } from '../../../Definitions/programmeDefinitions';
 import { Action } from '../../../Enums/action.enum';
 import { ProgrammeEntity } from '../../../Entities/programme';
 import { useAbilityContext } from '../../../Casl/Can';
@@ -40,9 +36,7 @@ import { getActivityTableColumns } from '../../../Definitions/columns/activityCo
 import { getSupportTableColumns } from '../../../Definitions/columns/supportColumns';
 import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 import {
-  attachButtonBps,
   attachTableHeaderBps,
-  attachTableSeparatorBps,
   halfColumnBps,
   quarterColumnBps,
   shortButtonBps,
@@ -79,10 +73,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const validation = getValidationRules(method);
 
-  // First Rendering Check
-
-  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
-
   // Entity Validation Status
 
   const [isValidated, setIsValidated] = useState<boolean>(false);
@@ -93,7 +83,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Form General State
 
-  const [programmeMigratedData, setProgrammeMigratedData] = useState<ProgrammeMigratedData>();
   const [uploadedFiles, setUploadedFiles] = useState<
     { key: string; title: string; data: string }[]
   >([]);
@@ -108,21 +97,17 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Project Attachment state
 
-  const [allProjectIds, setAllProjectIdList] = useState<string[]>([]);
-  const [attachedProjectIds, setAttachedProjectIds] = useState<string[]>([]);
-  const [tempProjectIds, setTempProjectIds] = useState<string[]>([]);
-
   const [projectData, setProjectData] = useState<ProjectData[]>([]);
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
-  // Activity Attachment State:Activity link functions removed keeping original state
-
-  const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
+  // Activity Attachment State
 
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
   const [activityPageSize, setActivityPageSize] = useState<number>(10);
+
+  // Support Attachment State
 
   const [supportData, setSupportData] = useState<SupportData[]>([]);
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
@@ -130,12 +115,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Popup Definition
 
-  const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
   const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
-
-  // Detach Entity Data
-
-  const [detachingEntityId, setDetachingEntityId] = useState<string>();
 
   // KPI State
 
@@ -153,469 +133,17 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     yearsList.push(year);
   }
 
-  useEffect(() => {
-    // Initially Loading All Actions that can be parent
+  // Column Definition
 
-    const fetchNonValidatedActions = async () => {
-      try {
-        const payload = {
-          sort: {
-            key: 'actionId',
-            order: 'ASC',
-          },
-        };
-        const response: any = await post('national/actions/query', payload);
+  const projTableColumns = getProjectTableColumns();
 
-        const tempActionData: ActionSelectData[] = [];
-        response.data.forEach((action: any) => {
-          tempActionData.push({
-            id: action.actionId,
-            title: action.title,
-            instrumentType: action.instrumentType,
-            sector: action.sector,
-            type: action.type,
-          });
-        });
-        setActionList(tempActionData);
-      } catch (error: any) {
-        displayErrorMessage(error);
-      }
-    };
-    fetchNonValidatedActions();
+  // Activity Column Definition
 
-    // Initially Loading Free Projects and Activities that can be attached
+  const activityTableColumns = getActivityTableColumns();
 
-    const fetchFreeChildren = async () => {
-      if (method !== 'view') {
-        try {
-          const response: any = await get('national/projects/link/eligible');
+  // Support Column Definition
 
-          const freeProjectIds: string[] = [];
-          response.data.forEach((prj: any) => {
-            freeProjectIds.push(prj.projectId);
-          });
-          setAllProjectIdList(freeProjectIds);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-    };
-    fetchFreeChildren();
-
-    // Initially Loading the underlying programme data when not in create mode
-
-    const fetchData = async () => {
-      if (method !== 'create' && entId) {
-        let response: any;
-        try {
-          response = await get(`national/programmes/${entId}`);
-
-          if (response.status === 200 || response.status === 201) {
-            const entityData: any = response.data;
-
-            // Populating Action owned data fields
-            form.setFieldsValue({
-              actionId: entityData.actionId,
-              type: entityData.type,
-              instrumentType: entityData.instrumentType,
-              title: entityData.title,
-              description: entityData.description,
-              objective: entityData.objectives,
-              programmeStatus: entityData.programmeStatus,
-              startYear: entityData.startYear,
-              natAnchor: entityData.natAnchor,
-              sector: entityData.sector,
-              affectedSubSector: entityData.affectedSubSector,
-              natImplementor: entityData.nationalImplementor,
-              investment: entityData.investment,
-              comments: entityData.comments ?? undefined,
-            });
-
-            // Setting validation status
-
-            setIsValidated(entityData.validated ?? false);
-
-            if (entityData.documents?.length > 0) {
-              const tempFiles: { key: string; title: string; url: string }[] = [];
-              entityData.documents.forEach((document: any) => {
-                tempFiles.push({
-                  key: document.createdTime,
-                  title: document.title,
-                  url: document.url,
-                });
-              });
-              setStoredFiles(tempFiles);
-            }
-
-            // Populating Migrated Fields (Will be overwritten when attachments change)
-            setProgrammeMigratedData({
-              intImplementor: entityData.interNationalImplementor ?? [],
-              recipientEntity: entityData.recipientEntity ?? [],
-              ghgsAffected: entityData.ghgsAffected ?? [],
-              achievedReduct: entityData.achievedGHGReduction,
-              expectedReduct: entityData.expectedGHGReduction,
-            });
-          }
-        } catch {
-          navigate('/programmes');
-        }
-        setIsSaveButtonDisabled(true);
-      }
-    };
-    fetchData();
-
-    // Initially Loading the KPI data when not in create mode
-
-    const fetchCreatedKPIData = async () => {
-      if (method !== 'create' && entId) {
-        try {
-          const response: any = await get(`national/kpis/achieved/programme/${entId}`);
-          if (response.status === 200 || response.status === 201) {
-            const tempCreatedKpiList: CreatedKpiData[] = [];
-            const tempInheritedKpiList: CreatedKpiData[] = [];
-            let tempKpiCounter = kpiCounter;
-            response.data.forEach((kpi: any) => {
-              if (kpi.creatorId === entId) {
-                tempCreatedKpiList.push({
-                  index: tempKpiCounter,
-                  creator: entId,
-                  id: kpi.kpiId,
-                  name: kpi.name,
-                  unit: kpi.kpiUnit,
-                  achieved: parseFloat(kpi.achieved ?? 0),
-                  expected: parseFloat(kpi.expected ?? 0),
-                  kpiAction: KPIAction.NONE,
-                });
-              } else {
-                tempInheritedKpiList.push({
-                  index: tempKpiCounter,
-                  creator: kpi.creatorId,
-                  id: kpi.kpiId,
-                  name: kpi.name,
-                  unit: kpi.kpiUnit,
-                  achieved: parseFloat(kpi.achieved ?? 0),
-                  expected: parseFloat(kpi.expected ?? 0),
-                  kpiAction: KPIAction.NONE,
-                });
-              }
-              tempKpiCounter = tempKpiCounter + 1;
-            });
-            setKpiCounter(tempKpiCounter);
-            setCreatedKpiList(tempCreatedKpiList);
-            setInheritedKpiList(tempInheritedKpiList);
-
-            if (tempCreatedKpiList.length > 0 || tempInheritedKpiList.length > 0) {
-              setHandleKPI(true);
-            }
-          }
-        } catch (error: any) {
-          console.log(error, t('kpiSearchFailed'));
-        }
-      }
-    };
-    fetchCreatedKPIData();
-
-    // Initially Loading the attached project data when not in create mode
-
-    const fetchConnectedProjectIds = async () => {
-      if (method !== 'create') {
-        try {
-          const payload = {
-            filterAnd: [
-              {
-                key: 'programmeId',
-                operation: '=',
-                value: entId,
-              },
-            ],
-            sort: {
-              key: 'projectId',
-              order: 'ASC',
-            },
-          };
-          const response: any = await post('national/projects/query', payload);
-
-          const connectedProjectIds: string[] = [];
-          response.data.forEach((prj: any) => {
-            connectedProjectIds.push(prj.projectId);
-          });
-          setAttachedProjectIds(connectedProjectIds);
-          setTempProjectIds(connectedProjectIds);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-    };
-    fetchConnectedProjectIds();
-
-    // Initially Loading the attached activity data when not in create mode
-
-    const fetchConnectedActivityIds = async () => {
-      if (method !== 'create') {
-        try {
-          const connectedActivityIds: string[] = [];
-          const payload = {
-            filterAnd: [
-              {
-                key: 'parentId',
-                operation: '=',
-                value: entId,
-              },
-              {
-                key: 'parentType',
-                operation: '=',
-                value: 'programme',
-              },
-            ],
-            sort: {
-              key: 'activityId',
-              order: 'ASC',
-            },
-          };
-          const response: any = await post('national/activities/query', payload);
-          response.data.forEach((act: any) => {
-            connectedActivityIds.push(act.activityId);
-          });
-          setAttachedActivityIds(connectedActivityIds);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-    };
-    fetchConnectedActivityIds();
-  }, []);
-
-  // Populating Form Migrated Fields, when migration data changes
-
-  useEffect(() => {
-    if (programmeMigratedData) {
-      form.setFieldsValue({
-        intImplementor: programmeMigratedData.intImplementor,
-        recipientEntity: programmeMigratedData.recipientEntity,
-        ghgsAffected: programmeMigratedData.ghgsAffected,
-        achievedReduct: programmeMigratedData.achievedReduct,
-        expectedReduct: programmeMigratedData.expectedReduct,
-      });
-    }
-    if (!firstRenderingCompleted) {
-      setFirstRenderingCompleted(true);
-    }
-  }, [programmeMigratedData]);
-
-  // Fetching Project data
-
-  useEffect(() => {
-    const payload = {
-      page: 1,
-      size: tempProjectIds.length,
-      filterOr: [] as any[],
-    };
-
-    const fetchData = async () => {
-      if (tempProjectIds.length > 0) {
-        try {
-          tempProjectIds.forEach((projId) => {
-            payload.filterOr.push({
-              key: 'projectId',
-              operation: '=',
-              value: projId,
-            });
-          });
-          const response: any = await post('national/projects/query', payload);
-
-          const tempPRJData: ProjectData[] = [];
-
-          response.data.forEach((prj: any, index: number) => {
-            tempPRJData.push({
-              key: index.toString(),
-              projectId: prj.projectId,
-              projectName: prj.title,
-              internationalImplementingEntities: prj.internationalImplementingEntities ?? [],
-              recipientEntities: prj.recipientEntities ?? [],
-              ghgsAffected: prj.migratedData[0]?.ghgsAffected ?? [],
-              achievedReduction: prj.migratedData[0]?.achievedGHGReduction ?? 0,
-              estimatedReduction: prj.migratedData[0]?.expectedGHGReduction ?? 0,
-            });
-          });
-          setProjectData(tempPRJData);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      } else {
-        setProjectData([]);
-      }
-    };
-    fetchData();
-
-    // Setting Pagination
-    setCurrentPage(1);
-    setPageSize(10);
-  }, [tempProjectIds]);
-
-  // Fetching Activity data and calculating migrated fields when attachment changes
-
-  useEffect(() => {
-    const activityPayload = {
-      filterOr: [] as any[],
-      sort: {
-        key: 'activityId',
-        order: 'ASC',
-      },
-    };
-
-    const supportPayload = {
-      filterOr: [] as any[],
-      sort: {
-        key: 'supportId',
-        order: 'ASC',
-      },
-    };
-
-    const fetchActivityAttachmentData = async () => {
-      if (attachedActivityIds.length > 0) {
-        try {
-          attachedActivityIds.forEach((activityId) => {
-            activityPayload.filterOr.push({
-              key: 'activityId',
-              operation: '=',
-              value: activityId,
-            });
-            supportPayload.filterOr.push({
-              key: 'activityId',
-              operation: '=',
-              value: activityId,
-            });
-          });
-          const activityResponse: any = await post('national/activities/query', activityPayload);
-          const supportResponse: any = await post('national/supports/query', supportPayload);
-
-          const tempActivityData: ActivityData[] = [];
-          const tempSupportData: SupportData[] = [];
-
-          activityResponse.data.forEach((act: any, index: number) => {
-            tempActivityData.push({
-              key: index.toString(),
-              activityId: act.activityId,
-              title: act.title,
-              reductionMeasures: act.measure,
-              status: act.status,
-              natImplementor: act.nationalImplementingEntity ?? [],
-              ghgsAffected: act.ghgsAffected,
-              achievedReduction: act.achievedGHGReduction ?? 0,
-              estimatedReduction: act.expectedGHGReduction ?? 0,
-            });
-          });
-
-          supportResponse.data.forEach((sup: any, index: number) => {
-            tempSupportData.push({
-              key: index.toString(),
-              supportId: sup.supportId,
-              financeNature: sup.financeNature,
-              direction: sup.direction,
-              finInstrument:
-                sup.financeNature === 'International'
-                  ? sup.internationalFinancialInstrument
-                  : sup.nationalFinancialInstrument,
-              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-              recievedUSD: getRounded(sup.receivedAmount ?? 0),
-              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
-            });
-          });
-
-          setActivityData(tempActivityData);
-          setSupportData(tempSupportData);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      } else {
-        setActivityData([]);
-        setSupportData([]);
-      }
-    };
-    fetchActivityAttachmentData();
-
-    // Setting Pagination
-    setActivityCurrentPage(1);
-    setActivityPageSize(10);
-
-    setSupportCurrentPage(1);
-    setSupportPageSize(10);
-  }, [attachedActivityIds]);
-
-  // Calculating migrated fields when attachment changes
-
-  const memoizedMigratedData = useMemo(() => {
-    const tempMigratedData: ProgrammeMigratedData = {
-      intImplementor: [],
-      recipientEntity: [],
-      ghgsAffected: [],
-      achievedReduct: 0,
-      expectedReduct: 0,
-    };
-
-    projectData.forEach((prj: ProjectData) => {
-      tempMigratedData.intImplementor = joinTwoArrays(
-        tempMigratedData.intImplementor,
-        prj.internationalImplementingEntities ?? []
-      );
-
-      tempMigratedData.recipientEntity = joinTwoArrays(
-        tempMigratedData.recipientEntity,
-        prj.recipientEntities ?? []
-      );
-
-      tempMigratedData.ghgsAffected = joinTwoArrays(
-        tempMigratedData.ghgsAffected,
-        prj.ghgsAffected ?? []
-      );
-
-      const prgGHGAchievement = prj.achievedReduction ?? 0;
-      const prgGHGExpected = prj.estimatedReduction ?? 0;
-
-      tempMigratedData.achievedReduct = tempMigratedData.achievedReduct + prgGHGAchievement;
-
-      tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + prgGHGExpected;
-    });
-
-    activityData.forEach((act: ActivityData) => {
-      if (act.ghgsAffected && !tempMigratedData.ghgsAffected.includes(act.ghgsAffected)) {
-        tempMigratedData.ghgsAffected.push(act.ghgsAffected);
-      }
-
-      const actGHGAchievement = act.achievedReduction ?? 0;
-      const actGHGExpected = act.estimatedReduction ?? 0;
-
-      tempMigratedData.achievedReduct = tempMigratedData.achievedReduct + actGHGAchievement;
-
-      tempMigratedData.expectedReduct = tempMigratedData.expectedReduct + actGHGExpected;
-    });
-
-    return tempMigratedData;
-  }, [projectData, activityData]);
-
-  useEffect(() => {
-    setProgrammeMigratedData(memoizedMigratedData);
-  }, [memoizedMigratedData]);
-
-  // Attachment resolve before updating an already created programme
-
-  const resolveProjectAttachments = async () => {
-    const toAttach = tempProjectIds.filter((prj) => !attachedProjectIds.includes(prj));
-    const toDetach = attachedProjectIds.filter((prj) => !tempProjectIds.includes(prj));
-
-    try {
-      if (toDetach.length > 0) {
-        await post('national/projects/unlink', { projects: toDetach });
-      }
-
-      if (toAttach.length > 0) {
-        await post('national/projects/link', { programmeId: entId, projectIds: toAttach });
-      }
-    } catch (error: any) {
-      displayErrorMessage(error);
-    }
-  };
+  const supportTableColumns = getSupportTableColumns();
 
   // Form Submit
 
@@ -713,23 +241,11 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         method === 'create' ? t('programmeCreationSuccess') : t('programmeUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
-        if (entId && method === 'update') {
-          resolveProjectAttachments();
-        }
-
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
-        });
-
         message.open({
           type: 'success',
           content: successMsg,
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
         });
 
         setWaitingForBE(false);
@@ -820,7 +336,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Add New KPI
+  // KPI Handler Functions
 
   const createKPI = () => {
     const newItem: NewKpiData = {
@@ -887,8 +403,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Fetch Parent KPI
-
   const fetchParentKPIData = async (parentId: string) => {
     if (typeof parentId === 'undefined') {
       setInheritedKpiList([]);
@@ -921,33 +435,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Detach Programme
-
-  const detachProject = async (prjId: string) => {
-    setDetachingEntityId(prjId);
-    setOpenDetachPopup(true);
-  };
-
-  // Handle Detachment
-
-  const detachEntity = async (entityId: string) => {
-    const filteredIds = tempProjectIds.filter((id) => id !== entityId);
-    setTempProjectIds(filteredIds);
-    setIsSaveButtonDisabled(false);
-  };
-
-  // Column Definition
-
-  const projTableColumns = getProjectTableColumns(isView, detachProject);
-
-  // Activity Column Definition
-
-  const activityTableColumns = getActivityTableColumns();
-
-  // Support Column Definition
-
-  const supportTableColumns = getSupportTableColumns();
-
   // Table Behaviour
 
   const handleTableChange = (pagination: any) => {
@@ -955,14 +442,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     setPageSize(pagination.pageSize);
   };
 
-  // Activity Table Behaviour
-
   const handleActivityTableChange = (pagination: any) => {
     setActivityCurrentPage(pagination.current);
     setActivityPageSize(pagination.pageSize);
   };
-
-  // Support Table Behaviour
 
   const handleSupportTableChange = (pagination: any) => {
     setSupportCurrentPage(pagination.current);
@@ -975,23 +458,298 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     setIsSaveButtonDisabled(false);
   };
 
+  // DB Queries
+
+  const fetchNonValidatedActions = async () => {
+    try {
+      const payload = {
+        sort: {
+          key: 'actionId',
+          order: 'ASC',
+        },
+      };
+      const response: any = await post('national/actions/query', payload);
+
+      const tempActionData: ActionSelectData[] = [];
+      response.data.forEach((action: any) => {
+        tempActionData.push({
+          id: action.actionId,
+          title: action.title,
+          instrumentType: action.instrumentType,
+          sector: action.sector,
+          type: action.type,
+        });
+      });
+      setActionList(tempActionData);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
+  };
+
+  const fetchProgramData = async () => {
+    if (method !== 'create' && entId) {
+      let response: any;
+      try {
+        response = await get(`national/programmes/${entId}`);
+
+        if (response.status === 200 || response.status === 201) {
+          const entityData: any = response.data;
+
+          // Populating Action owned data fields
+          form.setFieldsValue({
+            actionId: entityData.actionId,
+            type: entityData.type,
+            instrumentType: entityData.instrumentType,
+            title: entityData.title,
+            description: entityData.description,
+            objective: entityData.objectives,
+            programmeStatus: entityData.programmeStatus,
+            startYear: entityData.startYear,
+            natAnchor: entityData.natAnchor,
+            sector: entityData.sector,
+            affectedSubSector: entityData.affectedSubSector,
+            natImplementor: entityData.nationalImplementor,
+            investment: entityData.investment,
+            comments: entityData.comments ?? undefined,
+          });
+
+          // Setting validation status
+
+          setIsValidated(entityData.validated ?? false);
+
+          if (entityData.documents?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.documents.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredFiles(tempFiles);
+          }
+
+          // Populating Migrated Fields
+
+          form.setFieldsValue({
+            intImplementor: entityData.interNationalImplementor ?? [],
+            recipientEntity: entityData.recipientEntity ?? [],
+            ghgsAffected: entityData.ghgsAffected ?? [],
+            achievedReduct: entityData.achievedGHGReduction,
+            expectedReduct: entityData.expectedGHGReduction,
+          });
+        }
+      } catch {
+        navigate('/programmes');
+      }
+      setIsSaveButtonDisabled(true);
+    }
+  };
+
+  const fetchAttachedKPIData = async () => {
+    if (method !== 'create' && entId) {
+      try {
+        const response: any = await get(`national/kpis/achieved/programme/${entId}`);
+        if (response.status === 200 || response.status === 201) {
+          const tempCreatedKpiList: CreatedKpiData[] = [];
+          const tempInheritedKpiList: CreatedKpiData[] = [];
+          let tempKpiCounter = kpiCounter;
+          response.data.forEach((kpi: any) => {
+            if (kpi.creatorId === entId) {
+              tempCreatedKpiList.push({
+                index: tempKpiCounter,
+                creator: entId,
+                id: kpi.kpiId,
+                name: kpi.name,
+                unit: kpi.kpiUnit,
+                achieved: parseFloat(kpi.achieved ?? 0),
+                expected: parseFloat(kpi.expected ?? 0),
+                kpiAction: KPIAction.NONE,
+              });
+            } else {
+              tempInheritedKpiList.push({
+                index: tempKpiCounter,
+                creator: kpi.creatorId,
+                id: kpi.kpiId,
+                name: kpi.name,
+                unit: kpi.kpiUnit,
+                achieved: parseFloat(kpi.achieved ?? 0),
+                expected: parseFloat(kpi.expected ?? 0),
+                kpiAction: KPIAction.NONE,
+              });
+            }
+            tempKpiCounter = tempKpiCounter + 1;
+          });
+          setKpiCounter(tempKpiCounter);
+          setCreatedKpiList(tempCreatedKpiList);
+          setInheritedKpiList(tempInheritedKpiList);
+
+          if (tempCreatedKpiList.length > 0 || tempInheritedKpiList.length > 0) {
+            setHandleKPI(true);
+          }
+        }
+      } catch (error: any) {
+        console.log(error, t('kpiSearchFailed'));
+      }
+    }
+  };
+
+  const fetchConnectedProjectData = async () => {
+    if (method !== 'create') {
+      try {
+        const payload = {
+          filterAnd: [
+            {
+              key: 'programmeId',
+              operation: '=',
+              value: entId,
+            },
+          ],
+          sort: {
+            key: 'projectId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/projects/query', payload);
+
+        const tempPRJData: ProjectData[] = [];
+
+        response.data.forEach((prj: any, index: number) => {
+          tempPRJData.push({
+            key: index.toString(),
+            projectId: prj.projectId,
+            projectName: prj.title,
+            internationalImplementingEntities: prj.internationalImplementingEntities ?? [],
+            recipientEntities: prj.recipientEntities ?? [],
+            ghgsAffected: prj.migratedData[0]?.ghgsAffected ?? [],
+            achievedReduction: prj.migratedData[0]?.achievedGHGReduction ?? 0,
+            estimatedReduction: prj.migratedData[0]?.expectedGHGReduction ?? 0,
+          });
+        });
+
+        setProjectData(tempPRJData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
+    }
+  };
+
+  const fetchConnectedActivityData = async () => {
+    if (method !== 'create') {
+      try {
+        const payload = {
+          filterAnd: [
+            {
+              key: 'parentId',
+              operation: '=',
+              value: entId,
+            },
+            {
+              key: 'parentType',
+              operation: '=',
+              value: 'programme',
+            },
+          ],
+          sort: {
+            key: 'activityId',
+            order: 'ASC',
+          },
+        };
+
+        const activityResponse: any = await post('national/activities/query', payload);
+
+        const tempActivityData: ActivityData[] = [];
+
+        activityResponse.data.forEach((act: any, index: number) => {
+          tempActivityData.push({
+            key: index.toString(),
+            activityId: act.activityId,
+            title: act.title,
+            reductionMeasures: act.measure,
+            status: act.status,
+            natImplementor: act.nationalImplementingEntity ?? [],
+            ghgsAffected: act.ghgsAffected,
+            achievedReduction: act.achievedGHGReduction ?? 0,
+            estimatedReduction: act.expectedGHGReduction ?? 0,
+          });
+        });
+
+        setActivityData(tempActivityData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
+    }
+  };
+
+  const fetchSupportData = async () => {
+    const supportPayload = {
+      filterOr: [] as any[],
+      sort: {
+        key: 'supportId',
+        order: 'ASC',
+      },
+    };
+
+    if (activityData.length > 0) {
+      try {
+        activityData.forEach((activity) => {
+          supportPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activity.activityId,
+          });
+        });
+
+        const supportResponse: any = await post('national/supports/query', supportPayload);
+
+        const tempSupportData: SupportData[] = [];
+
+        supportResponse.data.forEach((sup: any, index: number) => {
+          tempSupportData.push({
+            key: index.toString(),
+            supportId: sup.supportId,
+            financeNature: sup.financeNature,
+            direction: sup.direction,
+            finInstrument:
+              sup.financeNature === 'International'
+                ? sup.internationalFinancialInstrument
+                : sup.nationalFinancialInstrument,
+            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+            recievedUSD: getRounded(sup.receivedAmount ?? 0),
+            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+          });
+        });
+
+        setSupportData(tempSupportData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
+    } else {
+      setSupportData([]);
+    }
+  };
+
+  // Dynamic Updates
+
+  // 01 - Init For Entity
+
+  useEffect(() => {
+    fetchNonValidatedActions();
+    fetchProgramData();
+    fetchAttachedKPIData();
+    fetchConnectedProjectData();
+    fetchConnectedActivityData();
+  }, []);
+
+  // 02 - Fetching Support data, After Activity Data Loads
+
+  useEffect(() => {
+    fetchSupportData();
+  }, [activityData]);
+
   return (
     <div className="content-container">
-      <ConfirmPopup
-        key={'detach_popup'}
-        icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
-        isDanger={true}
-        content={{
-          primaryMsg: `${t('detachPopup:primaryMsg')} Project ${detachingEntityId}`,
-          secondaryMsg: t('detachPopup:secondaryMsg'),
-          cancelTitle: t('detachPopup:cancelTitle'),
-          actionTitle: t('detachPopup:actionTitle'),
-        }}
-        actionRef={detachingEntityId}
-        doAction={detachEntity}
-        open={openDetachPopup}
-        setOpen={setOpenDetachPopup}
-      />
       <ConfirmPopup
         key={'delete_popup'}
         icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
@@ -1010,7 +768,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE && firstRenderingCompleted ? (
+      {!waitingForBE ? (
         <div className="programme-form">
           <Form
             form={form}
@@ -1032,6 +790,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('selectActionHeader')}</label>}
                     name="actionId"
+                    rules={[validation.required]}
                   >
                     <Select
                       size={'large'}
@@ -1275,15 +1034,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       </label>
                     }
                     name="investment"
-                    rules={[validation.required]}
                   >
-                    <Input
-                      className="form-input-box"
-                      min={0}
-                      step={0.01}
-                      type="number"
-                      disabled={isView}
-                    />
+                    <Input className="form-input-box" disabled={true} />
                   </Form.Item>
                 </Col>
               </Row>
@@ -1311,54 +1063,34 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <Row>
-                <Col span={12}>
-                  <div className="form-section-header">{t('projectListTitle')}</div>
-                  <LayoutTable
-                    tableData={projectData.slice(
-                      (currentPage - 1) * pageSize,
-                      (currentPage - 1) * pageSize + pageSize
-                    )}
-                    columns={projTableColumns}
-                    loading={false}
-                    pagination={{
-                      current: currentPage,
-                      pageSize: pageSize,
-                      total: projectData.length,
-                      showQuickJumper: true,
-                      pageSizeOptions: ['10', '20', '30'],
-                      showSizeChanger: true,
-                      style: { textAlign: 'center' },
-                      locale: { page: '' },
-                      position: ['bottomRight'],
-                    }}
-                    handleTableChange={handleTableChange}
-                    emptyMessage={t('noProjectsMessage')}
-                  />
-                </Col>
-                <Col {...attachTableSeparatorBps}></Col>
-                <Col
-                  {...attachButtonBps}
-                  style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
-                >
-                  <AttachEntity
-                    isDisabled={isView}
-                    content={{
-                      buttonName: t('attachProjects'),
-                      attach: t('entityAction:attach'),
-                      contentTitle: t('attachProjects'),
-                      listTitle: t('projectList'),
-                      cancel: t('entityAction:cancel'),
-                    }}
-                    options={allProjectIds}
-                    alreadyAttached={attachedProjectIds}
-                    currentAttachments={tempProjectIds}
-                    setCurrentAttachments={setTempProjectIds}
-                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
-                    icon={<Layers style={{ fontSize: '120px' }} />}
-                  ></AttachEntity>
-                </Col>
-              </Row>
+              {method !== 'create' && (
+                <Row>
+                  <Col span={12}>
+                    <div className="form-section-header">{t('projectListTitle')}</div>
+                    <LayoutTable
+                      tableData={projectData.slice(
+                        (currentPage - 1) * pageSize,
+                        (currentPage - 1) * pageSize + pageSize
+                      )}
+                      columns={projTableColumns}
+                      loading={false}
+                      pagination={{
+                        current: currentPage,
+                        pageSize: pageSize,
+                        total: projectData.length,
+                        showQuickJumper: true,
+                        pageSizeOptions: ['10', '20', '30'],
+                        showSizeChanger: true,
+                        style: { textAlign: 'center' },
+                        locale: { page: '' },
+                        position: ['bottomRight'],
+                      }}
+                      handleTableChange={handleTableChange}
+                      emptyMessage={t('noProjectsMessage')}
+                    />
+                  </Col>
+                </Row>
+              )}
             </div>
             {method !== 'create' && (
               <div className="form-section-card">
@@ -1387,7 +1119,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                         }}
                         handleTableChange={handleActivityTableChange}
                         emptyMessage={t('formHeader:noActivityMessage')}
-                      />{' '}
+                      />
                     </div>
                   </Col>
                 </Row>
