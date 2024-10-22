@@ -732,7 +732,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Dynamic Updates
 
-  // 01 - Init For Entity
+  // Init For Entity
 
   useEffect(() => {
     fetchNonValidatedActions();
@@ -742,7 +742,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     fetchConnectedActivityData();
   }, []);
 
-  // 02 - Fetching Support data, After Activity Data Loads
+  // Fetching Support data, After Activity Data Loads
 
   useEffect(() => {
     fetchSupportData();
