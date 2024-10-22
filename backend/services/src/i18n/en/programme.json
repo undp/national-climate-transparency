@@ -16,6 +16,7 @@
     "programmeDeletionFailed": "Programme deletion failed due to {}",
     "parentNotValidated": "Parent action with id {} should be validated.",
     "verifyProgrammeSuccess": "Programme verified successfully",
-    "unverifyProgrammeSuccess": "Programme unverified successfully"
+    "unverifyProgrammeSuccess": "Programme unverified successfully",
+    "activitiesLinkedToAction": "Cannot attach programme to the action with id : {} as it has activities attached"
 
 }

@@ -5,7 +5,6 @@ WITH fullp AS (
 	SELECT 
 			prg."programmeId",
 			prg."actionId",
-			prg."investment",
 			prg."natImplementor" AS nat_impl,
 			COALESCE(SUM(pve."achievedGHGReduction"), 0) AS "achievedGHGReduction",
 			COALESCE(SUM(pve."expectedGHGReduction"), 0) AS "expectedGHGReduction",
@@ -24,7 +23,7 @@ WITH fullp AS (
 					id
 	) pve ON prg."programmeId" = pve.id
 	GROUP BY 
-			prg."programmeId", prg."actionId", prg."investment", prg."natImplementor"
+			prg."programmeId", prg."actionId", prg."natImplementor"
 ),
 act AS (
 	SELECT 
@@ -54,7 +53,6 @@ SELECT
 	CUSTOM_ARRAY_AGG(fullp.nat_impl) FILTER (WHERE fullp.nat_impl IS NOT NULL) AS "natImplementors",
 	COALESCE(SUM(fullp."achievedGHGReduction"), 0) + COALESCE(act."achievedGHGReduction", 0) AS "achievedGHGReduction",
 	COALESCE(SUM(fullp."expectedGHGReduction"), 0) + COALESCE(act."expectedGHGReduction", 0) AS "expectedGHGReduction",
-	SUM(fullp."investment") AS "totalInvestment",
 	MAX(finance."totalRequired") AS "financeNeeded",
 	MAX(finance."totalReceived") AS "financeReceived",
 	CUSTOM_ARRAY_AGG(DISTINCT COALESCE(fullp."ghgsAffected", '{}') || COALESCE(act."ghgsAffected", '{}')) FILTER (WHERE (fullp."ghgsAffected" IS NOT NULL OR act."ghgsAffected" IS NOT NULL)) AS "ghgsAffected"
@@ -80,8 +78,8 @@ export class ActionViewEntity {
 	@ViewColumn()
 	natImplementors: string[];
 
-	@ViewColumn()
-	totalInvestment: number
+	// @ViewColumn()
+	// totalInvestment: number
 
 	// From Project Entities
 

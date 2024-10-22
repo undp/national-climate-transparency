@@ -10,6 +10,7 @@ import {
 } from "../enums/support.enum";
 import { ActivityEntity } from "./activity.entity";
 import { Sector } from "../enums/sector.enum";
+import { ActionType } from "../enums/action.enum";
 
 @Entity("support")
 export class SupportEntity {
@@ -57,6 +58,9 @@ export class SupportEntity {
 
   @Column({ nullable: true })
   sector: Sector;
+
+  @Column({ type: "enum", enum: ActionType,nullable: false })
+  type: string;
 
   @ManyToOne(() => ActivityEntity, (activity) => activity.support, {
     nullable: false,

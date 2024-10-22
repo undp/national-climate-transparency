@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn, UpdateDateColumn } from "typeorm";
-import { EntityType, GHGS } from "../enums/shared.enum";
+import { EntityType, GHGS, Recipient } from "../enums/shared.enum";
 import { AchievementEntity } from "./achievement.entity";
 import { SupportEntity } from "./support.entity";
 import {
@@ -11,6 +11,7 @@ import {
 import { NatImplementor, IntImplementor } from "../enums/shared.enum";
 import { Sector } from "../enums/sector.enum";
 import { EntitySubject } from "./entity.subject";
+import { ActionType } from "../enums/action.enum";
 
 @Entity("activity")
 export class ActivityEntity implements EntitySubject {
@@ -40,6 +41,9 @@ export class ActivityEntity implements EntitySubject {
 
 	@Column("varchar", { array: true, nullable: true })
 	nationalImplementingEntity: NatImplementor[];
+
+	@Column("varchar", { array: true, nullable: false })
+  recipientEntities: Recipient[];
 
 	@Column({ nullable: true })
 	anchoredInNationalStrategy: boolean;
@@ -103,6 +107,9 @@ export class ActivityEntity implements EntitySubject {
 
 	@Column({ type: "enum", enum: Sector, nullable: true })
 	sector: Sector;
+
+	@Column({ type: "enum", enum: ActionType,nullable: false })
+  type: string;
 
 	@Column({ type: "ltree" })
 	path: string;

@@ -94,11 +94,21 @@ export class ProgrammeService {
 		let action: ActionEntity;
 
 		if (programmeDto.actionId) {
-			action = await this.actionService.findActionById(programmeDto.actionId);
+			action = await this.actionService.findActionByIdWithAllLinkedChildren(programmeDto.actionId);
 			if (!action) {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"programme.actionNotFound",
+						[programmeDto.actionId]
+					),
+					HttpStatus.BAD_REQUEST
+				);
+			}
+
+			if (action.activities && action.activities.length > 0) {
+				throw new HttpException(
+					this.helperService.formatReqMessagesString(
+						"programme.activitiesLinkedToAction",
 						[programmeDto.actionId]
 					),
 					HttpStatus.BAD_REQUEST
@@ -118,6 +128,7 @@ export class ProgrammeService {
 			programme.action = action;
 			programme.path = programmeDto.actionId;
 			programme.sector = action.sector;
+			programme.type = action.type;
 
 			this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_LINKED, EntityType.ACTION, action.actionId, user.id, programme.programmeId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, action.actionId);
@@ -216,7 +227,7 @@ export class ProgrammeService {
 			);
 		}
 
-		return this.getProgrammeViewDto(programme.data[0]);
+		return this.getProgrammeViewDto(programme.data[0], programme.data[0]?.migratedData);
 	}
 
 	//MARK: Query Programme
@@ -309,6 +320,7 @@ export class ProgrammeService {
 		programmeUpdate.action = currentProgramme.action;
 		programmeUpdate.path = currentProgramme.path;
 		programmeUpdate.sector = currentProgramme.sector;
+		programmeUpdate.type = currentProgramme.type;
 		programmeUpdate.projects = currentProgramme.projects;
 		programmeUpdate.activities = currentProgramme.activities;
 
@@ -588,11 +600,21 @@ export class ProgrammeService {
 
 	//MARK: Link Updated Programme
 	async linkUpdatedProgrammeToAction(actionId: string, updatedProgramme: ProgrammeEntity, user: User, em: EntityManager) {
-		const action = await this.actionService.findActionById(actionId);
+		const action = await this.actionService.findActionByIdWithAllLinkedChildren(actionId);
 		if (!action) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
 					"programme.actionNotFound",
+					[actionId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (action.activities && action.activities.length > 0) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"programme.activitiesLinkedToAction",
 					[actionId]
 				),
 				HttpStatus.BAD_REQUEST
@@ -958,7 +980,7 @@ export class ProgrammeService {
 		return log;
 	}
 
-	getProgrammeViewDto(programme: ProgrammeEntity) {
+	getProgrammeViewDto(programme: ProgrammeEntity, migratedData: any) {
 
 		let type: string = null;
 		const recipientEntitySet: Set<Recipient> = new Set();
@@ -966,11 +988,11 @@ export class ProgrammeService {
 
 		if (programme.projects && programme.projects.length > 0) {
 			for (const project of programme.projects) {
-				if (project.recipientEntities) {
-					project.recipientEntities.forEach(recipient => {
-						recipientEntitySet.add(recipient);
-					});
-				}
+				// if (project.recipientEntities) {
+				// 	project.recipientEntities.forEach(recipient => {
+				// 		recipientEntitySet.add(recipient);
+				// 	});
+				// }
 				if (project.internationalImplementingEntities) {
 					project.internationalImplementingEntities.forEach(internationalImplementer => {
 						interNationalImplementorSet.add(internationalImplementer);
@@ -978,6 +1000,16 @@ export class ProgrammeService {
 				};
 			}
 		}
+
+		if (migratedData && migratedData.length > 0) {
+      for (const data of migratedData) {
+        if (data.recipientEntities) {
+          data.recipientEntities.forEach((recipientEntity) => {
+            recipientEntitySet.add(recipientEntity);
+          });
+        }
+      }
+    }
 
 		if (programme.action) {
 			type = programme.action.type;
@@ -996,13 +1028,14 @@ export class ProgrammeService {
 		programmeViewDto.objectives = programme.objective;
 		programmeViewDto.instrumentType = programme.action?.instrumentType;
 		programmeViewDto.sector = programme.sector;
+		programmeViewDto.type = programme.type;
 		programmeViewDto.affectedSubSector = programme.affectedSubSector;
 		programmeViewDto.programmeStatus = programme.programmeStatus;
 		programmeViewDto.recipientEntity = recipientEntity;
 		programmeViewDto.startYear = programme.startYear;
 		programmeViewDto.interNationalImplementor = interNationalImplementor;
 		programmeViewDto.nationalImplementor = programme.natImplementor;
-		programmeViewDto.investment = programme.investment;
+		// programmeViewDto.investment = programme.investment;
 		programmeViewDto.documents = programme.documents;
 		programmeViewDto.comments = programme.comments;
 		programmeViewDto.validated = programme.validated;
