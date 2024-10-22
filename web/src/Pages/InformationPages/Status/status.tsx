@@ -13,20 +13,14 @@ const Status = () => {
     <div className="status-container">
       <Row>
         <Col md={24} lg={24}>
-          <div className="title">Status</div>
+          <div className="title">Status analytics can be linked here</div>
         </Col>
       </Row>
       <Row justify="center">
         <Col span={20}>
           <div className="text">
-            We as members, contributors, and leaders pledge to make participation in our community a
-            harassment-free experience for everyone, regardless of age, body size, visible or
-            invisible disability, ethnicity, sex characteristics, gender identity and expression,
-            level of experience, education, socio-economic status, nationality, personal appearance,
-            race, religion, or sexual identity and orientation.
-            <br />
-            We pledge to act and interact in ways that contribute to an open, welcoming, diverse,
-            inclusive, and healthy community.
+            For more information please contact UNDP at{' '}
+            <a href="mailto:vu.hanh.dung.nguyen@undp.org">vu.hanh.dung.nguyen@undp.org</a>
           </div>
         </Col>
       </Row>

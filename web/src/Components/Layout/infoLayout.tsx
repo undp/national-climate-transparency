@@ -2,7 +2,6 @@ import { Layout } from 'antd';
 import { Suspense } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Loading } from '../Loading/loading';
-import LayoutFooter from '../Footer/layout.footer';
 import sliderLogo from '../../Assets/Images/mrvlogo.svg';
 import './infoLayout.scss';
 
@@ -13,8 +12,8 @@ const InfoLayout = () => {
 
   return (
     <div className="info-layout-container">
-      <div className="header-container">
-        <div className="logo" onClick={() => navigate('/')}>
+      <div className="header-container" onClick={() => navigate('/')}>
+        <div className="logo">
           <img src={sliderLogo} alt="slider-logo" />
         </div>
         <div>
@@ -30,9 +29,6 @@ const InfoLayout = () => {
           <Outlet />
         </Suspense>
       </Content>
-      <div>
-        <LayoutFooter />
-      </div>
     </div>
   );
 };
