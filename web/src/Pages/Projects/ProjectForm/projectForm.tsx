@@ -536,9 +536,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
           // Populating Migrated Fields
 
+          const meansOfImplementation = entityData.migratedData?.meansOfImplementation ?? [];
+
           form.setFieldsValue({
-            techDevContribution: 'No', // Need a fix here
-            capBuildObjectives: 'No',
+            techDevContribution: meansOfImplementation.includes('Technology Development & Transfer')
+              ? 'Yes'
+              : 'No',
+            capBuildObjectives: meansOfImplementation.includes('Capacity Building') ? 'Yes' : 'No',
             techType: entityData.migratedData?.technologyTypes ?? [],
             neededUSD: getRounded(entityData.migratedData?.estimatedAmount ?? 0),
             neededLCL: getRounded(entityData.migratedData?.estimatedAmountDomestic ?? 0),
