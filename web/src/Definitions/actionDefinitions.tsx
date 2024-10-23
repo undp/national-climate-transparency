@@ -12,4 +12,5 @@ export type ActionSelectData = {
   instrumentType: string;
   sector: string;
   type: string;
+  hasChildActivities: boolean;
 };

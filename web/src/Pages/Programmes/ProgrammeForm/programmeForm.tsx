@@ -462,13 +462,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const fetchNonValidatedActions = async () => {
     try {
-      const payload = {
-        sort: {
-          key: 'actionId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/actions/query', payload);
+      const response: any = await get('national/actions/attach/query');
 
       const tempActionData: ActionSelectData[] = [];
       response.data.forEach((action: any) => {
@@ -478,6 +472,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           instrumentType: action.instrumentType,
           sector: action.sector,
           type: action.type,
+          hasChildActivities: action.hasChildActivities,
         });
       });
       setActionList(tempActionData);
@@ -809,8 +804,16 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       }}
                     >
                       {actionList.map((action) => (
-                        <Option key={action.id} value={action.id}>
-                          {action.id}
+                        <Option
+                          key={action.id}
+                          value={action.id}
+                          disabled={action.hasChildActivities}
+                        >
+                          <span style={{ color: action.hasChildActivities ? 'red' : 'inherit' }}>
+                            {action.hasChildActivities
+                              ? `${action.id} : Attached to Activities`
+                              : action.id}
+                          </span>
                         </Option>
                       ))}
                     </Select>

@@ -184,6 +184,47 @@ export class ActionService {
 		.getOne();
 	}
 
+	async findAllActionsForAttaching() {
+		const allActions = await this.actionRepo.find({
+			select: ["actionId", "title", "instrumentType", "sector", "type"]
+		});
+	
+		const actionIds = allActions.map(action => action.actionId);
+	
+		const programmeCounts = await this.programmeRepo
+			.createQueryBuilder("programme")
+			.select("programme.actionId", "actionId")
+			.addSelect("COUNT(*)", "count")
+			.where("programme.actionId IN (:...actionIds)", { actionIds })
+			.groupBy("programme.actionId")
+			.getRawMany();
+	
+		const activityCounts = await this.activityRepo
+			.createQueryBuilder("activity")
+			.select("activity.parentId", "parentId")
+			.addSelect("COUNT(*)", "count")
+			.where("activity.parentId IN (:...actionIds)", { actionIds })
+			.groupBy("activity.parentId")
+			.getRawMany();
+	
+		const programmeCountMap = new Map(programmeCounts.map(pc => [pc.actionId, parseInt(pc.count, 10)]));
+		const activityCountMap = new Map(activityCounts.map(ac => [ac.parentId, parseInt(ac.count, 10)]));
+	
+		const attachingActionsDto = allActions.map(action => {
+			const countOfChildProgrammes = programmeCountMap.get(action.actionId) || 0;
+			const countOfChildActivities = activityCountMap.get(action.actionId) || 0;
+	
+			return {
+				...action,
+				hasChildProgrammes: countOfChildProgrammes > 0,
+				hasChildActivities: countOfChildActivities > 0,
+			};
+		});
+	
+		return attachingActionsDto;
+	}
+	
+
 	async findActionViewById(actionId: string) {
 		return await this.actionViewRepo.findOneBy({
 			id: actionId
@@ -492,83 +533,83 @@ export class ActionService {
 		);
 	}
 
-		//MARK: Delete Action
-		async deleteAction(deleteDto: DeleteDto, user: User) {
-			if (user.role !== Role.Admin && user.role !== Role.Root) {
+	//MARK: Delete Action
+	async deleteAction(deleteDto: DeleteDto, user: User) {
+		if (user.role !== Role.Admin && user.role !== Role.Root) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"user.userUnAUth",
+					[]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const action = await this.findActionByIdWithAllLinkedChildren(deleteDto.entityId);
+		if (!action) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.actionNotFound",
+					[deleteDto.entityId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
+		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"action.permissionDeniedForSector",
+					[action.actionId]
+				),
+				HttpStatus.FORBIDDEN
+			);
+		}
+
+		const actionKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, action.actionId);
+
+		const actionKpiIds = actionKPIs?.map(kpi => kpi.kpiId);
+
+		const linkedActivityIds = action.activities?.map(activity => activity.activityId);
+
+
+		const act = await this.entityManager
+			.transaction(async (em) => {
+
+				// related parent and children entity un-validation happens when projects are unlinking
+				await this.linkUnlinkService.unlinkProgrammesFromAction(action.programmes, action, action.actionId, user, this.entityManager, [], true);
+				const result = await em.delete<ActionEntity>(ActionEntity, action.actionId);
+
+				if (result.affected > 0) {
+					if (linkedActivityIds && linkedActivityIds.length > 0) {
+						await em.delete<ActivityEntity>(ActivityEntity, linkedActivityIds);
+					}
+
+					if (actionKpiIds && actionKpiIds.length > 0) {
+						await em.delete<KpiEntity>(KpiEntity, actionKpiIds);
+					}
+				}
+				return result;
+			})
+			.catch((err: any) => {
+				console.log(err);
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
-						"user.userUnAUth",
-						[]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
-	
-			const action = await this.findActionByIdWithAllLinkedChildren(deleteDto.entityId);
-			if (!action) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"action.actionNotFound",
-						[deleteDto.entityId]
+						"action.actionDeletionFailed",
+						[err]
 					),
 					HttpStatus.BAD_REQUEST
 				);
-			}
-	
-			if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
-				throw new HttpException(
-					this.helperService.formatReqMessagesString(
-						"action.permissionDeniedForSector",
-						[action.actionId]
-					),
-					HttpStatus.FORBIDDEN
-				);
-			}
-	
-			const actionKPIs = await this.kpiService.getKpisByCreatorTypeAndCreatorId(EntityType.ACTION, action.actionId);
-	
-			const actionKpiIds = actionKPIs?.map(kpi => kpi.kpiId);
-	
-			const linkedActivityIds = action.activities?.map(activity => activity.activityId);
+			});
 
-	
-			const act = await this.entityManager
-				.transaction(async (em) => {
-	
-					// related parent and children entity un-validation happens when projects are unlinking
-					await this.linkUnlinkService.unlinkProgrammesFromAction(action.programmes, action, action.actionId, user, this.entityManager, [], true);
-					const result = await em.delete<ActionEntity>(ActionEntity, action.actionId);
-	
-					if (result.affected > 0) {
-						if (linkedActivityIds && linkedActivityIds.length > 0) {
-							await em.delete<ActivityEntity>(ActivityEntity, linkedActivityIds);
-						}
-	
-						if (actionKpiIds && actionKpiIds.length > 0) {
-							await em.delete<KpiEntity>(KpiEntity, actionKpiIds);
-						}
-					}
-					return result;
-				})
-				.catch((err: any) => {
-					console.log(err);
-					throw new HttpException(
-						this.helperService.formatReqMessagesString(
-							"action.actionDeletionFailed",
-							[err]
-						),
-						HttpStatus.BAD_REQUEST
-					);
-				});
-	
-			await this.helperService.refreshMaterializedViews(this.entityManager);
-			return new DataResponseMessageDto(
-				HttpStatus.OK,
-				this.helperService.formatReqMessagesString("action.deleteActionSuccess", []),
-				null
-			);
-	
-		}
+		await this.helperService.refreshMaterializedViews(this.entityManager);
+		return new DataResponseMessageDto(
+			HttpStatus.OK,
+			this.helperService.formatReqMessagesString("action.deleteActionSuccess", []),
+			null
+		);
+
+	}
 
 	async validateAction(validateDto: ValidateDto, user: User) {
 

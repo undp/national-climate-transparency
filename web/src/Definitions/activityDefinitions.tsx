@@ -15,6 +15,7 @@ export type ActivityData = {
 export type ParentData = {
   id: string;
   title: string;
+  hasChildProgrammes: boolean;
 };
 
 export type ActivityMigratedData = {

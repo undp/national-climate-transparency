@@ -850,7 +850,14 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             order: 'ASC',
           },
         };
-        const response: any = await post(`national/${parentType}s/query`, payload);
+
+        let response: any;
+
+        if (parentType !== 'action') {
+          response = await post(`national/${parentType}s/query`, payload);
+        } else {
+          response = await get('national/actions/attach/query');
+        }
 
         const tempParentData: ParentData[] = [];
         response.data.forEach((parent: any) => {
@@ -862,8 +869,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 ? parent.programmeId
                 : parent.projectId,
             title: parent.title,
+            hasChildProgrammes: parent.hasChildProgrammes ?? false,
           });
         });
+
         setParentList(tempParentData);
       } catch (error: any) {
         displayErrorMessage(error);
@@ -1264,8 +1273,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                         onChange={handleParentIdSelect}
                       >
                         {parentList.map((parent) => (
-                          <Option key={parent.id} value={parent.id}>
-                            {parent.id}
+                          <Option
+                            key={parent.id}
+                            value={parent.id}
+                            disabled={parent.hasChildProgrammes}
+                          >
+                            <span style={{ color: parent.hasChildProgrammes ? 'red' : 'inherit' }}>
+                              {parent.hasChildProgrammes
+                                ? `${parent.id} : Attached to Programmes`
+                                : parent.id}
+                            </span>
                           </Option>
                         ))}
                       </Select>
