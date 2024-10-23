@@ -471,7 +471,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           form.setFieldsValue({
             ghgsAffected: entityData.migratedData?.ghgsAffected,
             natImplementor: entityData.migratedData?.natImplementors ?? [],
-            estimatedInvestment: entityData.migratedData?.totalInvestment,
+            estimatedInvestment: entityData.migratedData?.financeNeeded ?? 0,
             achievedReduct: entityData.migratedData?.achievedGHGReduction,
             expectedReduct: entityData.migratedData?.expectedGHGReduction,
           });
@@ -542,7 +542,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             programmeId: prg.programmeId,
             actionId: prg.action?.actionId,
             title: prg.title,
-            type: prg.migratedData[0]?.types ?? [],
+            type: prg.action?.type,
             status: prg.programmeStatus,
             subSectorsAffected: prg.affectedSubSector ?? [],
             estimatedInvestment: prg.investment,
@@ -931,7 +931,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
             </div>
-            {method !== 'create' && (
+            {method !== 'create' && programData.length > 0 && (
               <div className="form-section-card">
                 <Row>
                   <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
@@ -965,7 +965,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Row>
               </div>
             )}
-            {method !== 'create' && (
+            {method !== 'create' && activityData.length > 0 && (
               <div className="form-section-card">
                 <Row>
                   <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
@@ -998,7 +998,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Row>
               </div>
             )}
-            {method !== 'create' && (
+            {method !== 'create' && supportData.length > 0 && (
               <div className="form-section-card">
                 <Row>
                   <Col span={20}>

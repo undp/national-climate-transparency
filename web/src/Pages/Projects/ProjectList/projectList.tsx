@@ -194,11 +194,13 @@ const projectList = () => {
             programmeId: unstructuredData[i].programme?.programmeId ?? '',
             title: unstructuredData[i].title,
             projectStatus: unstructuredData[i].projectStatus,
-            recipientEntity: unstructuredData[i].recipientEntities ?? [],
+            recipientEntity: unstructuredData[i].migratedData[0]?.recipientEntities ?? [],
             intImplementingEntity: unstructuredData[i].internationalImplementingEntities ?? [],
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             natImplementingEntity: unstructuredData[i].programme?.natImplementor ?? [],
-            estimatedInvestment: Math.round(unstructuredData[i].programme?.investment ?? 0),
+            estimatedInvestment: Math.round(
+              unstructuredData[i].migratedData[0]?.estimatedAmount ?? 0
+            ),
           });
         }
         setTableData(structuredData);
