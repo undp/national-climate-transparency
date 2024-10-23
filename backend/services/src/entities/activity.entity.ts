@@ -43,7 +43,7 @@ export class ActivityEntity implements EntitySubject {
 	nationalImplementingEntity: NatImplementor[];
 
 	@Column("varchar", { array: true, nullable: false })
-  recipientEntities: Recipient[];
+  	recipientEntities: Recipient[];
 
 	@Column({ nullable: true })
 	anchoredInNationalStrategy: boolean;

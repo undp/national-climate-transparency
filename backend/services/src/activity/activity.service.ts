@@ -1450,7 +1450,7 @@ export class ActivityService {
 
 	//MARK: update mitigation timeline Data
 	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto, user: User) {
-		const { activityId, mitigationTimeline } = mitigationTimelineDto;
+		const { activityId, mitigationTimeline, expectedGHGReduction, achievedGHGReduction } = mitigationTimelineDto;
 		const activity = await this.linkUnlinkService.findActivityByIdWithSupports(activityId);
 
 		if (!activity) {
@@ -1529,7 +1529,12 @@ export class ActivityService {
 				await em
 					.createQueryBuilder()
 					.update(ActivityEntity)
-					.set({ mitigationTimeline: updatedMitigationTimeline, validated: activity.validated})
+					.set(
+						{ mitigationTimeline: updatedMitigationTimeline, 
+						  validated: activity.validated, 
+						  achievedGHGReduction: achievedGHGReduction, 
+						  expectedGHGReduction: expectedGHGReduction
+						})
 					.where('activityId = :activityId', { activityId })
 					.execute();
 

@@ -63,6 +63,7 @@ const { TextArea } = Input;
 
 const gutterSize = 30;
 const inputFontSize = '13px';
+const currentYear = new Date().getFullYear();
 
 const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
@@ -157,7 +158,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const handleParentIdSelect = (id: string) => {
     setConnectedParentId(id);
     setShouldFetchParentKpi(true);
-    if (id === undefined) {
+
+    if (id === undefined && method === 'create') {
       setMtgStartYear(0);
     }
   };
@@ -165,7 +167,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const handleParentTypeSelect = (value: string) => {
     setParentType(value);
     setConnectedParentId(undefined);
-    setMtgStartYear(0);
+
+    if (method === 'create') {
+      setMtgStartYear(0);
+    }
+
     form.setFieldsValue({
       parentId: '',
       parentDescription: '',
@@ -532,7 +538,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // MTG timeline update
 
-  const MtgTimelineUpdate = async () => {
+  const updateMtgTimeline = async () => {
     try {
       if (entId) {
         const payload = {
@@ -563,6 +569,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               },
             },
           },
+          achievedGHGReduction: parseFloat(form.getFieldValue('achievedGHGReduction')),
+          expectedGHGReduction: parseFloat(form.getFieldValue('expectedGHGReduction')),
         };
         const response: any = await put('national/activities/mitigation/update', payload);
 
@@ -1082,6 +1090,50 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, [activityMigratedData]);
 
+  // Finding Achieved and Expected Emission Values
+
+  useEffect(() => {
+    if (expectedTimeline && expectedTimeline.length === 5) {
+      const expectedValues = expectedTimeline[3].values;
+      const mostRecentYearIndex = Math.max(0, Math.min(mtgRange, currentYear - mtgStartYear));
+
+      let expectedValue = 0;
+
+      for (let i = mostRecentYearIndex; i >= 0; i--) {
+        if (expectedValues[i] !== 0) {
+          expectedValue = expectedValues[i];
+          break;
+        }
+      }
+
+      form.setFieldsValue({
+        expectedGHGReduction: expectedValue ?? 0,
+      });
+    }
+  }, [expectedTimeline]);
+
+  useEffect(() => {
+    if (actualTimeline && actualTimeline.length === 3) {
+      const actualValues = actualTimeline[2].values;
+      const mostRecentYearIndex = Math.max(0, Math.min(mtgRange, currentYear - mtgStartYear));
+
+      let actualValue = 0;
+
+      for (let i = mostRecentYearIndex; i >= 0; i--) {
+        if (actualValues[i] !== 0) {
+          actualValue = actualValues[i];
+          break;
+        }
+      }
+
+      form.setFieldsValue({
+        achievedGHGReduction: actualValue ?? 0,
+      });
+    }
+  }, [actualTimeline]);
+
+  // Init Run
+
   useEffect(() => {
     fetchActivityData();
     fetchSupportData();
@@ -1539,11 +1591,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       showSearch
                       onChange={(value: GHGS) => setSelectedGhg(value)}
                     >
-                      {Object.values(GHGS).map((ghg) => (
-                        <Option key={ghg} value={ghg}>
-                          {ghg}
-                        </Option>
-                      ))}
+                      {Object.values(GHGS)
+                        .filter((ghg) => ghg !== GHGS.COE)
+                        .map((ghg) => (
+                          <Option key={ghg} value={ghg}>
+                            {ghg}
+                          </Option>
+                        ))}
                     </Select>
                   </Form.Item>
                 </Col>
@@ -1553,30 +1607,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('formHeader:achieved')}</label>}
                     name="achievedGHGReduction"
-                    rules={[validation.required]}
                   >
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      className="form-input-box"
-                      disabled={isView}
-                    />
+                    <Input type="number" className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('formHeader:expected')}</label>}
                     name="expectedGHGReduction"
-                    rules={[validation.required]}
                   >
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      className="form-input-box"
-                      disabled={isView}
-                    />
+                    <Input type="number" className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
               </Row>
@@ -1741,7 +1781,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                         size="large"
                         block
                         onClick={() => {
-                          MtgTimelineUpdate();
+                          updateMtgTimeline();
                         }}
                         disabled={!isMtgButtonEnabled}
                       >
