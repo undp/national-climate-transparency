@@ -40,4 +40,10 @@ export class ProgrammeViewDto {
 
 	validated: boolean;
 
+	achievedGHGReduction?: number;
+
+	expectedGHGReduction?: number;
+
+	ghgsAffected?: string[]
+
 }

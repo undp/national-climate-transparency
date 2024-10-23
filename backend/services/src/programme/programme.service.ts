@@ -988,11 +988,6 @@ export class ProgrammeService {
 
 		if (programme.projects && programme.projects.length > 0) {
 			for (const project of programme.projects) {
-				// if (project.recipientEntities) {
-				// 	project.recipientEntities.forEach(recipient => {
-				// 		recipientEntitySet.add(recipient);
-				// 	});
-				// }
 				if (project.internationalImplementingEntities) {
 					project.internationalImplementingEntities.forEach(internationalImplementer => {
 						interNationalImplementorSet.add(internationalImplementer);
@@ -1002,24 +997,24 @@ export class ProgrammeService {
 		}
 
 		if (migratedData && migratedData.length > 0) {
-      for (const data of migratedData) {
-        if (data.recipientEntities) {
-          data.recipientEntities.forEach((recipientEntity) => {
-            recipientEntitySet.add(recipientEntity);
-          });
-        }
-      }
-    }
+			for (const data of migratedData) {
+				if (data.recipientEntities) {
+				data.recipientEntities.forEach((recipientEntity) => {
+					recipientEntitySet.add(recipientEntity);
+				});
+				}
+			}
+		}
 
 		if (programme.action) {
 			type = programme.action.type;
 		}
 
-		
 		const recipientEntity: string[] = Array.from(recipientEntitySet);
 		const interNationalImplementor: string[] = Array.from(interNationalImplementorSet);
 
 		const programmeViewDto = new ProgrammeViewDto();
+
 		programmeViewDto.programmeId = programme.programmeId;
 		programmeViewDto.actionId = programme.action?.actionId;
 		programmeViewDto.type = type;
@@ -1035,12 +1030,13 @@ export class ProgrammeService {
 		programmeViewDto.startYear = programme.startYear;
 		programmeViewDto.interNationalImplementor = interNationalImplementor;
 		programmeViewDto.nationalImplementor = programme.natImplementor;
-		// programmeViewDto.investment = programme.investment;
 		programmeViewDto.documents = programme.documents;
 		programmeViewDto.comments = programme.comments;
 		programmeViewDto.validated = programme.validated;
+		programmeViewDto.ghgsAffected = migratedData[0]?.ghgsAffected ?? [];
+		programmeViewDto.achievedGHGReduction = migratedData[0]?.achievedGHGReduction ?? 0;
+		programmeViewDto.expectedGHGReduction = migratedData[0]?.expectedGHGReduction ?? 0;
 
 		return programmeViewDto;
-
 	}
 }
