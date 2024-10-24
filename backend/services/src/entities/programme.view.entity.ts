@@ -97,9 +97,9 @@ export class ProgrammeViewEntity {
   @ViewColumn()
   ghgsAffected: string[];
 
-	@ViewColumn()
-	estimatedAmount: number
+  @ViewColumn()
+  estimatedAmount: number
 
-	@ViewColumn()
-	receivedAmount: number
+  @ViewColumn()
+  receivedAmount: number
 }

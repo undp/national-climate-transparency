@@ -507,7 +507,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
             sector: entityData.sector,
             affectedSubSector: entityData.affectedSubSector,
             natImplementor: entityData.nationalImplementor,
-            investment: entityData.investment,
+            investment: entityData.estimatedAmount ?? 0,
             comments: entityData.comments ?? undefined,
           });
 

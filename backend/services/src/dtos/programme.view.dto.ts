@@ -32,8 +32,6 @@ export class ProgrammeViewDto {
 
   nationalImplementor: NatImplementor[];
 
-  // investment: number;
-
   documents: DocumentDto[];
 
   comments: string;
@@ -46,4 +44,7 @@ export class ProgrammeViewDto {
 
 	ghgsAffected?: string[]
 
+  estimatedAmount: number
+
+  receivedAmount: number
 }
