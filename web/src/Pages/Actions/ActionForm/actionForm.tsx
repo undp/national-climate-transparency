@@ -303,7 +303,16 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Entity Delete
 
   const deleteClicked = () => {
-    setOpenDeletePopup(true);
+    if (activityData.length > 0 || programData.length > 0) {
+      message.open({
+        type: 'error',
+        content: t('error:actionDeletePrevented'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    } else {
+      setOpenDeletePopup(true);
+    }
   };
 
   const deleteEntity = async () => {
@@ -716,13 +725,13 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('formHeader:typeHeader')}</label>}
                     name="type"
-                    rules={[validation.required]}
+                    rules={method === 'create' ? [validation.required] : undefined}
                   >
                     <Select
                       size="large"
                       style={{ fontSize: inputFontSize }}
                       allowClear
-                      disabled={isView}
+                      disabled={method !== 'create'}
                       showSearch
                       onChange={(selectedValue) => setIsGasFlow(isGasFlowCheck(selectedValue))}
                     >

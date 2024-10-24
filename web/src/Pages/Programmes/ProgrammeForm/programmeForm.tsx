@@ -303,7 +303,16 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   // Entity Delete
 
   const deleteClicked = () => {
-    setOpenDeletePopup(true);
+    if (activityData.length > 0 || projectData.length > 0) {
+      message.open({
+        type: 'error',
+        content: t('error:programmeDeletePrevented'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    } else {
+      setOpenDeletePopup(true);
+    }
   };
 
   const deleteEntity = async () => {

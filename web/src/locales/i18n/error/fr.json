@@ -1,3 +1,5 @@
 {
-    "validationPermissionRequired": "Autorisation de validation requise"
+    "validationPermissionRequired": "L'autorisation de validation est requise",
+    "actionDeletePrevented": "Impossible de supprimer une action avec des sous-éléments attachés",
+    "programmeDeletePrevented": "Impossible de supprimer un programme avec des sous-éléments attachés"
 }
