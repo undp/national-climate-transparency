@@ -198,3 +198,20 @@ export const doesUserHaveValidatePermission = async (get: any): Promise<boolean>
     return true;
   }
 };
+
+export const subtractTwoArrays = (
+  array1: number[],
+  array2: number[],
+  multiplier?: number
+): number[] => {
+  const processedMultiplier = multiplier ?? 1;
+  return array1.map((value, index) => (value - array2[index]) * processedMultiplier);
+};
+
+export const calculateArraySum = (array: number[]) => {
+  let arrSum = 0;
+  for (let index = 0; index <= array.length; index++) {
+    arrSum += array[index] || 0;
+  }
+  return arrSum;
+};

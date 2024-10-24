@@ -6,7 +6,7 @@ WITH fullprj AS (
 			prj."projectId" AS id,
 			prj."programmeId",
 			prj."internationalImplementingEntities",
-			prj."recipientEntities",
+			p_v_e."recipientEntities",
 			COALESCE(SUM(p_v_e."achievedGHGReduction"), 0) AS "achievedGHGReduction",
 			COALESCE(SUM(p_v_e."expectedGHGReduction"), 0) AS "expectedGHGReduction",
 			CUSTOM_ARRAY_AGG(p_v_e."ghgsAffected") FILTER (WHERE p_v_e."ghgsAffected" IS NOT NULL) AS "ghgsAffected"
@@ -17,12 +17,13 @@ WITH fullprj AS (
 					id,
 					"achievedGHGReduction",
 					"expectedGHGReduction",
-					"ghgsAffected"
+					"ghgsAffected",
+					"recipientEntities"
 			FROM 
 					project_view_entity
 	) p_v_e ON prj."projectId" = p_v_e.id
 	GROUP BY 
-			prj."projectId", prj."programmeId", prj."internationalImplementingEntities", prj."recipientEntities"
+			prj."projectId", prj."programmeId", prj."internationalImplementingEntities", p_v_e."recipientEntities"
 ),
 act AS (
 	SELECT 

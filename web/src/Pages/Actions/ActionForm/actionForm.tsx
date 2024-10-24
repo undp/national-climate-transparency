@@ -1,13 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import './actionForm.scss';
 import { Row, Col, Input, Button, Form, Select, message, Spin, Tooltip } from 'antd';
-import {
-  AppstoreOutlined,
-  DeleteOutlined,
-  DisconnectOutlined,
-  PlusCircleOutlined,
-} from '@ant-design/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import {
   InstrumentType,
@@ -19,9 +14,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import UploadFileGrid from '../../../Components/Upload/uploadFiles';
-import AttachEntity from '../../../Components/Popups/attach';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
-import { ActionMigratedData } from '../../../Definitions/actionDefinitions';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeData } from '../../../Definitions/programmeDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
@@ -30,7 +23,6 @@ import {
   doesUserHaveValidatePermission,
   getFormTitle,
   getRounded,
-  joinTwoArrays,
 } from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
@@ -50,7 +42,6 @@ import { KPIAction } from '../../../Enums/shared.enum';
 import { Role } from '../../../Enums/role.enum';
 import ConfirmPopup from '../../../Components/Popups/Confirmation/confirmPopup';
 import {
-  attachButtonBps,
   attachTableHeaderBps,
   halfColumnBps,
   quarterColumnBps,
@@ -83,10 +74,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const { userInfoState, isValidationAllowed, setIsValidationAllowed } = useUserContext();
   const { entId } = useParams();
 
-  // First Rendering Check
-
-  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
-
   // Form Validation Rules
 
   const validation = getValidationRules(method);
@@ -97,7 +84,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Form General State
 
-  const [actionMigratedData, setActionMigratedData] = useState<ActionMigratedData>();
   const [uploadedFiles, setUploadedFiles] = useState<
     { key: string; title: string; data: string }[]
   >([]);
@@ -110,23 +96,19 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
 
-  // Programme Attachments state
-
-  const [allProgramIds, setAllProgramIdList] = useState<string[]>([]);
-  const [attachedProgramIds, setAttachedProgramIds] = useState<string[]>([]);
-  const [tempProgramIds, setTempProgramIds] = useState<string[]>([]);
+  // Programme state
 
   const [programData, setProgramData] = useState<ProgrammeData[]>([]);
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [pageSize, setPageSize] = useState<number>(10);
 
-  // Activity Attachment state: Activity link functions removed keeping original state
-
-  const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
+  // Activity state
 
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [activityCurrentPage, setActivityCurrentPage] = useState<any>(1);
   const [activityPageSize, setActivityPageSize] = useState<number>(10);
+
+  // Support state
 
   const [supportData, setSupportData] = useState<SupportData[]>([]);
   const [supportCurrentPage, setSupportCurrentPage] = useState<any>(1);
@@ -134,12 +116,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // Popup Definition
 
-  const [openDetachPopup, setOpenDetachPopup] = useState<boolean>(false);
   const [openDeletePopup, setOpenDeletePopup] = useState<boolean>(false);
-
-  // Detach Entity Data
-
-  const [detachingEntityId, setDetachingEntityId] = useState<string>();
 
   // KPI State
 
@@ -164,424 +141,17 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     userSectors.map((sector) => availableSectors.push(sector));
   }
 
-  useEffect(() => {
-    // Initially Loading Free Programmes and Activities that can be attached
+  // Programme Column Definition
 
-    const fetchFreeChildren = async () => {
-      if (method !== 'view') {
-        try {
-          const prgResponse: any = await get('national/programmes/link/eligible');
+  const progTableColumns = getProgrammeTableColumns();
 
-          const freeProgrammeIds: string[] = [];
-          prgResponse.data.forEach((prg: any) => {
-            freeProgrammeIds.push(prg.programmeId);
-          });
-          setAllProgramIdList(freeProgrammeIds);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-    };
-    fetchFreeChildren();
+  // Activity Column Definition
 
-    // Initially Loading the underlying action data when not in create mode
+  const activityTableColumns = getActivityTableColumns();
 
-    const fetchData = async () => {
-      if (method !== 'create' && entId) {
-        try {
-          const response: any = await get(`national/actions/${entId}`);
-          if (response.status === 200 || response.status === 201) {
-            const entityData: any = response.data;
+  // Support Column Definition
 
-            // Populating Action owned data fields
-            form.setFieldsValue({
-              title: entityData.title,
-              description: entityData.description,
-              objective: entityData.objective,
-              type: entityData.type,
-              sector: entityData.sector,
-              instrumentType: entityData.instrumentType,
-              status: entityData.status,
-              startYear: entityData.startYear,
-              natAnchor: entityData.natAnchor,
-            });
-
-            setIsValidated(entityData.validated ?? false);
-
-            if (entityData.documents?.length > 0) {
-              const tempFiles: { key: string; title: string; url: string }[] = [];
-              entityData.documents.forEach((document: any) => {
-                tempFiles.push({
-                  key: document.createdTime,
-                  title: document.title,
-                  url: document.url,
-                });
-              });
-              setStoredFiles(tempFiles);
-            }
-
-            // Populating Migrated Fields (Will be overwritten when attachments change)
-            setActionMigratedData({
-              ghgsAffected: entityData.migratedData?.ghgsAffected,
-              estimatedInvestment: entityData.migratedData?.totalInvestment,
-              achievedReduction: entityData.migratedData?.achievedGHGReduction,
-              expectedReduction: entityData.migratedData?.expectedGHGReduction,
-              natImplementer: entityData.migratedData?.natImplementors ?? [],
-            });
-          }
-        } catch {
-          navigate('/actions');
-        }
-        setIsSaveButtonDisabled(true);
-      }
-    };
-    fetchData();
-
-    // Initially Loading the KPI data when not in create mode
-
-    const fetchCreatedKPIData = async () => {
-      if (method !== 'create' && entId) {
-        try {
-          const response: any = await get(`national/kpis/achieved/action/${entId}`);
-          if (response.status === 200 || response.status === 201) {
-            const tempKpiList: CreatedKpiData[] = [];
-            let tempKpiCounter = kpiCounter;
-            response.data.forEach((kpi: any) => {
-              tempKpiList.push({
-                index: tempKpiCounter,
-                creator: entId,
-                id: kpi.kpiId,
-                name: kpi.name,
-                unit: kpi.kpiUnit,
-                achieved: parseFloat(kpi.achieved ?? 0),
-                expected: parseFloat(kpi.expected ?? 0),
-                kpiAction: KPIAction.NONE,
-              });
-              tempKpiCounter = tempKpiCounter + 1;
-            });
-            setKpiCounter(tempKpiCounter);
-            setCreatedKpiList(tempKpiList);
-
-            if (tempKpiList.length > 0) {
-              setHandleKPI(true);
-            }
-          }
-        } catch (error: any) {
-          console.log(error, t('kpiSearchFailed'));
-        }
-      }
-    };
-    fetchCreatedKPIData();
-
-    // Initially Loading the attached programme data when not in create mode
-
-    const fetchConnectedProgrammeIds = async () => {
-      if (method !== 'create') {
-        try {
-          const payload = {
-            filterAnd: [
-              {
-                key: 'actionId',
-                operation: '=',
-                value: entId,
-              },
-            ],
-            sort: {
-              key: 'programmeId',
-              order: 'ASC',
-            },
-          };
-          const response: any = await post('national/programmes/query', payload);
-
-          const connectedProgrammeIds: string[] = [];
-          response.data.forEach((prg: any) => {
-            connectedProgrammeIds.push(prg.programmeId);
-          });
-          setAttachedProgramIds(connectedProgrammeIds);
-          setTempProgramIds(connectedProgrammeIds);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-    };
-    fetchConnectedProgrammeIds();
-
-    // Initially Loading the attached activity data when not in create mode
-
-    const fetchConnectedActivityIds = async () => {
-      if (method !== 'create') {
-        try {
-          const connectedActivityIds: string[] = [];
-          const payload = {
-            filterAnd: [
-              {
-                key: 'parentId',
-                operation: '=',
-                value: entId,
-              },
-              {
-                key: 'parentType',
-                operation: '=',
-                value: 'action',
-              },
-            ],
-            sort: {
-              key: 'activityId',
-              order: 'ASC',
-            },
-          };
-          const response: any = await post('national/activities/query', payload);
-          response.data.forEach((act: any) => {
-            connectedActivityIds.push(act.activityId);
-          });
-          setAttachedActivityIds(connectedActivityIds);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-    };
-    fetchConnectedActivityIds();
-  }, []);
-
-  // Populating Form Migrated Fields, when migration data changes
-
-  useEffect(() => {
-    if (actionMigratedData) {
-      form.setFieldsValue({
-        ghgsAffected: actionMigratedData.ghgsAffected,
-        natImplementor: actionMigratedData.natImplementer,
-        estimatedInvestment: actionMigratedData.estimatedInvestment,
-        achievedReduct: actionMigratedData.achievedReduction,
-        expectedReduct: actionMigratedData.expectedReduction,
-      });
-    }
-    if (!firstRenderingCompleted) {
-      setFirstRenderingCompleted(true);
-    }
-  }, [actionMigratedData]);
-
-  // Fetching Programme data and calculating migrated fields when attachment changes
-
-  useEffect(() => {
-    const payload = {
-      page: 1,
-      size: tempProgramIds.length,
-      filterOr: [] as any[],
-      sort: {
-        key: 'programmeId',
-        order: 'ASC',
-      },
-    };
-
-    const fetchAttachmentData = async () => {
-      if (tempProgramIds.length > 0) {
-        try {
-          tempProgramIds.forEach((progId) => {
-            payload.filterOr.push({
-              key: 'programmeId',
-              operation: '=',
-              value: progId,
-            });
-          });
-          const response: any = await post('national/programmes/query', payload);
-
-          const tempPRGData: ProgrammeData[] = [];
-
-          response.data.forEach((prg: any, index: number) => {
-            tempPRGData.push({
-              key: index.toString(),
-              programmeId: prg.programmeId,
-              actionId: prg.action?.actionId,
-              title: prg.title,
-              type: prg.migratedData[0]?.types ?? [],
-              status: prg.programmeStatus,
-              subSectorsAffected: prg.affectedSubSector ?? [],
-              estimatedInvestment: prg.investment,
-              ghgsAffected: prg.migratedData[0]?.ghgsAffected ?? [],
-              types: prg.migratedData[0]?.types ?? [],
-              natImplementer: prg.natImplementor ?? [],
-              achievedReduction: prg.migratedData[0]?.achievedGHGReduction ?? 0,
-              estimatedReduction: prg.migratedData[0]?.expectedGHGReduction ?? 0,
-            });
-          });
-
-          setProgramData(tempPRGData);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      } else {
-        setProgramData([]);
-      }
-    };
-    fetchAttachmentData();
-
-    // Setting Pagination
-    setCurrentPage(1);
-    setPageSize(10);
-  }, [tempProgramIds]);
-
-  // Fetching Activity data and calculating migrated fields when attachment changes
-
-  useEffect(() => {
-    const activityPayload = {
-      filterOr: [] as any[],
-      sort: {
-        key: 'activityId',
-        order: 'ASC',
-      },
-    };
-
-    const supportPayload = {
-      filterOr: [] as any[],
-      sort: {
-        key: 'supportId',
-        order: 'ASC',
-      },
-    };
-
-    const fetchActivityAttachmentData = async () => {
-      if (attachedActivityIds.length > 0) {
-        try {
-          attachedActivityIds.forEach((activityId) => {
-            activityPayload.filterOr.push({
-              key: 'activityId',
-              operation: '=',
-              value: activityId,
-            });
-            supportPayload.filterOr.push({
-              key: 'activityId',
-              operation: '=',
-              value: activityId,
-            });
-          });
-          const activityResponse: any = await post('national/activities/query', activityPayload);
-          const supportResponse: any = await post('national/supports/query', supportPayload);
-
-          const tempActivityData: ActivityData[] = [];
-          const tempSupportData: SupportData[] = [];
-
-          activityResponse.data.forEach((act: any, index: number) => {
-            tempActivityData.push({
-              key: index.toString(),
-              activityId: act.activityId,
-              title: act.title,
-              reductionMeasures: act.measure,
-              status: act.status,
-              natImplementor: act.nationalImplementingEntity ?? [],
-              ghgsAffected: act.ghgsAffected,
-              achievedReduction: act.achievedGHGReduction ?? 0,
-              estimatedReduction: act.expectedGHGReduction ?? 0,
-            });
-          });
-
-          supportResponse.data.forEach((sup: any, index: number) => {
-            tempSupportData.push({
-              key: index.toString(),
-              supportId: sup.supportId,
-              financeNature: sup.financeNature,
-              direction: sup.direction,
-              finInstrument:
-                sup.financeNature === 'International'
-                  ? sup.internationalFinancialInstrument
-                  : sup.nationalFinancialInstrument,
-              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-              recievedUSD: getRounded(sup.receivedAmount ?? 0),
-              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
-            });
-          });
-
-          setActivityData(tempActivityData);
-          setSupportData(tempSupportData);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      } else {
-        setActivityData([]);
-        setSupportData([]);
-      }
-    };
-    fetchActivityAttachmentData();
-
-    // Setting Pagination
-    setActivityCurrentPage(1);
-    setActivityPageSize(10);
-
-    setSupportCurrentPage(1);
-    setSupportPageSize(10);
-  }, [attachedActivityIds]);
-
-  // Calculating migrated fields when attachment changes
-
-  const memoizedMigratedData = useMemo(() => {
-    const tempMigratedData: ActionMigratedData = {
-      natImplementer: [],
-      estimatedInvestment: 0,
-      achievedReduction: 0,
-      expectedReduction: 0,
-      ghgsAffected: [],
-    };
-
-    programData.forEach((prg: ProgrammeData) => {
-      tempMigratedData.ghgsAffected = joinTwoArrays(
-        tempMigratedData.ghgsAffected,
-        prg.ghgsAffected ?? []
-      );
-
-      tempMigratedData.natImplementer = joinTwoArrays(
-        tempMigratedData.natImplementer,
-        prg.natImplementer ?? []
-      );
-
-      tempMigratedData.estimatedInvestment =
-        tempMigratedData.estimatedInvestment + prg.estimatedInvestment ?? 0;
-
-      const prgGHGAchievement = prg.achievedReduction ?? 0;
-      const prgGHGExpected = prg.estimatedReduction ?? 0;
-
-      tempMigratedData.achievedReduction = tempMigratedData.achievedReduction + prgGHGAchievement;
-      tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + prgGHGExpected;
-    });
-
-    activityData.forEach((act: ActivityData) => {
-      if (act.ghgsAffected && !tempMigratedData.ghgsAffected.includes(act.ghgsAffected)) {
-        tempMigratedData.ghgsAffected.push(act.ghgsAffected);
-      }
-
-      const actGHGAchievement = act.achievedReduction ?? 0;
-      const actGHGExpected = act.estimatedReduction ?? 0;
-
-      tempMigratedData.achievedReduction = tempMigratedData.achievedReduction + actGHGAchievement;
-      tempMigratedData.expectedReduction = tempMigratedData.expectedReduction + actGHGExpected;
-    });
-
-    return tempMigratedData;
-  }, [programData, activityData]);
-
-  useEffect(() => {
-    setActionMigratedData(memoizedMigratedData);
-  }, [memoizedMigratedData]);
-
-  // Attachment resolve before updating an already created action
-
-  const resolveProgrammeAttachments = async () => {
-    const toAttach = tempProgramIds.filter((prg) => !attachedProgramIds.includes(prg));
-    const toDetach = attachedProgramIds.filter((prg) => !tempProgramIds.includes(prg));
-
-    try {
-      if (toDetach.length > 0) {
-        toDetach.forEach(async (prg) => {
-          await post('national/programmes/unlink', { programme: prg });
-        });
-      }
-
-      if (toAttach.length > 0) {
-        await post('national/programmes/link', { actionId: entId, programmes: toAttach });
-      }
-    } catch (error: any) {
-      displayErrorMessage(error);
-    }
-  };
+  const supportTableColumns = getSupportTableColumns();
 
   // Form Submit
 
@@ -671,23 +241,11 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
         method === 'create' ? t('actionCreationSuccess') : t('actionUpdateSuccess');
 
       if (response.status === 200 || response.status === 201) {
-        if (entId && method === 'update') {
-          resolveProgrammeAttachments();
-        }
-
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
-        });
-
         message.open({
           type: 'success',
           content: successMsg,
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
         });
 
         setWaitingForBE(false);
@@ -778,22 +336,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Detach Programme
-
-  const detachProgramme = async (prgId: string) => {
-    setDetachingEntityId(prgId);
-    setOpenDetachPopup(true);
-  };
-
-  // Handle Detachment
-
-  const detachEntity = async (entityId: string) => {
-    const filteredIds = tempProgramIds.filter((id) => id !== entityId);
-    setTempProgramIds(filteredIds);
-    setIsSaveButtonDisabled(false);
-  };
-
-  // Add New KPI
+  // KPI handler Functions
 
   const createKPI = () => {
     const newItem: NewKpiData = {
@@ -860,18 +403,6 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Programme Column Definition
-
-  const progTableColumns = getProgrammeTableColumns(isView, detachProgramme);
-
-  // Activity Column Definition
-
-  const activityTableColumns = getActivityTableColumns();
-
-  // Support Column Definition
-
-  const supportTableColumns = getSupportTableColumns();
-
   // Programme Table Behaviour
 
   const handleTableChange = (pagination: any) => {
@@ -899,23 +430,249 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     setIsSaveButtonDisabled(false);
   };
 
+  // DB Queries
+
+  const fetchActionData = async () => {
+    if (method !== 'create' && entId) {
+      try {
+        const response: any = await get(`national/actions/${entId}`);
+        if (response.status === 200 || response.status === 201) {
+          const entityData: any = response.data;
+
+          // Populating Action owned data fields
+          form.setFieldsValue({
+            title: entityData.title,
+            description: entityData.description,
+            objective: entityData.objective,
+            type: entityData.type,
+            sector: entityData.sector,
+            instrumentType: entityData.instrumentType,
+            status: entityData.status,
+            startYear: entityData.startYear,
+            natAnchor: entityData.natAnchor,
+          });
+
+          setIsValidated(entityData.validated ?? false);
+
+          if (entityData.documents?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.documents.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredFiles(tempFiles);
+          }
+
+          // Populating Migrated Fields (Will be overwritten when attachments change)
+
+          form.setFieldsValue({
+            ghgsAffected: entityData.migratedData?.ghgsAffected,
+            natImplementor: entityData.migratedData?.natImplementors ?? [],
+            estimatedInvestment: entityData.migratedData?.financeNeeded ?? 0,
+            achievedReduct: entityData.migratedData?.achievedGHGReduction,
+            expectedReduct: entityData.migratedData?.expectedGHGReduction,
+          });
+        }
+      } catch {
+        navigate('/actions');
+      }
+      setIsSaveButtonDisabled(true);
+    }
+  };
+
+  const fetchCreatedKPIData = async () => {
+    if (method !== 'create' && entId) {
+      try {
+        const response: any = await get(`national/kpis/achieved/action/${entId}`);
+        if (response.status === 200 || response.status === 201) {
+          const tempKpiList: CreatedKpiData[] = [];
+          let tempKpiCounter = kpiCounter;
+          response.data.forEach((kpi: any) => {
+            tempKpiList.push({
+              index: tempKpiCounter,
+              creator: entId,
+              id: kpi.kpiId,
+              name: kpi.name,
+              unit: kpi.kpiUnit,
+              achieved: parseFloat(kpi.achieved ?? 0),
+              expected: parseFloat(kpi.expected ?? 0),
+              kpiAction: KPIAction.NONE,
+            });
+            tempKpiCounter = tempKpiCounter + 1;
+          });
+          setKpiCounter(tempKpiCounter);
+          setCreatedKpiList(tempKpiList);
+
+          if (tempKpiList.length > 0) {
+            setHandleKPI(true);
+          }
+        }
+      } catch (error: any) {
+        console.log(error, t('kpiSearchFailed'));
+      }
+    }
+  };
+
+  const fetchConnectedProgrammeData = async () => {
+    if (method !== 'create') {
+      try {
+        const payload = {
+          filterAnd: [
+            {
+              key: 'actionId',
+              operation: '=',
+              value: entId,
+            },
+          ],
+          sort: {
+            key: 'programmeId',
+            order: 'ASC',
+          },
+        };
+        const response: any = await post('national/programmes/query', payload);
+
+        const tempPRGData: ProgrammeData[] = [];
+
+        response.data.forEach((prg: any, index: number) => {
+          tempPRGData.push({
+            key: index.toString(),
+            programmeId: prg.programmeId,
+            actionId: prg.action?.actionId,
+            title: prg.title,
+            type: prg.action?.type,
+            status: prg.programmeStatus,
+            subSectorsAffected: prg.affectedSubSector ?? [],
+            estimatedInvestment: prg.investment,
+            ghgsAffected: prg.migratedData[0]?.ghgsAffected ?? [],
+            types: prg.migratedData[0]?.types ?? [],
+            natImplementer: prg.natImplementor ?? [],
+            achievedReduction: prg.migratedData[0]?.achievedGHGReduction ?? 0,
+            estimatedReduction: prg.migratedData[0]?.expectedGHGReduction ?? 0,
+          });
+        });
+
+        setProgramData(tempPRGData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
+    }
+  };
+
+  const fetchConnectedActivityData = async () => {
+    if (method !== 'create') {
+      try {
+        const payload = {
+          filterAnd: [
+            {
+              key: 'parentId',
+              operation: '=',
+              value: entId,
+            },
+            {
+              key: 'parentType',
+              operation: '=',
+              value: 'action',
+            },
+          ],
+          sort: {
+            key: 'activityId',
+            order: 'ASC',
+          },
+        };
+
+        const activityResponse: any = await post('national/activities/query', payload);
+        const tempActivityData: ActivityData[] = [];
+
+        activityResponse.data.forEach((act: any, index: number) => {
+          tempActivityData.push({
+            key: index.toString(),
+            activityId: act.activityId,
+            title: act.title,
+            reductionMeasures: act.measure,
+            status: act.status,
+            natImplementor: act.nationalImplementingEntity ?? [],
+            ghgsAffected: act.ghgsAffected,
+            achievedReduction: act.achievedGHGReduction ?? 0,
+            estimatedReduction: act.expectedGHGReduction ?? 0,
+          });
+        });
+
+        setActivityData(tempActivityData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
+    }
+  };
+
+  const fetchSupportData = async () => {
+    const supportPayload = {
+      filterOr: [] as any[],
+      sort: {
+        key: 'supportId',
+        order: 'ASC',
+      },
+    };
+
+    if (activityData.length > 0) {
+      try {
+        activityData.forEach((activity) => {
+          supportPayload.filterOr.push({
+            key: 'activityId',
+            operation: '=',
+            value: activity,
+          });
+        });
+
+        const supportResponse: any = await post('national/supports/query', supportPayload);
+
+        const tempSupportData: SupportData[] = [];
+
+        supportResponse.data.forEach((sup: any, index: number) => {
+          tempSupportData.push({
+            key: index.toString(),
+            supportId: sup.supportId,
+            financeNature: sup.financeNature,
+            direction: sup.direction,
+            finInstrument:
+              sup.financeNature === 'International'
+                ? sup.internationalFinancialInstrument
+                : sup.nationalFinancialInstrument,
+            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+            recievedUSD: getRounded(sup.receivedAmount ?? 0),
+            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+          });
+        });
+
+        setSupportData(tempSupportData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
+    } else {
+      setSupportData([]);
+    }
+  };
+
+  // Dynamic Update
+
+  useEffect(() => {
+    fetchActionData();
+    fetchCreatedKPIData();
+    fetchConnectedProgrammeData();
+    fetchConnectedActivityData();
+  }, []);
+
+  // Fetching Activity data and calculating migrated fields when attachment changes
+
+  useEffect(() => {
+    fetchSupportData();
+  }, [activityData]);
+
   return (
     <div className="content-container">
-      <ConfirmPopup
-        key={'detach_popup'}
-        icon={<DisconnectOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
-        isDanger={true}
-        content={{
-          primaryMsg: `${t('detachPopup:primaryMsg')} Programme ${detachingEntityId}`,
-          secondaryMsg: t('detachPopup:secondaryMsg'),
-          cancelTitle: t('detachPopup:cancelTitle'),
-          actionTitle: t('detachPopup:actionTitle'),
-        }}
-        actionRef={detachingEntityId}
-        doAction={detachEntity}
-        open={openDetachPopup}
-        setOpen={setOpenDetachPopup}
-      />
       <ConfirmPopup
         key={'delete_popup'}
         icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '120px' }} />}
@@ -934,7 +691,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE && firstRenderingCompleted ? (
+      {!waitingForBE ? (
         <div className="action-form">
           <Form
             form={form}
@@ -1174,57 +931,41 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
             </div>
-            <div className="form-section-card">
-              <Row>
-                <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
-                  <div className="form-section-header">{t('programInfoTitle')}</div>
-                </Col>
-                <Col {...attachButtonBps}>
-                  <AttachEntity
-                    isDisabled={isView}
-                    content={{
-                      buttonName: t('attachProgramme'),
-                      attach: t('entityAction:attach'),
-                      contentTitle: t('attachProgramme'),
-                      listTitle: t('programmeList'),
-                      cancel: t('entityAction:cancel'),
-                    }}
-                    options={allProgramIds}
-                    alreadyAttached={attachedProgramIds}
-                    currentAttachments={tempProgramIds}
-                    setCurrentAttachments={setTempProgramIds}
-                    setIsSaveButtonDisabled={setIsSaveButtonDisabled}
-                    icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
-                  ></AttachEntity>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <LayoutTable
-                    tableData={programData.slice(
-                      (currentPage - 1) * pageSize,
-                      (currentPage - 1) * pageSize + pageSize
-                    )}
-                    columns={progTableColumns}
-                    loading={false}
-                    pagination={{
-                      current: currentPage,
-                      pageSize: pageSize,
-                      total: programData.length,
-                      showQuickJumper: true,
-                      pageSizeOptions: ['10', '20', '30'],
-                      showSizeChanger: true,
-                      style: { textAlign: 'center' },
-                      locale: { page: '' },
-                      position: ['bottomRight'],
-                    }}
-                    handleTableChange={handleTableChange}
-                    emptyMessage={t('noProgramsMessage')}
-                  />
-                </Col>
-              </Row>
-            </div>
-            {method !== 'create' && (
+            {method !== 'create' && programData.length > 0 && (
+              <div className="form-section-card">
+                <Row>
+                  <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
+                    <div className="form-section-header">{t('programInfoTitle')}</div>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <LayoutTable
+                      tableData={programData.slice(
+                        (currentPage - 1) * pageSize,
+                        (currentPage - 1) * pageSize + pageSize
+                      )}
+                      columns={progTableColumns}
+                      loading={false}
+                      pagination={{
+                        current: currentPage,
+                        pageSize: pageSize,
+                        total: programData.length,
+                        showQuickJumper: true,
+                        pageSizeOptions: ['10', '20', '30'],
+                        showSizeChanger: true,
+                        style: { textAlign: 'center' },
+                        locale: { page: '' },
+                        position: ['bottomRight'],
+                      }}
+                      handleTableChange={handleTableChange}
+                      emptyMessage={t('noProgramsMessage')}
+                    />
+                  </Col>
+                </Row>
+              </div>
+            )}
+            {method !== 'create' && activityData.length > 0 && (
               <div className="form-section-card">
                 <Row>
                   <Col {...attachTableHeaderBps} style={{ paddingTop: '6px' }}>
@@ -1257,7 +998,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Row>
               </div>
             )}
-            {method !== 'create' && (
+            {method !== 'create' && supportData.length > 0 && (
               <div className="form-section-card">
                 <Row>
                   <Col span={20}>

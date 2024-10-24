@@ -3,21 +3,14 @@ import '../../../Styles/app.scss';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import './actionList.scss';
 import { Action } from '../../../Enums/action.enum';
-import { Button, Col, Row, Input, Dropdown, Popover, message, Radio, Space, MenuProps } from 'antd';
-import {
-  AppstoreOutlined,
-  EllipsisOutlined,
-  FilterOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { Button, Col, Row, Input, Dropdown, Popover, Radio, Space, MenuProps } from 'antd';
+import { EllipsisOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAbilityContext } from '../../../Casl/Can';
 import { ActionEntity } from '../../../Entities/action';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import StatusChip from '../../../Components/StatusChip/statusChip';
-import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
 import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
@@ -49,7 +42,7 @@ interface Filter {
 
 const actionList = () => {
   const navigate = useNavigate();
-  const { get, post } = useConnection();
+  const { post } = useConnection();
   const ability = useAbilityContext();
 
   const { t } = useTranslation(['actionList', 'tableAction', 'columnHeader', 'entityAction']);
@@ -86,60 +79,6 @@ const actionList = () => {
 
   const [tempSearchValue, setTempSearchValue] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
-
-  // Programme Attachment State
-
-  const [openAttaching, setOpenAttaching] = useState<boolean>(false);
-  const [allFreeProgrammeIds, setAllFreeProgrammeIds] = useState<string[]>([]);
-
-  const [selectedActionId, setSelectedActionId] = useState<string>();
-  const [attachedProgrammeIds, setAttachedProgrammeIds] = useState<string[]>([]);
-  const [toBeAttached, setToBeAttached] = useState<string[]>([]);
-
-  // Free Prg Read from DB
-
-  const getFreeProgrammeIds = async () => {
-    try {
-      const response: any = await get('national/programmes/link/eligible');
-
-      const freeProgrammeIds: string[] = [];
-      response.data.forEach((prg: any) => {
-        freeProgrammeIds.push(prg.programmeId);
-      });
-      setAllFreeProgrammeIds(freeProgrammeIds);
-    } catch (error: any) {
-      displayErrorMessage(error);
-    }
-  };
-
-  // Get Attached Programmes
-
-  const getAttachedProgrammeIds = async (actionId: string) => {
-    try {
-      const payload = {
-        filterAnd: [
-          {
-            key: 'actionId',
-            operation: '=',
-            value: actionId,
-          },
-        ],
-        sort: {
-          key: 'programmeId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/programmes/query', payload);
-
-      const freeProgrammeIds: string[] = [];
-      response.data.forEach((prg: any) => {
-        freeProgrammeIds.push(prg.programmeId);
-      });
-      setAttachedProgrammeIds(freeProgrammeIds);
-    } catch (error: any) {
-      displayErrorMessage(error);
-    }
-  };
 
   // Data Read from DB
 
@@ -216,38 +155,6 @@ const actionList = () => {
     }
   };
 
-  // Attach Multiple Programmes for an Action
-
-  const attachProgrammes = async () => {
-    try {
-      const payload = {
-        actionId: selectedActionId,
-        programmes: toBeAttached,
-      };
-      const response: any = await post('national/programmes/link', payload);
-      if (response.status === 200 || response.status === 201) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
-        });
-
-        message.open({
-          type: 'success',
-          content: t('programmeLinkSuccess'),
-          duration: 3,
-          style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-        });
-
-        await new Promise((resolve) => {
-          setTimeout(resolve, 500);
-        });
-
-        getAllData();
-      }
-    } catch (error: any) {
-      displayErrorMessage(error);
-    }
-  };
-
   // Handling Table Pagination and Sorting Changes
 
   // eslint-disable-next-line no-unused-vars
@@ -299,25 +206,8 @@ const actionList = () => {
   // State Management
 
   useEffect(() => {
-    getFreeProgrammeIds();
-    if (!openAttaching) {
-      setAttachedProgrammeIds([]);
-    }
-  }, [openAttaching]);
-
-  useEffect(() => {
     getAllData();
   }, [currentPage, pageSize, sortField, sortOrder, searchValue, appliedFilterValue]);
-
-  // Children Attachment Functionality
-
-  useEffect(() => {
-    if (toBeAttached.length > 0) {
-      attachProgrammes();
-      setToBeAttached([]);
-      setSelectedActionId(undefined);
-    }
-  }, [toBeAttached]);
 
   // Action List Table Columns
 
@@ -388,9 +278,6 @@ const actionList = () => {
               ActionEntity,
               record.actionId,
               record.validationStatus ?? 'pending',
-              getAttachedProgrammeIds,
-              setOpenAttaching,
-              setSelectedActionId,
               navigate,
               t
             )}
@@ -518,21 +405,6 @@ const actionList = () => {
         <div className="body-title">{t('viewTitle')}</div>
       </div>
       <div className="content-card">
-        <SimpleAttachEntity
-          open={openAttaching}
-          setOpen={setOpenAttaching}
-          options={allFreeProgrammeIds}
-          content={{
-            buttonName: t('attachProgramme'),
-            attach: t('entityAction:attach'),
-            contentTitle: t('attachProgramme'),
-            listTitle: t('programmeList'),
-            cancel: t('entityAction:cancel'),
-          }}
-          attachedUnits={attachedProgrammeIds}
-          setToBeAttached={setToBeAttached}
-          icon={<AppstoreOutlined style={{ fontSize: '120px' }} />}
-        ></SimpleAttachEntity>
         <Row className="table-actions-section">
           <Col {...addActionBps}>
             <div className="action-bar">

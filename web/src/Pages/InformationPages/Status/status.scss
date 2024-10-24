@@ -1,0 +1,39 @@
+@import '../../../Assets/Fonts/fonts.scss';
+@import '../../../Styles/variables.scss';
+
+.status-container {
+  text-align: left;
+  justify-content: left;
+  background-color:white;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-bottom: 60px;
+
+  .title {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: $primary-font-family;
+    color: $title-text-color;
+    text-align: center;
+    justify-content: center;
+    text-transform: uppercase;
+    padding: 50px 50px 10px 50px;
+
+    .code-row {
+      display: block !important;
+    }
+
+    @media (max-width: $lg-size) {
+      font-size: 2rem;
+      margin-top: 1rem;
+      color: $title-text-color;
+      line-height: 1.5em;
+    }
+  }
+
+  .text {
+    color: $title-text-color;
+    padding: 20px 0px 20px 0px;
+  }
+}
+

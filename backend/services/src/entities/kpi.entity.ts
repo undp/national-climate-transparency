@@ -1,7 +1,6 @@
 import { EntityType } from '../enums/shared.enum';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, AfterLoad, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { AchievementEntity } from './achievement.entity';
-import { KpiUnits } from '../enums/kpi.enum';
 
 @Entity('kpi')
 export class KpiEntity {
@@ -11,7 +10,7 @@ export class KpiEntity {
   @Column()
   name: string;
 
-	@Column({ type: "enum", enum: KpiUnits })
+	@Column()
   kpiUnit: string;
 
   @Column({ type: 'enum', enum: EntityType })

@@ -79,6 +79,7 @@ export class ActivityService {
 					action = await this.isActionValid(activityDto.parentId, user);
 					activity.path = `${activityDto.parentId}._._`;
 					activity.sector = action.sector;
+					activity.type = action.type;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.ACTION, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
 
@@ -90,6 +91,7 @@ export class ActivityService {
 					action = programme.action;
 					activity.path = programme.path && programme.path.trim() !== '' ? `${programme.path}.${activityDto.parentId}._` : `_.${activityDto.parentId}._`;
 					activity.sector = programme.sector;
+					activity.type = programme.type;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROGRAMME, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
 
@@ -102,6 +104,7 @@ export class ActivityService {
 					action = programme?.action;
 					activity.path = project.path && project.path.trim() !== '' ? `${project.path}.${activityDto.parentId}` : `_._.${activityDto.parentId}`;
 					activity.sector = project.sector;
+					activity.type = project.type;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, activityDto.parentId, user.id, activity.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROJECT, EntityType.ACTIVITY, activity.activityId, user.id, activityDto.parentId);
 
@@ -458,6 +461,7 @@ export class ActivityService {
 			activityUpdate.parentId = null;
 			activityUpdate.parentType = null;
 			activityUpdate.sector = null;
+			activityUpdate.type = null;
 			activityUpdate.path = '_._._';
 		}
 	}
@@ -499,6 +503,7 @@ export class ActivityService {
 
 					activityUpdate.path = `${activityUpdateDto.parentId}._._`;
 					activityUpdate.sector = action.sector;
+					activityUpdate.type = action.type;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.ACTION, activityUpdateDto.parentId, user.id, activityUpdate.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto.parentId);
 					break;
@@ -537,6 +542,7 @@ export class ActivityService {
 
 					activityUpdate.path = programme.path && programme.path.trim() !== '' ? `${programme.path}.${activityUpdateDto.parentId}._` : `_.${activityUpdateDto.parentId}._`;
 					activityUpdate.sector = programme.sector;
+					activityUpdate.type = programme.type;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROGRAMME, activityUpdateDto.parentId, user.id, activityUpdate.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto.parentId);
 					break;
@@ -589,6 +595,7 @@ export class ActivityService {
 
 					activityUpdate.path = project.path && project.path.trim() !== '' ? `${project.path}.${activityUpdateDto.parentId}` : `_._.${activityUpdateDto.parentId}`;
 					activityUpdate.sector = project.sector;
+					activityUpdate.type = project.type;
 					this.addEventLogEntry(eventLog, LogEventType.ACTIVITY_LINKED, EntityType.PROJECT, activityUpdateDto.parentId, user.id, activityUpdate.activityId);
 					this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROJECT, EntityType.ACTIVITY, activityUpdate.activityId, user.id, activityUpdateDto.parentId);
 					break;
@@ -1051,6 +1058,19 @@ export class ActivityService {
 				HttpStatus.BAD_REQUEST
 			);
 		}
+
+		// TODO: Refactor this code
+		const actionWithChildren = await this.actionService.findActionByIdWithAllLinkedChildren(actionId);
+		if (actionWithChildren.programmes && actionWithChildren.programmes.length > 0) {
+			throw new HttpException(
+				this.helperService.formatReqMessagesString(
+					"activity.programmesLinkedToAction",
+					[actionId]
+				),
+				HttpStatus.BAD_REQUEST
+			);
+		}
+
 		if (!this.helperService.doesUserHaveSectorPermission(user, action.sector)) {
 			throw new HttpException(
 				this.helperService.formatReqMessagesString(
@@ -1430,7 +1450,7 @@ export class ActivityService {
 
 	//MARK: update mitigation timeline Data
 	async updateMitigationTimeline(mitigationTimelineDto: mitigationTimelineDto, user: User) {
-		const { activityId, mitigationTimeline } = mitigationTimelineDto;
+		const { activityId, mitigationTimeline, expectedGHGReduction, achievedGHGReduction } = mitigationTimelineDto;
 		const activity = await this.linkUnlinkService.findActivityByIdWithSupports(activityId);
 
 		if (!activity) {
@@ -1509,7 +1529,12 @@ export class ActivityService {
 				await em
 					.createQueryBuilder()
 					.update(ActivityEntity)
-					.set({ mitigationTimeline: updatedMitigationTimeline, validated: activity.validated})
+					.set(
+						{ mitigationTimeline: updatedMitigationTimeline, 
+						  validated: activity.validated, 
+						  achievedGHGReduction: achievedGHGReduction, 
+						  expectedGHGReduction: expectedGHGReduction
+						})
 					.where('activityId = :activityId', { activityId })
 					.execute();
 

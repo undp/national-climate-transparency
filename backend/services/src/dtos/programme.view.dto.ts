@@ -32,12 +32,18 @@ export class ProgrammeViewDto {
 
   nationalImplementor: NatImplementor[];
 
-  investment: number;
+  // investment: number;
 
   documents: DocumentDto[];
 
   comments: string;
 
 	validated: boolean;
+
+	achievedGHGReduction?: number;
+
+	expectedGHGReduction?: number;
+
+	ghgsAffected?: string[]
 
 }

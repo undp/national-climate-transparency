@@ -1,12 +1,9 @@
 import { ApiProperty, ApiPropertyOptional, getSchemaPath } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max, Matches, registerDecorator, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface} from 'class-validator';
-import { Sector } from "../enums/sector.enum";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsArray, ArrayMinSize, MaxLength, Min, Max, ValidationOptions} from 'class-validator';
 import { SubSector, NatImplementor } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { KpiDto } from "./kpi.dto";
 import { ProgrammeStatus } from "../enums/programme-status.enum";
-import { KpiUnits } from "../enums/kpi.enum";
-import { IsTwoDecimalPoints } from "../util/twoDecimalPointNumber.decorator";
 
 export class ProgrammeDto {
 
@@ -26,6 +23,11 @@ export class ProgrammeDto {
     @IsString()
     @ApiProperty()
     objective: string;
+
+    @IsNotEmpty()
+    @IsString()
+    @ApiProperty()
+    actionId: string;
     
     @IsArray()
     @ArrayMinSize(1)
@@ -62,11 +64,11 @@ export class ProgrammeDto {
     })
     natImplementor: NatImplementor[];
   
-    @IsNotEmpty()
-    @IsNumber()
-		@IsTwoDecimalPoints()
-    @ApiProperty()
-    investment: number;
+    // @IsNotEmpty()
+    // @IsNumber()
+		// @IsTwoDecimalPoints()
+    // @ApiProperty()
+    // investment: number;
 
 		@IsNotEmpty()
     @IsEnum(ProgrammeStatus, {
@@ -99,9 +101,6 @@ export class ProgrammeDto {
   @IsString()
   comments: string;
 
-  @IsOptional()
-  @ApiPropertyOptional()
-  actionId?: string;
 
   @IsOptional()
   @ApiPropertyOptional()
@@ -113,7 +112,7 @@ export class ProgrammeDto {
       type: "array",
       example: [{
         name: "KPI 1",
-        kpiUnit: KpiUnits.GWp_INSTALLED,
+        kpiUnit: "mWp-installed",
         creatorType: "programme",
         expected: 100
     }],

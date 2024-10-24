@@ -15,17 +15,25 @@ import {
   ExpectedTimeline,
 } from '../../../Definitions/mtgTimeline.definition';
 import { ActivityStatus, ImplMeans, Measure, TechnologyType } from '../../../Enums/activity.enum';
-import { GHGS, IntImplementor, KPIAction, NatImplementor } from '../../../Enums/shared.enum';
+import {
+  GHGS,
+  IntImplementor,
+  KPIAction,
+  NatImplementor,
+  Recipient,
+} from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { SupportData } from '../../../Definitions/supportDefinitions';
 import { ActivityMigratedData, ParentData } from '../../../Definitions/activityDefinitions';
 import { FormLoadProps } from '../../../Definitions/InterfacesAndType/formInterface';
 import { getValidationRules } from '../../../Utils/validationRules';
 import {
+  calculateArraySum,
   delay,
   doesUserHaveValidatePermission,
   getFormTitle,
   getRounded,
+  subtractTwoArrays,
 } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ActivityEntity } from '../../../Entities/activity';
@@ -55,6 +63,7 @@ const { TextArea } = Input;
 
 const gutterSize = 30;
 const inputFontSize = '13px';
+const currentYear = new Date().getFullYear();
 
 const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const [form] = Form.useForm();
@@ -78,10 +87,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   // Form Validation Rules
 
   const validation = getValidationRules(method);
-
-  // First Rendering Check
-
-  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
 
   // Entity Validation Status
 
@@ -140,12 +145,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [expectedTimeline, setExpectedTimeline] = useState<ExpectedTimeline[]>([]);
   const [actualTimeline, setActualTimeline] = useState<ActualTimeline[]>([]);
-  const [isMtgButtonEnabled, setIsMtgButtonEnabled] = useState(false);
   const [mtgStartYear, setMtgStartYear] = useState<number>(0);
   const [selectedGhg, setSelectedGhg] = useState<GHGS>();
+  const [isMtgButtonEnabled, setIsMtgButtonEnabled] = useState(false);
+
   const [gwpSettings, setGwpSettings] = useState<{ CH4: number; N2O: number }>();
-  const [gwpValue, setGwpValue] = useState<number>(1);
-  const [mtgUnit, setMtgUnit] = useState<GHGS>(GHGS.CO);
 
   // Initialization Logic
 
@@ -154,7 +158,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const handleParentIdSelect = (id: string) => {
     setConnectedParentId(id);
     setShouldFetchParentKpi(true);
-    if (id === undefined) {
+
+    if (id === undefined && method === 'create') {
       setMtgStartYear(0);
     }
   };
@@ -162,142 +167,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
   const handleParentTypeSelect = (value: string) => {
     setParentType(value);
     setConnectedParentId(undefined);
-    setMtgStartYear(0);
+
+    if (method === 'create') {
+      setMtgStartYear(0);
+    }
+
     form.setFieldsValue({
       parentId: '',
       parentDescription: '',
     });
   };
-
-  // Tracking Parent selection
-
-  useEffect(() => {
-    const fetchConnectedParent = async () => {
-      const tempMigratedData: ActivityMigratedData = {
-        description: undefined,
-        type: undefined,
-        recipient: undefined,
-        affSectors: undefined,
-        affSubSectors: undefined,
-        startYear: undefined,
-        endYear: undefined,
-        expectedTimeFrame: undefined,
-      };
-
-      if (
-        (parentType === 'action' || parentType === 'programme' || parentType === 'project') &&
-        connectedParentId
-      ) {
-        try {
-          const response: any = await get(`national/${parentType}s/${connectedParentId}`);
-
-          if (parentType === 'action') {
-            tempMigratedData.description = response.data.description;
-            tempMigratedData.affSectors = response.data.sector ?? undefined;
-            tempMigratedData.startYear = response.data.startYear;
-            tempMigratedData.type = response.data.type;
-          } else if (parentType === 'programme') {
-            tempMigratedData.description = response.data.description;
-            tempMigratedData.recipient = response.data.recipientEntity;
-            tempMigratedData.affSectors = response.data.sector ?? undefined;
-            tempMigratedData.affSubSectors = response.data.affectedSubSector;
-            tempMigratedData.startYear = response.data.startYear;
-            tempMigratedData.type = response.data.type;
-          } else {
-            tempMigratedData.description = response.data.description;
-            tempMigratedData.recipient = response.data.recipientEntities;
-            tempMigratedData.affSectors = response.data.sector ?? undefined;
-            tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
-            tempMigratedData.startYear = response.data.startYear;
-            tempMigratedData.endYear = response.data.endYear;
-            tempMigratedData.expectedTimeFrame = response.data.expectedTimeFrame;
-            tempMigratedData.type = response.data.programme?.action?.type;
-          }
-          if (method === 'create') {
-            setMtgStartYear(response.data.startYear);
-          }
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-      setActivityMigratedData(tempMigratedData);
-    };
-    fetchConnectedParent();
-
-    const fetchParentKPIData = async () => {
-      if (typeof connectedParentId === 'undefined') {
-        setInheritedKpiList([]);
-      } else if (method !== 'view' && parentType && connectedParentId && shouldFetchParentKpi) {
-        try {
-          const response: any = await get(
-            `national/kpis/entities/${parentType}/${connectedParentId}`
-          );
-          if (response.status === 200 || response.status === 201) {
-            const tempInheritedKpiList: CreatedKpiData[] = [];
-            let tempKpiCounter = kpiCounter;
-            response.data.forEach((kpi: any) => {
-              tempInheritedKpiList.push({
-                index: tempKpiCounter,
-                creator: kpi.creatorId,
-                id: kpi.kpiId,
-                name: kpi.name,
-                unit: kpi.kpiUnit,
-                achieved: 0,
-                expected: parseFloat(kpi.expected ?? 0),
-                kpiAction: KPIAction.NONE,
-              });
-
-              tempKpiCounter = tempKpiCounter + 1;
-            });
-            setKpiCounter(tempKpiCounter);
-            setInheritedKpiList(tempInheritedKpiList);
-          }
-        } catch (error: any) {
-          console.log(error, t('kpiSearchFailed'));
-        }
-      }
-    };
-    fetchParentKPIData();
-  }, [connectedParentId]);
-
-  // Loading All Entities that can be parent on Parent Type select
-
-  useEffect(() => {
-    const fetchNonValidatedParents = async () => {
-      if (parentType === 'action' || parentType === 'programme' || parentType === 'project') {
-        try {
-          const payload = {
-            sort: {
-              key: `${parentType}Id`,
-              order: 'ASC',
-            },
-          };
-          const response: any = await post(`national/${parentType}s/query`, payload);
-
-          const tempParentData: ParentData[] = [];
-          response.data.forEach((parent: any) => {
-            tempParentData.push({
-              id:
-                parentType === 'action'
-                  ? parent.actionId
-                  : parentType === 'programme'
-                  ? parent.programmeId
-                  : parent.projectId,
-              title: parent.title,
-            });
-          });
-          setParentList(tempParentData);
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-    };
-    fetchNonValidatedParents();
-  }, [parentType]);
-
-  // Initializing Section
-
-  //fetch GWP settings
 
   const fetchGwpSettings = async () => {
     let response: any;
@@ -311,216 +190,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         });
       }
     } catch (error) {
-      console.error('Error fetching GWP values:', error);
+      console.log('Error fetching GWP values:', error);
     }
   };
-
-  useEffect(() => {
-    // Initially Loading the underlying Activity data when not in create mode
-
-    const fetchData = async () => {
-      if (method !== 'create' && entId) {
-        let response: any;
-        try {
-          response = await get(`national/activities/${entId}`);
-
-          if (response.status === 200 || response.status === 201) {
-            const entityData: any = response.data;
-
-            // Populating Action owned data fields
-            form.setFieldsValue({
-              title: entityData.title,
-              description: entityData.description,
-              status: entityData.status,
-              measure: entityData.measure ?? undefined,
-              nationalImplementingEntity: entityData.nationalImplementingEntity ?? undefined,
-              internationalImplementingEntity:
-                entityData.internationalImplementingEntity ?? undefined,
-              anchoredInNationalStrategy: entityData.anchoredInNationalStrategy ?? undefined,
-              meansOfImplementation: entityData.meansOfImplementation ?? undefined,
-              technologyType: entityData.technologyType ?? undefined,
-              etfDescription: entityData.etfDescription ?? undefined,
-              comment: entityData.comment ?? undefined,
-              ghgsAffected: entityData.ghgsAffected ?? undefined,
-              achievedGHGReduction: entityData.achievedGHGReduction,
-              expectedGHGReduction: entityData.expectedGHGReduction,
-            });
-
-            // Populating Mitigation data fields
-            form.setFieldsValue({
-              mtgMethodName: entityData.mitigationInfo?.mitigationMethodology ?? undefined,
-              mtgMethodDesc:
-                entityData.mitigationInfo?.mitigationMethodologyDescription ?? undefined,
-              mtgCalculateEntity: entityData.mitigationInfo?.mitigationCalcEntity ?? undefined,
-              mtgComments: entityData.mitigationInfo?.comments ?? undefined,
-            });
-
-            // Parent Data Update
-
-            if (entityData.parentType) {
-              form.setFieldsValue({
-                parentType: entityData.parentType,
-                parentId: entityData.parentId,
-              });
-              setParentType(entityData.parentType ?? undefined);
-              setConnectedParentId(entityData.parentId ?? undefined);
-            }
-
-            // Setting validation status
-
-            setIsValidated(entityData.validated ?? false);
-
-            // Setting selected ghg
-
-            setSelectedGhg(entityData.ghgsAffected ?? undefined);
-
-            // Setting up uploaded files
-
-            if (entityData.documents?.length > 0) {
-              const tempFiles: { key: string; title: string; url: string }[] = [];
-              entityData.documents.forEach((document: any) => {
-                tempFiles.push({
-                  key: document.createdTime,
-                  title: document.title,
-                  url: document.url,
-                });
-              });
-              setStoredFiles(tempFiles);
-            }
-
-            if (entityData.mitigationInfo?.methodologyDocuments?.length > 0) {
-              const tempFiles: { key: string; title: string; url: string }[] = [];
-              entityData.mitigationInfo?.methodologyDocuments.forEach((document: any) => {
-                tempFiles.push({
-                  key: document.createdTime,
-                  title: document.title,
-                  url: document.url,
-                });
-              });
-              setStoredMthFiles(tempFiles);
-            }
-
-            if (entityData.mitigationInfo?.resultDocuments?.length > 0) {
-              const tempFiles: { key: string; title: string; url: string }[] = [];
-              entityData.mitigationInfo?.resultDocuments.forEach((document: any) => {
-                tempFiles.push({
-                  key: document.createdTime,
-                  title: document.title,
-                  url: document.url,
-                });
-              });
-              setStoredRstFiles(tempFiles);
-            }
-          }
-        } catch {
-          navigate('/activities');
-        }
-        setIsSaveButtonDisabled(true);
-      }
-    };
-    fetchData();
-
-    // Initially Loading the underlying Support data when not in create mode
-
-    const fetchSupportData = async () => {
-      if (method !== 'create') {
-        try {
-          const tempSupportData: SupportData[] = [];
-
-          const payload = {
-            filterAnd: [
-              {
-                key: 'activityId',
-                operation: '=',
-                value: entId,
-              },
-            ],
-            sort: {
-              key: 'supportId',
-              order: 'ASC',
-            },
-          };
-
-          const response: any = await post('national/supports/query', payload);
-
-          response.data.forEach((sup: any, index: number) => {
-            tempSupportData.push({
-              key: index.toString(),
-              supportId: sup.supportId,
-              financeNature: sup.financeNature,
-              direction: sup.direction,
-              finInstrument:
-                sup.financeNature === 'International'
-                  ? sup.internationalFinancialInstrument
-                  : sup.nationalFinancialInstrument,
-              estimatedUSD: getRounded(sup.requiredAmount ?? 0),
-              estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
-              recievedUSD: getRounded(sup.receivedAmount ?? 0),
-              recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
-            });
-          });
-          setSupportData(tempSupportData);
-        } catch {
-          setSupportData([]);
-        }
-      }
-    };
-    fetchSupportData();
-
-    const fetchCreatedKPIData = async () => {
-      if (method !== 'create' && entId) {
-        try {
-          const response: any = await get(`national/kpis/entities/activity/${entId}`);
-          if (response.status === 200 || response.status === 201) {
-            const tempInheritedKpiList: CreatedKpiData[] = [];
-            let tempKpiCounter = kpiCounter;
-            response.data.forEach((kpi: any) => {
-              tempInheritedKpiList.push({
-                index: tempKpiCounter,
-                creator: kpi.creatorId,
-                id: kpi.kpiId,
-                name: kpi.name,
-                unit: kpi.kpiUnit,
-                achieved: parseFloat(
-                  kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
-                    ?.achieved ?? 0
-                ),
-                expected: parseFloat(kpi.expected ?? 0),
-                kpiAction: KPIAction.NONE,
-              });
-
-              tempKpiCounter = tempKpiCounter + 1;
-            });
-            setKpiCounter(tempKpiCounter);
-            setInheritedKpiList(tempInheritedKpiList);
-          }
-        } catch (error: any) {
-          console.log(error, t('kpiSearchFailed'));
-        }
-      }
-    };
-    fetchCreatedKPIData();
-  }, []);
-
-  // Populating Form Migrated Fields, when migration data changes
-
-  useEffect(() => {
-    if (activityMigratedData) {
-      form.setFieldsValue({
-        parentDescription: activityMigratedData.description,
-        supportType: activityMigratedData.type,
-        recipient: activityMigratedData.recipient,
-        sector: activityMigratedData.affSectors,
-        affSubSectors: activityMigratedData.affSubSectors,
-        startYear: activityMigratedData.startYear,
-        endYear: activityMigratedData.endYear,
-        expectedTimeFrame: activityMigratedData.expectedTimeFrame,
-      });
-    }
-    if (!firstRenderingCompleted) {
-      setFirstRenderingCompleted(true);
-    }
-  }, [activityMigratedData]);
 
   // KPI Achievement Resolve
 
@@ -681,86 +353,86 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  const gwpValueMapping = () => {
-    if (selectedGhg !== undefined && gwpSettings !== undefined) {
-      if (method === 'create') {
-        switch (selectedGhg) {
-          case GHGS.CH:
-            setGwpValue(gwpSettings?.CH4 ?? 1);
-            setMtgUnit(GHGS.CH);
-            break;
-          case GHGS.NO:
-            setGwpValue(gwpSettings?.N2O ?? 1);
-            setMtgUnit(GHGS.NO);
-            break;
-          default:
-            setGwpValue(1);
-            setMtgUnit(GHGS.CO);
-            break;
-        }
-      } else {
-        switch (mtgUnit) {
-          case GHGS.CH:
-            setGwpValue(gwpSettings?.CH4 ?? 1);
-            break;
-          case GHGS.NO:
-            setGwpValue(gwpSettings?.N2O ?? 1);
-            break;
-          default:
-            setGwpValue(1);
-            break;
-        }
-      }
+  // Find GWP Value
+
+  const findGWP = () => {
+    switch (selectedGhg) {
+      case GHGS.CH:
+        return gwpSettings?.CH4 ?? 1;
+      case GHGS.NO:
+        return gwpSettings?.N2O ?? 1;
+      default:
+        return 1;
     }
   };
 
-  //set mtg timeline data to zero values (when it is or null or create mode)
+  // Find MTG Unit
 
-  const setDefaultTimelineValues = (startYear: number, range: number) => {
-    const endYear = startYear + range;
-    const tempExpectedEntries: ExpectedTimeline[] = [];
-    Object.entries(ExpectedRows).forEach(([key, value]) => {
-      const expectedGhgValue =
-        key === 'ROW_ONE' || key === 'ROW_TWO' || key === 'ROW_THREE' ? `kt${mtgUnit}` : value[0];
-      const rowData: ExpectedTimeline = {
-        key: key,
-        ghg: expectedGhgValue,
-        topic: value[1],
-        total: 0,
-        values: new Array(Math.min(endYear, 2050) + 1 - startYear).fill(0),
-      };
-      tempExpectedEntries.push(rowData);
-    });
+  const findUnit = (ghg: GHGS | undefined) => {
+    if (ghg) {
+      const mtgUnit = [GHGS.CO, GHGS.CH, GHGS.NO].includes(ghg) ? ghg : GHGS.COE;
+      return mtgUnit;
+    } else {
+      return GHGS.COE;
+    }
+  };
 
-    const tempActualEntries: ActualTimeline[] = [];
-    Object.entries(ActualRows).forEach(([key, value]) => {
-      const actualGhgValue = key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${mtgUnit}` : value[0];
-      const rowData: ActualTimeline = {
-        key: key,
-        ghg: actualGhgValue,
-        topic: value[1],
-        total: 0,
-        values: new Array(Math.min(endYear, 2050) + 1 - startYear).fill(0),
-      };
-      tempActualEntries.push(rowData);
-    });
+  // Set mtg timeline data to default values
 
-    setExpectedTimeline(tempExpectedEntries);
-    setActualTimeline(tempActualEntries);
+  const setDefaultTimelineValues = () => {
+    if (mtgStartYear && selectedGhg) {
+      const endYear = mtgStartYear + mtgRange;
+      const mtgUnit = findUnit(selectedGhg);
+
+      const tempExpectedEntries: ExpectedTimeline[] = [];
+      const tempActualEntries: ActualTimeline[] = [];
+
+      Object.entries(ExpectedRows).forEach(([key, value]) => {
+        const expectedGhgValue =
+          key === 'ROW_ONE' || key === 'ROW_TWO' || key === 'ROW_THREE' ? `kt${mtgUnit}` : value[0];
+        const rowData: ExpectedTimeline = {
+          key: key,
+          ghg: expectedGhgValue,
+          topic: value[1],
+          total: 0,
+          values: new Array(Math.min(endYear, 2050) + 1 - mtgStartYear).fill(0),
+        };
+        tempExpectedEntries.push(rowData);
+      });
+
+      Object.entries(ActualRows).forEach(([key, value]) => {
+        const actualGhgValue = key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${mtgUnit}` : value[0];
+        const rowData: ActualTimeline = {
+          key: key,
+          ghg: actualGhgValue,
+          topic: value[1],
+          total: 0,
+          values: new Array(Math.min(endYear, 2050) + 1 - mtgStartYear).fill(0),
+        };
+        tempActualEntries.push(rowData);
+      });
+
+      setExpectedTimeline(tempExpectedEntries);
+      setActualTimeline(tempActualEntries);
+    }
   };
 
   // Get mtg timeline data
 
   const fetchMtgTimelineData = async () => {
-    if (method !== 'create' && entId) {
+    if (method !== 'create' && entId && selectedGhg) {
       let response: any;
       try {
         response = await get(`national/activities/mitigation/${entId}`);
 
         if (response.status === 200 || response.status === 201) {
           setMtgStartYear(response.data.startYear);
-          setMtgUnit(response.data.unit);
+
+          const mtgUnit = findUnit(selectedGhg);
+
           const tempExpectedEntries: ExpectedTimeline[] = [];
+          const tempActualEntries: ActualTimeline[] = [];
+
           Object.entries(ExpectedRows).forEach(([key, value]) => {
             const expectedGhgValue =
               key === 'ROW_ONE' || key === 'ROW_TWO' || key === 'ROW_THREE'
@@ -776,7 +448,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             tempExpectedEntries.push(rowData);
           });
 
-          const tempActualEntries: ActualTimeline[] = [];
           Object.entries(ActualRows).forEach(([key, value]) => {
             const actualGhgValue =
               key === 'ROW_ONE' || key === 'ROW_TWO' ? `kt${mtgUnit}` : value[0];
@@ -793,47 +464,12 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           setExpectedTimeline(tempExpectedEntries);
           setActualTimeline(tempActualEntries);
         } else {
-          setDefaultTimelineValues(mtgStartYear, mtgRange);
+          setDefaultTimelineValues();
         }
       } catch (error) {
         console.error('Error fetching timeline data:', error);
-        setDefaultTimelineValues(mtgStartYear, mtgRange);
+        setDefaultTimelineValues();
       }
-    }
-  };
-
-  //MTG timeline calculate array sum from row
-
-  const mtgCalculateArraySum = (array: number[]) => {
-    let arrSum = 0;
-    for (let index = 0; index <= array.length; index++) {
-      arrSum += array[index] || 0;
-    }
-    return arrSum;
-  };
-
-  //Values convert to ktCO2e
-
-  const multiplyByGwpValue = (entry: any) => {
-    switch (entry.topic) {
-      case expectedTimeline[1].topic:
-        for (let index = 0; index < expectedTimeline[1].values.length; index++) {
-          expectedTimeline[3].values[index] = expectedTimeline[1].values[index] * gwpValue;
-          expectedTimeline[3].total = mtgCalculateArraySum(expectedTimeline[3].values);
-        }
-        break;
-      case expectedTimeline[2].topic:
-        for (let index = 0; index < expectedTimeline[2].values.length; index++) {
-          expectedTimeline[4].values[index] = expectedTimeline[2].values[index] * gwpValue;
-          expectedTimeline[4].total = mtgCalculateArraySum(expectedTimeline[4].values);
-        }
-        break;
-      case actualTimeline[1].topic:
-        for (let index = 0; index < actualTimeline[1].values.length; index++) {
-          actualTimeline[2].values[index] = actualTimeline[1].values[index] * gwpValue;
-          actualTimeline[2].total = mtgCalculateArraySum(actualTimeline[2].values);
-        }
-        break;
     }
   };
 
@@ -851,23 +487,50 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       const updatedTimeline = expectedTimeline.map((entry) => {
         if (entry.topic === rowId) {
           entry.values[year - mtgStartYear] = newValue;
-          entry.total = mtgCalculateArraySum(entry.values);
-          multiplyByGwpValue(entry);
+          entry.total = calculateArraySum(entry.values);
           return entry;
         }
         return entry;
       });
+
+      // Updating calculated values
+      if (rowId === updatedTimeline[0].topic || rowId === updatedTimeline[1].topic) {
+        updatedTimeline[3].values = subtractTwoArrays(
+          updatedTimeline[0].values,
+          updatedTimeline[1].values,
+          findGWP()
+        );
+        updatedTimeline[3].total = calculateArraySum(updatedTimeline[3].values);
+      }
+
+      if (rowId === updatedTimeline[0].topic || rowId === updatedTimeline[2].topic) {
+        updatedTimeline[4].values = subtractTwoArrays(
+          updatedTimeline[0].values,
+          updatedTimeline[2].values,
+          findGWP()
+        );
+        updatedTimeline[4].total = calculateArraySum(updatedTimeline[4].values);
+      }
+
       setExpectedTimeline(updatedTimeline);
     } else {
       const updatedTimeline = actualTimeline.map((entry) => {
         if (entry.topic === rowId) {
           entry.values[year - mtgStartYear] = newValue;
-          entry.total = mtgCalculateArraySum(entry.values);
-          multiplyByGwpValue(entry);
+          entry.total = calculateArraySum(entry.values);
           return entry;
         }
         return entry;
       });
+
+      // Updating calculated values
+      updatedTimeline[2].values = subtractTwoArrays(
+        updatedTimeline[0].values,
+        updatedTimeline[1].values,
+        findGWP()
+      );
+      updatedTimeline[2].total = calculateArraySum(updatedTimeline[2].values);
+
       setActualTimeline(updatedTimeline);
     }
     setIsMtgButtonEnabled(true);
@@ -875,7 +538,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   // MTG timeline update
 
-  const MtgTimelineUpdate = async () => {
+  const updateMtgTimeline = async () => {
     try {
       if (entId) {
         const payload = {
@@ -906,6 +569,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
               },
             },
           },
+          achievedGHGReduction: parseFloat(form.getFieldValue('achievedGHGReduction')),
+          expectedGHGReduction: parseFloat(form.getFieldValue('expectedGHGReduction')),
         };
         const response: any = await put('national/activities/mitigation/update', payload);
 
@@ -924,18 +589,6 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       displayErrorMessage(error, `${entId} Mitigation Timeline Failed to Update`);
     }
   };
-
-  // Initializing mtg timeline data
-
-  useEffect(() => {
-    fetchGwpSettings();
-    if (method === 'create') {
-      setDefaultTimelineValues(mtgStartYear, mtgRange);
-    } else {
-      fetchMtgTimelineData();
-    }
-    gwpValueMapping();
-  }, [mtgStartYear, selectedGhg, mtgUnit]);
 
   // Form Submit
 
@@ -988,7 +641,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         resultDocuments: [],
       };
 
-      if (method === 'create') {
+      if (method === 'create' && selectedGhg) {
         payload.mitigationTimeline = {
           expected: {
             baselineEmissions: expectedTimeline[0].values,
@@ -1015,7 +668,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
             },
           },
           startYear: mtgStartYear,
-          unit: mtgUnit,
+          unit: [GHGS.CH, GHGS.NO].includes(selectedGhg) ? selectedGhg : GHGS.CO,
         };
       }
 
@@ -1104,6 +757,399 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
+  // DB Queries
+
+  const fetchConnectedParent = async () => {
+    const tempMigratedData: ActivityMigratedData = {
+      description: undefined,
+      type: undefined,
+      affSectors: undefined,
+      affSubSectors: undefined,
+      startYear: undefined,
+      endYear: undefined,
+      expectedTimeFrame: undefined,
+    };
+
+    if (
+      (parentType === 'action' || parentType === 'programme' || parentType === 'project') &&
+      connectedParentId
+    ) {
+      try {
+        const response: any = await get(`national/${parentType}s/${connectedParentId}`);
+
+        if (parentType === 'action') {
+          tempMigratedData.description = response.data.description;
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
+          tempMigratedData.startYear = response.data.startYear;
+          tempMigratedData.type = response.data.type;
+        } else if (parentType === 'programme') {
+          tempMigratedData.description = response.data.description;
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
+          tempMigratedData.affSubSectors = response.data.affectedSubSector;
+          tempMigratedData.startYear = response.data.startYear;
+          tempMigratedData.type = response.data.type;
+        } else {
+          tempMigratedData.description = response.data.description;
+          tempMigratedData.affSectors = response.data.sector ?? undefined;
+          tempMigratedData.affSubSectors = response.data.programme?.affectedSubSector ?? [];
+          tempMigratedData.startYear = response.data.startYear;
+          tempMigratedData.endYear = response.data.endYear;
+          tempMigratedData.expectedTimeFrame = response.data.expectedTimeFrame;
+          tempMigratedData.type = response.data.programme?.action?.type;
+        }
+        if (method === 'create') {
+          setMtgStartYear(response.data.startYear);
+        }
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
+    }
+    setActivityMigratedData(tempMigratedData);
+  };
+
+  const fetchParentKPIData = async () => {
+    if (typeof connectedParentId === 'undefined') {
+      setInheritedKpiList([]);
+    } else if (method !== 'view' && parentType && connectedParentId && shouldFetchParentKpi) {
+      try {
+        const response: any = await get(
+          `national/kpis/entities/${parentType}/${connectedParentId}`
+        );
+        if (response.status === 200 || response.status === 201) {
+          const tempInheritedKpiList: CreatedKpiData[] = [];
+          let tempKpiCounter = kpiCounter;
+          response.data.forEach((kpi: any) => {
+            tempInheritedKpiList.push({
+              index: tempKpiCounter,
+              creator: kpi.creatorId,
+              id: kpi.kpiId,
+              name: kpi.name,
+              unit: kpi.kpiUnit,
+              achieved: 0,
+              expected: parseFloat(kpi.expected ?? 0),
+              kpiAction: KPIAction.NONE,
+            });
+
+            tempKpiCounter = tempKpiCounter + 1;
+          });
+          setKpiCounter(tempKpiCounter);
+          setInheritedKpiList(tempInheritedKpiList);
+        }
+      } catch (error: any) {
+        console.log(error, t('kpiSearchFailed'));
+      }
+    }
+  };
+
+  const fetchNonValidatedParents = async () => {
+    if (parentType === 'action' || parentType === 'programme' || parentType === 'project') {
+      try {
+        const payload = {
+          sort: {
+            key: `${parentType}Id`,
+            order: 'ASC',
+          },
+        };
+
+        let response: any;
+
+        if (parentType !== 'action') {
+          response = await post(`national/${parentType}s/query`, payload);
+        } else {
+          response = await get('national/actions/attach/query');
+        }
+
+        const tempParentData: ParentData[] = [];
+        response.data.forEach((parent: any) => {
+          tempParentData.push({
+            id:
+              parentType === 'action'
+                ? parent.actionId
+                : parentType === 'programme'
+                ? parent.programmeId
+                : parent.projectId,
+            title: parent.title,
+            hasChildProgrammes: parent.hasChildProgrammes ?? false,
+          });
+        });
+
+        setParentList(tempParentData);
+      } catch (error: any) {
+        displayErrorMessage(error);
+      }
+    }
+  };
+
+  const fetchActivityData = async () => {
+    if (method !== 'create' && entId) {
+      let response: any;
+      try {
+        response = await get(`national/activities/${entId}`);
+
+        if (response.status === 200 || response.status === 201) {
+          const entityData: any = response.data;
+
+          // Populating Action owned data fields
+          form.setFieldsValue({
+            title: entityData.title,
+            description: entityData.description,
+            status: entityData.status,
+            measure: entityData.measure ?? undefined,
+            nationalImplementingEntity: entityData.nationalImplementingEntity ?? undefined,
+            internationalImplementingEntity:
+              entityData.internationalImplementingEntity ?? undefined,
+            anchoredInNationalStrategy: entityData.anchoredInNationalStrategy ?? undefined,
+            meansOfImplementation: entityData.meansOfImplementation ?? undefined,
+            technologyType: entityData.technologyType ?? undefined,
+            etfDescription: entityData.etfDescription ?? undefined,
+            comment: entityData.comment ?? undefined,
+            ghgsAffected: entityData.ghgsAffected ?? undefined,
+            achievedGHGReduction: entityData.achievedGHGReduction,
+            expectedGHGReduction: entityData.expectedGHGReduction,
+            recipientEntities: entityData.recipientEntities ?? [],
+          });
+
+          // Populating Mitigation data fields
+          form.setFieldsValue({
+            mtgMethodName: entityData.mitigationInfo?.mitigationMethodology ?? undefined,
+            mtgMethodDesc: entityData.mitigationInfo?.mitigationMethodologyDescription ?? undefined,
+            mtgCalculateEntity: entityData.mitigationInfo?.mitigationCalcEntity ?? undefined,
+            mtgComments: entityData.mitigationInfo?.comments ?? undefined,
+          });
+
+          // Parent Data Update
+
+          if (entityData.parentType) {
+            form.setFieldsValue({
+              parentType: entityData.parentType,
+              parentId: entityData.parentId,
+            });
+            setParentType(entityData.parentType ?? undefined);
+            setConnectedParentId(entityData.parentId ?? undefined);
+          }
+
+          // Setting validation status
+
+          setIsValidated(entityData.validated ?? false);
+
+          // Setting selected ghg
+
+          setSelectedGhg(entityData.ghgsAffected ?? undefined);
+
+          // Setting up uploaded files
+
+          if (entityData.documents?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.documents.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredFiles(tempFiles);
+          }
+
+          if (entityData.mitigationInfo?.methodologyDocuments?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.mitigationInfo?.methodologyDocuments.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredMthFiles(tempFiles);
+          }
+
+          if (entityData.mitigationInfo?.resultDocuments?.length > 0) {
+            const tempFiles: { key: string; title: string; url: string }[] = [];
+            entityData.mitigationInfo?.resultDocuments.forEach((document: any) => {
+              tempFiles.push({
+                key: document.createdTime,
+                title: document.title,
+                url: document.url,
+              });
+            });
+            setStoredRstFiles(tempFiles);
+          }
+        }
+      } catch {
+        navigate('/activities');
+      }
+      setIsSaveButtonDisabled(true);
+    }
+  };
+
+  const fetchSupportData = async () => {
+    if (method !== 'create') {
+      try {
+        const tempSupportData: SupportData[] = [];
+
+        const payload = {
+          filterAnd: [
+            {
+              key: 'activityId',
+              operation: '=',
+              value: entId,
+            },
+          ],
+          sort: {
+            key: 'supportId',
+            order: 'ASC',
+          },
+        };
+
+        const response: any = await post('national/supports/query', payload);
+
+        response.data.forEach((sup: any, index: number) => {
+          tempSupportData.push({
+            key: index.toString(),
+            supportId: sup.supportId,
+            financeNature: sup.financeNature,
+            direction: sup.direction,
+            finInstrument:
+              sup.financeNature === 'International'
+                ? sup.internationalFinancialInstrument
+                : sup.nationalFinancialInstrument,
+            estimatedUSD: getRounded(sup.requiredAmount ?? 0),
+            estimatedLC: getRounded(sup.requiredAmountDomestic ?? 0),
+            recievedUSD: getRounded(sup.receivedAmount ?? 0),
+            recievedLC: getRounded(sup.receivedAmountDomestic ?? 0),
+          });
+        });
+        setSupportData(tempSupportData);
+      } catch {
+        setSupportData([]);
+      }
+    }
+  };
+
+  const fetchCreatedKPIData = async () => {
+    if (method !== 'create' && entId) {
+      try {
+        const response: any = await get(`national/kpis/entities/activity/${entId}`);
+        if (response.status === 200 || response.status === 201) {
+          const tempInheritedKpiList: CreatedKpiData[] = [];
+          let tempKpiCounter = kpiCounter;
+          response.data.forEach((kpi: any) => {
+            tempInheritedKpiList.push({
+              index: tempKpiCounter,
+              creator: kpi.creatorId,
+              id: kpi.kpiId,
+              name: kpi.name,
+              unit: kpi.kpiUnit,
+              achieved: parseFloat(
+                kpi.achievements?.find((achEntity: any) => achEntity.activityId === entId)
+                  ?.achieved ?? 0
+              ),
+              expected: parseFloat(kpi.expected ?? 0),
+              kpiAction: KPIAction.NONE,
+            });
+
+            tempKpiCounter = tempKpiCounter + 1;
+          });
+          setKpiCounter(tempKpiCounter);
+          setInheritedKpiList(tempInheritedKpiList);
+        }
+      } catch (error: any) {
+        console.log(error, t('kpiSearchFailed'));
+      }
+    }
+  };
+
+  // Dynamic Updates
+
+  // Initializing mtg timeline data
+
+  useEffect(() => {
+    if (method === 'create') {
+      setDefaultTimelineValues();
+    } else {
+      fetchMtgTimelineData();
+    }
+  }, [mtgStartYear, selectedGhg]);
+
+  // Tracking Parent selection
+
+  useEffect(() => {
+    fetchConnectedParent();
+    fetchParentKPIData();
+  }, [connectedParentId]);
+
+  // Loading All Entities that can be parent on Parent Type select
+
+  useEffect(() => {
+    fetchNonValidatedParents();
+  }, [parentType]);
+
+  // Populating Form Migrated Fields, when migration data changes
+
+  useEffect(() => {
+    if (activityMigratedData) {
+      form.setFieldsValue({
+        parentDescription: activityMigratedData.description,
+        supportType: activityMigratedData.type,
+        sector: activityMigratedData.affSectors,
+        affSubSectors: activityMigratedData.affSubSectors,
+        startYear: activityMigratedData.startYear,
+        endYear: activityMigratedData.endYear,
+        expectedTimeFrame: activityMigratedData.expectedTimeFrame,
+      });
+    }
+  }, [activityMigratedData]);
+
+  // Finding Achieved and Expected Emission Values
+
+  useEffect(() => {
+    if (expectedTimeline && expectedTimeline.length === 5) {
+      const expectedValues = expectedTimeline[3].values;
+      const mostRecentYearIndex = Math.max(0, Math.min(mtgRange, currentYear - mtgStartYear));
+
+      let expectedValue = 0;
+
+      for (let i = mostRecentYearIndex; i >= 0; i--) {
+        if (expectedValues[i] !== 0) {
+          expectedValue = expectedValues[i];
+          break;
+        }
+      }
+
+      form.setFieldsValue({
+        expectedGHGReduction: expectedValue ?? 0,
+      });
+    }
+  }, [expectedTimeline]);
+
+  useEffect(() => {
+    if (actualTimeline && actualTimeline.length === 3) {
+      const actualValues = actualTimeline[2].values;
+      const mostRecentYearIndex = Math.max(0, Math.min(mtgRange, currentYear - mtgStartYear));
+
+      let actualValue = 0;
+
+      for (let i = mostRecentYearIndex; i >= 0; i--) {
+        if (actualValues[i] !== 0) {
+          actualValue = actualValues[i];
+          break;
+        }
+      }
+
+      form.setFieldsValue({
+        achievedGHGReduction: actualValue ?? 0,
+      });
+    }
+  }, [actualTimeline]);
+
+  // Init Run
+
+  useEffect(() => {
+    fetchActivityData();
+    fetchSupportData();
+    fetchCreatedKPIData();
+    fetchGwpSettings();
+  }, []);
+
   return (
     <div className="content-container">
       <ConfirmPopup
@@ -1124,7 +1170,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE && firstRenderingCompleted ? (
+      {!waitingForBE ? (
         <div className="activity-form">
           <Form
             form={form}
@@ -1227,8 +1273,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                         onChange={handleParentIdSelect}
                       >
                         {parentList.map((parent) => (
-                          <Option key={parent.id} value={parent.id}>
-                            {parent.id}
+                          <Option
+                            key={parent.id}
+                            value={parent.id}
+                            disabled={parent.hasChildProgrammes}
+                          >
+                            <span style={{ color: parent.hasChildProgrammes ? 'red' : 'inherit' }}>
+                              {parent.hasChildProgrammes
+                                ? `${parent.id} : Attached to Programmes`
+                                : parent.id}
+                            </span>
                           </Option>
                         ))}
                       </Select>
@@ -1390,25 +1444,31 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 )}
               </Row>
               <Row gutter={gutterSize}>
-                {(parentType === 'programme' || parentType === 'project') && (
-                  <Col {...halfColumnBps}>
-                    <Form.Item
-                      label={
-                        <label className="form-item-header">
-                          {t('formHeader:recipientEntityHeader')}
-                        </label>
-                      }
-                      name="recipient"
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:recipientEntityHeader')}
+                      </label>
+                    }
+                    name="recipientEntities"
+                    rules={[validation.required]}
+                  >
+                    <Select
+                      mode="multiple"
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      disabled={isView}
+                      showSearch
                     >
-                      <Select
-                        mode="multiple"
-                        size="large"
-                        style={{ fontSize: inputFontSize }}
-                        disabled
-                      ></Select>
-                    </Form.Item>
-                  </Col>
-                )}
+                      {Object.values(Recipient).map((recipient) => (
+                        <Option key={recipient} value={recipient}>
+                          {recipient}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
                 {parentType === 'project' && (
                   <Col {...halfColumnBps}>
                     <Form.Item
@@ -1548,11 +1608,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                       showSearch
                       onChange={(value: GHGS) => setSelectedGhg(value)}
                     >
-                      {Object.values(GHGS).map((ghg) => (
-                        <Option key={ghg} value={ghg}>
-                          {ghg}
-                        </Option>
-                      ))}
+                      {Object.values(GHGS)
+                        .filter((ghg) => ghg !== GHGS.COE)
+                        .map((ghg) => (
+                          <Option key={ghg} value={ghg}>
+                            {ghg}
+                          </Option>
+                        ))}
                     </Select>
                   </Form.Item>
                 </Col>
@@ -1562,30 +1624,16 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('formHeader:achieved')}</label>}
                     name="achievedGHGReduction"
-                    rules={[validation.required]}
                   >
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      className="form-input-box"
-                      disabled={isView}
-                    />
+                    <Input type="number" className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
                     label={<label className="form-item-header">{t('formHeader:expected')}</label>}
                     name="expectedGHGReduction"
-                    rules={[validation.required]}
                   >
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      className="form-input-box"
-                      disabled={isView}
-                    />
+                    <Input type="number" className="form-input-box" disabled />
                   </Form.Item>
                 </Col>
               </Row>
@@ -1737,7 +1785,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             </div>
-            {mtgStartYear !== 0 && mtgStartYear && mtgUnit && (
+            {mtgStartYear && selectedGhg ? (
               <div className="form-section-card">
                 <Row>
                   <Col {...mtgTableHeaderBps} style={{ paddingTop: '6px' }}>
@@ -1750,7 +1798,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                         size="large"
                         block
                         onClick={() => {
-                          MtgTimelineUpdate();
+                          updateMtgTimeline();
                         }}
                         disabled={!isMtgButtonEnabled}
                       >
@@ -1774,7 +1822,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Col>
                 </Row>
               </div>
-            )}
+            ) : null}
             {method !== 'create' && (
               <div className="form-section-timelineCard">
                 <div className="form-section-header">{t('formHeader:updatesInfoTitle')}</div>

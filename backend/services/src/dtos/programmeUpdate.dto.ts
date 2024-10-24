@@ -5,7 +5,6 @@ import { SubSector, NatImplementor, KPIAction } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { ProgrammeStatus } from "../enums/programme-status.enum";
 import { KpiUpdateDto } from "./kpi.update.dto";
-import { IsTwoDecimalPoints } from "../util/twoDecimalPointNumber.decorator";
 
 export class ProgrammeUpdateDto {
 
@@ -64,11 +63,11 @@ export class ProgrammeUpdateDto {
     })
     natImplementor: NatImplementor[];
 
-    @IsNotEmpty()
-    @IsNumber()
-		@IsTwoDecimalPoints()
-    @ApiProperty()
-    investment: number;
+    // @IsNotEmpty()
+    // @IsNumber()
+		// @IsTwoDecimalPoints()
+    // @ApiProperty()
+    // investment: number;
 
 		@IsNotEmpty()
     @IsEnum(ProgrammeStatus, {
@@ -110,9 +109,10 @@ export class ProgrammeUpdateDto {
     )
     removedDocuments: string[];
 
-    @IsOptional()
-    @ApiPropertyOptional()
-    actionId?: string;
+    @IsNotEmpty()
+    @IsString()
+    @ApiProperty()
+    actionId: string;
 
     @IsOptional()
     @ValidateNested()
