@@ -33,6 +33,7 @@ import {
   doesUserHaveValidatePermission,
   getFormTitle,
   getRounded,
+  isGasFlowCheck,
   subtractTwoArrays,
 } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
@@ -107,6 +108,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
+  const [isGasFlow, setIsGasFlow] = useState<boolean>(false);
+
   // Spinner When Form Submit Occurs
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
@@ -171,6 +174,8 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     if (method === 'create') {
       setMtgStartYear(0);
     }
+
+    setIsGasFlow(false);
 
     form.setFieldsValue({
       parentId: '',
@@ -802,7 +807,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
         }
       } catch (error: any) {
         displayErrorMessage(error);
+      } finally {
+        setIsGasFlow(isGasFlowCheck(tempMigratedData.type));
       }
+    } else {
+      setIsGasFlow(false);
     }
     setActivityMigratedData(tempMigratedData);
   };
@@ -1358,20 +1367,23 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 <Col {...halfColumnBps}>
                   <Form.Item
                     label={
-                      <label className="form-item-header">{t('formHeader:measuresTitle')}</label>
+                      <label className="form-item-header">
+                        {t('formHeader:recipientEntityHeader')}
+                      </label>
                     }
-                    name="measure"
+                    name="recipientEntities"
+                    rules={[validation.required]}
                   >
                     <Select
+                      mode="multiple"
                       size="large"
                       style={{ fontSize: inputFontSize }}
-                      allowClear
                       disabled={isView}
                       showSearch
                     >
-                      {Object.values(Measure).map((measure) => (
-                        <Option key={measure} value={measure}>
-                          {measure}
+                      {Object.values(Recipient).map((recipient) => (
+                        <Option key={recipient} value={recipient}>
+                          {recipient}
                         </Option>
                       ))}
                     </Select>
@@ -1444,31 +1456,30 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 )}
               </Row>
               <Row gutter={gutterSize}>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={
-                      <label className="form-item-header">
-                        {t('formHeader:recipientEntityHeader')}
-                      </label>
-                    }
-                    name="recipientEntities"
-                    rules={[validation.required]}
-                  >
-                    <Select
-                      mode="multiple"
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      disabled={isView}
-                      showSearch
+                {isGasFlow && (
+                  <Col {...halfColumnBps}>
+                    <Form.Item
+                      label={
+                        <label className="form-item-header">{t('formHeader:measuresTitle')}</label>
+                      }
+                      name="measure"
                     >
-                      {Object.values(Recipient).map((recipient) => (
-                        <Option key={recipient} value={recipient}>
-                          {recipient}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
+                      <Select
+                        size="large"
+                        style={{ fontSize: inputFontSize }}
+                        allowClear
+                        disabled={isView}
+                        showSearch
+                      >
+                        {Object.values(Measure).map((measure) => (
+                          <Option key={measure} value={measure}>
+                            {measure}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                )}
                 {parentType === 'project' && (
                   <Col {...halfColumnBps}>
                     <Form.Item
@@ -1589,54 +1600,64 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   </Form.Item>
                 </Col>
               </Row>
-              <div className="form-section-header">{t('formHeader:activityResultsInfoTitle')}</div>
-              <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
-              <Row gutter={gutterSize}>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={
-                      <label className="form-item-header">{t('formHeader:ghgAffected')}</label>
-                    }
-                    name="ghgsAffected"
-                    rules={[validation.required]}
-                  >
-                    <Select
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      allowClear
-                      disabled={method !== 'create'}
-                      showSearch
-                      onChange={(value: GHGS) => setSelectedGhg(value)}
-                    >
-                      {Object.values(GHGS)
-                        .filter((ghg) => ghg !== GHGS.COE)
-                        .map((ghg) => (
-                          <Option key={ghg} value={ghg}>
-                            {ghg}
-                          </Option>
-                        ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Row gutter={gutterSize}>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={<label className="form-item-header">{t('formHeader:achieved')}</label>}
-                    name="achievedGHGReduction"
-                  >
-                    <Input type="number" className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={<label className="form-item-header">{t('formHeader:expected')}</label>}
-                    name="expectedGHGReduction"
-                  >
-                    <Input type="number" className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
-              </Row>
+              {isGasFlow && (
+                <>
+                  <div className="form-section-header">
+                    {t('formHeader:activityResultsInfoTitle')}
+                  </div>
+                  <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
+                  <Row gutter={gutterSize}>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:ghgAffected')}</label>
+                        }
+                        name="ghgsAffected"
+                        rules={[validation.required]}
+                      >
+                        <Select
+                          size="large"
+                          style={{ fontSize: inputFontSize }}
+                          allowClear
+                          disabled={method !== 'create'}
+                          showSearch
+                          onChange={(value: GHGS) => setSelectedGhg(value)}
+                        >
+                          {Object.values(GHGS)
+                            .filter((ghg) => ghg !== GHGS.COE)
+                            .map((ghg) => (
+                              <Option key={ghg} value={ghg}>
+                                {ghg}
+                              </Option>
+                            ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={gutterSize}>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:achieved')}</label>
+                        }
+                        name="achievedGHGReduction"
+                      >
+                        <Input type="number" className="form-input-box" disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:expected')}</label>
+                        }
+                        name="expectedGHGReduction"
+                      >
+                        <Input type="number" className="form-input-box" disabled />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </>
+              )}
               {inheritedKpiList.length > 0 && (
                 <div className="form-section-sub-header">{t('formHeader:kpiInfoTitle')}</div>
               )}

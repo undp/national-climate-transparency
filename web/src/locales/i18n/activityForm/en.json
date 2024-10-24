@@ -20,7 +20,7 @@
     "activityDeleteSuccess": "Activity Deleted Successfully",
     "noSupportsMessage": "No Supports Attached",
     "supportTableHeader": "List of Support under the Activity",
-    "mtgInfoTitle": "Mitigation  Information",
+    "mtgInfoTitle": "Additional  Information",
     "mtgMethodName": "Name of Mitigation Methodology",
     "mtgDescTitle": "Short Description of Mitigation Methodology",
     "mtgCalculateEntityTitle": "Entity Completing the Mitigation Calculations",

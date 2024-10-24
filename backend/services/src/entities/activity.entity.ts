@@ -60,13 +60,13 @@ export class ActivityEntity implements EntitySubject {
 	@Column({ nullable: true })
 	etfDescription: string;
 
-	@Column({ type: "enum", enum: GHGS, nullable: false })
+	@Column({ type: "enum", enum: GHGS, nullable: true })
 	ghgsAffected: string;
 
-	@Column({ type: 'double precision' })
+	@Column({ type: 'double precision', nullable: true })
 	achievedGHGReduction: number;
 
-	@Column({ type: 'double precision' })
+	@Column({ type: 'double precision', nullable: true })
 	expectedGHGReduction: number;
 
 	@Column({ nullable: true })
