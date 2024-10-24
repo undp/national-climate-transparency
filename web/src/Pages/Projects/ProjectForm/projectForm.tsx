@@ -1197,7 +1197,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 setRemovedFiles={setFilesToRemove}
                 setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
-              <div className="form-section-header">{t('mitigationInfoTitle')}</div>
+              <div className="form-section-header">{t('formHeader:projectResultsInfoTitle')}</div>
               <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>

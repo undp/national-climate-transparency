@@ -1030,7 +1030,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               </div>
             )}
             <div className="form-section-card">
-              <div className="form-section-header">{t('formHeader:mitigationInfoTitle')}</div>
+              <div className="form-section-header">{t('formHeader:actionResultsInfoTitle')}</div>
               <Row gutter={gutterSize}>
                 <Col {...halfColumnBps}>
                   <Form.Item
