@@ -622,7 +622,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           supportPayload.filterOr.push({
             key: 'activityId',
             operation: '=',
-            value: activity,
+            value: activity.activityId,
           });
         });
 

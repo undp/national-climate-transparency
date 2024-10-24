@@ -188,6 +188,10 @@ export class ActionService {
 		const allActions = await this.actionRepo.find({
 			select: ["actionId", "title", "instrumentType", "sector", "type"]
 		});
+
+		if (allActions.length === 0){
+			return [];
+		}
 	
 		const actionIds = allActions.map(action => action.actionId);
 	
