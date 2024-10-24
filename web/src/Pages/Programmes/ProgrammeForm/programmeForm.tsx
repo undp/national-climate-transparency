@@ -20,6 +20,7 @@ import {
   doesUserHaveValidatePermission,
   getFormTitle,
   getRounded,
+  isGasFlowCheck,
 } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ProgrammeEntity } from '../../../Entities/programme';
@@ -90,6 +91,8 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+
+  const [isGasFlow, setIsGasFlow] = useState<boolean>(false);
 
   // Spinner When Form Submit Occurs
 
@@ -512,6 +515,12 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
           setIsValidated(entityData.validated ?? false);
 
+          // Setting Gas Flow Type
+
+          setIsGasFlow(isGasFlowCheck(entityData.type));
+
+          // Document Handling
+
           if (entityData.documents?.length > 0) {
             const tempFiles: { key: string; title: string; url: string }[] = [];
             entityData.documents.forEach((document: any) => {
@@ -794,13 +803,14 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                       disabled={isView}
                       showSearch
                       onChange={(value: any) => {
+                        const selectedAction = actionList.find((action) => action.id === value);
                         form.setFieldsValue({
-                          instrumentType: actionList.find((action) => action.id === value)
-                            ?.instrumentType,
-                          sector: actionList.find((action) => action.id === value)?.sector,
-                          type: actionList.find((action) => action.id === value)?.type,
+                          instrumentType: selectedAction?.instrumentType,
+                          sector: selectedAction?.sector,
+                          type: selectedAction?.type,
                         });
                         fetchParentKPIData(value);
+                        setIsGasFlow(isGasFlowCheck(selectedAction?.type));
                       }}
                     >
                       {actionList.map((action) => (
@@ -1160,49 +1170,62 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
               </div>
             )}
             <div className="form-section-card">
-              <div className="form-section-header">{t('formHeader:programmeResultsInfoTitle')}</div>
-              <Row gutter={gutterSize}>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={
-                      <label className="form-item-header">{t('formHeader:ghgAffected')}</label>
-                    }
-                    name="ghgsAffected"
-                  >
-                    <Select
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      mode="multiple"
-                      disabled={true}
-                    ></Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-              <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
-              <Row gutter={gutterSize}>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={<label className="form-item-header">{t('formHeader:achieved')}</label>}
-                    name="achievedReduct"
-                  >
-                    <Input className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={<label className="form-item-header">{t('formHeader:expected')}</label>}
-                    name="expectedReduct"
-                  >
-                    <Input className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
-              </Row>
+              <div className="form-section-header">
+                {isGasFlow
+                  ? t('formHeader:programmeResultsInfoTitle')
+                  : t('formHeader:kpiInfoTitle')}
+              </div>
+              {isGasFlow && (
+                <>
+                  <Row gutter={gutterSize}>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:ghgAffected')}</label>
+                        }
+                        name="ghgsAffected"
+                      >
+                        <Select
+                          size="large"
+                          style={{ fontSize: inputFontSize }}
+                          mode="multiple"
+                          disabled={true}
+                        ></Select>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
+                  <Row gutter={gutterSize}>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:achieved')}</label>
+                        }
+                        name="achievedReduct"
+                      >
+                        <Input className="form-input-box" disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:expected')}</label>
+                        }
+                        name="expectedReduct"
+                      >
+                        <Input className="form-input-box" disabled />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </>
+              )}
               {(method === 'create' ||
                 method === 'update' ||
                 (method === 'view' &&
-                  (inheritedKpiList.length > 0 || createdKpiList.length > 0))) && (
-                <div className="form-section-sub-header">{t('formHeader:kpiInfoTitle')}</div>
-              )}
+                  (inheritedKpiList.length > 0 || createdKpiList.length > 0))) &&
+                isGasFlow && (
+                  <div className="form-section-sub-header">{t('formHeader:kpiInfoTitle')}</div>
+                )}
               {inheritedKpiList.length > 0 &&
                 inheritedKpiList.map((createdKPI: CreatedKpiData) => (
                   <ViewKpi
