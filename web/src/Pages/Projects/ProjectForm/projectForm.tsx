@@ -8,7 +8,7 @@ import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './projectForm.scss';
 import { ProjectStatus } from '../../../Enums/project.enum';
-import { IntImplementor, KPIAction } from '../../../Enums/shared.enum';
+import { IntImplementor, KPIAction, Recipient } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeSelectData } from '../../../Definitions/programmeDefinitions';
@@ -553,6 +553,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             receivedLCL: getRounded(entityData.migratedData?.receivedAmountDomestic ?? 0),
             achievedGHGReduction: entityData.migratedData?.achievedGHGReduction ?? 0,
             expectedGHGReduction: entityData.migratedData?.expectedGHGReduction ?? 0,
+            recipient: entityData.migratedData?.recipientEntities ?? [],
           });
         }
       } catch {
@@ -1144,6 +1145,30 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
               <Row gutter={gutterSize}>
+                <Col {...halfColumnBps}>
+                  <Form.Item
+                    label={
+                      <label className="form-item-header">
+                        {t('formHeader:recipientEntityHeader')}
+                      </label>
+                    }
+                    name="recipient"
+                  >
+                    <Select
+                      size="large"
+                      style={{ fontSize: inputFontSize }}
+                      mode="multiple"
+                      allowClear
+                      disabled
+                    >
+                      {Object.values(Recipient).map((recipient) => (
+                        <Option key={recipient} value={recipient}>
+                          {recipient}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
                 <Col {...halfColumnBps}>
                   <Form.Item
                     label={
