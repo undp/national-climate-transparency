@@ -466,6 +466,12 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
           setIsValidated(entityData.validated ?? false);
 
+          // Setting flow condition
+
+          setIsGasFlow(isGasFlowCheck(entityData.type));
+
+          //Document Handling
+
           if (entityData.documents?.length > 0) {
             const tempFiles: { key: string; title: string; url: string }[] = [];
             entityData.documents.forEach((document: any) => {

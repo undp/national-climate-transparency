@@ -189,12 +189,14 @@ export class ConfigurationSettingsService {
 
 	private async updateMitigationTimeline(newGwpValue: any, oldGwpValue: any) {
 
+		const currentYear = new Date().getFullYear();
+
 		if (oldGwpValue === undefined || newGwpValue.gwp_ch4 !== oldGwpValue.gwp_ch4) {
-			await this.entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_ch4}::INTEGER, '${GHGS.CH}');`);
+			await this.entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_ch4}::INTEGER, '${GHGS.CH}', ${currentYear}::INTEGER);`);
 		}
 
 		if (oldGwpValue === undefined || newGwpValue.gwp_n2o !== oldGwpValue.gwp_n2o) {
-			await this.entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_n2o}::INTEGER, '${GHGS.NO}');`);
+			await this.entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_n2o}::INTEGER, '${GHGS.NO}', ${currentYear}::INTEGER);`);
 		}
 	}
 }
