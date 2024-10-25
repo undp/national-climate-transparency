@@ -3,15 +3,15 @@ import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
 import { useEffect, useState } from 'react';
-import { DashboardActionItem, PieChartData } from '../../Definitions/dashboard.definitions';
+import { DashboardActionItem, ChartData } from '../../Definitions/dashboard.definitions';
 import LayoutTable from '../../Components/common/Table/layout.table';
 import { useTranslation } from 'react-i18next';
 import { useConnection } from '../../Context/ConnectionContext/connectionContext';
-
 import { getActionTableColumns } from '../../Definitions/columns/actionColumns';
 import PieChart from '../../Components/Charts/PieChart/pieChart';
 import { dashboardHalfColumnBps } from '../../Definitions/breakpoints/breakpoints';
 import { displayErrorMessage } from '../../Utils/errorMessageHandler';
+import BarChart from '../../Components/Charts/BarChart/barChart';
 
 const { Option } = Select;
 const { useBreakpoint } = Grid;
@@ -43,13 +43,17 @@ const Dashboard = () => {
 
   // Individual Chart Data
 
+  const [actionChart, setActionChart] = useState<ChartData>();
+  const [projectChart, setProjectChart] = useState<ChartData>();
+  const [supportChart, setSupportChart] = useState<ChartData>();
+  const [financeChart, setFinanceChart] = useState<ChartData>();
+  const [mitigationRecentChart, setMitigationRecentChart] = useState<ChartData>();
+  const [mitigationIndividualChart, setMitigationIndividualChart] = useState<ChartData>();
+
+  // Chart Dimensions
+
   const [chartWidth, setChartWidth] = useState<number>(450);
-  const [actionChart, setActionChart] = useState<PieChartData>();
-  const [projectChart, setProjectChart] = useState<PieChartData>();
-  const [supportChart, setSupportChart] = useState<PieChartData>();
-  const [financeChart, setFinanceChart] = useState<PieChartData>();
-  const [mitigationRecentChart, setMitigationRecentChart] = useState<PieChartData>();
-  const [mitigationIndividualChart, setMitigationIndividualChart] = useState<PieChartData>();
+  const [chartHeight, setChartHeight] = useState<number>(225);
 
   // Year List to be shown in the Year Selector in Chart 5
 
@@ -64,16 +68,20 @@ const Dashboard = () => {
   useEffect(() => {
     if (screens.xxl) {
       setChartWidth(560);
+      setChartHeight(303);
     } else if (screens.xl) {
       setChartWidth(480);
+      setChartHeight(223);
     } else if (screens.lg) {
       setChartWidth(550);
+      setChartHeight(300);
     } else {
       setChartWidth(450);
+      setChartHeight(200);
     }
   }, [screens]);
 
-  // BE Call to fetch Action Data
+  // BE Call to fetch Data
 
   const getAllData = async () => {
     setLoading(true);
@@ -114,134 +122,19 @@ const Dashboard = () => {
     }
   };
 
-  // Data Fetching for GHG MTG Selected Year
-
-  useEffect(() => {
-    const getIndividualMitigationChartData = async () => {
-      if (mtgYear) {
-        try {
-          const response: any = await get(
-            `stats/analytics/ghgMitigationSummaryForYear/${mtgYear}`,
-            undefined,
-            statServerUrl
-          );
-          const mitigationIndividualChartData = response.data;
-          setMitigationIndividualChart({
-            chartId: 5,
-            chartTitle: t('mtgIndividualChartTitle'),
-            chartDescription: t('mtgIndividualChartDescription'),
-            categories: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
-              sector === null ? 'No Sector Attached' : sector
-            ),
-            values: mitigationIndividualChartData.stats.totals.map((count: string) =>
-              parseInt(count, 10)
-            ),
-            lastUpdatedTime: mitigationIndividualChartData.lastUpdate,
-          });
-        } catch (error: any) {
-          displayErrorMessage(error);
-        }
-      }
-    };
-    getIndividualMitigationChartData();
-  }, [mtgYear]);
-
-  // Data Fetching at the Initial Loading
-
-  useEffect(() => {
-    const getClimateActionChartData = async () => {
-      try {
-        const response: any = await get('stats/analytics/actionsSummery', undefined, statServerUrl);
-        const actionChartData = response.data;
-        setActionChart({
-          chartId: 1,
-          chartTitle: t('actionChartTitle'),
-          chartDescription: t('actionChartDescription'),
-          categories: actionChartData.stats.sectors,
-          values: actionChartData.stats.counts.map((count: string) => parseInt(count, 10)),
-          lastUpdatedTime: actionChartData.lastUpdate,
-        });
-      } catch (error: any) {
-        displayErrorMessage(error);
-      }
-    };
-    getClimateActionChartData();
-
-    const getProjectChartData = async () => {
-      try {
-        const response: any = await get('stats/analytics/projectSummary', undefined, statServerUrl);
-        const projectChartData = response.data;
-        setProjectChart({
-          chartId: 2,
-          chartTitle: t('projectChartTitle'),
-          chartDescription: t('projectChartDescription'),
-          categories: projectChartData.stats.sectors.map((sector: string) =>
-            sector === null ? 'No Sector Attached' : sector
-          ),
-          values: projectChartData.stats.counts.map((count: string) => parseInt(count, 10)),
-          lastUpdatedTime: projectChartData.lastUpdate,
-        });
-      } catch (error: any) {
-        displayErrorMessage(error);
-      }
-    };
-    getProjectChartData();
-
-    const getSupportChartData = async () => {
-      try {
-        const response: any = await get('stats/analytics/supportSummary', undefined, statServerUrl);
-        const supportChartData = response.data;
-        setSupportChart({
-          chartId: 3,
-          chartTitle: t('supportChartTitle'),
-          chartDescription: t('supportChartDescription'),
-          categories: ['Support Received', 'Support Needed'],
-          values: [
-            supportChartData.stats.supportReceivedActivities,
-            supportChartData.stats.supportNeededActivities,
-          ],
-          lastUpdatedTime: supportChartData.lastUpdate,
-        });
-      } catch (error: any) {
-        displayErrorMessage(error);
-      }
-    };
-    getSupportChartData();
-
-    const getFinanceChartData = async () => {
+  const getIndividualMitigationChartData = async () => {
+    if (mtgYear) {
       try {
         const response: any = await get(
-          'stats/analytics/supportFinanceSummary',
-          undefined,
-          statServerUrl
-        );
-        const financeChartData = response.data;
-        setFinanceChart({
-          chartId: 4,
-          chartTitle: t('financeChartTitle'),
-          chartDescription: t('financeChartDescription'),
-          categories: ['Support Received', 'Support Needed'],
-          values: [financeChartData.stats.supportReceived, financeChartData.stats.supportNeeded],
-          lastUpdatedTime: financeChartData.lastUpdate,
-        });
-      } catch (error: any) {
-        displayErrorMessage(error);
-      }
-    };
-    getFinanceChartData();
-
-    const getRecentMitigationChartData = async () => {
-      try {
-        const response: any = await get(
-          'stats/analytics/getGhgMitigationSummary',
+          `stats/analytics/ghgMitigationSummaryForYear/${mtgYear}`,
           undefined,
           statServerUrl
         );
         const mitigationIndividualChartData = response.data;
-        setMitigationRecentChart({
-          chartId: 6,
-          chartTitle: t('mtgRecentChartTitle'),
-          chartDescription: t('mtgRecentChartDescription'),
+        setMitigationIndividualChart({
+          chartId: 5,
+          chartTitle: t('mtgIndividualChartTitle'),
+          chartDescription: t('mtgIndividualChartDescription'),
           categories: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
             sector === null ? 'No Sector Attached' : sector
           ),
@@ -252,10 +145,127 @@ const Dashboard = () => {
         });
       } catch (error: any) {
         displayErrorMessage(error);
-      } finally {
-        setChartLoading(false);
       }
-    };
+    }
+  };
+
+  const getClimateActionChartData = async () => {
+    try {
+      const response: any = await get('stats/analytics/actionsSummery', undefined, statServerUrl);
+      const actionChartData = response.data;
+      setActionChart({
+        chartId: 1,
+        chartTitle: t('actionChartTitle'),
+        chartDescription: t('actionChartDescription'),
+        categories: actionChartData.stats.sectors,
+        values: actionChartData.stats.counts.map((count: string) => parseInt(count, 10)),
+        lastUpdatedTime: actionChartData.lastUpdate,
+      });
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
+  };
+
+  const getProjectChartData = async () => {
+    try {
+      const response: any = await get('stats/analytics/projectSummary', undefined, statServerUrl);
+      const projectChartData = response.data;
+      setProjectChart({
+        chartId: 2,
+        chartTitle: t('projectChartTitle'),
+        chartDescription: t('projectChartDescription'),
+        categories: projectChartData.stats.sectors.map((sector: string) =>
+          sector === null ? 'No Sector Attached' : sector
+        ),
+        values: projectChartData.stats.counts.map((count: string) => parseInt(count, 10)),
+        lastUpdatedTime: projectChartData.lastUpdate,
+      });
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
+  };
+
+  const getSupportChartData = async () => {
+    try {
+      const response: any = await get('stats/analytics/supportSummary', undefined, statServerUrl);
+      const supportChartData = response.data;
+      setSupportChart({
+        chartId: 3,
+        chartTitle: t('supportChartTitle'),
+        chartDescription: t('supportChartDescription'),
+        categories: ['Support Received', 'Support Needed'],
+        values: [
+          supportChartData.stats.supportReceivedActivities,
+          supportChartData.stats.supportNeededActivities,
+        ],
+        lastUpdatedTime: supportChartData.lastUpdate,
+      });
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
+  };
+
+  const getFinanceChartData = async () => {
+    try {
+      const response: any = await get(
+        'stats/analytics/supportFinanceSummary',
+        undefined,
+        statServerUrl
+      );
+      const financeChartData = response.data;
+      setFinanceChart({
+        chartId: 4,
+        chartTitle: t('financeChartTitle'),
+        chartDescription: t('financeChartDescription'),
+        categories: ['Support Received', 'Support Needed'],
+        values: [financeChartData.stats.supportReceived, financeChartData.stats.supportNeeded],
+        lastUpdatedTime: financeChartData.lastUpdate,
+      });
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
+  };
+
+  const getRecentMitigationChartData = async () => {
+    try {
+      const response: any = await get(
+        'stats/analytics/getGhgMitigationSummary',
+        undefined,
+        statServerUrl
+      );
+      const mitigationIndividualChartData = response.data;
+      setMitigationRecentChart({
+        chartId: 6,
+        chartTitle: t('mtgRecentChartTitle'),
+        chartDescription: t('mtgRecentChartDescription'),
+        categories: mitigationIndividualChartData.stats.sectors.map((sector: string) =>
+          sector === null ? 'No Sector Attached' : sector
+        ),
+        values: mitigationIndividualChartData.stats.totals.map((count: string) =>
+          parseInt(count, 10)
+        ),
+        lastUpdatedTime: mitigationIndividualChartData.lastUpdate,
+      });
+    } catch (error: any) {
+      displayErrorMessage(error);
+    } finally {
+      setChartLoading(false);
+    }
+  };
+
+  // Data Fetching for GHG MTG Selected Year
+
+  useEffect(() => {
+    getIndividualMitigationChartData();
+  }, [mtgYear]);
+
+  // Data Fetching at the Initial Loading
+
+  useEffect(() => {
+    getClimateActionChartData();
+    getProjectChartData();
+    getSupportChartData();
+    getFinanceChartData();
     getRecentMitigationChartData();
   }, []);
 
@@ -310,7 +320,7 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={actionChart} t={t} chartWidth={chartWidth}></PieChart>
+                  <PieChart chart={actionChart} t={t} chartWidth={chartWidth} />
                 </div>
               </Col>
             )}
@@ -333,7 +343,7 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={projectChart} t={t} chartWidth={chartWidth}></PieChart>
+                  <PieChart chart={projectChart} t={t} chartWidth={chartWidth} />
                 </div>
               </Col>
             )}
@@ -356,7 +366,7 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={supportChart} t={t} chartWidth={chartWidth}></PieChart>
+                  <PieChart chart={supportChart} t={t} chartWidth={chartWidth} />
                 </div>
               </Col>
             )}
@@ -379,7 +389,7 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={financeChart} t={t} chartWidth={chartWidth}></PieChart>
+                  <PieChart chart={financeChart} t={t} chartWidth={chartWidth} />
                 </div>
               </Col>
             )}
@@ -419,11 +429,7 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart
-                    chart={mitigationIndividualChart}
-                    t={t}
-                    chartWidth={chartWidth}
-                  ></PieChart>
+                  <BarChart chart={mitigationIndividualChart} t={t} chartHeight={chartHeight} />
                 </div>
               </Col>
             )}
@@ -449,7 +455,7 @@ const Dashboard = () => {
                       </Col>
                     </Row>
                   </div>
-                  <PieChart chart={mitigationRecentChart} t={t} chartWidth={chartWidth}></PieChart>
+                  <BarChart chart={mitigationRecentChart} t={t} chartHeight={chartHeight} />
                 </div>
               </Col>
             )}

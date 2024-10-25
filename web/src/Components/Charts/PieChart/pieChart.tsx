@@ -5,11 +5,11 @@ import {
   DashboardTotalFormatter,
   getArraySum,
 } from '../../../Utils/utilServices';
-import { PieChartData, chartColorMappings } from '../../../Definitions/dashboard.definitions';
+import { ChartData, chartColorMappings } from '../../../Definitions/dashboard.definitions';
 import { useEffect, useState } from 'react';
 
 interface Props {
-  chart: PieChartData;
+  chart: ChartData;
   t: any;
   chartWidth: number;
 }
