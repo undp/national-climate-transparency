@@ -23,6 +23,7 @@ import {
   doesUserHaveValidatePermission,
   getFormTitle,
   getRounded,
+  isGasFlowCheck,
 } from '../../../Utils/utilServices';
 import { getValidationRules } from '../../../Utils/validationRules';
 import { ActivityData } from '../../../Definitions/activityDefinitions';
@@ -91,6 +92,8 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+
+  const [isGasFlow, setIsGasFlow] = useState<boolean>(false);
 
   // Spinner For Form Submit
 
@@ -300,7 +303,16 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
   // Entity Delete
 
   const deleteClicked = () => {
-    setOpenDeletePopup(true);
+    if (activityData.length > 0 || programData.length > 0) {
+      message.open({
+        type: 'error',
+        content: t('error:actionDeletePrevented'),
+        duration: 3,
+        style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
+      });
+    } else {
+      setOpenDeletePopup(true);
+    }
   };
 
   const deleteEntity = async () => {
@@ -713,14 +725,15 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('formHeader:typeHeader')}</label>}
                     name="type"
-                    rules={[validation.required]}
+                    rules={method === 'create' ? [validation.required] : undefined}
                   >
                     <Select
                       size="large"
                       style={{ fontSize: inputFontSize }}
                       allowClear
-                      disabled={isView}
+                      disabled={method !== 'create'}
                       showSearch
+                      onChange={(selectedValue) => setIsGasFlow(isGasFlowCheck(selectedValue))}
                     >
                       {Object.values(ActionType).map((aType) => (
                         <Option key={aType} value={aType}>
@@ -1030,48 +1043,59 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
               </div>
             )}
             <div className="form-section-card">
-              <div className="form-section-header">{t('formHeader:mitigationInfoTitle')}</div>
-              <Row gutter={gutterSize}>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={
-                      <label className="form-item-header">{t('formHeader:ghgAffected')}</label>
-                    }
-                    name="ghgsAffected"
-                  >
-                    <Select
-                      size="large"
-                      style={{ fontSize: inputFontSize }}
-                      mode="multiple"
-                      disabled={true}
-                    ></Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-              <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
-              <Row gutter={gutterSize}>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={<label className="form-item-header">{t('formHeader:achieved')}</label>}
-                    name="achievedReduct"
-                  >
-                    <Input className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={<label className="form-item-header">{t('formHeader:expected')}</label>}
-                    name="expectedReduct"
-                  >
-                    <Input className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
-              </Row>
+              <div className="form-section-header">
+                {isGasFlow ? t('formHeader:actionResultsInfoTitle') : t('formHeader:kpiInfoTitle')}
+              </div>
+              {isGasFlow && (
+                <>
+                  <Row gutter={gutterSize}>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:ghgAffected')}</label>
+                        }
+                        name="ghgsAffected"
+                      >
+                        <Select
+                          size="large"
+                          style={{ fontSize: inputFontSize }}
+                          mode="multiple"
+                          disabled={true}
+                        ></Select>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
+                  <Row gutter={gutterSize}>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:achieved')}</label>
+                        }
+                        name="achievedReduct"
+                      >
+                        <Input className="form-input-box" disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:expected')}</label>
+                        }
+                        name="expectedReduct"
+                      >
+                        <Input className="form-input-box" disabled />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </>
+              )}
               {(method === 'create' ||
                 method === 'update' ||
-                (method === 'view' && createdKpiList.length > 0)) && (
-                <div className="form-section-sub-header">{t('formHeader:kpiInfoTitle')}</div>
-              )}
+                (method === 'view' && createdKpiList.length > 0)) &&
+                isGasFlow && (
+                  <div className="form-section-sub-header">{t('formHeader:kpiInfoTitle')}</div>
+                )}
               {method === 'view' &&
                 createdKpiList.map((createdKPI: CreatedKpiData) => (
                   <ViewKpi

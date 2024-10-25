@@ -21,6 +21,7 @@ import {
   doesUserHaveValidatePermission,
   getFormTitle,
   getRounded,
+  isGasFlowCheck,
 } from '../../../Utils/utilServices';
 import { Action } from '../../../Enums/action.enum';
 import { ProjectEntity } from '../../../Entities/project';
@@ -91,6 +92,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
+
+  const [isGasFlow, setIsGasFlow] = useState<boolean>(false);
 
   // Spinner When Form Submit Occurs
 
@@ -661,6 +664,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             actionTitle: actionData.title,
             natAnchor: actionData.natAnchor,
           });
+
+          // Setting Gas Flow
+
+          setIsGasFlow(isGasFlowCheck(actionData.type));
         }
       } catch (error: any) {
         navigate('/projects');
@@ -1197,26 +1204,36 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 setRemovedFiles={setFilesToRemove}
                 setIsSaveButtonDisabled={setIsSaveButtonDisabled}
               ></UploadFileGrid>
-              <div className="form-section-header">{t('mitigationInfoTitle')}</div>
-              <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
-              <Row gutter={gutterSize}>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={<label className="form-item-header">{t('formHeader:achieved')}</label>}
-                    name="achievedGHGReduction"
-                  >
-                    <Input type="number" className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
-                <Col {...halfColumnBps}>
-                  <Form.Item
-                    label={<label className="form-item-header">{t('formHeader:expected')}</label>}
-                    name="expectedGHGReduction"
-                  >
-                    <Input type="number" className="form-input-box" disabled />
-                  </Form.Item>
-                </Col>
-              </Row>
+              {isGasFlow && (
+                <>
+                  <div className="form-section-header">
+                    {t('formHeader:projectResultsInfoTitle')}
+                  </div>
+                  <div className="form-section-sub-header">{t('formHeader:emissionInfoTitle')}</div>
+                  <Row gutter={gutterSize}>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:achieved')}</label>
+                        }
+                        name="achievedGHGReduction"
+                      >
+                        <Input type="number" className="form-input-box" disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col {...halfColumnBps}>
+                      <Form.Item
+                        label={
+                          <label className="form-item-header">{t('formHeader:expected')}</label>
+                        }
+                        name="expectedGHGReduction"
+                      >
+                        <Input type="number" className="form-input-box" disabled />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </>
+              )}
               {(method === 'create' ||
                 method === 'update' ||
                 (method === 'view' &&

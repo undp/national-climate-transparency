@@ -2,6 +2,7 @@ import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
 import { Buffer } from 'buffer';
 import { AcceptedFileExtensions } from '../Enums/file.enum';
+import { ActionType } from '../Enums/action.enum';
 
 export const addCommSep = (value: any) => {
   return (
@@ -214,4 +215,16 @@ export const calculateArraySum = (array: number[]) => {
     arrSum += array[index] || 0;
   }
   return arrSum;
+};
+
+export const isGasFlowCheck = (type: ActionType | undefined): boolean => {
+  if (!type) {
+    return false;
+  }
+
+  if ([ActionType.MITIGATION, ActionType.CROSSCUT].includes(type)) {
+    return true;
+  }
+
+  return false;
 };

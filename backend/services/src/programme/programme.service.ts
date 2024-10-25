@@ -1036,6 +1036,8 @@ export class ProgrammeService {
 		programmeViewDto.ghgsAffected = migratedData[0]?.ghgsAffected ?? [];
 		programmeViewDto.achievedGHGReduction = migratedData[0]?.achievedGHGReduction ?? 0;
 		programmeViewDto.expectedGHGReduction = migratedData[0]?.expectedGHGReduction ?? 0;
+		programmeViewDto.estimatedAmount = migratedData[0]?.estimatedAmount ?? 0;
+		programmeViewDto.receivedAmount = migratedData[0]?.receivedAmount ?? 0;
 
 		return programmeViewDto;
 	}

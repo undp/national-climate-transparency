@@ -10,7 +10,6 @@
     "kpiUnit" : "KPI Unit",
     "kpiName": "KPI Name",
     "updatesInfoTitle": "Updates",
-    "mitigationInfoTitle": "Mitigation Information",
     "attachActivity": "Attach Activities",
     "supportTypeTitle": "Type of Support",
     "measuresTitle": "Reduction Measures",
@@ -39,5 +38,9 @@
     "capBuildHeader": "Contribution to Capacity-Building Objectives",
     "noSupportMessage": "No Supports Connected",
     "noActivityMessage": "No Activities Connected",
-    "kpiSearchFailed": "Searching for KPIs Failed"
+    "kpiSearchFailed": "Searching for KPIs Failed",
+    "actionResultsInfoTitle": "Summary of Action Results",
+    "programmeResultsInfoTitle": "Summary of Programme Results",
+    "projectResultsInfoTitle": "Summary of Project Results",
+    "activityResultsInfoTitle": "Summary of Activity Results"
 }

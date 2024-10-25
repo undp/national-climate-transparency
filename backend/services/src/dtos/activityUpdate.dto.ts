@@ -145,6 +145,7 @@ export class ActivityUpdateDto {
 	)
 	removedDocuments: string[];
 
+	@ValidateIf((c) => c.ghgsAffected)
 	@IsNotEmpty()
 	@ApiProperty({ enum: GHGS })
 	@IsEnum(GHGS, {
@@ -152,10 +153,12 @@ export class ActivityUpdateDto {
 	})
 	ghgsAffected: GHGS;
 
+	@ValidateIf((c) => c.achievedGHGReduction)
 	@IsNumber()
 	@ApiProperty()
 	achievedGHGReduction: number;
 
+	@ValidateIf((c) => c.expectedGHGReduction)
 	@IsNumber()
 	@ApiProperty()
 	expectedGHGReduction: number;

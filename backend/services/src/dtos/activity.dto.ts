@@ -133,6 +133,7 @@ export class ActivityDto {
 	)
 	documents: DocumentDto[];
 
+	@ValidateIf((c) => c.ghgsAffected)
 	@IsNotEmpty()
 	@ApiProperty({ enum: GHGS })
 	@IsEnum(GHGS, {
@@ -140,10 +141,12 @@ export class ActivityDto {
 	})
 	ghgsAffected: GHGS;
 
+	@ValidateIf((c) => c.achievedGHGReduction)
 	@IsNumber()
 	@ApiProperty()
 	achievedGHGReduction: number;
 
+	@ValidateIf((c) => c.expectedGHGReduction)
 	@IsNumber()
 	@ApiProperty()
 	expectedGHGReduction: number;
@@ -177,10 +180,7 @@ export class ActivityDto {
 	})
 	mitigationInfo: any;
 
-	@ValidateIf((o) => o.startYear && o.ghgsAffected)
-	@IsNotEmpty({
-		message: "Mitigation timeline is required when startYear and ghgsAffected are provided."
-	})
+	@IsOptional()
 	@ApiPropertyOptional({
 		type: "object",
 		example: {

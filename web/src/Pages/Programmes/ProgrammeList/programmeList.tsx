@@ -139,7 +139,7 @@ const programmeList = () => {
             status: unstructuredData[i].programmeStatus,
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             subSectorsAffected: unstructuredData[i].affectedSubSector,
-            investment: Math.round(unstructuredData[i].investment ?? 0),
+            investment: Math.round(unstructuredData[i].migratedData[0]?.estimatedAmount ?? 0),
             type: unstructuredData[i].action?.type,
           });
         }
