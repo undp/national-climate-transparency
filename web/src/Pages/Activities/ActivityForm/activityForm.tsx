@@ -486,7 +486,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     year: any,
     value: string
   ) => {
-    const newValue = value ? parseInt(value) : 0;
+    const newValue = value ? parseFloat(parseFloat(value).toFixed(2)) : 0;
 
     if (tableType === 'expected') {
       const updatedTimeline = expectedTimeline.map((entry) => {
