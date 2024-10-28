@@ -563,7 +563,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
             type: prg.action?.type,
             status: prg.programmeStatus,
             subSectorsAffected: prg.affectedSubSector ?? [],
-            estimatedInvestment: prg.investment,
+            estimatedInvestment: prg.migratedData[0]?.estimatedAmount ?? 0,
             ghgsAffected: prg.migratedData[0]?.ghgsAffected ?? [],
             types: prg.migratedData[0]?.types ?? [],
             natImplementer: prg.natImplementor ?? [],
