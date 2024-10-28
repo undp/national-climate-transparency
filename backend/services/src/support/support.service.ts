@@ -72,7 +72,7 @@ export class SupportService {
 		support.requiredAmountDomestic = this.helperService.roundToTwoDecimals(support.requiredAmount / support.exchangeRate);
 		support.receivedAmountDomestic = this.helperService.roundToTwoDecimals(support.receivedAmount / support.exchangeRate);
 		support.sector = activity.sector;
-		support.type = activity.type;
+		// support.type = activity.type;
 
 		support.activity = activity;
 		this.addEventLogEntry(eventLog, LogEventType.SUPPORT_CREATED, EntityType.SUPPORT, support.supportId, user.id, supportDto);
@@ -295,7 +295,7 @@ export class SupportService {
 
 			currentSupport.activity = activity;
 			currentSupport.sector = activity.sector;
-			currentSupport.type = activity.type;
+			// currentSupport.type = activity.type;
 
 			if (activity.validated) {
 				activity.validated = false;
