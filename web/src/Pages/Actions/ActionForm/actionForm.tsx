@@ -95,6 +95,10 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [isGasFlow, setIsGasFlow] = useState<boolean>(false);
 
+  // First Render Check
+
+  const [isFirstRenderDone, setIsFirstRenderDone] = useState<boolean>(false);
+
   // Spinner For Form Submit
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
@@ -250,17 +254,13 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
-
-        setWaitingForBE(false);
-        navigate('/actions');
       }
     } catch (error: any) {
       displayErrorMessage(error);
-
       await new Promise((resolve) => {
         setTimeout(resolve, 500);
       });
-
+    } finally {
       setWaitingForBE(false);
       navigate('/actions');
     }
@@ -674,20 +674,24 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Dynamic Update
-
-  useEffect(() => {
-    fetchActionData();
-    fetchCreatedKPIData();
-    fetchConnectedProgrammeData();
-    fetchConnectedActivityData();
-  }, []);
-
   // Fetching Activity data and calculating migrated fields when attachment changes
 
   useEffect(() => {
     fetchSupportData();
   }, [activityData]);
+
+  // Init Job
+
+  useEffect(() => {
+    Promise.all([
+      fetchActionData(),
+      fetchCreatedKPIData(),
+      fetchConnectedProgrammeData(),
+      fetchConnectedActivityData(),
+    ]).then(() => {
+      setIsFirstRenderDone(true);
+    });
+  }, []);
 
   return (
     <div className="content-container">
@@ -709,7 +713,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && isFirstRenderDone ? (
         <div className="action-form">
           <Form
             form={form}

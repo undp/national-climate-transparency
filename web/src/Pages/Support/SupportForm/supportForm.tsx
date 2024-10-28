@@ -61,9 +61,9 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const validation = getValidationRules(method);
 
-  // First Rendering Check
+  // First Render Check
 
-  const [firstRenderingCompleted, setFirstRenderingCompleted] = useState<boolean>(false);
+  const [isFirstRenderDone, setIsFirstRenderDone] = useState<boolean>(false);
 
   // Entity Validation Status
 
@@ -114,104 +114,86 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     }
   };
 
-  useEffect(() => {
-    // Fetching All Activities which can be the parent
-    const fetchNonValidatedActivities = async () => {
+  // DB Queries
+
+  const fetchNonValidatedActivities = async () => {
+    try {
+      const payload = {
+        sort: {
+          key: 'activityId',
+          order: 'ASC',
+        },
+      };
+      const response: any = await post('national/activities/query', payload);
+      const tempActivityData: ParentData[] = [];
+      response.data.forEach((activity: any) => {
+        tempActivityData.push({
+          id: activity.activityId,
+          title: activity.title,
+        });
+      });
+      setParentList(tempActivityData);
+    } catch (error: any) {
+      displayErrorMessage(error);
+    }
+  };
+
+  const fetchSupportData = async () => {
+    if (method !== 'create' && entId) {
+      let response: any;
       try {
         const payload = {
-          sort: {
-            key: 'activityId',
-            order: 'ASC',
-          },
+          filterAnd: [
+            {
+              key: 'supportId',
+              operation: '=',
+              value: entId,
+            },
+          ],
         };
-        const response: any = await post('national/activities/query', payload);
-        const tempActivityData: ParentData[] = [];
-        response.data.forEach((activity: any) => {
-          tempActivityData.push({
-            id: activity.activityId,
-            title: activity.title,
+        response = await post('national/supports/query', payload);
+
+        if (response.response.data.total === 1) {
+          const entityData: any = response.data[0];
+          // Populating Action owned data fields
+          form.setFieldsValue({
+            activityId: entityData.activity?.activityId ?? undefined,
+            direction: entityData.direction,
+            financeNature: entityData.financeNature,
+            internationalSupportChannel: entityData.internationalSupportChannel,
+            internationalFinancialInstrument:
+              entityData.internationalFinancialInstrument ?? undefined,
+            nationalFinancialInstrument: entityData.nationalFinancialInstrument ?? undefined,
+            financingStatus: entityData.financingStatus,
+            internationalSource: entityData.internationalSource ?? undefined,
+            nationalSource: entityData.nationalSource ?? undefined,
+            requiredAmount: entityData.requiredAmount,
+            receivedAmount: entityData.receivedAmount,
+            exchangeRate: entityData.exchangeRate,
           });
-        });
-        setParentList(tempActivityData);
-      } catch (error: any) {
-        displayErrorMessage(error);
-      }
-    };
-    fetchNonValidatedActivities();
 
-    // Initially Loading the underlying support data when not in create mode
+          setAmountNeeded(entityData.requiredAmount ?? undefined);
+          setAmountReceived(entityData.receivedAmount ?? undefined);
+          setExchangeRate(entityData.exchangeRate ?? undefined);
 
-    const fetchData = async () => {
-      if (method !== 'create' && entId) {
-        let response: any;
-        try {
-          const payload = {
-            filterAnd: [
-              {
-                key: 'supportId',
-                operation: '=',
-                value: entId,
-              },
-            ],
-          };
-          response = await post('national/supports/query', payload);
+          // Setting the field rendering conditions
 
-          if (response.response.data.total === 1) {
-            const entityData: any = response.data[0];
-            // Populating Action owned data fields
-            form.setFieldsValue({
-              activityId: entityData.activity?.activityId ?? undefined,
-              direction: entityData.direction,
-              financeNature: entityData.financeNature,
-              internationalSupportChannel: entityData.internationalSupportChannel,
-              internationalFinancialInstrument:
-                entityData.internationalFinancialInstrument ?? undefined,
-              nationalFinancialInstrument: entityData.nationalFinancialInstrument ?? undefined,
-              financingStatus: entityData.financingStatus,
-              internationalSource: entityData.internationalSource ?? undefined,
-              nationalSource: entityData.nationalSource ?? undefined,
-              requiredAmount: entityData.requiredAmount,
-              receivedAmount: entityData.receivedAmount,
-              exchangeRate: entityData.exchangeRate,
-            });
+          renderNatureBasedFields(entityData.financeNature);
 
-            setAmountNeeded(entityData.requiredAmount ?? undefined);
-            setAmountReceived(entityData.receivedAmount ?? undefined);
-            setExchangeRate(entityData.exchangeRate ?? undefined);
-
-            // Setting the field rendering conditions
-
-            renderNatureBasedFields(entityData.financeNature);
-
-            if (entityData.direction === 'Received') {
-              setIsReceived(true);
-            }
-
-            // Setting validation status
-
-            setIsValidated(entityData.validated ?? false);
+          if (entityData.direction === 'Received') {
+            setIsReceived(true);
           }
-        } catch {
-          navigate('/support');
+
+          // Setting validation status
+
+          setIsValidated(entityData.validated ?? false);
         }
-        setIsSaveButtonDisabled(true);
+      } catch {
+        navigate('/support');
       }
-    };
-    fetchData();
-
-    if (!firstRenderingCompleted) {
-      setFirstRenderingCompleted(true);
+      setIsSaveButtonDisabled(true);
     }
-  }, []);
-
-  useEffect(() => {
-    const updatedNeeded = (amountNeeded ?? 0) / (exchangeRate ?? 0);
-    const updatedReceived = (amountReceived ?? 0) / (exchangeRate ?? 0);
-    form.setFieldsValue({
-      neededLocal: updatedNeeded > 0 ? parseFloat(updatedNeeded.toFixed(2)) : null,
-      receivedLocal: updatedReceived > 0 ? parseFloat(updatedReceived.toFixed(2)) : null,
-    });
-  }, [exchangeRate, amountNeeded, amountReceived]);
+  };
 
   // Form Submit
 
@@ -344,6 +326,25 @@ const SupportForm: React.FC<Props> = ({ method }) => {
     setIsSaveButtonDisabled(false);
   };
 
+  // Dynamic Updates
+
+  useEffect(() => {
+    const updatedNeeded = (amountNeeded ?? 0) / (exchangeRate ?? 0);
+    const updatedReceived = (amountReceived ?? 0) / (exchangeRate ?? 0);
+    form.setFieldsValue({
+      neededLocal: updatedNeeded > 0 ? parseFloat(updatedNeeded.toFixed(2)) : null,
+      receivedLocal: updatedReceived > 0 ? parseFloat(updatedReceived.toFixed(2)) : null,
+    });
+  }, [exchangeRate, amountNeeded, amountReceived]);
+
+  // Init Job
+
+  useEffect(() => {
+    Promise.all([fetchNonValidatedActivities(), fetchSupportData()]).then(() => {
+      setIsFirstRenderDone(true);
+    });
+  }, []);
+
   return (
     <div className="content-container">
       <ConfirmPopup
@@ -364,7 +365,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE && firstRenderingCompleted ? (
+      {!waitingForBE && isFirstRenderDone ? (
         <div className="support-form">
           <Form
             form={form}

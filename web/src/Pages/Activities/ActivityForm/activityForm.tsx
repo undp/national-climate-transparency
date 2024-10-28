@@ -110,6 +110,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [isGasFlow, setIsGasFlow] = useState<boolean>(false);
 
+  // First Render Check
+
+  const [isFirstRenderDone, setIsFirstRenderDone] = useState<boolean>(false);
+
   // Spinner When Form Submit Occurs
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
@@ -772,11 +776,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
-        setWaitingForBE(false);
-        navigate('/activities');
       }
     } catch (error: any) {
       displayErrorMessage(error);
+    } finally {
       setWaitingForBE(false);
       navigate('/activities');
     }
@@ -1170,13 +1173,17 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, [actualTimeline]);
 
-  // Init Run
+  // Init JOb
 
   useEffect(() => {
-    fetchActivityData();
-    fetchSupportData();
-    fetchCreatedKPIData();
-    fetchGwpSettings();
+    Promise.all([
+      fetchActivityData(),
+      fetchSupportData(),
+      fetchCreatedKPIData(),
+      fetchGwpSettings(),
+    ]).then(() => {
+      setIsFirstRenderDone(true);
+    });
   }, []);
 
   return (
@@ -1199,7 +1206,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && isFirstRenderDone ? (
         <div className="activity-form">
           <Form
             form={form}

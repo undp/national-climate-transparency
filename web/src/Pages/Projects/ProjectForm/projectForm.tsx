@@ -95,6 +95,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [isGasFlow, setIsGasFlow] = useState<boolean>(false);
 
+  // First Render Check
+
+  const [isFirstRenderDone, setIsFirstRenderDone] = useState<boolean>(false);
+
   // Spinner When Form Submit Occurs
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
@@ -249,9 +253,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         await new Promise((resolve) => {
           setTimeout(resolve, 500);
         });
-
-        setWaitingForBE(false);
-        navigate('/projects');
       }
     } catch (error: any) {
       displayErrorMessage(error);
@@ -259,7 +260,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       await new Promise((resolve) => {
         setTimeout(resolve, 500);
       });
-
+    } finally {
       setWaitingForBE(false);
       navigate('/projects');
     }
@@ -766,17 +767,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Dynamic Updates
-
-  // Init for Entity
-
-  useEffect(() => {
-    fetchNonValidatedProgrammes();
-    fetchProjectData();
-    fetchCreatedKPIData();
-    fetchConnectedActivityData();
-  }, []);
-
   // Fetching Action data for parent change
 
   useEffect(() => {
@@ -809,6 +799,19 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, [startYear, endYear]);
 
+  // Init Job
+
+  useEffect(() => {
+    Promise.all([
+      fetchNonValidatedProgrammes(),
+      fetchProjectData(),
+      fetchCreatedKPIData(),
+      fetchConnectedActivityData(),
+    ]).then(() => {
+      setIsFirstRenderDone(true);
+    });
+  }, []);
+
   return (
     <div className="content-container">
       <ConfirmPopup
@@ -829,7 +832,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && isFirstRenderDone ? (
         <div className="project-form">
           <Form
             form={form}
