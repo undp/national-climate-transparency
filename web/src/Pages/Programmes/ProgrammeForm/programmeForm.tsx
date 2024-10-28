@@ -352,13 +352,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const createKPI = () => {
     const newItem: NewKpiData = {
-      index: kpiCounter + 1,
+      index: kpiCounter,
       name: '',
       unit: '',
       achieved: undefined,
       expected: 0,
     };
-    setKpiCounter(kpiCounter + 1);
+    setKpiCounter((prevCount) => prevCount + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
     setHandleKPI(true);
     setIsSaveButtonDisabled(false);
