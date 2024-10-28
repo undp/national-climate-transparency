@@ -54,7 +54,7 @@ export class LinkUnlinkService {
 					programme.action = action;
 					programme.path = action.actionId;
 					programme.sector = action.sector;
-					programme.type = action.type;
+					// programme.type = action.type;
 
 					programmeId = programme.programmeId;
 
@@ -84,7 +84,7 @@ export class LinkUnlinkService {
 							// update each activity's path that are directly linked to the programme
 							for (const activity of programme.activities) {
 								activity.sector = action.sector;
-								activity.type = action.type;
+								// activity.type = action.type;
 								activity.path = this.addActionToActivityPath(activity.path, action.actionId)
 
 								// unvalidate the activity linked to programme
@@ -104,7 +104,7 @@ export class LinkUnlinkService {
 								if (activity.support && activity.support.length > 0) {
 									for (const support of activity.support) {
 										support.sector = action.sector;
-										support.type = action.type;
+										// support.type = action.type;
 
 										// unvalidate the activity linked to programme
 										if (support.validated) {
@@ -124,7 +124,7 @@ export class LinkUnlinkService {
 							for (const project of programme.projects) {
 								// update project's path
 								project.sector = action.sector;
-								project.type = action.type;
+								// project.type = action.type;
 								project.path = this.addActionToProjectPath(project.path, action.actionId);
 
 								// unvalidate the linked projects
@@ -148,7 +148,7 @@ export class LinkUnlinkService {
 
 									for (const activity of project.activities) {
 										activity.sector = action.sector;
-										activity.type = action.type;
+										// activity.type = action.type;
 										activity.path = this.addActionToActivityPath(activity.path, action.actionId);
 
 										// unvalidate the activity linked to project
@@ -169,7 +169,7 @@ export class LinkUnlinkService {
 										if (activity.support && activity.support.length > 0) {
 											for (const support of activity.support) {
 												support.sector = action.sector;
-												support.type = action.type;
+												// support.type = action.type;
 
 												// unvalidate the activity linked to programme
 												if (support.validated) {
@@ -229,7 +229,7 @@ export class LinkUnlinkService {
 					programme.action = null;
 					programme.path = "";
 					programme.sector = null;
-					programme.type = null;
+					// programme.type = null;
 
 					logs.push(this.buildLogEntity(LogEventType.UNLINKED_FROM_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, payload))
 
@@ -267,7 +267,7 @@ export class LinkUnlinkService {
 								const parts = activity.path.split(".");
 								activity.path = ["_", parts[1], parts[2]].join(".");
 								activity.sector = null;
-								activity.type = null;
+								// activity.type = null;
 
 								// unvalidate the activity linked to programme
 								if (activity.validated) {
@@ -286,7 +286,7 @@ export class LinkUnlinkService {
 								if (activity.support && activity.support.length > 0) {
 									for (const support of activity.support) {
 										support.sector = action.sector;
-										support.type = action.type;
+										// support.type = action.type;
 	
 										// unvalidate the activity linked to programme
 										if (support.validated) {
@@ -311,7 +311,7 @@ export class LinkUnlinkService {
 								const parts = project.path.split(".");
 								project.path = ["_", parts[1]].join(".");
 								project.sector = null;
-								project.type = null;
+								// project.type = null;
 
 								// unvalidate the activity linked to programme
 								if (project.validated) {
@@ -333,7 +333,7 @@ export class LinkUnlinkService {
 										const parts = activity.path.split(".");
 										activity.path = ["_", parts[1], parts[2]].join(".");
 										activity.sector = null;
-										activity.type = null;
+										// activity.type = null;
 
 										// unvalidate the activity linked to project
 										if (activity.validated) {
@@ -352,7 +352,7 @@ export class LinkUnlinkService {
 										if (activity.support && activity.support.length > 0) {
 											for (const support of activity.support) {
 												support.sector = action.sector;
-												support.type = action.type;
+												// support.type = action.type;
 			
 												// unvalidate the activity linked to programme
 												if (support.validated) {
@@ -401,7 +401,7 @@ export class LinkUnlinkService {
 					project.programme = programme;
 					project.path = this.addProgrammeToProjectPath(project.path, programme.programmeId, programme.path);
 					project.sector = programme.sector;
-					project.type = programme.type;
+					// project.type = programme.type;
 
 					// unvalidate project
 					if (project.validated) {
@@ -428,7 +428,7 @@ export class LinkUnlinkService {
 									activity.support.forEach((support) => {
 
 										support.sector = programme.sector;
-										support.type = programme.type;
+										// support.type = programme.type;
 										// unvalidate support
 										if (support.validated) {
 											support.validated = false;
@@ -445,7 +445,7 @@ export class LinkUnlinkService {
 								}
 								activity.path = this.addProgrammeToActivityPath(activity.path, programme.programmeId, programme.path);
 								activity.sector = programme.sector;
-								activity.type = programme.type;
+								// activity.type = programme.type;
 
 								// unvalidate activity
 								if (activity.validated) {
@@ -545,7 +545,7 @@ export class LinkUnlinkService {
 					project.programme = null;
 					project.path = `_._`;
 					project.sector = null;
-					project.type = null;
+					// project.type = null;
 
 					// unvalidate project
 					if (project.validated) {
@@ -572,7 +572,7 @@ export class LinkUnlinkService {
 								if (activity.support && activity.support.length > 0) {
 									activity.support.forEach((support) => {
 										support.sector = null;
-										support.type = null;
+										// support.type = null;
 
 										// unvalidate project
 										if (support.validated) {
@@ -590,7 +590,7 @@ export class LinkUnlinkService {
 								}
 								activity.path = `_._.${project.projectId}`
 								activity.sector = null;
-								activity.type = null;
+								// activity.type = null;
 
 								// unvalidate project
 								if (activity.validated) {
@@ -673,7 +673,7 @@ export class LinkUnlinkService {
 							logEventType = LogEventType.LINKED_TO_ACTION;
 							entityType = EntityType.ACTION;
 							activity.sector = parentEntity?.sector;
-							activity.type = parentEntity?.type;
+							// activity.type = parentEntity?.type;
 
 							rootNodeType = EntityType.ACTION;
 							rootId = linkActivitiesDto.parentId;
@@ -685,7 +685,7 @@ export class LinkUnlinkService {
 							logEventType = LogEventType.LINKED_TO_PROGRAMME;
 							entityType = EntityType.PROGRAMME;
 							activity.sector = parentEntity?.sector;
-							activity.type = parentEntity?.type;
+							// activity.type = parentEntity?.type;
 
 							rootNodeType = (parentEntity.path) ? EntityType.ACTION : EntityType.PROGRAMME;
 							rootId = (parentEntity.path) ? parentEntity.path : linkActivitiesDto.parentId;
@@ -696,7 +696,7 @@ export class LinkUnlinkService {
 							logEventType = LogEventType.LINKED_TO_PROJECT;
 							entityType = EntityType.PROJECT;
 							activity.sector = parentEntity?.sector;
-							activity.type = parentEntity?.type;
+							// activity.type = parentEntity?.type;
 
 							const parts = parentEntity.path?.split(".");
 							if (parts && parts.length > 0) {
@@ -738,7 +738,7 @@ export class LinkUnlinkService {
 						if (activity.support && activity.support.length > 0) {
 							activity.support.forEach((support) => {
 								support.sector = linkedActivity.sector;
-								support.type = linkedActivity.type;
+								// support.type = linkedActivity.type;
 
 								if (support.validated) {
 									support.validated = false;
@@ -841,7 +841,7 @@ export class LinkUnlinkService {
 					activity.parentType = null;
 					activity.path = '_._._';
 					activity.sector = null;
-					activity.type = null;
+					// activity.type = null;
 					activity.validated = false;
 
 					const unlinkedActivity = await em.save<ActivityEntity>(activity);
@@ -851,7 +851,7 @@ export class LinkUnlinkService {
 						if (activity.support && activity.support.length > 0) {
 							activity.support.forEach((support) => {
 								support.sector = null;
-								support.type = null;
+								// support.type = null;
 								support.validated = false;
 								supports.push(support);
 							});

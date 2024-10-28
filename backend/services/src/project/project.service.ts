@@ -98,7 +98,7 @@ export class ProjectService {
 			project.programme = programme;
 			project.path = programme.path && programme.path.trim() !== '' ? `${programme.path}.${programme.programmeId}` : `_.${programme.programmeId}`;
 			project.sector = programme.sector;
-			project.type = programme.type;
+			// project.type = programme.type;
 			this.addEventLogEntry(eventLog, LogEventType.PROJECT_LINKED, EntityType.PROGRAMME, programme.programmeId, user.id, project.projectId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_PROGRAMME, EntityType.PROJECT, project.projectId, user.id, programme.programmeId);
 		}
@@ -371,7 +371,7 @@ export class ProjectService {
 		projectUpdate.path = currentProject.path;
 		projectUpdate.programme = currentProject.programme;
 		projectUpdate.sector = currentProject.sector;
-		projectUpdate.type = currentProject.type;
+		// projectUpdate.type = currentProject.type;
 		projectUpdate.activities = currentProject.activities;
 		projectUpdate.expectedTimeFrame = projectUpdateDto.endYear - projectUpdateDto.startYear;
 		

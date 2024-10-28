@@ -108,8 +108,8 @@ export class ActivityEntity implements EntitySubject {
 	@Column({ type: "enum", enum: Sector, nullable: true })
 	sector: Sector;
 
-	@Column({ type: "enum", enum: ActionType,nullable: false })
-  type: string;
+	// @Column({ type: "enum", enum: ActionType,nullable: false })
+  // type: string;
 
 	@Column({ type: "ltree" })
 	path: string;

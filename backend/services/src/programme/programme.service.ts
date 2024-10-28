@@ -128,7 +128,7 @@ export class ProgrammeService {
 			programme.action = action;
 			programme.path = programmeDto.actionId;
 			programme.sector = action.sector;
-			programme.type = action.type;
+			// programme.type = action.type;
 
 			this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_LINKED, EntityType.ACTION, action.actionId, user.id, programme.programmeId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, action.actionId);
@@ -320,7 +320,7 @@ export class ProgrammeService {
 		programmeUpdate.action = currentProgramme.action;
 		programmeUpdate.path = currentProgramme.path;
 		programmeUpdate.sector = currentProgramme.sector;
-		programmeUpdate.type = currentProgramme.type;
+		// programmeUpdate.type = currentProgramme.type;
 		programmeUpdate.projects = currentProgramme.projects;
 		programmeUpdate.activities = currentProgramme.activities;
 
@@ -1023,7 +1023,7 @@ export class ProgrammeService {
 		programmeViewDto.objectives = programme.objective;
 		programmeViewDto.instrumentType = programme.action?.instrumentType;
 		programmeViewDto.sector = programme.sector;
-		programmeViewDto.type = programme.type;
+		// programmeViewDto.type = programme.type;
 		programmeViewDto.affectedSubSector = programme.affectedSubSector;
 		programmeViewDto.programmeStatus = programme.programmeStatus;
 		programmeViewDto.recipientEntity = recipientEntity;
