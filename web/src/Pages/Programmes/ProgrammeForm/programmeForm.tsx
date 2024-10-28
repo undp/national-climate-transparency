@@ -803,13 +803,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('selectActionHeader')}</label>}
                     name="actionId"
-                    rules={[validation.required]}
+                    rules={method !== 'create' ? undefined : [validation.required]}
                   >
                     <Select
                       size={'large'}
                       style={{ fontSize: inputFontSize }}
                       allowClear
-                      disabled={isView}
+                      disabled={method !== 'create'}
                       showSearch
                       onChange={(value: any) => {
                         const selectedAction = actionList.find((action) => action.id === value);

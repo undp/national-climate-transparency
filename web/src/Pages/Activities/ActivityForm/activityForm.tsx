@@ -1221,13 +1221,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                   <Form.Item
                     label={<label className="form-item-header">{t('parentTypeTitle')}</label>}
                     name="parentType"
-                    rules={[validation.required]}
+                    rules={method !== 'create' ? undefined : [validation.required]}
                   >
                     <Select
                       size="large"
                       style={{ fontSize: inputFontSize }}
                       allowClear
-                      disabled={isView}
+                      disabled={method !== 'create'}
                       showSearch
                       onChange={handleParentTypeSelect}
                     >
@@ -1271,13 +1271,13 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                         </label>
                       }
                       name="parentId"
-                      rules={[validation.required]}
+                      rules={method !== 'create' ? undefined : [validation.required]}
                     >
                       <Select
                         size={'large'}
                         style={{ fontSize: inputFontSize }}
                         allowClear
-                        disabled={isView}
+                        disabled={method !== 'create'}
                         showSearch
                         onChange={handleParentIdSelect}
                       >
