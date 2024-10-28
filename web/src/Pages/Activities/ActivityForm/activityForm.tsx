@@ -158,29 +158,49 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const mtgRange = 30;
 
-  const handleParentIdSelect = (id: string) => {
-    setConnectedParentId(id);
-    setShouldFetchParentKpi(true);
+  const resetGasFlowOptions = () => {
+    setIsGasFlow(false);
+    setSelectedGhg(undefined);
+    setExpectedTimeline([]);
+    setActualTimeline([]);
 
-    if (id === undefined && method === 'create') {
-      setMtgStartYear(0);
+    form.setFieldsValue({
+      measure: undefined,
+      ghgsAffected: undefined,
+      achievedGHGReduction: undefined,
+      expectedGHGReduction: undefined,
+    });
+  };
+
+  const handleParentIdSelect = (id: string) => {
+    try {
+      resetGasFlowOptions();
+    } finally {
+      setConnectedParentId(id);
+      setShouldFetchParentKpi(true);
+
+      if (id === undefined && method === 'create') {
+        setMtgStartYear(0);
+      }
     }
   };
 
   const handleParentTypeSelect = (value: string) => {
-    setParentType(value);
-    setConnectedParentId(undefined);
+    try {
+      resetGasFlowOptions();
+    } finally {
+      setParentType(value);
+      setConnectedParentId(undefined);
 
-    if (method === 'create') {
-      setMtgStartYear(0);
+      if (method === 'create') {
+        setMtgStartYear(0);
+      }
+
+      form.setFieldsValue({
+        parentId: '',
+        parentDescription: '',
+      });
     }
-
-    setIsGasFlow(false);
-
-    form.setFieldsValue({
-      parentId: '',
-      parentDescription: '',
-    });
   };
 
   const fetchGwpSettings = async () => {
