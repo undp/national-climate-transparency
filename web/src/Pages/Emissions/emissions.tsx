@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { LockOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { EmissionTabItem } from '../../Definitions/emissionDefinitions';
 import { useUserContext } from '../../Context/UserInformationContext/userInformationContext';
+import { EmissionUnits } from '../../Enums/emission.enum';
 
 const GhgEmissions = () => {
   // Page Context
@@ -28,6 +29,16 @@ const GhgEmissions = () => {
 
   const [activeYear, setActiveYear] = useState<string>();
 
+  // GWP Settings
+
+  const [gwpSetting, setGwpSetting] = useState<{
+    [EmissionUnits.CH4]: number;
+    [EmissionUnits.N2O]: number;
+  }>({
+    [EmissionUnits.CH4]: 1,
+    [EmissionUnits.N2O]: 1,
+  });
+
   // Getter of all available emission report years and their state
 
   const getAvailableEmissionReports = async () => {
@@ -46,9 +57,26 @@ const GhgEmissions = () => {
     }
   };
 
+  const fetchGwpSettings = async () => {
+    let response: any;
+    try {
+      response = await get(`national/settings/GWP`);
+
+      if (response.status === 200 || response.status === 201) {
+        setGwpSetting({
+          [EmissionUnits.CH4]: response.data.gwp_ch4,
+          [EmissionUnits.N2O]: response.data.gwp_n2o,
+        });
+      }
+    } catch (error) {
+      console.log('Error fetching GWP values:', error);
+    }
+  };
+
   // Init Function at first render
 
   useEffect(() => {
+    fetchGwpSettings();
     getAvailableEmissionReports();
   }, []);
 
@@ -71,6 +99,7 @@ const GhgEmissions = () => {
                 year={null}
                 finalized={false}
                 availableYears={availableYears}
+                gwpSetting={gwpSetting}
                 setActiveYear={setActiveYear}
                 getAvailableEmissionReports={getAvailableEmissionReports}
               />
@@ -94,6 +123,7 @@ const GhgEmissions = () => {
               index={index + 1}
               year={report.year}
               availableYears={availableYears}
+              gwpSetting={gwpSetting}
               setActiveYear={setActiveYear}
               finalized={report.state === 'FINALIZED' ? true : false}
               getAvailableEmissionReports={getAvailableEmissionReports}

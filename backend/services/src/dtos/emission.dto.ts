@@ -42,16 +42,6 @@ export class EmissionDto {
   @IsNotEmpty()
   @Type(() => EmissionOther)
   other: EmissionOther;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @Type(() => EmissionProperties)
-  totalCo2WithoutLand: EmissionProperties;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @Type(() => EmissionProperties)
-  totalCo2WithLand: EmissionProperties;
 }
 
 export class EmissionValidateDto {

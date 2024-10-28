@@ -16,7 +16,6 @@ import {
 import NumberChip from '../NumberChip/numberChip';
 import {
   AgricultureSection,
-  EmissionData,
   EmissionTotals,
   EnergySection,
   IndustrySection,
@@ -25,7 +24,6 @@ import {
   SubSectionsDefinition,
   WasteSection,
   agricultureSectionInit,
-  emissionInitData,
   emissionSections,
   emissionTotals,
   energySectionInit,
@@ -33,7 +31,6 @@ import {
   otherSectionInit,
   processAgrEmissionData,
   processEnergyEmissionData,
-  processIndividualEmissionData,
   processIndustryEmissionData,
   processOtherEmissionData,
   processWasteEmissionData,
@@ -53,6 +50,10 @@ interface Props {
   year: string | null;
   finalized: boolean;
   availableYears: number[];
+  gwpSetting: {
+    [EmissionUnits.CH4]: number;
+    [EmissionUnits.N2O]: number;
+  };
   setActiveYear: React.Dispatch<React.SetStateAction<string | undefined>>;
   getAvailableEmissionReports: () => void;
 }
@@ -64,6 +65,7 @@ export const EmissionForm: React.FC<Props> = ({
   year,
   finalized,
   availableYears,
+  gwpSetting,
   setActiveYear,
   getAvailableEmissionReports,
 }) => {
@@ -94,8 +96,6 @@ export const EmissionForm: React.FC<Props> = ({
   const [agrSection, setAgrSection] = useState<AgricultureSection>({ ...agricultureSectionInit });
   const [wasteSection, setWasteSection] = useState<WasteSection>({ ...wasteSectionInit });
   const [otherSection, setOtherSection] = useState<OtherSection>({ ...otherSectionInit });
-  const [eqWithout, setEqWithout] = useState<EmissionData>({ ...emissionInitData });
-  const [eqWith, setEqWith] = useState<EmissionData>({ ...emissionInitData });
 
   // Total State
 
@@ -192,8 +192,6 @@ export const EmissionForm: React.FC<Props> = ({
           setAgrSection(processAgrEmissionData(response.data[0].agricultureForestryOtherLandUse));
           setWasteSection(processWasteEmissionData(response.data[0].waste));
           setOtherSection(processOtherEmissionData(response.data[0].other));
-          setEqWith(processIndividualEmissionData(response.data[0].totalCo2WithLand));
-          setEqWithout(processIndividualEmissionData(response.data[0].totalCo2WithoutLand));
         }
       } catch (error) {
         console.error('Error fetching timeline data:', error);
@@ -210,8 +208,6 @@ export const EmissionForm: React.FC<Props> = ({
     setAgrSection({ ...agricultureSectionInit });
     setWasteSection({ ...wasteSectionInit });
     setOtherSection({ ...otherSectionInit });
-    setEqWithout({ ...emissionInitData });
-    setEqWith({ ...emissionInitData });
 
     setEmissionTotal({ ...emissionTotals });
     setEmissionYear(undefined);
@@ -242,18 +238,6 @@ export const EmissionForm: React.FC<Props> = ({
     }
     const newValue = enteredValue ? parseToTwoDecimals(enteredValue) : 0;
     switch (section) {
-      case 'eqWithout':
-        setEqWithout((prevState) => ({
-          ...prevState,
-          [unit]: newValue,
-        }));
-        return;
-      case 'eqWith':
-        setEqWith((prevState) => ({
-          ...prevState,
-          [unit]: newValue,
-        }));
-        return;
       case '1':
         const energy = levelTwo as EnergyLevels;
         let secondLevel;
@@ -390,7 +374,49 @@ export const EmissionForm: React.FC<Props> = ({
       (section) => (overallSum += getSectionUnitSum(section, unit) ?? 0)
     );
 
-    return (overallSum ?? 0) + (eqWith[unit] ?? 0) + (eqWithout[unit] ?? 0);
+    return overallSum ?? 0;
+  };
+
+  // GWP Multiplier
+
+  const convertToEquivalentEmission = (rawValue: number, unit: EmissionUnits) => {
+    switch (unit) {
+      case EmissionUnits.CH4:
+        return gwpSetting[EmissionUnits.CH4] * rawValue;
+      case EmissionUnits.N2O:
+        return gwpSetting[EmissionUnits.N2O] * rawValue;
+      default:
+        return 1 * rawValue;
+    }
+  };
+
+  // Get EQV Sum with Land
+
+  const getOverallEquivalentWithLands = (unit: EmissionUnits) => {
+    let overallSum = 0;
+
+    Object.values(SectionLevels).map(
+      (section) => (overallSum += getSectionUnitSum(section, unit) ?? 0)
+    );
+
+    const convertedSum = convertToEquivalentEmission(overallSum, unit);
+
+    return convertedSum ?? 0;
+  };
+
+  // Get EQV Sum without Land
+
+  const getOverallEquivalentWithoutLands = (unit: EmissionUnits) => {
+    let overallSum = 0;
+
+    Object.values(SectionLevels).map(
+      (section) => (overallSum += getSectionUnitSum(section, unit) ?? 0)
+    );
+
+    const overallSumWithoutLand = overallSum - (agrSection[AgrLevels.ThreeB][unit] ?? 0);
+    const convertedSum = convertToEquivalentEmission(overallSumWithoutLand, unit);
+
+    return convertedSum ?? 0;
   };
 
   // Handle Submit
@@ -404,9 +430,7 @@ export const EmissionForm: React.FC<Props> = ({
           industrySection,
           agrSection,
           wasteSection,
-          otherSection,
-          eqWith,
-          eqWithout
+          otherSection
         );
 
         const response: any = await post('national/emissions/add', emissionCreatePayload);
@@ -651,11 +675,8 @@ export const EmissionForm: React.FC<Props> = ({
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`eqWithout_${unit}`} span={3} className="number-column">
             <InputNumber
-              disabled={isFinalized || !isGhgAllowed}
-              value={eqWithout[unit]}
-              onChange={(value) =>
-                setIndividualEntry(value ?? undefined, 'eqWithout', null, null, unit)
-              }
+              disabled={true}
+              value={getOverallEquivalentWithoutLands(unit)}
               decimalSeparator="."
               controls={false}
               className="input-emission"
@@ -670,11 +691,8 @@ export const EmissionForm: React.FC<Props> = ({
         {Object.values(EmissionUnits).map((unit) => (
           <Col key={`eqWith_${unit}`} span={3} className="number-column">
             <InputNumber
-              disabled={isFinalized || !isGhgAllowed}
-              value={eqWith[unit]}
-              onChange={(value) =>
-                setIndividualEntry(value ?? undefined, 'eqWith', null, null, unit)
-              }
+              disabled={true}
+              value={getOverallEquivalentWithLands(unit)}
               decimalSeparator="."
               controls={false}
               className="input-emission"
