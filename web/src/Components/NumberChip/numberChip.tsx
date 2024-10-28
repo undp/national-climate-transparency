@@ -1,7 +1,7 @@
 import './numberChip.scss';
 import { Tag, Tooltip } from 'antd';
 import { EmissionUnits } from '../../Enums/emission.enum';
-import { convertToMillions } from '../../Utils/utilServices';
+import { convertToBillions } from '../../Utils/utilServices';
 
 interface Props {
   value: number;
@@ -10,7 +10,7 @@ interface Props {
 
 const NumberChip: React.FC<Props> = ({ value, valueType }) => {
   // Converting to Million or Billion format to prevent overflow
-  const { processedNumber, isConverted } = convertToMillions(value);
+  const { processedNumber, isConverted } = convertToBillions(value);
 
   return (
     <div className="number-chip">

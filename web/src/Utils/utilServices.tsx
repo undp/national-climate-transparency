@@ -118,15 +118,12 @@ export const getRounded = (num: number | string): number => {
   }
 };
 
-export const convertToMillions = (value: number) => {
+export const convertToBillions = (value: number) => {
   const roundedNumber = getRounded(value);
   let processedNumber = roundedNumber.toString();
   let isConverted = false;
   if (roundedNumber > 1000000000) {
     processedNumber = `${customRound(roundedNumber / 1000000000)} billion`;
-    isConverted = true;
-  } else if (roundedNumber > 1000000) {
-    processedNumber = `${customRound(roundedNumber / 1000000)} million`;
     isConverted = true;
   }
 
