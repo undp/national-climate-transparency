@@ -206,7 +206,9 @@ export const subtractTwoArrays = (
   multiplier?: number
 ): number[] => {
   const processedMultiplier = multiplier ?? 1;
-  return array1.map((value, index) => (value - array2[index]) * processedMultiplier);
+  return array1.map((value, index) =>
+    parseFloat(((value - array2[index]) * processedMultiplier).toFixed(2))
+  );
 };
 
 export const calculateArraySum = (array: number[]) => {
@@ -214,7 +216,7 @@ export const calculateArraySum = (array: number[]) => {
   for (let index = 0; index <= array.length; index++) {
     arrSum += array[index] || 0;
   }
-  return arrSum;
+  return parseFloat(arrSum.toFixed(2));
 };
 
 export const isGasFlowCheck = (type: ActionType | undefined): boolean => {

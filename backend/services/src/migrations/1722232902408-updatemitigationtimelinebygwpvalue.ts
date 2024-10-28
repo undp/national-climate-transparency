@@ -4,7 +4,7 @@ export class Updatemitigationtimelinebygwpvalue1722232902408 implements Migratio
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
-            CREATE OR REPLACE FUNCTION update_mitigation_timeline(gwp_value INTEGER, mtg_unit TEXT)
+            CREATE OR REPLACE FUNCTION update_mitigation_timeline(gwp_value INTEGER, mtg_unit TEXT, current_year INTEGER)
             RETURNS VOID AS $$
             DECLARE
                 batch_size INTEGER := 100;
@@ -12,6 +12,9 @@ export class Updatemitigationtimelinebygwpvalue1722232902408 implements Migratio
                 record RECORD;
                 new_timeline JSONB;
                 temp_timeline JSONB;
+                start_index NUMERIC;
+                ghg_ach NUMERIC;
+                ghg_exp NUMERIC;
                 baseline_emissions_wm JSONB;
                 activity_emissions_with_m JSONB;
                 activity_emissions_with_am JSONB;
@@ -23,6 +26,8 @@ export class Updatemitigationtimelinebygwpvalue1722232902408 implements Migratio
                 total_expected_emission_reduct_with_m NUMERIC;
                 total_expected_emission_reduct_with_am NUMERIC;
                 total_actual_emission_reduct NUMERIC;
+                emission_array NUMERIC[];
+				actual_array NUMERIC[];
             BEGIN
                 LOOP
                     FOR record IN
@@ -61,6 +66,30 @@ export class Updatemitigationtimelinebygwpvalue1722232902408 implements Migratio
                             JOIN jsonb_array_elements(activity_actual_emissions) WITH ORDINALITY AS activity_elements(activity_value, idx2)
                             ON idx = idx2
                         );
+
+                        -- Calculate GHG ACH and EXP values
+
+                        ghg_exp := 0;
+						ghg_ach := 0;
+						
+						start_index := LEAST(GREATEST(1 + current_year - (record."mitigationTimeline"->>'startYear')::INT, 1), 31);
+
+						emission_array := ARRAY(SELECT jsonb_array_elements_text(expected_emission_reduct_with_m)::NUMERIC);
+						actual_array := ARRAY(SELECT jsonb_array_elements_text(actual_emission_reduct)::NUMERIC);
+
+						FOR idx IN REVERSE start_index..1 LOOP
+							IF emission_array[idx] != 0 THEN
+								ghg_exp := emission_array[idx];
+								EXIT;
+							END IF;
+						END LOOP;
+
+						FOR idx IN REVERSE start_index..1 LOOP
+							IF actual_array[idx] != 0 THEN
+								ghg_ach := actual_array[idx];
+								EXIT;
+							END IF;
+						END LOOP;
                         
                         -- Calculate total values
 
@@ -129,11 +158,14 @@ export class Updatemitigationtimelinebygwpvalue1722232902408 implements Migratio
                             true
                         );
 
-                        -- Update the row with the modified JSONB object
+                        -- Update the row with the modified MTG object, and the updated ach, exp values
 
-                        UPDATE activity
-                        SET "mitigationTimeline" = new_timeline
-                        WHERE "activityId" = record."activityId";
+						UPDATE activity
+						SET 
+							"mitigationTimeline" = new_timeline,
+							"expectedGHGReduction" = ghg_exp,
+							"achievedGHGReduction" = ghg_ach
+						WHERE "activityId" = record."activityId";
 
                     END LOOP;
                     EXIT WHEN NOT FOUND;

@@ -35,8 +35,8 @@ export class ProgrammeEntity {
 	@Column({ type: "enum", enum: Sector, nullable: true })
   sector: Sector;
 
-  @Column({ type: "enum", enum: ActionType,nullable: false })
-  type: string;
+  // @Column({ type: "enum", enum: ActionType,nullable: false })
+  // type: string;
 
   @Column("varchar", { array: true, nullable: false })
   affectedSubSector: SubSector[];

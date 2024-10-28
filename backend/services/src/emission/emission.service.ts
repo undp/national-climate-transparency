@@ -190,9 +190,6 @@ export class GhgEmissionsService {
 					if (typeof emissionData[key] === 'string') {
 						throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.invalidDataType", []), HttpStatus.BAD_REQUEST);
 					}
-					if (typeof emissionData[key] === 'number' && emissionData[key] < 0) {
-						throw new HttpException(this.helperService.formatReqMessagesString("ghgInventory.negativeValuesNotAllowed", []), HttpStatus.BAD_REQUEST);
-					}
 				}
 
 			}

@@ -565,7 +565,6 @@ export const EmissionForm: React.FC<Props> = ({
                                 unit
                               )
                             }
-                            min={0}
                             decimalSeparator="."
                             controls={false}
                             className="input-emission"
@@ -630,7 +629,6 @@ export const EmissionForm: React.FC<Props> = ({
                                       unit
                                     )
                                   }
-                                  min={0}
                                   decimalSeparator="."
                                   controls={false}
                                   className="input-emission"
@@ -658,7 +656,6 @@ export const EmissionForm: React.FC<Props> = ({
               onChange={(value) =>
                 setIndividualEntry(value ?? undefined, 'eqWithout', null, null, unit)
               }
-              min={0}
               decimalSeparator="."
               controls={false}
               className="input-emission"
@@ -678,7 +675,6 @@ export const EmissionForm: React.FC<Props> = ({
               onChange={(value) =>
                 setIndividualEntry(value ?? undefined, 'eqWith', null, null, unit)
               }
-              min={0}
               decimalSeparator="."
               controls={false}
               className="input-emission"

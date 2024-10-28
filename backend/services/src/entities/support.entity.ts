@@ -59,8 +59,8 @@ export class SupportEntity {
   @Column({ nullable: true })
   sector: Sector;
 
-  @Column({ type: "enum", enum: ActionType,nullable: false })
-  type: string;
+  // @Column({ type: "enum", enum: ActionType,nullable: false })
+  // type: string;
 
   @ManyToOne(() => ActivityEntity, (activity) => activity.support, {
     nullable: false,
