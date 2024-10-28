@@ -7,6 +7,7 @@ SELECT
 	ARRAY_AGG(DISTINCT fullact."ghgsAffected") FILTER (WHERE fullact."ghgsAffected" IS NOT NULL) AS "ghgsAffected",
 	ARRAY_AGG(DISTINCT fullact."meansOfImplementation") FILTER (WHERE fullact."meansOfImplementation" IS NOT NULL) AS "meansOfImplementation",
 	CUSTOM_ARRAY_AGG(fullact."recipientEntities") FILTER (WHERE fullact."recipientEntities" IS NOT NULL) AS "recipientEntities",
+    CUSTOM_ARRAY_AGG(fullact."internationalImplementingEntities") FILTER (WHERE fullact."internationalImplementingEntities" IS NOT NULL) AS "internationalImplementingEntities",
     SUM(fullact."requiredAmount") AS "estimatedAmount",
     SUM(fullact."receivedAmount") AS "receivedAmount",
     SUM(fullact."requiredAmountDomestic") AS "estimatedAmountDomestic",
@@ -25,6 +26,7 @@ LEFT JOIN (
         act."achievedGHGReduction" AS "achievedGHGReduction",
         act."expectedGHGReduction" AS "expectedGHGReduction",
 		act."recipientEntities" AS "recipientEntities",
+        act."internationalImplementingEntity" AS "internationalImplementingEntities",
         sup."requiredAmount",
         sup."receivedAmount",
         sup."requiredAmountDomestic",
@@ -66,6 +68,9 @@ export class ProjectViewEntity {
 
     @ViewColumn()
     recipientEntities: string[];
+
+    @ViewColumn()
+    internationalImplementingEntities: string[];
 
 	@ViewColumn()
 	technologyTypes: string[]

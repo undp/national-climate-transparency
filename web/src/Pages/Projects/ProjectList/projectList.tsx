@@ -139,7 +139,8 @@ const projectList = () => {
             title: unstructuredData[i].title,
             projectStatus: unstructuredData[i].projectStatus,
             recipientEntity: unstructuredData[i].migratedData[0]?.recipientEntities ?? [],
-            intImplementingEntity: unstructuredData[i].internationalImplementingEntities ?? [],
+            intImplementingEntity:
+              unstructuredData[i].migratedData[0]?.internationalImplementingEntities ?? [],
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             natImplementingEntity: unstructuredData[i].programme?.natImplementor ?? [],
             estimatedInvestment: Math.round(

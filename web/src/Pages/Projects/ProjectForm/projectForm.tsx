@@ -8,7 +8,7 @@ import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './projectForm.scss';
 import { ProjectStatus } from '../../../Enums/project.enum';
-import { IntImplementor, KPIAction, Recipient } from '../../../Enums/shared.enum';
+import { KPIAction, Recipient } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeSelectData } from '../../../Definitions/programmeDefinitions';
@@ -502,7 +502,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             expectedTimeFrame: entityData.expectedTimeFrame,
             recipientEntities: entityData.recipientEntities,
             internationalImplementingEntities:
-              entityData.internationalImplementingEntities ?? undefined,
+              entityData.migratedData?.internationalImplementingEntities ?? [],
             comment: entityData.comment ?? undefined,
           });
 
@@ -1183,15 +1183,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       style={{ fontSize: inputFontSize }}
                       mode="multiple"
                       allowClear
-                      disabled={isView}
-                      showSearch
-                    >
-                      {Object.values(IntImplementor).map((instrument) => (
-                        <Option key={instrument} value={instrument}>
-                          {instrument}
-                        </Option>
-                      ))}
-                    </Select>
+                      disabled={true}
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>
