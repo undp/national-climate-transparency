@@ -20,7 +20,7 @@ LEFT JOIN (
     SELECT 
         act."activityId",
         act."parentId" AS "projectId",
-        act."technologyType" AS "techTypes",
+        act."technologyType"::character varying AS "techTypes",
 		act."ghgsAffected"::character varying AS "ghgsAffected",
         act."meansOfImplementation" AS "meansOfImplementation",
         act."achievedGHGReduction" AS "achievedGHGReduction",

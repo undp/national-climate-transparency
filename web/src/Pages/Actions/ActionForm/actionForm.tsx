@@ -487,7 +487,7 @@ const actionForm: React.FC<FormLoadProps> = ({ method }) => {
           // Populating Migrated Fields (Will be overwritten when attachments change)
 
           form.setFieldsValue({
-            ghgsAffected: entityData.migratedData?.ghgsAffected,
+            ghgsAffected: entityData.migratedData?.ghgsAffected ?? [],
             natImplementor: entityData.migratedData?.natImplementors ?? [],
             estimatedInvestment: entityData.migratedData?.financeNeeded ?? 0,
             achievedReduct: entityData.migratedData?.achievedGHGReduction,
