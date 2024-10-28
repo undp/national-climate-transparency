@@ -1,4 +1,4 @@
-import { Col, Grid, Row, Select, Spin, Tag } from 'antd';
+import { Col, Grid, Row, Select, Tag } from 'antd';
 import './dashboard.scss';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import ChartInformation from '../../Components/Popups/chartInformation';
@@ -24,7 +24,6 @@ const Dashboard = () => {
   const { get, post, statServerUrl } = useConnection();
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [chartLoading, setChartLoading] = useState<boolean>(true);
 
   // Table Data State
 
@@ -248,30 +247,8 @@ const Dashboard = () => {
       });
     } catch (error: any) {
       displayErrorMessage(error);
-    } finally {
-      setChartLoading(false);
     }
   };
-
-  // Data Fetching for GHG MTG Selected Year
-
-  useEffect(() => {
-    getIndividualMitigationChartData();
-  }, [mtgYear]);
-
-  // Data Fetching at the Initial Loading
-
-  useEffect(() => {
-    getClimateActionChartData();
-    getProjectChartData();
-    getSupportChartData();
-    getFinanceChartData();
-    getRecentMitigationChartData();
-  }, []);
-
-  useEffect(() => {
-    getAllData();
-  }, [currentPage, pageSize]);
 
   // Action List Table Columns
 
@@ -286,24 +263,39 @@ const Dashboard = () => {
     setPageSize(pagination.pageSize);
   };
 
+  // Data Fetching for GHG MTG Selected Year
+
+  useEffect(() => {
+    getIndividualMitigationChartData();
+  }, [mtgYear]);
+
+  useEffect(() => {
+    getAllData();
+  }, [currentPage, pageSize]);
+
+  // Init Job
+
+  useEffect(() => {
+    getClimateActionChartData();
+    getProjectChartData();
+    getSupportChartData();
+    getFinanceChartData();
+    getRecentMitigationChartData();
+  }, []);
+
   return (
     <div className="dashboard-page">
-      {chartLoading && (
-        <div className="loading-charts-spinner">
-          <Spin size="large" />
-        </div>
-      )}
-      {!chartLoading && (
-        <div>
-          <ChartInformation
-            open={openChartInfo}
-            setOpen={setOpenChartInfo}
-            content={chartContent}
-          ></ChartInformation>
-          <Row gutter={30}>
-            {actionChart && (
-              <Col key={'chart_1'} className="gutter-row" {...dashboardHalfColumnBps}>
-                <div className="chart-section-card">
+      <div>
+        <ChartInformation
+          open={openChartInfo}
+          setOpen={setOpenChartInfo}
+          content={chartContent}
+        ></ChartInformation>
+        <Row gutter={30}>
+          <Col key={'chart_1'} className="gutter-row" {...dashboardHalfColumnBps}>
+            <div className="chart-section-card">
+              {actionChart && (
+                <>
                   <div className="chart-title">
                     <Row gutter={30}>
                       <Col span={22}>{actionChart.chartTitle}</Col>
@@ -321,12 +313,14 @@ const Dashboard = () => {
                     </Row>
                   </div>
                   <PieChart chart={actionChart} t={t} chartWidth={chartWidth} />
-                </div>
-              </Col>
-            )}
-            {projectChart && (
-              <Col key={'chart_2'} className="gutter-row" {...dashboardHalfColumnBps}>
-                <div className="chart-section-card">
+                </>
+              )}
+            </div>
+          </Col>
+          <Col key={'chart_2'} className="gutter-row" {...dashboardHalfColumnBps}>
+            <div className="chart-section-card">
+              {projectChart && (
+                <>
                   <div className="chart-title">
                     <Row gutter={30}>
                       <Col span={22}>{projectChart.chartTitle}</Col>
@@ -344,12 +338,14 @@ const Dashboard = () => {
                     </Row>
                   </div>
                   <PieChart chart={projectChart} t={t} chartWidth={chartWidth} />
-                </div>
-              </Col>
-            )}
-            {supportChart && (
-              <Col key={'chart_3'} className="gutter-row" {...dashboardHalfColumnBps}>
-                <div className="chart-section-card">
+                </>
+              )}
+            </div>
+          </Col>
+          <Col key={'chart_3'} className="gutter-row" {...dashboardHalfColumnBps}>
+            <div className="chart-section-card">
+              {supportChart && (
+                <>
                   <div className="chart-title">
                     <Row gutter={30}>
                       <Col span={22}>{supportChart.chartTitle}</Col>
@@ -367,12 +363,14 @@ const Dashboard = () => {
                     </Row>
                   </div>
                   <PieChart chart={supportChart} t={t} chartWidth={chartWidth} />
-                </div>
-              </Col>
-            )}
-            {financeChart && (
-              <Col key={'chart_4'} className="gutter-row" {...dashboardHalfColumnBps}>
-                <div className="chart-section-card">
+                </>
+              )}
+            </div>
+          </Col>
+          <Col key={'chart_4'} className="gutter-row" {...dashboardHalfColumnBps}>
+            <div className="chart-section-card">
+              {financeChart && (
+                <>
                   <div className="chart-title">
                     <Row gutter={30}>
                       <Col span={22}>{financeChart.chartTitle}</Col>
@@ -390,12 +388,14 @@ const Dashboard = () => {
                     </Row>
                   </div>
                   <PieChart chart={financeChart} t={t} chartWidth={chartWidth} />
-                </div>
-              </Col>
-            )}
-            {mitigationIndividualChart && (
-              <Col key={'chart_5'} className="gutter-row" {...dashboardHalfColumnBps}>
-                <div className="chart-section-card">
+                </>
+              )}
+            </div>
+          </Col>
+          <Col key={'chart_5'} className="gutter-row" {...dashboardHalfColumnBps}>
+            <div className="chart-section-card">
+              {mitigationIndividualChart && (
+                <>
                   <div className="chart-title">
                     <Row gutter={30}>
                       <Col span={17}>{mitigationIndividualChart.chartTitle}</Col>
@@ -430,12 +430,14 @@ const Dashboard = () => {
                     </Row>
                   </div>
                   <BarChart chart={mitigationIndividualChart} t={t} chartHeight={chartHeight} />
-                </div>
-              </Col>
-            )}
-            {mitigationRecentChart && (
-              <Col key={'chart_6'} className="gutter-row" {...dashboardHalfColumnBps}>
-                <div className="chart-section-card">
+                </>
+              )}
+            </div>
+          </Col>
+          <Col key={'chart_6'} className="gutter-row" {...dashboardHalfColumnBps}>
+            <div className="chart-section-card">
+              {mitigationRecentChart && (
+                <>
                   <div className="chart-title">
                     <Row gutter={30}>
                       <Col span={17}>{mitigationRecentChart.chartTitle}</Col>
@@ -456,38 +458,36 @@ const Dashboard = () => {
                     </Row>
                   </div>
                   <BarChart chart={mitigationRecentChart} t={t} chartHeight={chartHeight} />
-                </div>
-              </Col>
-            )}
-          </Row>
-        </div>
-      )}
-      {!loading && (
-        <div className="content-card">
-          <Row gutter={30}>
-            <Col span={24}>
-              <LayoutTable
-                tableData={tableData}
-                columns={columns}
-                loading={loading}
-                pagination={{
-                  total: totalRowCount,
-                  current: currentPage,
-                  pageSize: pageSize,
-                  showQuickJumper: true,
-                  pageSizeOptions: ['10', '20', '30'],
-                  showSizeChanger: true,
-                  style: { textAlign: 'center' },
-                  locale: { page: '' },
-                  position: ['bottomRight'],
-                }}
-                handleTableChange={handleTableChange}
-                emptyMessage={t('noActionsAvailable')}
-              />
-            </Col>
-          </Row>
-        </div>
-      )}
+                </>
+              )}
+            </div>
+          </Col>
+        </Row>
+      </div>
+      <div className="content-card">
+        <Row gutter={30}>
+          <Col span={24}>
+            <LayoutTable
+              tableData={tableData}
+              columns={columns}
+              loading={loading}
+              pagination={{
+                total: totalRowCount,
+                current: currentPage,
+                pageSize: pageSize,
+                showQuickJumper: true,
+                pageSizeOptions: ['10', '20', '30'],
+                showSizeChanger: true,
+                style: { textAlign: 'center' },
+                locale: { page: '' },
+                position: ['bottomRight'],
+              }}
+              handleTableChange={handleTableChange}
+              emptyMessage={t('noActionsAvailable')}
+            />
+          </Col>
+        </Row>
+      </div>
     </div>
   );
 };
