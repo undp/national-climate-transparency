@@ -365,14 +365,14 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE && isFirstRenderDone ? (
-        <div className="support-form">
-          <Form
-            form={form}
-            onFinish={handleSubmit}
-            layout="vertical"
-            onValuesChange={handleValuesChange}
-          >
+      <Form
+        form={form}
+        onFinish={handleSubmit}
+        layout="vertical"
+        onValuesChange={handleValuesChange}
+      >
+        {!waitingForBE && isFirstRenderDone ? (
+          <div className="support-form">
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
@@ -805,11 +805,11 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                 </Col>
               </Row>
             )}
-          </Form>
-        </div>
-      ) : (
-        <Spin className="loading-center" size="large" />
-      )}
+          </div>
+        ) : (
+          <Spin className="loading-center" size="large" />
+        )}
+      </Form>
     </div>
   );
 };
