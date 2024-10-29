@@ -832,14 +832,14 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE && isFirstRenderDone ? (
-        <div className="project-form">
-          <Form
-            form={form}
-            onFinish={handleSubmit}
-            layout="vertical"
-            onValuesChange={handleValuesChange}
-          >
+      <Form
+        form={form}
+        onFinish={handleSubmit}
+        layout="vertical"
+        onValuesChange={handleValuesChange}
+      >
+        {!waitingForBE && isFirstRenderDone ? (
+          <div className="project-form">
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
@@ -1575,11 +1575,11 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             )}
-          </Form>
-        </div>
-      ) : (
-        <Spin className="loading-center" size="large" />
-      )}
+          </div>
+        ) : (
+          <Spin className="loading-center" size="large" />
+        )}
+      </Form>
     </div>
   );
 };

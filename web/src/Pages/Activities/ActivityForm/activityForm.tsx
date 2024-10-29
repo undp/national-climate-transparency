@@ -1206,14 +1206,14 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE && isFirstRenderDone ? (
-        <div className="activity-form">
-          <Form
-            form={form}
-            onFinish={handleSubmit}
-            layout="vertical"
-            onValuesChange={handleValuesChange}
-          >
+      <Form
+        form={form}
+        onFinish={handleSubmit}
+        layout="vertical"
+        onValuesChange={handleValuesChange}
+      >
+        {!waitingForBE && isFirstRenderDone ? (
+          <div className="activity-form">
             <div className="form-section-card">
               <div className="form-section-header">{t('generalInfoTitle')}</div>
               {method !== 'create' && entId && (
@@ -1314,7 +1314,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                             value={parent.id}
                             disabled={parent.hasChildProgrammes}
                           >
-                            <span style={{ color: parent.hasChildProgrammes ? 'red' : 'inherit' }}>
+                            <span
+                              style={{ color: parent.hasChildProgrammes ? '#ff4d4f' : 'inherit' }}
+                            >
                               {parent.hasChildProgrammes
                                 ? `${parent.id} : Attached to Programmes`
                                 : parent.id}
@@ -1985,11 +1987,11 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                 </Col>
               </Row>
             )}
-          </Form>
-        </div>
-      ) : (
-        <Spin className="loading-center" size="large" />
-      )}
+          </div>
+        ) : (
+          <Spin className="loading-center" size="large" />
+        )}
+      </Form>
     </div>
   );
 };
