@@ -135,7 +135,7 @@ const GhgEmissions = () => {
 
     tempTabItems.sort((a, b) => parseFloat(a.key) - parseFloat(b.key));
     setTabItems(tempTabItems);
-  }, [availableReports, availableYears]);
+  }, [availableReports, availableYears, gwpSetting]);
 
   return (
     <div className="content-container">
