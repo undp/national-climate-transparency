@@ -8,7 +8,7 @@ import UploadFileGrid from '../../../Components/Upload/uploadFiles';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import './projectForm.scss';
 import { ProjectStatus } from '../../../Enums/project.enum';
-import { IntImplementor, KPIAction, Recipient } from '../../../Enums/shared.enum';
+import { KPIAction, Recipient } from '../../../Enums/shared.enum';
 import EntityIdCard from '../../../Components/EntityIdCard/entityIdCard';
 import { CreatedKpiData, NewKpiData } from '../../../Definitions/kpiDefinitions';
 import { ProgrammeSelectData } from '../../../Definitions/programmeDefinitions';
@@ -94,6 +94,10 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(true);
 
   const [isGasFlow, setIsGasFlow] = useState<boolean>(false);
+
+  // First Render Check
+
+  const [isFirstRenderDone, setIsFirstRenderDone] = useState<boolean>(false);
 
   // Spinner When Form Submit Occurs
 
@@ -249,9 +253,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
         await new Promise((resolve) => {
           setTimeout(resolve, 500);
         });
-
-        setWaitingForBE(false);
-        navigate('/projects');
       }
     } catch (error: any) {
       displayErrorMessage(error);
@@ -259,7 +260,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       await new Promise((resolve) => {
         setTimeout(resolve, 500);
       });
-
+    } finally {
       setWaitingForBE(false);
       navigate('/projects');
     }
@@ -342,13 +343,13 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const createKPI = () => {
     const newItem: NewKpiData = {
-      index: kpiCounter + 1,
+      index: kpiCounter,
       name: '',
       unit: '',
       achieved: undefined,
       expected: 0,
     };
-    setKpiCounter(kpiCounter + 1);
+    setKpiCounter((prevCount) => prevCount + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
     setHandleKPI(true);
     setIsSaveButtonDisabled(false);
@@ -502,7 +503,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
             expectedTimeFrame: entityData.expectedTimeFrame,
             recipientEntities: entityData.recipientEntities,
             internationalImplementingEntities:
-              entityData.internationalImplementingEntities ?? undefined,
+              entityData.migratedData?.internationalImplementingEntities ?? [],
             comment: entityData.comment ?? undefined,
           });
 
@@ -766,17 +767,6 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Dynamic Updates
-
-  // Init for Entity
-
-  useEffect(() => {
-    fetchNonValidatedProgrammes();
-    fetchProjectData();
-    fetchCreatedKPIData();
-    fetchConnectedActivityData();
-  }, []);
-
   // Fetching Action data for parent change
 
   useEffect(() => {
@@ -809,6 +799,19 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, [startYear, endYear]);
 
+  // Init Job
+
+  useEffect(() => {
+    Promise.all([
+      fetchNonValidatedProgrammes(),
+      fetchProjectData(),
+      fetchCreatedKPIData(),
+      fetchConnectedActivityData(),
+    ]).then(() => {
+      setIsFirstRenderDone(true);
+    });
+  }, []);
+
   return (
     <div className="content-container">
       <ConfirmPopup
@@ -829,7 +832,7 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && isFirstRenderDone ? (
         <div className="project-form">
           <Form
             form={form}
@@ -1183,15 +1186,8 @@ const ProjectForm: React.FC<FormLoadProps> = ({ method }) => {
                       style={{ fontSize: inputFontSize }}
                       mode="multiple"
                       allowClear
-                      disabled={isView}
-                      showSearch
-                    >
-                      {Object.values(IntImplementor).map((instrument) => (
-                        <Option key={instrument} value={instrument}>
-                          {instrument}
-                        </Option>
-                      ))}
-                    </Select>
+                      disabled={true}
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>

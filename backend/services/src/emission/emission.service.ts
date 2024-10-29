@@ -31,7 +31,7 @@ export class GhgEmissionsService {
 		const emission: EmissionEntity = this.toEmission(emissionDto);
 		this.verifyEmissionValues(emission);
 
-		let savedEmission;
+		let savedEmission: any;
 		const result = await this.getEmissionByYear(emission.year, user);
 
 		if (result && result.length > 0) {
@@ -55,8 +55,6 @@ export class GhgEmissionsService {
 							agricultureForestryOtherLandUse: emission.agricultureForestryOtherLandUse,
 							waste: emission.waste,
 							other: emission.other,
-							totalCo2WithoutLand: emission.totalCo2WithoutLand,
-							totalCo2WithLand: emission.totalCo2WithLand,
 							state: emission.state,
 						});
 					return updatedData;

@@ -57,20 +57,8 @@ export class ReportFiveViewEntity {
 	@ViewColumn()
 	actionId: string;
 
-	// @ViewColumn()
-	// programmeId: string;
-
-	// @ViewColumn()
-	// projectId: string;
-
 	@ViewColumn()
 	titleOfAction: string;
-
-	// @ViewColumn()
-	// titleOfProgramme: string;
-
-	// @ViewColumn()
-	// titleOfProject: string;
 
 	@ViewColumn()
 	description: string;

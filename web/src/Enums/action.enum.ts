@@ -11,7 +11,7 @@ export enum Action {
 
 export enum ActionType {
   MITIGATION = 'Mitigation',
-  ADAPTION = 'Adaption',
+  ADAPTION = 'Adaptation',
   CROSSCUT = 'Cross-cutting',
   TRANSPARENCY = 'Transparency',
   OTHER = 'Other',

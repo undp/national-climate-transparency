@@ -35,12 +35,6 @@ export class EmissionEntity {
   @Column('jsonb', { array: false, nullable: true })
   other?: EmissionOther;
 
-  @Column('jsonb', { array: false, nullable: true })
-  totalCo2WithoutLand?: EmissionProperties;
-
-  @Column('jsonb', { array: false, nullable: true })
-  totalCo2WithLand?: EmissionProperties;
-
   @Column({
     type: 'enum',
     enum: GHGRecordState,

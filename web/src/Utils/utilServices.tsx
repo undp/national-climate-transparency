@@ -118,16 +118,16 @@ export const getRounded = (num: number | string): number => {
   }
 };
 
-export const convertToMillions = (value: number) => {
+export const convertToBillions = (value: number) => {
   const roundedNumber = getRounded(value);
-  let numberInMills = roundedNumber.toString();
+  let processedNumber = roundedNumber.toString();
+  let isConverted = false;
   if (roundedNumber > 1000000000) {
-    numberInMills = `${customRound(roundedNumber / 1000000000)} billion`;
-  } else if (roundedNumber > 1000000) {
-    numberInMills = `${customRound(roundedNumber / 1000000)} million`;
+    processedNumber = `${customRound(roundedNumber / 1000000000)} billion`;
+    isConverted = true;
   }
 
-  return numberInMills;
+  return { processedNumber, isConverted };
 };
 
 export const getCollapseIcon = (isActive: boolean, clicked?: any) => {

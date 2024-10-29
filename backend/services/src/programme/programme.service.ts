@@ -986,22 +986,18 @@ export class ProgrammeService {
 		const recipientEntitySet: Set<Recipient> = new Set();
 		const interNationalImplementorSet: Set<IntImplementor> = new Set();
 
-		if (programme.projects && programme.projects.length > 0) {
-			for (const project of programme.projects) {
-				if (project.internationalImplementingEntities) {
-					project.internationalImplementingEntities.forEach(internationalImplementer => {
-						interNationalImplementorSet.add(internationalImplementer);
-					});
-				};
-			}
-		}
-
 		if (migratedData && migratedData.length > 0) {
 			for (const data of migratedData) {
 				if (data.recipientEntities) {
-				data.recipientEntities.forEach((recipientEntity) => {
-					recipientEntitySet.add(recipientEntity);
-				});
+					data.recipientEntities.forEach((recipientEntity) => {
+						recipientEntitySet.add(recipientEntity);
+					});
+				}
+
+				if (data.internationalImplementingEntities) {
+					data.internationalImplementingEntities.forEach((IntImplementor) => {
+						interNationalImplementorSet.add(IntImplementor);
+					});
 				}
 			}
 		}
@@ -1023,7 +1019,6 @@ export class ProgrammeService {
 		programmeViewDto.objectives = programme.objective;
 		programmeViewDto.instrumentType = programme.action?.instrumentType;
 		programmeViewDto.sector = programme.sector;
-		// programmeViewDto.type = programme.type;
 		programmeViewDto.affectedSubSector = programme.affectedSubSector;
 		programmeViewDto.programmeStatus = programme.programmeStatus;
 		programmeViewDto.recipientEntity = recipientEntity;

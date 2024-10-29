@@ -52,35 +52,6 @@ export class ProjectDto {
 	@ApiProperty()
 	endYear: number;
 
-	// @IsArray()
-	// @ArrayMinSize(1)
-	// @MaxLength(100, { each: true })
-	// @IsNotEmpty({ each: true })
-	// @IsEnum(Recipient, {
-	// 	each: true,
-	// 	message: 'Invalid Recipient Entity. Supported following entities:' + Object.values(Recipient)
-	// })
-	// @ApiProperty({
-	// 	type: [String],
-	// 	enum: Object.values(Recipient),
-	// })
-	// recipientEntities: Recipient[];
-
-	@ValidateIf((c) => c.internationalImplementingEntities)
-	@IsArray()
-	@ArrayMinSize(1)
-	@MaxLength(100, { each: true })
-	@IsNotEmpty({ each: true })
-	@IsEnum(IntImplementor, {
-		each: true,
-		message: 'Invalid International Implementing Entity. Supported following entities:' + Object.values(IntImplementor)
-	})
-	@ApiPropertyOptional({
-		type: [String],
-		enum: Object.values(IntImplementor),
-	})
-	internationalImplementingEntities: IntImplementor[];
-
 	@IsOptional()
 	@ApiPropertyOptional(
 		{

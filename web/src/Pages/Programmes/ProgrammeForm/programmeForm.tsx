@@ -94,6 +94,10 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [isGasFlow, setIsGasFlow] = useState<boolean>(false);
 
+  // First Render Check
+
+  const [isFirstRenderDone, setIsFirstRenderDone] = useState<boolean>(false);
+
   // Spinner When Form Submit Occurs
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
@@ -250,9 +254,6 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
-
-        setWaitingForBE(false);
-        navigate('/programmes');
       }
     } catch (error: any) {
       displayErrorMessage(error);
@@ -260,7 +261,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       await new Promise((resolve) => {
         setTimeout(resolve, 500);
       });
-
+    } finally {
       setWaitingForBE(false);
       navigate('/programmes');
     }
@@ -352,13 +353,13 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const createKPI = () => {
     const newItem: NewKpiData = {
-      index: kpiCounter + 1,
+      index: kpiCounter,
       name: '',
       unit: '',
       achieved: undefined,
       expected: 0,
     };
-    setKpiCounter(kpiCounter + 1);
+    setKpiCounter((prevCount) => prevCount + 1);
     setNewKpiList((prevList) => [...prevList, newItem]);
     setHandleKPI(true);
     setIsSaveButtonDisabled(false);
@@ -743,23 +744,25 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   };
 
-  // Dynamic Updates
-
-  // Init For Entity
-
-  useEffect(() => {
-    fetchNonValidatedActions();
-    fetchProgramData();
-    fetchAttachedKPIData();
-    fetchConnectedProjectData();
-    fetchConnectedActivityData();
-  }, []);
-
   // Fetching Support data, After Activity Data Loads
 
   useEffect(() => {
     fetchSupportData();
   }, [activityData]);
+
+  // Init Job
+
+  useEffect(() => {
+    Promise.all([
+      fetchNonValidatedActions(),
+      fetchProgramData(),
+      fetchAttachedKPIData(),
+      fetchConnectedProjectData(),
+      fetchConnectedActivityData(),
+    ]).then(() => {
+      setIsFirstRenderDone(true);
+    });
+  }, []);
 
   return (
     <div className="content-container">
@@ -781,7 +784,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && isFirstRenderDone ? (
         <div className="programme-form">
           <Form
             form={form}

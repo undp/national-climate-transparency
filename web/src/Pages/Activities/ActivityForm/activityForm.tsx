@@ -110,6 +110,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const [isGasFlow, setIsGasFlow] = useState<boolean>(false);
 
+  // First Render Check
+
+  const [isFirstRenderDone, setIsFirstRenderDone] = useState<boolean>(false);
+
   // Spinner When Form Submit Occurs
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
@@ -158,29 +162,49 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
 
   const mtgRange = 30;
 
-  const handleParentIdSelect = (id: string) => {
-    setConnectedParentId(id);
-    setShouldFetchParentKpi(true);
+  const resetGasFlowOptions = () => {
+    setIsGasFlow(false);
+    setSelectedGhg(undefined);
+    setExpectedTimeline([]);
+    setActualTimeline([]);
 
-    if (id === undefined && method === 'create') {
-      setMtgStartYear(0);
+    form.setFieldsValue({
+      measure: undefined,
+      ghgsAffected: undefined,
+      achievedGHGReduction: undefined,
+      expectedGHGReduction: undefined,
+    });
+  };
+
+  const handleParentIdSelect = (id: string) => {
+    try {
+      resetGasFlowOptions();
+    } finally {
+      setConnectedParentId(id);
+      setShouldFetchParentKpi(true);
+
+      if (id === undefined && method === 'create') {
+        setMtgStartYear(0);
+      }
     }
   };
 
   const handleParentTypeSelect = (value: string) => {
-    setParentType(value);
-    setConnectedParentId(undefined);
+    try {
+      resetGasFlowOptions();
+    } finally {
+      setParentType(value);
+      setConnectedParentId(undefined);
 
-    if (method === 'create') {
-      setMtgStartYear(0);
+      if (method === 'create') {
+        setMtgStartYear(0);
+      }
+
+      form.setFieldsValue({
+        parentId: '',
+        parentDescription: '',
+      });
     }
-
-    setIsGasFlow(false);
-
-    form.setFieldsValue({
-      parentId: '',
-      parentDescription: '',
-    });
   };
 
   const fetchGwpSettings = async () => {
@@ -752,11 +776,10 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
           duration: 3,
           style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
         });
-        setWaitingForBE(false);
-        navigate('/activities');
       }
     } catch (error: any) {
       displayErrorMessage(error);
+    } finally {
       setWaitingForBE(false);
       navigate('/activities');
     }
@@ -1150,13 +1173,17 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
     }
   }, [actualTimeline]);
 
-  // Init Run
+  // Init JOb
 
   useEffect(() => {
-    fetchActivityData();
-    fetchSupportData();
-    fetchCreatedKPIData();
-    fetchGwpSettings();
+    Promise.all([
+      fetchActivityData(),
+      fetchSupportData(),
+      fetchCreatedKPIData(),
+      fetchGwpSettings(),
+    ]).then(() => {
+      setIsFirstRenderDone(true);
+    });
   }, []);
 
   return (
@@ -1179,7 +1206,7 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
       <div className="title-bar">
         <div className="body-title">{t(formTitle)}</div>
       </div>
-      {!waitingForBE ? (
+      {!waitingForBE && isFirstRenderDone ? (
         <div className="activity-form">
           <Form
             form={form}

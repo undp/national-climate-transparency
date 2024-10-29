@@ -1,6 +1,5 @@
 import {
   AgricultureSection,
-  EmissionData,
   EmissionPayload,
   EnergySection,
   IndustrySection,
@@ -27,9 +26,7 @@ export const getEmissionCreatePayload = (
   industryData: IndustrySection,
   agrData: AgricultureSection,
   wasteData: WasteSection,
-  otherData: OtherSection,
-  eqWith: EmissionData,
-  eqWithout: EmissionData
+  otherData: OtherSection
 ) => {
   const tempPayload: EmissionPayload = {
     year: year,
@@ -79,8 +76,6 @@ export const getEmissionCreatePayload = (
       indirectN2oEmissions: otherData[OtherLevels.FiveA],
       other: otherData[OtherLevels.FiveB],
     },
-    totalCo2WithoutLand: eqWithout,
-    totalCo2WithLand: eqWith,
   };
 
   return tempPayload;
