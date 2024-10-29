@@ -36,6 +36,9 @@ const BarChart: React.FC<Props> = ({ chart, t, chartHeight }) => {
             options={{
               chart: {
                 id: `Chart_${chart.chartId}`,
+                toolbar: {
+                  show: false,
+                },
               },
               tooltip: {
                 enabled: false,
@@ -64,6 +67,16 @@ const BarChart: React.FC<Props> = ({ chart, t, chartHeight }) => {
               },
               legend: {
                 show: false,
+              },
+              annotations: {
+                yaxis: [
+                  {
+                    y: 0,
+                    borderColor: '#000',
+                    borderWidth: 1,
+                    strokeDashArray: 0,
+                  },
+                ],
               },
             }}
             series={[{ name: 'mtg_data', data: chart.values }]}
