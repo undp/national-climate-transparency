@@ -1314,7 +1314,9 @@ const ActivityForm: React.FC<FormLoadProps> = ({ method }) => {
                             value={parent.id}
                             disabled={parent.hasChildProgrammes}
                           >
-                            <span style={{ color: parent.hasChildProgrammes ? 'red' : 'inherit' }}>
+                            <span
+                              style={{ color: parent.hasChildProgrammes ? '#ff4d4f' : 'inherit' }}
+                            >
                               {parent.hasChildProgrammes
                                 ? `${parent.id} : Attached to Programmes`
                                 : parent.id}

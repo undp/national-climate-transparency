@@ -831,7 +831,9 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
                           value={action.id}
                           disabled={action.hasChildActivities}
                         >
-                          <span style={{ color: action.hasChildActivities ? 'red' : 'inherit' }}>
+                          <span
+                            style={{ color: action.hasChildActivities ? '#ff4d4f' : 'inherit' }}
+                          >
                             {action.hasChildActivities
                               ? `${action.id} : Attached to Activities`
                               : action.id}
