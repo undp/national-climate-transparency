@@ -110,11 +110,9 @@ const GhgConfigurations = () => {
                   >
                     <Input
                       type="number"
-                      min={0}
-                      step={0.01}
                       className="form-input-box"
                       onKeyDown={(e) => {
-                        if (e.key === '-' || e.key === 'e' || e.key === '+') {
+                        if (e.key === '.' || e.key === 'e' || e.key === '+') {
                           e.preventDefault();
                         }
                       }}
@@ -130,11 +128,9 @@ const GhgConfigurations = () => {
                   >
                     <Input
                       type="number"
-                      min={0}
-                      step={0.01}
                       className="form-input-box"
                       onKeyDown={(e) => {
-                        if (e.key === '-' || e.key === 'e' || e.key === '+') {
+                        if (e.key === '.' || e.key === 'e' || e.key === '+') {
                           e.preventDefault();
                         }
                       }}

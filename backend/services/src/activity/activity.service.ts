@@ -1524,7 +1524,7 @@ export class ActivityService {
 			)
 		}
 
-		const activ = await this.entityManager
+		await this.entityManager
 			.transaction(async (em) => {
 				await em
 					.createQueryBuilder()
@@ -1548,6 +1548,9 @@ export class ActivityService {
 					}
 					em.save<SupportEntity>(supportsList);
 				}
+
+				// Refreshing M-View for ACH and EXP update
+				await this.helperService.refreshMaterializedViews(em);
 
 				await em.save<LogEntity>(logs);
 				return activity;

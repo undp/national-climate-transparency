@@ -128,7 +128,6 @@ export class ProgrammeService {
 			programme.action = action;
 			programme.path = programmeDto.actionId;
 			programme.sector = action.sector;
-			// programme.type = action.type;
 
 			this.addEventLogEntry(eventLog, LogEventType.PROGRAMME_LINKED, EntityType.ACTION, action.actionId, user.id, programme.programmeId);
 			this.addEventLogEntry(eventLog, LogEventType.LINKED_TO_ACTION, EntityType.PROGRAMME, programme.programmeId, user.id, action.actionId);
@@ -171,12 +170,11 @@ export class ProgrammeService {
 								programme.programmeId
 							);
 						await em.save<LogEntity>(saveUnvalidatedLog);
-						await em.save<ActionEntity>(action)
+						await em.update<ActionEntity>(ActionEntity, action.actionId, { validated: false });
 						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(action.actionId, em);
 					}
 
-
-					if (programmeDto.kpis) {
+					if (programmeDto.kpis) { 
 						await em.save<KpiEntity>(kpiList);
 					}
 				}
