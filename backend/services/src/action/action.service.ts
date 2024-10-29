@@ -186,7 +186,10 @@ export class ActionService {
 
 	async findAllActionsForAttaching() {
 		const allActions = await this.actionRepo.find({
-			select: ["actionId", "title", "instrumentType", "sector", "type"]
+			select: ["actionId", "title", "instrumentType", "sector", "type"],
+			order: {
+				actionId: "ASC"
+			}
 		});
 
 		if (allActions.length === 0){
