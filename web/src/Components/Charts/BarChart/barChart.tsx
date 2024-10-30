@@ -20,7 +20,7 @@ const BarChart: React.FC<Props> = ({ chart, t, chartHeight }) => {
   useEffect(() => {
     const tempChartColorMapping: string[] = [1, 2, 5, 6].includes(chart.chartId)
       ? chartColorMappings.sectors
-      : chart.chartId === 5
+      : chart.chartId === 3
       ? chartColorMappings.support
       : chartColorMappings.finance;
 
@@ -47,7 +47,6 @@ const BarChart: React.FC<Props> = ({ chart, t, chartHeight }) => {
                 bar: {
                   distributed: true,
                   colors: {
-                    backgroundBarColors: chartColorMapping,
                     backgroundBarOpacity: 0,
                   },
                   dataLabels: {
@@ -55,6 +54,7 @@ const BarChart: React.FC<Props> = ({ chart, t, chartHeight }) => {
                   },
                 },
               },
+              colors: chartColorMapping,
               dataLabels: {
                 enabled: true,
                 offsetY: -25,

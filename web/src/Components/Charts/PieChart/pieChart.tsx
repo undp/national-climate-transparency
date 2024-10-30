@@ -34,7 +34,7 @@ const PieChart: React.FC<Props> = ({ chart, t, chartWidth }) => {
   useEffect(() => {
     const tempChartColorMapping: string[] = [1, 2, 5, 6].includes(chart.chartId)
       ? chartColorMappings.sectors
-      : chart.chartId === 5
+      : chart.chartId === 3
       ? chartColorMappings.support
       : chartColorMappings.finance;
 
