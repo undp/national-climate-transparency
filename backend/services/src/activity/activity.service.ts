@@ -129,25 +129,24 @@ export class ActivityService {
 
 		if (activityDto.mitigationTimeline) {
 			const gwpSettingsRecord = await this.configSettingsRepo.findOneBy({ id: ConfigurationSettingsType.GWP });
+
+			const gwpSetting = {
+				[GHGS.NO]: gwpSettingsRecord?.settingValue?.gwp_n20 ?? 1,
+				[GHGS.CH]: gwpSettingsRecord?.settingValue?.gwp_ch4 ?? 1,
+			}
+
 			let validUnit: GHGS = GHGS.CO;
 			let gwpValue: number = 1;
 
-			if (gwpSettingsRecord) {
-				const gwpSettings = gwpSettingsRecord.settingValue;
-				switch (activityDto.ghgsAffected) {
-					case GHGS.NO:
-						validUnit = gwpSettings.gwp_n2o > 1 ? GHGS.NO : GHGS.CO;
-						gwpValue = gwpSettings.gwp_n2o > 1 ? gwpSettings.gwp_n2o : 1;
-						break;
-					case GHGS.CH:
-						validUnit = gwpSettings.gwp_ch4 > 1 ? GHGS.CH : GHGS.CO;
-						gwpValue = gwpSettings.gwp_ch4 > 1 ? gwpSettings.gwp_ch4 : 1;
-						break;
-					default:
-						validUnit = GHGS.CO;
-						gwpValue = 1;
-						break;
-				}
+			switch (activityDto.ghgsAffected) {
+				case GHGS.NO:
+					validUnit = GHGS.NO;
+					gwpValue = gwpSetting[GHGS.NO];
+					break;
+				case GHGS.CH:
+					validUnit = GHGS.CH;
+					gwpValue = gwpSetting[GHGS.CH];
+					break;
 			}
 
 			if (!activityDto.mitigationTimeline.startYear) {
