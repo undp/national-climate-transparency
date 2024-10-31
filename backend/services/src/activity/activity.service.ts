@@ -131,8 +131,8 @@ export class ActivityService {
 			const gwpSettingsRecord = await this.configSettingsRepo.findOneBy({ id: ConfigurationSettingsType.GWP });
 
 			const gwpSetting = {
-				[GHGS.NO]: gwpSettingsRecord?.settingValue?.gwp_n20 ?? 1,
-				[GHGS.CH]: gwpSettingsRecord?.settingValue?.gwp_ch4 ?? 1,
+				[GHGS.NO]: parseFloat(gwpSettingsRecord?.settingValue?.gwp_n2o) ?? 1,
+				[GHGS.CH]: parseFloat(gwpSettingsRecord?.settingValue?.gwp_ch4) ?? 1,
 			}
 
 			let validUnit: GHGS = GHGS.CO;
@@ -1473,22 +1473,23 @@ export class ActivityService {
 		}
 
 		const currentMitigationTimeline = activity.mitigationTimeline;
+
 		const gwpSettingsRecord = await this.configSettingsRepo.findOneBy({ id: ConfigurationSettingsType.GWP });
+
+		const gwpSetting = {
+			[GHGS.NO]: parseFloat(gwpSettingsRecord?.settingValue?.gwp_n2o) ?? 1,
+			[GHGS.CH]: parseFloat(gwpSettingsRecord?.settingValue?.gwp_ch4) ?? 1,
+		}
+
 		let gwpValue: number = 1;
 
-		if (gwpSettingsRecord) {
-			const gwpSettings = gwpSettingsRecord.settingValue;
-			switch (currentMitigationTimeline.unit) {
-				case GHGS.NO:
-					gwpValue = gwpSettings.gwp_n2o > 1 ? gwpSettings.gwp_n2o : 1;
-					break;
-				case GHGS.CH:
-					gwpValue = gwpSettings.gwp_ch4 > 1 ? gwpSettings.gwp_ch4 : 1;
-					break;
-				default:
-					gwpValue = 1;
-					break;
-			}
+		switch (currentMitigationTimeline.unit) {
+			case GHGS.NO:
+				gwpValue = gwpSetting[GHGS.NO];
+				break;
+			case GHGS.CH:
+				gwpValue = gwpSetting[GHGS.CH];
+				break;
 		}
 		
 		this.payloadValidator.validateMitigationTimelinePayload(mitigationTimelineDto, gwpValue, currentMitigationTimeline.startYear);
