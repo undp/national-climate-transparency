@@ -22,6 +22,7 @@ import { DeleteDto } from "../dtos/delete.dto";
 import { Role } from "../casl/role.enum";
 import { LinkUnlinkService } from "../util/linkUnlink.service";
 import { ActionEntity } from "src/entities/action.entity";
+import { ProgrammeEntity } from "src/entities/programme.entity";
 
 @Injectable()
 export class SupportService {
@@ -70,6 +71,11 @@ export class SupportService {
 			parentProject = await this.activityService.isProjectValid(activity.parentId, user);
 		}
 
+		let parentProgramme: ProgrammeEntity;
+		if (activity.parentType == EntityType.PROGRAMME) {
+			parentProgramme = await this.activityService.isProgrammeValid(activity.parentId, user);
+		}
+
 		let parentAction: ActionEntity;
 		if (activity.parentType == EntityType.ACTION) {
 			parentAction = await this.activityService.isActionValid(activity.parentId, user);
@@ -90,6 +96,7 @@ export class SupportService {
 				const savedSupport = await em.save<SupportEntity>(support);
 				if (savedSupport) {
 					let unvalidateActionTree = false;
+					let unvalidateProgrammeTree = false;
 					let unvalidateProjectTree = false;
 
 					if (activity.validated) {
@@ -127,6 +134,18 @@ export class SupportService {
 							);
 							unvalidateProjectTree = true;
 							await em.update<ProjectEntity>(ProjectEntity, parentProject.projectId, { validated: false });
+						} else if (parentProgramme && parentProgramme.validated) {
+							parentProgramme.validated = false;
+							this.addEventLogEntry(
+								eventLog, 
+								LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+								EntityType.PROGRAMME, 
+								parentProgramme.programmeId, 
+								0, 
+								activity.activityId
+							);
+							unvalidateProgrammeTree = true;
+							await em.update<ProgrammeEntity>(ProgrammeEntity, parentProgramme.programmeId, { validated: false });
 						} else if (parentAction && parentAction.validated) {
 							parentAction.validated = false;
 							this.addEventLogEntry(
@@ -146,6 +165,8 @@ export class SupportService {
 
 					if (unvalidateProjectTree) {
 						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProject(parentProject, em, true, [activity.activityId]);
+					} else if (unvalidateProgrammeTree) {
+						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProgrammeId(parentProgramme, em, false);
 					} else if (unvalidateActionTree) {
 						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(parentAction.actionId, em);
 					} else {
@@ -251,9 +272,11 @@ export class SupportService {
 
 		const activityList: ActivityEntity[] = [];
 		const projectList: ProjectEntity[] = [];
+		const programmeList: ProgrammeEntity[] = [];
 		const actionList: ActionEntity[] = [];
 
 		const updatedActionIds = [];
+		const updatedProgrammeIds = [];
 		const updatedProjectIds = [];
 		const updatedActivityIds = [];
 
@@ -285,6 +308,21 @@ export class SupportService {
 					);
 					projectList.push(currentParentProject);
 					updatedProjectIds.push(currentParentProject.projectId);
+				}
+			} else if (currentActivity.parentType == EntityType.PROGRAMME) {
+				const currentParentProgramme = await this.activityService.isProgrammeValid(currentSupport.activity.parentId, user);
+				if (currentParentProgramme.validated) {
+					currentParentProgramme.validated = false;
+					this.addEventLogEntry(
+						eventLog, 
+						LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+						EntityType.PROGRAMME, 
+						currentParentProgramme.programmeId, 
+						0, 
+						currentSupport.supportId
+					);
+					programmeList.push(currentParentProgramme);
+					updatedProgrammeIds.push(currentParentProgramme.programmeId);
 				}
 			} else if (currentActivity.parentType == EntityType.ACTION) {
 				const currentParentAction = await this.activityService.isActionValid(currentSupport.activity.parentId, user);
@@ -364,6 +402,21 @@ export class SupportService {
 						projectList.push(newParentProject);
 						updatedProjectIds.push(newParentProject.projectId);
 					}
+				} else if (activity.parentType == EntityType.PROGRAMME) {
+					const newParentProgramme = await this.activityService.isProgrammeValid(activity.parentId, user);
+					if (newParentProgramme.validated) {
+						newParentProgramme.validated = false;
+						this.addEventLogEntry(
+							eventLog, 
+							LogEventType.PROGRAMME_UNVERIFIED_DUE_LINKED_ENTITY_UPDATE, 
+							EntityType.PROGRAMME, 
+							newParentProgramme.programmeId, 
+							0, 
+							activity.activityId
+						);
+						programmeList.push(newParentProgramme);
+						updatedProgrammeIds.push(newParentProgramme.programmeId);
+					}
 				} else if (activity.parentType == EntityType.ACTION) {
 					const newParentAction = await this.activityService.isActionValid(activity.parentId, user);
 					if (newParentAction.validated) {
@@ -415,15 +468,20 @@ export class SupportService {
 						for (const project of projectList) {
 							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProject(project, em, true, updatedActivityIds);
 						}
+					} else if (programmeList && programmeList.length > 0) { 
+						await em.save<ProgrammeEntity>(programmeList)
+						for (const programme of programmeList) {
+							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProgrammeId(programme, em, false);
+						}
 					} else if (actionList && actionList.length > 0) { 
 						await em.save<ActionEntity>(actionList)
 						for (const action of actionList) {
 							await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(action.actionId, em);
 						}
-				    }
-					
-					for (const activity of activityList) {
-						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [currentSupport.supportId]);
+				    } else {
+						for (const activity of activityList) {
+							await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [currentSupport.supportId]);
+						}
 					}
 	
 				}
