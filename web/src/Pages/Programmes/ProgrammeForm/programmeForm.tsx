@@ -302,7 +302,7 @@ const ProgrammeForm: React.FC<FormLoadProps> = ({ method }) => {
         displayErrorMessage(error, `${entId} Validation Failed`);
       }
     } finally {
-      setIsValidationAllowed(false);
+      setWaitingForValidation(false);
     }
   };
 

@@ -268,7 +268,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
         displayErrorMessage(error, `${entId} Validation Failed`);
       }
     } finally {
-      setIsValidationAllowed(false);
+      setWaitingForValidation(false);
     }
   };
 
