@@ -1038,7 +1038,7 @@ export class LinkUnlinkService {
 								actionId)
 							)
 						}
-						programmeIdsToUnvalidate.push(programme.programmeId)
+						programmeIdsToUnvalidate.push(programme.programmeId);
 					}
 
 					if (programmeIdsToUnvalidate.length > 0) {
@@ -1063,7 +1063,7 @@ export class LinkUnlinkService {
 							)
 						}
 
-						projectIdsToUnvalidate.push(project)
+						projectIdsToUnvalidate.push(project.projectId);
 					}
 
 					if (projectIdsToUnvalidate.length > 0) {
@@ -1087,7 +1087,7 @@ export class LinkUnlinkService {
 								actionId)
 							)
 						}
-						activityIdsToUnvalidate.push(activity)
+						activityIdsToUnvalidate.push(activity.activityId);
 
 						if (activity.support && activity.support.length > 0) {
 							const supportIdsToUnvalidate = []
