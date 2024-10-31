@@ -76,6 +76,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
   // Spinner When Form Submit Occurs
 
   const [waitingForBE, setWaitingForBE] = useState<boolean>(false);
+  const [waitingForValidation, setWaitingForValidation] = useState<boolean>(false);
 
   // Popup Definition
 
@@ -237,6 +238,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
 
   const validateEntity = async () => {
     try {
+      setWaitingForValidation(true);
+
       if (entId) {
         const payload = {
           entityId: entId,
@@ -264,6 +267,8 @@ const SupportForm: React.FC<Props> = ({ method }) => {
       } else {
         displayErrorMessage(error, `${entId} Validation Failed`);
       }
+    } finally {
+      setIsValidationAllowed(false);
     }
   };
 
@@ -751,6 +756,7 @@ const SupportForm: React.FC<Props> = ({ method }) => {
                           onClick={() => {
                             validateEntity();
                           }}
+                          loading={waitingForValidation}
                           disabled={!isValidationAllowed}
                         >
                           {isValidated ? t('entityAction:unvalidate') : t('entityAction:validate')}
