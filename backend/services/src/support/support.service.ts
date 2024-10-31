@@ -146,14 +146,12 @@ export class SupportService {
 
 					if (unvalidateProjectTree) {
 						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByProject(parentProject, em, true, [activity.activityId]);
+					} else if (unvalidateActionTree) {
+						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(parentAction.actionId, em);
+					} else {
+						await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [support.supportId]);
 					}
 
-					if (unvalidateActionTree) {
-						await this.linkUnlinkService.updateAllValidatedChildrenStatusByActionId(parentAction.actionId, em);
-					}
-					
-					await this.linkUnlinkService.updateAllValidatedChildrenAndParentStatusByActivityId(activity.activityId, em, [support.supportId]);
-					
 				}
 				return savedSupport;
 			})
