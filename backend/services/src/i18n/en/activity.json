@@ -29,6 +29,6 @@
     "permissionDeniedForSector": "User does not have the permission for the sector",
     "deleteActivitySuccess": "Activity deleted successfully",
     "activityDeletionFailed": "Activity delete failed due to {}",
-    "parentNotValidated": "Parent entity with id {} should be validated.",
+    "parentNotValidated": "Parent {} with id {} should be validated.",
     "programmesLinkedToAction": "Cannot attach activity to the action with id : {} as it has programmes attached"
 }

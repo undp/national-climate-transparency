@@ -1334,7 +1334,7 @@ export class ActivityService {
 				throw new HttpException(
 					this.helperService.formatReqMessagesString(
 						"activity.parentNotValidated",
-						[activity.parentId]
+						[activity.parentType, activity.parentId]
 					),
 					HttpStatus.FORBIDDEN
 				);
