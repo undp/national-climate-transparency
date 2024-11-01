@@ -217,7 +217,6 @@ export const BaselineForm: React.FC<Props> = ({ index, projectionType }) => {
                   enteredValue ? parseToTwoDecimals(enteredValue) : 0
                 );
               }}
-              min={value === GrowthRateProperties.GR ? undefined : 0}
               decimalSeparator="."
               controls={false}
               disabled={userInfoState?.userRole !== Role.Root}

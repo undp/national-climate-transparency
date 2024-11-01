@@ -5,12 +5,7 @@ import { ProgrammeEntity } from '../../Entities/programme';
 import { ProjectEntity } from '../../Entities/project';
 import { ActivityEntity } from '../../Entities/activity';
 import { SupportEntity } from '../../Entities/support';
-import {
-  DisconnectOutlined,
-  EditOutlined,
-  InfoCircleOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
+import { DisconnectOutlined, EditOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 export const actionMenuWithAttaching = (
   calledIn: 'action' | 'programme' | 'project',
@@ -18,9 +13,6 @@ export const actionMenuWithAttaching = (
   entity: ActionEntity | ProgrammeEntity | ProjectEntity,
   recordId: string,
   validationStatus: 'pending' | 'validated',
-  getAttachedEntityIds: (recordId: string) => void,
-  setOpenAttaching: React.Dispatch<React.SetStateAction<boolean>>,
-  setSelectedEntityId: React.Dispatch<React.SetStateAction<string | undefined>>,
   navigate: any,
   t: any
 ) => {
@@ -42,19 +34,6 @@ export const actionMenuWithAttaching = (
           click: () => {
             {
               navigate(`/${calledIn}s/view/${recordId}`);
-            }
-          },
-        },
-        {
-          text: t(`tableAction:${calledIn}Attach`),
-          icon: <PlusOutlined style={{ color: '#9155FD' }} />,
-          // calledIn === 'project' used to prevent attaching activities
-          isDisabled: !ability.can(Action.Update, entity) || calledIn === 'project',
-          click: () => {
-            {
-              setOpenAttaching(true);
-              setSelectedEntityId(recordId);
-              getAttachedEntityIds(recordId);
             }
           },
         },

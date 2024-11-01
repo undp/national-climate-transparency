@@ -31,7 +31,7 @@ export class GhgProjectionService {
 
 		const projection: ProjectionEntity = this.toProjection(projectionDto);
 
-		let savedProjection;
+		let savedProjection: any;
 		const result = await this.getActualProjection(projection.projectionType, user);
 
 		if (result) {

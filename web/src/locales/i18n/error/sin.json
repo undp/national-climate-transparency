@@ -1,3 +1,5 @@
 {
-    "validationPermissionRequired": "තහවුරු කිරීමේ අවසර අවශ්‍ය වේ"
+    "validationPermissionRequired": "තහවුරු කිරීමේ අවසරය අවශ්‍ය වේ",
+    "actionDeletePrevented": "අමුණා ඇති උපකණ්ඩායම් සහිත ක්‍රියාව මකා දැමිය නොහැක",
+    "programmeDeletePrevented": "අමුණා ඇති උපකණ්ඩායම් සහිත වැඩසටහන මකා දැමිය නොහැක"
 }

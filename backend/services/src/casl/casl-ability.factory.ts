@@ -31,7 +31,6 @@ export const createAppAbility = createMongoAbility as CreateAbility<AppAbility>;
 @Injectable()
 export class CaslAbilityFactory {
 	createForUser(user: User) {
-		console.log("createForUser", user);
 		const { can, cannot, build } = new AbilityBuilder(createAppAbility);
 		if (user) {
 			if (user.role == Role.Root) {

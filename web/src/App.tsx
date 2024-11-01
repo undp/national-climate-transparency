@@ -20,11 +20,6 @@ import AddUser from './Pages/Users/AddUser/addUser';
 import UserManagement from './Pages/Users/UserManagement/userManagement';
 import Dashboard from './Pages/Dashboard/dashboard';
 import Homepage from './Pages/Homepage/homepage';
-import PrivacyPolicy from './Pages/PrivacyPolicy/privacyPolicy';
-import CodeOfConduct from './Pages/CodeofConduct/codeofConduct';
-import CookiePolicy from './Pages/CookiePolicy/cookiePolicy';
-import TermsOfUse from './Pages/TermsofUse/termsofUse';
-import CarbonHelp from './Pages/Help/help';
 import ActionList from './Pages/Actions/ActionList/actionList';
 import ProgrammeList from './Pages/Programmes/ProgrammeList/programmeList';
 import ProjectList from './Pages/Projects/ProjectList/projectList';
@@ -33,6 +28,7 @@ import SupportList from './Pages/Support/SupportList/supportList';
 import ReportList from './Pages/Reporting/reportList';
 import Faq from './Pages/Faq/faq';
 import UserProfile from './Pages/Users/UserProfile/UserProfile';
+import InfoLayout from './Components/Layout/infoLayout';
 
 // Lazy Component Loading
 
@@ -44,6 +40,12 @@ const SupportForm = lazy(() => import('./Pages/Support/SupportForm/supportForm')
 const GhgEmissions = lazy(() => import('./Pages/Emissions/emissions'));
 const GhgProjections = lazy(() => import('./Pages/Projections/projections'));
 const GhgConfigurations = lazy(() => import('./Pages/Configurations/configurations'));
+const TransparencyHelp = lazy(() => import('./Pages/InformationPages/Help/help'));
+const TransparencyStatus = lazy(() => import('./Pages/InformationPages/Status/status'));
+const PrivacyPolicy = lazy(() => import('./Pages/InformationPages/PrivacyPolicy/privacyPolicy'));
+const CodeOfConduct = lazy(() => import('./Pages/InformationPages/CodeofConduct/codeofConduct'));
+const CookiePolicy = lazy(() => import('./Pages/InformationPages/CookiePolicy/cookiePolicy'));
+const TermsOfUse = lazy(() => import('./Pages/InformationPages/TermsofUse/termsofUse'));
 
 const App = () => {
   const ability = defineAbility();
@@ -72,15 +74,25 @@ const App = () => {
         <UserInformationContextProvider>
           <BrowserRouter>
             <Routes>
+              {/* Home Page */}
+              <Route path="/" element={<Homepage />} />
+
+              {/* Authentication Routes */}
               <Route path="login" element={<Login />} />
               <Route path="forgotPassword" element={<Login forgotPassword={true} />} />
               <Route path="resetPassword/:requestId" element={<Login resetPassword={true} />} />
-              <Route path="privacy" element={<PrivacyPolicy />} />
-              <Route path="help" element={<CarbonHelp />} />
-              <Route path="codeconduct" element={<CodeOfConduct />} />
-              <Route path="cookie" element={<CookiePolicy />} />
-              <Route path="terms" element={<TermsOfUse />} />
-              <Route path="/" element={<Homepage />} />
+
+              {/* Information Page Routes */}
+              <Route path="/info" element={<InfoLayout />}>
+                <Route path="help" element={<TransparencyHelp />} />
+                <Route path="status" element={<TransparencyStatus />} />
+                <Route path="cookie" element={<CookiePolicy />} />
+                <Route path="codeOfConduct" element={<CodeOfConduct />} />
+                <Route path="termsOfUse" element={<TermsOfUse />} />
+                <Route path="privacy" element={<PrivacyPolicy />} />
+              </Route>
+
+              {/* Protected Routes */}
               <Route path="/" element={<PrivateRoute />}>
                 <Route path="/dashboard" element={<CustomLayout selectedKey="dashboard" />}>
                   <Route index element={<Dashboard />} />
@@ -148,6 +160,8 @@ const App = () => {
                   <Route path="view" element={<UserProfile />} />
                 </Route>
               </Route>
+
+              {/* Not Found Redirect */}
               <Route path="/*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>

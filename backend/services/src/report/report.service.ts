@@ -20,6 +20,7 @@ import { DataExportReportElevenDto } from "../dtos/data.export.reportEleven.dto"
 import { AnnexThreeViewEntity } from "../entities/annexThree.view.entity";
 import { ImpleMeans } from "../enums/activity.enum";
 import { SupportDirection } from "../enums/support.enum";
+import { ActionType } from "src/enums/action.enum";
 
 export class ReportService {
 	constructor(
@@ -50,57 +51,57 @@ export class ReportService {
 				return this.reportFiveViewRepo.createQueryBuilder("reportFive");
 		} else {
 			let direction: SupportDirection;
-			let implementation: ImpleMeans[];
+			let mitigationType: ActionType[];
 
 			switch(reportNumber){
 				case Reports.SIX:
 					direction = SupportDirection.NEEDED;
-					implementation = [ImpleMeans.FINANCE];
+					mitigationType = [ActionType.MITIGATION, ActionType.ADAPTION, ActionType.CROSSCUT, ActionType.TRANSPARENCY, ActionType.OTHER];
 					break;
 				case Reports.SEVEN:
 					direction = SupportDirection.RECEIVED;
-					implementation = [ImpleMeans.FINANCE];
+					mitigationType = [ActionType.MITIGATION, ActionType.ADAPTION, ActionType.CROSSCUT, ActionType.TRANSPARENCY, ActionType.OTHER];
 					break;
 				case Reports.EIGHT:
 					direction = SupportDirection.NEEDED;
-					implementation = [ImpleMeans.TECH_DEV];
+					mitigationType = [ActionType.MITIGATION, ActionType.ADAPTION, ActionType.CROSSCUT, ActionType.OTHER];
 					break;
 				case Reports.NINE:
 					direction = SupportDirection.RECEIVED;
-					implementation = [ImpleMeans.TECH_DEV];
+					mitigationType = [ActionType.MITIGATION, ActionType.ADAPTION, ActionType.CROSSCUT, ActionType.OTHER];
 					break;
 				case Reports.TEN:
 					direction = SupportDirection.NEEDED;
-					implementation = [ImpleMeans.CAPACITY_BUILD];
+					mitigationType = [ActionType.MITIGATION, ActionType.ADAPTION, ActionType.CROSSCUT, ActionType.OTHER];
 					break;
 				case Reports.ELEVEN:
 					direction = SupportDirection.RECEIVED;
-					implementation = [ImpleMeans.CAPACITY_BUILD];
+					mitigationType = [ActionType.MITIGATION, ActionType.ADAPTION, ActionType.CROSSCUT, ActionType.OTHER];
 					break;
 				case Reports.TWELVE:
 					direction = SupportDirection.NEEDED;
-					implementation = [ImpleMeans.FINANCE, ImpleMeans.TRANSP];
+					mitigationType = [ActionType.TRANSPARENCY];
 					break;
 				case Reports.THIRTEEN:
 					direction = SupportDirection.RECEIVED;
-					implementation = [ImpleMeans.FINANCE, ImpleMeans.TRANSP];
+					mitigationType = [ActionType.TRANSPARENCY];
 					break;
 			}
 
-			let implementationCondition = '';
+			let mitigationCondition = '';
 
-			implementation.forEach((implementation, index) => {
-				implementationCondition = index > 0 ? 
-					`${implementationCondition} OR annex_three.meansOfImplementation = '${implementation}'` : 
-					`annex_three.meansOfImplementation = '${implementation}'`
+			mitigationType.forEach((mitigation, index) => {
+				mitigationCondition = index > 0 ? 
+					`${mitigationCondition} OR annex_three.type = '${mitigation}'` : 
+					`annex_three.type = '${mitigation}'`
 			});
 
-			implementationCondition = `(${implementationCondition})`
+			mitigationCondition = `(${mitigationCondition})`
 
 			return this.annexThreeViewRepo
 					   .createQueryBuilder("annex_three")
 					   .where("annex_three.direction = :direction", { direction: direction })
-					   .andWhere(implementationCondition)
+					   .andWhere(mitigationCondition)
 		}
 	}
 

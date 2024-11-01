@@ -1,0 +1,85 @@
+@import '../../../Assets/Fonts/fonts.scss';
+@import '../../../Styles/variables.scss';
+
+.code-container {
+  text-align: left;
+  justify-content: left;
+  background-color:white;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-bottom: 60px;
+
+  .code-body {
+    color: $title-text-color;
+    padding: 20px 0px 20px 0px;
+  }
+  .code-body-contact {
+    color: $title-text-color;
+    text-align: left;
+    padding: 20px 60px 20px 60px;
+  }
+  .code-sub {
+    padding-bottom: 30px;
+    font-weight: 700;
+    color: $title-text-color;
+  }
+  .codetitle {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: $primary-font-family;
+    color: $title-text-color;
+    text-align: center;
+    justify-content: center;
+    text-transform: uppercase;
+    padding: 50px 50px 10px 50px;
+
+    .code-row {
+      display: block !important;
+    }
+
+    @media (max-width: $lg-size) {
+      font-size: 2rem;
+      margin-top: 1rem;
+      color: $title-text-color;
+      line-height: 1.5em;
+    }
+  }
+  .code-subtitle {
+    display: flex;
+    text-align: left;
+    justify-content: left;
+    background-color: #fff;
+    color: $title-text-color;
+    padding-top: 30px;
+    font-size: 20px;
+    font-weight: 700;
+    padding-left: 0px;
+  }
+  .code-card-subtitle {
+    text-decoration: underline;
+    color: $title-text-color;
+    font-size: 20px;
+    font-weight: 700;
+    padding-bottom: 20px;
+  }
+  .code-card-subtitle-text {
+    margin: 10px 60px 10px 60px;
+  }
+  .code-card-container {
+    text-align: left;
+    margin: 30px 60px 30px 60px;
+    padding: 30px;
+    border-style: solid;
+    border-color: $common-form-input-border;
+    border-width: 1px;
+    table {
+      color: $title-text-color;
+      align-items: center;
+
+      td {
+        padding-right: 20px;
+      }
+    }
+  }
+}
+

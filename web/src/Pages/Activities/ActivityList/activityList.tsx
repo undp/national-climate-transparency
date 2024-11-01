@@ -156,7 +156,7 @@ const activityList = () => {
                 : tempParentType === 'project'
                 ? unstructuredData[i].migratedData?.programme?.action?.type
                 : '',
-            recipientEntity: unstructuredData[i].migratedData?.recipientEntities ?? [],
+            recipientEntity: unstructuredData[i].recipientEntities ?? [],
             intImplementingEntity: unstructuredData[i].internationalImplementingEntity ?? [],
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             natImplementingEntity: unstructuredData[i].nationalImplementingEntity ?? [],

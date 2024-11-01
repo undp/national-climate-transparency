@@ -39,7 +39,7 @@ SELECT 'action' AS source, * FROM (
 description, objective, "instrumentType", status::text, sector::text, ave."ghgsAffected", "startYear" , ave."natImplementors" as "implementingEntities", 
 ave."achievedGHGReduction", ave."expectedGHGReduction"
 	FROM action act join action_view_entity ave on ave.id = act."actionId"
-	WHERE validated = true
+	WHERE validated = true AND act.type IN ('Mitigation', 'Cross-cutting')
 ) act;`
 
 @ViewEntity({
@@ -57,20 +57,8 @@ export class ReportFiveViewEntity {
 	@ViewColumn()
 	actionId: string;
 
-	// @ViewColumn()
-	// programmeId: string;
-
-	// @ViewColumn()
-	// projectId: string;
-
 	@ViewColumn()
 	titleOfAction: string;
-
-	// @ViewColumn()
-	// titleOfProgramme: string;
-
-	// @ViewColumn()
-	// titleOfProject: string;
 
 	@ViewColumn()
 	description: string;

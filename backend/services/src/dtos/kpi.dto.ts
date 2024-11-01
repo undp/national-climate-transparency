@@ -1,7 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { EntityType } from "../enums/shared.enum";
-import { KpiUnits } from "../enums/kpi.enum";
 import { IsTwoDecimalPoints } from "../util/twoDecimalPointNumber.decorator";
 
 export class KpiDto {
@@ -11,10 +10,8 @@ export class KpiDto {
     name: string;
 
 		@IsNotEmpty()
-    @ApiProperty({ enum: KpiUnits })
-    @IsEnum(KpiUnits, {
-        message: "Invalid Unit. Supported following creator types:" + Object.values(KpiUnits),
-    })
+    @ApiProperty()
+    @IsString()
     kpiUnit: string;
 
     @IsNotEmpty()

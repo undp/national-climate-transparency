@@ -1,3 +1,5 @@
+import { ActionType } from '../Enums/action.enum';
+
 export type ActionMigratedData = {
   ghgsAffected: string[];
   natImplementer: string[];
@@ -11,5 +13,6 @@ export type ActionSelectData = {
   title: string;
   instrumentType: string;
   sector: string;
-  type: string;
+  type: ActionType;
+  hasChildActivities: boolean;
 };

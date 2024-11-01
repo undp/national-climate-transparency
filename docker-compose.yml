@@ -16,7 +16,6 @@ services:
       POSTGRES_USER: root
       PGPORT: 5433
       PSQL_USERNAME: root
-      # POSTGRES_HOST_AUTH_METHOD: trust
       PGDATA: /data/postgres
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -105,7 +104,6 @@ services:
       DB_HOST: dbmrv
       DB_USER: root
       DB_PASSWORD: "<ANY PASSWORD>"
-      # ,data-importer
       RUN_MODULE: async-operations-handler,data-importer
       LOCATION_SERVICE: https://mrv-common-dev.s3.amazonaws.com/flag.png
       CERTIFIER_IMAGE : "https://mrv-common-dev.s3.amazonaws.com/flag.png"
@@ -128,21 +126,6 @@ services:
       SYSTEM_TYPE: CARBON_TRANSPARENCY_SYSTEM
       SYNC_ENABLE: true
       BACKEND_HOST: http://localhost:9000
-  # async-operations-handler:
-  #   build:
-  #     context: .
-  #     dockerfile: ./backend/services/Dockerfile
-  #   depends_on:
-  #     - db
-  #     - national
-  #   environment:
-  #     DB_HOST: db
-  #     DB_USER: root
-  #     DB_PASSWORD: "<ANY PASSOWORD>"
-  #     RUN_MODULE: async-operations-handler
-  #     SMTP_ENDPOINT: email-smtp.us-east-1.amazonaws.com
-  #     SMTP_PASSWORD: "<ANY PASSOWORD>"
-  #     ASYNC_OPERATIONS_TYPE: Database
   web:
     build:
       context: .
@@ -152,11 +135,6 @@ services:
         REACT_APP_BACKEND: http://localhost:9000
         REACT_APP_STAT_URL: http://localhost:9100
         REACT_APP_COUNTRY_NAME: "Antarctic Region"
-        REACT_APP_GOVERNMENT_MINISTRY: "Ministry Of Environment"
-        REACT_APP_COUNTRY_FLAG_URL: "https://mrv-common-dev.s3.amazonaws.com/flag.png"
-        COUNTRY_CODE: "NG"
-        REACT_APP_MAP_TYPE: "None"
-        REACT_APP_ENABLE_REGISTRATION: true
     ports:
       - "9030:3030"
     depends_on:

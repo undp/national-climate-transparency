@@ -1,6 +1,5 @@
-import { Form, Input, Row, Col, Select, Tooltip } from 'antd';
+import { Form, Input, Row, Col, Tooltip } from 'antd';
 import './kpiGrid.scss';
-import { KpiUnits } from '../../Enums/kpi.enum';
 import { CreatedKpiData } from '../../Definitions/kpiDefinitions';
 import { UserOutlined, UserSwitchOutlined } from '@ant-design/icons';
 
@@ -12,8 +11,6 @@ interface Props {
   callingEntityId: string | undefined;
   ownerEntityId: string | undefined;
 }
-
-const { Option } = Select;
 
 export const ViewKpi: React.FC<Props> = ({
   index,
@@ -42,13 +39,7 @@ export const ViewKpi: React.FC<Props> = ({
               name={`kpi_unit_${index}`}
               initialValue={kpi?.unit}
             >
-              <Select size="large" className="form-unit-select" disabled={true}>
-                {Object.values(KpiUnits).map((unit) => (
-                  <Option key={unit} value={unit}>
-                    {unit}
-                  </Option>
-                ))}
-              </Select>
+              <Input className="form-input-box" disabled={true} />
             </Form.Item>
           </Col>
         </Row>
