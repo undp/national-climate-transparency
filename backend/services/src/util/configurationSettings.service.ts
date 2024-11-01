@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
 import { EntityManager, Repository } from "typeorm";
 import { BasicResponseDto } from "../dtos/basic.response.dto";
@@ -11,7 +11,6 @@ import { GHGRecordState } from "../enums/ghg.state.enum";
 import { ExtendedProjectionType, ProjectionLeafSection } from "../enums/projection.enum";
 import { User } from "../entities/user.entity";
 import { GHGInventoryManipulate } from "../enums/user.enum";
-import { ActivityEntity } from "../entities/activity.entity";
 import { GHGS } from "../enums/shared.enum";
 
 @Injectable()
@@ -21,7 +20,6 @@ export class ConfigurationSettingsService {
 		@InjectRepository(ConfigurationSettingsEntity)
 		private configSettingsRepo: Repository<ConfigurationSettingsEntity>,
 		@InjectRepository(ProjectionEntity) private projectionRepo: Repository<ProjectionEntity>,
-		@InjectRepository(ActivityEntity) private activityRepo: Repository<ActivityEntity>,
 		private helperService: HelperService
 	) { }
 
@@ -89,7 +87,6 @@ export class ConfigurationSettingsService {
 
 					if (savedSetting){
 						if ([ConfigurationSettingsType.PROJECTIONS_WITH_MEASURES, ConfigurationSettingsType.PROJECTIONS_WITH_ADDITIONAL_MEASURES, ConfigurationSettingsType.PROJECTIONS_WITHOUT_MEASURES].includes(type)){
-
 							const projectionType = type === ConfigurationSettingsType.PROJECTIONS_WITH_MEASURES 
 															? ExtendedProjectionType.BASELINE_WITH_MEASURES : (
 																type === ConfigurationSettingsType.PROJECTIONS_WITH_ADDITIONAL_MEASURES 
@@ -97,16 +94,16 @@ export class ConfigurationSettingsService {
 																: ExtendedProjectionType.BASELINE_WITHOUT_MEASURES);
 							
 							await this.updateBaselineProjection(settingValue as ProjectionData, projectionType)
+						} else if (type === ConfigurationSettingsType.GWP){
+								await this.updateActivityGhgState(setting.settingValue, oldGwp);
+								await this.helperService.refreshMaterializedViews(em);
 						}
 					}
 				})
 				.catch((err: any) => {
 					throw err;
 				});
-			
-				if(type === ConfigurationSettingsType.GWP){
-					await this.updateMitigationTimeline(setting.settingValue, oldGwp);
-				}
+		
 			// Return success message
 			return new BasicResponseDto(
 				HttpStatus.OK,
@@ -187,14 +184,20 @@ export class ConfigurationSettingsService {
 
 	}
 
-	private async updateMitigationTimeline(newGwpValue: any, oldGwpValue: any) {
+	private async updateActivityGhgState(newGwpValue: any, oldGwpValue: any) {
 
-		if (oldGwpValue === undefined || newGwpValue.gwp_ch4 !== oldGwpValue.gwp_ch4) {
-			await this.entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_ch4}::INTEGER, '${GHGS.CH}');`);
-		}
+		try {
+			const currentYear = new Date().getFullYear();
 
-		if (oldGwpValue === undefined || newGwpValue.gwp_n2o !== oldGwpValue.gwp_n2o) {
-			await this.entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_n2o}::INTEGER, '${GHGS.NO}');`);
+			if (oldGwpValue === undefined || newGwpValue.gwp_ch4 !== oldGwpValue.gwp_ch4) {
+				await this.entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_ch4}::INTEGER, '${GHGS.CH}', ${currentYear}::INTEGER);`);
+			}
+	
+			if (oldGwpValue === undefined || newGwpValue.gwp_n2o !== oldGwpValue.gwp_n2o) {
+				await this.entityManager.query(`SELECT update_mitigation_timeline(${newGwpValue.gwp_n2o}::INTEGER, '${GHGS.NO}', ${currentYear}::INTEGER);`);
+			}
+		} catch (error: any) {
+			console.log('Error occurred when updating activity ghg state ', error);	
 		}
 	}
 }

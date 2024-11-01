@@ -388,6 +388,4 @@ export type EmissionPayload = {
     indirectN2oEmissions: any;
     other: any;
   };
-  totalCo2WithoutLand: any;
-  totalCo2WithLand: any;
 };

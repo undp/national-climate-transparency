@@ -8,9 +8,9 @@
 
     "growthRate": "Taux de Croissance (%)",
     "baselineYear": "Année de Référence",
-    "co2": "Référence CO2",
-    "ch4": "Référence CH4",
-    "n2o": "Référence N2O",
+    "co2": "Référence ktCO2",
+    "ch4": "Référence ktCH4",
+    "n2o": "Référence ktN2O",
 
     "gwp_co2": "CO2",
     "gwp_ch4": "CH4",

@@ -16,16 +16,24 @@ services:
       POSTGRES_USER: root
       PGPORT: 5433
       PSQL_USERNAME: root
-      # POSTGRES_HOST_AUTH_METHOD: trust
       PGDATA: /data/postgres
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - data:/data/postgres
+  migration:
+    image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-services:CARBON-329
+    depends_on:
+      - dbmrv
+      - national
+    command: ['yarn', 'migration:run']
+    environment:
+      DB_HOST: dbmrv
+      DB_PORT: "5433"
+      DB_USER: root
+      DB_PASSWORD: "<ANY PASSWORD>"
+      DB_NAME: "carbondev"
   national:
     image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-services:CARBON-329
-    # build:
-    # context: .
-    # dockerfile: ./backend/services/Dockerfile
     ports:
       - "9000:3000"
     depends_on:
@@ -34,6 +42,8 @@ services:
       DB_HOST: dbmrv
       DB_USER: root
       DB_PASSWORD: "<ANY PASSWORD>"
+      DB_PORT: "5433"
+      DB_NAME: "carbondev"
       RUN_MODULE: national-api
       rootEmail: <ROOT EMAIL>
       systemCountryCode: "NG"
@@ -45,8 +55,6 @@ services:
       HOST: "http://localhost:80"
       DOMAIN_MAP: "true"
       EXPIRES_IN: "7200"
-      DB_PORT: "5433"
-      DB_NAME: "carbondev"
       NODE_ENV: 'dev'
       FILE_SERVICE: local
       DISABLE_LOW_PRIORITY_EMAIL: "true"
@@ -61,9 +69,6 @@ services:
       - ./users.csv:/app/backend/services/users.csv
       - ./organisations.csv:/app/backend/services/organisations.csv
   stats:
-    # build:
-    #   context: .
-    #   dockerfile: ./backend/services/Dockerfile
     image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-services:CARBON-329
     ports:
       - "9100:3100"
@@ -83,9 +88,6 @@ services:
       FILE_SERVICE: local
   async-operations-handler:
     image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-services:CARBON-329
-    # build:
-    #   context: .
-    #   dockerfile: ./backend/services/Dockerfile
     depends_on:
       - dbmrv
       - national
@@ -93,7 +95,6 @@ services:
       DB_HOST: dbmrv
       DB_USER: root
       DB_PASSWORD: "<ANY PASSWORD>"
-      # ,data-importer
       RUN_MODULE: async-operations-handler,data-importer
       LOCATION_SERVICE: https://mrv-common-dev.s3.amazonaws.com/flag.png
       CERTIFIER_IMAGE : "https://mrv-common-dev.s3.amazonaws.com/flag.png"
@@ -118,17 +119,6 @@ services:
       BACKEND_HOST: http://localhost:9000
   web:
     image: 302213478610.dkr.ecr.us-east-1.amazonaws.com/transparency-web:CARBON-329
-    # build:
-    #   context: .
-    #   dockerfile: ./web/Dockerfile
-    #   args:
-    #     PORT: 3030
-    #     REACT_APP_BACKEND: http://localhost:3000
-    #     REACT_APP_STAT_URL: http://localhost:3100
-    #     REACT_APP_GOVERNMENT_MINISTRY: "Ministry Of Environment"
-    #     REACT_APP_COUNTRY_NAME: "Antarctic Region"
-    #     REACT_APP_COUNTRY_FLAG_URL: "https://mrv-common-dev.s3.amazonaws.com/flag.png"
-    #     COUNTRY_CODE: "NG"
     ports:
       - "9030:3030"
     depends_on:

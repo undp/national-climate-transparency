@@ -5,13 +5,13 @@
 
     "totalRowHeader": "Total des Émissions et Captures Nationales",
 
-    "eqWithHeader": "Émissions totales équivalentes en CO2 avec utilisation des terres, changement d'affectation des terres et foresterie",
-    "eqWithoutHeader": "Émissions totales équivalentes en CO2 sans utilisation des terres, changement d'affectation des terres et foresterie",
-
-    "co2": "tCO2",
-    "ch4": "tCH4",
-    "n2o": "tN2O",
-    "co2eq": "tCO2-éq",
+    "eqWithHeader": "Émissions totales en ktCO2 équivalent avec terres",
+    "eqWithoutHeader": "Émissions totales en ktCO2 équivalent sans terres",
+    
+    "co2": "ktCO2",
+    "ch4": "ktCH4",
+    "n2o": "ktN2O",
+    "co2eq": "ktCO2-éq",
 
     "1_title": "Énergie",
     "2_title": "Processus Industriels et Utilisation des Produits",

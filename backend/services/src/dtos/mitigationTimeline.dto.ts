@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsNotEmpty, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber, IsString, ValidateNested } from "class-validator";
 
 
 export class mitigationTimelineDto {
@@ -37,4 +37,13 @@ export class mitigationTimelineDto {
         };
     }
 
+    @IsNotEmpty()
+    @IsNumber()
+	@ApiProperty()
+	achievedGHGReduction: number;
+
+    @IsNotEmpty()
+	@IsNumber()
+	@ApiProperty()
+	expectedGHGReduction: number;
 }

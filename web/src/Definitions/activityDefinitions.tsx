@@ -1,3 +1,5 @@
+import { ActionType } from '../Enums/action.enum';
+
 export type ActivityData = {
   key: string;
   activityId: string;
@@ -15,12 +17,12 @@ export type ActivityData = {
 export type ParentData = {
   id: string;
   title: string;
+  hasChildProgrammes: boolean;
 };
 
 export type ActivityMigratedData = {
   description: string | undefined;
-  type: string | undefined;
-  recipient: string[] | undefined;
+  type: ActionType | undefined;
   affSectors: string[] | undefined;
   affSubSectors: string[] | undefined;
   startYear: number | undefined;

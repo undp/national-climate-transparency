@@ -3,7 +3,7 @@ import '../../../Styles/app.scss';
 import LayoutTable from '../../../Components/common/Table/layout.table';
 import './projectList.scss';
 import { Action } from '../../../Enums/action.enum';
-import { Button, Col, Row, Input, Dropdown, Popover, message, Radio, Space, MenuProps } from 'antd';
+import { Button, Col, Row, Input, Dropdown, Popover, Radio, Space, MenuProps } from 'antd';
 import { EllipsisOutlined, FilterOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -11,9 +11,7 @@ import { useAbilityContext } from '../../../Casl/Can';
 import { ActionEntity } from '../../../Entities/action';
 import { useConnection } from '../../../Context/ConnectionContext/connectionContext';
 import StatusChip from '../../../Components/StatusChip/statusChip';
-import SimpleAttachEntity from '../../../Components/Popups/simpleAttach';
 import ScrollableList from '../../../Components/ScrollableList/scrollableList';
-import { GraphUpArrow } from 'react-bootstrap-icons';
 import { actionMenuWithAttaching } from '../../../Components/Popups/tableAction';
 import { ProjectEntity } from '../../../Entities/project';
 import { displayErrorMessage } from '../../../Utils/errorMessageHandler';
@@ -45,7 +43,7 @@ interface Filter {
 
 const projectList = () => {
   const navigate = useNavigate();
-  const { get, post } = useConnection();
+  const { post } = useConnection();
   const ability = useAbilityContext();
 
   const { t } = useTranslation(['projectList', 'tableAction', 'columnHeader', 'entityAction']);
@@ -82,60 +80,6 @@ const projectList = () => {
 
   const [tempSearchValue, setTempSearchValue] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
-
-  // Programme Attachment State
-
-  const [openAttaching, setOpenAttaching] = useState<boolean>(false);
-  const [allFreeActivityIds, setAllFreeActivityIds] = useState<string[]>([]);
-
-  const [selectedProjectId, setSelectedProjectId] = useState<string>();
-  const [attachedActivityIds, setAttachedActivityIds] = useState<string[]>([]);
-  const [toBeAttached, setToBeAttached] = useState<string[]>([]);
-
-  // Free Act Read from DB
-
-  const getFreeActivityIds = async () => {
-    try {
-      const response: any = await get('national/activities/link/eligible');
-
-      const freeActivityIds: string[] = [];
-      response.data.forEach((act: any) => {
-        freeActivityIds.push(act.activityId);
-      });
-      setAllFreeActivityIds(freeActivityIds);
-    } catch (error: any) {
-      displayErrorMessage(error);
-    }
-  };
-
-  // Get Attached Programmes
-
-  const getAttachedActivityIds = async (projectId: string) => {
-    try {
-      const payload = {
-        filterAnd: [
-          {
-            key: 'parentId',
-            operation: '=',
-            value: projectId,
-          },
-        ],
-        sort: {
-          key: 'activityId',
-          order: 'ASC',
-        },
-      };
-      const response: any = await post('national/activities/query', payload);
-
-      const attachedActIds: string[] = [];
-      response.data.forEach((act: any) => {
-        attachedActIds.push(act.activityId);
-      });
-      setAttachedActivityIds(attachedActIds);
-    } catch (error: any) {
-      displayErrorMessage(error);
-    }
-  };
 
   // Data Read from DB
 
@@ -194,11 +138,14 @@ const projectList = () => {
             programmeId: unstructuredData[i].programme?.programmeId ?? '',
             title: unstructuredData[i].title,
             projectStatus: unstructuredData[i].projectStatus,
-            recipientEntity: unstructuredData[i].recipientEntities ?? [],
-            intImplementingEntity: unstructuredData[i].internationalImplementingEntities ?? [],
+            recipientEntity: unstructuredData[i].migratedData[0]?.recipientEntities ?? [],
+            intImplementingEntity:
+              unstructuredData[i].migratedData[0]?.internationalImplementingEntities ?? [],
             validationStatus: unstructuredData[i].validated ? 'validated' : 'pending',
             natImplementingEntity: unstructuredData[i].programme?.natImplementor ?? [],
-            estimatedInvestment: Math.round(unstructuredData[i].programme?.investment ?? 0),
+            estimatedInvestment: Math.round(
+              unstructuredData[i].migratedData[0]?.estimatedAmount ?? 0
+            ),
           });
         }
         setTableData(structuredData);
@@ -208,41 +155,6 @@ const projectList = () => {
     } catch (error: any) {
       displayErrorMessage(error);
       setLoading(false);
-    }
-  };
-
-  // Attach Multiple Activities for a Project
-
-  const attachActivities = async () => {
-    if (toBeAttached.length > 0) {
-      try {
-        const payload = {
-          parentType: 'project',
-          parentId: selectedProjectId,
-          activityIds: toBeAttached,
-        };
-        const response: any = await post('national/activities/link', payload);
-        if (response.status === 200 || response.status === 201) {
-          await new Promise((resolve) => {
-            setTimeout(resolve, 500);
-          });
-
-          message.open({
-            type: 'success',
-            content: t('activityLinkSuccess'),
-            duration: 3,
-            style: { textAlign: 'right', marginRight: 15, marginTop: 10 },
-          });
-
-          await new Promise((resolve) => {
-            setTimeout(resolve, 500);
-          });
-
-          getAllData();
-        }
-      } catch (error: any) {
-        displayErrorMessage(error);
-      }
     }
   };
 
@@ -297,25 +209,8 @@ const projectList = () => {
   // State Management
 
   useEffect(() => {
-    getFreeActivityIds();
-    if (!openAttaching) {
-      setAttachedActivityIds([]);
-    }
-  }, [openAttaching]);
-
-  useEffect(() => {
     getAllData();
   }, [currentPage, pageSize, sortField, sortOrder, searchValue, appliedFilterValue]);
-
-  // Children Attachment Functionality
-
-  useEffect(() => {
-    if (toBeAttached.length > 0) {
-      attachActivities();
-      setToBeAttached([]);
-      setSelectedProjectId(undefined);
-    }
-  }, [toBeAttached]);
 
   // Action List Table Columns
 
@@ -391,9 +286,6 @@ const projectList = () => {
               ProjectEntity,
               record.projectId,
               record.validationStatus ?? 'pending',
-              getAttachedActivityIds,
-              setOpenAttaching,
-              setSelectedProjectId,
               navigate,
               t
             )}
@@ -521,21 +413,6 @@ const projectList = () => {
         <div className="body-title">{t('viewTitle')}</div>
       </div>
       <div className="content-card">
-        <SimpleAttachEntity
-          open={openAttaching}
-          setOpen={setOpenAttaching}
-          options={allFreeActivityIds}
-          content={{
-            buttonName: t('attachActivity'),
-            attach: t('entityAction:attach'),
-            contentTitle: t('attachActivity'),
-            listTitle: t('activityList'),
-            cancel: t('entityAction:cancel'),
-          }}
-          attachedUnits={attachedActivityIds}
-          setToBeAttached={setToBeAttached}
-          icon={<GraphUpArrow style={{ fontSize: '120px' }} />}
-        ></SimpleAttachEntity>
         <Row className="table-actions-section">
           <Col {...addActionBps}>
             <div className="action-bar">

@@ -11,9 +11,10 @@ export enum Action {
 
 export enum ActionType {
   MITIGATION = 'Mitigation',
-  // ADAPTION = 'Adaption',
-  // CROSSCUT = 'Cross-cutting',
-  // ENABLING = 'Enabling',
+  ADAPTION = 'Adaptation',
+  CROSSCUT = 'Cross-cutting',
+  TRANSPARENCY = 'Transparency',
+  OTHER = 'Other',
 }
 
 export enum InstrumentType {

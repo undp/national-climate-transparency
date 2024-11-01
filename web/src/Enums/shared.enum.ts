@@ -78,6 +78,7 @@ export enum EntityType {
 
 export enum GHGS {
   CO = 'CO2',
+  COE = 'CO2e',
   CH = 'CH4',
   NO = 'N2O',
   HFC = 'HFCs',

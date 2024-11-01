@@ -2,6 +2,7 @@ import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/lib/upload';
 import { Buffer } from 'buffer';
 import { AcceptedFileExtensions } from '../Enums/file.enum';
+import { ActionType } from '../Enums/action.enum';
 
 export const addCommSep = (value: any) => {
   return (
@@ -117,16 +118,16 @@ export const getRounded = (num: number | string): number => {
   }
 };
 
-export const convertToMillions = (value: number) => {
+export const convertToBillions = (value: number) => {
   const roundedNumber = getRounded(value);
-  let numberInMills = roundedNumber.toString();
+  let processedNumber = roundedNumber.toString();
+  let isConverted = false;
   if (roundedNumber > 1000000000) {
-    numberInMills = `${customRound(roundedNumber / 1000000000)} billion`;
-  } else if (roundedNumber > 1000000) {
-    numberInMills = `${customRound(roundedNumber / 1000000)} million`;
+    processedNumber = `${customRound(roundedNumber / 1000000000)} billion`;
+    isConverted = true;
   }
 
-  return numberInMills;
+  return { processedNumber, isConverted };
 };
 
 export const getCollapseIcon = (isActive: boolean, clicked?: any) => {
@@ -197,4 +198,35 @@ export const doesUserHaveValidatePermission = async (get: any): Promise<boolean>
   } catch (exception) {
     return true;
   }
+};
+
+export const subtractTwoArrays = (
+  array1: number[],
+  array2: number[],
+  multiplier?: number
+): number[] => {
+  const processedMultiplier = multiplier ?? 1;
+  return array1.map((value, index) =>
+    parseFloat(((value - array2[index]) * processedMultiplier).toFixed(2))
+  );
+};
+
+export const calculateArraySum = (array: number[]) => {
+  let arrSum = 0;
+  for (let index = 0; index <= array.length; index++) {
+    arrSum += array[index] || 0;
+  }
+  return parseFloat(arrSum.toFixed(2));
+};
+
+export const isGasFlowCheck = (type: ActionType | undefined): boolean => {
+  if (!type) {
+    return false;
+  }
+
+  if ([ActionType.MITIGATION, ActionType.CROSSCUT].includes(type)) {
+    return true;
+  }
+
+  return false;
 };

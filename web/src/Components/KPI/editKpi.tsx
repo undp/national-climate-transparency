@@ -1,6 +1,5 @@
-import { Form, Input, Row, Col, Select, Card } from 'antd';
+import { Form, Input, Row, Col, Card } from 'antd';
 import './kpiGrid.scss';
-import { KpiUnits } from '../../Enums/kpi.enum';
 import { CreatedKpiData } from '../../Definitions/kpiDefinitions';
 import { DeleteOutlined } from '@ant-design/icons';
 
@@ -14,8 +13,6 @@ interface Props {
   updateKPI?: (index: number, property: any, value: string, inWhich: 'created' | 'new') => void;
   removeKPI?: (kpiId: number, inWhich: 'created' | 'new') => void;
 }
-
-const { Option } = Select;
 
 export const EditKpi: React.FC<Props> = ({
   rules,
@@ -55,22 +52,15 @@ export const EditKpi: React.FC<Props> = ({
               rules={isFromActivity ? [] : rules}
               initialValue={kpi?.unit}
             >
-              <Select
-                size="large"
-                className="form-unit-select"
-                onChange={(selectedValue) => {
+              <Input
+                className="form-input-box"
+                onChange={(e) => {
                   if (updateKPI) {
-                    updateKPI(index, 'unit', selectedValue, 'created');
+                    updateKPI(index, 'unit', e.target.value, 'created');
                   }
                 }}
                 disabled={isFromActivity}
-              >
-                {Object.values(KpiUnits).map((unit) => (
-                  <Option key={unit} value={unit}>
-                    {unit}
-                  </Option>
-                ))}
-              </Select>
+              />
             </Form.Item>
           </Col>
         </Row>

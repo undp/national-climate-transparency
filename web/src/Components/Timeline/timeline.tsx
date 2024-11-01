@@ -1,4 +1,4 @@
-import { Table, TableProps, Input, Grid } from 'antd';
+import { Table, TableProps, Grid, InputNumber } from 'antd';
 import {
   ActualRows,
   ActualTimeline,
@@ -39,6 +39,7 @@ const TimelineTable: React.FC<Props> = ({
   const screens = useBreakpoint();
 
   const isView: boolean = method === 'view' ? true : false;
+
   const [allowFixedLegend, setAllowFixedLegend] = useState<boolean>(false);
 
   useEffect(() => {
@@ -58,7 +59,6 @@ const TimelineTable: React.FC<Props> = ({
       align: 'center',
       ellipsis: true,
       width: 100,
-      fixed: 'left',
     },
     {
       title: t('timelineTable:catExpectedEmissionReduct'),
@@ -85,7 +85,6 @@ const TimelineTable: React.FC<Props> = ({
       align: 'center',
       ellipsis: true,
       width: 100,
-      fixed: 'left',
     },
     {
       title: t('timelineTable:catActualEmissionReduct'),
@@ -109,7 +108,7 @@ const TimelineTable: React.FC<Props> = ({
     expectedTableColumns.push({
       title: year.toString(),
       dataIndex: 'values',
-      width: 80,
+      width: 120,
       align: 'center',
       render: (colValue: any, record: any) => {
         const isDisabled =
@@ -117,17 +116,15 @@ const TimelineTable: React.FC<Props> = ({
           record.topic === ExpectedRows.ROW_FIVE[1] ||
           isView;
         return (
-          <Input
-            value={colValue[year - mtgStartYear]}
+          <InputNumber
             disabled={isDisabled}
-            onChange={(event: any) => {
-              const inputValue = event.target.value;
-              const regex = /^\d*$/;
-              if (regex.test(inputValue) || inputValue === '') {
-                onValueEnter('expected', record.topic, year.toString(), inputValue);
-              }
+            value={colValue[year - mtgStartYear]}
+            decimalSeparator="."
+            controls={false}
+            style={{ width: '100%', height: '30px' }}
+            onChange={(value: any) => {
+              onValueEnter('expected', record.topic, year.toString(), value);
             }}
-            className="input-box"
           />
         );
       },
@@ -136,22 +133,20 @@ const TimelineTable: React.FC<Props> = ({
     actualTableColumns.push({
       title: year.toString(),
       dataIndex: 'values',
-      width: 80,
+      width: 120,
       align: 'center',
       render: (colValue: any, record: any) => {
         const isDisabled = record.topic === ActualRows.ROW_THREE[1] || isView;
         return (
-          <Input
-            value={colValue[year - mtgStartYear]}
+          <InputNumber
             disabled={isDisabled}
-            onChange={(event: any) => {
-              const inputValue = event.target.value;
-              const regex = /^\d*$/;
-              if (regex.test(inputValue) || inputValue === '') {
-                onValueEnter('actual', record.topic, year.toString(), event.target.value);
-              }
+            value={colValue[year - mtgStartYear]}
+            decimalSeparator="."
+            controls={false}
+            style={{ width: '100%', height: '30px' }}
+            onChange={(value: any) => {
+              onValueEnter('actual', record.topic, year.toString(), value);
             }}
-            className="input-box"
           />
         );
       },
