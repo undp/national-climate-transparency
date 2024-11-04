@@ -4,12 +4,11 @@ import { ProjectStatus } from "../enums/project.enum";
 import { IntImplementor, Recipient } from "../enums/shared.enum";
 import { DocumentDto } from "./document.dto";
 import { KpiDto } from "./kpi.dto";
-import { KpiUnits } from "../enums/kpi.enum";
 
 export class ProjectDto {
 
 	@IsString()
-	@IsOptional()
+	@IsNotEmpty()
 	@ApiProperty()
 	programmeId: string;
 
@@ -53,35 +52,6 @@ export class ProjectDto {
 	@ApiProperty()
 	endYear: number;
 
-	@IsArray()
-	@ArrayMinSize(1)
-	@MaxLength(100, { each: true })
-	@IsNotEmpty({ each: true })
-	@IsEnum(Recipient, {
-		each: true,
-		message: 'Invalid Recipient Entity. Supported following entities:' + Object.values(Recipient)
-	})
-	@ApiProperty({
-		type: [String],
-		enum: Object.values(Recipient),
-	})
-	recipientEntities: Recipient[];
-
-	@ValidateIf((c) => c.internationalImplementingEntities)
-	@IsArray()
-	@ArrayMinSize(1)
-	@MaxLength(100, { each: true })
-	@IsNotEmpty({ each: true })
-	@IsEnum(IntImplementor, {
-		each: true,
-		message: 'Invalid International Implementing Entity. Supported following entities:' + Object.values(IntImplementor)
-	})
-	@ApiPropertyOptional({
-		type: [String],
-		enum: Object.values(IntImplementor),
-	})
-	internationalImplementingEntities: IntImplementor[];
-
 	@IsOptional()
 	@ApiPropertyOptional(
 		{
@@ -112,7 +82,7 @@ export class ProjectDto {
 			type: "array",
 			example: [{
 				name: "KPI 1",
-				kpiUnit: KpiUnits.GWp_INSTALLED,
+				kpiUnit: "mWp-installed",
 				creatorType: "project",
 				expected: 100
 			}],

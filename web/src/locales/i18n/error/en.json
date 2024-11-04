@@ -1,3 +1,5 @@
 {
-    "validationPermissionRequired": "Validation Permission is Required"
+    "validationPermissionRequired": "Validation Permission is Required",
+    "actionDeletePrevented": "Cannot delete an Action with attached children",
+    "programmeDeletePrevented": "Cannot delete a Programme with attached children"
 }

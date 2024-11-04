@@ -10,7 +10,6 @@
     "kpiUnit": "Unité de KPI",
     "kpiName": "Nom du KPI",
     "updatesInfoTitle": "Mises à jour",
-    "mitigationInfoTitle": "Informations sur la mitigation",
     "attachProgramme": "Joindre des programmes",
     "attachActivity": "Joindre des activités",
     "supportTypeTitle": "Type de support",
@@ -24,7 +23,7 @@
     "additionalInfoTitle": "Informations supplémentaires pour les rapports ETF",
     "documentsHeader": "Documents",
     "emissionInfoTitle": "Estimations des réductions des émissions de GES (ktCO2e)",
-    "kpiInfoTitle": "Autre valeur KPI du programme",
+    "kpiInfoTitle": "Autre valeur KPI",
     "investmentNeedsHeader": "Besoins d'investissement estimés (USD)",
     "typeHeader": "Type",
     "natAnchorHeader": "Ancré dans une stratégie nationale",
@@ -40,5 +39,9 @@
     "capBuildHeader": "Contribution aux objectifs de renforcement des capacités",
     "noSupportMessage": "Aucun support connecté",
     "noActivityMessage": "Aucune activité connectée",
-    "kpiSearchFailed": "La recherche des KPI a échoué"
+    "kpiSearchFailed": "La recherche des KPI a échoué",
+    "actionResultsInfoTitle": "Résumé des résultats de l'action",
+    "programmeResultsInfoTitle": "Résumé des résultats du programme",
+    "projectResultsInfoTitle": "Résumé des résultats du projet",
+    "activityResultsInfoTitle": "Résumé des résultats de l'activité"
 }

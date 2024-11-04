@@ -4,7 +4,6 @@ import { ActionStatus, ActionType, InstrumentType, NatAnchor } from "../enums/ac
 import { KpiDto } from "./kpi.dto";
 import { DocumentDto } from "./document.dto";
 import { KpiUpdateDto } from "./kpi.update.dto";
-import { KpiUnits } from "../enums/kpi.enum";
 import { Sector } from "../enums/sector.enum";
 import { KPIAction } from "../enums/shared.enum";
 
@@ -124,7 +123,7 @@ export class ActionUpdateDto {
 			type: "array",
 			example: [{
 				kpiId: "1",
-				kpiUnit: KpiUnits.GWp_INSTALLED,
+				kpiUnit: "mWp-installed",
 				name: "KPI 1",
 				creatorType: "action",
 				expected: 100,

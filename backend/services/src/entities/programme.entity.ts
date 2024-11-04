@@ -16,6 +16,7 @@ import { ProjectEntity } from "./project.entity";
 import { ActivityEntity } from "./activity.entity";
 import { ProgrammeStatus } from "../enums/programme-status.enum";
 import { KpiEntity } from "./kpi.entity";
+import { ActionType } from "../enums/action.enum";
 
 @Entity("programme")
 export class ProgrammeEntity {
@@ -34,6 +35,9 @@ export class ProgrammeEntity {
 	@Column({ type: "enum", enum: Sector, nullable: true })
   sector: Sector;
 
+  // @Column({ type: "enum", enum: ActionType,nullable: false })
+  // type: string;
+
   @Column("varchar", { array: true, nullable: false })
   affectedSubSector: SubSector[];
 
@@ -43,8 +47,8 @@ export class ProgrammeEntity {
   @Column("varchar", { array: true, nullable: false })
   natImplementor: NatImplementor[];
 
-  @Column({nullable: false, type: 'double precision' })
-  investment: number;
+  // @Column({nullable: false, type: 'double precision' })
+  // investment: number;
 
 	@Column({ type: "enum", enum: ProgrammeStatus })
   programmeStatus: string;

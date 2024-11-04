@@ -20,7 +20,8 @@ export enum NatAnchor {
 
 export enum ActionType {
   MITIGATION = "Mitigation",
-  ADAPTION = "Adaption",
+  ADAPTION = "Adaptation",
   CROSSCUT = "Cross-cutting",
-  ENABLING = "Enabling",
+  TRANSPARENCY = "Transparency",
+  OTHER = "Other",
 }

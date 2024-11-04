@@ -5,13 +5,13 @@
 
     "totalRowHeader" : "Total National Emissions and Removals",
 
-    "eqWithHeader" : "Total CO2 equivalent emissions with land use, land-use change and forestry",
-    "eqWithoutHeader" : "Total CO2 equivalent emissions without land use, land-use change and forestry",
+    "eqWithHeader" : "Total ktCO2 equivalent emissions with land",
+    "eqWithoutHeader" : "Total ktCO2 equivalent emissions without land",
 
-    "co2" : "tCO2",
-    "ch4" : "tCH4",
-    "n2o" : "tN2O",
-    "co2eq" : "tCO2-eq",
+    "co2" : "ktCO2",
+    "ch4" : "ktCH4",
+    "n2o" : "ktN2O",
+    "co2eq" : "ktCO2-eq",
 
     "1_title": "Energy",
     "2_title": "Industrial Processes & Product Use",

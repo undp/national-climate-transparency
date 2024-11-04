@@ -355,7 +355,6 @@ export const ProjectionForm: React.FC<Props> = ({ index, projectionType }) => {
                 enteredValue ? parseToTwoDecimals(enteredValue) : 0
               );
             }}
-            min={0}
             decimalSeparator="."
             controls={false}
             className={
