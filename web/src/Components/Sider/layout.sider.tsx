@@ -84,7 +84,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
           {!collapsed && (
             <div>
               <div style={{ display: 'flex' }}>
-                <div className="title">{collapsed ? '' : 'TRANSPARENCY'}</div>
+                <div className="title">{collapsed ? '' : 'NDC TRANSPARENCY'}</div>
                 <div className="title-sub">{collapsed ? '' : 'SYSTEM'}</div>
               </div>
               <div className="country-name">{process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}</div>

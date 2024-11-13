@@ -17,7 +17,7 @@ const LayoutFooter = () => {
             </div>
             <div>
               <div style={{ display: 'flex' }}>
-                <div className="title">{'TRANSPARENCY'}</div>
+                <div className="title">{'NDC TRANSPARENCY'}</div>
                 <div className="title-sub">{'SYSTEM'}</div>
               </div>
               <div className="footer-country-name">
