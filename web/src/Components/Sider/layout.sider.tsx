@@ -83,7 +83,7 @@ const LayoutSider = (props: LayoutSiderProps) => {
           </div>
           {!collapsed && (
             <div>
-              <div style={{ display: 'flex' }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div className="title">{collapsed ? '' : 'NDC TRANSPARENCY'}</div>
                 <div className="title-sub">{collapsed ? '' : 'SYSTEM'}</div>
               </div>
