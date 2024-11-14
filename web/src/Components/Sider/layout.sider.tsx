@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Menu, Layout, MenuProps } from 'antd';
+import { Menu, Layout, MenuProps, Row } from 'antd';
 import sliderLogo from '../../Assets/Images/mrvlogo.svg';
 import { useNavigate } from 'react-router-dom';
 import './layout.sider.scss';
@@ -83,9 +83,13 @@ const LayoutSider = (props: LayoutSiderProps) => {
           </div>
           {!collapsed && (
             <div>
-              <div style={{ display: 'flex' }}>
-                <div className="title">{collapsed ? '' : 'TRANSPARENCY'}</div>
-                <div className="title-sub">{collapsed ? '' : 'SYSTEM'}</div>
+              <div className="sider-logo-system-name">
+                <Row>
+                  <div className="title">{collapsed ? '' : 'NDC TRANSPARENCY'}</div>
+                </Row>
+                <Row>
+                  <div className="title-sub">{collapsed ? '' : 'SYSTEM'}</div>
+                </Row>
               </div>
               <div className="country-name">{process.env.REACT_APP_COUNTRY_NAME || 'CountryX'}</div>
             </div>
