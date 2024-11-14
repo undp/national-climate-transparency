@@ -12,7 +12,7 @@
   .country-name {
     font-size: 0.65rem;
     color: $logo-text-color;
-    margin-top: -5px;
+    margin-top: -2px;
     font-family: 'MuseoSans';
   }
 
@@ -46,24 +46,30 @@
       padding-left: 20px;
       cursor: pointer;
 
-      .title {
-        font-family: 'MuseoSans';
-        font-size: 14px;
-        color: $logo-text-color;
-        font-weight: 700;
-        margin-right: 5px;
-      }
+      .sider-logo-system-name {
+        // display: flex;
+        // flex-direction: column;
 
-      .title-sub {
-        font-weight: 100 !important;
-        font-family: 'MuseoSans';
-        font-size: 14px;
-        color: $logo-text-color;
+        .title {
+          font-family: 'MuseoSans';
+          font-size: 13px;
+          color: $logo-text-color;
+          font-weight: 700;
+          margin-right: 5px;
+        }
+
+        .title-sub {
+          font-weight: 100 !important;
+          font-family: 'MuseoSans';
+          font-size: 12px;
+          color: $logo-text-color;
+          margin-top: -5px;
+        }
       }
 
       .logo {
-        height: 52px;
-        width: 80px;
+        height: 60px;
+        width: 51px;
 
         img {
           object-fit: cover;
@@ -76,7 +82,6 @@
     }
 
     .sider-menu-container {
-
       overflow-y: auto;
       max-height: 80vh;
       padding-top: 10px;
@@ -92,19 +97,18 @@
       &::-webkit-scrollbar {
         width: 8px;
       }
-      
+
       &::-webkit-scrollbar-track {
         background: #f0e9fd;
       }
-      
+
       &::-webkit-scrollbar-thumb {
         background: #d5d0dd;
       }
-      
+
       &::-webkit-scrollbar-thumb:hover {
         cursor: pointer;
       }
     }
-
   }
 }
