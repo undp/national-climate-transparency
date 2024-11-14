@@ -599,7 +599,7 @@ $title-color: #3a8ab5;
     }
 
     .title {
-      font-size: 2rem;
+      font-size: 28px;
       font-weight: 700;
       font-family: $primary-font-family;
       color: $title-text-color;
@@ -608,7 +608,7 @@ $title-color: #3a8ab5;
       justify-content: left;
       text-transform: uppercase;
       margin-left: 4.5rem;
-      padding: 50px 50px 10px 0;
+      padding: 0 50px 10px 0;
 
       @media (max-width: $lg-size) {
         font-size: 24px;
