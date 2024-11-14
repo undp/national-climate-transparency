@@ -575,15 +575,16 @@ const Homepage = () => {
                       key="5"
                       className="homepage_collapsepanel"
                     >
+                      <div className="collapsetext">{t('homepage:faqA5')}</div>
                       <div className="collapsetext">
                         <Trans
-                          i18nKey="homepage:faqA5"
+                          i18nKey="homepage:faqA5-2"
                           components={{
                             a: <a href="mailto:digital4planet@undp.org" target="_blank" />,
                           }}
                         />
                       </div>
-                      <div className="collapsetext">{t('homepage:faqA5-2')}</div>
+                      <div className="collapsetext">{t('homepage:faqA5-3')}</div>
                     </CollapsePanel>
                     <CollapsePanel
                       header={t('homepage:faqQ6')}
