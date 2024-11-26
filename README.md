@@ -1,21 +1,33 @@
-# National Climate Transparency Tool
+# Digital Transparency System (DTS)
  
 <a name="about"></a>
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/undp/carbon-registry)
 [![SparkBlue Chat](https://img.shields.io/badge/chat-SparkBlue-blue)](https://www.sparkblue.org/group/keeping-track-digital-public-goods-paris-agreement)
 
-The National Climate Transparency Tool is your gateway to ensure robust Measurement, Reporting and Verification (MRV) toward the Enhanced Transparency Framework (ETF) and to accelerate implementation of the Nationally Determined Contribution (NDC).
+The Digital Transparency System (DTS) is your country’s gateway to ensure robust  information gathering and reporting following the Enhanced Transparency Framework (ETF) of the Paris Agreement and to assist in the management of progress and implementation of your country’s Nationally Determined Contribution (NDC).
 
-In an era where climate action is not just an aspiration but a responsibility, the National Climate Transparency System is a tool to support the country's uncompromising commitment towards environmental stewardship. This module is an integral part of our open-source software ecosystem, to support countries in easing the process of developing national data management systems for NDC tracking, GHG inventory data management and Biennal Transparency Reporting (BTR). The interface co-designed with countries, coupled with a robust backend ensures that managing complex climate data becomes a seamless experience, fostering a culture of transparency and accountability.
+The DTS does this by helping governments optimise the management of information related to climate change actions and support across ministries, agencies, and departments. It also allows for the option to easily share this information with parties outside government, such as UNFCCC, development partners, education institutions, etc. By centralizing essential data in a single digital location, the DTS significantly reduces workload, saving thousands of person-hours. Its user-friendly access and standardized reporting tools for ETF information further streamline operations and enhance efficiency.
 
-By employing the National Climate Transparency tool, countries can effortlessly align their climate actions with international standards, ensuring a harmonized approach towards a sustainable future. The tool is engineered to provide a clear lens into the progress and impact of NDC actions, making compliance with international commitments and national institutional arrangements a streamlined process. This Digital Public Good codebase envisions to encapsulate the essence of effective climate action management, which countries can configure, adapt and build on to meet national circumstance.
+The DTS is an integral part of UNDP’s open-source Digital for Climate software ecosystem. This Digital Public Good has an open-source codebase and is designed to encapsulate the essence of effective climate action management, enabling countries to configure, adapt and build on it to meet national requirements.
 
-The system has 3 key features, and to be uploaded by the third quarter of 2024.
+The DTS has 7 key features.
 
-* **NDC Actions Tracking:** Effortlessly track and report NDC mitigation / adaptation actions, programmes, projects, activities and support. The system is intended to support monitoring and reporting of national activities and finance, facilitating compliance with international reporting commitments. The codebase can be configured to national institutional arrangements and NDC context.
-* **GHG Inventory:** Maintains a comprehensive inventory of greenhouse gas (GHG) emissions with ease. The system allows for accurate data collection (with Excel integration), automated calculations, and reporting, supporting informed decision-making.
-* **Reporting Module:** Pulls together data collected and managed across the above two modules into a format that is required for reporting to UNFCCCC. The standard codebase uses the recently approved Common Tabular Format and can be configured to any other format. 
+* **Systemic Information Structure**: The different modules in the DTS follow the information structure often used when countries and development partners plan and implement climate actions. This includes general information on broad climate actions and the more detailed information on sectoral programmes, projects, and activities that fall under each climate action.
+  
+* **NDC Progress Tracking**: Following the Paris Agreement’s Modalities Procedures and Guidelines of the ETF, the DTS allows users to effortlessly tracks and reports progress of NDC mitigation and adaptation actions, plus support that is needed and received.  Including enables standard reporting using the critical Common Tabular Formats of the ETF.
+
+* **Tracking National Sustainable Development**: Every country and ministry has specific development planning that commonly overlaps with climate actions.  The DTS allows for the inclusion of customised Key Performance Indicators for actions, programmes, projects, and activities that align with national goals and planning.
+ 
+* **GHG Emissions Projections**: The DTS has a module to help governments project GHG emissions based on different scenarios for sectors and subsectors using standard exponential modelling and/or by inputting modelling data from other software and models.  Additionally, the module enables the input of GHG inventory results, organized by categories and subcategories, ensuring comprehensive and flexible emissions analysis.
+
+* **Validation**: To ensure quality control, governments can assign users to validate the information provided for each climate action, programme, project, activity and support.
+
+* **Standard Reporting**: The information for climate action, programme, project, activity, and support is automatically consolidated and reported in the dashboard, along with reporting information using important Common Tabular Formats of the ETF.
+
+* **Assigning Users**: the DTS allows governments to assign users based on the entities they work for (e.g. government departments, education institutions, consultants…) and what information they should have access to both read and input (e.g. for specific sectors…).
+
+More information about the project’s background, vision, policy context, support provided can be found in the demo site https://transparency-demo.carbreg.org/. Please contact the UNDP DPG team digital4planet@undp.org to request a walkthrough demonstration and to discuss further support and collaboration.
 
 ## Index
 Below contents are planned to be updated by the third quarter of 2024 based on user feedback and recent change in international requirements. 
@@ -26,13 +38,13 @@ Below contents are planned to be updated by the third quarter of 2024 based on u
 * [Run Services as Containers](#container)
 * [Run Services Locally](#local)
 * [Deploy System on the AWS Cloud](#cloud)
-* [Modules](#modules)
 * [Web Frontend](#frontend)
 * [Localization](#localization)
 * [API (Application Programming Interface)](#api)
 * [Status Page](#status)
 * [User Manual](#manual)
 * [Demonstration Video](#demo)
+* [Help Tools](#tools) 
 * [Data Sovereignty](#data)
 * [Governance and Support](#support)
 
@@ -52,9 +64,9 @@ This codebase aims to fulfill the [Digital Public Goods standard](https://digita
 
 ### Deployment
 
-System services can deploy in 2 ways.
+System services can be deployed in 2 ways.
 
-* **As a Container** - Each service boundary containerized in to a docker container and can deploy on any container orchestration service. [Please refer Docker Compose file](./docker-compose.yml)
+* **As a Container** - Each service boundary containerized into a docker container and can deploy on any container orchestration service. [Please refer Docker Compose file](./docker-compose.yml)
 * **As a Function** - Each service boundary packaged as a function (Serverless) and host on any Function As A Service (FaaS) stack. [Please refer Serverless configuration file](./backend/services/serverless.yml)
 
 ### **External Service Providers**
@@ -157,14 +169,6 @@ aws lambda invoke \
     response.json
 ```
 
-<a name="modules"></a>
-
-## Modules
-
-### UNDP Platform for Voluntary Bilateral Cooperation
-
-UNDP Platform for Voluntary Bilateral Cooperation generation is implemented in a separate node module. [Please refer this](./modules/Platform%20for%20Voluntary%20Bilateral%20Cooperation/README.md) for more information.
-
 <a name="frontend"></a>
 
 ### Web Frontend
@@ -175,8 +179,8 @@ Web frontend implemented using ReactJS framework. Please refer [getting started 
 
 ### Localization
 
-* Languages (Current): English
-* Languages (In progress): French, Spanish
+* Languages (Current): English, French
+* Languages (In progress): Spanish
 
 For updating translations or adding new ones, reference <https://github.com/undp/national-climate-transparency/tree/main/web/src/locales/i18n>
 
@@ -220,6 +224,12 @@ Coming soon...
 
 Coming soon...
 
+<a name="tools"></a>
+
+### Help Tools
+
+Coming soon...
+
 <a name="data"></a>
 
 ### Data Sovereignty
@@ -228,7 +238,7 @@ The code is designed with data sovereignty at its core, empowering nations and o
 
 - **Local Control**: 
    - Allows nations and entities to store, manage, and process their data locally or in a preferred jurisdiction, adhering to local laws and regulations.
-- **Open Source Architecture**:
+- **Open-Source Architecture**:
    - Facilitates transparency, customization, and control over the software, enabling adaptation to specific legal and regulatory requirements.
 - **Decentralized Infrastructure**:
    - Supports a decentralized data management approach, minimizing reliance on external or centralized systems.
@@ -247,6 +257,10 @@ By integrating these features, the code significantly contributes to achieving d
 
 ### Governance and Support
 
-[Digital For Climate (D4C)](https://www.theclimatewarehouse.org/work/digital-4-climate) is responsible for managing the application. D4C is a collaboration between the [European Bank for Reconstruction and Development (EBRD)](https://www.ebrd.com), [United Nations Development Program (UNDP)](https://www.undp.org), [United Nations Framework Convention on Climate Change (UNFCCC)](https://www.unfccc.int), [International Emissions Trading Association (IETA)](https://www.ieta.org), [European Space Agency (ESA)](https://www.esa.int), and [World Bank Group](https://www.worldbank.org) that aims to coordinate respective workflows and create a modular and interoperable end-to-end digital ecosystem for the carbon market. The overarching goal is to support a transparent, high integrity global carbon market that can channel capital for impactful climate action and low-carbon development.
+This code is managed by [United Nations Development Programme](https://www.undp.org) as custodian.  Governments and potential partners working with UNDP can:
+* Request access to the demo site.
+* Request a live demonstration.
+* Customize and install as a sovereign system.
+* Explore potential collaboration and support.
 
-This code is managed by [United Nations Development Programme](https://www.undp.org) as custodian, detailed in the [press release](https://www.undp.org/news/newly-accredited-digital-public-good-national-carbon-registry-will-help-countries-meet-their-climate-targets). For any questions, contact us at [digital4planet@undp.org](mailto:digital4planet@undp.org).
+For any questions, contact us at [digital4planet@undp.org](mailto:digital4planet@undp.org).
