@@ -2,7 +2,7 @@
 
 ## 🌐 Supported Versions
 
-This is the list of versions of `carbon-registry` which are currently being supported with security updates.
+This is the list of versions of `digitial-transparency-system` which are currently being supported with security updates.
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -19,7 +19,7 @@ The United Nations Development Programme (UNDP) takes the security of our softwa
    - Please do not report security vulnerabilities through public GitHub issues.
 
 2. **📧 Email**
-   - Directly email the UNDP Carbon Registry security team at [digital4planet@undp.org](mailto:digital4planet@undp.org?subject=Carbon%20Registry%20Security%20Warning%20Submission&body=Hi%20Standard%20Carbon%20Registry%20Team,%0AI%20identified%20a%20security%20vulnerability%20in%20https://github.com/undp/carbon-registry%20that%20I%20would%20like%20to%20privately%20warn%20you%20about.%20Details:%20).
+   - Directly email the UNDP Carbon Registry security team at [digital4planet@undp.org](mailto:digital4planet@undp.org?subject=Transparency%20System%20Security%20Warning%20Submission&body=Hi%20Standard%20Carbon%20Registry%20Team,%0AI%20identified%20a%20security%20vulnerability%20in%20https://github.com/undp/carbon-registry%20that%20I%20would%20like%20to%20privately%20warn%20you%20about.%20Details:%20).
    - Please provide detailed information about the vulnerability, including steps to reproduce, potential impact, and suggested mitigation or remediation if known.
 
 3. **🕒 Expect a Response**
