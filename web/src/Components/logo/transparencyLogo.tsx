@@ -21,10 +21,10 @@ const TransparencyLogo: React.FC = () => {
         </Col>
         <Col span={18} style={{ marginLeft: '20px' }}>
           <Row className="logo-text">
-            <Col span={14}>
-              <div className="bold-logo-title">{'TRANSPARENCY'}</div>
+            <Col span={18}>
+              <div className="bold-logo-title">{'NDC TRANSPARENCY'}</div>
             </Col>
-            <Col span={10}>
+            <Col span={6}>
               <div className="logo-title">{'SYSTEM'}</div>
             </Col>
             <Col span={24}>
